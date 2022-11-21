@@ -20,7 +20,6 @@ import {withTranslation} from 'react-i18next';
 import {getConnectionById as fetchConnection} from '@entity/connection/redux_toolkit/action_creators/ConnectionCreators';
 import {permission} from "@entity/application/utils/permission";
 import {ConnectionForm} from "@entity/connection/components/components/content/connections/ConnectionForm";
-import {setConnectionViewType} from "../../../../../redux_toolkit/slices/ConnectionSlice";
 import {useNavigate, useParams} from "react-router";
 import {ConnectionPermissions} from "@entity/connection/constants";
 
@@ -32,7 +31,6 @@ function mapStateToProps(state){
     const connection = state.connectionReducer;
     return{
         authUser,
-        connectionViewType: connection.connectionViewType,
         error: connection.error,
         connection: connection.currentConnection,
         fetchingConnection: connection.gettingConnection,
@@ -43,7 +41,7 @@ function mapStateToProps(state){
 /**
  * Component to View Connection
  */
-@connect(mapStateToProps, {fetchConnection, setConnectionViewType})
+@connect(mapStateToProps, {fetchConnection})
 @permission(ConnectionPermissions.READ, true)
 @withTranslation(['connections', 'app'])
 @ConnectionForm('view')

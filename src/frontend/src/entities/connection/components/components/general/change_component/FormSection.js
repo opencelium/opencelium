@@ -73,7 +73,6 @@ class FormSection extends Component{
 
         this.state = {
             isFormSectionMinimized: false,
-            isFullScreen: false,
         }
     }
 
@@ -83,14 +82,6 @@ class FormSection extends Component{
                 isFormSectionMinimized: !this.state.isFormSectionMinimized,
             }, )
         }
-    }
-
-    toggleFullScreen(){
-        const {content} = this.props;
-        this.setState({
-            isFullScreen: !this.state.isFullScreen,
-        }, () => window.scrollTo({top: findTopLeft(`form_section_header_${content.header.toLowerCase()}`).top - 4, behavior: "instant"}));
-        this.props.setFullScreenFormSection(!this.state.isFullScreen)
     }
 
     /**
@@ -321,7 +312,7 @@ class FormSection extends Component{
     }
 
     render(){
-        const {isFormSectionMinimized, isFullScreen} = this.state;
+        const {isFormSectionMinimized} = this.state;
         const {isSubFormSection, isOneFormSectionFullScreen, } = this.props;
         let style = {};
         const content = {
@@ -337,13 +328,13 @@ class FormSection extends Component{
             style.overflow = 'hidden';
             style.padding = 0;
         }
-        const hasHeader = content.header !== '' && !(isFullScreen && content.hasFullScreenFunction);
+        const hasHeader = content.header !== '' && !isOneFormSectionFullScreen;/*
         if(isOneFormSectionFullScreen && (!content.hasOwnProperty('hasFullScreenFunction') || !content.hasFullScreenFunction)){
             return null;
-        }
+        }*/
         const hasIcons = content.hasFullScreenFunction || !!content.AdditionalIcon;
         return (
-            <div className={`${!isSubFormSection ? styles.form : ''} ${content.visible ? content.formClassName : ''} ${isFormSectionMinimized ? styles.minimized_form : ''} ${isFullScreen ? styles.full_screen : ''}`} style={style}>
+            <div className={`${!isSubFormSection ? styles.form : ''} ${content.visible ? content.formClassName : ''} ${isFormSectionMinimized ? styles.minimized_form : ''} ${isOneFormSectionFullScreen ? styles.full_screen : ''}`} style={style}>
                 {hasHeader &&
                     <Label value={content.header} position={'absolute'}/>
                 }
@@ -354,14 +345,6 @@ class FormSection extends Component{
                             <div>
                                 {
                                     content.AdditionalIcon
-                                }
-                                {
-                                    content.hasFullScreenFunction &&
-                                    <TooltipFontIcon whiteTheme size={20} tooltipPosition={'bottom'} isButton
-                                                     className={styles.full_screen_icon}
-                                                     value={isFullScreen ? 'close_fullscreen' : 'open_in_full'}
-                                                     tooltip={isFullScreen ? 'Minimize' : 'Maximize'}
-                                                     onClick={() => this.toggleFullScreen()}/>
                                 }
                             </div>
                         </FormSectionIconsStyled>

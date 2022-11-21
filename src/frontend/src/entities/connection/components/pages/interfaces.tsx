@@ -15,12 +15,7 @@
 
 import { PermissionProps } from "@application/interfaces/IApplication";
 import {ITheme} from "@style/Theme";
-export type ConnectionViewType = 'COLUMN' | 'DIAGRAM';
 
-export enum ConnectionViewProps{
-    Column= 'COLUMN',
-    Diagram= 'DIAGRAM',
-}
 interface ConnectionListProps{
     theme?: ITheme,
     permission?: PermissionProps;

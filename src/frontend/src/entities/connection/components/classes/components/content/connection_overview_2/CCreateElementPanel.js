@@ -29,9 +29,6 @@ export default class CCreateElementPanel{
             case CONNECTOR_TO:
                 element = document.getElementById(`${CONNECTOR_TO}_panel_text`);
                 break;
-            case 'business_layout':
-                element = document.getElementById(`business_layout_empty_text`);
-                break;
         }
         if (element) {
             const clientSvg = element.getBoundingClientRect();
@@ -49,19 +46,13 @@ export default class CCreateElementPanel{
     }
 
     static getLocationData(type){
-        const isInBusinessLayout = CCreateElementPanel.isInBusinessLayout(type);
         const isInTechnicalFromConnectorLayout = CCreateElementPanel.isInTechnicalFromConnectorLayout(type);
         const isInTechnicalToConnectorLayout = CCreateElementPanel.isInTechnicalToConnectorLayout(type);
         return {
-            isInBusinessLayout,
             isInTechnicalToConnectorLayout,
             isInTechnicalFromConnectorLayout,
-            hasLocation: isInBusinessLayout || isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout,
+            hasLocation: isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout,
         }
-    }
-
-    static isInBusinessLayout(type){
-        return type === 'business_layout';
     }
 
     static isInTechnicalFromConnectorLayout(type){

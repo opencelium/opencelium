@@ -21,14 +21,11 @@ import Dialog from "@entity/connection/components/components/general/basic_compo
 import {connect} from "react-redux";
 import {setPanelConfigurations} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import ColorMode from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/ColorMode";
-import BusinessLabelMode
-    from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/BusinessLabelMode";
 
 function mapStateToProps(store){
     const connectionOverview = store.connectionReducer;
     return{
         colorMode: connectionOverview.colorMode,
-        businessLabelMode: connectionOverview.businessLabelMode,
     }
 }
 
@@ -40,7 +37,6 @@ class ConfigurationsIcon extends React.Component{
         this.state = {
             isVisibleSettingsWindow: false,
             colorMode: props.colorMode,
-            businessLabelMode: props.businessLabelMode,
         };
     }
 
@@ -60,21 +56,15 @@ class ConfigurationsIcon extends React.Component{
         })
     }
 
-    onChangeBusinessLabelMode(businessLabelMode){
-        this.setState({
-            businessLabelMode,
-        })
-    }
-
     save(){
-        const {colorMode, businessLabelMode} = this.state;
+        const {colorMode} = this.state;
         const {setPanelConfigurations} = this.props;
-        setPanelConfigurations({colorMode, businessLabelMode});
+        setPanelConfigurations({colorMode});
         this.toggleIsVisibleSettingsWindow();
     }
 
     render(){
-        const {isVisibleSettingsWindow, colorMode, businessLabelMode} = this.state;
+        const {isVisibleSettingsWindow, colorMode} = this.state;
         const {disabled, tooltipPosition} = this.props;
         return(
             <React.Fragment>
@@ -96,7 +86,6 @@ class ConfigurationsIcon extends React.Component{
                 >
                     <React.Fragment>
                         <ColorMode colorMode={colorMode} onChangeColorMode={(a) => this.onChangeColorMode(a)}/>
-                        <BusinessLabelMode businessLabelMode={businessLabelMode} onChangeBusinessLabelMode={(a) => this.onChangeBusinessLabelMode(a)}/>
                     </React.Fragment>
                 </Dialog>
             </React.Fragment>

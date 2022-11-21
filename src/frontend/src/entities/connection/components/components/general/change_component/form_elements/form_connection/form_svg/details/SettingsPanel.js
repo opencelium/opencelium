@@ -16,93 +16,45 @@
 import React from 'react';
 import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
-import {DETAILS_POSITION} from "../FormConnectionSvg";
-import {LocalStorage} from "@application/classes/LocalStorage";
+import {findTopLeft} from "@application/utils/utils";
+import {connect} from "react-redux";
+import {setFullScreen as setFullScreenFormSection} from "@application/redux_toolkit/slices/ApplicationSlice";
+import ConfigurationsIcon
+    from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/ConfigurationsIcon";
 
 
+@connect(null, {setFullScreenFormSection})
 class SettingsPanel extends React.Component{
     constructor(props) {
         super(props);
+        this.state = {
+            isFullScreen: false,
+        }
     }
 
-    openInNewWindow(){
-        const storage = LocalStorage.getStorage();
-        storage.set('connection_overview', this.props.connectionOverviewState);
-        this.props.openInNewWindow();
+    toggleFullScreen(){
+        this.setState({
+            isFullScreen: !this.state.isFullScreen,
+        }, () => window.scrollTo({top: findTopLeft(`technical_layout_svg`).top - 4, behavior: "instant"}));
+        this.props.setFullScreenFormSection(!this.state.isFullScreen)
     }
 
     render(){
-        const {moveDetailsLeft, moveDetailsRight, position, isMinimized, minimize, maximize} = this.props;
-        let positionIconClassName = '';
-        let minMaxIconClassName = '';
-        let newWindowIconClassName = '';
-        let positionTooltip = '';
-        let positionValue = '';
-        let positionClick = null;
-        let tooltipPosition = 'bottom';
-        let settingsPanelStyles = {};
-        let detailsTitleClassName = '';
-        if(position === DETAILS_POSITION.LEFT){
-            tooltipPosition = 'right_bottom';
-            positionIconClassName = styles.position_icon_left;
-            minMaxIconClassName = styles.min_max_icon_left;
-            newWindowIconClassName = styles.new_window_icon_left;
-            positionTooltip = 'Move to the Right';
-            positionValue = 'keyboard_arrow_right';
-            positionClick = moveDetailsRight;
-            settingsPanelStyles.borderRight = 'none';
-            detailsTitleClassName = styles.details_title_left;
-        }
-        if(position === DETAILS_POSITION.RIGHT){
-            tooltipPosition = 'left_bottom';
-            positionIconClassName = styles.position_icon_right;
-            minMaxIconClassName = styles.min_max_icon_right;
-            newWindowIconClassName = styles.new_window_icon_right;
-            positionTooltip = 'Move to the Left';
-            positionValue = 'keyboard_arrow_left';
-            positionClick = moveDetailsLeft;
-            settingsPanelStyles.borderLeft = 'none';
-            detailsTitleClassName = styles.details_title_right;
-        }
-        let minMaxTooltip = '';
-        let minMaxValue = '';
-        let minMaxClick;
-        if(isMinimized){
-            minMaxTooltip = 'Maximize';
-            minMaxValue = 'maximize';
-            minMaxClick = maximize;
-        } else{
-            minMaxTooltip = 'Minimize';
-            minMaxValue = 'minimize';
-            minMaxClick = minimize;
-        }
+        const {isFullScreen} = this.state;
+        const {togglePanel, isHidden} = this.props;
         return(
-            <div className={styles.details_settings_panel} style={settingsPanelStyles}>
-                <TooltipFontIcon
-                    size={20}
-                    className={positionIconClassName}
-                    onClick={positionClick}
-                    tooltip={positionTooltip}
-                    value={positionValue}
-                    tooltipPosition={tooltipPosition}
-                />
-                {isMinimized && <div className={detailsTitleClassName}>Details</div>}
-                <TooltipFontIcon
-                    size={20}
-                    className={minMaxIconClassName}
-                    onClick={minMaxClick}
-                    tooltip={minMaxTooltip}
-                    value={minMaxValue}
-                    tooltipPosition={tooltipPosition}
-                />
-                <TooltipFontIcon
-                    size={20}
-                    className={newWindowIconClassName}
-                    onClick={() => this.openInNewWindow()}
-                    tooltip={'Open in new Window'}
-                    value={'open_in_new'}
-                    tooltipPosition={tooltipPosition}
-                />
+            <div className={styles.details_settings_panel}>
+                <TooltipFontIcon size={20} tooltipPosition={'bottom'} isButton
+                                 className={styles.position_icon_left}
+                                 value={isFullScreen ? 'close_fullscreen' : 'open_in_full'}
+                                 tooltip={isFullScreen ? 'Minimize' : 'Maximize'}
+                                 onClick={() => this.toggleFullScreen()}/>
+                <ConfigurationsIcon/>
+                <TooltipFontIcon size={24} tooltipPosition={'bottom'} isButton
+                                 className={styles.position_icon_left}
+                                 value={isHidden ? 'chevron_left' : 'chevron_right'}
+                                 tooltip={isHidden ? 'Show' : 'Hide'}
+                                 onClick={() => togglePanel()}/>
             </div>
         );
     }

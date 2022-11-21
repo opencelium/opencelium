@@ -17,102 +17,78 @@ import React from 'react';
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2.scss";
 import {connect} from "react-redux";
 import SettingsPanel from "./SettingsPanel";
-import {DETAILS_POSITION} from "../FormConnectionSvg";
-import {PANEL_LOCATION, SEPARATE_WINDOW} from "@entity/connection/components/utils/constants/app";
 import {mapItemsToClasses} from "../utils";
-import {connectionOverviewDetailsUrl} from "@entity/connection/components/utils/constants/url";
-import {NewWindowFeature} from "@entity/connection/components/decorators/NewWindowFeature";
 import Description from "@change_component/form_elements/form_connection/form_svg/details/description/Description";
-import {setDetailsLocation} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
-    const {currentBusinessItem, currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state);
+    const {currentTechnicalItem, connection} = mapItemsToClasses(state);
     return{
         connectionOverviewState: connectionOverview,
-        currentBusinessItem,
         currentTechnicalItem,
         detailsLocation: connectionOverview.detailsLocation,
         connection,
     };
 }
 
-function isLocationSameWindow(props){
-    return props.detailsLocation === PANEL_LOCATION.SAME_WINDOW;
-}
 
-function setLocation(props, data){
-    props.setDetailsLocation(data);
-}
-
-function moveTo(props, newWindow){
-    if(props.position === DETAILS_POSITION.LEFT){
-        newWindow.moveTo(0, 0);
-    }
-    if(props.position === DETAILS_POSITION.RIGHT){
-        newWindow.moveTo(20000, 0);
-    }
-}
-
-@connect(mapStateToProps, {setDetailsLocation})
-@NewWindowFeature({url: connectionOverviewDetailsUrl, windowName: SEPARATE_WINDOW.CONNECTION_OVERVIEW.DETAILS, setLocation, isLocationSameWindow, moveTo})
+@connect(mapStateToProps, {})
 class Details extends React.Component{
     constructor(props) {
         super(props);
+        this.state = {
+            isHidden: false,
+        }
+    }
+
+    togglePanel(){
+        this.setState({
+            isHidden: !this.state.isHidden,
+        })
     }
 
     render(){
-        const {readOnly, currentBusinessItem, currentTechnicalItem, isMinimized, position, detailsLocation, openInNewWindow, updateConnection, connection} = this.props;
-        if(detailsLocation === PANEL_LOCATION.NEW_WINDOW || connection === null){
+        const {isHidden} = this.state;
+        const {readOnly, currentTechnicalItem, updateConnection, connection} = this.props;
+        if(connection === null){
             return null;
         }
-        let details = currentTechnicalItem ? currentTechnicalItem : currentBusinessItem;
-        let detailsClassName = '';
+        let details = currentTechnicalItem ? currentTechnicalItem : null;
         let detailsStyle = {};
-        if(isMinimized){
-            detailsClassName = styles.details_minimized;
-        } else{
-            detailsClassName = styles.details_maximized;
-        }
-        if(position === DETAILS_POSITION.RIGHT){
-            detailsClassName += ` ${styles.details_right}`;
-        }
-        if(position === DETAILS_POSITION.LEFT){
-            detailsClassName += ` ${styles.details_left}`;
+        if(isHidden){
+            return (
+                <TooltipFontIcon size={24} tooltipPosition={'bottom'} isButton
+                                 className={styles.show_icon}
+                                 value={isHidden ? 'chevron_left' : 'chevron_right'}
+                                 tooltip={isHidden ? 'Show' : 'Hide'}
+                                 onClick={() => this.togglePanel()}/>
+            );
         }
         return(
-            <div className={detailsClassName} style={detailsStyle}>
-                <SettingsPanel {...this.props} openInNewWindow={openInNewWindow}/>
-                {!isMinimized &&
-                    <div className={styles.details_data}>
-                        <div className={styles.title}>
-                            Details
-                        </div>
-                        {details ?
-                            <div className={styles.label}>
-                                <Description readOnly={readOnly} details={details} updateConnection={updateConnection} connection={connection}/>
-                            </div>
-                            :
-                            <div>
-                                No item selected
-                            </div>
-                        }
+            <div className={`${styles.details_maximized} ${styles.details_right}`} style={detailsStyle}>
+                <SettingsPanel {...this.props} togglePanel={() => this.togglePanel()} isHidden={isHidden}/>
+                <div className={styles.details_data}>
+                    <div className={styles.title}>
+                        Details
                     </div>
-                }
+                    {details ?
+                        <div className={styles.label}>
+                            <Description readOnly={readOnly} details={details} updateConnection={updateConnection} connection={connection}/>
+                        </div>
+                        :
+                        <div>
+                            {"There is no selected item"}
+                        </div>
+                    }
+                </div>
             </div>
         );
     }
 }
 
 Details.defaultProps = {
-    moveDetailsRight: () => {},
-    moveDetailsLeft: () => {},
-    position: '',
-    minimize: () => {},
-    maximize: () => {},
-    isMinimized: false,
-
 }
 
 export default Details;

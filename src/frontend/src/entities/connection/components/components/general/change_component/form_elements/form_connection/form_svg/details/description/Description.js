@@ -24,9 +24,6 @@ import OperatorType from "@change_component/form_elements/form_connection/form_s
 import TechnicalProcessDescription
     from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/TechnicalProcessDescription";
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
-import {CBusinessProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CBusinessProcess";
-import BusinessProcessDescription
-    from "@change_component/form_elements/form_connection/form_svg/details/description/business_process/BusinessProcessDescription";
 
 
 class Description extends React.Component{
@@ -57,7 +54,6 @@ class Description extends React.Component{
         return(
             <div className={styles.description}>
                 {details instanceof CTechnicalProcess && <TechnicalProcessDescription {...this.props}/>}
-                {details instanceof CBusinessProcess && <BusinessProcessDescription {...this.props}/>}
                 {details instanceof COperator && this.renderForOperator()}
             </div>
         );

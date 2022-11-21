@@ -153,9 +153,6 @@ const DuplicateIcon: FC<DuplicateIconProps> =
             }
             connection.fieldBinding = fieldBinding;
             delete connection.connectionId;
-            if(connection.businessLayout){
-                delete connection.businessLayout.id;
-            }
             dispatch(addConnection(connection));
             toggleDuplicateForm();
         }

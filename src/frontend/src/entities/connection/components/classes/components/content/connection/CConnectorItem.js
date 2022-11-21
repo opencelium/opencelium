@@ -102,10 +102,6 @@ export default class CConnectorItem{
         return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForSvgItems, currentItemIndex, svgItems, arrows, sslCert);
     }
 
-    static isInstanceOfBusinessItem(item){
-        return item instanceof CTechnicalProcess || item instanceof CTechnicalOperator;
-    }
-
     static hasIcon(icon){
         return isString(icon) && icon !== '' && icon.substr(icon.length - 5) !== '/null';
     }
