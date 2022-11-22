@@ -67,9 +67,7 @@ class TechnicalLayout extends React.Component{
     setCurrentItem(currentItem){
         if(currentItem) {
             const {setCurrentTechnicalItem, connection, updateConnection, currentTechnicalItem} = this.props;
-            if(!currentTechnicalItem || currentTechnicalItem.entity.index !== currentItem.entity.index){
-                setCurrentTechnicalItem(currentItem.getObject());
-            }
+            setCurrentTechnicalItem(currentItem.getObject());
             if (connection) {
                 const connector = connection.getConnectorByType(currentItem.connectorType);
                 const currentItemInConnector = connector.getCurrentItem();
