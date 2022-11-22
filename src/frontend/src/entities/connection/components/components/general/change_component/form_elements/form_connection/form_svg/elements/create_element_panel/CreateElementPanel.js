@@ -24,9 +24,6 @@ import CreateOperator
 import {
     OUTSIDE_ITEM
 } from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
-import CreateBusinessItem
-    from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateBusinessItem";
-import {CBusinessProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CBusinessProcess";
 import CCreateElementPanel, {
     CREATE_OPERATOR,
     CREATE_PROCESS
@@ -43,10 +40,9 @@ import ReactDOM from "react-dom";
 
 
 function mapStateToProps(state){
-    const {currentTechnicalItem, currentBusinessItem} = mapItemsToClasses(state);
+    const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
         currentTechnicalItem,
-        currentBusinessItem,
     };
 }
 
@@ -105,16 +101,15 @@ class CreateElementPanel extends React.Component{
             return null;
         }
         const {type, itemPosition} = this.state;
-        let {currentTechnicalItem, currentBusinessItem, connection} = this.props;
-        const {hasLocation, isInBusinessLayout, isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
+        let {currentTechnicalItem, connection} = this.props;
+        const {hasLocation, isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
         let selectedItem = null;
         if(!hasLocation){
-            selectedItem = currentTechnicalItem !== null ? currentTechnicalItem : currentBusinessItem;
+            selectedItem = currentTechnicalItem !== null ? currentTechnicalItem : null;
         }
         let noOperatorType = isInTechnicalFromConnectorLayout;
         const isSelectedItemTechnicalOperator = selectedItem !== null && selectedItem instanceof CTechnicalOperator;
         const isSelectedItemTechnicalProcess = selectedItem !== null && selectedItem instanceof CTechnicalProcess;
-        const isSelectedItemBusinessProcess = selectedItem !== null && selectedItem instanceof CBusinessProcess;
         const isTypeCreateOperator = type === CREATE_OPERATOR;
         const isTypeCreateProcess = type === CREATE_PROCESS;
 
@@ -122,8 +117,6 @@ class CreateElementPanel extends React.Component{
         const isSelectedItemTechnical = isSelectedItemTechnicalOperator || isSelectedItemTechnicalProcess;
         const isForCreateTechnicalItem = isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout || isSelectedItemTechnical;
 
-        let isForCreateBusinessItem = isInBusinessLayout || isSelectedItemBusinessProcess;
-        const hasCreateBusinessItem = isForCreateBusinessItem;
         const hasItemPositionPanel = isForCreateTechnicalItem && isSelectedItemOperator;
         let hasItemTypePanel = isForCreateTechnicalItem;
         let isFromConnectorEmpty = connection.fromConnector.svgItems.length === 0;
@@ -137,14 +130,6 @@ class CreateElementPanel extends React.Component{
         return(
             ReactDOM.createPortal(
                 <div>
-                    {hasCreateBusinessItem &&
-                        <CreateBusinessItem
-                            {...this.props}
-                            itemPosition={itemPosition}
-                            selectedItem={selectedItem}
-                            isTypeCreateOperator={isTypeCreateOperator}
-                        />
-                    }
                     {hasItemPositionPanel &&
                         <ItemPositionPanel
                             {...this.props}
@@ -188,7 +173,6 @@ class CreateElementPanel extends React.Component{
 
 CreateElementPanel.defaultProps = {
     isOnTheTopLayout: false,
-    isBusinessLayout: false,
 }
 
 export default CreateElementPanel;

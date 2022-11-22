@@ -15,13 +15,7 @@
 
 import { Middleware } from 'redux'
 import {RootState} from "@application/utils/store";
-import {LocalStorage} from "@application/classes/LocalStorage";
-import { setConnectionViewType } from '../redux_toolkit/slices/ConnectionSlice';
 
 export const connectionMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
-    if(setConnectionViewType.type === action.type){
-        const storage = LocalStorage.getStorage();
-        storage.set('connectionViewType', action.payload);
-    }
     return next(action);
 }

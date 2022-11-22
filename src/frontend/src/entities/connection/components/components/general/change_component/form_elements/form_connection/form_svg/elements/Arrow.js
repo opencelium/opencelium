@@ -19,9 +19,8 @@ import CCoordinates from "@entity/connection/components/classes/components/conte
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2.scss";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {connect} from "react-redux";
-import {setCurrentBusinessItem} from "@root/redux_toolkit/slices/ConnectionSlice";
-import COperator, {OPERATOR_SIZE} from "@classes/content/connection_overview_2/operator/COperator";
-import CConnectorItem, {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
+import COperator from "@classes/content/connection_overview_2/operator/COperator";
+import {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
 
 export const ARROW_WIDTH = 2;
 
@@ -33,7 +32,7 @@ function mapStateToProps(state){
     }
 }
 
-@connect(mapStateToProps, {setCurrentBusinessItem})
+@connect(mapStateToProps, {})
 class Arrow extends React.Component{
     constructor(props) {
         super(props);
@@ -119,9 +118,14 @@ class Arrow extends React.Component{
                     : null
                 }
                 {showPlaceholder && isRejectedPlaceholder &&
-                    <text dominantBaseline={"middle"} textAnchor={"middle"} fill={stroke} fontSize={'10px'} x={processPlaceholderX + 18} y={processPlaceholderY + 30}>
-                        {'dependency'}
-                    </text>
+                    <React.Fragment>
+                        <rect fill={'#fff'} x={processPlaceholderX - 12} y={processPlaceholderY + 25} width={60} height={10}>
+                            {'dependency'}
+                        </rect>
+                        <text dominantBaseline={"middle"} textAnchor={"middle"} fill={stroke} fontSize={'10px'} x={processPlaceholderX + 18} y={processPlaceholderY + 30}>
+                            {'dependency'}
+                        </text>
+                    </React.Fragment>
                 }
                 <rect id={`arrow_from__${from.id}__${isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM}`} data-movable={isAvailableForDragging} onMouseOver={() => this.onMouseOver()} onMouseLeave={() => this.onMouseLeave()} className={styles.process_placeholder_background} {...processPlaceholderBackgroundCoord}/>
             </React.Fragment>

@@ -46,9 +46,6 @@ export const neo4jUrl = `${protocol}//${hostname}:${neo4jPort}/`;
 
 export const appUrl = `${protocol}//${hostname}:${port}/apps`;
 export const invokerUrl = `${protocol}//${hostname}:${port}/invokers`;
-export const connectionOverviewDetailsUrl = `${protocol}//${hostname}:${port}/connection_overview_details`;
-export const connectionOverviewTechnicalLayoutUrl = `${protocol}//${hostname}:${port}/connection_overview_technical_layout`;
-export const connectionOverviewBusinessLayoutUrl = `${protocol}//${hostname}:${port}/connection_overview_business_layout`;
 export const i18nextLoadPath = isBuild ? `${pathname.substring(0, pathname.lastIndexOf('/'))}/locales/{{lng}}/{{ns}}.json` : `${window.location.protocol}//${window.location.host}/locales/{{lng}}/{{ns}}.json`;
 
 export const errorTicketUrl = 'https://becon88.atlassian.net/rest/collectors/1.0/template/form/cb37ee4e';

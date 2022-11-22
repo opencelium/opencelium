@@ -20,7 +20,6 @@ import CTemplate from "./CTemplate";
 import CBindingItem from "./field_binding/CBindingItem";
 import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../invoker/response/CResponse";
 import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
-import CBusinessLayout from "@entity/connection/components/classes/components/content/connection_overview_2/CBusinessLayout";
 
 const DEFAULT_COLOR = '#ffffff';
 
@@ -48,7 +47,7 @@ export const ALL_COLORS = [
  */
 export default class CConnection{
 
-    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false, businessLayout = null){
+    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false){
         if(connectionId !== 0){
             this._id = isId(connectionId) ? connectionId : 0;
         }
@@ -110,7 +109,6 @@ export default class CConnection{
         this._currentFieldBindingTo = -1;
         this.setError(error);
         this._readOnly = readOnly;
-        this._businessLayout = this.convertBusinessLayout(businessLayout);
     }
 
     static createConnection(connection){
@@ -126,8 +124,7 @@ export default class CConnection{
         const template = connection && connection.hasOwnProperty('template') ? connection.template : null;
         const error = connection && connection.hasOwnProperty('error') ? connection.error : null;
         const readOnly = connection && connection.hasOwnProperty('readOnly') ? connection.readOnly : false;
-        const businessLayout = connection && connection.hasOwnProperty('businessLayout') ? connection.businessLayout : null;
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly, businessLayout);
+        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly);
     }
 
     static duplicateConnection(connection){
@@ -137,16 +134,6 @@ export default class CConnection{
             duplicate.connectionId = duplicate.id;
         }
         return new CConnection(duplicate);
-    }
-
-    convertBusinessLayout(businessLayout){
-        if(!(businessLayout instanceof CBusinessLayout)){
-            if(businessLayout === null){
-                businessLayout = {};
-            }
-            return CBusinessLayout.createBusinessLayout({...businessLayout, connection: this});
-        }
-        return businessLayout;
     }
 
     convertBindingItem(bindingItem){
@@ -285,7 +272,6 @@ export default class CConnection{
             '#D13298', '#B3CDE0', '#F512EA', '#4F3444',];
         this._fieldBinding = [];
         this._allTemplates = [];
-        this._businessLayout = this.convertBusinessLayout(null);
     }
 
     addRestColor(color){
@@ -405,10 +391,6 @@ export default class CConnection{
 
     set readOnly(readOnly){
         this._readOnly = readOnly;
-    }
-
-    get businessLayout(){
-        return this._businessLayout;
     }
 
     getCurrentFieldBindingTo(){
@@ -738,7 +720,6 @@ export default class CConnection{
             fromConnector: fromConnector,
             toConnector: toConnector,
             fieldBinding: fieldBinding,
-            businessLayout: this._businessLayout.getObject(),
         };
         if(this.hasOwnProperty('_id')){
             obj.id = this._id;
@@ -750,7 +731,6 @@ export default class CConnection{
         let data = this.getObject();
         return{
             ...data,
-            businessLayout: this._businessLayout.getItems().length === 0 ? null : this._businessLayout.getObjectForBackend(),
         }
     }
 
@@ -761,7 +741,6 @@ export default class CConnection{
             toConnector: this._toConnector.getObjectForConnectionOverview(),
             template: this.template.getObject(),
             readOnly: this._readOnly,
-            businessLayout: this._businessLayout.getObject(),
         }
     }
 }

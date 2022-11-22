@@ -17,7 +17,6 @@ import React from 'react';
 import {Line} from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/Lines";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import CCreateElementPanel, {CREATE_OPERATOR, CREATE_PROCESS} from "@entity/connection/components/classes/components/content/connection_overview_2/CCreateElementPanel";
-import {CBusinessProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 
 class ItemTypePanel extends React.Component{
@@ -27,13 +26,10 @@ class ItemTypePanel extends React.Component{
 
     render(){
         const {selectedItem, type, changeType, noOperatorType, hasBeforeLine, createElementPanelConnectorType, isOnTheTopLayout} = this.props;
-        const {isInBusinessLayout,isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
+        const {isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
         let {x, y} = CCreateElementPanel.getCoordinates(this.props);
         let ItemClass = selectedItem;
         if(selectedItem === null){
-            if(isInBusinessLayout){
-                ItemClass = CBusinessProcess;
-            }
             if(isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout){
                 ItemClass = CTechnicalProcess;
             }

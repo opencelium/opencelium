@@ -25,18 +25,12 @@ import {
     getConnectionById, updateConnection,
 } from "../action_creators/ConnectionCreators";
 import {IConnection} from "../../interfaces/IConnection";
-import {PANEL_LOCATION, SEPARATE_WINDOW} from "../../components/utils/constants/app";
-import {ConnectionViewProps, ConnectionViewType} from "@root/components/pages/interfaces";
+import {PANEL_LOCATION} from "../../components/utils/constants/app";
 
 const COLOR_MODE = {
     RECTANGLE_TOP: 'RECTANGLE_TOP',
     BACKGROUND: 'BACKGROUND_COLOR',
     CIRCLE_LEFT_TOP: 'CIRCLE_LEFT_TOP',
-};
-const BUSINESS_LABEL_MODE = {
-    NOT_VISIBLE: 'NOT_VISIBLE',
-    VISIBLE: 'VISIBLE',
-    VISIBLE_ON_PRESS_KEY: 'VISIBLE_ON_PRESS_KEY'
 };
 
 export interface ConnectionState extends ICommonState{
@@ -55,7 +49,6 @@ export interface ConnectionState extends ICommonState{
     /*
     * TODO: rework during the the connection cleaning
     */
-    currentBusinessItem: any,
     currentTechnicalItem: any,
     connection: any,
     updateConnection: any,
@@ -63,83 +56,49 @@ export interface ConnectionState extends ICommonState{
     arrows: any[],
     notificationData: any,
     detailsLocation: string,
-    businessLayoutLocation: string,
     technicalLayoutLocation: string,
     colorMode: string,
-    businessLabelMode: string,
-    isVisibleBusinessLabelKeyPressed: boolean,
     isCreateElementPanelOpened: boolean,
     isDraftOpenedOnce: boolean,
-    connectionViewType: ConnectionViewType,
 }
 
 
-let initialState: ConnectionState = null;
+let initialState: ConnectionState = {
+    connections: [],
+    metaConnections: [],
+    isCurrentConnectionHasUniqueTitle: TRIPLET_STATE.INITIAL,
+    checkingConnectionTitle: API_REQUEST_STATE.INITIAL,
+    addingConnection: API_REQUEST_STATE.INITIAL,
+    updatingConnection: API_REQUEST_STATE.INITIAL,
+    gettingConnection: API_REQUEST_STATE.INITIAL,
+    gettingConnections: API_REQUEST_STATE.INITIAL,
+    gettingMetaConnections: API_REQUEST_STATE.INITIAL,
+    deletingConnectionById: API_REQUEST_STATE.INITIAL,
+    deletingConnectionsById: API_REQUEST_STATE.INITIAL,
+    currentConnection: null,
+    currentTechnicalItem: null,
+    connection: null,
+    updateConnection: null,
+    items: [],
+    arrows: [],
+    notificationData: {},
+    detailsLocation: PANEL_LOCATION.SAME_WINDOW,
+    technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
+    colorMode: COLOR_MODE.RECTANGLE_TOP,
+    isCreateElementPanelOpened: false,
+    isDraftOpenedOnce: false,
+    ...CommonState,
+};
 const storage = LocalStorage.getStorage();
-const connectionViewType: ConnectionViewType = storage.get('connectionViewType');
-function isExternalWindow(){
-    for(let windowParam in SEPARATE_WINDOW.CONNECTION_OVERVIEW){
-        //@ts-ignore
-        if(window.name === SEPARATE_WINDOW.CONNECTION_OVERVIEW[windowParam]){
-            return true;
-        }
-    }
-    return false;
-}
-if(isExternalWindow()){
-    const storage = LocalStorage.getStorage();
-    initialState = storage.get('connection_overview');
-}
-
-if(initialState === null) {
-    initialState = {
-        connections: [],
-        metaConnections: [],
-        isCurrentConnectionHasUniqueTitle: TRIPLET_STATE.INITIAL,
-        checkingConnectionTitle: API_REQUEST_STATE.INITIAL,
-        addingConnection: API_REQUEST_STATE.INITIAL,
-        updatingConnection: API_REQUEST_STATE.INITIAL,
-        gettingConnection: API_REQUEST_STATE.INITIAL,
-        gettingConnections: API_REQUEST_STATE.INITIAL,
-        gettingMetaConnections: API_REQUEST_STATE.INITIAL,
-        deletingConnectionById: API_REQUEST_STATE.INITIAL,
-        deletingConnectionsById: API_REQUEST_STATE.INITIAL,
-        currentConnection: null,
-        currentBusinessItem: null,
-        currentTechnicalItem: null,
-        connection: null,
-        updateConnection: null,
-        items: [],
-        arrows: [],
-        notificationData: {},
-        detailsLocation: PANEL_LOCATION.SAME_WINDOW,
-        businessLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
-        technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
-        colorMode: COLOR_MODE.RECTANGLE_TOP,
-        businessLabelMode: BUSINESS_LABEL_MODE.NOT_VISIBLE,
-        isVisibleBusinessLabelKeyPressed: false,
-        isCreateElementPanelOpened: false,
-        isDraftOpenedOnce: false,
-        connectionViewType: connectionViewType || ConnectionViewProps.Diagram,
-        ...CommonState,
-    }
-}
 
 export const connectionSlice = createSlice({
     name: 'connection',
     initialState,
     reducers: {
-        setIsVisibleBusinessLabelKeyPressed: (state, action: PayloadAction<boolean>) => {
-            state.isVisibleBusinessLabelKeyPressed = action.payload;
-        },
-        setBusinessLabelMode: (state, action: PayloadAction<string>) => {
-            state.businessLabelMode = action.payload;
-        },
         setColorMode: (state, action: PayloadAction<string>) => {
             state.colorMode = action.payload;
         },
         setPanelConfigurations: (state, action: PayloadAction<any>) => {
-            state.businessLabelMode = action.payload.businessLabelMode;
             state.colorMode = action.payload.colorMode;
         },
         setConnectionData: (state, action: PayloadAction<any>) => {
@@ -154,10 +113,6 @@ export const connectionSlice = createSlice({
         setItems: (state, action: PayloadAction<any[]>) => {
             state.items = action.payload;
         },
-        setCurrentBusinessItem: (state, action: PayloadAction<any>) => {
-            state.currentBusinessItem = action.payload;
-            state.currentTechnicalItem = null;
-        },
         setCurrentTechnicalItem: (state, action: PayloadAction<any>) => {
             state.currentTechnicalItem = action.payload;
             state.isCreateElementPanelOpened = action.payload !== null;
@@ -165,17 +120,11 @@ export const connectionSlice = createSlice({
         setDetailsLocation: (state, action: PayloadAction<any>) => {
             state.detailsLocation = action.payload.location;
         },
-        setBusinessLayoutLocation: (state, action: PayloadAction<any>) => {
-            state.businessLayoutLocation = action.payload.location;
-        },
         setTechnicalLayoutLocation: (state, action: PayloadAction<any>) => {
             state.technicalLayoutLocation = action.payload.location;
         },
         setConnectionDraftWasOpened: (state, action: PayloadAction<never>) => {
             state.isDraftOpenedOnce = true;
-        },
-        setConnectionViewType: (state, action: PayloadAction<ConnectionViewType>) => {
-            state.connectionViewType = action.payload;
         },
     },
     extraReducers: {
@@ -306,10 +255,10 @@ export const connectionSlice = createSlice({
 })
 
 export const {
-    setIsVisibleBusinessLabelKeyPressed, setBusinessLabelMode, setColorMode, setPanelConfigurations,
-    setConnectionData, setArrows, setItems, setCurrentBusinessItem, setCurrentTechnicalItem,
-    setDetailsLocation, setBusinessLayoutLocation, setTechnicalLayoutLocation,
-    setConnectionDraftWasOpened, setConnectionViewType,
+    setColorMode, setPanelConfigurations,
+    setConnectionData, setArrows, setItems, setCurrentTechnicalItem,
+    setDetailsLocation, setTechnicalLayoutLocation,
+    setConnectionDraftWasOpened,
 } = connectionSlice.actions;
 
 export default connectionSlice.reducer;

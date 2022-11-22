@@ -29,7 +29,7 @@ export class CJsonEditor extends CBodyEditor{
     }
 
     static hasImport(){
-        return true;
+        return false;
     }
 
     static isAbsolute(){

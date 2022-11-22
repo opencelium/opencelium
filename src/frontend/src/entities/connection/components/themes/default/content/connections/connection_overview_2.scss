@@ -18,15 +18,10 @@
 $ITEM_HOVER_COLOR: #5d5b5b;
 $ITEM_ACTIVE_COLOR: #5b6c8d;
 $CURRENT_ITEM_FILL: #f4f4f4;
-$ASSIGN_COLOR: #79c883;
-$ASSIGNED_COLOR: #79c883;
-$ASSIGN_HOVER_COLOR: #9ee7a4;
-$ASSIGN_ACTIVE_COLOR: #5c9966;
 $MOVE_COLOR: #3a5d86;
 $MOVE_HOVER_COLOR: #3c75b7;
 $MOVE_ACTIVE_COLOR: #263e5b;
 $SVG_DISABLED_HIGHLIGHT_COLOR: #499f54;
-$SVG_NOT_ASSIGNABLE_COLOR: #eee;
 $HIGHLIGHT_COLOR: #8a9dd7;
 
 .process_rect{
@@ -135,17 +130,6 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   width: 200px;
   z-index: 1000;
 }
-.business_layout {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: #fafafa;
-  border: 1px solid #eee;
-}
-.business_layout_extended{
-  @extend .business_layout;
-  height: 100vh;
-}
 .technical_layout{
   width: 100%;
   height: 100%;
@@ -161,7 +145,7 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   outline: none;
   cursor: move;
   width: 100%;
-  height: calc(100% - 22px);
+  height: 100%;
   padding: 2px;
 }
 .operator_polygon{
@@ -189,16 +173,8 @@ $HIGHLIGHT_COLOR: #8a9dd7;
     @extend .highlighting;
   }
 }
-.assigned_process{
-  stroke: $ASSIGNED_COLOR;
-}
 .disabled_process{
   opacity: 0.3;
-}
-.assigned_operator{
-  polygon{
-    stroke: $ASSIGNED_COLOR;
-  }
 }
 .disabled_operator{
   opacity: 0.3;
@@ -269,34 +245,11 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 .process_delete{
   @extend .delete;
 }
-.process_assign_rect{
-  fill: white;
-  cursor: pointer;
-}
 .process_move_rect{
   fill: white;
   cursor: pointer;
 }
 
-.process_assign{
-  stroke: $ASSIGN_COLOR !important;
-}
-.process_assign:hover{
-  stroke: $ASSIGN_HOVER_COLOR !important;
-}
-.process_assign:active{
-  stroke: $ASSIGN_ACTIVE_COLOR !important;
-}
-.assign_icon{
-  cursor: pointer;
-  fill: $ASSIGN_COLOR;
-}
-.assign_icon:hover{
-  fill: $ASSIGN_HOVER_COLOR;
-}
-.assign_icon:active{
-  fill: $ASSIGN_ACTIVE_COLOR;
-}
 .move_icon{
   cursor: pointer;
   fill: $MOVE_COLOR;
@@ -341,7 +294,7 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 .details_data{
   padding: 0 10px 10px;
   overflow-y: auto;
-  height: calc(100% - 22px);
+  height: calc(100% - 26px);
   .title{
     font-size: 32px;
     margin-left: -2px;
@@ -353,16 +306,12 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 }
 .settings_panel{
   position: relative;
-  background: #e5e8f3;
   height: 21px;
-  border: 1px solid #eee;
   top: 0;
   width: 100%;
   .icon{
-    position: absolute;
     cursor: pointer;
     background: white;
-    border: 1px solid #eee;
     height: 22px;
     z-index: 1;
     >span{
@@ -404,7 +353,7 @@ $HIGHLIGHT_COLOR: #8a9dd7;
     left: 40px;
   }
   .configurations_icon{
-    left: 60px;
+    left: 0;
   }
 }
 .layout_settings_panel_right{
@@ -422,12 +371,35 @@ $HIGHLIGHT_COLOR: #8a9dd7;
     right: 60px;
   }
 }
+.show_icon{
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: white;
+  width: 28px;
+  height: 28px;
+  z-index: 1;
+  border: 1px solid #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .details_settings_panel{
   @extend .settings_panel;
-  height: 24px;
+  height: 28px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  >span{
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   .position_icon{
     cursor: pointer;
-    position: absolute;
   }
   .position_icon_left{
     @extend .position_icon;
@@ -529,9 +501,6 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   font-weight: bold;
   font-size: $FONT_SIZE_BIG;
   fill: #e5dfdf;
-}
-.business_layout_empty_text{
-  @extend .empty_text;
 }
 .connector_empty_text{
   @extend .empty_text;
@@ -743,10 +712,6 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   width: 430px;
   height: 80px;
   margin: 0 auto;
-}
-
-.configurations_icon_business_label_mode{
-  margin-top: 20px;
 }
 
 .configurations_icon_process_color_mode{

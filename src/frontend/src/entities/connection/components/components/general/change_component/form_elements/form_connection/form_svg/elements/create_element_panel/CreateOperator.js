@@ -23,7 +23,6 @@ import {
 } from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/Lines";
 import {CreateIcon} from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateIcon";
 import CCreateElementPanel from "@entity/connection/components/classes/components/content/connection_overview_2/CCreateElementPanel";
-import {CBusinessProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {setFocusById} from "@application/utils/utils";
 
@@ -86,12 +85,9 @@ class CreateOperator extends React.Component{
         const {type} = this.state;
         const {selectedItem, isTypeCreateOperator, createElementPanelConnectorType} = this.props;
         let {x, y} = CCreateElementPanel.getCoordinates(this.props);
-        const {isInBusinessLayout,isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
+        const {isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
         let ItemClass = selectedItem;
         if(selectedItem === null){
-            if(isInBusinessLayout){
-                ItemClass = CBusinessProcess;
-            }
             if(isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout){
                 ItemClass = CTechnicalProcess;
             }

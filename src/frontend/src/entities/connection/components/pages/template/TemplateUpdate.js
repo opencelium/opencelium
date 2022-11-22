@@ -22,7 +22,6 @@ import {getTemplateById as fetchTemplate, getAllTemplates as fetchTemplates, che
 import {updateTemplate} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from '@entity/connector/redux_toolkit/action_creators/ConnectorCreators';
 import {permission} from "@entity/application/utils/permission";
-import {setConnectionViewType} from "../../../redux_toolkit/slices/ConnectionSlice";
 import {TemplateForm} from "./TemplateForm";
 import {useNavigate, useParams} from "react-router";
 import {ConnectionPermissions} from "@entity/connection/constants";
@@ -35,7 +34,6 @@ function mapStateToProps(state){
     const connectionReducer = state.connectionReducer;
     return{
         authUser,
-        connectionViewType: connectionReducer.connectionViewType,
         template: templateReducer.currentTemplate,
         fetchingTemplate: templateReducer.gettingTemplate,
         updatingTemplate: templateReducer.updatingTemplate,
@@ -51,7 +49,7 @@ function mapStateToProps(state){
 /**
  * Component to Update Template
  */
-@connect(mapStateToProps, {addConnection, checkConnectionTitle, updateTemplate, fetchTemplate, fetchConnectors, fetchTemplates, checkTemplateName, setConnectionViewType})
+@connect(mapStateToProps, {addConnection, checkConnectionTitle, updateTemplate, fetchTemplate, fetchConnectors, fetchTemplates, checkTemplateName})
 @permission(ConnectionPermissions.UPDATE, true)
 @withTranslation(['templates', 'app', 'basic_components'])
 @TemplateForm('update')

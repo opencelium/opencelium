@@ -55,7 +55,6 @@ export function TemplateForm(type) {
                     },
                     connection: CConnection.createConnection(null),
                     entity: null,
-                    isNewConnectionView: props.connectionViewType === CONNECTION_VIEW_TYPE.DIAGRAM,
                     mode: EXPERT_MODE,
                     isDataUploaded: false,
                 };
@@ -94,14 +93,6 @@ export function TemplateForm(type) {
 
             setMode(mode, callback = null){
                 this.setState({mode}, callback);
-            }
-
-            toggleIsNewConnectionView(){
-                const {setConnectionViewType} = this.props;
-                setConnectionViewType(!this.state.isNewConnectionView ? CONNECTION_VIEW_TYPE.DIAGRAM : CONNECTION_VIEW_TYPE.COLUMN)
-                this.setState({
-                    isNewConnectionView: !this.state.isNewConnectionView,
-                }, () => {const elem = document.getElementById('form_section_header_methods'); if(elem) elem.scrollIntoView();})
             }
 
             /**
@@ -221,11 +212,9 @@ export function TemplateForm(type) {
             }
 
             getMethodsFormSection(){
-                const {isNewConnectionView} = this.state;
                 const {t, connectors} = this.props;
-                const inputs = isNewConnectionView ? {...INPUTS.CONNECTION_SVG} : {...INPUTS.METHODS};
                 return {
-                    ...inputs,
+                    ...INPUTS.CONNECTION_SVG,
                     label: t(`${this.translationKey}.FORM.METHODS`),
                     templateLabels: {addTemplate: t(`${this.translationKey}.FORM.ADD_TEMPLATE`), addTemplateTitle: t(`${this.translationKey}.FORM.ADD_TEMPLATE_TITLE`)},
                     actions: {addTemplate: (a) => this.addTemplate(a)},
@@ -329,7 +318,7 @@ export function TemplateForm(type) {
             }
 
             getSecondThirdFormsSections(){
-                const {hasModeInputsSection, validationMessages, hasMethodsInputsSection, isNewConnectionView, mode} = this.state;
+                const {hasModeInputsSection, validationMessages, hasMethodsInputsSection, mode} = this.state;
                 const {t, connectors} = this.props;
                 let connectorMenuItems = this.getConnectorMenuItems();
                 let result = [];
@@ -382,8 +371,6 @@ export function TemplateForm(type) {
                     hint: {text: t(`${this.translationKey}.FORM.HINT_3`)},
                     header: t(`${this.translationKey}.FORM.PAGE_3`),
                     visible: hasMethodsInputsSection || this.isView,
-                    hasFullScreenFunction: true,
-                    AdditionalIcon: <TooltipFontIcon whiteTheme size={20} tooltipPosition={'bottom'} isButton className={styles.switch_view_icon} value={isNewConnectionView ? 'align_vertical_top' : 'account_tree'} tooltip={isNewConnectionView ? 'Column View' : 'Diagram View'} onClick={() => this.toggleIsNewConnectionView()}/>
                 }
                 result.push(thirdFormSection);
                 return result;

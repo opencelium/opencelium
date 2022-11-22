@@ -17,10 +17,10 @@ import COperator from "@entity/connection/components/classes/components/content/
 
 export class CTechnicalOperator extends COperator{
 
-    constructor(businessOperator) {
-        super(businessOperator);
-        this._items = businessOperator && businessOperator.hasOwnProperty('items') ? businessOperator.items : [];
-        this._arrows = businessOperator && businessOperator.hasOwnProperty('arrows') ? businessOperator.arrows : [];
+    constructor(technicalOperator) {
+        super(technicalOperator);
+        this._items = technicalOperator && technicalOperator.hasOwnProperty('items') ? technicalOperator.items : [];
+        this._arrows = technicalOperator && technicalOperator.hasOwnProperty('arrows') ? technicalOperator.arrows : [];
     }
 
     static createTechnicalOperator(operator){

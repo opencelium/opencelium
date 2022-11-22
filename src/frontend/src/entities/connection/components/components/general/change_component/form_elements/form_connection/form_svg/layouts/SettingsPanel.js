@@ -58,7 +58,7 @@ class SettingsPanel extends React.Component{
         }
         return(
             <div className={settingsPanelClassName} onDoubleClick={minMaxClick}>
-
+{/*
                 <TooltipFontIcon
                     className={styles.replace_icon}
                     size={20}
@@ -70,7 +70,7 @@ class SettingsPanel extends React.Component{
                     isButton={true}
                 />
                 <div style={{cursor: 'pointer'}} className={titleClassName}>{title}</div>
-                <TooltipFontIcon
+               <TooltipFontIcon
                     className={styles.min_max_icon}
                     size={20}
                     onClick={minMaxClick}
@@ -80,7 +80,7 @@ class SettingsPanel extends React.Component{
                     disabled={isDisabled || isMinMaxIconDisabled}
                     isButton={true}
                 />
-                <TooltipFontIcon
+               <TooltipFontIcon
                     size={20}
                     className={styles.new_window_icon}
                     onClick={openInNewWindow}
@@ -89,7 +89,7 @@ class SettingsPanel extends React.Component{
                     tooltipPosition={tooltipPosition}
                     disabled={isDisabled || isNewWindowIconDisabled}
                     isButton={true}
-                />
+                />*/}
                 {hasConfigurationsIcon && <ConfigurationsIcon disabled={isDisabled} tooltipPosition={tooltipPosition}/>}
             </div>
         );
