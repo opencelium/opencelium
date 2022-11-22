@@ -36,6 +36,7 @@ import CProcess from "@entity/connection/components/classes/components/content/c
 import COperator from "@entity/connection/components/classes/components/content/connection_overview_2/operator/COperator";
 import ReactDOM from "react-dom";
 import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
+import {withTheme} from "styled-components";
 
 
 @connect(null, {setCurrentTechnicalItem})
@@ -183,6 +184,7 @@ class Condition extends React.Component{
             if(rightMethod) operatorItem.setRightStatementParent(connection.getMethodByColor(rightMethod.color).response.success);
         }
         if(property) operatorItem.setRightStatementRightPropertyValue(property);
+        operatorItem.error = null;
         updateConnection(connection);
         let currentTechnicalItem = connector.getSvgElementByIndex(operator.index);
         setCurrentTechnicalItem(currentTechnicalItem.getObject());
@@ -297,16 +299,19 @@ class Condition extends React.Component{
 
     render(){
         const {isMouseOver, isOpenEditDialog} = this.state;
-        const {details, isExtended, isCurrentInfo, readOnly} = this.props;
+        const {details, isExtended, isCurrentInfo, readOnly, theme, connection} = this.props;
         const operator = details.entity;
         const conditionText = operator.condition.generateStatementText();
         const conditionTextTitle = operator.condition.generateStatementText(true);
         const label = readOnly ? 'Ok' : 'Apply';
+        const errorColor = theme?.input?.error?.color || '#9b2e2e';
+        const connector = connection.getConnectorByType(details.connectorType);
+        const errorMessages = connector ? connector.getOperatorByIndex(operator.index).error.messages : [];
         return(
             <React.Fragment>
-                <Col xs={4} className={styles.col}>{`Condition`}</Col>
+                <Col xs={4} className={styles.col} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{`Condition`}</Col>
                 <Col xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
-                    <span className={styles.value} title={conditionTextTitle}>{conditionText}</span>
+                    <span className={styles.value} title={conditionTextTitle} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{conditionText}</span>
                     {isMouseOver && !isOpenEditDialog && !readOnly && <EditIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isMouseOver && !isOpenEditDialog && readOnly && <ViewIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isExtended && isCurrentInfo &&
@@ -334,4 +339,4 @@ Condition.propTypes = {
 }
 
 
-export default Condition;
+export default withTheme(Condition);

@@ -15,7 +15,6 @@
 
 import CCondition from "./CCondition";
 import CStatement, {DEFAULT_COLOR} from "./CStatement";
-import {isString} from "@application/utils/utils";
 
 export const IF_OPERATOR = 'if';
 export const LOOP_OPERATOR = 'loop';
@@ -56,8 +55,7 @@ export default class COperatorItem{
     deleteError(){
         this._error = {
             hasError: false,
-            location: '',
-            message: '',
+            messages: [],
         };
     }
 
@@ -66,13 +64,12 @@ export default class COperatorItem{
     }
 
     checkError(error){
-        if(error && error.hasOwnProperty('hasError') && error.hasOwnProperty('location')){
+        if(error && error.hasOwnProperty('hasError')){
             return error;
         }
         return {
             hasError: false,
-            location: '',
-            message: '',
+            messages: [],
         };
     }
 
@@ -260,5 +257,12 @@ export default class COperatorItem{
             obj.iterator = this._iterator;
         }
         return obj;
+    }
+
+    getObjectForConnectionOverview(){
+        return {
+            ...this.getObject(),
+            error: this._error,
+        }
     }
 }

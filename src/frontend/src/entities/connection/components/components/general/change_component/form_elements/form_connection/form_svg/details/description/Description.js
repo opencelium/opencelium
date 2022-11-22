@@ -24,6 +24,8 @@ import OperatorType from "@change_component/form_elements/form_connection/form_s
 import TechnicalProcessDescription
     from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/TechnicalProcessDescription";
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
+import {withTheme} from "styled-components";
+import {ITheme} from "@style/Theme";
 
 
 class Description extends React.Component{
@@ -32,8 +34,11 @@ class Description extends React.Component{
     }
 
     renderForOperator(){
-        const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo, readOnly} = this.props;
+        const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo, readOnly, theme} = this.props;
         const operatorItem = details.entity;
+        const errorColor = theme?.input?.error?.color || '#9b2e2e';
+        const connector = connection.getConnectorByType(details.connectorType);
+        const errorMessages = connector ? connector.getOperatorByIndex(operatorItem.index).error.messages : [];
         return(
             <Row className={styles.row}>
                 <OperatorType readOnly={readOnly} details={details} connection={connection} updateConnection={updateConnection}/>
@@ -45,6 +50,11 @@ class Description extends React.Component{
                     </React.Fragment>
                 }
                 <Condition readOnly={readOnly} nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details}/>
+                {/*{
+                    errorMessages.map(error => {
+                        return <div style={{color: errorColor}}>{error}</div>
+                    })
+                }*/}
             </Row>
         );
     }
@@ -70,4 +80,4 @@ Description.defaultProps = {
     isExtended: false,
 };
 
-export default Description;
+export default withTheme(Description);

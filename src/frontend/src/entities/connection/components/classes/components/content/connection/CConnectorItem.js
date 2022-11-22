@@ -179,6 +179,18 @@ export default class CConnectorItem{
         return this._svgItems.find(svgItem => svgItem.entity.index === index);
     }
 
+    setErrorsForOperators(errors){
+        let hasNewErrors = false;
+        errors.forEach(errorData => {
+            const index = this._operators.findIndex(operator => operator.index === errorData.index);
+            if(index !== -1){
+                this._operators[index].error = {hasError: true, location: '', messages: errorData.errors};
+                hasNewErrors = true;
+            }
+        })
+        return hasNewErrors;
+    }
+
     getNearestLoopOperatorFromReference(reference){
         const iterators = ITERATOR_NAMES.join('|');
         const previousLoopOperators = this.getPreviousLoopOperators(this);
@@ -1497,8 +1509,13 @@ export default class CConnectorItem{
         for(let i = 0; i < this._svgItems.length; i++){
             svgItems.push(this._svgItems[i].getObject());
         }
+        let operators = [];
+        for (let i = 0; i < this._operators.length; i++){
+            operators.push(this._operators[i].getObjectForConnectionOverview());
+        }
         return {
             ...this.getObject(),
+            operators,
             title: this._title,
             invoker: this._invoker.getObject(),
             currentItemIndex: this._currentItem ? this._currentItem.index : '',

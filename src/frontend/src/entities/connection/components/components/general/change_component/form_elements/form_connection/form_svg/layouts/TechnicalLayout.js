@@ -65,12 +65,21 @@ class TechnicalLayout extends React.Component{
     }
 
     setCurrentItem(currentItem){
-        const {setCurrentTechnicalItem, connection, updateConnection} = this.props;
-        setCurrentTechnicalItem(currentItem.getObject());
-        if(connection) {
-            const connector = connection.getConnectorByType(currentItem.connectorType);
-            connector.setCurrentItem(currentItem.entity);
-            updateConnection(connection);
+        if(currentItem) {
+            const {setCurrentTechnicalItem, connection, updateConnection, currentTechnicalItem} = this.props;
+            if(!currentTechnicalItem || currentTechnicalItem.entity.index !== currentItem.entity.index){
+                setCurrentTechnicalItem(currentItem.getObject());
+            }
+            if (connection) {
+                const connector = connection.getConnectorByType(currentItem.connectorType);
+                const currentItemInConnector = connector.getCurrentItem();
+                if (currentItemInConnector) {
+                    if (currentItemInConnector.index !== currentItem.entity.index) {
+                        connector.setCurrentItem(currentItem.entity);
+                        updateConnection(connection);
+                    }
+                }
+            }
         }
     }
 
@@ -122,7 +131,7 @@ class TechnicalLayout extends React.Component{
                     fromConnectorPanelParams={fromConnectorPanelParams}
                     toConnectorPanelParams={toConnectorPanelParams}
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
-                    startingSvgX={-40}
+                    startingSvgX={-250}
                     startingSvgY={startingSvgY}
                 />
             </div>

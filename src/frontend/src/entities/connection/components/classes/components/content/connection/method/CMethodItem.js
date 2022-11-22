@@ -59,8 +59,7 @@ export default class CMethodItem{
     deleteError(){
         this._error = {
             hasError: false,
-            location: '',
-            message: '',
+            message: [],
         };
     }
 
@@ -73,13 +72,12 @@ export default class CMethodItem{
     }
 
     checkError(error){
-        if(error && error.hasOwnProperty('hasError') && error.hasOwnProperty('location')){
+        if(error && error.hasOwnProperty('hasError')){
             return error;
         }
         return {
             hasError: false,
-            location: '',
-            message: '',
+            messages: [],
         };
     }
 
@@ -265,6 +263,12 @@ export default class CMethodItem{
         return {
             ...this.getObject(),
             invoker: this._invoker.getObject(),
+        }
+    }
+    getObjectForConnectionOverview(){
+        return {
+            ...this.getObject(),
+            error: this._error,
         }
     }
 }

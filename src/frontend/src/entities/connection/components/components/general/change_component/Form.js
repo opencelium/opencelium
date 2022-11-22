@@ -19,23 +19,28 @@ import {connect} from 'react-redux';
 
 import styles from '@entity/connection/components/themes/default/general/form_component.scss';
 import FormSection from "@change_component/FormSection";
-import {isArray, isEmptyObject} from "@application/utils/utils";
+import {findTopLeft, isArray, isEmptyObject} from "@application/utils/utils";
 import ListButton from "@entity/connection/components/components/general/view_component/ListButton";
 import {ActionButton, SubFormSections} from "@change_component/FormComponents";
 import CancelButton from "@entity/connection/components/components/general/view_component/CancelButton";
 
 import {setConnectionData} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
+import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import Title from "@app_component/collection/collection_title/Title";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import CSvg from "@classes/content/connection_overview_2/CSvg";
 
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
+    const {currentTechnicalItem} = mapItemsToClasses(state);
     return {
         authUser,
+        currentTechnicalItem,
     }
 }
 
-@connect(mapStateToProps, {setConnectionData})
+@connect(mapStateToProps, {setConnectionData, setCurrentTechnicalItem})
 class Form extends React.Component{
     constructor(props) {
         super(props);
@@ -73,6 +78,61 @@ class Form extends React.Component{
             makingRequest: false,
             contentsLength: props.contents ? props.contents.length : 0,
         };
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const prevErrors = prevProps.contents[2].inputs[1].errors;
+        const curErrors = this.props.contents[2].inputs[1].errors;
+        if(JSON.stringify(prevErrors) !== JSON.stringify(curErrors)){
+            const {entity} = this.state;
+            const {setCurrentTechnicalItem, currentTechnicalItem} = this.props;
+            const fromConnectorErrors = curErrors.operators.fromConnector;
+            const toConnectorErrors = curErrors.operators.toConnector;
+            let hasErrors = false;
+            let currentItem = null;
+            if(fromConnectorErrors.length > 0){
+                hasErrors = entity.fromConnector.setErrorsForOperators(fromConnectorErrors);
+                currentItem = entity.fromConnector.getSvgElementByIndex(fromConnectorErrors[0].index);
+                const currentItemInConnector = entity.fromConnector.getCurrentItem();
+                if (currentItemInConnector) {
+                    if (currentItemInConnector.index !== currentItem.entity.index || (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)) {
+                        entity.fromConnector.setCurrentItem(currentItem.entity);
+                    } else{
+                        currentItem = null;
+                    }
+                }
+            }
+            if(toConnectorErrors.length > 0){
+                hasErrors = entity.toConnector.setErrorsForOperators(toConnectorErrors);
+                currentItem = entity.toConnector.getSvgElementByIndex(toConnectorErrors[0].index);
+                const currentItemInConnector = entity.toConnector.getCurrentItem();
+                if (!currentItem && currentItemInConnector) {
+                    if (currentItemInConnector.index !== currentItem.entity.index || (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)) {
+                        entity.toConnector.setCurrentItem(currentItem.entity);
+                    } else{
+                        currentItem = null;
+                    }
+                }
+            }
+            if(hasErrors){
+                if(currentItem){
+                    setCurrentTechnicalItem(currentItem.getObject());
+                    const elementWithError = document.getElementById(`${currentItem.connectorType}__${currentItem.connectorType}_${currentItem.entity.index}`)
+                    if(elementWithError){
+                        const firstElement = document.querySelector('[id^=fromConnector__fromConnector_0]');
+                        if(firstElement){
+                            const x = -300 + elementWithError.getBoundingClientRect().x - firstElement.getBoundingClientRect().x;
+                            const y = -100 + elementWithError.getBoundingClientRect().y - firstElement.getBoundingClientRect().y;
+                            const viewBox = {x, y, width: 1800, height: 715};
+                            CSvg.setViewBox('technical_layout_svg', viewBox);
+                        }
+                    }
+                }
+                this.updateEntity(entity);
+                this.props.setConnectionData({connection: entity.getObjectForConnectionOverview()});
+                window.scrollTo({top: findTopLeft(`technical_layout_svg`).top - 4, behavior: "instant"});
+            }
+        }
     }
 
     getInputsState(inputs){

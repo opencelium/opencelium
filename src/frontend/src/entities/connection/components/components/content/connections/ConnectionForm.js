@@ -20,7 +20,10 @@ import Form from "@change_component/Form";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import {EXPERT_MODE, TEMPLATE_MODE} from "@entity/connection/components/classes/components/content/connection/CTemplate";
 import styles from '@entity/connection/components/themes/default/content/connections/change.scss';
-import {CONNECTOR_FROM} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
+import {
+    CONNECTOR_FROM,
+    CONNECTOR_TO
+} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 import AddTemplate from "@change_component/form_elements/form_connection/form_methods/AddTemplate";
 import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
 import {LocalStorage} from "@application/classes/LocalStorage";
@@ -56,6 +59,7 @@ export function ConnectionForm(type) {
                         fromConnector: '',
                         toConnector: '',
                         template: '',
+                        logic: {operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}},
                     },
                     connection: CConnection.createConnection(),
                     entity: null,
@@ -216,6 +220,7 @@ export function ConnectionForm(type) {
                     actions: {addTemplate: (a) => this.addTemplate(a)},
                     source: Object.freeze(connectors),
                     readOnly: this.isView,
+                    errors: this.state.validationMessages.logic,
                 };
             }
 
@@ -309,6 +314,37 @@ export function ConnectionForm(type) {
             }
 
             /**
+             * to validate methods and operators
+             */
+            validateLogic(entity) {
+                const fromConnectorOperators = entity.fromConnector.operators;
+                const toConnectorOperators = entity.toConnector.operators;
+                const errors = {operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}};
+                const checkOperator = (connector, connectorType) => {
+                    connector.forEach((operator) => {
+                        const condition = operator.condition;
+                        let operatorErrors = [];
+                        if(!condition.leftStatement.color || !condition.leftStatement.field){
+                            operatorErrors.push('Left Statement is missing');
+                        }
+                        if(!condition.relationalOperator){
+                            operatorErrors.push('Relational Operator is missing');
+                        }
+                        if(operatorErrors.length > 0){
+                            errors.operators[connectorType].push({
+                                index: operator.index,
+                                errors: operatorErrors,
+                            })
+                        }
+                    })
+                }
+                checkOperator(fromConnectorOperators, CONNECTOR_FROM);
+                checkOperator(toConnectorOperators, CONNECTOR_TO);
+                const hasErrors = errors.operators[CONNECTOR_FROM].length > 0 || errors.operators[CONNECTOR_TO].length > 0;
+                return {passed: !hasErrors, result: errors};
+            }
+
+            /**
              * to add template
              */
             addTemplate(template){
@@ -396,6 +432,9 @@ export function ConnectionForm(type) {
                         }
                     }
                 }
+                const logicValidation = this.validateLogic(entity);
+                validations.logic = logicValidation.result;
+                isValidationPassed = isValidationPassed && logicValidation.passed;
                 if(isValidationPassed){
                     this.action(entity);
                     this.startDoingAction = false;
@@ -422,6 +461,7 @@ export function ConnectionForm(type) {
                     this.props.addConnection(typeof entity.getObjectForBackend === 'function' ? entity.getObjectForBackend() : entity);
                 }
             }
+
             /**
              * to add/update Connection
              */
