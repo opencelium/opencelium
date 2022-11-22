@@ -169,8 +169,6 @@ public class ConnectorExecutor {
         FunctionInvoker functionInvoker = invoker.getOperations().stream()
                 .filter(m -> m.getName().equals(methodNode.getName())).findFirst()
                 .orElseThrow(() -> new RuntimeException("Method not found in Invoker"));
-        String taId = executionContainer.getTaId();
-
         if (debugMode) {
             System.out.println("============================================================");
             System.out.println("Function: " + methodNode.getName() + " -- color: " + methodNode.getColor());
@@ -287,7 +285,6 @@ public class ConnectorExecutor {
         String endpoint = methodNode.getRequestNode().getEndpoint();
         BodyNode b = methodNode.getRequestNode().getBodyNode();
         String format = b == null ? "json" : b.getFormat();
-        String requiredField;
         String refRegex = "\\{(.*?)\\}";
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(endpoint);

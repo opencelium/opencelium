@@ -17,7 +17,8 @@
 package com.becon.opencelium.backend.neo4j.entity.relation;
 
 import com.becon.opencelium.backend.neo4j.entity.FieldNode;
-import org.neo4j.ogm.annotation.*;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
 
 @RelationshipEntity(type = "linked")
 public class LinkRelation {
