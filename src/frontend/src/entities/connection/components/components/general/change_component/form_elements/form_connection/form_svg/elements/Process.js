@@ -101,7 +101,7 @@ class Process extends React.Component{
             if (connection) {
                 if(isItemDraggable){
                     process.isDragged = true;
-                    process.isDraggedForCopy = e.ctrlKey;
+                    process.isDraggedForCopy = e.altKey;
                 }
                 setCurrentItem(process);
             }

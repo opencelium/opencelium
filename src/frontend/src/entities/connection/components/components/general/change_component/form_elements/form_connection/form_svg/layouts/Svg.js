@@ -278,7 +278,7 @@ class Svg extends React.Component {
                         }
                         if(e.target.getAttribute('data-movable') === 'true'){
                             shouldMoveItem = true;
-                            this.moveItem(connector, sourceItem, targetLeftItem, mode, !e.ctrlKey);
+                            this.moveItem(connector, sourceItem, targetLeftItem, mode, !e.altKey);
                         }
                     }
                 }
