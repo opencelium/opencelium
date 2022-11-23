@@ -7,9 +7,10 @@ import com.jayway.jsonpath.JsonPath;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.elasticsearch.client.Client;
+import org.neo4j.ogm.model.Result;
+import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.YamlJsonParser;
-import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -19,7 +20,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -31,7 +36,10 @@ public class SystemOverviewRepository {
     private DataSource dataSource;
 
     @Autowired
-    private Neo4jClient neo4jClient;
+    private SessionFactory sessionFactory;
+
+    @Autowired
+    private Client client;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -55,21 +63,21 @@ public class SystemOverviewRepository {
         }
 
 
-//        // get neo4j version
-//        try {
-//            Result result = neo4jClient
-//                    .query("call dbms.components() yield versions unwind versions as version return version;").fetchAs(HashMap<String, Object>.class);
-//            while (result.iterator().hasNext()) {
-//                Map<String, Object> map = result.iterator().next();
-//                if (map.containsKey("version")) {
-//                    systemOverview.setNeo4j((String) map.get("version"));
-//                    break;
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            systemOverview.setNeo4j("Service is down. Unable to detect version. ");
-//        }
+        // get neo4j version
+        try {
+            Result result = sessionFactory.openSession()
+                    .query("call dbms.components() yield versions unwind versions as version return version;",  new HashMap<String, Object>());
+            while (result.iterator().hasNext()) {
+                Map<String, Object> map = result.iterator().next();
+                if (map.containsKey("version")) {
+                    systemOverview.setNeo4j((String) map.get("version"));
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            systemOverview.setNeo4j("Service is down. Unable to detect version. ");
+        }
 
         // get elasticsearch version
 //        try {
@@ -130,7 +138,7 @@ public class SystemOverviewRepository {
                     while ((read = zis.read(buffer, 0, 1024)) >= 0) {
                         stringBuilder.append(new String(buffer, 0, read));
                     }
-                    ObjectMapper yamlReader = new ObjectMapper();
+                    ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
                     Object obj = yamlReader.readValue(stringBuilder.toString(), Object.class);
                     ObjectMapper jsonReader = new ObjectMapper();
                     String s = jsonReader.writeValueAsString(obj);

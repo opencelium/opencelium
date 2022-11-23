@@ -15,9 +15,11 @@ import com.becon.opencelium.backend.neo4j.service.LinkRelationServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.JsonPathException;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -122,7 +124,7 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public void deleteZipFile(Path path) {
-        if(path.toString().equals("")){
+        if(path.equals("")){
             return;
         }
         try {

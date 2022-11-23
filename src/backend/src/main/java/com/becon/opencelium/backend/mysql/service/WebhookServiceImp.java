@@ -24,16 +24,9 @@ import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
 import com.becon.opencelium.backend.utility.TokenUtility;
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.DirectEncrypter;
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.JWEDecryptionKeySelector;
-import com.nimbusds.jose.proc.JWEKeySelector;
-import com.nimbusds.jose.proc.SimpleSecurityContext;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -63,11 +56,14 @@ public class WebhookServiceImp implements WebhookService {
     //TODO: rename method - gets some info from token
     @Override
     public Optional<WebhookTokenResource> getTokenObject(String token) {
-        JWTClaimsSet claims = getAllClaimsFromToken(token);
+        Claims claims = Jwts.parser()
+                .setSigningKey(tokenUtility.getSecret().getBytes())
+                .parseClaimsJws(token.replace(SecurityConstant.BEARER, ""))
+                .getBody();
 
-        String uuid = claims.getClaim("uuid").toString();
-        String tmp = claims.getClaim("userId").toString();
-        int schedulerId =  (int) claims.getClaim("schedulerId");
+        String uuid = claims.get("uuid").toString();
+        String tmp = claims.get("userId").toString();
+        int schedulerId =  (int) claims.get("schedulerId");
         int userId = Integer.parseInt(tmp);
 
         boolean userExists = userService.existsById(userId);
@@ -85,19 +81,6 @@ public class WebhookServiceImp implements WebhookService {
 
         return Optional.of(webhookToken);
     }
-    private JWTClaimsSet getAllClaimsFromToken(String token) {
-
-        try {
-            ConfigurableJWTProcessor<SimpleSecurityContext> jwtProcessor = new DefaultJWTProcessor<SimpleSecurityContext>();
-            JWKSource<SimpleSecurityContext> jweKeySource = new ImmutableSecret<>(tokenUtility.getSecret().getBytes());
-            JWEKeySelector<SimpleSecurityContext> jweKeySelector =
-                    new JWEDecryptionKeySelector<>(JWEAlgorithm.DIR, EncryptionMethod.A128CBC_HS256, jweKeySource);
-            jwtProcessor.setJWEKeySelector(jweKeySelector);
-            return jwtProcessor.process(token, null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public Webhook save(int userId, Scheduler scheduler) {
@@ -113,28 +96,15 @@ public class WebhookServiceImp implements WebhookService {
 
     @Override
     public String generateToken(int userId, String uuid, int schedulerId) {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject("webhook")
+
+        return Jwts.builder()
+                .setSubject("webhook")
                 .claim("userId", userId)
                 .claim("uuid", uuid)
                 .claim("schedulerId", schedulerId)
-                .jwtID(Long.toString(schedulerId))
-                .build();
-
-        return doGenerateToken(claimsSet);
-    }
-
-    private String doGenerateToken(JWTClaimsSet claims) {
-        JWEHeader header = new JWEHeader(JWEAlgorithm.DIR, EncryptionMethod.A256CBC_HS512);
-        Payload payload = new Payload(claims.toJSONObject());
-        try {
-            DirectEncrypter encrypter = new DirectEncrypter(tokenUtility.getSecret().getBytes());
-            JWEObject jweObject = new JWEObject(header, payload);
-            jweObject.encrypt(encrypter);
-            return jweObject.serialize();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+                .setId(Long.toString(schedulerId))
+                .signWith(SignatureAlgorithm.HS256, tokenUtility.getSecret().getBytes())
+                .compact();
     }
 
     @Override
