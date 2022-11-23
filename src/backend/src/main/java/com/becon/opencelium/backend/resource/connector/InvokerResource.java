@@ -20,7 +20,7 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.annotation.Resource;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InvokerResource extends RepresentationModel {
+public class InvokerResource extends ResourceSupport {
 
     private String name;
     private String description;

@@ -16,12 +16,12 @@
 
 package com.becon.opencelium.backend.resource.connection.binding;
 
-import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.annotation.Resource;
 
 @Resource
-public class CodeResource extends RepresentationModel {
+public class CodeResource extends ResourceSupport {
 
     private String name;
     private String value;

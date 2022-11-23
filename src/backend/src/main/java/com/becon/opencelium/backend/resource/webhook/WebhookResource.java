@@ -18,12 +18,12 @@ package com.becon.opencelium.backend.resource.webhook;
 
 
 import com.becon.opencelium.backend.mysql.entity.Webhook;
-import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.annotation.Resource;
 
 @Resource
-public class WebhookResource extends RepresentationModel{
+public class WebhookResource extends ResourceSupport{
     private int webhookId;
     private String url;
 

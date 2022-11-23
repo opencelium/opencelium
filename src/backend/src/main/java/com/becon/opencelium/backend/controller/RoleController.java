@@ -18,14 +18,18 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.exception.RoleExistsException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
+import com.becon.opencelium.backend.mysql.entity.Component;
+import com.becon.opencelium.backend.mysql.entity.RoleHasPermission;
+import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.entity.UserRole;
 import com.becon.opencelium.backend.mysql.service.PermissionServiceImpl;
 import com.becon.opencelium.backend.mysql.service.RoleHasPermissionServiceImp;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
+import com.becon.opencelium.backend.resource.user.ComponentResource;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
 import com.becon.opencelium.backend.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -62,10 +66,10 @@ public class RoleController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<CollectionModel<UserRoleResource>> all(){
+    public ResponseEntity<Resources<UserRoleResource>> all(){
         final List<UserRoleResource> collection =
                 userRoleService.findAll().stream().map(UserRoleResource::new).collect(Collectors.toList());
-        final CollectionModel<UserRoleResource> resources = CollectionModel.of(collection);
+        final Resources<UserRoleResource> resources = new Resources<>(collection);
         return ResponseEntity.ok(resources);
     }
 

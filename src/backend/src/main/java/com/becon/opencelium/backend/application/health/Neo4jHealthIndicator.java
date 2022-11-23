@@ -1,10 +1,8 @@
 package com.becon.opencelium.backend.application.health;
 
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.internal.DriverFactory;
-import org.neo4j.driver.internal.SessionFactory;
+import org.neo4j.ogm.model.Result;
+import org.neo4j.ogm.session.Session;
+import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
@@ -20,29 +18,28 @@ public class Neo4jHealthIndicator extends AbstractHealthIndicator {
     static final String CYPHER = "match (n) return count(n) as nodes";
 
     @Autowired
-    private Driver driver;
+    private SessionFactory sessionFactory;
 
     @Override
     protected void doHealthCheck(Health.Builder builder) throws Exception {
-        Session session = this.driver.session();
-        getProductVersion(builder, session);
-
+        getProductVersion(builder);
+        Session session = this.sessionFactory.openSession();
         extractResult(session, builder);
 
 
     }
 
     private void extractResult(Session session, Health.Builder builder) throws Exception {
-        Result result = session.run(CYPHER, Collections.emptyMap());
-        builder.up().withDetail("nodes", result.next().get("nodes"));
+        Result result = session.query(CYPHER, Collections.emptyMap());
+        builder.up().withDetail("nodes", result.queryResults().iterator().next().get("nodes"));
     }
 
-    private void getProductVersion(Health.Builder builder, Session session) {
+    private void getProductVersion(Health.Builder builder) {
         String version = "";
-        Result result = session
-                .run("call dbms.components() yield versions unwind versions as version return version;",  new HashMap<String, Object>());
-        while (result.hasNext()) {
-            Map<String, Object> map = result.next().asMap();
+        Result result = sessionFactory.openSession()
+                .query("call dbms.components() yield versions unwind versions as version return version;",  new HashMap<String, Object>());
+        while (result.iterator().hasNext()) {
+            Map<String, Object> map = result.iterator().next();
             if (map.containsKey("version")) {
                 version = (String) map.get("version");
                 break;

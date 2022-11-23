@@ -31,10 +31,11 @@ import com.becon.opencelium.backend.utility.PathUtility;
 import com.becon.opencelium.backend.utility.Xml;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -84,7 +85,7 @@ public class InvokerController {
                 .stream().map(inv -> invokerService.toResource(inv))
                 .collect(Collectors.toList());
 
-        final CollectionModel<InvokerResource> resources = CollectionModel.of(invokerResources);
+        final Resources<InvokerResource> resources = new Resources<>(invokerResources);
         return ResponseEntity.ok(resources);
     }
 
@@ -122,7 +123,7 @@ public class InvokerController {
 
         Invoker invoker = invokerContainer.getByName(filename);
         InvokerResource invokerResource = invokerService.toResource(invoker);
-        final EntityModel<InvokerResource> resource = EntityModel.of(invokerResource);
+        final Resource<InvokerResource> resource = new Resource<>(invokerResource);
         return ResponseEntity.ok().body(resource);
     }
 

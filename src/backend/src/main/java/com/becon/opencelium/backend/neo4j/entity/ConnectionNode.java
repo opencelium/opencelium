@@ -16,26 +16,26 @@
 
 package com.becon.opencelium.backend.neo4j.entity;
 
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
-import org.springframework.data.neo4j.core.schema.Id;
-import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Relationship;
-import org.springframework.data.neo4j.core.schema.Relationship.Direction;
+import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
+import com.becon.opencelium.backend.neo4j.service.ConnectorNodeServiceImp;
+import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import org.neo4j.ogm.annotation.*;
 
-@Node("Connection")
+@NodeEntity(label = "Connection")
 public class ConnectionNode {
 
     @Id
     @GeneratedValue
     private Long id;
 
+    @Index
     private Long connectionId;
     private String name;
 
-    @Relationship(type = "from_connector", direction = Direction.OUTGOING)
+    @Relationship(type = "from_connector", direction = Relationship.OUTGOING)
     private ConnectorNode fromConnector;
 
-    @Relationship(type = "to_connector", direction = Direction.OUTGOING)
+    @Relationship(type = "to_connector", direction = Relationship.OUTGOING)
     private ConnectorNode toConnector;
 
     public Long getId() {

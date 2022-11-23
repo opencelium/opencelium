@@ -17,11 +17,11 @@
 package com.becon.opencelium.backend.neo4j.entity;
 
 import com.becon.opencelium.backend.resource.connection.StatementResource;
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
-import org.springframework.data.neo4j.core.schema.Id;
-import org.springframework.data.neo4j.core.schema.Node;
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.NodeEntity;
 
-@Node("Variable")
+@NodeEntity(label = "Variable")
 public class StatementVariable {
 
     @Id

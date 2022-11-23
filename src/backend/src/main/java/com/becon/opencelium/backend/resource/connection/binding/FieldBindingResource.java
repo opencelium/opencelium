@@ -16,14 +16,14 @@
 
 package com.becon.opencelium.backend.resource.connection.binding;
 
-import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
 @Resource
-public class FieldBindingResource extends RepresentationModel {
+public class FieldBindingResource extends ResourceSupport {
     private List<LinkedFieldResource> from = new ArrayList<>();
     private EnhancementResource enhancement;
     private List<LinkedFieldResource> to = new ArrayList<>();

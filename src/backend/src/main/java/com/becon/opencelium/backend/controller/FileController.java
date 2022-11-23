@@ -42,10 +42,12 @@ import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.jayway.jsonpath.JsonPath;
+import io.netty.handler.codec.serialization.ObjectEncoder;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -192,8 +194,8 @@ public class FileController {
             Template template = objectMapper.readValue(file.getBytes(), Template.class);
             template.setTemplateId(id);
             templateService.save(template);
-            final EntityModel<TemplateResource> resource
-                    = EntityModel.of(templateService.toResource(template));
+            final org.springframework.hateoas.Resource<TemplateResource> resource
+                    = new org.springframework.hateoas.Resource<>(templateService.toResource(template));
             return ResponseEntity.ok().body(resource);
         } catch (Exception e){
             throw new RuntimeException(e);

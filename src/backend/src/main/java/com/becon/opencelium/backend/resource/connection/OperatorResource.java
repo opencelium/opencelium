@@ -16,12 +16,12 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
-import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.annotation.Resource;
 
 @Resource
-public class OperatorResource extends RepresentationModel {
+public class OperatorResource extends ResourceSupport {
 
     private Long nodeId;
     private String type;

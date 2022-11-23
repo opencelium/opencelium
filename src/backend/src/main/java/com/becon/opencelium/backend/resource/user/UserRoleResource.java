@@ -19,7 +19,7 @@ package com.becon.opencelium.backend.resource.user;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.mysql.entity.RoleHasPermission;
 import com.becon.opencelium.backend.mysql.entity.UserRole;
-import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.annotation.Resource;
@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Resource
-public class UserRoleResource extends RepresentationModel {
+public class UserRoleResource extends ResourceSupport {
 
     private int groupId;
     private String name; //TODO: change from role to name

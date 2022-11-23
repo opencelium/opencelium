@@ -19,14 +19,14 @@ package com.becon.opencelium.backend.resource.connection;
 import com.becon.opencelium.backend.mysql.entity.BusinessLayout;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ConnectorNodeResource extends RepresentationModel {
+public class ConnectorNodeResource extends ResourceSupport {
 
     private Long nodeId;
     private Integer connectorId;

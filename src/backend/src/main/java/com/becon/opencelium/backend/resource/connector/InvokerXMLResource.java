@@ -16,12 +16,12 @@
 
 package com.becon.opencelium.backend.resource.connector;
 
-import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.annotation.Resource;
 
 @Resource
-public class InvokerXMLResource extends RepresentationModel {
+public class InvokerXMLResource extends ResourceSupport {
     String xml;
 
     public String getXml() {

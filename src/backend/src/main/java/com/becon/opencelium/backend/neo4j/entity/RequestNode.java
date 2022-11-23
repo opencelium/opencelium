@@ -16,13 +16,12 @@
 
 package com.becon.opencelium.backend.neo4j.entity;
 
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
-import org.springframework.data.neo4j.core.schema.Id;
-import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Relationship;
-import org.springframework.data.neo4j.core.schema.Relationship.Direction;
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
 
-@Node("Request")
+@NodeEntity(label = "Request")
 public class RequestNode {
 
     @Id
@@ -33,10 +32,10 @@ public class RequestNode {
     private String method;
     private String endpoint;
 
-    @Relationship(type = "has_header", direction = Direction.OUTGOING)
+    @Relationship(type = "has_header", direction = Relationship.OUTGOING)
     private HeaderNode headerNode;
 
-    @Relationship(type = "has_body", direction = Direction.OUTGOING)
+    @Relationship(type = "has_body", direction = Relationship.OUTGOING)
     private BodyNode bodyNode;
 
     public Long getId() {

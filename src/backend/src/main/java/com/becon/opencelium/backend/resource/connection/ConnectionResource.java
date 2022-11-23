@@ -20,14 +20,14 @@ import com.becon.opencelium.backend.mysql.entity.BusinessLayout;
 import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ConnectionResource extends RepresentationModel {
+public class ConnectionResource extends ResourceSupport {
 
     private Long nodeId;
     private Long connectionId;

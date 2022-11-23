@@ -14,15 +14,11 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.resource.user;
+package com.becon.opencelium.backend.elasticsearch.logs.service;
 
-import org.springframework.hateoas.ResourceSupport;
 
-import javax.annotation.Resource;
-import java.util.List;
+import com.becon.opencelium.backend.elasticsearch.logs.entity.LogMessage;
 
-@Resource
-public class PermissionResource extends ResourceSupport {
-
-    private List<String> name;
+public interface LogMessageService {
+    LogMessage save(LogMessage logMessage);
 }

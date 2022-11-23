@@ -16,13 +16,12 @@
 
 package com.becon.opencelium.backend.neo4j.entity;
 
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
-import org.springframework.data.neo4j.core.schema.Id;
-import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Relationship;
-import org.springframework.data.neo4j.core.schema.Relationship.Direction;
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
 
-@Node("Statement")
+@NodeEntity(label = "Statement")
 public class StatementNode {
     @Id
     @GeneratedValue
@@ -33,22 +32,22 @@ public class StatementNode {
     private String iterator;
     private String operand;
 
-    @Relationship(type = "left", direction = Direction.OUTGOING)
+    @Relationship(type = "left", direction = Relationship.OUTGOING)
     private StatementVariable leftStatementVariable;
 
-    @Relationship(type = "right", direction = Direction.OUTGOING)
+    @Relationship(type = "right", direction = Relationship.OUTGOING)
     private StatementVariable rightStatementVariable;
 
-    @Relationship(type = "next_action", direction = Direction.OUTGOING)
+    @Relationship(type = "next_action", direction = Relationship.OUTGOING)
     private MethodNode nextFunction;
 
-    @Relationship(type = "next_action", direction = Direction.OUTGOING)
+    @Relationship(type = "next_action", direction = Relationship.OUTGOING)
     private StatementNode nextOperator;
 
-    @Relationship(type = "body_action", direction = Direction.OUTGOING)
+    @Relationship(type = "body_action", direction = Relationship.OUTGOING)
     private MethodNode bodyFunction;
 
-    @Relationship(type = "body_action", direction = Direction.OUTGOING)
+    @Relationship(type = "body_action", direction = Relationship.OUTGOING)
     private StatementNode bodyOperator;
 
     public Long getId() {

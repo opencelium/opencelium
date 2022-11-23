@@ -16,13 +16,12 @@
 
 package com.becon.opencelium.backend.neo4j.entity;
 
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
-import org.springframework.data.neo4j.core.schema.Id;
-import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Relationship;
-import org.springframework.data.neo4j.core.schema.Relationship.Direction;
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
 
-@Node("Method")
+@NodeEntity(label = "Method")
 public class MethodNode {
 
     @Id
@@ -33,16 +32,16 @@ public class MethodNode {
     private String name;
     private String label;
 
-    @Relationship(type = "has_request", direction = Direction.OUTGOING)
+    @Relationship(type = "has_request", direction = Relationship.OUTGOING)
     private RequestNode requestNode;
 
-    @Relationship(type = "has_response", direction = Direction.OUTGOING)
+    @Relationship(type = "has_response", direction = Relationship.OUTGOING)
     private ResponseNode responseNode;
 
-    @Relationship(type = "next_action", direction = Direction.OUTGOING)
+    @Relationship(type = "next_action", direction = Relationship.OUTGOING)
     private MethodNode nextFunction;
 
-    @Relationship(type = "next_action", direction = Direction.OUTGOING)
+    @Relationship(type = "next_action", direction = Relationship.OUTGOING)
     private StatementNode nextOperator;
 
     public Long getId() {

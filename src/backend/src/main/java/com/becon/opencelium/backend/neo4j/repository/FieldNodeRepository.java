@@ -20,8 +20,9 @@ import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
 import com.becon.opencelium.backend.neo4j.entity.FieldNode;
 import com.becon.opencelium.backend.neo4j.entity.RequestNode;
 import com.becon.opencelium.backend.neo4j.entity.ResultNode;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
-import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

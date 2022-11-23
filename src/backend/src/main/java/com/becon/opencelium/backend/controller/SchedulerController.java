@@ -26,8 +26,8 @@ import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
@@ -57,7 +57,7 @@ public class SchedulerController {
 //            return s;
 //        })
         .map(s -> schedulerService.toResource(s)).collect(Collectors.toList());
-        final CollectionModel<SchedulerResource> resources = CollectionModel.of(scheduleList);
+        final Resources<SchedulerResource> resources = new Resources<>(scheduleList);
         return ResponseEntity.ok(resources);
     }
 
@@ -66,7 +66,7 @@ public class SchedulerController {
         Scheduler scheduler = schedulerService.findById(id).orElseThrow(() -> new RuntimeException("SCHEDULER_NOT_FOUND"));
 //        scheduler.setWebhook(webhookServiceImp.findBySchedulerId(scheduler.getId()).orElse(null));
         SchedulerResource schedulerResource = schedulerService.toResource(scheduler);
-        final EntityModel<SchedulerResource> resource = EntityModel.of(schedulerResource);
+        final Resource<SchedulerResource> resource = new Resource<>(schedulerResource);
         return ResponseEntity.ok(resource);
     }
 
@@ -117,7 +117,7 @@ public class SchedulerController {
         schedulerService.saveEntity(scheduler);
 
         SchedulerResource schedulerResource = schedulerService.toResource(scheduler);
-        final EntityModel<SchedulerResource> resource = EntityModel.of(schedulerResource);
+        final Resource<SchedulerResource> resource = new Resource<>(schedulerResource);
         return ResponseEntity.ok(resource);
     }
 
@@ -243,7 +243,7 @@ public class SchedulerController {
         if (runningJobResources == null){
             return ResponseEntity.noContent().build();
         }
-        final CollectionModel<RunningJobsResource> resources = CollectionModel.of(runningJobResources);
+        final Resources<RunningJobsResource> resources = new Resources<>(runningJobResources);
         return ResponseEntity.ok(resources);
     }
 
@@ -253,7 +253,7 @@ public class SchedulerController {
         List<Scheduler> schedulers = schedulerService.findAllById(schedulerIds);
         List<SchedulerResource> scheduleList = schedulers.stream()
                 .map(sch -> schedulerService.toResource(sch)).collect(Collectors.toList());
-        final CollectionModel<SchedulerResource> resources = CollectionModel.of(scheduleList);
+        final Resources<SchedulerResource> resources = new Resources<>(scheduleList);
         return ResponseEntity.ok(resources);
     }
 
@@ -262,7 +262,7 @@ public class SchedulerController {
     public ResponseEntity<?> getAllNotifications(@PathVariable int schedulerId) throws Exception {
         List<NotificationResource> notificationResource = schedulerService.getAllNotifications(schedulerId)
                 .stream().map(e -> schedulerService.toNotificationResource(e)).collect(Collectors.toList());
-        final CollectionModel<NotificationResource> resources = CollectionModel.of(notificationResource);
+        final Resources<NotificationResource> resources = new Resources<>(notificationResource);
         return ResponseEntity.ok(resources);
     }
 
@@ -273,7 +273,7 @@ public class SchedulerController {
                 .orElseThrow(()->new RuntimeException("Notification not found"));
         NotificationResource notificationResource = schedulerService.toNotificationResource(en);
 
-        final EntityModel<NotificationResource> resource = EntityModel.of(notificationResource);
+        final Resource<NotificationResource> resource = new Resource<>(notificationResource);
         return ResponseEntity.ok(resource);
     }
 

@@ -6,11 +6,12 @@ import com.becon.opencelium.backend.mysql.service.ContentServiceImpl;
 import com.becon.opencelium.backend.mysql.service.MessageServiceImpl;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.hateoas.Resources;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +32,7 @@ public class MessageController {
         List<MessageResource> messageResources = eventMessageList.stream()
                 .map(message -> messageService.toResource(message))
                 .collect(Collectors.toList());
-        final CollectionModel<MessageResource> resources = CollectionModel.of(messageResources);
+        final Resources<MessageResource> resources = new Resources<>(messageResources);
         return ResponseEntity.ok(resources);
     }
 
@@ -39,7 +40,7 @@ public class MessageController {
     public ResponseEntity<?> get(@PathVariable int id) throws Exception{
         EventMessage eventMessage = messageService.findById(id).orElseThrow(()->new RuntimeException("MESSAGE_TEMPLATE_NOT_FOUND"));
         MessageResource messageResource = new MessageResource(eventMessage);
-        final EntityModel<MessageResource> resource = EntityModel.of(messageResource);
+        final Resource<MessageResource> resource = new Resource<>(messageResource);
         return ResponseEntity.ok(resource);
     }
 
@@ -53,7 +54,7 @@ public class MessageController {
             contentService.save(eventContents.get(i));
         }
 
-        final EntityModel<MessageResource> resource = EntityModel.of(messageService.toResource(eventMessage));
+        final Resource<MessageResource> resource = new Resource<>(messageService.toResource(eventMessage));
         return ResponseEntity.ok(resource);
     }
 
@@ -81,7 +82,7 @@ public class MessageController {
             contentService.save(eventContents.get(i));
         }
 
-        final EntityModel<MessageResource> resource = EntityModel.of(messageService.toResource(eventMessage));
+        final Resource<MessageResource> resource = new Resource<>(messageService.toResource(eventMessage));
         return ResponseEntity.ok(resource);
     }
 
@@ -91,7 +92,7 @@ public class MessageController {
         List<MessageResource> messageResources = eventMessageList.stream()
                 .map(message -> messageService.toResource(message))
                 .collect(Collectors.toList());
-        final CollectionModel<MessageResource> resources = CollectionModel.of(messageResources);
+        final Resources<MessageResource> resources = new Resources<>(messageResources);
         return ResponseEntity.ok(resources);
     }
 
