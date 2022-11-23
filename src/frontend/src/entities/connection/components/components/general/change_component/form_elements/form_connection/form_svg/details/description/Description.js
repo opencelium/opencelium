@@ -50,11 +50,11 @@ class Description extends React.Component{
                     </React.Fragment>
                 }
                 <Condition readOnly={readOnly} nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details}/>
-                {/*{
+                {
                     errorMessages.map(error => {
                         return <div style={{color: errorColor}}>{error}</div>
                     })
-                }*/}
+                }
             </Row>
         );
     }

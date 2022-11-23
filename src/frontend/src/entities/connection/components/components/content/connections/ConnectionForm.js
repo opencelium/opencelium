@@ -35,6 +35,7 @@ import "@style/css/react_resizable.css";
 import "@style/css/graphiql.css";
 import ContentLoading from "@app_component/base/loading/ContentLoading";
 import {ConnectionPermissions} from "@root/constants";
+import {IF_OPERATOR} from "@classes/content/connection/operator/COperatorItem";
 
 /**
  * common component to add and update Connection
@@ -59,8 +60,8 @@ export function ConnectionForm(type) {
                         fromConnector: '',
                         toConnector: '',
                         template: '',
-                        logic: {operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}},
                     },
+                    validateLogicResult: {toggleFlag: false, operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}},
                     connection: CConnection.createConnection(),
                     entity: null,
                     mode: EXPERT_MODE,
@@ -87,7 +88,9 @@ export function ConnectionForm(type) {
                 this.checkValidationRequest('title', checkingConnectionTitle === API_REQUEST_STATE.FINISH, checkTitleResult === TRIPLET_STATE.FALSE, t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_EXIST`));
                 if(this.props[this.actionName] === API_REQUEST_STATE.FINISH && this.startAction){
                     this.startAction = false;
-                    navigate(this.redirectUrl, { replace: false });
+                    if(this.redirectUrl){
+                        navigate(this.redirectUrl, { replace: false });
+                    }
                 }
                 if(this.props.fetchingConnection && prevProps.fetchingConnection === API_REQUEST_STATE.START && this.props.fetchingConnection === API_REQUEST_STATE.FINISH){
                     this.isFetchedConnection = true;
@@ -220,7 +223,8 @@ export function ConnectionForm(type) {
                     actions: {addTemplate: (a) => this.addTemplate(a)},
                     source: Object.freeze(connectors),
                     readOnly: this.isView,
-                    errors: this.state.validationMessages.logic,
+                    errors: this.state.validateLogicResult,
+                    justUpdate: (entity) => this.justUpdate(entity)
                 };
             }
 
@@ -327,7 +331,7 @@ export function ConnectionForm(type) {
                         if(!condition.leftStatement.color || !condition.leftStatement.field){
                             operatorErrors.push('Left Statement is missing');
                         }
-                        if(!condition.relationalOperator){
+                        if(operator.type === IF_OPERATOR && !condition.relationalOperator){
                             operatorErrors.push('Relational Operator is missing');
                         }
                         if(operatorErrors.length > 0){
@@ -411,8 +415,14 @@ export function ConnectionForm(type) {
                 return result;
             }
 
+            justUpdate(entity){
+                this.do(entity)
+                this.redirectUrl = '';
+            }
+
             do(entity){
                 const {validationMessages} = this.state;
+                this.redirectUrl = '/connections';
                 this.startDoingAction = true;
                 let validationNames = Object.keys(validationMessages);
                 let isValidationPassed = true;
@@ -433,7 +443,6 @@ export function ConnectionForm(type) {
                     }
                 }
                 const logicValidation = this.validateLogic(entity);
-                validations.logic = logicValidation.result;
                 isValidationPassed = isValidationPassed && logicValidation.passed;
                 if(isValidationPassed){
                     this.action(entity);
@@ -443,6 +452,7 @@ export function ConnectionForm(type) {
                     this.setState({
                         validationMessages: {...validationMessages, ...validations},
                         entity: Object.assign({}, convertedObject),
+                        validateLogicResult: {toggleFlag: !this.state.validateLogicResult.toggleFlag, ...logicValidation.result}
                     });
                     if(firstValidationName !== ''){
                         if(validations[firstValidationName] !== '') {

@@ -299,6 +299,11 @@ $HIGHLIGHT_COLOR: #8a9dd7;
     font-size: 32px;
     margin-left: -2px;
   }
+  .update_button{
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+  }
 }
 .extended_details_data{
   @extend .details_data;

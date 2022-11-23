@@ -108,6 +108,7 @@ class FormConnectionSvg extends Component{
                 <Details
                     readOnly={data.readOnly}
                     updateConnection={(a, b) => this.updateEntity(a, b)}
+                    data={data}
                 />
                 <TechnicalLayout
                     readOnly={data.readOnly}
