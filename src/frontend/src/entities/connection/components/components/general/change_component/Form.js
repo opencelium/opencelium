@@ -121,9 +121,11 @@ class Form extends React.Component{
                     if(elementWithError){
                         const firstElement = document.querySelector('[id^=fromConnector__fromConnector_0]');
                         if(firstElement){
+                            let viewBox = {x: -250, y: -50, width: 1800, height: 715};
+                            CSvg.setViewBox('technical_layout_svg', viewBox);
                             const x = -300 + elementWithError.getBoundingClientRect().x - firstElement.getBoundingClientRect().x;
                             const y = -100 + elementWithError.getBoundingClientRect().y - firstElement.getBoundingClientRect().y;
-                            const viewBox = {x, y, width: 1800, height: 715};
+                            viewBox = {x, y, width: 1800, height: 715};
                             CSvg.setViewBox('technical_layout_svg', viewBox);
                         }
                     }

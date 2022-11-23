@@ -26,8 +26,17 @@ import TechnicalProcessDescription
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {withTheme} from "styled-components";
 import {ITheme} from "@style/Theme";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import {connect} from "react-redux";
 
+function mapStateToProps(state){
+    const {connection} = mapItemsToClasses(state);
+    return{
+        connection,
+    };
+}
 
+@connect(mapStateToProps, {})
 class Description extends React.Component{
     constructor(props) {
         super(props);
@@ -38,7 +47,7 @@ class Description extends React.Component{
         const operatorItem = details.entity;
         const errorColor = theme?.input?.error?.color || '#9b2e2e';
         const connector = connection.getConnectorByType(details.connectorType);
-        const errorMessages = connector ? connector.getOperatorByIndex(operatorItem.index).error.messages : [];
+        const errorMessages = connector ? connector.getOperatorByIndex(operatorItem.index)?.error?.messages || [] : [];
         return(
             <Row className={styles.row}>
                 <OperatorType readOnly={readOnly} details={details} connection={connection} updateConnection={updateConnection}/>

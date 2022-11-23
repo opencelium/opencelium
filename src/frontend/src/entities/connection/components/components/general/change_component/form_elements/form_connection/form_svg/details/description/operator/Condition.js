@@ -306,7 +306,7 @@ class Condition extends React.Component{
         const label = readOnly ? 'Ok' : 'Apply';
         const errorColor = theme?.input?.error?.color || '#9b2e2e';
         const connector = connection.getConnectorByType(details.connectorType);
-        const errorMessages = connector ? connector.getOperatorByIndex(operator.index).error.messages : [];
+        const errorMessages = connector ? connector.getOperatorByIndex(operator.index)?.error?.messages || [] : [];
         return(
             <React.Fragment>
                 <Col xs={4} className={styles.col} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{`Condition`}</Col>

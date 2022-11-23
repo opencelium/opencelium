@@ -324,13 +324,15 @@ class Svg extends React.Component {
             }
             updateConnection(connection);
             const currentItem = connector.getMethodByColor(sourceItem.color);
-            connector.setCurrentItem(currentItem);
-            const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
-            setCurrentItem(currentSvgElement)
+            if(currentItem){
+                connector.setCurrentItem(currentItem);
+                const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+                setCurrentItem(currentSvgElement)
+            }
         }
         if (sourceItem instanceof COperatorItem) {
             sourceItem.isDragged = false;
-            const sourceItemData = sourceItem.getObject();
+            const sourceItemData = sourceItem.getObjectForConnectionOverview();
             sourceItemData.index = '';
             connector.setCurrentItem(targetLeftItem);
             if (connector.getConnectorType() === CONNECTOR_FROM) {
@@ -338,7 +340,8 @@ class Svg extends React.Component {
             } else {
                 connection.addToConnectorOperator(sourceItemData, mode);
             }
-            connector.updateIndexesForOperator(sourceItem, connector.generateNextIndex(mode, targetLeftItem), connection, shouldDelete);
+            const newIndex = connector.generateNextIndex(mode, targetLeftItem);
+            connector.updateIndexesForOperator(sourceItem, newIndex, connection, shouldDelete);
             if(shouldDelete) {
                 if (connector.getConnectorType() === CONNECTOR_FROM) {
                     connection.removeFromConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
@@ -347,10 +350,12 @@ class Svg extends React.Component {
                 }
             }
             updateConnection(connection);
-            const currentItem = connector.getOperatorByIndex(sourceItem.index);
-            connector.setCurrentItem(currentItem);
-            const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
-            setCurrentItem(currentSvgElement)
+            const currentItem = connector.getOperatorByIndex(newIndex);
+            if(currentItem) {
+                connector.setCurrentItem(currentItem);
+                const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+                setCurrentItem(currentSvgElement)
+            }
         }
     }
 
