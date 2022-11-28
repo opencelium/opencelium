@@ -23,6 +23,7 @@ interface NotificationPanelProps{
 interface NotificationProps{
     theme?: ITheme,
     notification: INotification,
+    index: number,
 }
 
 export {

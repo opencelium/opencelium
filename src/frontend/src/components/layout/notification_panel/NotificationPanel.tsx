@@ -70,8 +70,8 @@ const NotificationPanel: FC<NotificationPanelProps> = ({theme}) => {
                     </ActionsStyled>
                     <NotificationsStyled>
                         {
-                            notificationInstances.map((notification: INotification) => (
-                                <Notification key={notification.id} notification={notification}/>
+                            notificationInstances.map((notification: INotification, index) => (
+                                <Notification key={notification.id} index={index} notification={notification}/>
                             ))
                         }
                     </NotificationsStyled>
