@@ -62,7 +62,7 @@ const ImportTemplateButton: FC<ImportTemplateButtonProps> =
                     onChange={(f) => onChangeImportTemplateFile(f)}
                     // @ts-ignore
                     value={templateFile}
-                    accept={'application/JSON'}
+                    accept={'application/JSON,application/zip'}
                     hasCrop={false}
                 />
             </Dialog>

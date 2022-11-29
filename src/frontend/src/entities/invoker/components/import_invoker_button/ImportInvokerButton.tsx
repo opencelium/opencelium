@@ -62,7 +62,7 @@ const ImportInvokerButton: FC<ImportInvokerButtonProps> =
                     onChange={(f) => onChangeImportInvokerFile(f)}
                     // @ts-ignore
                     value={invokerFile}
-                    accept={'text/xml'}
+                    accept={'text/xml,application/zip'}
                     hasCrop={false}
                 />
             </Dialog>
