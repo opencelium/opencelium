@@ -185,7 +185,13 @@ public class ConnectorExecutor {
         if (debugMode) System.out.println("Method: " + method.name());
 
         String url = buildUrl(methodNode); // done
-        if (debugMode) System.out.println("URL: " + url);
+        URI uri;
+        try {
+            uri = new URI(url);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (debugMode) System.out.println("URL: " + uri);
 
         LogMessage logMessage = LogMessageServiceImp.LogBuilder.newInstance()
                 .setTaId(taId)
@@ -271,12 +277,6 @@ public class ConnectorExecutor {
             httpEntity = new HttpEntity <Object> (header);
         }
 
-        URI uri;
-        try {
-            uri = new URI(url);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 //        f (invoker.getName().equalsIgnoreCase("igel")){
 //            restTemplate = getRestTemplate();
 //        }i

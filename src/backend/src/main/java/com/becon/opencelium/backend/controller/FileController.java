@@ -46,6 +46,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.JsonPath;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -61,11 +62,13 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 @Controller
@@ -182,21 +185,42 @@ public class FileController {
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
         // Get extension
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if (!checkJsonExtension(extension)){
-            throw new StorageException("File should be JSON");
+        if (extension == null) {
+            throw new RuntimeException("Extension not found");
         }
 
+        List<byte[]> files = new ArrayList<>();
         try {
-            //Generate new file name
-            String id = UUID.randomUUID().toString();
-            // Save file in storage
-            ObjectMapper objectMapper = new ObjectMapper();
-            Template template = objectMapper.readValue(file.getBytes(), Template.class);
-            template.setTemplateId(id);
-            templateService.save(template);
-            final org.springframework.hateoas.Resource<TemplateResource> resource
-                    = new org.springframework.hateoas.Resource<>(templateService.toResource(template));
-            return ResponseEntity.ok().body(resource);
+            if (extension.equals("zip")) {
+                InputStream inputStream = file.getInputStream();
+                ZipInputStream zis = new ZipInputStream(inputStream);
+                ZipEntry zipEntry = zis.getNextEntry();
+                while (zipEntry != null) {
+                    System.out.println(zipEntry.getName());
+                    zipEntry = zis.getNextEntry();
+                    byte[] bytes = IOUtils.toByteArray(zis);
+                    files.add(bytes);
+                }
+            } else {
+                files.add(file.getBytes());
+            }
+
+            for (byte[] tmpBytes : files) {
+                if (!checkJsonExtension(extension)){
+                    throw new StorageException("File should be JSON");
+                }
+                //Generate new file name
+                String id = UUID.randomUUID().toString();
+                // Save file in storage
+                ObjectMapper objectMapper = new ObjectMapper();
+                Template template = objectMapper.readValue(tmpBytes, Template.class);
+                template.setTemplateId(id);
+                templateService.save(template);
+            }
+
+//            final org.springframework.hateoas.Resource<TemplateResource> resource
+//                    = new org.springframework.hateoas.Resource<>(templateService.toResource(template));
+            return ResponseEntity.ok().build();
         } catch (Exception e){
             throw new RuntimeException(e);
         }
@@ -205,7 +229,7 @@ public class FileController {
     @PostMapping("/invoker")
     public ResponseEntity<?> uploadInvoker(@RequestParam("file") MultipartFile file) {
         String filename = file.getOriginalFilename();
-
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
         try {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file " + filename);
@@ -216,12 +240,29 @@ public class FileController {
                         "Cannot store file with relative path outside current directory "
                                 + filename);
             }
-            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = dBuilder.parse(file.getInputStream());
-            doc.setDocumentURI(PathConstant.INVOKER + filename);
-            Xml xml = new Xml(doc, filename);
-            xml.save();
-            invokerServiceImp.save(doc);
+
+            List<InputStream> files = new ArrayList<>();
+            if (extension.equals("zip")) {
+                InputStream inputStream = file.getInputStream();
+                ZipInputStream zis = new ZipInputStream(inputStream);
+                ZipEntry zipEntry = zis.getNextEntry();
+                while (zipEntry != null) {
+                    System.out.println(zipEntry.getName());
+                    zipEntry = zis.getNextEntry();
+                    files.add(zis);
+                }
+            } else {
+                files.add(file.getInputStream());
+            }
+
+            for (InputStream is : files) {
+                DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                Document doc = dBuilder.parse(is);
+                doc.setDocumentURI(PathConstant.INVOKER + filename);
+                Xml xml = new Xml(doc, filename);
+                xml.save();
+                invokerServiceImp.save(doc);
+            }
         }
         catch (Exception e) {
             invokerServiceImp.delete(FilenameUtils.removeExtension(filename));
@@ -230,7 +271,7 @@ public class FileController {
 
         Invoker invoker = invokerServiceImp.findByName(FilenameUtils.removeExtension(filename));
         InvokerResource invokerResource = invokerServiceImp.toResource(invoker);
-        return ResponseEntity.ok(invokerResource);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/connector")
