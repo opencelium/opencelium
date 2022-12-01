@@ -47,7 +47,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
 
 import javax.net.ssl.SSLContext;
@@ -184,63 +186,14 @@ public class ConnectorExecutor {
         HttpMethod method = getMethod(methodNode); // done
         if (debugMode) System.out.println("Method: " + method.name());
 
-        String url = buildUrl(methodNode); // done
-        URI uri;
-        try {
-            uri = new URI(url);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        URI uri = buildUrl(methodNode); // done
         if (debugMode) System.out.println("URL: " + uri);
-
-        LogMessage logMessage = LogMessageServiceImp.LogBuilder.newInstance()
-                .setTaId(taId)
-                .setOrderId(executionContainer.getOrder())
-                .setMethod(methodNode.getName())
-                .setExchange("REQUEST")
-                .setMethodPart("URL")
-                .setMessage(url)
-                .build();
-        try {
-            logMessageService.save(logMessage);
-        } catch (Exception e){
-            if(debugMode) System.err.println(e.getMessage());
-        }
-
 
         HttpHeaders header = buildHeader(functionInvoker); // done
         if (debugMode) System.out.println("Header: " + header.toString());
-        logMessage = LogMessageServiceImp.LogBuilder.newInstance()
-                .setTaId(taId)
-                .setOrderId(executionContainer.getOrder())
-                .setMethod(methodNode.getName())
-                .setExchange("REQUEST")
-                .setMethodPart("HEADER")
-                .setMessage(header.toString())
-                .build();
-        try {
-            logMessageService.save(logMessage);
-        } catch (Exception e){
-            if(debugMode) System.err.println(e.getMessage());
-        }
-
         String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
-
         if (debugMode) System.out.println("Body: " + body);
         if (debugMode) System.out.println("============================================================");
-        logMessage = LogMessageServiceImp.LogBuilder.newInstance()
-                .setTaId(taId)
-                .setOrderId(executionContainer.getOrder())
-                .setMethod(methodNode.getName())
-                .setExchange("REQUEST")
-                .setMethodPart("BODY")
-                .setMessage(body)
-                .build();
-        try {
-            logMessageService.save(logMessage);
-        } catch (Exception e){
-            if (debugMode) System.err.println(e.getMessage());
-        }
 
         // TODO: added application/x-www-form-urlencoded support: need to refactor.
         Object data;
@@ -281,33 +234,6 @@ public class ConnectorExecutor {
 //            restTemplate = getRestTemplate();
 //        }i
         ResponseEntity<String> response = restTemplate.exchange(uri, method ,httpEntity, String.class);
-        logMessage = LogMessageServiceImp.LogBuilder.newInstance()
-                .setTaId(taId)
-                .setOrderId(executionContainer.getOrder())
-                .setMethod(methodNode.getName())
-                .setExchange("RESPONSE")
-                .setMethodPart("HEADER")
-                .setMessage(response.getHeaders().toString())
-                .build();
-        try {
-            logMessageService.save(logMessage);
-        } catch (Exception e){
-            if (debugMode) System.err.println(e.getMessage());
-        }
-
-        logMessage = LogMessageServiceImp.LogBuilder.newInstance()
-                .setTaId(taId)
-                .setOrderId(executionContainer.getOrder())
-                .setMethod(methodNode.getName())
-                .setExchange("RESPONSE")
-                .setMethodPart("BODY")
-                .setMessage(response.getBody())
-                .build();
-        try {
-            logMessageService.save(logMessage);
-        } catch (Exception e){
-            if (debugMode) System.err.println(e.getMessage());
-        }
         return response;
     }
 
@@ -363,7 +289,7 @@ public class ConnectorExecutor {
         return httpMethodType;
     }
 
-    public String buildUrl(MethodNode methodNode){
+    public URI buildUrl(MethodNode methodNode){
         String endpoint = methodNode.getRequestNode().getEndpoint();
         BodyNode b = methodNode.getRequestNode().getBodyNode();
         String format = b == null ? "json" : b.getFormat();
@@ -374,7 +300,16 @@ public class ConnectorExecutor {
         if(matcher.find()) {
             endpoint = replaceRefValue(endpoint, format);
         }
-        return endpoint;
+        URI uri = null;
+        try {
+            uri = new URI(endpoint);
+            String strictlyEscapedQuery = StringUtils.replace(uri.getRawQuery(), "+", "%2B");
+            uri = UriComponentsBuilder.fromUri(uri).replaceQuery(strictlyEscapedQuery).build(true).toUri();
+        } catch (Exception e) {
+            new RuntimeException(e);
+        }
+
+        return uri;
     }
 
     public String buildBody(BodyNode bodyNode){
