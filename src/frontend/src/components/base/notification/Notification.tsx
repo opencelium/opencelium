@@ -39,6 +39,7 @@ import {TextSize} from "../text/interfaces";
 const Notification: FC<NotificationProps> =
     ({
         notification,
+        index,
     }) => {
     const dispatch = useAppDispatch();
     let navigate = useNavigate();
@@ -75,7 +76,7 @@ const Notification: FC<NotificationProps> =
         };
     }
     return (
-        <NotificationStyled onMouseOver={() => onMouseOver()} onMouseLeave={() => onMouseLeave()}>
+        <NotificationStyled onMouseOver={() => onMouseOver()} onMouseLeave={() => onMouseLeave()} id={`notification_${index}`}>
             {isMouseOver && hasFoldIcon() &&
                 <UnFoldIconStyled
                     color={ColorTheme.Black}

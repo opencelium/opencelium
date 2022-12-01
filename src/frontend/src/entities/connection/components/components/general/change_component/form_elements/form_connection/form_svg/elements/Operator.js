@@ -133,7 +133,7 @@ class Operator extends React.Component{
             if (connection) {
                 if(isItemDraggable){
                     operator.isDragged = true;
-                    operator.isDraggedForCopy = e.ctrlKey;
+                    operator.isDraggedForCopy = e.altKey;
                 }
                 setCurrentItem(operator);
             }

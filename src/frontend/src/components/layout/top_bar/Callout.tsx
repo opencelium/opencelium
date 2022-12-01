@@ -26,7 +26,7 @@ const Callout: FC<CalloutProps> =
         hasFoot,
     }) => {
     return ReactDOM.createPortal(
-        <CalloutStyled hasFoot={hasFoot}>
+        <CalloutStyled hasFoot={hasFoot} id={'notification_callout_container'}>
             {icon}
             <CalloutMessageStyled hasFoot={hasFoot}>{message}</CalloutMessageStyled>
         </CalloutStyled>, document.getElementById('oc_callout')

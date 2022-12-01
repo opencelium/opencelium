@@ -85,7 +85,7 @@ class Details extends React.Component{
                     </div>
                     {details ?
                         <div className={styles.label}>
-                            <Description readOnly={readOnly} details={details} updateConnection={updateConnection} connection={connection}/>
+                            <Description readOnly={readOnly} details={details} updateConnection={updateConnection}/>
                         </div>
                         :
                         <div>

@@ -2,7 +2,7 @@
 Changelog
 *********
 
-Major Relase :loudspeaker:
+Major Release :loudspeaker:
 ============
 
 3.0
@@ -13,9 +13,9 @@ Features
 --------
 
 * New Service Portal
-    * Marketplace to get all invoker and business template files
-    * Service Center to create ticket requests
-    * Api converter to generate invoker files from openapi or wsdl files
+* Marketplace to get all invoker and business template files
+* Service Center to create ticket requests
+* Api converter to generate invoker files from openapi or wsdl files
 
 Connector
 ---------
