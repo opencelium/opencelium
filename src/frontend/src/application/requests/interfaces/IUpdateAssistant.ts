@@ -41,6 +41,8 @@ export interface CheckForUpdateProps{
 
 export interface IUpdateAssistantRequest{
 
+    getUpdatesFromServicePortal(currentVersion: string): Promise<AxiosResponse<OnlineUpdateProps[]>>,
+
     //to get git versions of application based on tags
     getOnlineUpdates(): Promise<AxiosResponse<OnlineUpdateProps[]>>,
 

@@ -21,7 +21,7 @@ import Table from "@basic_components/table/Table";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import OldVersionEntry from "@entity/update_assistant/components/available_updates/OldVersionEntry";
-import {getOnlineUpdates as fetchOnlineUpdates, getOfflineUpdates as fetchOfflineUpdates, uploadApplicationFile as uploadVersion} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
+import {getUpdatesFromServicePortal as fetchOnlineUpdates, getOfflineUpdates as fetchOfflineUpdates, uploadApplicationFile as uploadVersion} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {API_REQUEST_STATE, VERSION_STATUS} from "@application/interfaces/IApplication";
 import Loading from "@app_component/base/loading/Loading";
  import {TextSize} from "@app_component/base/text/interfaces";
@@ -37,7 +37,7 @@ function mapStateToProps(state){
     const updateAssistant = state.updateAssistantReducer;
     return{
         authUser,
-        fetchingOnlineUpdates: updateAssistant.gettingOnlineUpdates,
+        fetchingOnlineUpdates: updateAssistant.gettingUpdatesFromServicePortal,
         fetchingOfflineUpdates: updateAssistant.gettingOfflineUpdates,
         uploadingVersion: updateAssistant.uploadingApplicationFile,
         onlineUpdates: updateAssistant.onlineUpdates,
@@ -119,7 +119,7 @@ class AvailableUpdates extends React.Component{
         let newEntity = {...entity};
         switch (activeMode){
             case ONLINE_UPDATE:
-                //fetchOnlineUpdates();
+                fetchOnlineUpdates();
                 startFetchingOnlineUpdates = true;
                 break;
             case OFFLINE_UPDATE:
@@ -224,9 +224,6 @@ class AvailableUpdates extends React.Component{
         const {selectedVersionName, isOldVersionsExtended, isNewVersionsExtended, activeMode, startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
         const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates, error} = this.props;
         let updates = this.getUpdates();
-        if(activeMode === ONLINE_UPDATE){
-            return <div style={{marginTop: '40px'}}>{"This feature is currently in development phase."}</div>;
-        }
         if(updates.available.length === 0 && updates.old.length === 0 && updates.veryNew.length === 0){
             if(activeMode !== '' && !(fetchingOnlineUpdates === API_REQUEST_STATE.START || fetchingOfflineUpdates === API_REQUEST_STATE.START)){
                 if(error === null){

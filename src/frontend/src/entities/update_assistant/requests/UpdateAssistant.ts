@@ -18,12 +18,28 @@ import {AxiosResponse} from "axios";
 import {IUpdateAssistantRequest, OnlineUpdateProps, OfflineUpdateProps} from "@application/requests/interfaces/IUpdateAssistant";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
+import {onlineApiServerOpenCeliumUrl} from "@entity/application/requests/classes/url";
+import {generateSignature} from "@application/utils/utils";
 
 
 export class UpdateAssistantRequest extends Request implements IUpdateAssistantRequest{
 
     constructor(settings?: Partial<IRequestSettings>) {
         super({url: 'assistant/oc', ...settings});
+    }
+
+    async getUpdatesFromServicePortal(currentVersion: string): Promise<AxiosResponse<OnlineUpdateProps[]>>{
+        this.isFullUrl = true;
+        const currentDate = `${+ new Date()}`;
+        const endpoint = `p984zhugh3443g8-438ghi4uh34g83-03ugoigh498t53y-483hy4pgh438ty3948gh34p8g-34ug394gheklrghdgopwuew09327-89f/${currentVersion}`;
+        this.url = `${onlineApiServerOpenCeliumUrl}${endpoint}`;
+        return super.get<OnlineUpdateProps[]>({
+            headers: {
+                'x-access-token': 'qpoeqavncbms09248527qrkazmvbgw9328uq0akzvzncbjgwh3pw09r0iavlhgwe98y349t8ghergiueh49230ur29ut3hg9',
+                'x-sp-timestamp': currentDate,
+                'x-sp-signature': generateSignature('tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv', 'GET', `/${endpoint}`, currentDate)
+            }
+        });
     }
 
     async getOnlineUpdates(): Promise<AxiosResponse<OnlineUpdateProps[]>>{

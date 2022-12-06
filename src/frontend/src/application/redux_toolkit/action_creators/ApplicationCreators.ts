@@ -19,7 +19,7 @@ import {ITicket} from "../../interfaces/ITicket";
 import {SettingsProps} from "../../requests/interfaces/IResponse";
 import {RemoteApiRequestProps} from "../../requests/interfaces/IApplication";
 import {errorHandler} from "../../utils/utils";
-import {tmpServerOpenCeliumUrl} from "@entity/application/requests/classes/url";
+import {onlineApiServerOpenCeliumUrl} from "@entity/application/requests/classes/url";
 import ModelUpdateThemes from "@application/requests/models/UpdateThemes";
 
 
@@ -40,7 +40,7 @@ export const getLogoName = createAsyncThunk(
     'application/get/logoName',
     async(email: string, thunkAPI) => {
         try{
-            const request = new ApplicationRequest({url: `${tmpServerOpenCeliumUrl}fsdlfshdfksldfdfsd-sdfjslkdfhsdlkfhfs-sdfjskdfhjsbdasdalksdhah/name/${email}`});
+            const request = new ApplicationRequest({url: `${onlineApiServerOpenCeliumUrl}fsdlfshdfksldfdfsd-sdfjslkdfhsdlkfhfs-sdfjskdfhjsbdasdalksdhah/name/${email}`});
             const response = await request.getLogoName(email);
             return response.data;
         }catch(e){

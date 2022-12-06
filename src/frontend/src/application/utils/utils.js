@@ -19,6 +19,7 @@ import React, {ReactElement, useEffect, useRef} from "react";
 import _ from "lodash";
 import {ResponseMessages} from "../requests/interfaces/IResponse";
 import {Application} from "../classes/Application";
+import crypto from "crypto";
 
 //TODO rename utils.js into utils.tsx
 /**
@@ -884,4 +885,10 @@ export const debounce = (callback, wait = 500) => {
         clearTimeout(timeout);
         timeout = setTimeout(() => callback.apply(this, args), wait);
     };
+}
+
+export const generateSignature = (token, method, url, timestamp) => {
+    const hmac = crypto.createHmac('SHA256', token);
+    hmac.update(`${method.toUpperCase()}${url}${timestamp}`);
+    return hmac.digest('hex');
 }

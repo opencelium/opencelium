@@ -20,7 +20,7 @@ import {API_REQUEST_STATE, OC_NAME} from "@application/interfaces/IApplication";
 import {RootState, useAppSelector} from "@application/utils/store";
 import {Application} from "@application/classes/Application";
 import LogoOcWhiteImagePath from "@image/application/logo_oc_white.png";
-import {tmpServerOpenCeliumUrl} from "@entity/application/requests/classes/url";
+import {onlineApiServerOpenCeliumUrl} from "@entity/application/requests/classes/url";
 import {LogoImageStyled, LoadingStyled} from "./styles";
 
 const LogoImage = (props: any) => {
@@ -32,7 +32,7 @@ const LogoImage = (props: any) => {
     const [src, setSrc] = useState<string>('');
     const logoName = authUser.logoName || OC_NAME;
     const isThemeSynced = authUser.userDetail.themeSync;
-    let logoPath = isThemeSynced ? `${tmpServerOpenCeliumUrl}fsdlfshdfksldfdfsd-sdfjslkdfhsdlkfhfs-sdfjskdfhjsbdasdalksdhah/logo/${authUser.email}?${new Date().getTime()}` : LogoOcWhiteImagePath;
+    let logoPath = isThemeSynced ? `${onlineApiServerOpenCeliumUrl}fsdlfshdfksldfdfsd-sdfjslkdfhsdlkfhfs-sdfjskdfhjsbdasdalksdhah/logo/${authUser.email}?${new Date().getTime()}` : LogoOcWhiteImagePath;
     useEffect(() => {
         if(isThemeSynced) {
             checkImage(logoPath, () => {

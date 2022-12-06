@@ -23,7 +23,7 @@ import {
     deleteApplicationFile,
     checkForUpdates,
     getOfflineUpdates,
-    getOnlineUpdates,
+    getUpdatesFromServicePortal,
     updateApplication,
     uploadApplicationFile
 } from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
@@ -34,7 +34,7 @@ import {
 } from "@application/requests/interfaces/IUpdateAssistant";
 
 export interface AuthState extends ICommonState{
-    gettingOnlineUpdates: API_REQUEST_STATE,
+    gettingUpdatesFromServicePortal: API_REQUEST_STATE,
     gettingOfflineUpdates: API_REQUEST_STATE,
     uploadingApplicationFile: API_REQUEST_STATE,
     deletingApplicationFile: API_REQUEST_STATE,
@@ -49,7 +49,7 @@ export interface AuthState extends ICommonState{
 }
 
 const initialState: AuthState = {
-    gettingOnlineUpdates: API_REQUEST_STATE.INITIAL,
+    gettingUpdatesFromServicePortal: API_REQUEST_STATE.INITIAL,
     gettingOfflineUpdates: API_REQUEST_STATE.INITIAL,
     uploadingApplicationFile: API_REQUEST_STATE.INITIAL,
     deletingApplicationFile: API_REQUEST_STATE.INITIAL,
@@ -83,16 +83,16 @@ export const updateAssistantSlice = createSlice({
             state.gettingLastAvailableVersion = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
-        [getOnlineUpdates.pending.type]: (state) => {
-            state.gettingOnlineUpdates = API_REQUEST_STATE.START;
+        [getUpdatesFromServicePortal.pending.type]: (state) => {
+            state.gettingUpdatesFromServicePortal = API_REQUEST_STATE.START;
         },
-        [getOnlineUpdates.fulfilled.type]: (state, action: PayloadAction<OnlineUpdateProps[]>) => {
-            state.gettingOnlineUpdates = API_REQUEST_STATE.FINISH;
+        [getUpdatesFromServicePortal.fulfilled.type]: (state, action: PayloadAction<OnlineUpdateProps[]>) => {
+            state.gettingUpdatesFromServicePortal = API_REQUEST_STATE.FINISH;
             state.onlineUpdates = action.payload;
             state.error = null;
         },
-        [getOnlineUpdates.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.gettingOnlineUpdates = API_REQUEST_STATE.ERROR;
+        [getUpdatesFromServicePortal.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingUpdatesFromServicePortal = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [getOfflineUpdates.pending.type]: (state) => {
