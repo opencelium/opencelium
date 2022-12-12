@@ -50,7 +50,7 @@ class Arrow extends React.Component{
             const isInsideDirection = line1 !== null && line2 !== null;
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            let isAvailableForDragging = connector.areIndexesUnderScope(from.entity, currentTechnicalItem.entity, isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM);
+            let isAvailableForDragging = connector.areIndexesUnderScope(from.entity, currentTechnicalItem.entity, isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM, currentTechnicalItem.isSelectedAll);
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(from.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){

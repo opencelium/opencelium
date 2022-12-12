@@ -31,6 +31,7 @@ export default class CProcess{
         this._isDragged = process && process.hasOwnProperty('isDragged') ? process.isDragged : false;
         this._isDraggedForCopy = process && process.hasOwnProperty('isDraggedForCopy') ? process.isDraggedForCopy : false;
         this._isAvailableForDragging = process && process.hasOwnProperty('isAvailableForDragging') ? process.isAvailableForDragging : false;
+        this._isSelectedAll = process && process.hasOwnProperty('isSelectedAll') ? process.isSelectedAll : false;
     }
 
     get id(){
@@ -120,6 +121,14 @@ export default class CProcess{
         this._isAvailableForDragging = isAvailableForDragging;
     }
 
+    get isSelectedAll(){
+        return this._isSelectedAll;
+    }
+
+    set isSelectedAll(isSelectedAll){
+        this._isSelectedAll = isSelectedAll;
+    }
+
     get items(){
         return this._items;
     }
@@ -136,8 +145,16 @@ export default class CProcess{
         this._arrows = arrows;
     }
 
-    isHighlighted(currentProcess){
-        return currentProcess ? `${this._id}`.indexOf(currentProcess.id) === 0 : false;
+    isHighlighted(currentItem){
+        return currentItem ? `${this._id}`.indexOf(currentItem.id) === 0 || currentItem.isSelectedAll && this.isAfter(currentItem) : false;
+    }
+
+    isAfter(currentItem){
+        if(!currentItem) return false;
+        let indexes = currentItem.id.split('_');
+        indexes.pop();
+        let rootIndex = indexes.join('_');
+        return this._id > currentItem.id && this._id.substring(0, rootIndex.length) === rootIndex;
     }
 
     isCurrent(currentProcess){
@@ -163,6 +180,7 @@ export default class CProcess{
             isDragged: this._isDragged,
             isDraggedForCopy: this._isDraggedForCopy,
             isAvailableForDragging: this._isAvailableForDragging,
+            isSelectedAll: this._isSelectedAll,
         };
     }
 

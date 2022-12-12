@@ -20,6 +20,8 @@ import CTemplate from "./CTemplate";
 import CBindingItem from "./field_binding/CBindingItem";
 import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../invoker/response/CResponse";
 import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
+ import CMethodItem from "@classes/content/connection/method/CMethodItem";
+ import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 
 const DEFAULT_COLOR = '#ffffff';
 
@@ -163,6 +165,57 @@ export default class CConnection{
             return CTemplate.createTemplate(template);
         }
         return template;
+    }
+
+    moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete = true){
+        if (sourceItem instanceof CMethodItem) {
+            if (connector.getConnectorType() === CONNECTOR_FROM) {
+                if(shouldDelete){
+                    this.removeFromConnectorMethod(sourceItem);
+                    sourceItem.index = '';
+                    sourceItem.isDragged = false;
+                    connector.setCurrentItem(targetLeftItem);
+                    this.addFromConnectorMethod(sourceItem, mode);
+                } else{
+                    connector.setCurrentItem(targetLeftItem);
+                    this.addFromConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
+                }
+            } else {
+                if(shouldDelete) {
+                    this.removeToConnectorMethod(sourceItem);
+                    sourceItem.index = '';
+                    sourceItem.isDragged = false;
+                    connector.setCurrentItem(targetLeftItem);
+                    this.addToConnectorMethod(sourceItem, mode);
+                } else{
+                    connector.setCurrentItem(targetLeftItem);
+                    this.addToConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
+                }
+            }
+            return connector.getMethodByColor(sourceItem.color);
+        }
+        if (sourceItem instanceof COperatorItem) {
+            sourceItem.isDragged = false;
+            const sourceItemData = sourceItem.getObjectForConnectionOverview();
+            sourceItemData.index = '';
+            connector.setCurrentItem(targetLeftItem);
+            if (connector.getConnectorType() === CONNECTOR_FROM) {
+                this.addFromConnectorOperator(sourceItemData, mode);
+            } else {
+                this.addToConnectorOperator(sourceItemData, mode);
+            }
+            const newIndex = connector.generateNextIndex(mode, targetLeftItem);
+            connector.updateIndexesForOperator(sourceItem, newIndex, this, shouldDelete);
+            if(shouldDelete) {
+                if (connector.getConnectorType() === CONNECTOR_FROM) {
+                    this.removeFromConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
+                } else {
+                    this.removeToConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
+                }
+            }
+            return connector.getOperatorByIndex(newIndex);
+        }
+        return null;
     }
 
     isEmpty(){

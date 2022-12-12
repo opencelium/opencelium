@@ -1,0 +1,889 @@
+<invoker type="RESTful">
+    <name>ZenWorksviaDB2API</name>
+    <description>Novell ZENworks is systems management software for the automated administration of desktop computers and servers. Novell's suite of software can manage the entire lifecycle of servers, desktops, laptops, handhelds and mobile devices.</description>
+    <hint>Translates HTTP request into database queries. Allowing users to interact with that SQL DB as if it was a native API. It is only supports the response type GET.</hint>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="db_hostname" type="string" visibility="public"/>
+        <item name="db_username" type="string" visibility="public"/>
+        <item name="db_password" type="string" visibility="protected"/>
+        <item name="db_name" type="string" visibility="public"/>
+        <item name="db_databasetype" type="string" visibility="public"/>
+    </requiredData>
+    <authType>apikey</authType>
+    <operations>
+        <operation name="DBQuery" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetWorkstations" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_workstation</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_workstation" type="array">
+                            <field name="workstationoid" type="string"/>
+                            <field name="zenworksagentid" type="string"/>
+                            <field name="unmanagedagentid" type="string"/>
+                            <field name="machinename" type="string"/>
+                            <field name="inventorytype" type="string"/>
+                            <field name="assettype" type="string"/>
+                            <field name="virtualmachinetype" type="string"/>
+                            <field name="loginname" type="string"/>
+                            <field name="site" type="string"/>
+                            <field name="dept" type="string"/>
+                            <field name="costcenter" type="string"/>
+                            <field name="building" type="string"/>
+                            <field name="floor" type="string"/>
+                            <field name="room" type="string"/>
+                            <field name="phone" type="string"/>
+                            <field name="totalmemory" type="string"/>
+                            <field name="availablememoryslots" type="string"/>
+                            <field name="totalharddiskspace" type="string"/>
+                            <field name="freeharddiskspace" type="string"/>
+                            <field name="lastscanid" type="string"/>
+                            <field name="lastsuccessfulscandate" type="string"/>
+                            <field name="lastsuccessfulloaddate" type="string"/>
+                            <field name="lastusagegatherdate" type="string"/>
+                            <field name="lanaddress" type="string"/>
+                            <field name="ipaddress" type="string"/>
+                            <field name="ipv6address" type="string"/>
+                            <field name="subnetmask" type="string"/>
+                            <field name="prefixlength" type="string"/>
+                            <field name="defaultgateway" type="string"/>
+                            <field name="ipv6defaultgateway" type="string"/>
+                            <field name="wkstndomain" type="string"/>
+                            <field name="serialnumber" type="string"/>
+                            <field name="assettag" type="string"/>
+                            <field name="isleased" type="string"/>
+                            <field name="leaseexpiredate" type="string"/>
+                            <field name="leasecontractid" type="string"/>
+                            <field name="accountid" type="string"/>
+                            <field name="createdate" type="string"/>
+                            <field name="datelastmodified" type="string"/>
+                            <field name="isdeleted" type="string"/>
+                            <field name="cpuspeed" type="string"/>
+                            <field name="cpuproduct" type="string"/>
+                            <field name="cpucount" type="string"/>
+                            <field name="systemmanufacturer" type="string"/>
+                            <field name="systemproduct" type="string"/>
+                            <field name="systemmodel" type="string"/>
+                            <field name="systemchassis" type="string"/>
+                            <field name="osmanufacturer" type="string"/>
+                            <field name="osproduct" type="string"/>
+                            <field name="osmodel" type="string"/>
+                            <field name="osservicepack" type="string"/>
+                            <field name="osbuild" type="string"/>
+                            <field name="scannedserialnumber" type="string"/>
+                            <field name="calculatedprimaryuser" type="string"/>
+                            <field name="sequenceno" type="string"/>
+                            <field name="iterationno" type="string"/>
+                            <field name="adf0" type="string"/>
+                            <field name="adf1" type="string"/>
+                            <field name="adf2" type="string"/>
+                            <field name="adf3" type="string"/>
+                            <field name="adf4" type="string"/>
+                            <field name="adf5" type="string"/>
+                            <field name="adf6" type="string"/>
+                            <field name="adf7" type="string"/>
+                            <field name="adf8" type="string"/>
+                            <field name="adf9" type="string"/>
+                            <field name="adf10" type="string"/>
+                            <field name="adf11" type="string"/>
+                            <field name="adf12" type="string"/>
+                            <field name="adf13" type="string"/>
+                            <field name="adf14" type="string"/>
+                            <field name="adf15" type="string"/>
+                            <field name="adf16" type="string"/>
+                            <field name="adf17" type="string"/>
+                            <field name="adf18" type="string"/>
+                            <field name="adf19" type="string"/>                            
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetGeneralInfo" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/zzenobject?filter=zuid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="zzenobject" type="array">
+                            <field name="zuid" type="string"/>
+                            <field name="name" type="string"/>
+                            <field name="parentuid" type="string"/>
+                            <field name="path" type="string"/>
+                            <field name="primarytype" type="string"/>
+                            <field name="subtype" type="string"/>
+                            <field name="generaltype" type="string"/>
+                            <field name="undeletable" type="string"/>
+                            <field name="errorwarningstatus" type="string"/>
+                            <field name="compliancestatus" type="string"/>
+                            <field name="tobedeleted" type="string"/>
+                            <field name="description" type="string"/>
+                            <field name="rowlastupdated" type="string"/>
+                            <field name="idcol" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetProduct" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_product?filter=productoid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_product" type="array">
+                            <field name="productoid" type="string"/>
+                            <field name="code" type="string"/>
+                            <field name="producttype" type="string"/>
+                            <field name="manufacturer" type="string"/>
+                            <field name="product" type="string"/>
+                            <field name="model" type="string"/>
+                            <field name="source" type="string"/>
+                            <field name="swplatform" type="string"/>
+                            <field name="notinuse" type="string"/>
+                            <field name="classification" type="string"/>
+                            <field name="platform" type="string"/>
+                            <field name="language" type="string"/>
+                            <field name="iscodevalid" type="string"/>
+                            <field name="ismerged" type="string"/>
+                            <field name="distributionmodel" type="string"/>
+                            <field name="licenseproducttype" type="string"/>
+                            <field name="currentmanufacturer" type="string"/>
+                            <field name="createdate" type="string"/>
+                            <field name="datelastmodified" type="string"/>
+                            <field name="isdeleted" type="string"/>
+                            <field name="adf0" type="string"/>
+                            <field name="adf1" type="string"/>
+                            <field name="adf2" type="string"/>
+                            <field name="adf3" type="string"/>
+                            <field name="adf4" type="string"/>
+                            <field name="adf5" type="string"/>
+                            <field name="adf6" type="string"/>
+                            <field name="adf7" type="string"/>
+                            <field name="adf8" type="string"/>
+                            <field name="adf9" type="string"/>
+                            <field name="adf10" type="string"/>
+                            <field name="adf11" type="string"/>
+                            <field name="adf12" type="string"/>
+                            <field name="adf13" type="string"/>
+                            <field name="adf14" type="string"/>
+                            <field name="adf15" type="string"/>
+                            <field name="adf16" type="string"/>
+                            <field name="adf17" type="string"/>
+                            <field name="adf18" type="string"/>
+                            <field name="adf19" type="string"/>
+                            <field name="productcategoryoid" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetMonitor" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_monitorcomp?filter=workstationoid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_monitorcomp" type="array">
+                            <field name="componentoid" type="string"/>
+                            <field name="derivedclassid" type="string"/>
+                            <field name="surrogateid" type="string"/>
+                            <field name="producttype" type="string"/>
+                            <field name="collector" type="string"/>
+                            <field name="source" type="string"/>
+                            <field name="serialnumber" type="string"/>
+                            <field name="assettag" type="string"/>
+                            <field name="serialnumberalias" type="string"/>
+                            <field name="assettagalias" type="string"/>
+                            <field name="modelnumber" type="string"/>
+                            <field name="createdate" type="string"/>
+                            <field name="datelastmodified" type="string"/>
+                            <field name="isdeleted" type="string"/>
+                            <field name="excludednoncoll" type="string"/>
+                            <field name="adf0" type="string"/>
+                            <field name="adf1" type="string"/>
+                            <field name="adf2" type="string"/>
+                            <field name="adf3" type="string"/>
+                            <field name="adf4" type="string"/>
+                            <field name="adf5" type="string"/>
+                            <field name="adf6" type="string"/>
+                            <field name="adf7" type="string"/>
+                            <field name="adf8" type="string"/>
+                            <field name="adf9" type="string"/>
+                            <field name="adf10" type="string"/>
+                            <field name="adf11" type="string"/>
+                            <field name="adf12" type="string"/>
+                            <field name="adf13" type="string"/>
+                            <field name="adf14" type="string"/>
+                            <field name="adf15" type="string"/>
+                            <field name="adf16" type="string"/>
+                            <field name="adf17" type="string"/>
+                            <field name="adf18" type="string"/>
+                            <field name="adf19" type="string"/>
+                            <field name="isretired" type="string"/>
+                            <field name="productoid" type="string"/>
+                            <field name="productalias" type="string"/>
+                            <field name="workstationoid" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetMonitorDetails" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_monitor?filter=componentoid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_monitor" type="array">
+                            <field name="componentoid" type="string"/>
+                            <field name="eisamanufacturer" type="string"/>
+                            <field name="vesaproduct" type="string"/>
+                            <field name="yearmanufactured" type="string"/>
+                            <field name="weekmanufactured" type="string"/>
+                            <field name="diagonalsize" type="string"/>
+                            <field name="displaytype" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetLanAdapter" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_lanadaptercomp?filter=isdeleted,is,NULL&amp;filter=workstationoid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_lanadaptercomp" type="array">
+                            <field name="componentoid" type="string"/>
+                            <field name="derivedclassid" type="string"/>
+                            <field name="surrogateid" type="string"/>
+                            <field name="producttype" type="string"/>
+                            <field name="collector" type="string"/>
+                            <field name="source" type="string"/>
+                            <field name="serialnumber" type="string"/>
+                            <field name="assettag" type="string"/>
+                            <field name="serialnumberalias" type="string"/>
+                            <field name="assettagalias" type="string"/>
+                            <field name="modelnumber" type="string"/>
+                            <field name="createdate" type="string"/>
+                            <field name="datelastmodified" type="string"/>
+                            <field name="isdeleted" type="string"/>
+                            <field name="excludednoncoll" type="string"/>
+                            <field name="adf0" type="string"/>
+                            <field name="adf1" type="string"/>
+                            <field name="adf2" type="string"/>
+                            <field name="adf3" type="string"/>
+                            <field name="adf4" type="string"/>
+                            <field name="adf5" type="string"/>
+                            <field name="adf6" type="string"/>
+                            <field name="adf7" type="string"/>
+                            <field name="adf8" type="string"/>
+                            <field name="adf9" type="string"/>
+                            <field name="adf10" type="string"/>
+                            <field name="adf11" type="string"/>
+                            <field name="adf12" type="string"/>
+                            <field name="adf13" type="string"/>
+                            <field name="adf14" type="string"/>
+                            <field name="adf15" type="string"/>
+                            <field name="adf16" type="string"/>
+                            <field name="adf17" type="string"/>
+                            <field name="adf18" type="string"/>
+                            <field name="adf19" type="string"/>
+                            <field name="isretired" type="string"/>
+                            <field name="productoid" type="string"/>
+                            <field name="productalias" type="string"/>
+                            <field name="workstationoid" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetLanAdapterDetails" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_lanadapter?filter=componentoid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_lanadapter" type="array">
+                            <field name="componentoid" type="string"/>
+                            <field name="lanaddress" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetIPAddress" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_ipaddress?filter=lanadapteroid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="lanadapteroid" type="array">
+                            <field name="ipaddressoid" type="string"/>
+                            <field name="ipaddress" type="string"/>
+                            <field name="subnetmask" type="string"/>
+                            <field name="lanadapteroid" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>          
+        <operation name="GetDisc" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_diskcomp?filter=isdeleted,is,NULL&amp;filter=workstationoid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_diskcomp" type="array">
+                            <field name="componentoid" type="string"/>
+                            <field name="derivedclassid" type="string"/>
+                            <field name="surrogateid" type="string"/>
+                            <field name="producttype" type="string"/>
+                            <field name="collector" type="string"/>
+                            <field name="source" type="string"/>
+                            <field name="serialnumber" type="string"/>
+                            <field name="assettag" type="string"/>
+                            <field name="serialnumberalias" type="string"/>
+                            <field name="assettagalias" type="string"/>
+                            <field name="modelnumber" type="string"/>
+                            <field name="createdate" type="string"/>
+                            <field name="datelastmodified" type="string"/>
+                            <field name="isdeleted" type="string"/>
+                            <field name="excludednoncoll" type="string"/>
+                            <field name="adf0" type="string"/>
+                            <field name="adf1" type="string"/>
+                            <field name="adf2" type="string"/>
+                            <field name="adf3" type="string"/>
+                            <field name="adf4" type="string"/>
+                            <field name="adf5" type="string"/>
+                            <field name="adf6" type="string"/>
+                            <field name="adf7" type="string"/>
+                            <field name="adf8" type="string"/>
+                            <field name="adf9" type="string"/>
+                            <field name="adf10" type="string"/>
+                            <field name="adf11" type="string"/>
+                            <field name="adf12" type="string"/>
+                            <field name="adf13" type="string"/>
+                            <field name="adf14" type="string"/>
+                            <field name="adf15" type="string"/>
+                            <field name="adf16" type="string"/>
+                            <field name="adf17" type="string"/>
+                            <field name="adf18" type="string"/>
+                            <field name="adf19" type="string"/>
+                            <field name="isretired" type="string"/>
+                            <field name="productoid" type="string"/>
+                            <field name="productalias" type="string"/>
+                            <field name="workstationoid" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetDiscDetails" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_disk?filter=componentoid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_disk" type="array">
+                            <field name="componentoid" type="string"/>
+                            <field name="drivenumber" type="string"/>
+                            <field name="issmartwarning" type="string"/>
+                            <field name="logicaldrives" type="string"/>
+                            <field name="rawtotalspace" type="string"/>
+                            <field name="interfacetype" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetBios" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_bioscomp?filter=?filter=isdeleted,is,NULL&amp;filter=workstationoid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_bioscomp" type="array">
+                            <field name="componentoid" type="string"/>
+                            <field name="derivedclassid" type="string"/>
+                            <field name="surrogateid" type="string"/>
+                            <field name="producttype" type="string"/>
+                            <field name="collector" type="string"/>
+                            <field name="source" type="string"/>
+                            <field name="serialnumber" type="string"/>
+                            <field name="assettag" type="string"/>
+                            <field name="serialnumberalias" type="string"/>
+                            <field name="assettagalias" type="string"/>
+                            <field name="modelnumber" type="string"/>
+                            <field name="createdate" type="string"/>
+                            <field name="datelastmodified" type="string"/>
+                            <field name="isdeleted" type="string"/>
+                            <field name="excludednoncoll" type="string"/>
+                            <field name="adf0" type="string"/>
+                            <field name="adf1" type="string"/>
+                            <field name="adf2" type="string"/>
+                            <field name="adf3" type="string"/>
+                            <field name="adf4" type="string"/>
+                            <field name="adf5" type="string"/>
+                            <field name="adf6" type="string"/>
+                            <field name="adf7" type="string"/>
+                            <field name="adf8" type="string"/>
+                            <field name="adf9" type="string"/>
+                            <field name="adf10" type="string"/>
+                            <field name="adf11" type="string"/>
+                            <field name="adf12" type="string"/>
+                            <field name="adf13" type="string"/>
+                            <field name="adf14" type="string"/>
+                            <field name="adf15" type="string"/>
+                            <field name="adf16" type="string"/>
+                            <field name="adf17" type="string"/>
+                            <field name="adf18" type="string"/>
+                            <field name="adf19" type="string"/>
+                            <field name="isretired" type="string"/>
+                            <field name="productoid" type="string"/>
+                            <field name="productalias" type="string"/>
+                            <field name="workstationoid" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetBiosDetails" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_bios?filter=componentoid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_bios" type="array">
+                            <field name="componentoid" type="string"/>
+                            <field name="version" type="string"/>
+                            <field name="releasedate" type="string"/>
+                            <field name="dmicompversion" type="string"/>
+                            <field name="isapmsupport" type="string"/>
+                            <field name="isacpicompatible" type="string"/>
+                            <field name="familycode" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetLogicalDrive" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_logicaldrivecomp?filter=?filter=isdeleted,is,NULL&amp;filter=workstationoid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_logicaldrivecomp" type="array">
+                            <field name="componentoid" type="string"/>
+                            <field name="derivedclassid" type="string"/>
+                            <field name="surrogateid" type="string"/>
+                            <field name="producttype" type="string"/>
+                            <field name="collector" type="string"/>
+                            <field name="source" type="string"/>
+                            <field name="serialnumber" type="string"/>
+                            <field name="assettag" type="string"/>
+                            <field name="serialnumberalias" type="string"/>
+                            <field name="assettagalias" type="string"/>
+                            <field name="modelnumber" type="string"/>
+                            <field name="createdate" type="string"/>
+                            <field name="datelastmodified" type="string"/>
+                            <field name="isdeleted" type="string"/>
+                            <field name="excludednoncoll" type="string"/>
+                            <field name="adf0" type="string"/>
+                            <field name="adf1" type="string"/>
+                            <field name="adf2" type="string"/>
+                            <field name="adf3" type="string"/>
+                            <field name="adf4" type="string"/>
+                            <field name="adf5" type="string"/>
+                            <field name="adf6" type="string"/>
+                            <field name="adf7" type="string"/>
+                            <field name="adf8" type="string"/>
+                            <field name="adf9" type="string"/>
+                            <field name="adf10" type="string"/>
+                            <field name="adf11" type="string"/>
+                            <field name="adf12" type="string"/>
+                            <field name="adf13" type="string"/>
+                            <field name="adf14" type="string"/>
+                            <field name="adf15" type="string"/>
+                            <field name="adf16" type="string"/>
+                            <field name="adf17" type="string"/>
+                            <field name="adf18" type="string"/>
+                            <field name="adf19" type="string"/>
+                            <field name="isretired" type="string"/>
+                            <field name="productoid" type="string"/>
+                            <field name="productalias" type="string"/>
+                            <field name="workstationoid" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>        
+        <operation name="GetLogicalDriveDetails" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/nc_logicaldrive?filter=componentoid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="nc_logicaldrive" type="array">
+                            <field name="componentoid" type="string"/>
+                            <field name="drivenumber" type="string"/>
+                            <field name="driveletter" type="string"/>
+                            <field name="availablespace" type="string"/>
+                            <field name="totalspace" type="string"/>
+                            <field name="logicalnumber" type="string"/>
+                            <field name="isremote" type="string"/>
+                            <field name="filesystem" type="string"/>
+                            <field name="volumelabel" type="string"/>
+                            <field name="volumeserialnumber" type="string"/>
+                            <field name="uncpath" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetDevices" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/zdevice</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="zdevice" type="array">
+                            <field name="zuid" type="string"/>
+                            <field name="platform" type="string"/>
+                            <field name="hostname" type="string"/>
+                            <field name="dns" type="string"/>
+                            <field name="port" type="string"/>
+                            <field name="addeddate" type="string"/>
+                            <field name="lastcontact" type="string"/>
+                            <field name="lastfullrefresh" type="string"/>
+                            <field name="osname" type="string"/>
+                            <field name="osid" type="string"/>
+                            <field name="primaryuser" type="string"/>
+                            <field name="owner" type="string"/>
+                            <field name="language" type="string"/>
+                            <field name="site" type="string"/>
+                            <field name="department" type="string"/>
+                            <field name="location" type="string"/>
+                            <field name="serialnumber" type="string"/>
+                            <field name="lastinventoryscan" type="string"/>
+                            <field name="primaryusercalculated" type="string"/>
+                            <field name="lost" type="string"/>
+                            <field name="managedfolder" type="string"/>
+                            <field name="retired" type="string"/>
+                            <field name="retireddate" type="string"/>
+                            <field name="wiperequestinitiatedtime" type="string"/>
+                            <field name="agentversion" type="string"/>
+                            <field name="istest" type="string"/>
+                            <field name="eri" type="string"/>
+                            <field name="joinproxyid" type="string"/>
+                            <field name="ownership" type="string"/>
+                            <field name="zavversion" type="string"/>
+                            <field name="zavonlydevice" type="string"/>
+                            <field name="isenrolled" type="string"/>
+                            <field name="restricted" type="string"/>
+                            <field name="hasotaidentity" type="string"/>
+                            <field name="hasmdmidentity" type="string"/>
+                            <field name="devicestatus" type="string"/>
+                            <field name="primaryuserdatareset" type="string"/>
+                            <field name="zenagentversion" type="string"/>
+                            <field name="timezone" type="string"/>
+                            <field name="ismdmenrolled" type="string"/>
+                            <field name="deviceseqid" type="string"/>
+                            <field name="rowlastupdated" type="string"/>
+                            <field name="idcol" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>        
+        <operation name="GetUserDetails" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/zreference?filter=zuid,eqBase64,</endpoint>
+                <header>
+                    <item name="user" type="string">{db_username}</item>
+                    <item name="password" type="string">{db_password}</item>
+                    <item name="db_name" type="string">{db_name}</item>
+                    <item name="hostname" type="string">{db_hostname}</item>
+                    <item name="datasource" type="string">{db_databasetype}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="zreference" type="array">
+                            <field name="zuid" type="string"/>
+                            <field name="sourceuid" type="string"/>
+                            <field name="objectuid" type="string"/>
+                            <field name="istest" type="string"/>
+                            <field name="email" type="string"/>
+                            <field name="loginname" type="string"/>
+                            <field name="useractivesynclogonname" type="string"/>
+                            <field name="userfulldn" type="string"/>
+                            <field name="rowlastupdated" type="string"/>
+                            <field name="idcol" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>                                                                                                                              
+    </operations>
+</invoker>

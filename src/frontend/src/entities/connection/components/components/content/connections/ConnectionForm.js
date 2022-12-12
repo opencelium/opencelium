@@ -328,7 +328,7 @@ export function ConnectionForm(type) {
                     connector.forEach((operator) => {
                         const condition = operator.condition;
                         let operatorErrors = [];
-                        if(!condition.leftStatement.color || !condition.leftStatement.field){
+                        if(!condition.leftStatement || !condition.leftStatement.color || !condition.leftStatement.field){
                             operatorErrors.push('Left Statement is missing');
                         }
                         if(operator.type === IF_OPERATOR && !condition.relationalOperator){

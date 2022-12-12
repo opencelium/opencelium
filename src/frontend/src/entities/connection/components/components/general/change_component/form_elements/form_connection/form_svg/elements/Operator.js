@@ -75,7 +75,7 @@ class Operator extends React.Component{
         if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverRightPlaceholder && currentTechnicalItem.entity.index !== operator.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            let isAvailableForDragging = connector.areIndexesUnderScope(operator.entity, currentTechnicalItem.entity, OUTSIDE_ITEM);
+            let isAvailableForDragging = connector.areIndexesUnderScope(operator.entity, currentTechnicalItem.entity, OUTSIDE_ITEM, currentTechnicalItem.isSelectedAll);
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(operator.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
@@ -104,7 +104,7 @@ class Operator extends React.Component{
         if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverBottomPlaceholder && currentTechnicalItem.entity.index !== operator.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            let isAvailableForDragging = connector.areIndexesUnderScope(operator.entity, currentTechnicalItem.entity, INSIDE_ITEM);
+            let isAvailableForDragging = connector.areIndexesUnderScope(operator.entity, currentTechnicalItem.entity, INSIDE_ITEM, currentTechnicalItem.isSelectedAll);
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(operator.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
@@ -128,12 +128,15 @@ class Operator extends React.Component{
     }
 
     onMouseDown(e){
-        const {connection, setCurrentItem, operator, isDisabled, isItemDraggable} = this.props;
+        const {connection, setCurrentItem, operator, isDisabled, isItemDraggable, currentTechnicalItem} = this.props;
         if(!isDisabled) {
             if (connection) {
                 if(isItemDraggable){
                     operator.isDragged = true;
                     operator.isDraggedForCopy = e.altKey;
+                }
+                if(currentTechnicalItem.index === operator.index){
+                    operator.isSelectedAll = currentTechnicalItem.isSelectedAll;
                 }
                 setCurrentItem(operator);
             }

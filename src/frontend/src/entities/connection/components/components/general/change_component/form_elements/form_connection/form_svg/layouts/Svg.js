@@ -278,7 +278,7 @@ class Svg extends React.Component {
                         }
                         if(e.target.getAttribute('data-movable') === 'true'){
                             shouldMoveItem = true;
-                            this.moveItem(connector, sourceItem, targetLeftItem, mode, !e.altKey);
+                            this.moveItem(connector, sourceItem, targetLeftItem, mode, !e.altKey, currentTechnicalItem.isSelectedAll);
                         }
                     }
                 }
@@ -296,66 +296,14 @@ class Svg extends React.Component {
         if(this.isPointerDown) this.isPointerDown = false;
     }
 
-    moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete = true){
+    moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete = true, isSelectedAll = false){
         const {connection, updateConnection, setCurrentItem} = this.props;
-        if (sourceItem instanceof CMethodItem) {
-            if (connector.getConnectorType() === CONNECTOR_FROM) {
-                if(shouldDelete){
-                    connection.removeFromConnectorMethod(sourceItem);
-                    sourceItem.index = '';
-                    sourceItem.isDragged = false;
-                    connector.setCurrentItem(targetLeftItem);
-                    connection.addFromConnectorMethod(sourceItem, mode);
-                } else{
-                    connector.setCurrentItem(targetLeftItem);
-                    connection.addFromConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
-                }
-            } else {
-                if(shouldDelete) {
-                    connection.removeToConnectorMethod(sourceItem);
-                    sourceItem.index = '';
-                    sourceItem.isDragged = false;
-                    connector.setCurrentItem(targetLeftItem);
-                    connection.addToConnectorMethod(sourceItem, mode);
-                } else{
-                    connector.setCurrentItem(targetLeftItem);
-                    connection.addToConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
-                }
-            }
-            updateConnection(connection);
-            const currentItem = connector.getMethodByColor(sourceItem.color);
-            if(currentItem){
-                connector.setCurrentItem(currentItem);
-                const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
-                setCurrentItem(currentSvgElement)
-            }
-        }
-        if (sourceItem instanceof COperatorItem) {
-            sourceItem.isDragged = false;
-            const sourceItemData = sourceItem.getObjectForConnectionOverview();
-            sourceItemData.index = '';
-            connector.setCurrentItem(targetLeftItem);
-            if (connector.getConnectorType() === CONNECTOR_FROM) {
-                connection.addFromConnectorOperator(sourceItemData, mode);
-            } else {
-                connection.addToConnectorOperator(sourceItemData, mode);
-            }
-            const newIndex = connector.generateNextIndex(mode, targetLeftItem);
-            connector.updateIndexesForOperator(sourceItem, newIndex, connection, shouldDelete);
-            if(shouldDelete) {
-                if (connector.getConnectorType() === CONNECTOR_FROM) {
-                    connection.removeFromConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
-                } else {
-                    connection.removeToConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
-                }
-            }
-            updateConnection(connection);
-            const currentItem = connector.getOperatorByIndex(newIndex);
-            if(currentItem) {
-                connector.setCurrentItem(currentItem);
-                const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
-                setCurrentItem(currentSvgElement)
-            }
+        const currentItem = connection.moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete);
+        updateConnection(connection);
+        if(currentItem){
+            connector.setCurrentItem(currentItem);
+            const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+            setCurrentItem(currentSvgElement)
         }
     }
 
@@ -399,7 +347,7 @@ class Svg extends React.Component {
     renderItems(){
         const {
             isItemDraggable, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened,
-            readOnly, deleteProcess, setCurrentItem,
+            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll,
         } = this.props;
         return items.map((item,key) => {
             let currentItem = null;

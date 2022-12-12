@@ -50,6 +50,43 @@ function doAction(event, action){
 }
 
 /**
+ * pressing alt + a select all after elements in connection form
+ */
+let SelectAllAfterItemsKeyNavigation = {
+    handleEvent(event) {
+        switch (event.type) {
+            case 'keydown':
+                selectAllAfterItems(event, this.that);
+                break;
+        }
+
+    }
+};
+function selectAllAfterItems(e, that){
+    let key = e.keyCode;
+    switch (key) {
+        case 65:
+            doAction(e, () => {
+                const currentItem = that.props.currentTechnicalItem;
+                const connector = that.props.connection.getConnectorByType(currentItem.connectorType);
+                const svgElement = connector.getSvgElementByIndex(currentItem.entity.index);
+                svgElement.isSelectedAll = true;
+                if(e.altKey && currentItem){
+                    that.setCurrentItem(svgElement);
+                    that.props.updateConnection(that.props.connection);
+                }
+            });
+            break;
+
+    }
+}
+function addSelectAllAfterItemsKeyNavigation(that){
+    addNavigationListener(that, SelectAllAfterItemsKeyNavigation);
+}
+function removeSelectAllAfterItemsKeyNavigation(that){
+    removeNavigationListener(that, SelectAllAfterItemsKeyNavigation);
+}
+/**
  * pressing ARROW_DOWN select next option in select
  */
 let SelectArrowDownKeyNavigation = {
@@ -1017,6 +1054,8 @@ function removeLoginKeyNavigation(that){
 
 
 export{
+    addSelectAllAfterItemsKeyNavigation,
+    removeSelectAllAfterItemsKeyNavigation,
     switchUserListKeyNavigation,
     addSelectArrowDownKeyNavigation,
     removeSelectArrowDownKeyNavigation,

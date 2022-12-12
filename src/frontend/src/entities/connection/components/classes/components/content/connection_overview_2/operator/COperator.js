@@ -37,6 +37,7 @@ export default class COperator{
         this._isDragged = operator && operator.hasOwnProperty('isDragged') ? operator.isDragged : false;
         this._isDraggedForCopy = operator && operator.hasOwnProperty('isDraggedForCopy') ? operator.isDraggedForCopy : false;
         this._isAvailableForDragging = operator && operator.hasOwnProperty('isAvailableForDragging') ? operator.isAvailableForDragging : false;
+        this._isSelectedAll = operator && operator.hasOwnProperty('isSelectedAll') ? operator.isSelectedAll : false;
     }
 
     static getPoints(x, y, size = OPERATOR_SIZE){
@@ -159,12 +160,28 @@ export default class COperator{
         this._arrows = arrows;
     }
 
-    isHighlighted(currentOperator){
-        return currentOperator ? this._id.indexOf(currentOperator.id) === 0 : false;
+    isHighlighted(currentItem){
+        return currentItem ? this._id.indexOf(currentItem.id) === 0 || currentItem.isSelectedAll && this.isAfter(currentItem) : false;
+    }
+
+    isAfter(currentItem){
+        if(!currentItem) return false;
+        let indexes = currentItem.id.split('_');
+        indexes.pop();
+        let rootIndex = indexes.join('_');
+        return this._id > currentItem.id && this._id.substring(0, rootIndex.length) === rootIndex;
     }
 
     isCurrent(currentOperator){
         return currentOperator ? currentOperator.id === this._id : false
+    }
+
+    get isSelectedAll(){
+        return this._isSelectedAll;
+    }
+
+    set isSelectedAll(isSelectedAll){
+        this._isSelectedAll = isSelectedAll;
     }
 
     setCoordinates(coordinates){
@@ -194,6 +211,7 @@ export default class COperator{
             isDragged: this._isDragged,
             isDraggedForCopy: this._isDraggedForCopy,
             isAvailableForDragging: this._isAvailableForDragging,
+            isSelectedAll: this._isSelectedAll,
             connectorType: this._connectorType,
             invoker: this._invoker,
             entity: this._entity.getObject(),

@@ -350,17 +350,44 @@ export default class CConnectorItem{
         return Array.from(new Set([...inReferences, ...outReferences, ...operatorReferences]));
     }
 
-    getReferencesForItem(item){
+    getReferencesForItem(item, isSelectedAll = false){
         const isOperator = item instanceof COperatorItem;
-        if(isOperator){
-            return this.getReferencesForOperator(item);
-        } else{
-            return this.getReferencesForMethod(item);
+        let result = !isOperator ? {inReferences: [], outReferences: []} : [];
+        let items = [item];
+        if(isSelectedAll){
+            items = [item, ...this.getAllNextElements(item)];
         }
+        for(let i = 0; i < items.length; i++){
+            let itemResult;
+            if(isOperator){
+                itemResult = this.getReferencesForOperator(items[i]);
+                result = [...result, ...itemResult];
+            } else{
+                itemResult = this.getReferencesForMethod(items[i]);
+                result = {
+                    inReferences: [...result.inReferences, ...itemResult.inReferences],
+                    outReferences: [...result.outReferences, ...itemResult.outReferences],
+                };
+            }
+        }
+        if(isOperator) {
+            result = Array.from(new Set(result));
+            if(isSelectedAll){
+                result = result.filter(ref => item.isAfter({index: ref}))
+            }
+        } else{
+            result.inReferences = Array.from(new Set(result.inReferences));
+            result.outReferences = Array.from(new Set(result.outReferences));
+            if(isSelectedAll){
+                result.inReferences = result.inReferences.filter(ref => item.isAfter({index: ref}))
+                result.outReferences = result.outReferences.filter(ref => item.isAfter({index: ref}))
+            }
+        }
+        return result;
     }
 
-    areIndexesUnderScopeForOperator(scopeElement, draggableElement){
-        let indexes = this.getReferencesForItem(draggableElement);
+    areIndexesUnderScopeForOperator(scopeElement, draggableElement, isSelectedAll = false){
+        let indexes = this.getReferencesForItem(draggableElement, isSelectedAll);
         const draggableElementIndex = draggableElement.index;
         indexes = sortConnectorItemIndexes(indexes);
         let startIndex = '0';
@@ -390,8 +417,24 @@ export default class CConnectorItem{
         return validSubstring && startIndex <= scopeElement.index;
     }
 
-    areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode){
-        let indexes = this.getReferencesForItem(draggableElement);
+    getAllNextElements(element){
+        let result = [];
+        this._methods.forEach((method) => {
+            if(method.index > element.index && method.isAfter(element)){
+                result.push(method);
+            }
+        })
+        this._operators.forEach((operator) => {
+            if(operator.index > element.index && operator.isAfter(element)){
+                result.push(operator);
+            }
+        })
+        return result;
+    }
+
+    areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode, isSelectedAll = false){
+        let indexes = this.getReferencesForItem(draggableElement, isSelectedAll);
+        console.log(indexes);
         let startIndex = '0';
         let endIndex = '';
         let inReferences = sortConnectorItemIndexes(indexes.inReferences);
@@ -432,15 +475,15 @@ export default class CConnectorItem{
         return checkStartIndex && checkEndIndex && checkNextItemOfOperator;
     }
 
-    areIndexesUnderScope(scopeElement, draggableElement, mode){
+    areIndexesUnderScope(scopeElement, draggableElement, mode, isSelectedAll = false){
         if(!scopeElement || !draggableElement){
             return false;
         }
         const isDraggableItemOperator = draggableElement instanceof COperatorItem;
         if(isDraggableItemOperator){
-            return this.areIndexesUnderScopeForOperator(scopeElement, draggableElement);
+            return this.areIndexesUnderScopeForOperator(scopeElement, draggableElement, isSelectedAll);
         } else{
-            return this.areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode);
+            return this.areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode, isSelectedAll);
         }
     }
 
@@ -534,7 +577,7 @@ export default class CConnectorItem{
                         if(this.getConnectorType() === CONNECTOR_FROM){
                             connection.addFromConnectorOperator({...this._operators[i].getObject(), index, color: ''}, mode);
                         } else {
-                            connection.addToConnectorMethod({...this._operators[i].getObject(), index, color: ''}, mode);
+                            connection.addToConnectorOperator({...this._operators[i].getObject(), index, color: ''}, mode);
                         }
                     }
                 }
@@ -1324,7 +1367,6 @@ export default class CConnectorItem{
         }
         return !isExistNextIndexInMethods;
     }
-
 
     removeMethod(method, withRefactorIndexes = true){
         let methodIndex = method.index;

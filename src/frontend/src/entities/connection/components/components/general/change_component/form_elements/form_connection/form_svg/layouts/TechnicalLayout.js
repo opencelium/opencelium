@@ -24,6 +24,10 @@ import {
     HAS_LAYOUTS_SCALING,
 } from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
+import {
+    addSelectAllAfterItemsKeyNavigation,
+    removeSelectAllAfterItemsKeyNavigation
+} from "@root/components/utils/key_navigation";
 
 
 function mapStateToProps(state){
@@ -36,13 +40,20 @@ function mapStateToProps(state){
     };
 }
 
-
 @connect(mapStateToProps, {setCurrentTechnicalItem, setTechnicalLayoutLocation})
 class TechnicalLayout extends React.Component{
 
     constructor(props) {
         super(props);
         this.layoutId = 'technical_layout';
+    }
+
+    componentDidMount() {
+        addSelectAllAfterItemsKeyNavigation(this);
+    }
+
+    componentWillUnmount() {
+        removeSelectAllAfterItemsKeyNavigation(this);
     }
 
     deleteProcess(process){
@@ -116,7 +127,7 @@ class TechnicalLayout extends React.Component{
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
                     isDraggable={true}
-                    isScalable={HAS_LAYOUTS_SCALING}
+                    isScalable={true}
                     isItemDraggable={true}
                     setCurrentItem={(a) => this.setCurrentItem(a)}
                     deleteProcess={(a) => this.deleteProcess(a)}
