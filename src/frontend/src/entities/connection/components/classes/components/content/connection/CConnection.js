@@ -168,6 +168,10 @@ export default class CConnection{
     }
 
     moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete = true){
+        const result = {
+            currentItem: null,
+            colorMapping: {},
+        }
         if (sourceItem instanceof CMethodItem) {
             if (connector.getConnectorType() === CONNECTOR_FROM) {
                 if(shouldDelete){
@@ -175,10 +179,11 @@ export default class CConnection{
                     sourceItem.index = '';
                     sourceItem.isDragged = false;
                     connector.setCurrentItem(targetLeftItem);
-                    this.addFromConnectorMethod(sourceItem, mode);
+                    result.currentItem = this.addFromConnectorMethod(sourceItem, mode);
                 } else{
                     connector.setCurrentItem(targetLeftItem);
-                    this.addFromConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
+                    result.currentItem = this.addFromConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
+                    result.colorMapping[sourceItem.color] = result.currentItem.color;
                 }
             } else {
                 if(shouldDelete) {
@@ -186,13 +191,14 @@ export default class CConnection{
                     sourceItem.index = '';
                     sourceItem.isDragged = false;
                     connector.setCurrentItem(targetLeftItem);
-                    this.addToConnectorMethod(sourceItem, mode);
+                    result.currentItem = this.addToConnectorMethod(sourceItem, mode);
                 } else{
                     connector.setCurrentItem(targetLeftItem);
-                    this.addToConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
+                    result.currentItem = this.addToConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
+                    result.colorMapping[sourceItem.color] = result.currentItem.color;
                 }
             }
-            return connector.getMethodByColor(sourceItem.color);
+            return result;
         }
         if (sourceItem instanceof COperatorItem) {
             sourceItem.isDragged = false;
@@ -200,9 +206,9 @@ export default class CConnection{
             sourceItemData.index = '';
             connector.setCurrentItem(targetLeftItem);
             if (connector.getConnectorType() === CONNECTOR_FROM) {
-                this.addFromConnectorOperator(sourceItemData, mode);
+                result.currentItem = this.addFromConnectorOperator(sourceItemData, mode);
             } else {
-                this.addToConnectorOperator(sourceItemData, mode);
+                result.currentItem = this.addToConnectorOperator(sourceItemData, mode);
             }
             const newIndex = connector.generateNextIndex(mode, targetLeftItem);
             connector.updateIndexesForOperator(sourceItem, newIndex, this, shouldDelete);
@@ -212,10 +218,18 @@ export default class CConnection{
                 } else {
                     this.removeToConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
                 }
+            } else{
+                const existedChildren = connector.getOperatorChildren(sourceItem, true);
+                const newChildren = connector.getOperatorChildren(result.currentItem, true);
+                if(existedChildren.length === newChildren.length){
+                    for(let i = 0; i < existedChildren.length; i++){
+                        result.colorMapping[existedChildren[i].color] = newChildren[i].color;
+                    }
+                }
             }
-            return connector.getOperatorByIndex(newIndex);
+            return result;
         }
-        return null;
+        return result;
     }
 
     isEmpty(){
@@ -422,6 +436,10 @@ export default class CConnection{
         this._fieldBinding = this.convertFieldBindingItems(fieldBindingItems);
     }
 
+    addFieldBinding(fieldBinding){
+        this.fieldBinding = [...this._fieldBinding, this.convertFieldBindingItem(fieldBinding)];
+    }
+
     get template(){
         return this._template;
     }
@@ -512,7 +530,7 @@ export default class CConnection{
             this.removeRestColor(color);
             method.color = color;
         }
-        connector.addMethod(method, mode);
+        return connector.addMethod(method, mode);
     }
 
     removeConnectorMethod(connectorType, method, withRefactorIndexes = true){
@@ -567,23 +585,25 @@ export default class CConnection{
     }
 
     addFromConnectorOperator(operator, mode = OUTSIDE_ITEM){
-        this.fromConnector.addOperator(operator, mode);
+        const newOperator = this.fromConnector.addOperator(operator, mode);
         this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
         this.toConnector.setSvgItems();
+        return newOperator;
     }
 
     addToConnectorOperator(operator, mode = OUTSIDE_ITEM){
-        this.toConnector.addOperator(operator, mode);
+        return this.toConnector.addOperator(operator, mode);
     }
 
     addFromConnectorMethod(method, mode){
-        this.addConnectorMethod(CONNECTOR_FROM, method, mode);
+        const newMethod = this.addConnectorMethod(CONNECTOR_FROM, method, mode);
         this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
         this.toConnector.setSvgItems();
+        return newMethod;
     }
 
     addToConnectorMethod(method, mode){
-        this.addConnectorMethod(CONNECTOR_TO, method, mode);
+        return this.addConnectorMethod(CONNECTOR_TO, method, mode);
     }
 
     removeFromConnectorMethod(method, withRefactorIndexes = true){

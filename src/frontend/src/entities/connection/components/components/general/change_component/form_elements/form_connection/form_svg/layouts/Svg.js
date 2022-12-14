@@ -34,6 +34,7 @@ import {CONNECTOR_FROM, OUTSIDE_ITEM} from "@classes/content/connection/CConnect
 import CMethodItem from "@classes/content/connection/method/CMethodItem";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import CFieldBinding from "@classes/content/connection/field_binding/CFieldBinding";
 
 function mapStateToProps(state){
     const {currentTechnicalItem} = mapItemsToClasses(state);
@@ -298,11 +299,53 @@ class Svg extends React.Component {
 
     moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete = true, isSelectedAll = false){
         const {connection, updateConnection, setCurrentItem} = this.props;
-        const currentItem = connection.moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete);
+        const nextSiblingItems = connector.getNextSiblings(sourceItem);
+        const result = connection.moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete);
+        let colorMapping = {[sourceItem.color]: result.currentItem.color};
+        let targetItem = result.currentItem;
+        if(isSelectedAll){
+            nextSiblingItems.forEach((item) => {
+                const moveItemResult = connection.moveItem(connector, item, targetItem, OUTSIDE_ITEM, shouldDelete);
+                targetItem = moveItemResult.currentItem;
+                colorMapping = {...colorMapping, ...moveItemResult.colorMapping};
+            })
+        }
+        const connectionFieldBinding = [...connection.fieldBinding];
+        const allNextItems = connector.getAllNextItems(result.currentItem);
+        for (const colorMappingKey in colorMapping) {
+            allNextItems.methods.forEach(method => {
+                method.request.endpoint = method.request.endpoint.replace(new RegExp(colorMappingKey, 'g'), colorMapping[colorMappingKey]);
+            })
+            allNextItems.operators.forEach(o => {
+                if(o.condition.leftStatement.color === colorMappingKey){
+                    o.condition.leftStatement.setOnlyColor(colorMapping[colorMappingKey]);
+                }
+                if(o.condition.rightStatement.color === colorMappingKey){
+                    o.condition.rightStatement.setOnlyColor(colorMapping[colorMappingKey]);
+                }
+            })
+            const fieldBindings = [...connectionFieldBinding].filter(f => f.from.findIndex(from => from.color === colorMappingKey) !== -1 || f.to.findIndex(to => to.color === colorMappingKey) !== -1);
+            fieldBindings.forEach(fieldBinding => {
+                let newFieldBinding = {...fieldBinding.getObject()}
+                newFieldBinding.from = newFieldBinding.from.map(from => {
+                    if(from.color === colorMappingKey){
+                        from.color = colorMapping[colorMappingKey];
+                    }
+                    return from;
+                })
+                newFieldBinding.to = newFieldBinding.to.map(to => {
+                    if(to.color === colorMappingKey){
+                        to.color = colorMapping[colorMappingKey];
+                    }
+                    return to;
+                })
+                connection.addFieldBinding(CFieldBinding.createFieldBinding(newFieldBinding));
+            })
+        }
         updateConnection(connection);
-        if(currentItem){
-            connector.setCurrentItem(currentItem);
-            const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+        if(result.currentItem){
+            connector.setCurrentItem(result.currentItem);
+            const currentSvgElement = connector.getSvgElementByIndex(result.currentItem.index);
             setCurrentItem(currentSvgElement)
         }
     }

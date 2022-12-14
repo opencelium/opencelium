@@ -82,6 +82,10 @@ export default class CStatement{
         return this._color;
     }
 
+    setOnlyColor(color){
+        this._color = this.checkColor(color) ? color : DEFAULT_COLOR;
+    }
+
     set color(color){
         this._color = this.checkColor(color) ? color : DEFAULT_COLOR;
         this._field = '';
