@@ -89,8 +89,9 @@ public class TemplateServiceImp implements TemplateService {
             if (t == null){
                 return;
             }
-            if (t.getConnection().getFromConnector().getInvoker().getName().equals(fromInvoker) &&
-                    t.getConnection().getToConnector().getInvoker().getName().equals(toInvoker)){
+            String invNameFrom = t.getConnection().getFromConnector().getInvoker().getName().toUpperCase();
+            String invNameTo = t.getConnection().getToConnector().getInvoker().getName().toUpperCase();
+            if (invNameFrom.equals(fromInvoker.toUpperCase()) && invNameTo.equals(toInvoker.toUpperCase())){
                 result.add(t);
             }
         });
@@ -161,7 +162,7 @@ public class TemplateServiceImp implements TemplateService {
                         StringBuilder contentBuilder = new StringBuilder();
                         try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {
                             stream.forEach(s -> contentBuilder.append(s).append("\n"));
-                            System.out.println(Paths.get(path.toString()).getFileName().toString());
+//                            System.out.println(Paths.get(path.toString()).getFileName().toString());
                             return objectMapper.readValue(contentBuilder.toString(), Template.class);
                         } catch (Exception e) {
                             e.printStackTrace();
