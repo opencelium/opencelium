@@ -173,7 +173,7 @@ class Process extends React.Component{
         if(isString(label) && label.length > 12){
             shortLabel = `${label.substr(0, 9)}...`;
         }
-        //shortLabel = method.index;
+        //shortLabel = method.color;
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
         const hasDraggableItem = isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
         const isSelected = isCurrent && !readOnly;

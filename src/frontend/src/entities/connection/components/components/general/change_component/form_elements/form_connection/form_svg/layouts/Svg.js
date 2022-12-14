@@ -310,11 +310,13 @@ class Svg extends React.Component {
                 colorMapping = {...colorMapping, ...moveItemResult.colorMapping};
             })
         }
-        const connectionFieldBinding = [...connection.fieldBinding];
         const allNextItems = connector.getAllNextItems(result.currentItem);
+        const connectionFieldBinding = [...connection.fieldBinding];
         for (const colorMappingKey in colorMapping) {
             allNextItems.methods.forEach(method => {
                 method.request.endpoint = method.request.endpoint.replace(new RegExp(colorMappingKey, 'g'), colorMapping[colorMappingKey]);
+                const fieldsString = JSON.stringify(method.request.body.fields);
+                method.request.body.fields = JSON.parse(fieldsString.replace(new RegExp(`${colorMappingKey}\\.\\(`, 'g'), `${colorMapping[colorMappingKey]}.(`));
             })
             allNextItems.operators.forEach(o => {
                 if(o.condition.leftStatement.color === colorMappingKey){
@@ -324,24 +326,32 @@ class Svg extends React.Component {
                     o.condition.rightStatement.setOnlyColor(colorMapping[colorMappingKey]);
                 }
             })
-            const fieldBindings = [...connectionFieldBinding].filter(f => f.from.findIndex(from => from.color === colorMappingKey) !== -1 || f.to.findIndex(to => to.color === colorMappingKey) !== -1);
-            fieldBindings.forEach(fieldBinding => {
-                let newFieldBinding = {...fieldBinding.getObject()}
-                newFieldBinding.from = newFieldBinding.from.map(from => {
-                    if(from.color === colorMappingKey){
-                        from.color = colorMapping[colorMappingKey];
-                    }
-                    return from;
-                })
-                newFieldBinding.to = newFieldBinding.to.map(to => {
-                    if(to.color === colorMappingKey){
-                        to.color = colorMapping[colorMappingKey];
-                    }
-                    return to;
-                })
-                connection.addFieldBinding(CFieldBinding.createFieldBinding(newFieldBinding));
-            })
         }
+        const fieldBindings = [...connectionFieldBinding].filter(f => f.from.findIndex(from => !!colorMapping.hasOwnProperty(from.color)) !== -1 || f.to.findIndex(to => !!colorMapping.hasOwnProperty(to.color)) !== -1);
+        fieldBindings.forEach(fieldBinding => {
+            let localColorMapping = {};
+            let newFieldBinding = {...fieldBinding.getObject()}
+            newFieldBinding.from = newFieldBinding.from.map(from => {
+                if(colorMapping.hasOwnProperty(from.color)){
+                    localColorMapping[from.color] = colorMapping[from.color];
+                    from.color = colorMapping[from.color];
+                }
+                return from;
+            })
+            newFieldBinding.to = newFieldBinding.to.map(to => {
+                if(colorMapping.hasOwnProperty(to.color)){
+                    localColorMapping[to.color] = colorMapping[to.color];
+                    to.color = colorMapping[to.color];
+                }
+                return to;
+            })
+            if(newFieldBinding.enhancement){
+                for(let colorMappingKey in localColorMapping){
+                    newFieldBinding.enhancement.expertVar = newFieldBinding.enhancement.expertVar.replace(new RegExp(colorMappingKey, 'g'), colorMapping[colorMappingKey]);
+                }
+            }
+            connection.addFieldBinding(CFieldBinding.createFieldBinding(newFieldBinding));
+        })
         updateConnection(connection);
         if(result.currentItem){
             connector.setCurrentItem(result.currentItem);
