@@ -247,6 +247,14 @@ export default class COperatorItem{
         this._iterator = iterator;
     }
 
+    isAfter(item){
+        if(!item) return false;
+        let indexes = item.index.split('_');
+        indexes.pop();
+        let rootIndex = indexes.join('_');
+        return this.index > item.index && this.index.substring(0, rootIndex.length) === rootIndex;
+    }
+
     getObject(){
         let obj = {
             index: this._index,

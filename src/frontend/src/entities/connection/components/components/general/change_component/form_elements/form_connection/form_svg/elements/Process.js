@@ -27,6 +27,10 @@ import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_
 import COperator from "@classes/content/connection_overview_2/operator/COperator";
 import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
 import {OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
+import {
+    addSelectAllAfterItemsKeyNavigation,
+    removeSelectAllAfterItemsKeyNavigation
+} from "@root/components/utils/key_navigation";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
@@ -72,7 +76,7 @@ class Process extends React.Component{
         if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== process.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            let isAvailableForDragging = connector.areIndexesUnderScope(process.entity, currentTechnicalItem.entity, OUTSIDE_ITEM);
+            let isAvailableForDragging = connector.areIndexesUnderScope(process.entity, currentTechnicalItem.entity, OUTSIDE_ITEM, currentTechnicalItem.isSelectedAll);
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(process.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
@@ -96,12 +100,15 @@ class Process extends React.Component{
     }
 
     onMouseDown(e){
-        const {connection, setCurrentItem, process, isDisabled, isItemDraggable} = this.props;
+        const {connection, setCurrentItem, process, isDisabled, isItemDraggable, currentTechnicalItem} = this.props;
         if(!isDisabled) {
             if (connection) {
                 if(isItemDraggable){
                     process.isDragged = true;
                     process.isDraggedForCopy = e.altKey;
+                }
+                if(currentTechnicalItem.index === process.index){
+                    process.isSelectedAll = currentTechnicalItem.isSelectedAll;
                 }
                 setCurrentItem(process);
             }
@@ -166,7 +173,7 @@ class Process extends React.Component{
         if(isString(label) && label.length > 12){
             shortLabel = `${label.substr(0, 9)}...`;
         }
-        //shortLabel = method.index;
+        //shortLabel = method.color;
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
         const hasDraggableItem = isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
         const isSelected = isCurrent && !readOnly;

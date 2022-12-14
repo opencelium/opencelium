@@ -242,6 +242,14 @@ export default class CMethodItem{
         return this._request.body.data === BODY_DATA.GRAPHQL;
     }
 
+    isAfter(item){
+        if(!item) return false;
+        let indexes = item.index.split('_');
+        indexes.pop();
+        let rootIndex = indexes.join('_');
+        return this.index > item.index && this.index.substring(0, rootIndex.length) === rootIndex;
+    }
+
     getObject(){
         let obj = {
             name: this._name,

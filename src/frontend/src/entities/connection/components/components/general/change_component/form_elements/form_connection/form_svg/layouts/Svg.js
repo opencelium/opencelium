@@ -34,6 +34,7 @@ import {CONNECTOR_FROM, OUTSIDE_ITEM} from "@classes/content/connection/CConnect
 import CMethodItem from "@classes/content/connection/method/CMethodItem";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import CFieldBinding from "@classes/content/connection/field_binding/CFieldBinding";
 
 function mapStateToProps(state){
     const {currentTechnicalItem} = mapItemsToClasses(state);
@@ -278,7 +279,7 @@ class Svg extends React.Component {
                         }
                         if(e.target.getAttribute('data-movable') === 'true'){
                             shouldMoveItem = true;
-                            this.moveItem(connector, sourceItem, targetLeftItem, mode, !e.altKey);
+                            this.moveItem(connector, sourceItem, targetLeftItem, mode, !e.altKey, currentTechnicalItem.isSelectedAll);
                         }
                     }
                 }
@@ -296,66 +297,66 @@ class Svg extends React.Component {
         if(this.isPointerDown) this.isPointerDown = false;
     }
 
-    moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete = true){
+    moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete = true, isSelectedAll = false){
         const {connection, updateConnection, setCurrentItem} = this.props;
-        if (sourceItem instanceof CMethodItem) {
-            if (connector.getConnectorType() === CONNECTOR_FROM) {
-                if(shouldDelete){
-                    connection.removeFromConnectorMethod(sourceItem);
-                    sourceItem.index = '';
-                    sourceItem.isDragged = false;
-                    connector.setCurrentItem(targetLeftItem);
-                    connection.addFromConnectorMethod(sourceItem, mode);
-                } else{
-                    connector.setCurrentItem(targetLeftItem);
-                    connection.addFromConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
-                }
-            } else {
-                if(shouldDelete) {
-                    connection.removeToConnectorMethod(sourceItem);
-                    sourceItem.index = '';
-                    sourceItem.isDragged = false;
-                    connector.setCurrentItem(targetLeftItem);
-                    connection.addToConnectorMethod(sourceItem, mode);
-                } else{
-                    connector.setCurrentItem(targetLeftItem);
-                    connection.addToConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
-                }
-            }
-            updateConnection(connection);
-            const currentItem = connector.getMethodByColor(sourceItem.color);
-            if(currentItem){
-                connector.setCurrentItem(currentItem);
-                const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
-                setCurrentItem(currentSvgElement)
-            }
+        const nextSiblingItems = connector.getNextSiblings(sourceItem);
+        const result = connection.moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete);
+        let colorMapping = {[sourceItem.color]: result.currentItem.color};
+        let targetItem = result.currentItem;
+        if(isSelectedAll){
+            nextSiblingItems.forEach((item) => {
+                const moveItemResult = connection.moveItem(connector, item, targetItem, OUTSIDE_ITEM, shouldDelete);
+                targetItem = moveItemResult.currentItem;
+                colorMapping = {...colorMapping, ...moveItemResult.colorMapping};
+            })
         }
-        if (sourceItem instanceof COperatorItem) {
-            sourceItem.isDragged = false;
-            const sourceItemData = sourceItem.getObjectForConnectionOverview();
-            sourceItemData.index = '';
-            connector.setCurrentItem(targetLeftItem);
-            if (connector.getConnectorType() === CONNECTOR_FROM) {
-                connection.addFromConnectorOperator(sourceItemData, mode);
-            } else {
-                connection.addToConnectorOperator(sourceItemData, mode);
-            }
-            const newIndex = connector.generateNextIndex(mode, targetLeftItem);
-            connector.updateIndexesForOperator(sourceItem, newIndex, connection, shouldDelete);
-            if(shouldDelete) {
-                if (connector.getConnectorType() === CONNECTOR_FROM) {
-                    connection.removeFromConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
-                } else {
-                    connection.removeToConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
+        const allNextItems = connector.getAllNextItems(result.currentItem);
+        const connectionFieldBinding = [...connection.fieldBinding];
+        for (const colorMappingKey in colorMapping) {
+            allNextItems.methods.forEach(method => {
+                method.request.endpoint = method.request.endpoint.replace(new RegExp(colorMappingKey, 'g'), colorMapping[colorMappingKey]);
+                const fieldsString = JSON.stringify(method.request.body.fields);
+                method.request.body.fields = JSON.parse(fieldsString.replace(new RegExp(`${colorMappingKey}\\.\\(`, 'g'), `${colorMapping[colorMappingKey]}.(`));
+            })
+            allNextItems.operators.forEach(o => {
+                if(o.condition.leftStatement.color === colorMappingKey){
+                    o.condition.leftStatement.setOnlyColor(colorMapping[colorMappingKey]);
+                }
+                if(o.condition.rightStatement.color === colorMappingKey){
+                    o.condition.rightStatement.setOnlyColor(colorMapping[colorMappingKey]);
+                }
+            })
+        }
+        const fieldBindings = [...connectionFieldBinding].filter(f => f.from.findIndex(from => !!colorMapping.hasOwnProperty(from.color)) !== -1 || f.to.findIndex(to => !!colorMapping.hasOwnProperty(to.color)) !== -1);
+        fieldBindings.forEach(fieldBinding => {
+            let localColorMapping = {};
+            let newFieldBinding = {...fieldBinding.getObject()}
+            newFieldBinding.from = newFieldBinding.from.map(from => {
+                if(colorMapping.hasOwnProperty(from.color)){
+                    localColorMapping[from.color] = colorMapping[from.color];
+                    from.color = colorMapping[from.color];
+                }
+                return from;
+            })
+            newFieldBinding.to = newFieldBinding.to.map(to => {
+                if(colorMapping.hasOwnProperty(to.color)){
+                    localColorMapping[to.color] = colorMapping[to.color];
+                    to.color = colorMapping[to.color];
+                }
+                return to;
+            })
+            if(newFieldBinding.enhancement){
+                for(let colorMappingKey in localColorMapping){
+                    newFieldBinding.enhancement.expertVar = newFieldBinding.enhancement.expertVar.replace(new RegExp(colorMappingKey, 'g'), colorMapping[colorMappingKey]);
                 }
             }
-            updateConnection(connection);
-            const currentItem = connector.getOperatorByIndex(newIndex);
-            if(currentItem) {
-                connector.setCurrentItem(currentItem);
-                const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
-                setCurrentItem(currentSvgElement)
-            }
+            connection.addFieldBinding(CFieldBinding.createFieldBinding(newFieldBinding));
+        })
+        updateConnection(connection);
+        if(result.currentItem){
+            connector.setCurrentItem(result.currentItem);
+            const currentSvgElement = connector.getSvgElementByIndex(result.currentItem.index);
+            setCurrentItem(currentSvgElement)
         }
     }
 
@@ -399,7 +400,7 @@ class Svg extends React.Component {
     renderItems(){
         const {
             isItemDraggable, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened,
-            readOnly, deleteProcess, setCurrentItem,
+            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll,
         } = this.props;
         return items.map((item,key) => {
             let currentItem = null;

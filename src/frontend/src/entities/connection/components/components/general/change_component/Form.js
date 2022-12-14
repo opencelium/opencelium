@@ -81,8 +81,8 @@ class Form extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const prevErrors = prevProps.contents[2].inputs[1].errors;
-        const curErrors = this.props.contents[2].inputs[1].errors;
+        const prevErrors = prevProps.contents[2].inputs[1]?.errors || {};
+        const curErrors = this.props.contents[2].inputs[1]?.errors || {};
         if(JSON.stringify(prevErrors) !== JSON.stringify(curErrors)){
             const {entity} = this.state;
             const {setCurrentTechnicalItem, currentTechnicalItem} = this.props;

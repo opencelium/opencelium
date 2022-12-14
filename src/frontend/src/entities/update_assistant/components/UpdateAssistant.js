@@ -53,7 +53,6 @@ class UpdateAssistant extends Component{
 
     constructor(props){
         super(props);
-        const {authUser} = this.props;
         this.startCheckingResetFiles = false;
         this.state = {
             updateData: {

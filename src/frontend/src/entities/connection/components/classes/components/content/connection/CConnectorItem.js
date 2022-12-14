@@ -350,17 +350,44 @@ export default class CConnectorItem{
         return Array.from(new Set([...inReferences, ...outReferences, ...operatorReferences]));
     }
 
-    getReferencesForItem(item){
+    getReferencesForItem(item, isSelectedAll = false){
         const isOperator = item instanceof COperatorItem;
-        if(isOperator){
-            return this.getReferencesForOperator(item);
-        } else{
-            return this.getReferencesForMethod(item);
+        let result = !isOperator ? {inReferences: [], outReferences: []} : [];
+        let items = [item];
+        if(isSelectedAll){
+            items = [item, ...this.getAllNextElements(item)];
         }
+        for(let i = 0; i < items.length; i++){
+            let itemResult;
+            if(isOperator){
+                itemResult = this.getReferencesForOperator(items[i]);
+                result = [...result, ...itemResult];
+            } else{
+                itemResult = this.getReferencesForMethod(items[i]);
+                result = {
+                    inReferences: [...result.inReferences, ...itemResult.inReferences],
+                    outReferences: [...result.outReferences, ...itemResult.outReferences],
+                };
+            }
+        }
+        if(isOperator) {
+            result = Array.from(new Set(result));
+            if(isSelectedAll){
+                result = result.filter(ref => item.isAfter({index: ref}))
+            }
+        } else{
+            result.inReferences = Array.from(new Set(result.inReferences));
+            result.outReferences = Array.from(new Set(result.outReferences));
+            if(isSelectedAll){
+                result.inReferences = result.inReferences.filter(ref => item.isAfter({index: ref}))
+                result.outReferences = result.outReferences.filter(ref => item.isAfter({index: ref}))
+            }
+        }
+        return result;
     }
 
-    areIndexesUnderScopeForOperator(scopeElement, draggableElement){
-        let indexes = this.getReferencesForItem(draggableElement);
+    areIndexesUnderScopeForOperator(scopeElement, draggableElement, isSelectedAll = false){
+        let indexes = this.getReferencesForItem(draggableElement, isSelectedAll);
         const draggableElementIndex = draggableElement.index;
         indexes = sortConnectorItemIndexes(indexes);
         let startIndex = '0';
@@ -390,8 +417,23 @@ export default class CConnectorItem{
         return validSubstring && startIndex <= scopeElement.index;
     }
 
-    areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode){
-        let indexes = this.getReferencesForItem(draggableElement);
+    getAllNextElements(element){
+        let result = [];
+        this._methods.forEach((method) => {
+            if(method.index > element.index && method.isAfter(element)){
+                result.push(method);
+            }
+        })
+        this._operators.forEach((operator) => {
+            if(operator.index > element.index && operator.isAfter(element)){
+                result.push(operator);
+            }
+        })
+        return result;
+    }
+
+    areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode, isSelectedAll = false){
+        let indexes = this.getReferencesForItem(draggableElement, isSelectedAll);
         let startIndex = '0';
         let endIndex = '';
         let inReferences = sortConnectorItemIndexes(indexes.inReferences);
@@ -432,15 +474,15 @@ export default class CConnectorItem{
         return checkStartIndex && checkEndIndex && checkNextItemOfOperator;
     }
 
-    areIndexesUnderScope(scopeElement, draggableElement, mode){
+    areIndexesUnderScope(scopeElement, draggableElement, mode, isSelectedAll = false){
         if(!scopeElement || !draggableElement){
             return false;
         }
         const isDraggableItemOperator = draggableElement instanceof COperatorItem;
         if(isDraggableItemOperator){
-            return this.areIndexesUnderScopeForOperator(scopeElement, draggableElement);
+            return this.areIndexesUnderScopeForOperator(scopeElement, draggableElement, isSelectedAll);
         } else{
-            return this.areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode);
+            return this.areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode, isSelectedAll);
         }
     }
 
@@ -488,7 +530,48 @@ export default class CConnectorItem{
         }
     }
 
-    getOperatorChildren(operator){
+    getNextSiblings(item){
+        let result = [];
+        if(item){
+            let itemIndex = item.index;
+            let indexes = itemIndex.split('_');
+            indexes.pop();
+            let rootIndex = indexes.join('_');
+            this._methods.forEach((method) => {
+                let index = method.index;
+                if(index.indexOf(`${rootIndex}_`) === 0 && index > itemIndex && itemIndex.split('_').length === index.split('_').length){
+                    result.push(method);
+                }
+            })
+            this._operators.forEach((operator) => {
+                let index = operator.index;
+                if(index.indexOf(`${rootIndex}_`) === 0 && index > itemIndex && itemIndex.split('_').length === index.split('_').length){
+                    result.push(operator);
+                }
+            })
+            result = sortByIndex(result);
+        }
+        return result;
+    }
+
+    getAllNextItems(item){
+        let result = {methods: [], operators: []};
+        if(item) {
+            for (let i = 0; i < this._methods.length; i++) {
+                if(this._methods[i].isAfter(item)){
+                    result.methods.push(this._methods[i]);
+                }
+            }
+            for (let i = 0; i < this._operators.length; i++) {
+                if(this._operators[i].isAfter(item)){
+                    result.operators.push(this._operators[i]);
+                }
+            }
+        }
+        return result;
+    }
+
+    getOperatorChildren(operator, onlyMethods = false){
         const children = [];
         if(operator){
             let operatorIndex = operator.index;
@@ -497,9 +580,11 @@ export default class CConnectorItem{
                     children.push(this._methods[i]);
                 }
             }
-            for(let i = 0; i < this._operators.length; i++){
-                if(this._operators[i].index.indexOf(operatorIndex) === 0 && this._operators[i].index !== operatorIndex){
-                    children.push(this._operators[i]);
+            if(!onlyMethods) {
+                for (let i = 0; i < this._operators.length; i++) {
+                    if (this._operators[i].index.indexOf(operatorIndex) === 0 && this._operators[i].index !== operatorIndex) {
+                        children.push(this._operators[i]);
+                    }
                 }
             }
         }
@@ -509,32 +594,34 @@ export default class CConnectorItem{
     updateIndexesForOperator(operator, newParentIndex, connection, shouldDelete){
         if(isString(newParentIndex)){
             let operatorIndex = operator.index;
-            for(let i = 0; i < this._methods.length; i++){
-                if(this._methods[i].index.indexOf(operatorIndex) === 0 && this._methods[i].index !== operatorIndex){
-                    let index = `${newParentIndex}${this._methods[i].index.substring(operatorIndex.length)}`;
+            const methods = [...this._methods];
+            for(let i = 0; i < methods.length; i++){
+                if(methods[i].index.indexOf(operatorIndex) === 0 && methods[i].index !== operatorIndex){
+                    let index = `${newParentIndex}${methods[i].index.substring(operatorIndex.length)}`;
                     if(shouldDelete) {
-                        this._methods[i].index = index;
+                        methods[i].index = index;
                     } else {
                         let mode = index.substring(index.length - 2) === '_0' ? INSIDE_ITEM : OUTSIDE_ITEM;
                         if(this.getConnectorType() === CONNECTOR_FROM){
-                            connection.addFromConnectorMethod({...this._methods[i].getObject(), index, color: ''}, mode);
+                            connection.addFromConnectorMethod({...methods[i].getObject(), index, color: ''}, mode);
                         } else {
-                            connection.addToConnectorMethod({...this._methods[i].getObject(), index, color: ''}, mode);
+                            connection.addToConnectorMethod({...methods[i].getObject(), index, color: ''}, mode);
                         }
                     }
                 }
             }
-            for(let i = 0; i < this._operators.length; i++){
-                if(this._operators[i].index.indexOf(operatorIndex) === 0 && this._operators[i].index !== operatorIndex){
-                    let index = `${newParentIndex}${this._operators[i].index.substring(operatorIndex.length)}`;
+            const operators = [...this._operators];
+            for(let i = 0; i < operators.length; i++){
+                if(operators[i].index.indexOf(operatorIndex) === 0 && operators[i].index !== operatorIndex){
+                    let index = `${newParentIndex}${operators[i].index.substring(operatorIndex.length)}`;
                     if(shouldDelete) {
-                        this._operators[i].index = index;
+                        operators[i].index = index;
                     } else {
                         let mode = index.substring(index.length - 2) === '_0' ? INSIDE_ITEM : OUTSIDE_ITEM;
                         if(this.getConnectorType() === CONNECTOR_FROM){
-                            connection.addFromConnectorOperator({...this._operators[i].getObject(), index, color: ''}, mode);
+                            connection.addFromConnectorOperator({...operators[i].getObject(), index, color: ''}, mode);
                         } else {
-                            connection.addToConnectorMethod({...this._operators[i].getObject(), index, color: ''}, mode);
+                            connection.addToConnectorOperator({...operators[i].getObject(), index, color: ''}, mode);
                         }
                     }
                 }
@@ -1121,6 +1208,7 @@ export default class CConnectorItem{
         this.setCurrentItem(newItem);
         this.reloadPagination({newItem});
         this.setSvgItems();
+        return newItem;
     }
 
     // max can be 18 depth of loop operators
@@ -1186,7 +1274,7 @@ export default class CConnectorItem{
     }*/
 
     addMethod(method, mode = OUTSIDE_ITEM){
-        this.addItem(METHOD_ITEM, method, mode);
+        return this.addItem(METHOD_ITEM, method, mode);
     }
 
     getNextInsideItemForOperator(operator){
@@ -1325,7 +1413,6 @@ export default class CConnectorItem{
         return !isExistNextIndexInMethods;
     }
 
-
     removeMethod(method, withRefactorIndexes = true){
         let methodIndex = method.index;
         let key = this._methods.findIndex(m => m.index === methodIndex);
@@ -1346,7 +1433,7 @@ export default class CConnectorItem{
     }
 
     addOperator(operator, mode = OUTSIDE_ITEM){
-        this.addItem(OPERATOR_ITEM, operator, mode);
+        return this.addItem(OPERATOR_ITEM, operator, mode);
     }
 
     removeOperator(operator, withRefactorIndexes = true, isParent = false){

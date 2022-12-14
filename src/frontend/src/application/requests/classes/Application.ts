@@ -15,7 +15,7 @@
 
 import {AxiosResponse} from "axios";
 import Request from "@entity/application/requests/classes/Request";
-import {errorTicketUrl, tmpServerOpenCeliumUrl} from "@entity/application/requests/classes/url";
+import {errorTicketUrl} from "@entity/application/requests/classes/url";
 import {IRequestSettings} from "../interfaces/IRequest";
 import {
     ResourcesProps,
