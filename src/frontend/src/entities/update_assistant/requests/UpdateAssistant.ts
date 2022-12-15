@@ -37,13 +37,13 @@ export class UpdateAssistantRequest extends Request implements IUpdateAssistantR
             headers: {
                 'x-access-token': 'qpoeqavncbms09248527qrkazmvbgw9328uq0akzvzncbjgwh3pw09r0iavlhgwe98y349t8ghergiueh49230ur29ut3hg9',
                 'x-sp-timestamp': currentDate,
-                'x-sp-signature': generateSignature('tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv', 'GET', `/${endpoint}`, currentDate)
+                'x-sp-signature': generateSignature('tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv', 'GET', `/api/${endpoint}`, currentDate)
             }
         });
     }
 
     async getOnlineUpdates(): Promise<AxiosResponse<OnlineUpdateProps[]>>{
-        this.endpoint = '/online/versions';
+        this.endpoint = '/online/version';
         return super.get<OnlineUpdateProps[]>();
     }
 
@@ -53,12 +53,12 @@ export class UpdateAssistantRequest extends Request implements IUpdateAssistantR
     }
 
     async uploadApplicationFile(application: FormData): Promise<AxiosResponse<IResponse>>{
-        this.url = 'storage/assistant/zipfile';
+        this.url = '/assistant/zipfile';
         return super.post<IResponse>(application);
     }
 
     async deleteApplicationFile(): Promise<AxiosResponse<IResponse>>{
-        this.url = 'storage/assistant/zipfile';
+        this.url = '/assistant/zipfile';
         return super.delete<IResponse>();
     }
 
