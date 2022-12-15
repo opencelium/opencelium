@@ -16,10 +16,11 @@
 import ActionCreators from "../../redux_toolkit/action_creators";
 import {getAndUpdateConnection} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 
-const {addConnection, updateConnection, deleteConnectionById, deleteConnectionsById, getConnectionById, getAllMetaConnections, getAllConnections, checkConnectionTitle, graphQLLogin} = ActionCreators;
+const {testConnection, addConnection, updateConnection, deleteConnectionById, deleteConnectionsById, getConnectionById, getAllMetaConnections, getAllConnections, checkConnectionTitle, graphQLLogin} = ActionCreators;
 
 export default {
     fulfilled: {
+        [testConnection.fulfilled.type]: "Test run was successfully triggered",
         [addConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully added",
         [updateConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully updated",
         [getAndUpdateConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully updated",
@@ -27,6 +28,9 @@ export default {
         [deleteConnectionsById.fulfilled.type]: "The selected connections were successfully removed",
     },
     rejected: {
+        [testConnection.rejected.type]: {
+            "__DEFAULT__": "There is an error in during the test of the connection"
+        },
         [checkConnectionTitle.rejected.type]: {
             "__DEFAULT__": "There is an error in checking uniqueness of the title."
         },

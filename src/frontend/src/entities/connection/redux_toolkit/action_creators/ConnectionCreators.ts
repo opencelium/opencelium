@@ -18,6 +18,36 @@ import {errorHandler, sortByIndex} from "@application/utils/utils";
 import {ConnectionRequest} from "../../requests/classes/Connection";
 import { IConnection } from "../../interfaces/IConnection";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
+import {ScheduleRequest} from "@entity/schedule/requests/classes/Schedule";
+import ModelWebhook from "@entity/schedule/requests/models/Webhook";
+
+
+export const testConnection = createAsyncThunk(
+    'connection/test',
+    async(connection: IConnection, thunkAPI) => {
+        try {
+            const now = new Date();
+            const date = new Date(now.getTime() + 10000);
+            const schedule = {
+                cronExp: `0 0 0 1 JAN ? 2100`,
+                debugMode: false,
+                status: 1,
+                title: `test_schedule_${+ date}_${connection.title}`,
+                connectionId: connection?.id || connection.connectionId,
+            }
+            const addScheduleRequest = new ScheduleRequest();
+            const addScheduleResponse = await addScheduleRequest.addSchedule(schedule);
+            const addedSchedule = addScheduleResponse.data;
+            const executeScheduleRequest = new ScheduleRequest({endpoint: `/execute/${addedSchedule.schedulerId}`});
+            await executeScheduleRequest.startSchedule();
+            const deleteScheduleRequest = new ScheduleRequest({endpoint: `/${addedSchedule.schedulerId}`});
+            await deleteScheduleRequest.deleteScheduleById();
+            return {};
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 
 export const checkConnectionTitle = createAsyncThunk(
     'connection/exist/title',
@@ -164,6 +194,7 @@ export const deleteConnectionsById = createAsyncThunk(
 )
 
 export default {
+    testConnection,
     checkConnectionTitle,
     addConnection,
     getAndUpdateConnection,

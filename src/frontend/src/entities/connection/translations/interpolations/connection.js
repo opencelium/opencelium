@@ -20,7 +20,7 @@ import {InterpolateTranslation} from "@app_component/base/interpolate_translatio
 import {
     addConnection,
     deleteConnectionById,
-    getAndUpdateConnection,
+    getAndUpdateConnection, testConnection,
     updateConnection
 } from "../../redux_toolkit/action_creators/ConnectionCreators";
 
