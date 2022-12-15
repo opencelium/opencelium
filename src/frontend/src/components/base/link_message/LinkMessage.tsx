@@ -15,7 +15,7 @@
 
 import React, {FC} from 'react';
 import {withTheme} from 'styled-components';
-import { setSearchValue } from '@application/redux_toolkit/slices/ApplicationSlice';
+import {setSearchFields } from '@application/redux_toolkit/slices/ApplicationSlice';
 import { LinkMessageProps } from './interfaces';
 import { LinkMessageStyled } from './styles';
 
@@ -26,13 +26,14 @@ const LinkMessage: FC<LinkMessageProps> =
         shouldSetSearchValue,
         dispatch,
         navigate,
+        collectionName,
     }) => {
     const notClickable = link === '';
     let onClick = () => {};
     if(!notClickable){
         onClick = () => {
-            if(shouldSetSearchValue && dispatch){
-               dispatch(setSearchValue(message));
+            if(shouldSetSearchValue && dispatch && collectionName){
+                dispatch(setSearchFields({[collectionName]: message}));
             }
             if(navigate){
                 navigate(link, { replace: false });

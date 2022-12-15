@@ -28,6 +28,7 @@ interface LinkMessageProps{
     shouldSetSearchValue?: boolean,
     dispatch?: AppDispatch,
     navigate?: NavigateFunction,
+    collectionName?: string,
 }
 
 export {

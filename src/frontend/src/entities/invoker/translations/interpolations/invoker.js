@@ -18,36 +18,41 @@ import {getActionWithoutType} from "@application/utils/utils";
 import {InterpolateTranslation} from "@app_component/base/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@app_component/base/link_message/LinkMessage";
 import {addInvoker, deleteInvokerByName, importInvoker, updateInvoker} from "../../redux_toolkit/action_creators/InvokerCreators";
+import Invokers from "@entity/invoker/collections/Invokers";
 
 const IMPORT_INVOKER = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const invokers = new Invokers([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${importInvoker[responseType].type}`}>
-            The invoker <LinkMessage dispatch={dispatch} navigate={navigate} link={'invokers'} message={name}/> was successfully imported.
+            The invoker <LinkMessage collectionName={invokers.name} dispatch={dispatch} navigate={navigate} link={'invokers'} message={name}/> was successfully imported.
         </InterpolateTranslation>
     );
 }
 const ADD_INVOKER = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const invokers = new Invokers([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${addInvoker[responseType].type}`}>
-            The invoker <LinkMessage dispatch={dispatch} navigate={navigate} link={'invokers'} message={name}/> was successfully added.
+            The invoker <LinkMessage collectionName={invokers.name} dispatch={dispatch} navigate={navigate} link={'invokers'} message={name}/> was successfully added.
         </InterpolateTranslation>
     );
 }
 const UPDATE_INVOKER = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const invokers = new Invokers([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${updateInvoker[responseType].type}`}>
-            The invoker <LinkMessage dispatch={dispatch} navigate={navigate} link={'invokers'} message={name}/> was successfully updated.
+            The invoker <LinkMessage collectionName={invokers.name} dispatch={dispatch} navigate={navigate} link={'invokers'} message={name}/> was successfully updated.
         </InterpolateTranslation>
     );
 }
 const DELETE_INVOKER = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const invokers = new Invokers([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${deleteInvokerByName[responseType].type}`}>
-            The invoker <LinkMessage dispatch={dispatch} navigate={navigate} message={name}/> was successfully removed.
+            The invoker <LinkMessage collectionName={invokers.name} dispatch={dispatch} navigate={navigate} message={name}/> was successfully removed.
         </InterpolateTranslation>
     );
 }

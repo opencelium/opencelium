@@ -25,49 +25,56 @@ import {
     switchScheduleStatus,
     updateSchedule
 } from "../../redux_toolkit/action_creators/ScheduleCreators";
+import Schedules from "@entity/schedule/collections/Schedules";
 
 const ADD_SCHEDULE = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const schedules = new Schedules([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${addSchedule[responseType].type}`}>
-            The schedule <LinkMessage dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully added.
+            The schedule <LinkMessage collectionName={schedules.name} dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully added.
         </InterpolateTranslation>
     );
 }
 const ADD_SCHEDULE_NOTIFICATION = (responseType, dispatch, navigate, params) => {
     const {name, scheduleTitle} = params;
+    const schedules = new Schedules([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${addNotification[responseType].type}`}>
-            The notification <LinkMessage dispatch={dispatch} navigate={navigate} message={name}/> of schedule <LinkMessage dispatch={dispatch} navigate={navigate} link={'schedules'} message={scheduleTitle}/> was successfully added.
+            The notification <LinkMessage dispatch={dispatch} navigate={navigate} message={name}/> of schedule <LinkMessage collectionName={schedules.name} dispatch={dispatch} navigate={navigate} link={'schedules'} message={scheduleTitle}/> was successfully added.
         </InterpolateTranslation>
     );
 }
 const UPDATE_SCHEDULE = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const schedules = new Schedules([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${updateSchedule[responseType].type}`}>
-            The schedule <LinkMessage dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully updated.
+            The schedule <LinkMessage collectionName={schedules.name} dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully updated.
         </InterpolateTranslation>
     );
 }
 const UPDATE_SCHEDULE_NOTIFICATION = (responseType, dispatch, navigate, params) => {
     const {name, scheduleTitle} = params;
+    const schedules = new Schedules([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${updateNotification[responseType].type}`}>
-            The notification <LinkMessage dispatch={dispatch} navigate={navigate} message={name}/> of schedule <LinkMessage dispatch={dispatch} navigate={navigate} link={'schedules'} message={scheduleTitle}/> was successfully updated.
+            The notification <LinkMessage dispatch={dispatch} navigate={navigate} message={name}/> of schedule <LinkMessage collectionName={schedules.name} dispatch={dispatch} navigate={navigate} link={'schedules'} message={scheduleTitle}/> was successfully updated.
         </InterpolateTranslation>
     );
 }
 const SWITCH_SCHEDULE_STATUS = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const schedules = new Schedules([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${switchScheduleStatus[responseType].type}`}>
-            The status of schedule <LinkMessage dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully updated.
+            The status of schedule <LinkMessage collectionName={schedules.name} dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully updated.
         </InterpolateTranslation>
     );
 }
 const START_SCHEDULE = (responseType, dispatch, navigate, params) => {
     const title = params ? params.title : '';
+    const schedules = new Schedules([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${startSchedule[responseType].type}`}>
             The schedule <LinkMessage dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully triggered.
@@ -76,6 +83,7 @@ const START_SCHEDULE = (responseType, dispatch, navigate, params) => {
 }
 const DELETE_SCHEDULE = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const schedules = new Schedules([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${deleteScheduleById[responseType].type}`}>
             The schedule <LinkMessage dispatch={dispatch} navigate={navigate} message={title}/> was successfully removed.
@@ -84,6 +92,7 @@ const DELETE_SCHEDULE = (responseType, dispatch, navigate, params) => {
 }
 const DELETE_SCHEDULE_NOTIFICATION = (responseType, dispatch, navigate, params) => {
     const {name, scheduleTitle} = params;
+    const schedules = new Schedules([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${deleteNotificationById[responseType].type}`}>
             The notification <LinkMessage dispatch={dispatch} navigate={navigate} message={name}/> of schedule <LinkMessage dispatch={dispatch} navigate={navigate} link={'schedules'} message={scheduleTitle}/> was successfully removed.

@@ -30,6 +30,7 @@ import Gravatar from "react-gravatar";
 
 
 export default class Users extends ListCollection<UserProps>{
+    name: string = 'users';
     entities: IUser[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Users'}];
     keyPropName: UserProps = 'id';

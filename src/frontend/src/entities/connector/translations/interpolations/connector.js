@@ -18,37 +18,42 @@ import {getActionWithoutType} from "@application/utils/utils";
 import {InterpolateTranslation} from "@app_component/base/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@app_component/base/link_message/LinkMessage";
 import {addConnector, deleteConnectorById, updateConnector, uploadConnectorImage} from "../../redux_toolkit/action_creators/ConnectorCreators";
+import Connectors from "@entity/connector/collections/Connectors";
 
 
 const ADD_CONNECTOR = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const connectors = new Connectors([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${addConnector[responseType].type}`}>
-            The connector <LinkMessage dispatch={dispatch} navigate={navigate} link={'connectors'} message={title}/> was successfully added.
+            The connector <LinkMessage collectionName={connectors.name} dispatch={dispatch} navigate={navigate} link={'connectors'} message={title}/> was successfully added.
         </InterpolateTranslation>
     );
 }
 const ADD_CONNECTORICON = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const connectors = new Connectors([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${uploadConnectorImage[responseType].type}`}>
-            The icon of the connector <LinkMessage dispatch={dispatch} navigate={navigate} link={'connectors'} message={title}/> was successfully uploaded.
+            The icon of the connector <LinkMessage collectionName={connectors.name} dispatch={dispatch} navigate={navigate} link={'connectors'} message={title}/> was successfully uploaded.
         </InterpolateTranslation>
     );
 }
 const UPDATE_CONNECTOR = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const connectors = new Connectors([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${updateConnector[responseType].type}`}>
-            The connector <LinkMessage dispatch={dispatch} navigate={navigate} link={'connectors'} message={title}/> was successfully updated.
+            The connector <LinkMessage collectionName={connectors.name} dispatch={dispatch} navigate={navigate} link={'connectors'} message={title}/> was successfully updated.
         </InterpolateTranslation>
     );
 }
 const DELETE_CONNECTOR = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const connectors = new Connectors([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${deleteConnectorById[responseType].type}`}>
-            The connector <LinkMessage dispatch={dispatch} navigate={navigate} message={title}/> was successfully removed.
+            The connector <LinkMessage collectionName={connectors.name} dispatch={dispatch} navigate={navigate} message={title}/> was successfully removed.
         </InterpolateTranslation>
     );
 }

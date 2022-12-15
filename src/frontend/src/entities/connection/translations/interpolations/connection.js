@@ -23,36 +23,41 @@ import {
     getAndUpdateConnection, testConnection,
     updateConnection
 } from "../../redux_toolkit/action_creators/ConnectionCreators";
+import Connections from "@root/collections/Connections";
 
 const ADD_CONNECTION = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const connections = new Connections([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${addConnection[responseType].type}`}>
-            The connection <LinkMessage dispatch={dispatch} navigate={navigate} link={'connections'} message={title}/> was successfully added.
+            The connection <LinkMessage collectionName={connections.name} dispatch={dispatch} navigate={navigate} link={'connections'} message={title}/> was successfully added.
         </InterpolateTranslation>
     );
 }
 const UPDATE_CONNECTION = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const connections = new Connections([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${updateConnection[responseType].type}`}>
-            The connection <LinkMessage dispatch={dispatch} navigate={navigate} link={'connections'} message={title}/> was successfully updated.
+            The connection <LinkMessage collectionName={connections.name} dispatch={dispatch} navigate={navigate} link={'connections'} message={title}/> was successfully updated.
         </InterpolateTranslation>
     );
 }
 const GET_AND_UPDATE_CONNECTION = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const connections = new Connections([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${getAndUpdateConnection[responseType].type}`}>
-            The connection <LinkMessage dispatch={dispatch} navigate={navigate} link={'connections'} message={title}/> was successfully updated.
+            The connection <LinkMessage collectionName={connections.name} dispatch={dispatch} navigate={navigate} link={'connections'} message={title}/> was successfully updated.
         </InterpolateTranslation>
     );
 }
 const DELETE_CONNECTION = (responseType, dispatch, navigate, params) => {
     const {title} = params;
+    const connections = new Connections([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${deleteConnectionById[responseType].type}`}>
-            The connection <LinkMessage dispatch={dispatch} navigate={navigate} message={title}/> was successfully removed.
+            The connection <LinkMessage collectionName={connections.name} dispatch={dispatch} navigate={navigate} message={title}/> was successfully removed.
         </InterpolateTranslation>
     );
 }

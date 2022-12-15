@@ -32,6 +32,7 @@ import {TemplatePermissions} from "../constants";
 import ImportTemplateButton from "../components/import_template_button/ImportTemplateButton";
 
 class Templates extends ListCollection<TemplateProps>{
+    name: string = 'templates';
     entities: ITemplate[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Templates'}];
     keyPropName: TemplateProps ='id';

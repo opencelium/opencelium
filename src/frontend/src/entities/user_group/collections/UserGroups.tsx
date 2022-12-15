@@ -29,6 +29,7 @@ import {deleteUserGroupsById} from "../redux_toolkit/action_creators/UserGroupCr
 import { UserGroupPermissions } from "../constants";
 
 class UserGroups extends ListCollection<UserGroupProps>{
+    name: string = 'userGroups';
     entities: IUserGroup[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'User Groups'}];
     keyPropName: UserGroupProps ='id';

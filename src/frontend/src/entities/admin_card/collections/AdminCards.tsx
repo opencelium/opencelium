@@ -24,6 +24,7 @@ import {AdminCardProps, IAdminCard} from "../interfaces/IAdminCard";
 import {AdminCard} from "../classes/AdminCard";
 
 class AdminCards extends ListCollection<AdminCardProps>{
+    name: string = 'adminCards';
     entities: IAdminCard[];
     title = 'Admin Panel';
     keyPropName: AdminCardProps ='id';

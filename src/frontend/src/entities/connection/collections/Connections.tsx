@@ -33,6 +33,7 @@ import {ConnectionPermissions} from "../constants";
 import InlineEditInput from "@app_component/collection/collection_view/InlineEditInput";
 
 class Connections extends ListCollection<ConnectionProps>{
+    name: string = 'connections';
     entities: IConnection[];
     title = 'Connections';
     keyPropName: ConnectionProps ='id';
@@ -99,7 +100,7 @@ class Connections extends ListCollection<ConnectionProps>{
     deletingEntitiesState: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
     updatingConnection: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
 
-    constructor(connections: any[], dispatch: AppDispatch, deletingEntitiesState: API_REQUEST_STATE, updatingConnection: API_REQUEST_STATE) {
+    constructor(connections: any[], dispatch: AppDispatch, deletingEntitiesState?: API_REQUEST_STATE, updatingConnection?: API_REQUEST_STATE) {
         super();
         let connectionInstances = [];
         if(connections) {

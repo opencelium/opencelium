@@ -18,29 +18,33 @@ import {getActionWithoutType} from "@application/utils/utils";
 import {InterpolateTranslation} from "@app_component/base/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@app_component/base/link_message/LinkMessage";
 import {addUser, updateUser, deleteUserById} from "../../redux-toolkit/action_creators/UserCreators";
+import Users from "@entity/user/collections/Users";
 
 const ADD_USER = (responseType, dispatch, navigate, params) => {
     const {email} = params;
+    const users = new Users([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${addUser[responseType].type}`}>
-            The user <LinkMessage dispatch={dispatch} navigate={navigate} link={'users'} message={email}/> was successfully added.
+            The user <LinkMessage collectionName={users.name} dispatch={dispatch} navigate={navigate} link={'users'} message={email}/> was successfully added.
         </InterpolateTranslation>
     );
 }
 const UPDATE_USER = (responseType, dispatch, navigate, params) => {
     const {email} = params;
+    const users = new Users([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${updateUser[responseType].type}`}>
-            The user <LinkMessage dispatch={dispatch} navigate={navigate} link={'users'} message={email}/> was successfully updated.
+            The user <LinkMessage collectionName={users.name} dispatch={dispatch} navigate={navigate} link={'users'} message={email}/> was successfully updated.
         </InterpolateTranslation>
     );
 }
 
 const DELETE_USER = (responseType, dispatch, navigate, params) => {
     const {email} = params;
+    const users = new Users([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${deleteUserById[responseType].type}`}>
-            The user <LinkMessage dispatch={dispatch} navigate={navigate} message={email}/> was successfully removed.
+            The user <LinkMessage collectionName={users.name} dispatch={dispatch} navigate={navigate} message={email}/> was successfully removed.
         </InterpolateTranslation>
     );
 }

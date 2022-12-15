@@ -50,6 +50,7 @@ import {updateConnector} from "@entity/connector/redux_toolkit/action_creators/C
 import {InlineEditInput} from "@app_component/collection/collection_view/InlineEditInput";
 
 class Schedules extends ListCollection<ScheduleProps>{
+    name: string = 'schedules';
     hasElasticSearch: boolean = false;
     entities: ISchedule[];
     title = 'Schedules';

@@ -18,28 +18,32 @@ import {getActionWithoutType} from "@application/utils/utils";
 import {InterpolateTranslation} from "@app_component/base/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@app_component/base/link_message/LinkMessage";
 import {addUserGroup, deleteUserGroupById, updateUserGroup} from "../../redux_toolkit/action_creators/UserGroupCreators";
+import UserGroups from "@entity/user_group/collections/UserGroups";
 
 const ADD_USER_GROUP = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const userGroups = new UserGroups([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${addUserGroup[responseType].type}`}>
-            The user group <LinkMessage dispatch={dispatch} navigate={navigate} link={'usergroups'} message={name}/> was successfully added.
+            The user group <LinkMessage collectionName={userGroups.name} dispatch={dispatch} navigate={navigate} link={'usergroups'} message={name}/> was successfully added.
         </InterpolateTranslation>
     );
 }
 const UPDATE_USER_GROUP = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const userGroups = new UserGroups([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${updateUserGroup[responseType].type}`}>
-            The user group <LinkMessage dispatch={dispatch} navigate={navigate} link={'usergroups'} message={name}/> was successfully updated.
+            The user group <LinkMessage collectionName={userGroups.name} dispatch={dispatch} navigate={navigate} link={'usergroups'} message={name}/> was successfully updated.
         </InterpolateTranslation>
     );
 }
 const DELETE_USER_GROUP = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const userGroups = new UserGroups([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${deleteUserGroupById[responseType].type}`}>
-            The user group <LinkMessage dispatch={dispatch} navigate={navigate} message={name}/> was successfully deleted.
+            The user group <LinkMessage collectionName={userGroups.name} dispatch={dispatch} navigate={navigate} message={name}/> was successfully deleted.
         </InterpolateTranslation>
     );
 }
