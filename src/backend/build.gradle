@@ -21,8 +21,8 @@ plugins {
 }
 
 group = 'com.becon'
-version = '2.4.0-SNAPSHOT'
-sourceCompatibility = '1.8'
+version = '3.0'
+sourceCompatibility = '17'
 
 repositories {
 	mavenCentral()
@@ -45,6 +45,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 	implementation 'org.mariadb.jdbc:mariadb-java-client:2.5.3'
 	implementation 'org.liquibase:liquibase-core'
+	implementation 'org.openjdk.nashorn:nashorn-core:15.4'
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'com.jayway.jsonpath:json-path:2.4.0'
 	implementation 'org.eclipse.jgit:org.eclipse.jgit:5.11.0.202103091610-r'
