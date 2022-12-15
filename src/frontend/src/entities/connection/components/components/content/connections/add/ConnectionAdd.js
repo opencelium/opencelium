@@ -17,7 +17,12 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
-import {addConnection, checkConnectionTitle} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
+import {
+    addConnection,
+    checkConnectionTitle,
+    updateConnection,
+    testConnection,
+} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {addTemplate, getTemplatesByConnectors as fetchTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {permission} from "@entity/application/utils/permission";
@@ -33,7 +38,10 @@ function mapStateToProps(state){
     const connector = state.connectorReducer;
     return{
         authUser,
+        connection: connection.currentConnection,
         addingConnection: connection.addingConnection,
+        testingConnection: connection.testingConnection,
+        updatingConnection: connection.updatingConnection,
         error: connection.error,
         savingTemplate: template.addingTemplate,
         connectors: connector.connectors.map(connector => {return {...connector, id: connector.connectorId}}),
@@ -49,7 +57,7 @@ function mapStateToProps(state){
 /**
  * Component to Add Connection
  */
-@connect(mapStateToProps, {addConnection, addTemplate, fetchConnectors, checkConnectionTitle, fetchTemplates})
+@connect(mapStateToProps, {updateConnection, addConnection, addTemplate, fetchConnectors, checkConnectionTitle, fetchTemplates, testConnection})
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @ConnectionForm('add')

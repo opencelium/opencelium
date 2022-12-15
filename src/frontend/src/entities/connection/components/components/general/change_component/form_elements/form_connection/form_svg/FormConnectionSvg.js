@@ -80,6 +80,14 @@ class FormConnectionSvg extends Component{
         setConnectionData({connection: connectionData});
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const {entity, setConnectionData} = this.props;
+        if(prevProps.entity.id !== this.props.entity.id){
+            let connectionData = entity instanceof CConnection ? entity.getObjectForConnectionOverview() : entity;
+            setConnectionData({connection: connectionData});
+        }
+    }
+
     componentWillUnmount() {
         const {setCurrentTechnicalItem, currentTechnicalItem} = this.props;
         if(currentTechnicalItem !== null) setCurrentTechnicalItem(null);

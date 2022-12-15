@@ -35,7 +35,7 @@ class TooltipFontIcon extends Component{
         let {tooltip, tooltipPosition, wrapClassName, wrapStyles, ...props} = this.props;
         let fontSize = this.props.size ? isNumber(this.props.size) ? `${this.props.size}px` : this.props.size : '24px';
         return (
-            <Tooltip target={this.icon} tooltip={tooltip} position={'auto'} component={
+            <Tooltip target={this.icon} tooltip={tooltip} position={tooltipPosition || 'auto'} component={
                 <span className={`${wrapClassName} ${styles.tooltip_elem}`} style={{fontSize, ...wrapStyles}}>
                     <FontIcon myRef={this.icon} {...props}/>
                 </span>

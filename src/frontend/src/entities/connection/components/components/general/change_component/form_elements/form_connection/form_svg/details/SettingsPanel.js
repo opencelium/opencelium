@@ -18,18 +18,42 @@ import TooltipFontIcon from "@entity/connection/components/components/general/ba
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import {findTopLeft} from "@application/utils/utils";
 import {connect} from "react-redux";
+import {
+    testConnection,
+} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {setFullScreen as setFullScreenFormSection} from "@application/redux_toolkit/slices/ApplicationSlice";
 import ConfigurationsIcon
     from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/ConfigurationsIcon";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import Confirmation from "@components/general/app/Confirmation";
 
 
-@connect(null, {setFullScreenFormSection})
+function mapStateToProps(state){
+    const connectionOverview = state.connectionReducer;
+    const {connection} = mapItemsToClasses(state);
+    return{
+        connection,
+        testingConnection: connectionOverview.testingConnection,
+        updatingConnection: connectionOverview.updatingConnection,
+        checkingConnectionTitle: connectionOverview.checkingConnectionTitle,
+    };
+}
+
+@connect(mapStateToProps, {setFullScreenFormSection, testConnection})
 class SettingsPanel extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
             isFullScreen: false,
+            showConfirmation: false,
         }
+    }
+
+    toggleConfirmation(){
+        this.setState({
+            showConfirmation: !this.state.showConfirmation,
+        })
     }
 
     toggleFullScreen(){
@@ -39,22 +63,59 @@ class SettingsPanel extends React.Component{
         this.props.setFullScreenFormSection(!this.state.isFullScreen)
     }
 
+    update(){
+        const {data, connection} = this.props;
+        data.justUpdate(connection);
+    }
+
+    test(){
+        const {data, connection} = this.props;
+        if(!connection.id){
+            this.toggleConfirmation();
+        } else{
+            data.testConnection(connection);
+        }
+    }
+
     render(){
-        const {isFullScreen} = this.state;
-        const {togglePanel, isHidden} = this.props;
+        const {isFullScreen, showConfirmation} = this.state;
+        const {togglePanel, isHidden, testingConnection, updatingConnection, checkingConnectionTitle, data, connection} = this.props;
         return(
             <div className={styles.details_settings_panel}>
+                <TooltipFontIcon size={20} tooltipPosition={'bottom'} isButton
+                                 className={styles.position_icon_left}
+                                 spinnerStyle={{width: '12px', height: '12px', verticalAlign: 'middle'}}
+                                 wrapStyles={{fontSize: '14px'}}
+                                 value={'terminal'}
+                                 tooltip={'Test'}
+                                 isLoading={testingConnection === API_REQUEST_STATE.START}
+                                 onClick={() => this.test()}/>
+                <TooltipFontIcon size={20} tooltipPosition={'bottom'} isButton
+                                 className={styles.position_icon_left}
+                                 spinnerStyle={{width: '12px', height: '12px', verticalAlign: 'middle'}}
+                                 wrapStyles={{fontSize: '14px'}}
+                                 value={'save'}
+                                 tooltip={'Save'}
+                                 isLoading={updatingConnection === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START}
+                                 onClick={() => this.update()}/>
+                <ConfigurationsIcon/>
                 <TooltipFontIcon size={20} tooltipPosition={'bottom'} isButton
                                  className={styles.position_icon_left}
                                  value={isFullScreen ? 'close_fullscreen' : 'open_in_full'}
                                  tooltip={isFullScreen ? 'Minimize' : 'Maximize'}
                                  onClick={() => this.toggleFullScreen()}/>
-                <ConfigurationsIcon/>
                 <TooltipFontIcon size={24} tooltipPosition={'bottom'} isButton
                                  className={styles.position_icon_left}
                                  value={isHidden ? 'chevron_left' : 'chevron_right'}
                                  tooltip={isHidden ? 'Show' : 'Hide'}
                                  onClick={() => togglePanel()}/>
+                <Confirmation
+                    okClick={() => {this.toggleConfirmation(); setTimeout(() => data.testConnection(connection), 200); }}
+                    cancelClick={() => this.toggleConfirmation()}
+                    active={showConfirmation}
+                    title={'Confirmation'}
+                    message={'Your connection will be saved before test. Are you agree with that?'}
+                />
             </div>
         );
     }
