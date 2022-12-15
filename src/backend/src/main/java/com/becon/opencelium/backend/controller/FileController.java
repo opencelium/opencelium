@@ -249,19 +249,15 @@ public class FileController {
                 while (zipEntry != null) {
                     System.out.println(zipEntry.getName());
                     zipEntry = zis.getNextEntry();
-                    files.add(zis);
+                    DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                    Document doc = dBuilder.parse(zis);
+                    doc.setDocumentURI(PathConstant.INVOKER + filename);
+                    Xml xml = new Xml(doc, filename);
+                    xml.save();
+                    invokerServiceImp.save(doc);
                 }
             } else {
                 files.add(file.getInputStream());
-            }
-
-            for (InputStream is : files) {
-                DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                Document doc = dBuilder.parse(is);
-                doc.setDocumentURI(PathConstant.INVOKER + filename);
-                Xml xml = new Xml(doc, filename);
-                xml.save();
-                invokerServiceImp.save(doc);
             }
         }
         catch (Exception e) {
