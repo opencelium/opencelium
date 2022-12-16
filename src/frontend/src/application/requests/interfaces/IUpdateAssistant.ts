@@ -24,6 +24,7 @@ export enum UpdateStatus{
 
 export interface OnlineUpdateProps{
     name: string,
+    version: string,
     status: UpdateStatus,
 }
 
@@ -41,7 +42,8 @@ export interface CheckForUpdateProps{
 
 export interface IUpdateAssistantRequest{
 
-    getUpdatesFromServicePortal(currentVersion: string): Promise<AxiosResponse<OnlineUpdateProps[]>>,
+    //to upload online version by version
+    uploadOnlineVersion(): Promise<AxiosResponse<IResponse>>,
 
     //to get git versions of application based on tags
     getOnlineUpdates(): Promise<AxiosResponse<OnlineUpdateProps[]>>,

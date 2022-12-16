@@ -28,22 +28,12 @@ export class UpdateAssistantRequest extends Request implements IUpdateAssistantR
         super({url: 'assistant/oc', ...settings});
     }
 
-    async getUpdatesFromServicePortal(currentVersion: string): Promise<AxiosResponse<OnlineUpdateProps[]>>{
-        this.isFullUrl = true;
-        const currentDate = `${+ new Date()}`;
-        const endpoint = `p984zhugh3443g8-438ghi4uh34g83-03ugoigh498t53y-483hy4pgh438ty3948gh34p8g-34ug394gheklrghdgopwuew09327-89f/${currentVersion}`;
-        this.url = `${onlineApiServerOpenCeliumUrl}${endpoint}`;
-        return super.get<OnlineUpdateProps[]>({
-            headers: {
-                'x-access-token': 'qpoeqavncbms09248527qrkazmvbgw9328uq0akzvzncbjgwh3pw09r0iavlhgwe98y349t8ghergiueh49230ur29ut3hg9',
-                'x-sp-timestamp': currentDate,
-                'x-sp-signature': generateSignature('tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv', 'GET', `/api/${endpoint}`, currentDate)
-            }
-        });
+    async uploadOnlineVersion(): Promise<AxiosResponse<IResponse>>{
+        return super.get<IResponse>();
     }
 
     async getOnlineUpdates(): Promise<AxiosResponse<OnlineUpdateProps[]>>{
-        this.endpoint = '/online/version';
+        this.endpoint = '/online/version/all';
         return super.get<OnlineUpdateProps[]>();
     }
 

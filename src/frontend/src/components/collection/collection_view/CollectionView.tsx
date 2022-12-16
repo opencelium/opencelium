@@ -40,7 +40,7 @@ import Title from "../collection_title/Title";
 import {BadRequest} from "@app_component/default_pages/bad_request/BadRequest";
 import {debounce} from "@application/utils/utils";
 
-const LIST_VIEW_ENTITIES_NUMBER = 3;
+const LIST_VIEW_ENTITIES_NUMBER = 10;
 
 export enum ViewType{
     LIST= 'LIST',

@@ -23,9 +23,10 @@ import {
     deleteApplicationFile,
     checkForUpdates,
     getOfflineUpdates,
-    getUpdatesFromServicePortal,
     updateApplication,
-    uploadApplicationFile
+    uploadApplicationFile,
+    getOnlineUpdates,
+    uploadOnlineVersion
 } from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {
     CheckForUpdateProps,
@@ -34,7 +35,8 @@ import {
 } from "@application/requests/interfaces/IUpdateAssistant";
 
 export interface AuthState extends ICommonState{
-    gettingUpdatesFromServicePortal: API_REQUEST_STATE,
+    uploadingOnlineVersion: API_REQUEST_STATE,
+    gettingOnlineUpdates: API_REQUEST_STATE,
     gettingOfflineUpdates: API_REQUEST_STATE,
     uploadingApplicationFile: API_REQUEST_STATE,
     deletingApplicationFile: API_REQUEST_STATE,
@@ -49,7 +51,8 @@ export interface AuthState extends ICommonState{
 }
 
 const initialState: AuthState = {
-    gettingUpdatesFromServicePortal: API_REQUEST_STATE.INITIAL,
+    uploadingOnlineVersion: API_REQUEST_STATE.INITIAL,
+    gettingOnlineUpdates: API_REQUEST_STATE.INITIAL,
     gettingOfflineUpdates: API_REQUEST_STATE.INITIAL,
     uploadingApplicationFile: API_REQUEST_STATE.INITIAL,
     deletingApplicationFile: API_REQUEST_STATE.INITIAL,
@@ -70,6 +73,17 @@ export const updateAssistantSlice = createSlice({
     reducers: {
     },
     extraReducers: {
+        [uploadOnlineVersion.pending.type]: (state) => {
+            state.uploadingOnlineVersion = API_REQUEST_STATE.START;
+        },
+        [uploadOnlineVersion.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
+            state.uploadingOnlineVersion = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [uploadOnlineVersion.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.uploadingOnlineVersion = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
         [checkForUpdates.pending.type]: (state) => {
             state.gettingLastAvailableVersion = API_REQUEST_STATE.START;
         },
@@ -83,16 +97,16 @@ export const updateAssistantSlice = createSlice({
             state.gettingLastAvailableVersion = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
-        [getUpdatesFromServicePortal.pending.type]: (state) => {
-            state.gettingUpdatesFromServicePortal = API_REQUEST_STATE.START;
+        [getOnlineUpdates.pending.type]: (state) => {
+            state.gettingOnlineUpdates = API_REQUEST_STATE.START;
         },
-        [getUpdatesFromServicePortal.fulfilled.type]: (state, action: PayloadAction<OnlineUpdateProps[]>) => {
-            state.gettingUpdatesFromServicePortal = API_REQUEST_STATE.FINISH;
+        [getOnlineUpdates.fulfilled.type]: (state, action: PayloadAction<OnlineUpdateProps[]>) => {
+            state.gettingOnlineUpdates = API_REQUEST_STATE.FINISH;
             state.onlineUpdates = action.payload;
             state.error = null;
         },
-        [getUpdatesFromServicePortal.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.gettingUpdatesFromServicePortal = API_REQUEST_STATE.ERROR;
+        [getOnlineUpdates.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingOnlineUpdates = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [getOfflineUpdates.pending.type]: (state) => {

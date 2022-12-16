@@ -44,14 +44,26 @@ export const checkForUpdates = createAsyncThunk(
     }
 )
 
-export const getUpdatesFromServicePortal = createAsyncThunk(
+export const uploadOnlineVersion = createAsyncThunk(
+    'application/upload/online',
+    async(version: string, thunkAPI) => {
+        try {
+            const request = new UpdateAssistantRequest({endpoint: `/online/version/${version}`});
+            const response = await request.uploadOnlineVersion();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const getOnlineUpdates = createAsyncThunk(
     'application/get/online_updates',
     async(data: never, thunkAPI) => {
         try {
-            // @ts-ignore
-            const appVersion = thunkAPI.getState().applicationReducer.version;
+            return [{name: 'v2.7', version: '2.7', status: 'old'}, {name: 'v3.0', version: '3.0', status: 'current'}, {name: 'v3.1', version: '3.1', status: 'available'}];
             const request = new UpdateAssistantRequest();
-            const response = await request.getUpdatesFromServicePortal(appVersion);
+            const response = await request.getOnlineUpdates();
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -127,7 +139,8 @@ export const updateApplication = createAsyncThunk(
 )
 
 export default {
-    getUpdatesFromServicePortal,
+    uploadOnlineVersion,
+    getOnlineUpdates,
     getOfflineUpdates,
     uploadApplicationFile,
     deleteApplicationFile,
