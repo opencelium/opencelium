@@ -194,7 +194,7 @@ export default class CConnectorItem{
     getNearestLoopOperatorFromReference(reference){
         const iterators = ITERATOR_NAMES.join('|');
         const previousLoopOperators = this.getPreviousLoopOperators(this);
-        const loopIteratorExp =  new RegExp(`\\[(${iterators})\\]`,"g");
+        const loopIteratorExp = new RegExp(`\\[(${iterators})\\]`,"g");
         const nearestLoopIterator = reference
             .match(loopIteratorExp)?.map(iterator => iterator.substring(1, iterator.length - 1))
             .sort(function(a, b){
@@ -269,6 +269,16 @@ export default class CConnectorItem{
             references.push({element: this._operators[i].index, references: operatorReferences});
         }
         return references;
+    }
+
+    getNearestLoopOperatorByIterator(elementIndex, iterator){
+        let nearestOperator = null;
+        for(let i = 0; i < this._operators.length; i++){
+            if(this._operators[i].index < elementIndex && this._operators[i].iterator === iterator){
+                nearestOperator = this._operators[i];
+            }
+        }
+        return nearestOperator;
     }
 
     convertReferencesToIndexes(references){
@@ -454,8 +464,8 @@ export default class CConnectorItem{
         const subEndIndex = subArrayToString(endIndexSplit, '_', 0, endIndexSplit.length - 1);
         let subScopeStartIndex = subArrayToString(scopeElementIndexSplit, '_', 0, startIndexSplit.length - 1);
         const subScopeEndIndex = subArrayToString(scopeElementIndexSplit, '_', 0, endIndexSplit.length - 1);
-        const checkStartIndex = subStartIndex === subScopeStartIndex && startIndex <= scopeElement.index;
-        const checkEndIndex = (endIndex !== '' ? subEndIndex === subScopeEndIndex && endIndex > scopeElement.index : true);
+        const checkStartIndex = startIndex <= scopeElement.index;
+        const checkEndIndex = (endIndex !== '' ? endIndex > endIndexSplit : true);
         let checkNextItemOfOperator = true;
         if(draggableElement.index.split('_').length === scopeElementIndexSplit.length && mode === INSIDE_ITEM){
             let nextScopeElementIndex = `${scopeElement.index}_0`;
