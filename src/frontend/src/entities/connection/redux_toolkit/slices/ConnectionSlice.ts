@@ -22,7 +22,7 @@ import {LocalStorage} from "@application/classes/LocalStorage";
 import {
     addConnection, checkConnectionTitle, deleteConnectionById,
     deleteConnectionsById, getAllConnections, getAllMetaConnections, getAndUpdateConnection,
-    getConnectionById, updateConnection,
+    getConnectionById, testConnection, updateConnection,
 } from "../action_creators/ConnectionCreators";
 import {IConnection} from "../../interfaces/IConnection";
 import {PANEL_LOCATION} from "../../components/utils/constants/app";
@@ -38,6 +38,7 @@ export interface ConnectionState extends ICommonState{
     metaConnections: IConnection[],
     isCurrentConnectionHasUniqueTitle: TRIPLET_STATE,
     checkingConnectionTitle: API_REQUEST_STATE,
+    testingConnection: API_REQUEST_STATE,
     addingConnection: API_REQUEST_STATE,
     updatingConnection: API_REQUEST_STATE,
     gettingConnection: API_REQUEST_STATE,
@@ -68,6 +69,7 @@ let initialState: ConnectionState = {
     metaConnections: [],
     isCurrentConnectionHasUniqueTitle: TRIPLET_STATE.INITIAL,
     checkingConnectionTitle: API_REQUEST_STATE.INITIAL,
+    testingConnection: API_REQUEST_STATE.INITIAL,
     addingConnection: API_REQUEST_STATE.INITIAL,
     updatingConnection: API_REQUEST_STATE.INITIAL,
     gettingConnection: API_REQUEST_STATE.INITIAL,
@@ -128,6 +130,17 @@ export const connectionSlice = createSlice({
         },
     },
     extraReducers: {
+        [testConnection.pending.type]: (state) => {
+            state.testingConnection = API_REQUEST_STATE.START;
+        },
+        [testConnection.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
+            state.testingConnection = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [testConnection.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.testingConnection = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
         [checkConnectionTitle.pending.type]: (state) => {
             state.checkingConnectionTitle = API_REQUEST_STATE.START;
             state.isCurrentConnectionHasUniqueTitle = TRIPLET_STATE.INITIAL;
@@ -148,6 +161,7 @@ export const connectionSlice = createSlice({
             state.addingConnection = API_REQUEST_STATE.FINISH;
             state.connections.push(action.payload);
             state.metaConnections.push(action.payload);
+            state.currentConnection = action.payload;
             state.error = null;
         },
         [addConnection.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -184,6 +198,7 @@ export const connectionSlice = createSlice({
             state.error = action.payload;
         },
         [getConnectionById.pending.type]: (state) => {
+            state.currentConnection = null;
             state.gettingConnection = API_REQUEST_STATE.START;
         },
         [getConnectionById.fulfilled.type]: (state, action: PayloadAction<IConnection>) => {

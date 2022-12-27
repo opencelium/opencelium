@@ -18,20 +18,23 @@ import {getActionWithoutType} from "@application/utils/utils";
 import {InterpolateTranslation} from "@app_component/base/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@app_component/base/link_message/LinkMessage";
 import {deleteWebhook, getWebhook} from "../../redux_toolkit/action_creators/WebhookCreators";
+import Schedules from "@entity/schedule/collections/Schedules";
 
 const ADD_WEBHOOK = (responseType, dispatch, navigate, params) => {
     const title = params.schedule ? params.schedule.title : '';
+    const schedules = new Schedules([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${getWebhook[responseType].type}`}>
-            The webhook of schedule <LinkMessage dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully added.
+            The webhook of schedule <LinkMessage collectionName={schedules.name} dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully added.
         </InterpolateTranslation>
     );
 }
 const DELETE_WEBHOOK = (responseType, dispatch, navigate, params) => {
     const title = params.schedule ? params.schedule.title : '';
+    const schedules = new Schedules([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${deleteWebhook[responseType].type}`}>
-            The webhook of schedule <LinkMessage dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully removed.
+            The webhook of schedule <LinkMessage collectionName={schedules.name} dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully removed.
         </InterpolateTranslation>
     );
 }/*

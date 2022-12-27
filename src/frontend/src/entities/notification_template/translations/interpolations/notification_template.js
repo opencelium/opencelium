@@ -22,28 +22,32 @@ import {
     deleteNotificationTemplateById,
     updateNotificationTemplate
 } from "../../redux_toolkit/action_creators/NotificationTemplateCreators";
+import NotificationTemplates from "@entity/notification_template/collections/NotificationTemplates";
 
 const ADD_NOTIFICATION_TEMPLATE = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const notificationTemplates = new NotificationTemplates([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${addNotificationTemplate[responseType].type}`}>
-            The notification template <LinkMessage dispatch={dispatch} navigate={navigate} link={'notification_templates'} message={name}/> was successfully added.
+            The notification template <LinkMessage collectionName={notificationTemplates.name} dispatch={dispatch} navigate={navigate} link={'notification_templates'} message={name}/> was successfully added.
         </InterpolateTranslation>
     );
 }
 const UPDATE_NOTIFICATION_TEMPLATE = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const notificationTemplates = new NotificationTemplates([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${updateNotificationTemplate[responseType].type}`}>
-            The notification template <LinkMessage dispatch={dispatch} navigate={navigate} link={'notification_templates'} message={name}/> was successfully updated.
+            The notification template <LinkMessage collectionName={notificationTemplates.name} dispatch={dispatch} navigate={navigate} link={'notification_templates'} message={name}/> was successfully updated.
         </InterpolateTranslation>
     );
 }
 const DELETE_NOTIFICATION_TEMPLATE = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const notificationTemplates = new NotificationTemplates([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${deleteNotificationTemplateById[responseType].type}`}>
-            The notification template <LinkMessage dispatch={dispatch} navigate={navigate} message={name}/> was successfully removed.
+            The notification template <LinkMessage collectionName={notificationTemplates.name} dispatch={dispatch} navigate={navigate} message={name}/> was successfully removed.
         </InterpolateTranslation>
     );
 }

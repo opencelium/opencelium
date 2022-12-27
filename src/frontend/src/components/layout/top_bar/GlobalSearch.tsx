@@ -20,7 +20,7 @@ import {useAppDispatch} from "@application/utils/store";
 import {getGlobalSearchData} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {Application} from "@application/classes/Application";
 import {ComponentRoutes, SingleSearchResult} from "@application/requests/interfaces/IApplication";
-import {setSearchValue as setGlobalSearchValue} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {setSearchFields as setGlobalSearchValue} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import ReactSelect from "@app_component/base/input/select/ReactSelect";
 import { SearchProps } from './interfaces';
@@ -47,9 +47,12 @@ const GlobalSearch: FC<SearchProps> =
             if(index !== -1){
                 route = ComponentRoutes[searchResult[index].components];
             }
-            dispatch(setGlobalSearchValue(searchValue));
-            setSearchValue('');
-            navigate(route, { replace: false });
+            let searchValuePropertyName = route;
+            if(searchValuePropertyName){
+                dispatch(setGlobalSearchValue({[searchValuePropertyName]: option.label}));
+                setSearchValue('');
+                navigate(route, { replace: false });
+            }
         }
         const getData = () => {
             let data = [];

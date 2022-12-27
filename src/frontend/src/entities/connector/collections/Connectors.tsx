@@ -33,6 +33,7 @@ import {ConnectorPermissions} from "../constants";
 import {InlineEditInput} from "@app_component/collection/collection_view/InlineEditInput";
 
 class Connectors extends ListCollection<ConnectorProps>{
+    name: string = 'connectors';
     entities: IConnector[];
     title = 'Connectors';
     keyPropName: ConnectorProps ='id';

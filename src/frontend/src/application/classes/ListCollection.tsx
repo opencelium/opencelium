@@ -27,6 +27,9 @@ import { DeleteButtonStyled } from "@app_component/collection/collection_view/st
 // parent class represents collection of entities
 class ListCollection<EntityProps> implements IListCollection<EntityProps>{
 
+    // name of the collection
+    name: string;
+
     // to dispatch actions in collection (like delete by id)
     dispatch?: AppDispatch;
 

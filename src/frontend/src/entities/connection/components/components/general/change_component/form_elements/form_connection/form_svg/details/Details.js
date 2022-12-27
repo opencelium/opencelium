@@ -20,9 +20,6 @@ import SettingsPanel from "./SettingsPanel";
 import {mapItemsToClasses} from "../utils";
 import Description from "@change_component/form_elements/form_connection/form_svg/details/description/Description";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import Button from "@app_component/base/button/Button";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {TextSize} from "@app_component/base/text/interfaces";
 
 
 function mapStateToProps(state){
@@ -92,9 +89,6 @@ class Details extends React.Component{
                             {"There is no selected item"}
                         </div>
                     }
-                    <div className={styles.update_button}>
-                        <Button icon={'autorenew'} isLoading={updatingConnection === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START} title={'Save'} onClick={() => this.update()} size={TextSize.Size_16}/>
-                    </div>
                 </div>
             </div>
         );

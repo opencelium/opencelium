@@ -33,7 +33,7 @@ class FontIcon extends Component{
     }
 
     render(){
-        let {onClick, id, className, iconClassName, isButton, darkTheme, turquoiseTheme, blueTheme, grayTheme, darkBlueTheme, whiteTheme, value, myRef, iconStyles, onButtonFocus, onButtonBlur, disabled, ...props} = this.props;
+        let {onClick, id, className, iconClassName, isButton, darkTheme, turquoiseTheme, blueTheme, grayTheme, darkBlueTheme, whiteTheme, value, myRef, iconStyles, onButtonFocus, onButtonBlur, disabled, isLoading, spinnerStyle, ...props} = this.props;
         let theme = darkTheme === true ? styles.dark_theme : '';
         let size = isNumber(this.props.size) ? `${this.props.size}px` : this.props.size;
         let sizeStyle = {width: `${size}`, height: `${size}`};
@@ -55,9 +55,12 @@ class FontIcon extends Component{
         if(disabled){
             theme = styles.disabled_item;
         }
+        if(isLoading){
+            value = 'loading';
+        }
         if(value === 'loading'){
             return(
-                <Loading className={`${styles.loading_icon} ${className} ${theme}`} spinnerStyle={{...sizeStyle}}/>
+                <Loading className={`${styles.loading_icon} ${className} ${theme}`} spinnerStyle={{...sizeStyle, ...spinnerStyle}}/>
             );
         }
         //rework it
@@ -110,6 +113,7 @@ FontIcon.propTypes = {
     onButtonBlur: PropTypes.func,
     onButtonFocus: PropTypes.func,
     disabled: PropTypes.bool,
+    spinnerStyle: PropTypes.any,
 };
 
 FontIcon.defaultProps = {
@@ -128,6 +132,8 @@ FontIcon.defaultProps = {
     onButtonBlur: () => {},
     onButtonFocus: () => {},
     disabled: false,
+    spinnerStyle: {},
+    isLoading: false,
 };
 
 export default FontIcon;

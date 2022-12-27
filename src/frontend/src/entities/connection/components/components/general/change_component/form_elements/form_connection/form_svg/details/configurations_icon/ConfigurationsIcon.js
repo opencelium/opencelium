@@ -74,7 +74,7 @@ class ConfigurationsIcon extends React.Component{
                     onClick={(a) => this.toggleIsVisibleSettingsWindow(a)}
                     tooltip={disabled ? '' : 'Settings'}
                     value={'settings'}
-                    tooltipPosition={tooltipPosition}
+                    tooltipPosition={'bottom'}
                     disabled={disabled}
                     isButton={true}
                 />

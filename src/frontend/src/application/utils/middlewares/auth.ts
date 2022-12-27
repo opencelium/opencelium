@@ -21,6 +21,7 @@ import {LocalStorage} from "@application/classes/LocalStorage";
 import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {LogoutProps} from "@application/interfaces/IAuth";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {clearCurrentPages, clearSearchFields } from '@application/redux_toolkit/slices/ApplicationSlice';
 
 export const authMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     const dispatch: AppDispatch = storeApi.dispatch;
@@ -47,6 +48,9 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
         SecuredStorage.remove('authUser');
         const OpenedStorage = LocalStorage.getStorage();
         OpenedStorage.remove('appVersion');
+        const dispatch: AppDispatch = storeApi.dispatch;
+        dispatch(clearSearchFields({}));
+        dispatch(clearCurrentPages({}));
     }
     return next(action);
 }

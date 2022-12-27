@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
-import {updateConnection, checkConnectionTitle, getConnectionById as fetchConnection} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
+import {updateConnection, checkConnectionTitle, getConnectionById as fetchConnection, testConnection} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {addTemplate, getTemplatesByConnectors as fetchTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {permission} from "@entity/application/utils/permission";
@@ -39,6 +39,7 @@ function mapStateToProps(state){
         connection: connection.currentConnection,
         fetchingConnection: connection.gettingConnection,
         updatingConnection: connection.updatingConnection,
+        testingConnection: connection.testingConnection,
         error: connection.error,
         savingTemplate: template.addingTemplate,
         connectors: connector.connectors.map(connector => {return {...connector, id: connector.connectorId}}),
@@ -54,7 +55,7 @@ function mapStateToProps(state){
 /**
  * Component to Update Connection
  */
-@connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle, fetchTemplates})
+@connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle, fetchTemplates, testConnection})
 @permission(ConnectionPermissions.UPDATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @ConnectionForm('update')

@@ -32,6 +32,7 @@ import ImportInvokerButton from "../components/import_invoker_button/ImportInvok
 
 
 class Invokers extends ListCollection<InvokerProps>{
+    name: string = 'invokers';
     entities: IInvoker[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Invokers'}];
     keyPropName: InvokerProps = 'name';

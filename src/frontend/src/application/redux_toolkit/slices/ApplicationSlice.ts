@@ -65,6 +65,8 @@ export interface AuthState extends ICommonState{
     currentPageItems: any[],
     themes: LocalStorageTheme[],
     logoDataStatus: string,
+    searchFields: any,
+    currentPages: any,
 }
 
 
@@ -82,6 +84,8 @@ const notifications: INotification[] = storage.get('notifications');
 const version: string = storage.get('appVersion');
 const viewType: ViewType = storage.get('viewType');
 const gridViewType: GridViewType = storage.get('gridViewType');
+const searchFields = storage.get('searchFields') || {};
+const currentPages = storage.get('currentPages') || {};
 const initialState: AuthState = {
     gettingLogoName: API_REQUEST_STATE.INITIAL,
     addingTicket: API_REQUEST_STATE.INITIAL,
@@ -109,6 +113,8 @@ const initialState: AuthState = {
     currentPageItems: [],
     themes,
     logoDataStatus: storage.get('logoDataStatus') || '',
+    searchFields,
+    currentPages,
     ...CommonState,
 }
 
@@ -147,8 +153,17 @@ export const applicationSlice = createSlice({
         setFullScreen: (state, action: PayloadAction<boolean>) => {
             state.isFullScreen = action.payload;
         },
-        setSearchValue: (state, action: PayloadAction<string>) => {
-            state.searchValue = action.payload;
+        setSearchFields: (state, action: PayloadAction<any>) => {
+            state.searchFields = {...state.searchFields, ...action.payload};
+        },
+        clearSearchFields: (state, action: PayloadAction<unknown>) => {
+            state.searchFields = {};
+        },
+        setCurrentPages: (state, action: PayloadAction<any>) => {
+            state.currentPages = {...state.currentPages, ...action.payload};
+        },
+        clearCurrentPages: (state, action: PayloadAction<unknown>) => {
+            state.currentPages = {};
         },
         setThemes: (state, action: PayloadAction<string>) => {
             state.themes = JSON.parse(action.payload);
@@ -281,13 +296,14 @@ export const applicationSlice = createSlice({
 export const {
     addNotification, clearNotification, toggleNotificationPanel, clearAllNotifications,
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
-    setViewType, setFullScreen, setSearchValue, setThemes, setLogoDataStatus,
+    setViewType, setFullScreen, setThemes, setLogoDataStatus,
+    setSearchFields, clearSearchFields, clearCurrentPages, setCurrentPages,
 } = applicationSlice.actions;
 
 export const actions = {
     addNotification, clearNotification, toggleNotificationPanel, clearAllNotifications,
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
-    setViewType, setFullScreen, setSearchValue, setThemes, setLogoDataStatus,
+    setViewType, setFullScreen, setThemes, setLogoDataStatus,
 }
 
 export default applicationSlice.reducer;

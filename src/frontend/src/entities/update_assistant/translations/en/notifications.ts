@@ -17,7 +17,7 @@ import ActionCreators from "../../redux_toolkit/action_creators";
 
 const {
     deleteApplicationFile, uploadApplicationFile, updateApplication,
-    getUpdatesFromServicePortal, checkApplicationBeforeUpdate, getOfflineUpdates, checkForUpdates,
+    getOnlineUpdates, checkApplicationBeforeUpdate, getOfflineUpdates, checkForUpdates,
 } = ActionCreators;
 
 
@@ -32,7 +32,7 @@ export default {
         [checkForUpdates.rejected.type]: {
             "__DEFAULT__": "OC Update available"
         },
-        [getUpdatesFromServicePortal.rejected.type]: {
+        [getOnlineUpdates.rejected.type]: {
             "__DEFAULT__": "There is an error fetching online updates"
         },
         [getOfflineUpdates.rejected.type]: {

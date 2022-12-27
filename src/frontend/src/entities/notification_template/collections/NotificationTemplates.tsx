@@ -27,6 +27,7 @@ import {deleteNotificationTemplatesById} from "../redux_toolkit/action_creators/
 import { NotificationTemplatePermissions } from "../constants";
 
 class NotificationTemplates extends ListCollection<NotificationTemplateProps>{
+    name: string = 'notificationTemplates';
     entities: INotificationTemplate[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Notification Templates'}];
     keyPropName: NotificationTemplateProps ='id';

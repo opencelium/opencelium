@@ -18,7 +18,12 @@ import {AppDispatch, RootState} from "@application/utils/store";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {getLogoName, getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {ApplicationVersionResponseProps} from "@application/requests/interfaces/IApplication";
-import { setGridViewType, setViewType } from '@application/redux_toolkit/slices/ApplicationSlice';
+import {
+    setCurrentPages,
+    setGridViewType,
+    setSearchFields,
+    setViewType
+} from '@application/redux_toolkit/slices/ApplicationSlice';
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
 
@@ -43,6 +48,16 @@ export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next
     if(setGridViewType.type === action.type){
         const storage = LocalStorage.getStorage();
         storage.set('gridViewType', action.payload);
+    }
+    if(setSearchFields.type === action.type){
+        const storage = LocalStorage.getStorage();
+        const searchFields = storage.get('searchFields') || {};
+        storage.set('searchFields', {...searchFields, ...action.payload});
+    }
+    if(setCurrentPages.type === action.type){
+        const storage = LocalStorage.getStorage();
+        const currentPages = storage.get('currentPages') || {};
+        storage.set('currentPages', {...currentPages, ...action.payload});
     }
     return next(action);
 }

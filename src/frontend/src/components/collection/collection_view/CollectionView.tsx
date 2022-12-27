@@ -18,7 +18,11 @@ import {withTheme} from 'styled-components';
 import {Application} from "@application/classes/Application";
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {setViewType as setViewTypeGlobally, setGridViewType as setGridViewTypeGlobally, setSearchValue} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {
+    setViewType as setViewTypeGlobally,
+    setGridViewType as setGridViewTypeGlobally,
+    setSearchFields, setCurrentPages
+} from "@application/redux_toolkit/slices/ApplicationSlice";
 import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
 import ContentLoading from "@app_component/base/loading/ContentLoading";
 import InputText from "@app_component/base/input/text/InputText";
@@ -34,6 +38,7 @@ import {ActionsStyled, CollectionViewStyled, TopSectionStyled, ViewSectionStyled
 import {Grid} from "./Grid";
 import Title from "../collection_title/Title";
 import {BadRequest} from "@app_component/default_pages/bad_request/BadRequest";
+import {debounce} from "@application/utils/utils";
 
 const LIST_VIEW_ENTITIES_NUMBER = 10;
 
@@ -57,18 +62,30 @@ const CollectionView: FC<CollectionViewProps> =
         defaultFilterData,
     }) => {
         const dispatch = useAppDispatch();
-        const {searchValue, viewType, gridViewType} = Application.getReduxState();
+        const {searchFields, currentPages, viewType, gridViewType} = Application.getReduxState();
+        const searchValuePropertyName = collection?.name || '';
+        const [searchValue, setSearchValue] = useState<string>(searchValuePropertyName ? searchFields[searchValuePropertyName] || '' : '')
         const [isRefreshing, setIsRefreshing] = useState(false);
         const [isFilterVisible, toggleFilter] = useState<boolean>(false);
         const [filterData, setFilterData] = useState(defaultFilterData);
         const [checks, setChecks] = useState<any>({});
         const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER)
-        const [currentPage, setCurrentPage] = useState(1);
+        const [currentPage, setCurrentPage] = useState(searchValuePropertyName ? currentPages[searchValuePropertyName] || 1 : 1);
         const [totalPages, setTotalPages] = useState(Math.ceil(collection.entities.length / entitiesPerPage))
         let applicationViewType = viewType;
         if(defaultViewType !== ''){
             applicationViewType = defaultViewType;
         }
+        useEffect(() => {
+            if(searchValuePropertyName){
+                debounce(() => {dispatch(setSearchFields({[searchValuePropertyName]: searchValue}))})();
+            }
+        }, [searchValue])
+        useEffect(() => {
+            if(searchValuePropertyName){
+                debounce(() => {dispatch(setCurrentPages({[searchValuePropertyName]: currentPage}))})();
+            }
+        }, [currentPage])
         useEffect(() => {
             let newEntitiesPerPage = LIST_VIEW_ENTITIES_NUMBER;
             if(applicationViewType === ViewType.GRID){
@@ -95,9 +112,6 @@ const CollectionView: FC<CollectionViewProps> =
                 setChecks([]);
             }
         }, [collection.deletingEntitiesState]);
-        useEffect(() => {
-            return () => {dispatch(setSearchValue(''))};
-        }, [])
         const onChangeViewType = (newViewType: ViewType) => {
             setIsRefreshing(true);
             setTimeout(() => {
@@ -117,7 +131,7 @@ const CollectionView: FC<CollectionViewProps> =
         }
         const search = (searchValue: string) => {
             setCurrentPage(1);
-            dispatch(setSearchValue(searchValue));
+            setSearchValue(searchValue);
         }
         let checkedIds: any[] = [];
         for(let id in checks){

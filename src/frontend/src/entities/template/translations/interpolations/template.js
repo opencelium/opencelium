@@ -24,12 +24,14 @@ import {
     importTemplate,
     updateTemplate
 } from "../../redux_toolkit/action_creators/TemplateCreators";
+import Templates from "@entity/template/collections/Templates";
 
 const DELETE_TEMPLATE = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const templates = new Templates([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${deleteTemplateById[responseType].type}`}>
-            The template <LinkMessage dispatch={dispatch} navigate={navigate} message={name}/> was successfully removed.
+            The template <LinkMessage collectionName={templates.name} dispatch={dispatch} navigate={navigate} message={name}/> was successfully removed.
         </InterpolateTranslation>
     );
 }
@@ -37,36 +39,40 @@ const DELETE_TEMPLATE = (responseType, dispatch, navigate, params) => {
 const ADD_TEMPLATE = (responseType, dispatch, navigate, params) => {
     const {name, connection} = params;
     const title = connection ? connection.title : '';
+    const templates = new Templates([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${addTemplate[responseType].type}`}>
-            The template <LinkMessage dispatch={dispatch} navigate={navigate} link={'templates'} message={name}/> of the <LinkMessage dispatch={dispatch} navigate={navigate} link={'connections'} message={title}/> was successfully added.
+            The template <LinkMessage collectionName={templates.name} dispatch={dispatch} navigate={navigate} link={'templates'} message={name}/> of the <LinkMessage dispatch={dispatch} navigate={navigate} link={'connections'} message={title}/> was successfully added.
         </InterpolateTranslation>
     );
 }
 
 const UPDATE_TEMPLATE = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const templates = new Templates([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${updateTemplate[responseType].type}`}>
-            The template <LinkMessage dispatch={dispatch} navigate={navigate} link={'templates'} message={name}/> was successfully updated.
+            The template <LinkMessage collectionName={templates.name} dispatch={dispatch} navigate={navigate} link={'templates'} message={name}/> was successfully updated.
         </InterpolateTranslation>
     );
 }
 
 const IMPORT_TEMPLATE = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const templates = new Templates([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${importTemplate[responseType].type}`}>
-            The template <LinkMessage dispatch={dispatch} navigate={navigate} link={'templates'} message={name}/> was successfully imported.
+            The template <LinkMessage collectionName={templates.name} dispatch={dispatch} navigate={navigate} link={'templates'} message={name}/> was successfully imported.
         </InterpolateTranslation>
     );
 }
 
 const EXPORT_TEMPLATE = (responseType, dispatch, navigate, params) => {
     const {name} = params;
+    const templates = new Templates([], null);
     return (
         <InterpolateTranslation i18nKey={`notifications.${responseType}.${exportTemplate[responseType].type}`}>
-            The template <LinkMessage dispatch={dispatch} navigate={navigate} link={'templates'} message={name}/> was successfully downloaded.
+            The template <LinkMessage collectionName={templates.name} dispatch={dispatch} navigate={navigate} link={'templates'} message={name}/> was successfully downloaded.
         </InterpolateTranslation>
     );
 }

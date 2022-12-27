@@ -45,14 +45,16 @@ export function ConnectionForm(type) {
         return class extends Component {
             constructor(props) {
                 super(props);
-
+                this.type = type;
                 this.redirectUrl = '/connections';
-                this.translationKey = type.toUpperCase();
-                this.isUpdate = type === 'update';
-                this.isAdd = type === 'add';
-                this.isView = type === 'view';
+                this.translationKey = this.type.toUpperCase();
+                this.isUpdate = this.type === 'update';
+                this.isAdd = this.type === 'add';
+                this.isView = this.type === 'view';
                 this.actionName = this.isUpdate ? `updatingConnection` : `addingConnection`;
                 this.state = {
+                    runTest: false,
+                    justUpdate: false,
                     hasModeInputsSection: this.isUpdate,
                     hasMethodsInputsSection: this.isUpdate,
                     validationMessages: {
@@ -88,12 +90,27 @@ export function ConnectionForm(type) {
                 this.checkValidationRequest('title', checkingConnectionTitle === API_REQUEST_STATE.FINISH, checkTitleResult === TRIPLET_STATE.FALSE, t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_EXIST`));
                 if(this.props[this.actionName] === API_REQUEST_STATE.FINISH && this.startAction){
                     this.startAction = false;
-                    if(this.redirectUrl){
-                        navigate(this.redirectUrl, { replace: false });
+                    if(this.state.justUpdate){
+                        if(this.state.runTest){
+                            this.setState({justUpdate: false, runTest: false});
+                            this.props.testConnection(this.props.connection);
+                        } else{
+                            this.setState({justUpdate: false});
+                        }
+                    } else{
+                        if(this.redirectUrl){
+                            navigate(this.redirectUrl, { replace: false });
+                        }
                     }
                 }
-                if(this.props.fetchingConnection && prevProps.fetchingConnection === API_REQUEST_STATE.START && this.props.fetchingConnection === API_REQUEST_STATE.FINISH){
+                if((this.props.fetchingConnection && prevProps.fetchingConnection === API_REQUEST_STATE.START && this.props.fetchingConnection === API_REQUEST_STATE.FINISH)
+                || (prevProps.connection === null && this.props.connection !== null)){
                     this.isFetchedConnection = true;
+                    this.type = 'update';
+                    this.translationKey = this.type.toUpperCase();
+                    this.isUpdate = this.type === 'update';
+                    this.isAdd = this.type === 'add';
+                    this.isView = this.type === 'view';
                     this.setState({
                         connection: CConnection.createConnection({...this.props.connection, error}),
                     })
@@ -119,7 +136,9 @@ export function ConnectionForm(type) {
                             validationMessages: {
                                 ...this.state.validationMessages,
                                 [propertyName]: validationMessage
-                            }
+                            },
+                            runTest: false,
+                            justUpdate: false,
                         });
                         setFocusById(`input_${propertyName}`)
                         this.startDoingAction = false;
@@ -224,7 +243,8 @@ export function ConnectionForm(type) {
                     source: Object.freeze(connectors),
                     readOnly: this.isView,
                     errors: this.state.validateLogicResult,
-                    justUpdate: (entity) => this.justUpdate(entity)
+                    justUpdate: (entity) => this.justUpdate(entity),
+                    testConnection: (entity) => this.testConnection(entity)
                 };
             }
 
@@ -416,6 +436,18 @@ export function ConnectionForm(type) {
             }
 
             justUpdate(entity){
+                this.setState({
+                    justUpdate: true,
+                })
+                this.do(entity)
+                this.redirectUrl = '';
+            }
+
+            testConnection(entity){
+                this.setState({
+                    runTest: true,
+                    justUpdate: true,
+                })
                 this.do(entity)
                 this.redirectUrl = '';
             }
@@ -449,11 +481,23 @@ export function ConnectionForm(type) {
                     this.startDoingAction = false;
                 } else{
                     const convertedObject = typeof entity.getObjectForBackend === 'function' ? entity.getObjectForBackend() : typeof entity.getObject === 'function' ? entity.getObject() : entity;
-                    this.setState({
-                        validationMessages: {...validationMessages, ...validations},
+                    const allValidations = {...validationMessages, ...validations};
+                    let hasErrorMessage = false;
+                    for(let param in allValidations){
+                        if(allValidations[param] !== ''){
+                            hasErrorMessage = true;
+                        }
+                    }
+                    let newState = {
+                        validationMessages: allValidations,
                         entity: Object.assign({}, convertedObject),
-                        validateLogicResult: {toggleFlag: !this.state.validateLogicResult.toggleFlag, ...logicValidation.result}
-                    });
+                        validateLogicResult: {toggleFlag: !this.state.validateLogicResult.toggleFlag, ...logicValidation.result},
+                    }
+                    if(hasErrorMessage){
+                        newState.runTest = false;
+                        newState.justUpdate = false;
+                    }
+                    this.setState(newState);
                     if(firstValidationName !== ''){
                         if(validations[firstValidationName] !== '') {
                             setFocusById(`input_${firstValidationName}`);
@@ -577,7 +621,7 @@ export function ConnectionForm(type) {
                         clearValidationMessage={(a) => this.clearValidationMessage(a)}
                         action={(a) => this.doAction(a)}
                         entity={connection}
-                        type={type}
+                        type={this.type}
                         additionalButtons={additionalButtons}
                     />
                 );

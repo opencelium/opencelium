@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import styles from "@entity/connection/components/themes/default/general/change_component.scss";
 import {Input} from 'reactstrap';
 import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
+import Loading from "@components/general/app/Loading";
 
 class RadioButtons extends React.Component{
     constructor(props) {
@@ -34,7 +35,12 @@ class RadioButtons extends React.Component{
     renderRadios(){
         const {radios, value, id} = this.props;
         return radios.map((radio, index) => {
-            const {label, inputStyle, labelStyle, inputClassName, labelClassName, ...props} = radio;
+            const {label, inputStyle, isLoading, labelStyle, inputClassName, labelClassName, ...props} = radio;
+            if(isLoading){
+                return(
+                    <Loading style={{minHeight: 0, display: 'flex', justifyContent: 'center',alignItems: 'center', margin: 0, width: '100% !important'}} spinnerStyle={{width: '14px', height: '14px', margin: 0, minHeight: 0}}/>
+                );
+            }
             return(
                 <React.Fragment key={label}>
                     <Input id={index === 0 ? id : `${id}_${index}`} type="radio" {...props} checked={value === radio.value} onChange={(a) => this.onChange(a)} style={inputStyle} className={inputClassName ? inputClassName : ''}/>

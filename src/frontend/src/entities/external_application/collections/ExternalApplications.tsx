@@ -25,6 +25,7 @@ import {ExternalApplication} from "../classes/ExternalApplication";
 import {ExternalApplicationProps, IExternalApplication} from "../interfaces/IExternalApplication";
 
 class ExternalApplications extends ListCollection<ExternalApplicationProps>{
+    name: string = 'externalApplications';
     entities: IExternalApplication[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'External Application'}];
     keyPropName: ExternalApplicationProps ='id';
