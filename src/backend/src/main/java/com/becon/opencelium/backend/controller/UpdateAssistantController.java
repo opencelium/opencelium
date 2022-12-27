@@ -43,6 +43,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -57,7 +58,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/api/assistant", produces = "application/hal+json", consumes = {"application/json"})
+@RequestMapping(value = "/api/assistant")
 public class UpdateAssistantController {
 
     @Autowired
@@ -83,6 +84,9 @@ public class UpdateAssistantController {
 
     @Autowired
     private ConnectionNodeServiceImp connectionNodeServiceImp;
+
+    @Autowired
+    private UpdatePackageServiceImp updatePackageServiceImp;
 
     @GetMapping("/all")
     public List<String> getAll(){
@@ -118,7 +122,7 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(resource);
     }
 
-    @GetMapping("/oc/offline/versions")
+    @GetMapping("/oc/offline/version/all")
     public ResponseEntity<?> getOfflineVersion() {
 
         List<AvailableUpdate> offVersions  = packageServiceImp.getOffVersions();
@@ -282,7 +286,47 @@ public class UpdateAssistantController {
         return ResponseEntity.ok().build();
     }
 
+    //    @Autowired
+//    private SystemOverviewRepository systemOverviewRepository;
 
+    @PostMapping(value = "/zipfile")
+    public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
+        try {
+//            systemOverviewRepository.getCurrentVersionFromDb();
+//            return ResponseEntity.ok().build();
+
+            String zipedAppVersion = assistantServiceImp.getVersion(file.getInputStream()).replace(".", "_");
+            Path target = Paths.get(PathConstant.ASSISTANT + "versions/" + zipedAppVersion);
+            assistantServiceImp.uploadZipFile(file, target);
+            AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(zipedAppVersion);
+            AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
+            return ResponseEntity.ok(availableUpdateResource);
+//            Path target = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + zipedAppVersion
+//                               .replace(".", "_"));
+//            Path pathToFolder = assistantServiceImp.unzipFolder(file.getInputStream(), target);
+//            Path pathToZip = Paths.get(PathConstant.ASSISTANT + "zipfile/" + file.getOriginalFilename());
+//            assistantServiceImp.deleteZipFile(pathToZip);
+//            String folder = pathToFolder.toString().replace(pathToFolder.getParent().toString() + File.separator, "");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @DeleteMapping(value = "/zipfile/{filename}")
+    public ResponseEntity<?> assistantDeleteFile(@PathVariable String filename) {
+
+        Path zipPath = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + filename);
+        assistantServiceImp.deleteZipFile(zipPath);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    private boolean checkJsonExtension(String extension){
+        if (!(extension.equals("json") || extension.equals("JSON"))){
+            return false;
+        }
+        return true;
+    }
 
     @ResponseBody
     @GetMapping("/changelog/file/{packageName}")

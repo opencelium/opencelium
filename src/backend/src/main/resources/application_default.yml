@@ -7,12 +7,12 @@ spring:
 
   main:
     banner-mode: "off"
-
   data:
     rest:
       basePath: /api
-    neo4j:
-      url: bolt://localhost:7687
+  neo4j:
+    url: bolt://localhost:7687
+    authentication:
       username: neo4j
       password: secret
 
@@ -115,8 +115,9 @@ opencelium:
     activity-time: 18000
     experation-time: 86400
   assistant:
-    repo:
-      url: https://bobmustaev@bitbucket.org/becon_gmbh/opencelium
+    update:
+      online:
+        url: {insert url where portal service is located}
 
 
 

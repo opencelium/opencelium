@@ -15,13 +15,13 @@
  */
 
 plugins {
-	id 'org.springframework.boot' version '2.1.7.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+	id 'org.springframework.boot' version '3.0.0'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 	id 'java'
 }
 
 group = 'com.becon'
-version = '3.0'
+version = '3.0-opencelium'
 sourceCompatibility = '17'
 
 repositories {
@@ -50,6 +50,8 @@ dependencies {
 	implementation 'com.jayway.jsonpath:json-path:2.4.0'
 	implementation 'org.eclipse.jgit:org.eclipse.jgit:5.11.0.202103091610-r'
 	implementation 'wsdl4j:wsdl4j:1.6.2'
+	implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.0'
+	implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
 	runtimeOnly 'mysql:mysql-connector-java'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

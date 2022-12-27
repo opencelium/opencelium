@@ -16,10 +16,8 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.application.assistant.AssistantServiceImp;
 import com.becon.opencelium.backend.application.assistant.UpdatePackageServiceImp;
-import com.becon.opencelium.backend.application.repository.SystemOverviewRepository;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
@@ -33,20 +31,14 @@ import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
-import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
-import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
+import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.jayway.jsonpath.JsonPath;
-import io.netty.handler.codec.serialization.ObjectEncoder;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -113,7 +105,7 @@ public class FileController {
     public ResponseEntity<?> profilePictureUpload(@RequestParam("file") MultipartFile file,
                                                   @RequestParam("email") String email) {
         // Get extension
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String extension = FileNameUtils.getExtension(file.getOriginalFilename());
 
         // Check image extension. It should be JPEG, PNG or JPG
         if (!checkImageExtension(extension)){
@@ -151,7 +143,7 @@ public class FileController {
                                                 @RequestParam("userGroupId") int userGroupId) {
 
         // Get extension of file
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String extension = FileNameUtils.getExtension(file.getOriginalFilename());
 
         // Check image extension. It should be JPEG, PNG or JPG
         if (!checkImageExtension(extension)){
@@ -184,7 +176,7 @@ public class FileController {
     @PostMapping(value = "/template")
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
         // Get extension
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String extension = FileNameUtils.getExtension(file.getOriginalFilename());
         if (extension == null) {
             throw new RuntimeException("Extension not found");
         }
@@ -198,7 +190,7 @@ public class FileController {
                 while (zipEntry != null) {
                     System.out.println(zipEntry.getName());
                     zipEntry = zis.getNextEntry();
-                    byte[] bytes = IOUtils.toByteArray(zis);
+                    byte[] bytes = zis.readAllBytes(); //IOUtils.toByteArray(zis);
                     files.add(bytes);
                 }
             } else {
@@ -229,7 +221,7 @@ public class FileController {
     @PostMapping("/invoker")
     public ResponseEntity<?> uploadInvoker(@RequestParam("file") MultipartFile file) {
         String filename = file.getOriginalFilename();
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String extension = FileNameUtils.getExtension(file.getOriginalFilename());
         try {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file " + filename);
@@ -261,11 +253,11 @@ public class FileController {
             }
         }
         catch (Exception e) {
-            invokerServiceImp.delete(FilenameUtils.removeExtension(filename));
+            invokerServiceImp.delete(FileNameUtils.removeExtension(filename));
             throw new StorageException("Failed to store file " + filename, e);
         }
 
-        Invoker invoker = invokerServiceImp.findByName(FilenameUtils.removeExtension(filename));
+        Invoker invoker = invokerServiceImp.findByName(FileNameUtils.removeExtension(filename));
         InvokerResource invokerResource = invokerServiceImp.toResource(invoker);
         return ResponseEntity.ok().build();
     }
@@ -277,7 +269,7 @@ public class FileController {
         Connector connector = connectorService.findById(connectorId).orElseThrow(() ->
                 new RuntimeException("CONNECTOR_NOT_FOUND"));
         // Get extension
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String extension = FileNameUtils.getExtension(file.getOriginalFilename());
         if (!checkImageExtension(extension)){
             throw new StorageException("File should be jpg or png");
         }
@@ -296,40 +288,40 @@ public class FileController {
         }
     }
 
-    @Autowired
-    private SystemOverviewRepository systemOverviewRepository;
+////    @Autowired
+////    private SystemOverviewRepository systemOverviewRepository;
+//
+//    @PostMapping(value = "/assistant/zipfile")
+//    public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
+//        try {
+////            systemOverviewRepository.getCurrentVersionFromDb();
+////            return ResponseEntity.ok().build();
+//
+//            String zipedAppVersion = assistantServiceImp.getVersion(file.getInputStream()).replace(".", "_");
+//            Path target = Paths.get(PathConstant.ASSISTANT + "versions/" + zipedAppVersion);
+//            assistantServiceImp.uploadZipFile(file, target);
+//            AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(zipedAppVersion);
+//            AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
+//            return ResponseEntity.ok(availableUpdateResource);
+////            Path target = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + zipedAppVersion
+////                               .replace(".", "_"));
+////            Path pathToFolder = assistantServiceImp.unzipFolder(file.getInputStream(), target);
+////            Path pathToZip = Paths.get(PathConstant.ASSISTANT + "zipfile/" + file.getOriginalFilename());
+////            assistantServiceImp.deleteZipFile(pathToZip);
+////            String folder = pathToFolder.toString().replace(pathToFolder.getParent().toString() + File.separator, "");
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
-    @PostMapping(value = "/assistant/zipfile")
-    public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
-        try {
-//            systemOverviewRepository.getCurrentVersionFromDb();
-//            return ResponseEntity.ok().build();
-
-            String zipedAppVersion = assistantServiceImp.getVersion(file.getInputStream()).replace(".", "_");
-            Path target = Paths.get(PathConstant.ASSISTANT + "versions/" + zipedAppVersion);
-            assistantServiceImp.uploadZipFile(file, target);
-            AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(zipedAppVersion);
-            AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
-            return ResponseEntity.ok(availableUpdateResource);
-//            Path target = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + zipedAppVersion
-//                               .replace(".", "_"));
-//            Path pathToFolder = assistantServiceImp.unzipFolder(file.getInputStream(), target);
-//            Path pathToZip = Paths.get(PathConstant.ASSISTANT + "zipfile/" + file.getOriginalFilename());
-//            assistantServiceImp.deleteZipFile(pathToZip);
-//            String folder = pathToFolder.toString().replace(pathToFolder.getParent().toString() + File.separator, "");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @DeleteMapping(value = "/assistant/zipfile/{filename}")
-    public ResponseEntity<?> assistantDeleteFile(@PathVariable String filename) {
-
-        Path zipPath = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + filename);
-        assistantServiceImp.deleteZipFile(zipPath);
-
-        return ResponseEntity.noContent().build();
-    }
+//    @DeleteMapping(value = "/assistant/zipfile/{filename}")
+//    public ResponseEntity<?> assistantDeleteFile(@PathVariable String filename) {
+//
+//        Path zipPath = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + filename);
+//        assistantServiceImp.deleteZipFile(zipPath);
+//
+//        return ResponseEntity.noContent().build();
+//    }
 
     private boolean checkJsonExtension(String extension){
         if (!(extension.equals("json") || extension.equals("JSON"))){

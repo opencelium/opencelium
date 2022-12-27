@@ -2,16 +2,18 @@ package com.becon.opencelium.backend.resource.notification;
 
 import com.becon.opencelium.backend.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.mysql.entity.EventRecipient;
-import org.springframework.hateoas.ResourceSupport;
+import jakarta.annotation.Resource;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NotificationResource extends ResourceSupport {
+@Resource
+public class NotificationResource extends RepresentationModel {
 
     private int notificationId;
-    private int schedulerId;
+    private int schedulerId; // should be array
     private String name;
     private String eventType;
     private String notificationType;
