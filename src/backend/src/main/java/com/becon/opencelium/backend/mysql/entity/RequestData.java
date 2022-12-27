@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "request_data")

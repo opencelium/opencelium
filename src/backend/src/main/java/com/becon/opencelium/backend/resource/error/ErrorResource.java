@@ -17,9 +17,9 @@
 package com.becon.opencelium.backend.resource.error;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.annotation.Resource;
 import org.springframework.http.HttpStatus;
 
-import javax.annotation.Resource;
 import java.util.Date;
 
 @Resource

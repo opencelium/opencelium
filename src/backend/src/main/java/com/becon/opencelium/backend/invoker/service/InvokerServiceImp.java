@@ -25,31 +25,21 @@ import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
-import com.becon.opencelium.backend.neo4j.entity.BodyNode;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.storage.StorageService;
-import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.utility.ConditionUtility;
+import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import javax.xml.crypto.dsig.TransformException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.*;
 import java.io.*;
 import java.net.URI;
@@ -266,7 +256,8 @@ public class InvokerServiceImp implements InvokerService {
     @Override
     public Document getDocument(String name) throws Exception {
         File file = new File(filePath.toString() + "/" + name);
-        if(!FilenameUtils.getExtension(file.getName()).equals("xml")){
+
+        if(!FileNameUtils.getExtension(file.getName()).equals("xml")){
             return null;
         }
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -277,7 +268,7 @@ public class InvokerServiceImp implements InvokerService {
     public void save(Document document) {
         InvokerParserImp parser = new InvokerParserImp(document);
         File f = new File(document.getDocumentURI());
-        String invoker = FilenameUtils.removeExtension(f.getName());
+        String invoker = FileNameUtils.removeExtension(f.getName());
         invoker = invoker.replace("%20", " ");
         invokerContainer.update(invoker, parser.parse());
     }
@@ -337,7 +328,7 @@ public class InvokerServiceImp implements InvokerService {
     private Map<String, String> getAll(String folder) throws WrongEncode {
         try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
             return walk.filter(Files::isRegularFile)
-                    .filter(path -> FilenameUtils.getExtension(path.toString()).equals("xml"))
+                    .filter(path -> FileNameUtils.getExtension(path.toString()).equals("xml"))
                     .map(path -> {
                         StringBuilder contentBuilder = new StringBuilder();
                         try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {

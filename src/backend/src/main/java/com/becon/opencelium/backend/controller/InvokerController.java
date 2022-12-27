@@ -27,15 +27,14 @@ import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.resource.connector.FunctionResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerXMLResource;
+import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.PathUtility;
 import com.becon.opencelium.backend.utility.Xml;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -85,7 +84,7 @@ public class InvokerController {
                 .stream().map(inv -> invokerService.toResource(inv))
                 .collect(Collectors.toList());
 
-        final Resources<InvokerResource> resources = new Resources<>(invokerResources);
+        final CollectionModel<InvokerResource> resources = CollectionModel.of(invokerResources);
         return ResponseEntity.ok(resources);
     }
 
@@ -115,7 +114,7 @@ public class InvokerController {
         invokers.forEach(document -> {
             InvokerParserImp parser = new InvokerParserImp(document);
             File f = new File(document.getDocumentURI());
-            String invoker = FilenameUtils.removeExtension(f.getName());
+            String invoker = FileNameUtils.removeExtension(f.getName());
             invoker = invoker.replace("%20", " ");
             container.put(invoker, parser.parse());
         });
@@ -123,7 +122,7 @@ public class InvokerController {
 
         Invoker invoker = invokerContainer.getByName(filename);
         InvokerResource invokerResource = invokerService.toResource(invoker);
-        final Resource<InvokerResource> resource = new Resource<>(invokerResource);
+        final EntityModel<InvokerResource> resource = EntityModel.of(invokerResource);
         return ResponseEntity.ok().body(resource);
     }
 

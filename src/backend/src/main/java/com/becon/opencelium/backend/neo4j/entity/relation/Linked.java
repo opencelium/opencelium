@@ -17,26 +17,28 @@
 package com.becon.opencelium.backend.neo4j.entity.relation;
 
 import com.becon.opencelium.backend.neo4j.entity.FieldNode;
-import org.neo4j.ogm.annotation.*;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.RelationshipProperties;
+import org.springframework.data.neo4j.core.schema.TargetNode;
 
-@RelationshipEntity(type = "linked")
-public class LinkRelation {
+@RelationshipProperties()
+public class Linked {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @StartNode
     private FieldNode fieldNodeStart;
 
-    @EndNode
+    @TargetNode
     private FieldNode fieldNodeEnd;
 
-    public LinkRelation() {
+    public Linked() {
 
     }
 
-    public LinkRelation(FieldNode fieldNodeStart, FieldNode fieldNodeEnd) {
+    public Linked(FieldNode fieldNodeStart, FieldNode fieldNodeEnd) {
 
         this.fieldNodeStart = fieldNodeStart;
         this.fieldNodeEnd = fieldNodeEnd;

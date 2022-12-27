@@ -17,16 +17,16 @@
 package com.becon.opencelium.backend.neo4j.repository;
 
 
-import com.becon.opencelium.backend.neo4j.entity.relation.LinkRelation;
-import org.springframework.data.neo4j.annotation.Query;
+import com.becon.opencelium.backend.neo4j.entity.relation.Linked;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface LinkRelationRepository extends Neo4jRepository<LinkRelation, Long> {
+public interface LinkRelationRepository extends Neo4jRepository<Linked, Long> {
 
     @Query("MATCH (c:Connection)-[*]->(from:Field)-[l:linked]->(to:Field) WHERE ID(c)={0} RETURN from, l, to;")
-    List<LinkRelation> getLinkedRelationFields(Long connectionId);
+    List<Linked> getLinkedRelationFields(Long connectionId);
 }

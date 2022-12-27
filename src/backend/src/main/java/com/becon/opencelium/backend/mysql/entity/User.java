@@ -18,13 +18,11 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import com.becon.opencelium.backend.resource.user.UserResource;
 
-import javax.persistence.*;
-import javax.validation.constraints.Email;
-import java.util.ArrayList;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "user")
@@ -44,7 +42,7 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
     private Activity activity;
 
-    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "user")
     private UserDetail userDetail;
 
     @OneToOne(fetch = FetchType.EAGER)

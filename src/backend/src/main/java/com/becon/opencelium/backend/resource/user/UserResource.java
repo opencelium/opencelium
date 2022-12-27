@@ -17,16 +17,14 @@
 package com.becon.opencelium.backend.resource.user;
 
 import com.becon.opencelium.backend.mysql.entity.User;
-import com.becon.opencelium.backend.mysql.entity.WidgetSetting;
-import org.springframework.hateoas.ResourceSupport;
+import jakarta.annotation.Resource;
+import org.springframework.hateoas.RepresentationModel;
 
-import javax.annotation.Resource;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Resource
-public class UserResource  extends ResourceSupport {
+public class UserResource  extends RepresentationModel {
 
     private int userId;
     private String email;

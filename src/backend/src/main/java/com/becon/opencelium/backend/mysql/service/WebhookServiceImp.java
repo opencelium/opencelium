@@ -28,6 +28,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -47,6 +48,7 @@ public class WebhookServiceImp implements WebhookService {
     @Autowired
     private UserServiceImpl userService;
 
+    @Lazy
     @Autowired
     private SchedulerServiceImp schedulerService;
 

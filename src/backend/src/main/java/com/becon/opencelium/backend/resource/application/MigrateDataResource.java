@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.resource.application;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.annotation.Resource;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 @Resource

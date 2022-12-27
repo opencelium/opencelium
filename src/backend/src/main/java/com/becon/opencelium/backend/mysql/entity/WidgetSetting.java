@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.mysql.entity;
 
 import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "widget_setting")

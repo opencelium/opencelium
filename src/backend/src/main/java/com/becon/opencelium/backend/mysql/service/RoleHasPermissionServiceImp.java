@@ -17,20 +17,14 @@
 package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.mysql.entity.RoleHasPermission;
-import com.becon.opencelium.backend.mysql.entity.UserRole;
 import com.becon.opencelium.backend.mysql.repository.RoleHasPermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
 @Service
 public class RoleHasPermissionServiceImp implements RoleHasPermissionService {
 
-    @Autowired
-    private EntityManager em;
 
     @Autowired
     private RoleHasPermissionRepository repository;

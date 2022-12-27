@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.resource.connection.MethodResource;
 import com.becon.opencelium.backend.resource.connection.OperatorResource;
 import com.becon.opencelium.backend.utility.ActionUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,6 +35,7 @@ public class MethodNodeServiceImp implements MethodNodeService {
     @Autowired
     private MethodNodeRepository methodNodeRepository;
 
+    @Lazy
     @Autowired
     private ActionUtility actionUtility;
 
@@ -67,10 +69,10 @@ public class MethodNodeServiceImp implements MethodNodeService {
         return methodNodeRepository.findById(id);
     }
 
-    @Override
-    public Iterable<MethodNode> findAllById(List<Long> ids) {
-        return methodNodeRepository.findAllById(ids, -1);
-    }
+//    @Override
+//    public Iterable<MethodNode> findAllById(List<Long> ids) {
+//        return methodNodeRepository.findAllById(ids, -1);
+//    }
 
     @Override
     public Optional<MethodNode> findByConnectionIdAndColor(Long connectionId, String color) {

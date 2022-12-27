@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.invoker.resource;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Resource
 public class FieldResource {

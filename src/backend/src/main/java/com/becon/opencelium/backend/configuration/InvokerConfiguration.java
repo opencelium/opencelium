@@ -21,7 +21,7 @@ import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
-import org.apache.commons.io.FilenameUtils;
+import com.becon.opencelium.backend.utility.FileNameUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.w3c.dom.Document;
@@ -59,7 +59,7 @@ public class InvokerConfiguration {
             }
             InvokerParserImp parser = new InvokerParserImp(document);
             File f = new File(document.getDocumentURI());
-            String invoker = FilenameUtils.removeExtension(f.getName());
+            String invoker = FileNameUtils.removeExtension(f.getName());
             invoker = invoker.replace("%20", " ");
             container.put(invoker, parser.parse());
         });
@@ -80,7 +80,7 @@ public class InvokerConfiguration {
             return allInvokers.map(p -> new File(filePath.toString() + "/" + p.getFileName()))
                     .map(file -> {
                         try {
-                            if(!FilenameUtils.getExtension(file.getName()).equals("xml")){
+                            if(!FileNameUtils.getExtension(file.getName()).equals("xml")){
                                 return null;
                             }
                             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();

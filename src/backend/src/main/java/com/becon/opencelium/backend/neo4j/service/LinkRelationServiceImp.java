@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.neo4j.service;
 
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.neo4j.entity.FieldNode;
-import com.becon.opencelium.backend.neo4j.entity.relation.LinkRelation;
+import com.becon.opencelium.backend.neo4j.entity.relation.Linked;
 import com.becon.opencelium.backend.neo4j.repository.LinkRelationRepository;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,23 +38,23 @@ public class LinkRelationServiceImp implements LinkRelationService {
     private FieldNodeServiceImp fieldNodeService;
 
     @Override
-    public void saveAll(List<LinkRelation> linkRelations) {
+    public void saveAll(List<Linked> linkRelations) {
         linkRelationRepository.saveAll(linkRelations);
     }
 
     @Override
-    public List<LinkRelation> getLinkedFields(Long connectionId) {
+    public List<Linked> getLinkedFields(Long connectionId) {
         return linkRelationRepository.getLinkedRelationFields(connectionId);
     }
 
     @Override
-    public List<LinkRelation> toEntity(List<FieldBindingResource> fieldBindingResources, Connection connection) {
+    public List<Linked> toEntity(List<FieldBindingResource> fieldBindingResources, Connection connection) {
 
-        List<LinkRelation> linkRelations = new ArrayList<>();
+        List<Linked> linkRelations = new ArrayList<>();
 
         fieldBindingResources.forEach(l -> {
 
-            LinkRelation linkRelation = new LinkRelation();
+            Linked linkRelation = new Linked();
             if (l.getEnhancement() != null){
                 return;
             }

@@ -18,14 +18,14 @@ package com.becon.opencelium.backend.neo4j.service;
 
 
 import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.neo4j.entity.relation.LinkRelation;
+import com.becon.opencelium.backend.neo4j.entity.relation.Linked;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 
 import java.util.List;
 
 public interface LinkRelationService {
 
-    void saveAll(List<LinkRelation> linkRelations);
-    List<LinkRelation> getLinkedFields(Long connectionId);
-    List<LinkRelation> toEntity(List<FieldBindingResource> fieldBindingResources, Connection connection);
+    void saveAll(List<Linked> linkRelations);
+    List<Linked> getLinkedFields(Long connectionId);
+    List<Linked> toEntity(List<FieldBindingResource> fieldBindingResources, Connection connection);
 }

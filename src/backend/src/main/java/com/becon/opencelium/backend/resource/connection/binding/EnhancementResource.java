@@ -17,12 +17,12 @@
 package com.becon.opencelium.backend.resource.connection.binding;
 
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
-import org.springframework.hateoas.ResourceSupport;
+import jakarta.annotation.Resource;
+import org.springframework.hateoas.RepresentationModel;
 
-import javax.annotation.Resource;
 
 @Resource
-public class EnhancementResource extends ResourceSupport {
+public class EnhancementResource extends RepresentationModel {
 
     private Integer enhanceId;
     private String name;

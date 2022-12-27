@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import com.becon.opencelium.backend.resource.blayout.BLayoutArrowResource;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 
 @Entity

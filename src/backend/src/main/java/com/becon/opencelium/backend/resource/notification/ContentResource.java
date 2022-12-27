@@ -1,9 +1,9 @@
 package com.becon.opencelium.backend.resource.notification;
 
 import com.becon.opencelium.backend.mysql.entity.EventContent;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
-public class ContentResource extends ResourceSupport {
+public class ContentResource {
 
     private int contentId;
     private String subject;

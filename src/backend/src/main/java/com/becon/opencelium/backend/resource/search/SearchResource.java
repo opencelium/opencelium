@@ -3,10 +3,9 @@ package com.becon.opencelium.backend.resource.search;
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
+import jakarta.annotation.Resource;
 
-import javax.annotation.Resource;
-
-
+@Resource
 public class SearchResource {
 
     private long id;

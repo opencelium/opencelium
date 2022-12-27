@@ -16,21 +16,21 @@
 
 package com.becon.opencelium.backend.neo4j.entity;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
-@NodeEntity(label = "Response")
+@Node("Response")
 public class ResponseNode {
 
     @Id
     @GeneratedValue
     private Long id;
     private String name = "response";
-    @Relationship(type = "has_success", direction = Relationship.OUTGOING)
+    @Relationship(type = "has_success", direction = Relationship.Direction.OUTGOING)
     private ResultNode success;
-    @Relationship(type = "has_fail", direction = Relationship.OUTGOING)
+    @Relationship(type = "has_fail", direction = Relationship.Direction.OUTGOING)
     private ResultNode fail;
 
     public Long getId() {

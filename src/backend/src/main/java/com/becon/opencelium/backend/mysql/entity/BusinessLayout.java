@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.mysql.entity;
 import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 import java.util.stream.Collectors;
 

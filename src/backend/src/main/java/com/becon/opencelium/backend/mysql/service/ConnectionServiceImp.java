@@ -33,6 +33,7 @@ import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -57,6 +58,7 @@ public class ConnectionServiceImp implements ConnectionService{
     @Autowired
     private ConnectionNodeServiceImp connectionNodeService;
 
+    @Lazy
     @Autowired
     private SchedulerServiceImp schedulerService;
 

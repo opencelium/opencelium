@@ -26,16 +26,13 @@ import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.MalformedURLException;
@@ -63,7 +60,7 @@ public class TemplateController {
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("TEMPLATE_NOT_FOUND"));
         TemplateResource templateResource = templateService.toResource(template);
-        final Resource<TemplateResource> resource = new Resource<>(templateResource);
+        final EntityModel<TemplateResource> resource = EntityModel.of(templateResource);
         return ResponseEntity.ok().body(template);
     }
 
@@ -89,7 +86,7 @@ public class TemplateController {
             templateResources.add(templateResource);
         });
 
-        final Resources<TemplateResource> resources = new Resources<>(templateResources);
+        final CollectionModel<TemplateResource> resources = CollectionModel.of(templateResources);
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         return ResponseEntity.created(uri).body(resources);
     }
@@ -112,7 +109,7 @@ public class TemplateController {
             templateResources.add(templateResource);
         });
 
-        final Resources<TemplateResource> resources = new Resources<>(templateResources);
+        final CollectionModel<TemplateResource> resources = CollectionModel.of(templateResources);
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         return ResponseEntity.created(uri).body(resources);
     }
@@ -127,7 +124,7 @@ public class TemplateController {
             Template template = templateService.toEntity(templateResource);
             templateService.save(template);
             templateId = template.getTemplateId();
-            final Resource<TemplateResource> resource = new Resource<>(templateService.toResource(template));
+            final EntityModel<TemplateResource> resource = EntityModel.of(templateService.toResource(template));
             return ResponseEntity.ok().body(resource);
         } catch (Exception e){
             templateService.deleteById(templateId);
@@ -161,7 +158,7 @@ public class TemplateController {
             templateService.deleteById(templateResource.getTemplateId());
         }
         templateService.save(template);
-        final Resource<TemplateResource> resource = new Resource<>(templateService.toResource(template));
+        final EntityModel<TemplateResource> resource = EntityModel.of(templateService.toResource(template));
         return ResponseEntity.ok().body(resource);
     }
 
@@ -176,7 +173,7 @@ public class TemplateController {
             templateService.save(template);
         });
 
-        final Resources<TemplateResource> resource = new Resources<>(templateResources);
+        final CollectionModel<TemplateResource> resource = CollectionModel.of(templateResources);
         return ResponseEntity.ok().body(resource);
     }
 

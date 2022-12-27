@@ -17,8 +17,6 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.constant.RegExpression;
-import com.becon.opencelium.backend.elasticsearch.logs.entity.LogMessage;
-import com.becon.opencelium.backend.elasticsearch.logs.service.LogMessageServiceImp;
 import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.Body;
@@ -37,9 +35,17 @@ import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.*;
+import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -60,6 +66,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,20 +81,17 @@ public class ConnectorExecutor {
     private FieldNodeServiceImp fieldNodeService;
     private MethodNodeServiceImp methodNodeServiceImp;
     private ConnectorServiceImp connectorService;
-    private LogMessageServiceImp logMessageService;
     private VariableNodeServiceImp statementNodeService;
     private boolean debugMode = false;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
                              FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeServiceImp,
-                             ConnectorServiceImp connectorService, LogMessageServiceImp logMessageService,
-                             VariableNodeServiceImp statementNodeService) {
+                             ConnectorServiceImp connectorService, VariableNodeServiceImp statementNodeService) {
         this.invokerService = invokerService;
         this.executionContainer = executionContainer;
         this.fieldNodeService = fieldNodeService;
         this.methodNodeServiceImp = methodNodeServiceImp;
         this.connectorService = connectorService;
-        this.logMessageService = logMessageService;
         this.statementNodeService = statementNodeService;
     }
 
@@ -235,37 +239,6 @@ public class ConnectorExecutor {
 //        }i
         ResponseEntity<String> response = restTemplate.exchange(uri, method ,httpEntity, String.class);
         return response;
-    }
-
-    private CloseableHttpClient getDisabledHttpsClient() {
-
-        try {
-            TrustManager[] trustAllCerts = new TrustManager[] {
-                    new X509TrustManager() {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-                        public void checkClientTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-                        public void checkServerTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-                    }
-            };
-            SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            CloseableHttpClient httpClient = HttpClients.custom()
-                    .setSSLContext(sslContext)
-                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                    .build();
-
-
-
-            return httpClient;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private HttpMethod getMethod(MethodNode methodNode){
@@ -655,12 +628,38 @@ public class ConnectorExecutor {
         executeDecisionStatement(statementNode.getNextOperator());
     }
 
+    private CloseableHttpClient getDisabledHttpsClient() {
+
+        try {
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                        public void checkClientTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                        public void checkServerTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                    }
+            };
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            SSLConnectionSocketFactory ssl = new SSLConnectionSocketFactory(sslContext);
+            PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                    .setSSLSocketFactory(ssl).build();
+
+            return HttpClients.custom().setConnectionManager(connectionManager).build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private RestTemplate createRestTemplate(Connector connector) {
-        RestTemplate restTemplate = new RestTemplate();
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
         HttpComponentsClientHttpRequestFactory requestFactory;
         if (!connector.isSslCert()){
-//            ClientHttpRequestFactory requestFactory =
-//                    new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
             requestFactory =  new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
         } else {
             requestFactory = new HttpComponentsClientHttpRequestFactory();
@@ -669,11 +668,10 @@ public class ConnectorExecutor {
         int timeout = connector.getTimeout();
         if (timeout > 0) {
             requestFactory.setConnectTimeout(timeout);
-            requestFactory.setReadTimeout(timeout);
+            restTemplateBuilder.setReadTimeout(Duration.ofMillis(timeout));
         }
-
+        RestTemplate restTemplate = restTemplateBuilder.build();
         restTemplate.setRequestFactory(requestFactory);
-
         return restTemplate;
     }
 }

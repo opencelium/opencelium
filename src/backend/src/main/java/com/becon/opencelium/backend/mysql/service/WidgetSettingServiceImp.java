@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.mysql.entity.WidgetSetting;
 import com.becon.opencelium.backend.mysql.repository.WidgetSettingRepository;
 import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
     private WidgetServiceImp widgetServiceImp;
 
     @Autowired
+    @Lazy
     private UserServiceImpl userService;
 
     @Override

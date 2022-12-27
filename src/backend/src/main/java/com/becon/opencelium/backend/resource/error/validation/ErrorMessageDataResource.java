@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.resource.error.validation;
 
 import com.becon.opencelium.backend.validation.connection.entity.ErrorMessageData;
+import jakarta.annotation.Resource;
 
-import javax.annotation.Resource;
 
 @Resource
 public class ErrorMessageDataResource {

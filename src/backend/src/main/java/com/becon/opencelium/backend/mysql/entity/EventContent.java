@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.mysql.entity;
 import com.becon.opencelium.backend.resource.notification.ContentResource;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "event_content")

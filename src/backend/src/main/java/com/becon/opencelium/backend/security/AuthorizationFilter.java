@@ -22,39 +22,38 @@ import com.becon.opencelium.backend.mysql.entity.Activity;
 import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.mysql.service.ActivityServiceImpl;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
 
-@Component
+//@Component
 public class AuthorizationFilter extends BasicAuthenticationFilter {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private ActivityServiceImpl activityService;
 
-    @Autowired
     public AuthorizationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
 
-    // TODO: filter executes twice. FIX IT AS SOON AS POSSIBLE
     @Override
     protected void doFilterInternal( HttpServletRequest request,
                                      HttpServletResponse response,
@@ -73,22 +72,21 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith(SecurityConstant.BEARER)){
+        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (token == null || !token.startsWith(SecurityConstant.BEARER)){
             chain.doFilter(request, response);
-            throw new WrongHeaderAuthTypeException(header);
+            throw new WrongHeaderAuthTypeException(token);
         }
 
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION)
-                                .replace(SecurityConstant.BEARER + " ", "");
-        UsernamePasswordAuthenticationToken auth = getAuthentication(token);
+        String jwt = token.substring(7);
+        UsernamePasswordAuthenticationToken auth = getAuthentication(jwt);
         SecurityContextHolder.getContext().setAuthentication(auth);
         chain.doFilter(request, response);
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(String token) {
         String email = jwtTokenUtil.getEmailFromToken(token);
-        UserPrincipals userDetail = (UserPrincipals) jwtUserDetailsService.loadUserByUsername(email);
+        UserPrincipals userDetail = (UserPrincipals) userDetailsService.loadUserByUsername(email);
 
         if (!jwtTokenUtil.validateToken(token, userDetail)){
             return null;

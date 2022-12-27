@@ -16,12 +16,11 @@
 
 package com.becon.opencelium.backend.resource.schedule;
 
-import org.springframework.hateoas.ResourceSupport;
-
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class RunningJobsResource extends ResourceSupport {
+public class RunningJobsResource extends RepresentationModel {
 
     private int schedulerId;
     private String title;

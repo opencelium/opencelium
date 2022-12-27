@@ -17,12 +17,12 @@
 package com.becon.opencelium.backend.resource.connection.binding;
 
 import com.becon.opencelium.backend.neo4j.entity.FieldNode;
-import org.springframework.hateoas.ResourceSupport;
+import jakarta.annotation.Resource;
+import org.springframework.hateoas.RepresentationModel;
 
-import javax.annotation.Resource;
 
 @Resource
-public class LinkedFieldResource extends ResourceSupport {
+public class LinkedFieldResource extends RepresentationModel {
 
     private String color;
     private String type;

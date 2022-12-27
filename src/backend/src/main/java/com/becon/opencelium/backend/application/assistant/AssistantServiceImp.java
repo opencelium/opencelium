@@ -15,13 +15,11 @@ import com.becon.opencelium.backend.neo4j.service.LinkRelationServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.JsonPathException;
-import org.apache.commons.io.FileUtils;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -83,6 +81,9 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Autowired
     private ValidationContext validationContext;
+
+    @Autowired
+    private YamlPropertiesFactoryBean yamPropsFactory;
 
     @Override
     public SystemOverview getSystemOverview() {
@@ -185,6 +186,7 @@ public class AssistantServiceImp implements ApplicationService {
         }
     }
 
+    // TODO: test
     @Override
     public String getCurrentVersion() {
         return systemOverviewRepository.getCurrentVersionFromDb();
@@ -194,13 +196,9 @@ public class AssistantServiceImp implements ApplicationService {
     public String getVersionFromDir(String pathTodir) {
 
         try {
-            String content = String.join("\n", Files.readAllLines(Paths.get(pathTodir)));
-            ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
-            Object obj = yamlReader.readValue(content, Object.class);
-            ObjectMapper jsonReader = new ObjectMapper();
-            String s = jsonReader.writeValueAsString(obj);
-            if (JsonPath.isPathDefinite("$.opencelium.version")) {
-                return JsonPath.read(s, "$.opencelium.version");
+            Properties properties = yamPropsFactory.getObject();
+            if (Objects.requireNonNull(properties).containsKey("opencelium.version")) {
+                return properties.getProperty("opencelium.version");
             }
             return "NOT_SET";
         } catch (Exception e) {

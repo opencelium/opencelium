@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import com.becon.opencelium.backend.resource.blayout.BLayoutSvgItemResource;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "bl_svg_items")

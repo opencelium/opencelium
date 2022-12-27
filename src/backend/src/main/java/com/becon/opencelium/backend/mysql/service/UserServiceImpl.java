@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.mysql.repository.UserRoleRepository;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,7 @@ public class UserServiceImpl implements UserService{
     @Autowired
     private UserRoleRepository userRoleRepository;
 
+    @Lazy
     @Autowired
     private UserDetailServiceImpl detailService;
 
@@ -54,6 +56,13 @@ public class UserServiceImpl implements UserService{
     @Override
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
+//        User user = new User();
+//        UserRole role = new UserRole();
+//        role.setName("ADMIN");
+//        user.setEmail("admin@opencelium.io");
+//        user.setUserRole(role);
+//        user.setPassword("$2a$10$WOmLccLsWfqOJJpiGsyKcuSWKv91VyKvuSrARWvkLY.xAZXLaLZ36");
+//        return Optional.of(user);
     }
 
     @Override

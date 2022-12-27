@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.resource;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+
 import java.util.Map;
 
 @Resource

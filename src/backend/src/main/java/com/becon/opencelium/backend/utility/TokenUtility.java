@@ -8,15 +8,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class TokenUtility {
 
-    private String secret;
-    private Long activityTime;
-    private Long expirationTime;
-
     @Autowired
     private Environment env;
 
     public String getSecret() {
-        secret = env.getProperty("secret");
+        String secret = env.getProperty("secret");
         if (secret == null) {
             secret = SecurityConstant.SECRET;
         }
@@ -24,7 +20,7 @@ public class TokenUtility {
     }
 
     public long getActitvityTime() {
-        activityTime = env.getProperty("opencelium.token.activity-time", Long.class);
+        Long activityTime = env.getProperty("opencelium.token.activity-time", Long.class);
         if (activityTime == null) {
             activityTime = SecurityConstant.ACTIVITY_TIME;
         }
@@ -32,7 +28,7 @@ public class TokenUtility {
     }
 
     public long getExpirationTime() {
-        expirationTime = env.getProperty("opencelium.token.expiration-time", Long.class);
+        Long expirationTime = env.getProperty("opencelium.token.expiration-time", Long.class);
         if (expirationTime == null) {
             expirationTime = SecurityConstant.EXPIRATION_TIME;
         }

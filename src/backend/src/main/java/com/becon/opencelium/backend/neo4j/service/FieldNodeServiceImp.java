@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
@@ -52,6 +53,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
     @Autowired
     private FieldNodeRepository fieldNodeRepository;
 
+    @Lazy
     @Autowired
     private MethodNodeServiceImp functionNodeService;
 

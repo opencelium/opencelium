@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.mysql.repository.UserDetailRepository;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

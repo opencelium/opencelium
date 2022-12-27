@@ -1,8 +1,7 @@
 package com.becon.opencelium.backend.resource.application;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)

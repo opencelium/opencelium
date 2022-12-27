@@ -1,8 +1,7 @@
 package com.becon.opencelium.backend.resource.user;
 
-import com.becon.opencelium.backend.mysql.entity.WidgetSetting;
+import jakarta.annotation.Resource;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 @Resource

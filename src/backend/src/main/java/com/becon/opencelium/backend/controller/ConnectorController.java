@@ -16,11 +16,9 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.authentication.ApiAuth;
 import com.becon.opencelium.backend.exception.CommunicationFailedException;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
-import com.becon.opencelium.backend.factory.AuthFactory;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
@@ -33,7 +31,7 @@ import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -78,7 +76,7 @@ public class ConnectorController {
                 .stream().map(c -> connectorService.toResource(c))
                 .collect(Collectors.toList());
 
-        final Resources<ConnectorResource> resources = new Resources<>(connectorResources);
+        final CollectionModel<ConnectorResource> resources = CollectionModel.of(connectorResources);
         return ResponseEntity.ok(resources);
     }
     @PostMapping

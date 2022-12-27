@@ -22,7 +22,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -69,6 +69,7 @@ public class Connector {
     @Column(name = "ssl_cert")
     private boolean sslCert;
 
+    // millisecond
     @Column(name = "timeout")
     private int timeout;
 

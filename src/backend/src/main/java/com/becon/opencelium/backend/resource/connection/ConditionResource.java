@@ -18,12 +18,11 @@ package com.becon.opencelium.backend.resource.connection;
 
 import com.becon.opencelium.backend.neo4j.entity.StatementNode;
 import com.becon.opencelium.backend.utility.ConditionUtility;
-import org.springframework.hateoas.ResourceSupport;
-
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class ConditionResource extends ResourceSupport {
+public class ConditionResource extends RepresentationModel {
 
     private String relationalOperator;
     private StatementResource leftStatement;

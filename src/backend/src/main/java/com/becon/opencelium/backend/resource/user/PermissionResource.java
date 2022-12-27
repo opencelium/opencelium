@@ -16,13 +16,13 @@
 
 package com.becon.opencelium.backend.resource.user;
 
-import org.springframework.hateoas.ResourceSupport;
+import jakarta.annotation.Resource;
+import org.springframework.hateoas.RepresentationModel;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 @Resource
-public class PermissionResource extends ResourceSupport {
+public class PermissionResource extends RepresentationModel {
 
     private List<String> name;
 }

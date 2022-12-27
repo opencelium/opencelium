@@ -3,8 +3,6 @@ package com.becon.opencelium.backend.utility;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.invoker.resource.FieldResource;
 import com.becon.opencelium.backend.invoker.resource.OperationResource;
-import org.apache.commons.io.FilenameUtils;
-import org.springframework.security.core.parameters.P;
 import org.w3c.dom.*;
 
 import javax.xml.transform.OutputKeys;
@@ -39,7 +37,7 @@ public class Xml {
         this.document = document;
         this.format = document.getElementsByTagName("invoker").item(0)
                 .getAttributes().getNamedItem("type").getNodeValue();
-        this.fileName = FilenameUtils.getExtension(fileName)
+        this.fileName = FileNameUtils.getExtension(fileName)
                 .equalsIgnoreCase("xml") ? fileName : fileName + ".xml";
     }
 

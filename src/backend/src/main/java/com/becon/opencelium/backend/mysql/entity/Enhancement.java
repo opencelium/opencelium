@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.mysql.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "enhancement")

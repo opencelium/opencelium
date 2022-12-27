@@ -17,12 +17,11 @@
 package com.becon.opencelium.backend.resource.connector;
 
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
-import org.springframework.hateoas.ResourceSupport;
-
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class FunctionResource extends ResourceSupport {
+public class FunctionResource extends RepresentationModel {
 
     private String name;
     private String type;

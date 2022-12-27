@@ -24,7 +24,7 @@ import java.util.Optional;
 public interface MethodNodeService {
     Optional<MethodNode> getByFieldNodeId(Long nodeId);
     Optional<MethodNode> findById(Long id);
-    Iterable<MethodNode> findAllById(List<Long> ids);
+//    Iterable<MethodNode> findAllById(List<Long> ids);
     Optional<MethodNode> findByConnectionIdAndColor(Long connectionId, String color);
     List<MethodNode> findMethodsByConnectionIdAndConnectorId(Long connectionId, String direction, Integer id);
 }

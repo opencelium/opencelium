@@ -20,8 +20,8 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.WrongEncode;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
+import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -154,7 +154,7 @@ public class TemplateServiceImp implements TemplateService {
         try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
             ObjectMapper objectMapper = new ObjectMapper();
             return walk.filter(Files::isRegularFile)
-                    .filter(path -> FilenameUtils.getExtension(path.toString()).equals("json"))
+                    .filter(path -> FileNameUtils.getExtension(path.toString()).equals("json"))
                     .map(path -> {
 //                        if(!FilenameUtils.getExtension(path.toString()).equals("json")){
 //                            return null;
@@ -179,7 +179,7 @@ public class TemplateServiceImp implements TemplateService {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Template> files = new HashMap<>();
             walk.filter(Files::isRegularFile).forEach(path -> {
-                if(!FilenameUtils.getExtension(path.toString()).equals("json")){
+                if(!FileNameUtils.getExtension(path.toString()).equals("json")){
                     return;
                 }
                 StringBuilder contentBuilder = new StringBuilder();
