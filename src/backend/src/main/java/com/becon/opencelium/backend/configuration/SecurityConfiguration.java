@@ -50,28 +50,11 @@ public class SecurityConfiguration {
     @Lazy
     @Autowired
     private AuthenticationFilter authenticationFilter;
-//    @Autowired
-//    private AuthorizationFilter authorizationFilter;
-
     @Lazy
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception{
         return new ProviderManager(authenticationProvider());
     }
-
-    //TODO: need ti find another way to add authentication Manager bean in security context.
-    // Because authorizationFilter called twice
-//    @Bean
-//    public FilterRegistrationBean<AuthorizationFilter> filterRegistrationBean(AuthenticationManager am) throws Exception {
-//        FilterRegistrationBean<AuthorizationFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-//        AuthorizationFilter tokenAuthenticationFilter = filterRegistrationBean.getFilter();
-//
-//        tokenAuthenticationFilter = new AuthorizationFilter(am);
-//        filterRegistrationBean.setFilter(tokenAuthenticationFilter);
-//        filterRegistrationBean.setEnabled(false);
-//
-//        return filterRegistrationBean;
-//    }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
@@ -91,10 +74,6 @@ public class SecurityConfiguration {
     public AuthorizationFilter getAuthorizationFilter() throws Exception{
         return new AuthorizationFilter(authenticationManagerBean());
     }
-
-//    public void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(authUserDetailsService).passwordEncoder(bCryptPasswordEncoder);
-//    }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -116,24 +95,13 @@ public class SecurityConfiguration {
                                .permitAll()
                                .anyRequest()
                                .authenticated())
-//                .addFilter(authenticationFilter)
-//                .authenticationProvider(authenticationProvider())
                 .addFilter(authenticationFilter)
                 .addFilter(getAuthorizationFilter())
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-
-//                .addFilter(authenticationFilter)
-//                .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-
     }
-
-//    @Override
-//    public void configure(WebSecurity web) throws Exception {
-//        web.ignoring().antMatchers("/api/storage/files/**", "/api/webhook/execute/**", "/api/webhook/health");
-//    }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {

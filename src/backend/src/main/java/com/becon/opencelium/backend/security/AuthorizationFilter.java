@@ -38,7 +38,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-//@Component
 public class AuthorizationFilter extends BasicAuthenticationFilter {
 
     @Autowired
@@ -60,6 +59,7 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
                                      FilterChain chain ) throws IOException, ServletException {
 
         String url  = request.getRequestURI();
+        System.out.println(url);
         if (url.contains("api/webhook/execute") || url.contains("api/storage/files") || url.contains("api/webhook/health")){
 
             response.setHeader("Access-Control-Allow-Origin", "*");
