@@ -50,7 +50,7 @@ public class User {
     private UserRole userRole;
 
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
     private Set<WidgetSetting> widgetSettings = new HashSet<>();
 
     public User() {

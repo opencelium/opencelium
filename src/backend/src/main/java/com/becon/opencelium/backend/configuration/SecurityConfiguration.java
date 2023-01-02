@@ -33,10 +33,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 @Configuration
@@ -47,17 +47,23 @@ public class SecurityConfiguration {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired
     private JwtUserDetailsService authUserDetailsService;
+
     @Lazy
     @Autowired
     private AuthenticationFilter authenticationFilter;
-    @Lazy
+
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception{
         return new ProviderManager(authenticationProvider());
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    public AuthorizationFilter getAuthorizationFilter() throws Exception{
+        return new AuthorizationFilter(authenticationManagerBean());
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.addExposedHeader("GroupPermissionOperations, Authorization");
@@ -71,11 +77,6 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public AuthorizationFilter getAuthorizationFilter() throws Exception{
-        return new AuthorizationFilter(authenticationManagerBean());
-    }
-
-    @Bean
     public AuthenticationProvider authenticationProvider() {
         final DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setPasswordEncoder(bCryptPasswordEncoder);
@@ -85,16 +86,14 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception{
-
         return httpSecurity
                 .cors()
                 .and()
                 .csrf().disable()
-                .authorizeHttpRequests((request) ->
-                        request.requestMatchers("/api/storage/files/**", "/api/webhook/execute/**", "/api/webhook/health")
-                               .permitAll()
-                               .anyRequest()
-                               .authenticated())
+                .authorizeHttpRequests()
+                .anyRequest()
+                .authenticated()
+                .and()
                 .addFilter(authenticationFilter)
                 .addFilter(getAuthorizationFilter())
                 .sessionManagement()
