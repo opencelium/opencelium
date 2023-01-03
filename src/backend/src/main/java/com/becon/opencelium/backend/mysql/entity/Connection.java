@@ -66,6 +66,9 @@ public class Connection   {
     @Column(name = "modified_on")
     private Date modifiedOn;
 
+    @Column(name = "icon")
+    private String icon;
+
     @OneToMany(mappedBy = "connection", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Enhancement> enhancements;
 
@@ -151,6 +154,14 @@ public class Connection   {
         this.modifiedOn = modifiedOn;
     }
 
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
     public List<Enhancement> getEnhancements() {
         return enhancements;
     }
@@ -173,5 +184,24 @@ public class Connection   {
 
     public void setBusinessLayout(BusinessLayout businessLayout) {
         this.businessLayout = businessLayout;
+    }
+
+    @Override
+    public String toString() {
+        return "Connection{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", fromConnector=" + fromConnector +
+                ", toConnector=" + toConnector +
+                ", createdBy=" + createdBy +
+                ", createdOn=" + createdOn +
+                ", modifiedBy=" + modifiedBy +
+                ", modifiedOn=" + modifiedOn +
+                ", enhancements=" + enhancements +
+                ", schedulers=" + schedulers +
+                ", businessLayout=" + businessLayout +
+                ", icon=" + icon +
+                '}';
     }
 }

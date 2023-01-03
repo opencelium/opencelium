@@ -37,6 +37,8 @@ public class UserRoleResource extends RepresentationModel {
     private String icon;
     private List<ComponentResource> components = new ArrayList<>();
 
+//    private final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
+//    private final String imagePath = new ServerUtility().getUri();
     private final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
     private final String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
 
@@ -45,7 +47,7 @@ public class UserRoleResource extends RepresentationModel {
         this.name = userRole.getName();
         this.description = userRole.getDescription();
         if (userRole.getIcon() != null){
-            this.icon = imagePath + userRole.getIcon();
+            this.icon = "imagePath" + userRole.getIcon();
         }
         this.components = userRole.getComponents().stream()
                 .map(RoleHasPermission::getComponent)

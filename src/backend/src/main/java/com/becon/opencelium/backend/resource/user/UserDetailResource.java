@@ -46,6 +46,7 @@ public class UserDetailResource extends RepresentationModel {
 
     private final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
     private final String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
+//    private final String imagePath = new ServerUtility().getUri();
 
     public UserDetailResource() {
     }
