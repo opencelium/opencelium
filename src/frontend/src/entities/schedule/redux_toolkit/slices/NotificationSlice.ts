@@ -21,7 +21,7 @@ import {CommonState} from "@application/utils/store";
 import IUser from "@entity/user/interfaces/IUser";
 import {INotification} from "../../interfaces/INotification";
 import {
-    addNotification,
+    addNotification, addNotificationToSelectedSchedules,
     checkNotificationName,
     deleteNotificationById,
     getNotificationById, getNotificationByScheduleIdAndId, getNotificationRecipients, getNotificationsByScheduleId,
@@ -34,6 +34,7 @@ export interface NotificationState extends ICommonState{
     isCurrentNotificationHasUniqueName: TRIPLET_STATE,
     checkingNotificationName: API_REQUEST_STATE,
     addingNotification: API_REQUEST_STATE,
+    addingNotificationToSelectedSchedules: API_REQUEST_STATE,
     updatingNotification: API_REQUEST_STATE,
     gettingNotificationById: API_REQUEST_STATE,
     gettingNotificationByScheduleIdAndId: API_REQUEST_STATE,
@@ -50,6 +51,7 @@ const initialState: NotificationState = {
     isCurrentNotificationHasUniqueName: TRIPLET_STATE.INITIAL,
     checkingNotificationName: API_REQUEST_STATE.INITIAL,
     addingNotification: API_REQUEST_STATE.INITIAL,
+    addingNotificationToSelectedSchedules: API_REQUEST_STATE.INITIAL,
     updatingNotification: API_REQUEST_STATE.INITIAL,
     gettingNotificationById: API_REQUEST_STATE.INITIAL,
     gettingNotificationByScheduleIdAndId: API_REQUEST_STATE.INITIAL,
@@ -77,6 +79,17 @@ export const notificationSlice = createSlice({
         },
         [checkNotificationName.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.checkingNotificationName = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [addNotificationToSelectedSchedules.pending.type]: (state, action: PayloadAction<INotification>) => {
+            state.addingNotificationToSelectedSchedules = API_REQUEST_STATE.START;
+        },
+        [addNotificationToSelectedSchedules.fulfilled.type]: (state, action: PayloadAction<number[]>) => {
+            state.addingNotificationToSelectedSchedules = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [addNotificationToSelectedSchedules.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.addingNotificationToSelectedSchedules = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [addNotification.pending.type]: (state, action: PayloadAction<INotification>) => {

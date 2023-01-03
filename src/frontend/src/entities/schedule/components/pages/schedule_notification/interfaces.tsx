@@ -21,8 +21,10 @@ import { ISchedule } from "../../../interfaces/ISchedule";
 interface ScheduleNotificationFormProps extends IForm{
     toggle: () => void,
     isToggled: boolean,
-    schedule: ISchedule,
-    notificationId: number,
+    schedule?: ISchedule,
+    notificationId?: number,
+    isPlural?: boolean,
+    selectedScheduleIds?: number[],
 }
 
 interface ScheduleNotificationListProps extends ScheduleNotificationListStyledProps{

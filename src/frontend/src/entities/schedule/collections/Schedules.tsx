@@ -48,6 +48,8 @@ import LastDurationExecution from "../components/last_duration_execution/LastDur
 import LastFailExecution from "../components/last_fail_execution/LastFailExecution";
 import {updateConnector} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {InlineEditInput} from "@app_component/collection/collection_view/InlineEditInput";
+import SelectedNotificationButton
+    from "@entity/schedule/components/selected_notification_button/SelectedNotificationButton";
 
 class Schedules extends ListCollection<ScheduleProps>{
     name: string = 'schedules';
@@ -149,9 +151,7 @@ class Schedules extends ListCollection<ScheduleProps>{
         return(
             <React.Fragment>
                 <PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Schedule'} permission={SchedulePermissions.CREATE}/>
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0}  key={'start_button'} handleClick={() => this.dispatch(startSchedules(scheduleIds))} icon={'play_arrow'} label={'Start'} permission={SchedulePermissions.UPDATE}/>}
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0}  key={'enable_button'} handleClick={() => this.dispatch(enableSchedules(scheduleIds))} icon={'radio_button_unchecked'} label={'Enable'} permission={SchedulePermissions.UPDATE}/>}
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0}  key={'disable_button'} handleClick={() => this.dispatch(disableSchedules(scheduleIds))} icon={'cancel'} label={'Disable'} permission={SchedulePermissions.UPDATE}/>}
+                {viewType === ViewType.LIST && this.entities.length !== 0 && <SelectedNotificationButton key={'start_button'} scheduleIds={checkedIds}/>}
                 {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete'} handleClick={() => this.dispatch(deleteSchedulesById(checkedIds))} permission={SchedulePermissions.DELETE}/>}
             </React.Fragment>
         );

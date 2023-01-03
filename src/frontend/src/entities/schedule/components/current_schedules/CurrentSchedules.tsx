@@ -15,7 +15,7 @@
 
 import React, {FC, useEffect} from 'react';
 import {withTheme} from 'styled-components';
-import {usePrevious} from "@application/utils/usePrevious";
+import {usePrevious} from "@application/utils/hooks/usePrevious";
 import {useAppDispatch} from "@application/utils/store";
 import { CurrentSchedulesProps } from './interfaces';
 import {CurrentSchedulesStyled, EmptyListStyled, HeaderStyled} from './styles';

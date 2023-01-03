@@ -19,7 +19,7 @@ import {actions} from '../../redux_toolkit/slices/ScheduleSlice';
 const {
     addSchedule, disableSchedules, enableSchedules, switchScheduleStatus, startSchedule, deleteScheduleById,
     updateSchedule, startSchedules, deleteSchedulesById, getCurrentSchedules, getSchedulesById,
-    checkScheduleTitle, getScheduleById, getAllSchedules, deleteWebhook, getWebhook,
+    checkScheduleTitle, getScheduleById, getAllSchedules, deleteWebhook, getWebhook, addNotificationToSelectedSchedules,
 } = ActionCreators;
 
 const {
@@ -28,6 +28,7 @@ const {
 
 export default {
     fulfilled: {
+        [addNotificationToSelectedSchedules.fulfilled.type]: "The notification was successfully added to selected schedules",
         [addSchedule.fulfilled.type]: "The schedule <1><0>{{title}}</0></1> was successfully added",
         [deleteScheduleById.fulfilled.type]: "The schedule <1><0>{{title}}</0></1> was successfully removed",
         [updateSchedule.fulfilled.type]: "The schedule <1><0>{{title}}</0></1> was successfully updated",
@@ -43,6 +44,9 @@ export default {
 
     },
     rejected: {
+        [addNotificationToSelectedSchedules.rejected.type]: {
+            "__DEFAULT__": "The notification was not added",
+        },
         [addSchedule.rejected.type]: {
             "__DEFAULT__": "The schedule was not added"
         },

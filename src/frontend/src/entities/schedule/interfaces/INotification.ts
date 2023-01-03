@@ -42,12 +42,14 @@ export interface INotificationForm extends INotificationText, INotificationSelec
     reduxState?: NotificationState;
     getById: () => boolean;
     add: () => boolean;
+    addToSelectedSchedules: (ids: number[]) => boolean;
     update: () => boolean;
     deleteById: () => boolean;
 }
 
 export interface INotification extends INotificationForm{
     id?: number;
+    selectedScheduleIds?: number[];
     notificationId?: number;
     scheduleId?: number,
     schedulerId?: number,

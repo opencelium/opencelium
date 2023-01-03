@@ -37,10 +37,12 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         isToggled,
         schedule,
         notificationId,
+        isPlural,
+        selectedScheduleIds,
     }) => {
     const {
         addingNotification, updatingNotification, currentNotification, isCurrentNotificationHasUniqueName, checkingNotificationName,
-        gettingNotificationRecipients, recipients, error,
+        gettingNotificationRecipients, recipients, error, addingNotificationToSelectedSchedules,
     } = Notification.getReduxState();
     const {
         notificationTemplates, gettingNotificationTemplates,
@@ -50,7 +52,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     const recipientsOptions: OptionProps[] = recipients.map(recipient => {return {label: recipient.email, value: recipient.email}})
     const didMount = useRef(false);
     const shouldFetchScheduleNotification = isUpdate || isView;
-    const notification = Notification.createState<INotification>({id: notificationId, scheduleId: schedule.id, _readOnly: isView}, isAdd ? null : currentNotification);
+    const notification = Notification.createState<INotification>({id: notificationId, scheduleId: schedule ? schedule.id : 0, _readOnly: isView}, isAdd ? null : currentNotification);
     useEffect(() => {
         if(shouldFetchScheduleNotification){
             notification.getById()
@@ -112,7 +114,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         }
     });
     let actionLabel = isAdd ? 'Add' : isUpdate ? 'Update' : '';
-    let action = isAdd ? () => notification.add() : isUpdate ? () => notification.update() : null;
+    let action = isPlural ? () => notification.addToSelectedSchedules(selectedScheduleIds) : isAdd ? () => notification.add() : isUpdate ? () => notification.update() : null;
     return(
         <Dialog
             actions={[{label: actionLabel, onClick: action, id: 'action_button'}, {label: 'Cancel', onClick: toggle, id: 'cancel_button'}]}
@@ -127,6 +129,13 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             {!!notification.typeSelect && RecipientsComponent}
         </Dialog>
     )
+}
+
+ScheduleNotificationForm.defaultProps = {
+    isAdd: true,
+    notificationId: 0,
+    isPlural: false,
+    selectedScheduleIds: [],
 }
 
 export default ScheduleNotificationForm
