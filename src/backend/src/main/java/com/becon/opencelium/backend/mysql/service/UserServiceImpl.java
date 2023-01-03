@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,18 +57,11 @@ public class UserServiceImpl implements UserService{
     @Override
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
-//        User user = new User();
-//        UserRole role = new UserRole();
-//        role.setName("ADMIN");
-//        user.setEmail("admin@opencelium.io");
-//        user.setUserRole(role);
-//        user.setPassword("$2a$10$WOmLccLsWfqOJJpiGsyKcuSWKv91VyKvuSrARWvkLY.xAZXLaLZ36");
-//        return Optional.of(user);
     }
 
     @Override
     public Optional<User> findById(int id) {
-        return userRepository.findById(id);
+        return userRepository.findOneById(id);
     }
 
     @Override
@@ -87,7 +81,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void deleteById(int id) {
-        userRepository.deleteById(id);
+        userRepository.deleteOneById(id);
     }
 
     @Override

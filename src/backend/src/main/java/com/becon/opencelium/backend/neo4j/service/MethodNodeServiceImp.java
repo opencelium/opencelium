@@ -76,7 +76,9 @@ public class MethodNodeServiceImp implements MethodNodeService {
 
     @Override
     public Optional<MethodNode> findByConnectionIdAndColor(Long connectionId, String color) {
-        return methodNodeRepository.findByConnectionIdAndColor(connectionId, color);
+        Long methodId = methodNodeRepository.findIdByConnectionIdAndColor(connectionId, color)
+                .orElseThrow(() -> new RuntimeException("Method with color: " + color + "NOT FOUND in connection: " + connectionId));
+        return methodNodeRepository.findById(methodId);
     }
 
     @Override

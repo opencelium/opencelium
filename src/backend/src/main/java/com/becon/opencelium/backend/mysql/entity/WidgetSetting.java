@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 @Table(name = "widget_setting")
 public class WidgetSetting {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 

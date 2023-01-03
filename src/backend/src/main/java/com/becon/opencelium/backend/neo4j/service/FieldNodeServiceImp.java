@@ -197,7 +197,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
                 }
             } else if (f.getType().equals("array")){
                 if (f.getChild() == null || f.getChild().isEmpty()){
-                    if (f.getValue().isEmpty()){
+                    if (f.getValue() == null ||  f.getValue().isEmpty()){
                         fields.put(f.getName(), new ArrayList<>());
                         return;
                     }

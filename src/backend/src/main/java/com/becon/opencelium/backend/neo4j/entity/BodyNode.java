@@ -30,7 +30,7 @@ public class BodyNode {
     @GeneratedValue
     private Long id;
 
-    final private String name = "body";
+    private String name = "body";
     private String type;
     private String format;
     private String data;
@@ -48,6 +48,10 @@ public class BodyNode {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public List<FieldNode> getFields() {

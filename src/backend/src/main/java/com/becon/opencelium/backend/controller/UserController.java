@@ -60,7 +60,6 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable("id") int id) throws IOException {
-
         return userService.findById(id).map(p ->
                 ResponseEntity.ok(new UserResource(p))).orElseThrow(() -> new UserNotFoundException(id));
     }
@@ -148,7 +147,7 @@ public class UserController {
                             if (p.getUserDetail().getProfilePicture() != null){
                                 storageService.delete(p.getUserDetail().getProfilePicture());
                             }
-
+                            // delete user
                             userService.deleteById(id);
                             return ResponseEntity.noContent().build();
                         })

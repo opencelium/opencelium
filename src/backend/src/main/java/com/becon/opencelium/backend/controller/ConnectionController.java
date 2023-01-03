@@ -140,11 +140,12 @@ public class ConnectionController {
                         .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
                 enhancementNodeService.saveAll(enhancementNodes);
 
-                List<Linked> linkRelations = linkRelationService
-                        .toEntity(connectionResource.getFieldBinding(), connection);
-                if (linkRelations != null && !linkRelations.isEmpty()){
-                    linkRelationService.saveAll(linkRelations);
-                }
+                // Uncomment if fields are linked DIRECTLY, without enhancement;
+//                List<Linked> linkRelations = linkRelationService
+//                        .toEntity(connectionResource.getFieldBinding(), connection);
+//                if (linkRelations != null && !linkRelations.isEmpty()){
+//                    linkRelationService.saveAll(linkRelations);
+//                }
             }
 
             final EntityModel<ConnectionResource> resource = EntityModel.of(connectionService.toNodeResource(connection));
