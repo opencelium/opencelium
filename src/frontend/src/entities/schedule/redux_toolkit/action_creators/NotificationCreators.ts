@@ -31,6 +31,21 @@ export const checkNotificationName = createAsyncThunk(
     }
 )
 
+export const addNotificationToSelectedSchedules = createAsyncThunk(
+    'schedule/notification/add/toSelectedSchedules',
+    async(notification: INotification, thunkAPI) => {
+        try {
+            for(let i = 0; i < notification.selectedScheduleIds.length; i++){
+                const request = new NotificationRequest({endpoint: `/${notification.selectedScheduleIds[i]}/notification`});
+                await request.addNotification(notification);
+            }
+            return notification.selectedScheduleIds;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const addNotification = createAsyncThunk(
     'schedule/notification/add',
     async(notificationTemplate: INotification, thunkAPI) => {
@@ -126,6 +141,7 @@ export const deleteNotificationById = createAsyncThunk(
 
 export default {
     checkNotificationName,
+    addNotificationToSelectedSchedules,
     addNotification,
     updateNotification,
     getNotificationById,

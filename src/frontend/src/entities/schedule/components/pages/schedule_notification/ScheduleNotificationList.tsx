@@ -26,6 +26,8 @@ import {getNotificationsByScheduleId} from "../../../redux_toolkit/action_creato
 import { ScheduleNotificationListProps } from './interfaces';
 import {BottomActionsStyled, EmptyListStyled, ScheduleNotificationListStyled, ListStyled} from './styles';
 import ScheduleNotificationForm from "./ScheduleNotificationForm";
+import {useConstructor} from "@application/utils/hooks/useConstructor";
+import {useEventListener} from "@application/utils/utils";
 
 const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
     ({
@@ -72,6 +74,19 @@ const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
         .filter(notification => {
             return notification.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
         });
+    const checkIfClickedOutside = (e: any) => {
+        const listNode = document.getElementById('schedule_notification_list');
+        if(listNode){
+            if (isVisible && !listNode.contains(e.target)) {
+                const inputElement = document.querySelector('[role=dialog]');
+                const isPartOfDialog = inputElement ? document.querySelector('[role=dialog]').contains(e.target) : false;
+                if(!isPartOfDialog){
+                    close();
+                }
+            }
+        }
+    }
+    useEventListener('mousedown', checkIfClickedOutside, window, isVisible);
     return (
         ReactDOM.createPortal(
             <ScheduleNotificationListStyled x={x} y={y}>
@@ -82,7 +97,7 @@ const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
                     {notificationEntities.length === 0 && <EmptyListStyled value={'There are no notifications'}/>}
                     {notificationEntities.map(notification => {
                         return (
-                            <div>
+                            <div key={notification.id}>
                                 <span>{`${notification.name} (${notification.eventType}/${notification.type})`}</span>
                                 <TooltipButton target={`delete_schedule_notification_${notification.id}`} tooltip={'Delete'} float={'right'} iconSize={TextSize.Size_20} hasConfirmation={true} confirmationText={'Do you really want to delete?'} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} handleClick={() => notification.deleteById()}/>
                                 <TooltipButton target={`update_schedule_notification_${notification.id}`} tooltip={'Update'} float={'right'} iconSize={TextSize.Size_20} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} handleClick={() => onUpdate(notification)}/>

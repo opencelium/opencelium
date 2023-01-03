@@ -15,7 +15,7 @@
 
 import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
-import {usePrevious} from "@application/utils/usePrevious";
+import {usePrevious} from "@application/utils/hooks/usePrevious";
 import { LastDurationExecutionProps } from './interfaces';
 import {LastDurationExecutionStyled} from "./styles";
 

@@ -33,7 +33,7 @@ import {
 } from "../interfaces/INotification";
 import {NotificationState} from "../redux_toolkit/slices/NotificationSlice";
 import {
-    addNotification,
+    addNotification, addNotificationToSelectedSchedules,
     deleteNotificationById,
     getNotificationByScheduleIdAndId,
     updateNotification
@@ -43,6 +43,8 @@ export class Notification extends HookStateClass implements INotification{
     id: number;
 
     scheduleId: number;
+
+    selectedScheduleIds?: number[];
 
     static reduxState?: NotificationState;
 
@@ -206,6 +208,12 @@ export class Notification extends HookStateClass implements INotification{
     @App.dispatch<INotification>(getNotificationByScheduleIdAndId, {mapping: (notification: INotification) => {return {id: notification.id, scheduleId: notification.scheduleId};}, hasNoValidation: true})
     getById(): boolean{
         return this.validateId(this.id);
+    }
+
+    @App.dispatch(addNotificationToSelectedSchedules)
+    addToSelectedSchedules(scheduleIds: number[]): boolean{
+        this.selectedScheduleIds = scheduleIds;
+        return this.validateAdd();
     }
 
     @App.dispatch(addNotification)
