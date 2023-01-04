@@ -17,16 +17,12 @@
 package com.becon.opencelium.backend.aspect;
 
 import com.becon.opencelium.backend.mysql.entity.Activity;
-import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.service.ActivityServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
-import com.becon.opencelium.backend.security.UserPrincipals;
-import io.jsonwebtoken.Claims;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -48,9 +44,9 @@ public class AuthenticationAspect {
                     returning = "token")
     public void afterTokenGeneration(String token){
         String tokenId = jwtTokenUtil.getTokenId(token);
-        int userId = (int) jwtTokenUtil.getClaim(token, "userId");
+        String userId = jwtTokenUtil.getClaim(token, "userId").toString();
         Activity activity = new Activity();
-        activity.setId(userId);
+        activity.setId(Integer.parseInt(userId));
         activity.setTokenId(tokenId);
         activity.setLocked(false);
         activity.setRequestTime(new Date());
