@@ -138,7 +138,9 @@ public class ConnectionController {
 
                 List<EnhancementNode> enhancementNodes =  connectionNodeService
                         .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
-                enhancementNodeService.saveAll(enhancementNodes);
+
+                throw new RuntimeException("Test exception");
+//                enhancementNodeService.saveAll(enhancementNodes);
 
                 // Uncomment if fields are linked DIRECTLY, without enhancement;
 //                List<Linked> linkRelations = linkRelationService
@@ -153,7 +155,7 @@ public class ConnectionController {
             return ResponseEntity.ok().body(resource);
         } catch (Exception e) {
             e.printStackTrace();
-            enhancementService.deleteAllByConnectionId(connectionId);
+//            enhancementService.deleteAllByConnectionId(connectionId);
             connectionService.deleteById(connectionId);
             connectionNodeService.deleteById(connectionId);
 
