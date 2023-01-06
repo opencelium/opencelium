@@ -18,10 +18,16 @@ package com.becon.opencelium.backend.mysql.repository;
 
 import com.becon.opencelium.backend.mysql.entity.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface UserRoleRepository extends JpaRepository<UserRole, Integer> {
 
     boolean existsByName(String role);
+
+    @Query(value = "SELECT * FROM role", nativeQuery = true)
+    List<UserRole> findAll();
 }
