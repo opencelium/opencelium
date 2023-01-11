@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,7 +40,8 @@ public class UserRole {
     @Column(name = "icon")
     private String icon;
 
-    @OneToOne(mappedBy = "userRole", fetch = FetchType.EAGER)
+    @Transient
+    @OneToOne(mappedBy = "userRole")
     private User user;
 
     @OneToMany(mappedBy = "userRole", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

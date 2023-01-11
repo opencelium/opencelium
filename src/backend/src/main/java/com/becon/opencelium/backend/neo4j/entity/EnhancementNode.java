@@ -20,6 +20,7 @@ import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ import java.util.List;
 public class EnhancementNode {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(UUIDStringGenerator.class)
     private Long id;
 
     private Integer enhanceId; // TODO: need to change in db from int to bigint

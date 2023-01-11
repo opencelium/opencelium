@@ -20,12 +20,13 @@ import com.becon.opencelium.backend.resource.connection.StatementResource;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 @Node("Variable")
 public class StatementVariable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(UUIDStringGenerator.class)
     private Long id;
 
     private String color;

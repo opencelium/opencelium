@@ -36,15 +36,9 @@ import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.*;
-import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -75,13 +69,13 @@ public class ConnectorExecutor {
 
     private Invoker invoker;
 
-    private InvokerServiceImp invokerService;
+    private final InvokerServiceImp invokerService;
     private RestTemplate restTemplate;
-    private ExecutionContainer executionContainer;
-    private FieldNodeServiceImp fieldNodeService;
-    private MethodNodeServiceImp methodNodeServiceImp;
-    private ConnectorServiceImp connectorService;
-    private VariableNodeServiceImp statementNodeService;
+    private final ExecutionContainer executionContainer;
+    private final FieldNodeServiceImp fieldNodeService;
+    private final MethodNodeServiceImp methodNodeServiceImp;
+    private final ConnectorServiceImp connectorService;
+    private final VariableNodeServiceImp statementNodeService;
     private boolean debugMode = false;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
@@ -180,7 +174,6 @@ public class ConnectorExecutor {
         FunctionInvoker functionInvoker = invoker.getOperations().stream()
                 .filter(m -> m.getName().equals(methodNode.getName())).findFirst()
                 .orElseThrow(() -> new RuntimeException("Method not found in Invoker"));
-        String taId = executionContainer.getTaId();
 
         if (debugMode) {
             System.out.println("============================================================");
@@ -237,8 +230,7 @@ public class ConnectorExecutor {
 //        f (invoker.getName().equalsIgnoreCase("igel")){
 //            restTemplate = getRestTemplate();
 //        }i
-        ResponseEntity<String> response = restTemplate.exchange(uri, method ,httpEntity, String.class);
-        return response;
+        return restTemplate.exchange(uri, method ,httpEntity, String.class);
     }
 
     private HttpMethod getMethod(MethodNode methodNode){
@@ -628,7 +620,7 @@ public class ConnectorExecutor {
         executeDecisionStatement(statementNode.getNextOperator());
     }
 
-    private CloseableHttpClient getDisabledHttpsClient() {
+    public static CloseableHttpClient getDisabledHttpsClient() {
 
         try {
             TrustManager[] trustAllCerts = new TrustManager[] {
@@ -656,7 +648,7 @@ public class ConnectorExecutor {
         }
     }
 
-    private RestTemplate createRestTemplate(Connector connector) {
+    public static RestTemplate createRestTemplate(Connector connector) {
         RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
         HttpComponentsClientHttpRequestFactory requestFactory;
         if (!connector.isSslCert()){

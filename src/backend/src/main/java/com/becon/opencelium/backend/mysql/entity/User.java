@@ -45,8 +45,8 @@ public class User {
     @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "user")
     private UserDetail userDetail;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", referencedColumnName = "id")
+    @OneToOne
+    @JoinColumn(name = "role_id")
     private UserRole userRole;
 
 
