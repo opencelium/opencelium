@@ -15,6 +15,7 @@
  */
 
 package com.becon.opencelium.backend.controller;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
@@ -49,7 +50,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.List;
@@ -245,12 +248,16 @@ public class ConnectionController {
 
     @GetMapping("/check/{name}")
     public ResponseEntity<?> existsByName(@PathVariable("name") String name) throws IOException {
+        RuntimeException ex;
         if (connectionService.existsByName(name)){
-            throw new ResponseStatusException(
-                    HttpStatus.OK, "EXISTS");
+            ex = new RuntimeException("EXISTS");
         } else {
-            throw new ResponseStatusException(HttpStatus.OK, "NOT_EXISTS");
+            ex = new RuntimeException("NOT_EXISTS");
         }
+
+        String uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri().toString();
+        ErrorResource errorResource = new ErrorResource(ex, HttpStatus.OK, uri);
+        return ResponseEntity.ok().body(errorResource);
     }
 
 

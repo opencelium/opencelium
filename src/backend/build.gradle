@@ -28,6 +28,10 @@ repositories {
 	mavenCentral()
 }
 
+tasks.named('bootJar') {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
