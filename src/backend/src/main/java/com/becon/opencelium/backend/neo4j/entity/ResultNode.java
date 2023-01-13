@@ -28,7 +28,7 @@ import java.util.List;
 public class ResultNode {
 
     @Id
-    @GeneratedValue(UUIDStringGenerator.class)
+    @GeneratedValue
     private Long id;
 
     private String name;

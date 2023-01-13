@@ -28,7 +28,7 @@ import java.util.List;
 public class HeaderNode {
 
     @Id
-    @GeneratedValue(UUIDStringGenerator.class)
+    @GeneratedValue
     private Long id;
 
     private String name = "header";

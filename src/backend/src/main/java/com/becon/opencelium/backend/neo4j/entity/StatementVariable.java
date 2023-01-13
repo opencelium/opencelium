@@ -26,7 +26,7 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 public class StatementVariable {
 
     @Id
-    @GeneratedValue(UUIDStringGenerator.class)
+    @GeneratedValue
     private Long id;
 
     private String color;

@@ -142,7 +142,6 @@ public class ConnectionController {
                 List<EnhancementNode> enhancementNodes =  connectionNodeService
                         .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
 
-                throw new RuntimeException("Test exception");
 //                enhancementNodeService.saveAll(enhancementNodes);
 
                 // Uncomment if fields are linked DIRECTLY, without enhancement;

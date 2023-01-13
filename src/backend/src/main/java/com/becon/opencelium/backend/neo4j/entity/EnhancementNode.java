@@ -28,7 +28,7 @@ import java.util.List;
 public class EnhancementNode {
 
     @Id
-    @GeneratedValue(UUIDStringGenerator.class)
+    @GeneratedValue
     private Long id;
 
     private Integer enhanceId; // TODO: need to change in db from int to bigint

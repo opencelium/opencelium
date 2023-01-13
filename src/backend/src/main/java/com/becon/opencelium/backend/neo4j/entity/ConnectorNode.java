@@ -27,7 +27,7 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 public class ConnectorNode {
 
     @Id
-    @GeneratedValue(UUIDStringGenerator.class)
+    @GeneratedValue
     private Long id;
 
     private Integer connectorId;

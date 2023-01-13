@@ -25,7 +25,7 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 public class ItemNode {
 
     @Id
-    @GeneratedValue(UUIDStringGenerator.class)
+    @GeneratedValue
     private Long id;
 
     private String name;

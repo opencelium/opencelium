@@ -26,7 +26,7 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 public class RequestNode {
 
     @Id
-    @GeneratedValue(UUIDStringGenerator.class)
+    @GeneratedValue
     private Long id;
 
     private String name = "request";
