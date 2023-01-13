@@ -18,7 +18,6 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
