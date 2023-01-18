@@ -27,6 +27,6 @@ import java.util.List;
 @Repository
 public interface LinkRelationRepository extends Neo4jRepository<Linked, Long> {
 
-    @Query("MATCH (c:Connection)-[*]->(from:Field)-[l:linked]->(to:Field) WHERE ID(c)=$connectionId} RETURN from, l, to;")
+    @Query("MATCH (:Connection)-[*]->(from:Field)-[l:linked]->(to:Field) WHERE ID(c)=$connectionId} RETURN from, l, to;")
     List<Linked> getLinkedRelationFields(Long connectionId);
 }

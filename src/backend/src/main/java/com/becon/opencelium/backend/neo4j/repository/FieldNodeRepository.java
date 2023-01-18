@@ -30,12 +30,12 @@ import java.util.Optional;
 @Repository
 public interface FieldNodeRepository extends Neo4jRepository<FieldNode, Long> {
 
-    @Query("match (conn:Connection{connectionId:$connectionId})-[*]->(f:Method{color:$function})-[:has_response]->" +
+    @Query("match (:Connection{connectionId:$connectionId})-[*]->(f:Method{color:$function})-[:has_response]->" +
             "(:Response)-[:has_success|has_fail]->(:Result{name:$result})-[has_body]->" +
             "(:Body)-[:has_field]->(fi:Field{name:$field}) return fi;")
     FieldNode findFirstFieldInResponse(Long connectionId, String function, String result, String field);
 
-    @Query("match (conn:Connection{connectionId:$connectionId})-[*]->(f:Method{color:$function})-[:has_request]->" +
+    @Query("match (:Connection{connectionId:$connectionId})-[*]->(f:Method{color:$function})-[:has_request]->" +
             "(:Request)-[has_body]->(:Body)-[:has_field]->(fi:Field{name:$field}) return fi;")
     FieldNode findFirstFieldInRequest(Long connectionId, String function, String field);
 
@@ -54,7 +54,7 @@ public interface FieldNodeRepository extends Neo4jRepository<FieldNode, Long> {
     @Query("match (f:Field)-[:linked]->(enh:Enhancement)-[:linked]->(t:Field) where ID(t)=$fieldId return f;")
     List<FieldNode> findIncoming(Long fieldId);
 
-    @Query("MATCH (f:Field)<-[:has_field*0..10]-(:Body)<-[*]-()<-[:has_request|:has_response]-(:Method)<-[*]-(conn:Connector) WHERE ID(f)=$fieldId" +
+    @Query("MATCH (f:Field)<-[:has_field*0..10]-(:Body)<-[*]-()<-[:has_request|has_response]-(:Method)<-[*]-(conn:Connector) WHERE ID(f)=$fieldId" +
             " RETURN conn.name")
     String findInvoker(Long fieldId);
 }

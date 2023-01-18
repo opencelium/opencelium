@@ -141,8 +141,7 @@ public class ConnectionController {
 
                 List<EnhancementNode> enhancementNodes =  connectionNodeService
                         .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
-
-//                enhancementNodeService.saveAll(enhancementNodes);
+                enhancementNodeService.saveAll(enhancementNodes);
 
                 // Uncomment if fields are linked DIRECTLY, without enhancement;
 //                List<Linked> linkRelations = linkRelationService

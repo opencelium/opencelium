@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.neo4j.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
@@ -38,6 +39,7 @@ public class FieldNode {
     @Relationship(type = "has_field", direction = Relationship.Direction.OUTGOING)
     private List<FieldNode> child;
 
+    @JsonIgnore
     @Relationship(type = "has_attribute", direction = Relationship.Direction.OUTGOING)
     private List<AttributeNode> attribute;
 
