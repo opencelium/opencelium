@@ -61,7 +61,8 @@ public class MethodNodeServiceImp implements MethodNodeService {
 
     @Override
     public Optional<MethodNode> getByFieldNodeId(Long fieldNodeId) {
-        return methodNodeRepository.findByFieldNodeId(fieldNodeId);
+        MethodNode methodNode = methodNodeRepository.findByFieldNodeId(fieldNodeId).get(0);
+        return Optional.of(methodNode);
     }
 
     @Override

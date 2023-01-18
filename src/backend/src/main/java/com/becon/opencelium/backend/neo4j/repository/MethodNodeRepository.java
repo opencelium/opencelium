@@ -27,9 +27,10 @@ import java.util.Optional;
 @Repository
 public interface MethodNodeRepository extends Neo4jRepository<MethodNode, Long> {
 
-    @Query("MATCH p=((f:Field)<-[:has_field*0..10]-(:Body)<-[*]-()<-[:has_request|has_response]-(:Method)) " +
-            "WHERE ID(f) = $fieldNodeId RETURN p")
-    Optional<MethodNode> findByFieldNodeId(Long fieldNodeId);
+    @Query("MATCH (f:Field)<-[:has_field*0..10]-(:Body)<-[*]-()<-[:has_request|has_response]-(m:Method) " +
+            "WHERE ID(f) = $fieldNodeId " +
+            "OPTIONAL MATCH p=((m)-[:has_request|has_response]->()-[*0..]->()) RETURN p")
+    List<MethodNode> findByFieldNodeId(Long fieldNodeId);
 
 //    @Query("match (m:Method)-[:has_response|:has_request]->()-[*]->() where ID(m)={0} return m;")
 //    Optional<MethodNode> findById(Long id);

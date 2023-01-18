@@ -15,6 +15,9 @@
  */
 
 package com.becon.opencelium.backend.controller;
+import com.becon.opencelium.backend.neo4j.entity.FieldNode;
+import com.becon.opencelium.backend.neo4j.entity.MethodNode;
+import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -80,6 +83,9 @@ public class ConnectionController {
 
     @Autowired
     private ValidationContext validationContext;
+
+    @Autowired
+    private MethodNodeServiceImp methodNodeServiceImp;
 
 //    @Autowired
 //    private TConnectionServiceImp tConnectionServiceImp;

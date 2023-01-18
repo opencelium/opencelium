@@ -423,17 +423,16 @@ public class ConnectorExecutor {
             boolean isObject = f.getType().equals("object");
             boolean isArray = f.getType().equals("array");
 
-            if ((f.getValue() == null || f.getValue().equals("")) && (!isObject && !isArray)){
+            if ((f.getValue() == null || f.getValue().equals("")) && (!isObject && !isArray)) {
+                item.put(f.getName(), f.getValue());
                 return;
             }
-
             // replace from request_data
             if ((f.getValue() != null) && !f.getValue().contains("${") && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
 
                 item.put (f.getName(), executionContainer.getValueFromRequestData(f.getValue()));
                 return;
             }
-
             // from enhancement
             if (fieldNodeService.hasEnhancement(f.getId())){
                 MethodNode methodNode = methodNodeServiceImp.getByFieldNodeId(f.getId())
@@ -441,21 +440,19 @@ public class ConnectorExecutor {
                 item.put(f.getName(), executionContainer.getValueFromEnhancementData(f));
                 return;
             }
-
             // from response data;
             if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && FieldNodeServiceImp.hasReference(f.getValue())){
                 item.put(f.getName(), executionContainer.getValueFromResponseData(f.getValue()));
                 return;
             }
-
             // from url query data;
             if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && fieldNodeService.hasQueryParams(f.getValue())){
                 item.put(f.getName(), executionContainer.getValueWebhookParams(f.getValue()));
                 return;
             }
 
-            if (f.getChild() != null){
-                Object value = new Object();
+            if (f.getChild() != null && !f.getChild().isEmpty()){
+                Object value;
                 if (f.getType().equals("array")){
                     value = Collections.singletonList(replaceValues(f.getChild()));
                 } else {
@@ -478,11 +475,23 @@ public class ConnectorExecutor {
                 item.put(f.getName(), value);
                 return;
             }
-
-            item.put(f.getName(), f.getValue());
+            Object value = getEmptyValueByType(f.getValue(), f.getType());
+            item.put(f.getName(), value);
         });
-
         return item;
+    }
+
+    private static Object getEmptyValueByType(Object value, String type) {
+        if (type.equals("string") || type.equals("plaintext")) {
+            if (value instanceof HashMap<?,?> && ((HashMap<?,?>)value).isEmpty()) {
+                return null;
+            } else if (value instanceof List<?> && ((List<?>)value).isEmpty()) {
+                return null;
+            } else if (value instanceof String && ((String) value).isEmpty()) {
+                return "";
+            }
+        }
+        return value;
     }
 // ======================================= OPERATOR =================================================== //
     private void executeDecisionStatement(StatementNode statementNode) {
