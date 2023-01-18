@@ -111,7 +111,7 @@ public class ConnectionController {
     }
 
     @GetMapping("/{connectionId}")
-    public ResponseEntity<?> get(@PathVariable Long connectionId){
+    public ResponseEntity<?> get(@PathVariable Long connectionId) {
         Connection connection = connectionService.findById(connectionId).orElse(null);
         ConnectionResource connectionResource = connectionService.toNodeResource(connection);
         final EntityModel<ConnectionResource> resource = EntityModel.of(connectionResource);

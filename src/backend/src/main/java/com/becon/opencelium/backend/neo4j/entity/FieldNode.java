@@ -39,7 +39,6 @@ public class FieldNode {
     @Relationship(type = "has_field", direction = Relationship.Direction.OUTGOING)
     private List<FieldNode> child;
 
-    @JsonIgnore
     @Relationship(type = "has_attribute", direction = Relationship.Direction.OUTGOING)
     private List<AttributeNode> attribute;
 

@@ -28,7 +28,7 @@ public interface ConnectionNodeRepository extends Neo4jRepository<ConnectionNode
     @Query("MATCH (n)-[*0..]->(x) WHERE n.connectionId = $id DETACH DELETE x")
     void deleteById(Long id);
 
-    @Query("MATCH p=((:Connection{connectionId:$connectionId})-[*]->()) return p")
+//    @Query("MATCH p=((:Connection{connectionId:$connectionId})-[*]->()) return p")
     Optional<ConnectionNode> findByConnectionId(Long connectionId);
 
     boolean existsByConnectionId(Long id);
