@@ -20,9 +20,17 @@ import {CommonState} from "@application/utils/store";
 import {ICommonState} from "@application/interfaces/core";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {
-    addConnection, checkConnectionTitle, deleteConnectionById,
-    deleteConnectionsById, getAllConnections, getAllMetaConnections, getAndUpdateConnection,
-    getConnectionById, testConnection, updateConnection,
+    addConnection, addTestConnection,
+    checkConnectionTitle,
+    deleteConnectionById,
+    deleteConnectionsById,
+    deleteTestConnectionById,
+    getAllConnections,
+    getAllMetaConnections,
+    getAndUpdateConnection,
+    getConnectionById,
+    testConnection,
+    updateConnection,
 } from "../action_creators/ConnectionCreators";
 import {IConnection} from "../../interfaces/IConnection";
 import {PANEL_LOCATION} from "../../components/utils/constants/app";
@@ -40,11 +48,13 @@ export interface ConnectionState extends ICommonState{
     checkingConnectionTitle: API_REQUEST_STATE,
     testingConnection: API_REQUEST_STATE,
     addingConnection: API_REQUEST_STATE,
+    addingTestConnection: API_REQUEST_STATE,
     updatingConnection: API_REQUEST_STATE,
     gettingConnection: API_REQUEST_STATE,
     gettingConnections: API_REQUEST_STATE,
     gettingMetaConnections: API_REQUEST_STATE,
     deletingConnectionById: API_REQUEST_STATE,
+    deletingTestConnectionById: API_REQUEST_STATE,
     deletingConnectionsById: API_REQUEST_STATE,
     currentConnection: IConnection,
     /*
@@ -52,6 +62,7 @@ export interface ConnectionState extends ICommonState{
     */
     currentTechnicalItem: any,
     connection: any,
+    testConnection: any,
     updateConnection: any,
     items: any[],
     arrows: any[],
@@ -71,15 +82,18 @@ let initialState: ConnectionState = {
     checkingConnectionTitle: API_REQUEST_STATE.INITIAL,
     testingConnection: API_REQUEST_STATE.INITIAL,
     addingConnection: API_REQUEST_STATE.INITIAL,
+    addingTestConnection: API_REQUEST_STATE.INITIAL,
     updatingConnection: API_REQUEST_STATE.INITIAL,
     gettingConnection: API_REQUEST_STATE.INITIAL,
     gettingConnections: API_REQUEST_STATE.INITIAL,
     gettingMetaConnections: API_REQUEST_STATE.INITIAL,
     deletingConnectionById: API_REQUEST_STATE.INITIAL,
+    deletingTestConnectionById: API_REQUEST_STATE.INITIAL,
     deletingConnectionsById: API_REQUEST_STATE.INITIAL,
     currentConnection: null,
     currentTechnicalItem: null,
     connection: null,
+    testConnection: null,
     updateConnection: null,
     items: [],
     arrows: [],
@@ -128,6 +142,11 @@ export const connectionSlice = createSlice({
         setConnectionDraftWasOpened: (state, action: PayloadAction<never>) => {
             state.isDraftOpenedOnce = true;
         },
+        setInitialTestConnectionState: (state) => {
+            state.testConnection = null;
+            state.addingTestConnection = API_REQUEST_STATE.INITIAL;
+            state.deletingTestConnectionById = API_REQUEST_STATE.INITIAL;
+        },
     },
     extraReducers: {
         [testConnection.pending.type]: (state) => {
@@ -166,6 +185,18 @@ export const connectionSlice = createSlice({
         },
         [addConnection.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.addingConnection = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [addTestConnection.pending.type]: (state, action: PayloadAction<IConnection>) => {
+            state.addingTestConnection = API_REQUEST_STATE.START;
+        },
+        [addTestConnection.fulfilled.type]: (state, action: PayloadAction<IConnection>) => {
+            state.addingTestConnection = API_REQUEST_STATE.FINISH;
+            state.testConnection = action.payload;
+            state.error = null;
+        },
+        [addTestConnection.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.addingTestConnection = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [getAndUpdateConnection.pending.type]: (state, action: any) => {
@@ -250,6 +281,20 @@ export const connectionSlice = createSlice({
             state.deletingConnectionById = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
+        [deleteTestConnectionById.pending.type]: (state) => {
+            state.deletingTestConnectionById = API_REQUEST_STATE.START;
+        },
+        [deleteTestConnectionById.fulfilled.type]: (state, action: PayloadAction<number>) => {
+            state.deletingTestConnectionById = API_REQUEST_STATE.FINISH;
+            if(state.testConnection && state.testConnection.connectionId === action.payload){
+                state.testConnection = null;
+            }
+            state.error = null;
+        },
+        [deleteTestConnectionById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.deletingTestConnectionById = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
         [deleteConnectionsById.pending.type]: (state) => {
             state.deletingConnectionsById = API_REQUEST_STATE.START;
         },
@@ -273,7 +318,11 @@ export const {
     setColorMode, setPanelConfigurations,
     setConnectionData, setArrows, setItems, setCurrentTechnicalItem,
     setDetailsLocation, setTechnicalLayoutLocation,
-    setConnectionDraftWasOpened,
+    setConnectionDraftWasOpened, setInitialTestConnectionState,
 } = connectionSlice.actions;
+
+export const actions = {
+    setInitialTestConnectionState,
+}
 
 export default connectionSlice.reducer;

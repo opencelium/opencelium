@@ -28,12 +28,16 @@ export const testConnection = createAsyncThunk(
         try {
             const now = new Date();
             const date = new Date(now.getTime() + 10000);
+            const addConnectionRequest = new ConnectionRequest();
+            connection.title = `test_connection_${+ date}_${connection.title}`;
+            const addConnectionResponse = await addConnectionRequest.addConnection(connection);
+            const createdConnection = addConnectionResponse.data;
             const schedule = {
                 cronExp: `0 0 0 1 JAN ? 2100`,
                 debugMode: false,
                 status: 1,
-                title: `test_schedule_${+ date}_${connection.title}`,
-                connectionId: connection?.id || connection.connectionId,
+                title: `test_schedule_${+ date}_${createdConnection.title}`,
+                connectionId: createdConnection.connectionId,
             }
             const addScheduleRequest = new ScheduleRequest();
             const addScheduleResponse = await addScheduleRequest.addSchedule(schedule);
@@ -68,6 +72,23 @@ export const addConnection = createAsyncThunk(
         try {
             const request = new ConnectionRequest();
             const response = await request.addConnection(connection);
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const addTestConnection = createAsyncThunk(
+    'connection/add/test',
+    async(connection: IConnection, thunkAPI) => {
+        try {
+            const request = new ConnectionRequest();
+            const now = new Date();
+            const date = new Date(now.getTime() + 10000);
+            const title = `test_connection_${+ date}_${connection.title}`;
+            delete connection.id;
+            const response = await request.addConnection({...connection, title});
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -146,7 +167,14 @@ export const getAllConnections = createAsyncThunk(
             const request = new ConnectionRequest({endpoint: `/all`});
             const response = await request.getAllConnections();
             // @ts-ignore
-            return response.data;
+            return response.data.filter((connection) => {
+                if(connection.title.indexOf('test_connection_') === 0){
+                    if(connection.title.split('_').length >= 3){
+                        return false;
+                    }
+                }
+                return true;
+            }) || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -160,7 +188,14 @@ export const getAllMetaConnections = createAsyncThunk(
             const request = new ConnectionRequest({endpoint: `/all`});
             const response = await request.getAllMetaConnections();
             // @ts-ignore
-            return response.data;
+            return response.data/*.filter((connection) => {
+                if(connection.title.indexOf('test_connection_') === 0){
+                    if(connection.title.split('_').length >= 3){
+                        return false;
+                    }
+                }
+                return true;
+            }) */|| [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -169,6 +204,19 @@ export const getAllMetaConnections = createAsyncThunk(
 
 export const deleteConnectionById = createAsyncThunk(
     'connection/delete/byId',
+    async(id: number, thunkAPI) => {
+        try {
+            const request = new ConnectionRequest({endpoint: `/${id}`});
+            await request.deleteConnectionById();
+            return id;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const deleteTestConnectionById = createAsyncThunk(
+    'connection/delete/test/byId',
     async(id: number, thunkAPI) => {
         try {
             const request = new ConnectionRequest({endpoint: `/${id}`});
@@ -197,11 +245,13 @@ export default {
     testConnection,
     checkConnectionTitle,
     addConnection,
+    addTestConnection,
     getAndUpdateConnection,
     updateConnection,
     getConnectionById,
     getAllConnections,
     getAllMetaConnections,
     deleteConnectionById,
+    deleteTestConnectionById,
     deleteConnectionsById,
 }

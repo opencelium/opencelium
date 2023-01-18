@@ -377,17 +377,17 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   }
 }
 .show_icon{
-  position: absolute;
+  position: absolute !important;
   right: 0;
   top: 0;
-  background: white;
+  background: white !important;
   width: 28px;
   height: 28px;
   z-index: 1;
   border: 1px solid #eee;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 .details_settings_panel{
   @extend .settings_panel;
@@ -408,6 +408,10 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   }
   .position_icon_left{
     @extend .position_icon;
+    right: 0;
+    border-right: none;
+  }
+  .test_connection_icon{
     right: 0;
     border-right: none;
   }

@@ -37,6 +37,9 @@ class FontIcon extends Component{
         let theme = darkTheme === true ? styles.dark_theme : '';
         let size = isNumber(this.props.size) ? `${this.props.size}px` : this.props.size;
         let sizeStyle = {width: `${size}`, height: `${size}`};
+        if(disabled){
+            sizeStyle.pointer = 'default';
+        }
         if(turquoiseTheme === true){
             theme = styles.turquoise_theme;
         }
@@ -73,7 +76,7 @@ class FontIcon extends Component{
         const isImageValue = isString(value) && value.indexOf('/') !== -1;
         if (isButton) {
             return (
-                <button ref={myRef ? myRef : this.icon} disabled={disabled} className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={onClick} id={id} onFocus={onButtonFocus} onBlur={onButtonBlur}>
+                <button ref={myRef ? myRef : this.icon} disabled={disabled} className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={disabled ? () => {} : onClick} id={id} onFocus={onButtonFocus} onBlur={onButtonBlur}>
                     {isImageValue
                     ?
                         <img alt={''} src={value} className={iconClassName} width={size} height={size} style={{...iconStyles}}/>

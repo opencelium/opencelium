@@ -446,7 +446,6 @@ export function ConnectionForm(type) {
             testConnection(entity){
                 this.setState({
                     runTest: true,
-                    justUpdate: true,
                 })
                 this.do(entity)
                 this.redirectUrl = '';

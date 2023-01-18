@@ -20,6 +20,8 @@ import SettingsPanel from "./SettingsPanel";
 import {mapItemsToClasses} from "../utils";
 import Description from "@change_component/form_elements/form_connection/form_svg/details/description/Description";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
+import {TextSize} from "@app_component/base/text/interfaces";
 
 
 function mapStateToProps(state){
@@ -66,11 +68,16 @@ class Details extends React.Component{
         let detailsStyle = {};
         if(isHidden){
             return (
-                <TooltipFontIcon size={24} tooltipPosition={'bottom'} isButton
-                                 className={styles.show_icon}
-                                 value={isHidden ? 'chevron_left' : 'chevron_right'}
-                                 tooltip={isHidden ? 'Show' : 'Hide'}
-                                 onClick={() => this.togglePanel()}/>
+                <TooltipButton
+                    size={TextSize.Size_20}
+                    position={'bottom'}
+                    className={styles.show_icon}
+                    icon={isHidden ? 'chevron_left' : 'chevron_right'}
+                    tooltip={isHidden ? 'Show' : 'Hide'}
+                    target={`show_connection_button`}
+                    hasBackground={false}
+                    handleClick={() => this.togglePanel()}
+                />
             );
         }
         return(

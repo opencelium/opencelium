@@ -93,7 +93,6 @@ export const updateConnector = createAsyncThunk(
             if(connectorState.currentConnector && connectorState.currentConnector.title !== entityData.title){
                 const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${entityData.title}`});
                 const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
-
                 if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
                     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
                 }
