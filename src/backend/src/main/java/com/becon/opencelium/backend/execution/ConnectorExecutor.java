@@ -424,7 +424,7 @@ public class ConnectorExecutor {
             boolean isArray = f.getType().equals("array");
 
             if ((f.getValue() == null || f.getValue().equals("")) && (!isObject && !isArray)) {
-                item.put(f.getName(), f.getValue());
+//                item.put(f.getName(), f.getValue()); // uncomment if you want to add empty and null values to request
                 return;
             }
             // replace from request_data
@@ -488,7 +488,7 @@ public class ConnectorExecutor {
             } else if (value instanceof List<?> && ((List<?>)value).isEmpty()) {
                 return null;
             } else if (value instanceof String && ((String) value).isEmpty()) {
-                return "";
+                return null;
             }
         }
         return value;
