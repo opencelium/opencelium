@@ -117,7 +117,6 @@ public class ConnectionController {
     private FieldNodeServiceImp fieldNodeServiceImp;
     @GetMapping("/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId) {
-        fieldNodeServiceImp.hasEnhancement(856L);
         Connection connection = connectionService.findById(connectionId).orElse(null);
         ConnectionResource connectionResource = connectionService.toNodeResource(connection);
         final EntityModel<ConnectionResource> resource = EntityModel.of(connectionResource);
