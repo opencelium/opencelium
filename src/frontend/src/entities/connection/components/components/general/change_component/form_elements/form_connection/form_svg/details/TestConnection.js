@@ -14,6 +14,7 @@
  */
 
 import React from 'react';
+import styled from 'styled-components';
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import {connect} from "react-redux";
 import {
@@ -64,13 +65,12 @@ class TestConnectionButton extends React.Component{
         this.state = {
             isFullScreen: false,
             testingConnection: false,
-            showProcess: false,
+            startAddingConnection: false,
+            startAddingSchedule: false,
+            startTriggeringSchedule: false,
+            startDeletingConnection: false,
+            startDeletingSchedule: false,
         }
-        this.startAddingConnection = false;
-        this.startAddingSchedule = false;
-        this.startTriggeringSchedule = false;
-        this.startDeletingConnection = false;
-        this.startDeletingSchedule = false;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -80,67 +80,95 @@ class TestConnectionButton extends React.Component{
             startTestSchedule, deleteTestConnectionById, deletingConnection,
             connectionError, scheduleError, deletingSchedule, deleteTestScheduleById,
         } = this.props;
-        if(addingConnection === API_REQUEST_STATE.FINISH && testConnection && this.startAddingConnection){
-            this.startAddingConnection = false;
-            this.startAddingSchedule = true;
-            setTimeout(() => {addTestSchedule(testConnection)}, 500);
+        const {
+            startAddingConnection,
+            startAddingSchedule,
+            startTriggeringSchedule,
+            startDeletingConnection,
+            startDeletingSchedule,
+        } = this.state;
+        if(addingConnection === API_REQUEST_STATE.FINISH && testConnection && startAddingConnection){
+            this.setState({
+                startAddingConnection: false,
+                startAddingSchedule: true,
+            })
+            setTimeout(() => {addTestSchedule(testConnection)}, 300);
         }
-        if(addingSchedule === API_REQUEST_STATE.FINISH && testSchedule && this.startAddingSchedule){
-            this.startAddingSchedule = false;
-            this.startTriggeringSchedule = true;
-            setTimeout(() => {startTestSchedule(testSchedule)}, 500)
+        if(addingSchedule === API_REQUEST_STATE.FINISH && testSchedule && startAddingSchedule){
+            this.setState({
+                startAddingSchedule: false,
+                startTriggeringSchedule: true,
+            })
+            setTimeout(() => {startTestSchedule(testSchedule)}, 300)
         }
-        if(startingSchedule === API_REQUEST_STATE.FINISH && testConnection && this.startTriggeringSchedule){
-            this.startTriggeringSchedule = false;
-            this.startDeletingSchedule = true;
-            setTimeout(() => {deleteTestScheduleById(testSchedule.schedulerId)}, 500)
+        if(startingSchedule === API_REQUEST_STATE.FINISH && testConnection && startTriggeringSchedule){
+            this.setState({
+                startTriggeringSchedule: false,
+                startDeletingSchedule: true,
+            })
+            setTimeout(() => {deleteTestScheduleById(testSchedule.schedulerId)}, 300)
         }
-        if(deletingSchedule === API_REQUEST_STATE.FINISH && this.startDeletingSchedule){
-            this.startDeletingSchedule = false;
-            this.startDeletingConnection = true;
-            setTimeout(() => {deleteTestConnectionById(testConnection.connectionId)}, 500)
+        if(deletingSchedule === API_REQUEST_STATE.FINISH && startDeletingSchedule){
+            this.setState({
+                startDeletingSchedule: false,
+                startDeletingConnection: true,
+            })
+            setTimeout(() => {deleteTestConnectionById(testConnection.connectionId)}, 300)
         }
-        if(deletingConnection === API_REQUEST_STATE.FINISH && this.startDeletingConnection){
-            this.startDeletingConnection = false;
-            setTimeout(() => {this.setState({testingConnection: false})}, 2000)
+        if(deletingConnection === API_REQUEST_STATE.FINISH && startDeletingConnection){
+            this.setState({
+                startDeletingConnection: false,
+            });
+            setTimeout(() => {
+                this.setState({
+                    testingConnection: false,
+                });
+            }, 3500)
         }
         if(this.state.testingConnection && (connectionError || scheduleError)){
-            setTimeout(() => this.setState({testingConnection: false}), 2000);
+            setTimeout(() => this.setState({testingConnection: false}), 3500);
         }
     }
 
     test(e){
         const {connection, setInitialTestConnectionState, setInitialTestScheduleState} = this.props;
-        const {showProcess, testingConnection} = this.state;
-        const newState = {showProcess: !showProcess};
-        if(!testingConnection && !showProcess) {
-            this.startAddingConnection = true;
+        const {testingConnection} = this.state;
+        const newState = {};
+        if(!testingConnection) {
             setInitialTestConnectionState();
             setInitialTestScheduleState();
             setTimeout(() => this.props.addTestConnection(connection.getObjectForBackend()), 500);
             newState.testingConnection = true;
+            newState.startAddingConnection = true;
         }
         this.setState(newState);
     }
 
     render(){
-        const {showProcess, testingConnection} = this.state;
+        const {
+            testingConnection, startAddingConnection,
+            startAddingSchedule, startTriggeringSchedule,
+            startDeletingConnection, startDeletingSchedule,
+        } = this.state;
         return(
             <React.Fragment>
                 <TooltipButton
                     className={styles.test_connection_icon}
                     target={`test_connection_button`}
                     position={'bottom'}
-                    tooltip={!showProcess ? testingConnection ? 'Test Result' : 'Test' : 'Close'}
+                    tooltip={'Test'}
                     hasBackground={false}
                     handleClick={(e) => this.test(e)}
-                    icon={!showProcess ? testingConnection ? 'terminal' : 'play_arrow' : 'close'}
+                    icon={'terminal'}
                     size={TextSize.Size_20}
+                    isDisabled={testingConnection}
                 />
+                {testingConnection && <CoverButtonStyled/>}
                 <UncontrolledPopover
                     placement="bottom"
                     target="test_connection_button"
                     trigger="click"
+                    isOpen={testingConnection}
                 >
                     <PopoverHeader>
                         {"Test Connection"}
@@ -149,20 +177,20 @@ class TestConnectionButton extends React.Component{
                         <div style={{justifyContent: 'center', display: 'grid', gridTemplateColumns: '100% auto'}}>
                             <div>{`Creating a test connection `}</div>
                             <FontIcon
-                                isLoading={this.startAddingConnection}
-                                value={this.startAddingConnection ? ' ' : 'done'} size={20}/>
+                                isLoading={startAddingConnection}
+                                value={startAddingConnection ? ' ' : 'done'} size={20}/>
                             <div>{`Creating a test schedule `}</div>
                             <FontIcon
-                                isLoading={this.startAddingConnection || this.startAddingSchedule}
-                                value={this.startAddingConnection || this.startAddingSchedule ? ' ' : 'done'} size={20}/>
-                            <div>{`Starting a test connection `}</div>
+                                isLoading={startAddingConnection || startAddingSchedule}
+                                value={startAddingConnection || startAddingSchedule ? ' ' : 'done'} size={20}/>
+                            <div>{`Execute the connection `}</div>
                             <FontIcon
-                                isLoading={this.startAddingConnection || this.startAddingSchedule || this.startTriggeringSchedule}
-                                value={this.startAddingConnection || this.startAddingSchedule || this.startTriggeringSchedule ? ' ' : 'done'} size={20}/>
+                                isLoading={startAddingConnection || startAddingSchedule || startTriggeringSchedule}
+                                value={startAddingConnection || startAddingSchedule || startTriggeringSchedule ? ' ' : 'done'} size={20}/>
                             <div>{`Cleaning process `}</div>
                             <FontIcon
-                                isLoading={this.startAddingConnection || this.startAddingSchedule || this.startTriggeringSchedule || this.startDeletingConnection || this.startDeletingSchedule}
-                                value={this.startAddingConnection || this.startAddingSchedule || this.startTriggeringSchedule || this.startDeletingConnection || this.startDeletingSchedule ? ' ' : 'done'} size={20}/>
+                                isLoading={startAddingConnection || startAddingSchedule || startTriggeringSchedule || startDeletingConnection || startDeletingSchedule}
+                                value={startAddingConnection || startAddingSchedule || startTriggeringSchedule || startDeletingConnection || startDeletingSchedule ? ' ' : 'done'} size={20}/>
                         </div>
                     </PopoverBody>
                 </UncontrolledPopover>
@@ -170,5 +198,13 @@ class TestConnectionButton extends React.Component{
         );
     }
 }
+
+const CoverButtonStyled = styled.div`
+    width: 25px;
+    height: 20px;
+    position: absolute;
+    right: 95px;
+    top: 3px;
+`;
 
 export default TestConnectionButton;
