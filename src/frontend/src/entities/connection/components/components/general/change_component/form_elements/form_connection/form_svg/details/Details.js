@@ -19,7 +19,6 @@ import {connect} from "react-redux";
 import SettingsPanel from "./SettingsPanel";
 import {mapItemsToClasses} from "../utils";
 import Description from "@change_component/form_elements/form_connection/form_svg/details/description/Description";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 import {TextSize} from "@app_component/base/text/interfaces";
 
@@ -60,7 +59,7 @@ class Details extends React.Component{
 
     render(){
         const {isHidden} = this.state;
-        const {readOnly, currentTechnicalItem, updateConnection, connection, updatingConnection, checkingConnectionTitle} = this.props;
+        const {readOnly, currentTechnicalItem, updateConnection, connection} = this.props;
         if(connection === null){
             return null;
         }

@@ -23,6 +23,7 @@ import {setPanelConfigurations} from "@entity/connection/redux_toolkit/slices/Co
 import ColorMode from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/ColorMode";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 import {TextSize} from "@app_component/base/text/interfaces";
+import LabelSize from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/LabelSize";
 
 function mapStateToProps(store){
     const connectionOverview = store.connectionReducer;
@@ -89,6 +90,7 @@ class ConfigurationsIcon extends React.Component{
                 >
                     <React.Fragment>
                         <ColorMode colorMode={colorMode} onChangeColorMode={(a) => this.onChangeColorMode(a)}/>
+                        <LabelSize/>
                     </React.Fragment>
                 </Dialog>
             </React.Fragment>

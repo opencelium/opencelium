@@ -70,6 +70,7 @@ export interface ConnectionState extends ICommonState{
     detailsLocation: string,
     technicalLayoutLocation: string,
     colorMode: string,
+    processTextSize: number,
     isCreateElementPanelOpened: boolean,
     isDraftOpenedOnce: boolean,
 }
@@ -101,6 +102,7 @@ let initialState: ConnectionState = {
     detailsLocation: PANEL_LOCATION.SAME_WINDOW,
     technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
     colorMode: COLOR_MODE.RECTANGLE_TOP,
+    processTextSize: 20,
     isCreateElementPanelOpened: false,
     isDraftOpenedOnce: false,
     ...CommonState,
@@ -115,7 +117,12 @@ export const connectionSlice = createSlice({
             state.colorMode = action.payload;
         },
         setPanelConfigurations: (state, action: PayloadAction<any>) => {
-            state.colorMode = action.payload.colorMode;
+            if(action.payload.colorMode){
+                state.colorMode = action.payload.colorMode;
+            }
+            if(action.payload.processTextSize){
+                state.processTextSize = action.payload.processTextSize;
+            }
         },
         setConnectionData: (state, action: PayloadAction<any>) => {
             state.connection = action.payload.connection;
