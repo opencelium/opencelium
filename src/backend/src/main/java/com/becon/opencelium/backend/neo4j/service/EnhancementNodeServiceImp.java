@@ -57,7 +57,7 @@ public class EnhancementNodeServiceImp implements EnhancementNodeService {
     }
 
     @Override
-    public boolean hasEnhancement(Long fieldId) {
+    public boolean fieldHasEnhancement(Long fieldId) {
         EnhancementNode enhancementNode = enhancementNodeRepository.fieldHasEnhancement(fieldId).orElse(null);
         return enhancementNode != null;
     }

@@ -18,7 +18,6 @@ package com.becon.opencelium.backend.neo4j.service;
 
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
-import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.neo4j.entity.*;
@@ -36,10 +35,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -279,7 +276,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
 
     @Override
     public boolean hasEnhancement(Long fieldId) {
-        return enhancementNodeServiceImp.hasEnhancement(fieldId);
+        return enhancementNodeServiceImp.fieldHasEnhancement(fieldId);
     }
 
     @Override
