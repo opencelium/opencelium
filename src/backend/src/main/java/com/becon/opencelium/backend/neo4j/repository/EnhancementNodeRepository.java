@@ -35,4 +35,7 @@ public interface EnhancementNodeRepository extends Neo4jRepository<EnhancementNo
 
     @Query("match (enh:Enhancement)-[:linked]->(f:Field) where ID(f) = $connectionId return enh")
     LinkedList<EnhancementNode> findAllByConnectionId(Long connectionId);
+
+    @Query("match (f:Field)-[:linked]-(enh:Enhancement) where ID(f) = $fieldId return enh")
+    Optional<EnhancementNode> fieldHasEnhancement(Long fieldId);
 }

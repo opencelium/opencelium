@@ -33,5 +33,7 @@ public interface EnhancementNodeService {
 
     List<EnhancementNode> findAllByConnectionId(Long connectionId);
 
+    boolean hasEnhancement(Long fieldId);
+
     EnhancementNode toNode(FieldBindingResource fieldBindingResource, ConnectionNode connectionNode);
 }

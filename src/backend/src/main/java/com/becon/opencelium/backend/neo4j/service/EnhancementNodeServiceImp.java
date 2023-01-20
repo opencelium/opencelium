@@ -56,6 +56,12 @@ public class EnhancementNodeServiceImp implements EnhancementNodeService {
         return enhancementNodeRepository.findAllByConnectionId(connectionId);
     }
 
+    @Override
+    public boolean hasEnhancement(Long fieldId) {
+        EnhancementNode enhancementNode = enhancementNodeRepository.fieldHasEnhancement(fieldId).orElse(null);
+        return enhancementNode != null;
+    }
+
     public EnhancementNode toNode(FieldBindingResource fieldBindingResource, ConnectionNode connectionNode) {
         EnhancementNode enhancementNode = new EnhancementNode();
         List<FieldNode> incomingFields = new ArrayList<>();

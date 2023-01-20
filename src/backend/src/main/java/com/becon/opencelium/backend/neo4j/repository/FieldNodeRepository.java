@@ -48,9 +48,6 @@ public interface FieldNodeRepository extends Neo4jRepository<FieldNode, Long> {
     @Query("MATCH (f:Field)<-[:has_field*0..10]-(:Body)<-[*]-(req:Request) WHERE ID(f) = $fieldId RETURN req")
     RequestNode fieldHasRequest(Long fieldId);
 
-    @Query("match (enh:Enhancement)-[:linked]->(f:Field) where ID(f) = $fieldId return enh")
-    Optional<EnhancementNode> hasEnhancement(Long fieldId);
-
     @Query("match (f:Field)-[:linked]->(enh:Enhancement)-[:linked]->(t:Field) where ID(t)=$fieldId return f;")
     List<FieldNode> findIncoming(Long fieldId);
 

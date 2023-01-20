@@ -66,6 +66,9 @@ public class FieldNodeServiceImp implements FieldNodeService {
     @Autowired
     private ValidationContext validationContext;
 
+    @Autowired
+    private EnhancementNodeServiceImp enhancementNodeServiceImp;
+
     @Override
     public FieldNode findFieldByResource(LinkedFieldResource fieldResource, Connection connection) {
         Long connectionId = connection.getId();
@@ -276,8 +279,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
 
     @Override
     public boolean hasEnhancement(Long fieldId) {
-        EnhancementNode enhancementNode = fieldNodeRepository.hasEnhancement(fieldId).orElse(null);
-        return enhancementNode != null;
+        return enhancementNodeServiceImp.hasEnhancement(fieldId);
     }
 
     @Override
