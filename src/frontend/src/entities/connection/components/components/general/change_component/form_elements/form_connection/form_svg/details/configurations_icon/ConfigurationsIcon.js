@@ -87,10 +87,13 @@ class ConfigurationsIcon extends React.Component{
                     active={isVisibleSettingsWindow}
                     toggle={(a) => this.toggleIsVisibleSettingsWindow(a)}
                     title={'Settings'}
+                    hasAutoFocus={false}
                 >
                     <React.Fragment>
                         <ColorMode colorMode={colorMode} onChangeColorMode={(a) => this.onChangeColorMode(a)}/>
-                        <LabelSize/>
+                        <div style={{marginTop: '20px'}}>
+                            <LabelSize/>
+                        </div>
                     </React.Fragment>
                 </Dialog>
             </React.Fragment>
