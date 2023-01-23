@@ -13,7 +13,7 @@ spring:
     url: bolt://localhost:7687
     authentication:
       username: neo4j
-      password: secret
+      password: secretsecret
   jpa:
     properties:
       hibernate:
@@ -21,6 +21,7 @@ spring:
           new_generator_mappings: false
     hibernate:
       dll-auto: validate
+    open-in-view: false
   datasource:
     url: jdbc:mariadb://localhost:3306/opencelium?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Berlin
     username: root
@@ -64,6 +65,13 @@ spring:
   #        socketFactory:
   #          port: 465
   #          class: javax.net.ssl.SSLSocketFactory
+
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          neo4j: OFF
 server:
   port: 9090
 #  ssl:
@@ -85,7 +93,7 @@ management:
     health:
       show-details: always
 opencelium:
-  version: 3.0.0
+  version: 3.0.1
   debug_mode: true
   reboot:
     path: src/backend/src/main/resources/bashfile/restart.sh
@@ -99,3 +107,9 @@ opencelium:
     update:
       online:
         url: { insert url where portal service is located }
+#  ldap:
+#    embedded:
+#      base-dn: dc=springframework,dc=org
+#      ldif: classpath:test-server.ldif
+#      port: 8389
+#      url: ldap://localhost:8389/

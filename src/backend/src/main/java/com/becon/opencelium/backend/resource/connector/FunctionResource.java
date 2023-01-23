@@ -32,13 +32,9 @@ public class FunctionResource extends RepresentationModel {
     }
 
     public FunctionResource(FunctionInvoker functionInvoker) {
-        System.out.println(functionInvoker.getName());
         this.name = functionInvoker.getName();
         this.type = functionInvoker.getType();
         this.request =  new RequestResource(functionInvoker.getRequest());
-        if (this.name.equals("findGroups")) {
-            System.out.println("debugging started");
-        }
         this.response = new ResponseResource(functionInvoker.getResponse());
     }
 
