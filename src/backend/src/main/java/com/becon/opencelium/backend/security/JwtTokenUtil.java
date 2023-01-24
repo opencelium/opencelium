@@ -19,15 +19,23 @@ package com.becon.opencelium.backend.security;
 import com.becon.opencelium.backend.mysql.entity.Activity;
 import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.utility.TokenUtility;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.JWEDecryptionKeySelector;
+import com.nimbusds.jose.proc.JWEKeySelector;
+import com.nimbusds.jose.proc.SimpleSecurityContext;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
+import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -38,36 +46,41 @@ public class JwtTokenUtil {
     private TokenUtility tokenUtility;
 
     public String getEmailFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+        return getClaimFromToken(token, JWTClaimsSet::getSubject);
     }
 
     public String getTokenId(String token) {
-        return getClaimFromToken(token, Claims::getId);
+        return getClaimFromToken(token, JWTClaimsSet::getJWTID);
     }
 
     public Date getExpirationDateFromToken(String token) {
-        return getClaimFromToken(token, Claims::getExpiration);
+        return getClaimFromToken(token, JWTClaimsSet::getExpirationTime);
     }
 
     public Object getClaim(String token, String name){
-        final Claims claims = getAllClaimsFromToken(token);
-        return claims.get(name);
+        final JWTClaimsSet claims = getAllClaimsFromToken(token);
+        return claims.getClaim(name);
     }
 
-    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = getAllClaimsFromToken(token);
+    public <T> T getClaimFromToken(String token, Function<JWTClaimsSet, T> claimsResolver) {
+        final JWTClaimsSet claims = getAllClaimsFromToken(token);
         return  claimsResolver.apply(claims);
     }
 
     public String generateToken(UserPrincipals userDetails) {
-        Map<String, Object> claims = new HashMap<>();
         User user = userDetails.getUser();
         String token = UUID.randomUUID().toString();
-        claims.put("userId", user.getId());
-        claims.put("role", user.getUserRole().getName());
-        claims.put("sessionTime", tokenUtility.getActitvityTime());
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+            .claim("userId", user.getId())
+            .claim("role", user.getUserRole().getName())
+            .claim("sessionTime", tokenUtility.getActivityTime())
+            .expirationTime(new Date(System.currentTimeMillis() + tokenUtility.getExpirationTime() * 1000))
+            .issueTime(new Date(System.currentTimeMillis()))
+            .subject(user.getEmail())
+            .jwtID(token)
+            .build();
 
-        return doGenerateToken(claims, user.getEmail(), token);
+        return doGenerateToken(claimsSet);
     }
 
     public Boolean validateToken(String token, UserPrincipals userDetails) {
@@ -79,7 +92,7 @@ public class JwtTokenUtil {
         final String email = getEmailFromToken(token);
 
         long inactiveTime = new Date().getTime() - activity.getRequestTime().getTime();
-        if (inactiveTime > tokenUtility.getActitvityTime()){
+        if (inactiveTime > tokenUtility.getActivityTime()){
             return false;
         }
 
@@ -88,8 +101,14 @@ public class JwtTokenUtil {
                 && tokenId.equals(activity.getTokenId()));
     }
 
-    private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(tokenUtility.getSecret().getBytes()).parseClaimsJws(token).getBody();
+    public JWTClaimsSet getAllClaimsFromToken(String token) {
+        try {
+            return SignedJWT.parse(token).getJWTClaimsSet();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 
     private Boolean isTokenExpired(String token) {
@@ -98,13 +117,21 @@ public class JwtTokenUtil {
     }
 
 
-    private String doGenerateToken(Map<String, Object> claims, String subject, String id) {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setId(id)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + tokenUtility.getExpirationTime() * 1000))
-                .signWith(SignatureAlgorithm.HS512, tokenUtility.getSecret().getBytes()).compact();
+    public String doGenerateToken(JWTClaimsSet claims) {
+            try {
+                RSAKey rsaJWK = new RSAKeyGenerator(2048)
+                        .keyID("123")
+                        .generate();
+                // Create RSA-signer with the private key
+                JWSSigner signer = new RSASSASigner(rsaJWK);
+                SignedJWT signedJWT = new SignedJWT(
+                        new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaJWK.getKeyID()).build(),
+                        claims);
+                signedJWT.sign(signer);
+
+                return signedJWT.serialize();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
     }
 }

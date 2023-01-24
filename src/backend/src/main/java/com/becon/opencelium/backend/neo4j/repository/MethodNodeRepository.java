@@ -27,20 +27,22 @@ import java.util.Optional;
 @Repository
 public interface MethodNodeRepository extends Neo4jRepository<MethodNode, Long> {
 
-    @Query("MATCH p=((f:Field)<-[:has_field*0..10]-(:Body)<-[*]-()<-[:has_request|:has_response]-(:Method)) WHERE ID(f) = {0} RETURN p")
-    Optional<MethodNode> findByFieldNodeId(Long fieldNodeId);
+    @Query("MATCH (f:Field)<-[:has_field*]-(:Body)<-[*]-()<-[:has_request|has_response]-(m:Method) " +
+            "WHERE ID(f) = $fieldNodeId " +
+            "OPTIONAL MATCH p=((m)-[*]->()) RETURN p")
+    List<MethodNode> findByFieldNodeId(Long fieldNodeId);
 
-    @Query("match p=((m:Method)-[:has_response|:has_request]->()-[*]->()) where ID(m)={0} return p;")
-    Optional<MethodNode> findById(Long id);
+//    @Query("match (m:Method)-[:has_response|:has_request]->()-[*]->() where ID(m)={0} return m;")
+//    Optional<MethodNode> findById(Long id);
 
-    @Query("MATCH (:Connection{connectionId:{0}})-[:to_connector]->(:Connector{connectorId:{1}})-[*]->(m:Method) " +
-            "optional match p=((m)-[:has_request|:has_response]->()-[*0..]->()) RETURN p")
+    @Query("MATCH (:Connection{connectionId:$connectionId})-[:to_connector]->(:Connector{connectorId:$connectorId})-[*]->(m:Method) " +
+            "optional match p=((m)-[:has_request|has_response]->()-[*0..]->()) RETURN p")
     List<MethodNode> findToMethodsByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
 
-    @Query("MATCH (:Connection{connectionId:{0}})-[:from_connector]->(:Connector{connectorId:{1}})-[*]->(m:Method) " +
-            "optional match p=((m)-[:has_request|:has_response]->()-[*0..]->()) RETURN p")
+    @Query("MATCH (:Connection{connectionId:$connectionId})-[:from_connector]->(:Connector{connectorId:$connectorId})-[*]->(m:Method) " +
+            "optional match p=((m)-[:has_request|has_response]->()-[*0..]->()) RETURN p")
     List<MethodNode> findFromMethodsByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
 
-    @Query("match (c:Connection{connectionId:{0}})-[*]->(m:Method{color:{1}}) return m")
-    Optional<MethodNode> findByConnectionIdAndColor(Long connectionId, String color);
+    @Query("match (:Connection{connectionId:$connectionId})-[*]->(m:Method{color:$color}) return ID(m)")
+    Optional<Long> findIdByConnectionIdAndColor(Long connectionId, String color);
 }

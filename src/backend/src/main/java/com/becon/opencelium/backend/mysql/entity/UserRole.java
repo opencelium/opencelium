@@ -27,7 +27,7 @@ import java.util.Set;
 public class UserRole {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "name")
@@ -39,7 +39,8 @@ public class UserRole {
     @Column(name = "icon")
     private String icon;
 
-    @OneToOne(mappedBy = "userRole", fetch = FetchType.EAGER)
+    @Transient
+    @OneToOne(mappedBy = "userRole")
     private User user;
 
     @OneToMany(mappedBy = "userRole", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

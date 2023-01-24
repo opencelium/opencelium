@@ -19,6 +19,8 @@ package com.becon.opencelium.backend.mysql.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -33,7 +35,7 @@ import java.util.List;
 public class Connection   {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name")
@@ -72,11 +74,12 @@ public class Connection   {
     @OneToMany(mappedBy = "connection", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Enhancement> enhancements;
 
-    @OneToMany(mappedBy = "connection", fetch = FetchType.LAZY)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "connection")
     private List<Scheduler> schedulers;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "connection", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "connection", cascade = CascadeType.ALL, orphanRemoval = true)
     private BusinessLayout businessLayout;
 
     public Connection() {

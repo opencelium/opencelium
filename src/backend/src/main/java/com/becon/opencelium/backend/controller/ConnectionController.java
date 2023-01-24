@@ -15,12 +15,16 @@
  */
 
 package com.becon.opencelium.backend.controller;
+import com.becon.opencelium.backend.neo4j.entity.FieldNode;
+import com.becon.opencelium.backend.neo4j.entity.MethodNode;
+import com.becon.opencelium.backend.neo4j.service.*;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.hc.core5.ssl.TrustStrategy;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -37,9 +41,6 @@ import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
 import com.becon.opencelium.backend.neo4j.entity.relation.Linked;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
-import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
-import com.becon.opencelium.backend.neo4j.service.LinkRelationServiceImp;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.error.validation.ErrorMessageDataResource;
@@ -49,7 +50,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.List;
@@ -77,6 +80,9 @@ public class ConnectionController {
 
     @Autowired
     private ValidationContext validationContext;
+
+    @Autowired
+    private MethodNodeServiceImp methodNodeServiceImp;
 
 //    @Autowired
 //    private TConnectionServiceImp tConnectionServiceImp;
@@ -107,8 +113,10 @@ public class ConnectionController {
         return ResponseEntity.ok().body(connectionResources);
     }
 
+    @Autowired
+    private FieldNodeServiceImp fieldNodeServiceImp;
     @GetMapping("/{connectionId}")
-    public ResponseEntity<?> get(@PathVariable Long connectionId){
+    public ResponseEntity<?> get(@PathVariable Long connectionId) {
         Connection connection = connectionService.findById(connectionId).orElse(null);
         ConnectionResource connectionResource = connectionService.toNodeResource(connection);
         final EntityModel<ConnectionResource> resource = EntityModel.of(connectionResource);
@@ -140,11 +148,12 @@ public class ConnectionController {
                         .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
                 enhancementNodeService.saveAll(enhancementNodes);
 
-                List<Linked> linkRelations = linkRelationService
-                        .toEntity(connectionResource.getFieldBinding(), connection);
-                if (linkRelations != null && !linkRelations.isEmpty()){
-                    linkRelationService.saveAll(linkRelations);
-                }
+                // Uncomment if fields are linked DIRECTLY, without enhancement;
+//                List<Linked> linkRelations = linkRelationService
+//                        .toEntity(connectionResource.getFieldBinding(), connection);
+//                if (linkRelations != null && !linkRelations.isEmpty()){
+//                    linkRelationService.saveAll(linkRelations);
+//                }
             }
 
             final EntityModel<ConnectionResource> resource = EntityModel.of(connectionService.toNodeResource(connection));
@@ -152,7 +161,7 @@ public class ConnectionController {
             return ResponseEntity.ok().body(resource);
         } catch (Exception e) {
             e.printStackTrace();
-            enhancementService.deleteAllByConnectionId(connectionId);
+//            enhancementService.deleteAllByConnectionId(connectionId);
             connectionService.deleteById(connectionId);
             connectionNodeService.deleteById(connectionId);
 
@@ -242,21 +251,36 @@ public class ConnectionController {
 
     @GetMapping("/check/{name}")
     public ResponseEntity<?> existsByName(@PathVariable("name") String name) throws IOException {
+        RuntimeException ex;
         if (connectionService.existsByName(name)){
-            throw new ResponseStatusException(
-                    HttpStatus.OK, "EXISTS");
+            ex = new RuntimeException("EXISTS");
         } else {
-            throw new ResponseStatusException(HttpStatus.OK, "NOT_EXISTS");
+            ex = new RuntimeException("NOT_EXISTS");
         }
+
+        String uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri().toString();
+        ErrorResource errorResource = new ErrorResource(ex, HttpStatus.OK, uri);
+        return ResponseEntity.ok().body(errorResource);
     }
 
 
     public static RestTemplate getRestTemplate() throws Exception{
-        TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+        TrustManager[] acceptingTrustStrategy = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
+                    public void checkClientTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                    public void checkServerTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+        };
 
-        SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-                .loadTrustMaterial(null, acceptingTrustStrategy)
-                .build();
+        SSLContext sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(null, acceptingTrustStrategy, new java.security.SecureRandom());
         SSLConnectionSocketFactory ssl = new SSLConnectionSocketFactory(sslContext);
         PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                 .setSSLSocketFactory(ssl).build();

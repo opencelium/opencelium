@@ -38,6 +38,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.Collections;
+
 
 @Configuration
 @EnableWebSecurity
@@ -71,6 +73,7 @@ public class SecurityConfiguration {
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.setAllowedOriginPatterns(Collections.singletonList("*"));
         corsConfiguration.applyPermitDefaultValues();
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;

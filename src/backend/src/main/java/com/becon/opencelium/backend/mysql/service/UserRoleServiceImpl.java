@@ -20,8 +20,10 @@ import com.becon.opencelium.backend.mysql.entity.RoleHasPermission;
 import com.becon.opencelium.backend.mysql.entity.UserRole;
 import com.becon.opencelium.backend.mysql.repository.UserRoleRepository;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +59,7 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     @Override
     public UserRole getOne(int id) {
-        return userRoleRepository.getOne(id);
+        return userRoleRepository.getReferenceById(id);
     }
 
     @Override

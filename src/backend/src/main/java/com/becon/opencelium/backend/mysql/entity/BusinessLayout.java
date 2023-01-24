@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 @Table(name = "business_layout")
 public class BusinessLayout {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "name")

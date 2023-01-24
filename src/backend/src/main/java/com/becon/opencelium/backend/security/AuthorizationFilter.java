@@ -18,23 +18,18 @@ package com.becon.opencelium.backend.security;
 
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.exception.WrongHeaderAuthTypeException;
-import com.becon.opencelium.backend.mysql.entity.Activity;
-import com.becon.opencelium.backend.mysql.entity.User;
-import com.becon.opencelium.backend.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.mysql.service.ActivityServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 

@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 @Table(name = "widget_setting")
 public class WidgetSetting {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
@@ -29,11 +29,11 @@ public class WidgetSetting {
     @Column(name = "min_height")
     private int minHeight;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "widget_id")
     private Widget widget;
 

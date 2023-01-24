@@ -4,7 +4,6 @@ spring:
   #    port: 5672
   #    username: guest
   #    password: guest
-
   main:
     banner-mode: "off"
   data:
@@ -14,33 +13,28 @@ spring:
     url: bolt://localhost:7687
     authentication:
       username: neo4j
-      password: secret
-
+      password: secretsecret
   jpa:
     properties:
       hibernate:
         id:
           new_generator_mappings: false
-
     hibernate:
       dll-auto: validate
-
+    open-in-view: false
   datasource:
     url: jdbc:mariadb://localhost:3306/opencelium?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Berlin
     username: root
     password: root
     initialization-mode: always
     driver-class-name: org.mariadb.jdbc.Driver
-
   servlet:
     multipart:
       max-file-size: 1000000KB
       max-request-size: 1000000KB
-
   http:
     multipart:
       enabled: false
-
   quartz:
     properties:
       org:
@@ -50,11 +44,11 @@ spring:
           jobStore:
             tablePrefix: QRTZ_
     job-store-type: jdbc
-
   liquibase:
     change-log: classpath:/db/changelog/changelog-master.xml
 
   mail:
+    #    enabled: false
     host: smtp.gmail.com
     port: 587
     username: uname
@@ -72,6 +66,12 @@ spring:
   #          port: 465
   #          class: javax.net.ssl.SSLSocketFactory
 
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          neo4j: OFF
 server:
   port: 9090
 #  ssl:
@@ -81,7 +81,6 @@ server:
 #    key-store-password: password
 #    key-password: password
 #    key-alias: tomcat
-
 management:
   health:
     defaults:
@@ -93,19 +92,9 @@ management:
   endpoint:
     health:
       show-details: always
-
-elasticsearch:
-  clustername: open_celium
-  host: localhost
-  port: 9300
-
-kibana:
-  host: localhost
-  port: 5601
-
 opencelium:
-  version: 3.0.0
-  debug_mode: false
+  version: 3.0.1
+  debug_mode: true
   reboot:
     path: src/backend/src/main/resources/bashfile/restart.sh
   mail:
@@ -117,10 +106,7 @@ opencelium:
   assistant:
     update:
       online:
-        url: {insert url where portal service is located}
-
-
-
+        url: { insert url where portal service is located }
 #  ldap:
 #    embedded:
 #      base-dn: dc=springframework,dc=org

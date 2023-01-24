@@ -25,10 +25,10 @@ import java.util.Optional;
 
 @Repository
 public interface ConnectionNodeRepository extends Neo4jRepository<ConnectionNode, Long> {
-    @Query("MATCH (n)-[*0..]->(x) WHERE n.connectionId = {0} DETACH DELETE x")
+    @Query("MATCH (n)-[*0..]->(x) WHERE n.connectionId = $id DETACH DELETE x")
     void deleteById(Long id);
 
-    @Query("MATCH p=((:Connection{connectionId:{0}})-[*]->()) return p")
+//    @Query("MATCH p=((:Connection{connectionId:$connectionId})-[*]->()) return p")
     Optional<ConnectionNode> findByConnectionId(Long connectionId);
 
     boolean existsByConnectionId(Long id);

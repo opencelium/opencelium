@@ -23,10 +23,9 @@ import com.becon.opencelium.backend.mysql.repository.WebhookRepository;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
+import com.becon.opencelium.backend.security.JwtTokenUtil;
 import com.becon.opencelium.backend.utility.TokenUtility;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.nimbusds.jwt.JWTClaimsSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -53,19 +52,16 @@ public class WebhookServiceImp implements WebhookService {
     private SchedulerServiceImp schedulerService;
 
     @Autowired
-    private TokenUtility tokenUtility;
+    private JwtTokenUtil jwtTokenUtil;
 
     //TODO: rename method - gets some info from token
     @Override
     public Optional<WebhookTokenResource> getTokenObject(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(tokenUtility.getSecret().getBytes())
-                .parseClaimsJws(token.replace(SecurityConstant.BEARER, ""))
-                .getBody();
+        JWTClaimsSet claims = jwtTokenUtil.getAllClaimsFromToken(token);
 
-        String uuid = claims.get("uuid").toString();
-        String tmp = claims.get("userId").toString();
-        int schedulerId =  (int) claims.get("schedulerId");
+        String uuid = claims.getClaim("uuid").toString();
+        String tmp = claims.getClaim("userId").toString();
+        int schedulerId =  (int) claims.getClaim("schedulerId");
         int userId = Integer.parseInt(tmp);
 
         boolean userExists = userService.existsById(userId);
@@ -88,7 +84,7 @@ public class WebhookServiceImp implements WebhookService {
     public Webhook save(int userId, Scheduler scheduler) {
         Webhook webhook = new Webhook();
         UUID uuid = UUID.randomUUID();
-        String token = generateToken(userId, uuid.toString(), scheduler.getId());
+        String token = generateWebhookToken(userId, uuid.toString(), scheduler.getId());
 
         webhook.setUuid(uuid.toString());
         webhook.setToken(token);
@@ -97,16 +93,16 @@ public class WebhookServiceImp implements WebhookService {
     }
 
     @Override
-    public String generateToken(int userId, String uuid, int schedulerId) {
-
-        return Jwts.builder()
-                .setSubject("webhook")
+    public String generateWebhookToken(int userId, String uuid, int schedulerId) {
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .subject("webhook")
                 .claim("userId", userId)
                 .claim("uuid", uuid)
                 .claim("schedulerId", schedulerId)
-                .setId(Long.toString(schedulerId))
-                .signWith(SignatureAlgorithm.HS256, tokenUtility.getSecret().getBytes())
-                .compact();
+                .jwtID(Long.toString(schedulerId))
+                .build();
+
+        return jwtTokenUtil.doGenerateToken(claimsSet);
     }
 
     @Override

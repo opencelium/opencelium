@@ -20,6 +20,10 @@ import com.becon.opencelium.backend.resource.user.UserResource;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,7 +33,7 @@ import java.util.Set;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Email
@@ -46,26 +50,16 @@ public class User {
     private UserDetail userDetail;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", referencedColumnName = "id")
+    @JoinColumn(name = "role_id")
     private UserRole userRole;
 
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL,  mappedBy = "user")
     private Set<WidgetSetting> widgetSettings = new HashSet<>();
 
     public User() {
     }
-
-//    public User(UserResource userResource) {
-//        this.id = userResource.getUserId();
-//        this.email = userResource.getEmail();
-//        this.userDetail = new UserDetail(userResource.getUserDetail());
-//        this.userRole = new UserRole(userResource.getUserGroup());
-//        this.widgetSettings = userResource.getWidgetSettings()
-//                                            .stream()
-//                                            .map(WidgetSetting::new)
-//                                            .collect(Collectors.toList());
-//    }
 
     public User(UserResource userResource, Set<WidgetSetting> widgetSettings) {
         this.id = userResource.getUserId();

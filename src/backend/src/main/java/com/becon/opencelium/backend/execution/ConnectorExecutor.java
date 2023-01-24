@@ -36,15 +36,9 @@ import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.*;
-import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -75,13 +69,13 @@ public class ConnectorExecutor {
 
     private Invoker invoker;
 
-    private InvokerServiceImp invokerService;
+    private final InvokerServiceImp invokerService;
     private RestTemplate restTemplate;
-    private ExecutionContainer executionContainer;
-    private FieldNodeServiceImp fieldNodeService;
-    private MethodNodeServiceImp methodNodeServiceImp;
-    private ConnectorServiceImp connectorService;
-    private VariableNodeServiceImp statementNodeService;
+    private final ExecutionContainer executionContainer;
+    private final FieldNodeServiceImp fieldNodeService;
+    private final MethodNodeServiceImp methodNodeServiceImp;
+    private final ConnectorServiceImp connectorService;
+    private final VariableNodeServiceImp statementNodeService;
     private boolean debugMode = false;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
@@ -180,7 +174,6 @@ public class ConnectorExecutor {
         FunctionInvoker functionInvoker = invoker.getOperations().stream()
                 .filter(m -> m.getName().equals(methodNode.getName())).findFirst()
                 .orElseThrow(() -> new RuntimeException("Method not found in Invoker"));
-        String taId = executionContainer.getTaId();
 
         if (debugMode) {
             System.out.println("============================================================");
@@ -237,8 +230,7 @@ public class ConnectorExecutor {
 //        f (invoker.getName().equalsIgnoreCase("igel")){
 //            restTemplate = getRestTemplate();
 //        }i
-        ResponseEntity<String> response = restTemplate.exchange(uri, method ,httpEntity, String.class);
-        return response;
+        return restTemplate.exchange(uri, method ,httpEntity, String.class);
     }
 
     private HttpMethod getMethod(MethodNode methodNode){
@@ -431,17 +423,16 @@ public class ConnectorExecutor {
             boolean isObject = f.getType().equals("object");
             boolean isArray = f.getType().equals("array");
 
-            if ((f.getValue() == null || f.getValue().equals("")) && (!isObject && !isArray)){
+            if ((f.getValue() == null || f.getValue().equals("")) && (!isObject && !isArray)) {
+//                item.put(f.getName(), f.getValue()); // uncomment if you want to add empty and null values to request
                 return;
             }
-
             // replace from request_data
             if ((f.getValue() != null) && !f.getValue().contains("${") && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
 
                 item.put (f.getName(), executionContainer.getValueFromRequestData(f.getValue()));
                 return;
             }
-
             // from enhancement
             if (fieldNodeService.hasEnhancement(f.getId())){
                 MethodNode methodNode = methodNodeServiceImp.getByFieldNodeId(f.getId())
@@ -449,21 +440,19 @@ public class ConnectorExecutor {
                 item.put(f.getName(), executionContainer.getValueFromEnhancementData(f));
                 return;
             }
-
             // from response data;
             if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && FieldNodeServiceImp.hasReference(f.getValue())){
                 item.put(f.getName(), executionContainer.getValueFromResponseData(f.getValue()));
                 return;
             }
-
             // from url query data;
             if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && fieldNodeService.hasQueryParams(f.getValue())){
                 item.put(f.getName(), executionContainer.getValueWebhookParams(f.getValue()));
                 return;
             }
 
-            if (f.getChild() != null){
-                Object value = new Object();
+            if (f.getChild() != null && !f.getChild().isEmpty()){
+                Object value;
                 if (f.getType().equals("array")){
                     value = Collections.singletonList(replaceValues(f.getChild()));
                 } else {
@@ -486,11 +475,23 @@ public class ConnectorExecutor {
                 item.put(f.getName(), value);
                 return;
             }
-
-            item.put(f.getName(), f.getValue());
+            Object value = getEmptyValueByType(f.getValue(), f.getType());
+            item.put(f.getName(), value);
         });
-
         return item;
+    }
+
+    private static Object getEmptyValueByType(Object value, String type) {
+        if (type.equals("string") || type.equals("plaintext")) {
+            if (value instanceof HashMap<?,?> && ((HashMap<?,?>)value).isEmpty()) {
+                return null;
+            } else if (value instanceof List<?> && ((List<?>)value).isEmpty()) {
+                return null;
+            } else if (value instanceof String && ((String) value).isEmpty()) {
+                return null;
+            }
+        }
+        return value;
     }
 // ======================================= OPERATOR =================================================== //
     private void executeDecisionStatement(StatementNode statementNode) {
@@ -628,7 +629,7 @@ public class ConnectorExecutor {
         executeDecisionStatement(statementNode.getNextOperator());
     }
 
-    private CloseableHttpClient getDisabledHttpsClient() {
+    public static CloseableHttpClient getDisabledHttpsClient() {
 
         try {
             TrustManager[] trustAllCerts = new TrustManager[] {
@@ -656,7 +657,7 @@ public class ConnectorExecutor {
         }
     }
 
-    private RestTemplate createRestTemplate(Connector connector) {
+    public static RestTemplate createRestTemplate(Connector connector) {
         RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
         HttpComponentsClientHttpRequestFactory requestFactory;
         if (!connector.isSslCert()){

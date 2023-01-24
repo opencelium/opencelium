@@ -34,7 +34,10 @@ public class ResponseResource extends RepresentationModel {
 
     public ResponseResource(ResponseInv responseInv) {
         this.success = new ResultResource(responseInv.getSuccess());
-        this.fail = new ResultResource(responseInv.getFail());;
+
+        if (responseInv.getFail() != null) {
+            this.fail = new ResultResource(responseInv.getFail());
+        }
     }
 
     public Long getNodeId() {

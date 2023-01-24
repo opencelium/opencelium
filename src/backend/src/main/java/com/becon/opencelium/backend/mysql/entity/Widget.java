@@ -3,6 +3,9 @@ package com.becon.opencelium.backend.mysql.entity;
 import com.becon.opencelium.backend.resource.user.WidgetResource;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,7 +14,7 @@ import java.util.Set;
 public class Widget {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
@@ -24,7 +27,7 @@ public class Widget {
     @Column(name = "tooltipTranslationKey")
     private String tooltipTranslationKey;
 
-    @OneToMany(mappedBy = "widget", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "widget", cascade = CascadeType.ALL)
     private Set<WidgetSetting> widgetSettings = new HashSet<>();
 
     public Widget() {

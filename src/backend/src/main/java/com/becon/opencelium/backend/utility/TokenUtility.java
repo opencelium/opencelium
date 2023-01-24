@@ -19,7 +19,7 @@ public class TokenUtility {
         return secret;
     }
 
-    public long getActitvityTime() {
+    public long getActivityTime() {
         Long activityTime = env.getProperty("opencelium.token.activity-time", Long.class);
         if (activityTime == null) {
             activityTime = SecurityConstant.ACTIVITY_TIME;
