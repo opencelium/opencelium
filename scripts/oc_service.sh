@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) <2022>  <becon GmbH>
+#  Copyright (C) <2023>  <becon GmbH>
 #  
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -12,6 +12,16 @@
 #  
 #  You should have received a copy of the GNU General Public License
 #  along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+get_version()
+{
+        echo $(grep 'version =' /opt/src/backend/build.gradle | awk '{print $3}') | sed s/\'//g
+}
+
+get_backend_port()
+{
+        echo $(grep -A2 'server:' /opt/src/backend/src/main/resources/application.yml | awk '{print $2}')
+}
 
 refresh_db()
 {
@@ -39,19 +49,19 @@ start_backend(){
 
 	while [ $RETRY -gt 0 ]
 	do
-	    	if lsof -Pi :9090 -sTCP:LISTEN -t >/dev/null ;
+	    	if lsof -Pi :$(get_backend_port) -sTCP:LISTEN -t >/dev/null ;
 	    	then
-	        	echo "Port 9090 is used. Retrying Again" >&2
+	        	echo "Port $(get_backend_port) is used. Retrying Again" >&2
 		        RETRY=$((RETRY-1))
 		        sleep 2
 	    	else
-	        	cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar --spring.config.location=/opt/src/backend/src/main/resources/application.yml > /opt/logs/oc_backend.out &
+	        	cd /opt/src/backend/ && nohup java -Dserver.port=$(get_backend_port) -jar /opt/src/backend/build/libs/opencelium.backend-$(get_version).jar --spring.config.location=/opt/src/backend/src/main/resources/application.yml > /opt/logs/oc_backend.out &
 	        	echo "backend started..."
 	        	return 1
 		fi
 	done
 
-	echo "Server couldnt be started. Port 9090 is used."
+	echo "Server couldnt be started. Port $(get_backend_port) is used."
 }
 
 restart_backend(){
@@ -109,10 +119,10 @@ check_frontend(){
 
 check_backend(){
 
-        if lsof -Pi :9090 -sTCP:LISTEN -t >/dev/null ;
+        if lsof -Pi :$(get_backend_port) -sTCP:LISTEN -t >/dev/null ;
         then echo ""
         else
-        	cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar --spring.config.location=/opt/src/backend/src/main/resources/application.yml > /opt/logs/oc_backend.out &
+        	cd /opt/src/backend/ && nohup java -Dserver.port=$(get_backend_port) -jar /opt/src/backend/build/libs/opencelium.backend-$(get_version).jar --spring.config.location=/opt/src/backend/src/main/resources/application.yml > /opt/logs/oc_backend.out &
                 echo "backend started..."
                 return 1
         fi
@@ -257,6 +267,8 @@ else
     echo ""
     echo "Please use one of the following commands:"
     echo ""
+    echo "get_version           - show opencelium version"
+    echo "get_backend_port      - show configured backend port"
     echo "refresh_db		- deletes all databases"
     echo "rebuild_backend		- rebuild backend files"
     echo "stop_backend		- stop backend service"
