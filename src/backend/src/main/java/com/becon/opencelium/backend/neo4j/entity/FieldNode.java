@@ -34,10 +34,8 @@ public class FieldNode {
     private String value;
     private String type;
 
-    @Relationship(type = "has_field", direction = Relationship.Direction.OUTGOING)
     private List<FieldNode> child;
 
-    @Relationship(type = "has_attribute", direction = Relationship.Direction.OUTGOING)
     private List<AttributeNode> attribute;
 
     public Long getId() {

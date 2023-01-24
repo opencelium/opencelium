@@ -114,7 +114,7 @@ public class ConnectionController {
     }
 
     @Autowired
-    private FieldNodeServiceImp fieldNodeServiceImp;
+    private MethodNodeServiceImp methodNodeService;
     @GetMapping("/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId) {
         Connection connection = connectionService.findById(connectionId).orElse(null);
