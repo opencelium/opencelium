@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2023>  <becon GmbH>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -93,7 +93,6 @@ export const updateConnector = createAsyncThunk(
             if(connectorState.currentConnector && connectorState.currentConnector.title !== entityData.title){
                 const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${entityData.title}`});
                 const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
-
                 if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
                     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
                 }

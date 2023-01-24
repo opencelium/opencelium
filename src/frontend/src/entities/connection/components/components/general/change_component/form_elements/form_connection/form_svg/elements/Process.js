@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2023>  <becon GmbH>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ function mapStateToProps(state){
     const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
         colorMode: connectionOverview.colorMode,
+        textSize: connectionOverview.processTextSize,
         currentTechnicalItem,
     }
 }
@@ -148,7 +149,7 @@ class Process extends React.Component{
         const {technicalRectClassName, isMouseOverSvg, isMouseOverPlaceholder, isAvailableForDragging} = this.state;
         const {
             process, isNotDraggable, isCurrent, isHighlighted,
-            isDisabled, colorMode, readOnly, connection, currentTechnicalItem,
+            isDisabled, colorMode, readOnly, connection, currentTechnicalItem, textSize,
         } = this.props;
         const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
         const method = process.entity;
@@ -170,8 +171,8 @@ class Process extends React.Component{
         const color = method ? method.color : '';
         let hasColor = color !== '';
         let shortLabel = label;
-        if(isString(label) && label.length > 12){
-            shortLabel = `${label.substr(0, 9)}...`;
+        if(isString(label) && label.length > ((20 - textSize) * 2 + 12)){
+            shortLabel = `${label.substring(0, (20 - textSize) * 2 + 9)}...`;
         }
         //shortLabel = method.color;
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
@@ -197,7 +198,7 @@ class Process extends React.Component{
                           className={`${technicalRectClassName} ${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
                     />
                     <svg x={0} y={0} width={process.width} height={process.height}>
-                        <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
+                        <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY} fontSize={textSize}>
                             {shortLabel}
                         </text>
                     </svg>

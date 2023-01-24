@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2023>  <becon GmbH>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -83,10 +83,8 @@ class TechnicalLayout extends React.Component{
                 const connector = connection.getConnectorByType(currentItem.connectorType);
                 const currentItemInConnector = connector.getCurrentItem();
                 if (currentItemInConnector) {
-                    if (currentItemInConnector.index !== currentItem.entity.index) {
-                        connector.setCurrentItem(currentItem.entity);
-                        updateConnection(connection);
-                    }
+                    connector.setCurrentItem(currentItem.entity);
+                    updateConnection(connection);
                 }
             }
         }

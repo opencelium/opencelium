@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2023>  <becon GmbH>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,9 @@ import Dialog from "@entity/connection/components/components/general/basic_compo
 import {connect} from "react-redux";
 import {setPanelConfigurations} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import ColorMode from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/ColorMode";
+import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
+import {TextSize} from "@app_component/base/text/interfaces";
+import LabelSize from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/LabelSize";
 
 function mapStateToProps(store){
     const connectionOverview = store.connectionReducer;
@@ -68,24 +71,29 @@ class ConfigurationsIcon extends React.Component{
         const {disabled, tooltipPosition} = this.props;
         return(
             <React.Fragment>
-                <TooltipFontIcon
-                    size={20}
+                <TooltipButton
+                    size={TextSize.Size_20}
+                    position={'bottom'}
                     className={styles.configurations_icon}
-                    onClick={(a) => this.toggleIsVisibleSettingsWindow(a)}
+                    icon={'settings'}
                     tooltip={disabled ? '' : 'Settings'}
-                    value={'settings'}
-                    tooltipPosition={'bottom'}
-                    disabled={disabled}
-                    isButton={true}
+                    target={`settings_connection_button`}
+                    hasBackground={false}
+                    isDisabled={disabled}
+                    handleClick={() => this.toggleIsVisibleSettingsWindow()}
                 />
                 <Dialog
                     actions={[{label: 'Save', onClick: (a) => this.save(a)}, {label: 'Cancel', onClick: (a) => this.toggleIsVisibleSettingsWindow(a)}]}
                     active={isVisibleSettingsWindow}
                     toggle={(a) => this.toggleIsVisibleSettingsWindow(a)}
                     title={'Settings'}
+                    hasAutoFocus={false}
                 >
                     <React.Fragment>
                         <ColorMode colorMode={colorMode} onChangeColorMode={(a) => this.onChangeColorMode(a)}/>
+                        <div style={{marginTop: '20px'}}>
+                            <LabelSize/>
+                        </div>
                     </React.Fragment>
                 </Dialog>
             </React.Fragment>

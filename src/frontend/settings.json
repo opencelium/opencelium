@@ -6,6 +6,9 @@
     "KIBANA": 5601,
     "NEO4J": 7474
   },
+  "DEV": {
+    "PORT": 8888
+  },
   "PROTOCOL": "",
   "HOSTNAME": "",
   "HTTPS": {

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2023>  <becon GmbH>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,12 +20,12 @@ import {ICommonState} from "@application/interfaces/core";
 import {CommonState} from "@application/utils/store";
 import {SchedulesIdRequestProps} from "../../requests/interfaces/ISchedule";
 import {
-    addSchedule,
+    addSchedule, addTestSchedule,
     checkScheduleTitle,
     deleteScheduleById,
-    deleteSchedulesById, disableSchedules, enableSchedules,
+    deleteSchedulesById, deleteTestScheduleById, disableSchedules, enableSchedules,
     getAllSchedules, getCurrentSchedules,
-    getScheduleById, getSchedulesById, startSchedule, startSchedules, switchScheduleStatus,
+    getScheduleById, getSchedulesById, startSchedule, startSchedules, startTestSchedule, switchScheduleStatus,
     updateSchedule,
 } from "../action_creators/ScheduleCreators";
 import {deleteWebhook, getWebhook} from "../action_creators/WebhookCreators";
@@ -39,20 +39,24 @@ export interface ScheduleState extends ICommonState{
     checkingScheduleTitle: API_REQUEST_STATE,
     switchingScheduleStatus: API_REQUEST_STATE,
     startingSchedule: API_REQUEST_STATE,
+    startingTestSchedule: API_REQUEST_STATE,
     startingSchedules: API_REQUEST_STATE,
     enablingSchedules: API_REQUEST_STATE,
     disablingSchedules: API_REQUEST_STATE,
     addingSchedule: API_REQUEST_STATE,
+    addingTestSchedule: API_REQUEST_STATE,
     updatingSchedule: API_REQUEST_STATE,
     gettingScheduleById: API_REQUEST_STATE,
     gettingSchedulesById: API_REQUEST_STATE,
     gettingCurrentSchedules: API_REQUEST_STATE,
     gettingAllSchedules: API_REQUEST_STATE,
     deletingScheduleById: API_REQUEST_STATE,
+    deletingTestScheduleById: API_REQUEST_STATE,
     deletingSchedulesById: API_REQUEST_STATE,
     gettingWebhook: API_REQUEST_STATE,
     deletingWebhook: API_REQUEST_STATE,
     currentSchedule: ModelSchedule,
+    testSchedule: ModelSchedule,
 }
 
 const initialState: ScheduleState = {
@@ -62,20 +66,24 @@ const initialState: ScheduleState = {
     checkingScheduleTitle: API_REQUEST_STATE.INITIAL,
     switchingScheduleStatus: API_REQUEST_STATE.INITIAL,
     startingSchedule: API_REQUEST_STATE.INITIAL,
+    startingTestSchedule: API_REQUEST_STATE.INITIAL,
     startingSchedules: API_REQUEST_STATE.INITIAL,
     enablingSchedules: API_REQUEST_STATE.INITIAL,
     disablingSchedules: API_REQUEST_STATE.INITIAL,
     addingSchedule: API_REQUEST_STATE.INITIAL,
+    addingTestSchedule: API_REQUEST_STATE.INITIAL,
     updatingSchedule: API_REQUEST_STATE.INITIAL,
     gettingScheduleById: API_REQUEST_STATE.INITIAL,
     gettingSchedulesById: API_REQUEST_STATE.INITIAL,
     gettingCurrentSchedules: API_REQUEST_STATE.INITIAL,
     gettingAllSchedules: API_REQUEST_STATE.INITIAL,
     deletingScheduleById: API_REQUEST_STATE.INITIAL,
+    deletingTestScheduleById: API_REQUEST_STATE.INITIAL,
     deletingSchedulesById: API_REQUEST_STATE.INITIAL,
     gettingWebhook: API_REQUEST_STATE.INITIAL,
     deletingWebhook: API_REQUEST_STATE.INITIAL,
     currentSchedule: null,
+    testSchedule: null,
     ...CommonState,
 }
 
@@ -87,7 +95,13 @@ export const scheduleSlice = createSlice({
         },
         setCurrentSchedule: (state, action) => {
             state.currentSchedule = action.payload;
-        }
+        },
+        setInitialTestScheduleState: (state) => {
+            state.testSchedule = null;
+            state.addingTestSchedule = API_REQUEST_STATE.INITIAL;
+            state.deletingTestScheduleById = API_REQUEST_STATE.INITIAL;
+            state.startingTestSchedule = API_REQUEST_STATE.INITIAL;
+        },
     },
     extraReducers: {
         [checkScheduleTitle.pending.type]: (state) => {
@@ -126,6 +140,17 @@ export const scheduleSlice = createSlice({
         },
         [startSchedule.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.startingSchedule = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [startTestSchedule.pending.type]: (state) => {
+            state.startingTestSchedule = API_REQUEST_STATE.START;
+        },
+        [startTestSchedule.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
+            state.startingTestSchedule = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [startTestSchedule.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.startingTestSchedule = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [startSchedules.pending.type]: (state) => {
@@ -182,6 +207,18 @@ export const scheduleSlice = createSlice({
             if(action.payload?.message === ResponseMessages.EXISTS){
                 state.isCurrentScheduleHasUniqueTitle = TRIPLET_STATE.FALSE;
             }
+            state.error = action.payload;
+        },
+        [addTestSchedule.pending.type]: (state, action: PayloadAction<ModelSchedule>) => {
+            state.addingTestSchedule = API_REQUEST_STATE.START;
+        },
+        [addTestSchedule.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
+            state.addingTestSchedule = API_REQUEST_STATE.FINISH;
+            state.testSchedule = action.payload;
+            state.error = null;
+        },
+        [addTestSchedule.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.addingTestSchedule = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [updateSchedule.pending.type]: (state) => {
@@ -274,6 +311,20 @@ export const scheduleSlice = createSlice({
             state.deletingScheduleById = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
+        [deleteTestScheduleById.pending.type]: (state) => {
+            state.deletingTestScheduleById = API_REQUEST_STATE.START;
+        },
+        [deleteTestScheduleById.fulfilled.type]: (state, action: PayloadAction<number>) => {
+            state.deletingTestScheduleById = API_REQUEST_STATE.FINISH;
+            if(state.testSchedule && state.testSchedule.schedulerId === action.payload){
+                state.testSchedule = null;
+            }
+            state.error = null;
+        },
+        [deleteTestScheduleById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.deletingTestScheduleById = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
         [deleteSchedulesById.pending.type]: (state) => {
             state.deletingSchedulesById = API_REQUEST_STATE.START;
         },
@@ -317,11 +368,11 @@ export const scheduleSlice = createSlice({
 })
 
 export const {
-    copyWebhookToClipboard, setCurrentSchedule,
+    copyWebhookToClipboard, setCurrentSchedule, setInitialTestScheduleState,
 } = scheduleSlice.actions;
 
 export const actions = {
-    copyWebhookToClipboard,
+    copyWebhookToClipboard, setInitialTestScheduleState,
 }
 
 export default scheduleSlice.reducer;

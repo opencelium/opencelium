@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2023>  <becon GmbH>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -69,16 +69,19 @@ class Dialog extends Component{
     }
 
     setFocus(){
-        const {title, isConfirmation} = this.props;
-        setTimeout(() => {
-            let focusableElements = getFocusableElements(document.getElementById(`modal_${title}`));
-            if(focusableElements.length > 1) {
-                if(isConfirmation){
-                    focusableElements[focusableElements.length - 1].focus();
-                } else {
-                    focusableElements[1].focus();
+        const {title, isConfirmation, hasAutoFocus} = this.props;
+        if(hasAutoFocus) {
+            setTimeout(() => {
+                let focusableElements = getFocusableElements(document.getElementById(`modal_${title}`));
+                if (focusableElements.length > 1) {
+                    if (isConfirmation) {
+                        focusableElements[focusableElements.length - 1].focus();
+                    } else {
+                        focusableElements[1].focus();
+                    }
                 }
-            }}, 500);
+            }, 500);
+        }
     }
 
     renderButtons(){
@@ -127,12 +130,14 @@ Dialog.propTypes = {
         modal: PropTypes.string,
         dialog: PropTypes.string,
     }),
+    hasAutoFocus: PropTypes.bool,
 };
 
 Dialog.defaultProps = {
     theme: {wrapper: '', title: '', content: '', modal: '', dialog: ''},
     active: false,
     isConfirmation: false,
+    hasAutoFocus: true,
 };
 
 export default Dialog;

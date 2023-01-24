@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2023>  <becon GmbH>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import {
     SchedulesIdRequestProps,
 } from "../../requests/interfaces/ISchedule";
 import ModelSchedule from "../../requests/models/Schedule";
+import {IConnection} from "@root/interfaces/IConnection";
 
 export const checkScheduleTitle = createAsyncThunk(
     'schedule/exist/title',
@@ -49,6 +50,19 @@ export const switchScheduleStatus = createAsyncThunk(
 
 export const startSchedule = createAsyncThunk(
     'schedule/start',
+    async(schedule: ModelSchedule, thunkAPI) => {
+        try {
+            const request = new ScheduleRequest({endpoint: `/execute/${schedule.schedulerId}`});
+            await request.startSchedule();
+            return schedule;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const startTestSchedule = createAsyncThunk(
+    'schedule/start/test',
     async(schedule: ModelSchedule, thunkAPI) => {
         try {
             const request = new ScheduleRequest({endpoint: `/execute/${schedule.schedulerId}`});
@@ -132,14 +146,14 @@ export const getAllSchedules = createAsyncThunk(
         try {
             const request = new ScheduleRequest({endpoint: `/all`});
             const response = await request.getAllSchedules();
-            return response.data._embedded?.schedulerResourceList.filter((schedule) => {
+            return response.data._embedded?.schedulerResourceList/*.filter((schedule) => {
                 if(schedule.title.indexOf('test_schedule_') === 0){
-                    if(schedule.title.split('_').length >= 4){
+                    if(schedule.title.split('_').length >= 3){
                         return false;
                     }
                 }
                 return true;
-            }) || [];
+            })*/ || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -153,7 +167,14 @@ export const getCurrentSchedules = createAsyncThunk(
             const request = new ScheduleRequest({endpoint: `/running/all`});
             const response = await request.getCurrentSchedules();
             // @ts-ignore
-            return response.data._embedded?.runningJobsResourceList || [];
+            return response.data._embedded?.runningJobsResourceList.filter((schedule) => {
+                if(schedule.title.indexOf('test_schedule_') === 0){
+                    if(schedule.title.split('_').length >= 3){
+                        return false;
+                    }
+                }
+                return true;
+            }) || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -173,6 +194,28 @@ export const addSchedule = createAsyncThunk(
                 return thunkAPI.rejectWithValue(responseTitleRequest.data);
             }*/
             const addScheduleRequest = new ScheduleRequest();
+            const response = await addScheduleRequest.addSchedule(schedule);
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const addTestSchedule = createAsyncThunk(
+    'schedule/add/test',
+    async(connection: IConnection, thunkAPI) => {
+        try {
+            const addScheduleRequest = new ScheduleRequest();
+            const now = new Date();
+            const date = new Date(now.getTime() + 10000);
+            const schedule = {
+                cronExp: `0 0 0 1 JAN ? 2100`,
+                debugMode: false,
+                status: 1,
+                title: `test_schedule_${+ date}`,
+                connectionId: connection.connectionId,
+            }
             const response = await addScheduleRequest.addSchedule(schedule);
             return response.data;
         } catch(e){
@@ -220,6 +263,19 @@ export const deleteScheduleById = createAsyncThunk(
     }
 )
 
+export const deleteTestScheduleById = createAsyncThunk(
+    'schedule/delete/test/byId',
+    async(id: number, thunkAPI) => {
+        try {
+            const request = new ScheduleRequest({endpoint: `/${id}`});
+            await request.deleteScheduleById();
+            return id;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const deleteSchedulesById = createAsyncThunk(
     'schedule/delete/selected/byId',
     async(scheduleIds: number[], thunkAPI) => {
@@ -237,6 +293,7 @@ export default {
     checkScheduleTitle,
     switchScheduleStatus,
     startSchedule,
+    startTestSchedule,
     startSchedules,
     enableSchedules,
     disableSchedules,
@@ -245,7 +302,9 @@ export default {
     getAllSchedules,
     getCurrentSchedules,
     addSchedule,
+    addTestSchedule,
     updateSchedule,
     deleteScheduleById,
+    deleteTestScheduleById,
     deleteSchedulesById,
 }

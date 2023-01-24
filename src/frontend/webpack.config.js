@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2023>  <becon GmbH>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -195,7 +195,7 @@ const getConfig = ({isBuild, envVar}) => {
                 "Access-Control-Allow-Origin": "*"
             },
             compress: true,
-            port: 8888,
+            port: SETTINGS?.DEV?.PORT || 8888,
             open: true,
             liveReload: true,
             historyApiFallback: true,

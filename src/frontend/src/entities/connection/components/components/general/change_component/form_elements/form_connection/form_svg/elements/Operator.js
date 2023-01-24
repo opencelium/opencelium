@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2023>  <becon GmbH>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -253,7 +253,7 @@ class Operator extends React.Component{
                 {operatorType === IF_OPERATOR &&
                     <React.Fragment>
                         <polygon onMouseDown={(a) => this.onMouseDown(a)} onMouseUp={(a) => this.onMouseUp(a)} onDoubleClick={(a) => this.onDoubleClick(a)} onClick={(a) => this.onClick(a)} points={points} style={{...polygonStyle, ...errorStyles}} className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}/>
-                        <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY} style={errorStyles}>
+                        <text fontSize={20} dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY} style={errorStyles}>
                         {'if'}
                         </text>
                         <title>{'if'}</title>

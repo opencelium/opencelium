@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2023>  <becon GmbH>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ const {
     addSchedule, disableSchedules, enableSchedules, switchScheduleStatus, startSchedule, deleteScheduleById,
     updateSchedule, startSchedules, deleteSchedulesById, getCurrentSchedules, getSchedulesById,
     checkScheduleTitle, getScheduleById, getAllSchedules, deleteWebhook, getWebhook, addNotificationToSelectedSchedules,
+    startTestSchedule,
 } = ActionCreators;
 
 const {
@@ -40,6 +41,7 @@ export default {
         [getWebhook.fulfilled.type]: "The webhook of the job <1><0>{{name}}</0></1> was successfully created",
         [deleteWebhook.fulfilled.type]: "The webhook of the job <1><0>{{name}}</0></1> was successfully removed",
         [startSchedule.fulfilled.type]: "The job <1><0>{{title}}</0></1> was successfully triggered",
+        [startTestSchedule.fulfilled.type]: "Test was successfully triggered",
         [copyWebhookToClipboard.type]: "The webhook was successfully copied",
 
     },
