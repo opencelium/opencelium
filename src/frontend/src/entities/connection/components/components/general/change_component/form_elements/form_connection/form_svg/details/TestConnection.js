@@ -21,7 +21,7 @@ import {
     addTestConnection, deleteTestConnectionById,
 } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {
-    addTestSchedule, startTestSchedule, deleteTestScheduleById,
+    addTestSchedule, startTestSchedule, deleteTestScheduleById, getScheduleById,
 } from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 import {setFullScreen as setFullScreenFormSection} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
@@ -41,23 +41,25 @@ function mapStateToProps(state){
     return{
         connection,
         connectionError: connectionOverview.error,
-        scheduleError: scheduleOverview.error,
         testConnection: connectionOverview.testConnection,
         addingConnection: connectionOverview.addingTestConnection,
         deletingConnection: connectionOverview.deletingTestConnectionById,
+        updatingConnection: connectionOverview.updatingConnection,
+        checkingConnectionTitle: connectionOverview.checkingConnectionTitle,
         testSchedule: scheduleOverview.testSchedule,
+        currentSchedule: scheduleOverview.currentSchedule,
+        gettingScheduleById: scheduleOverview.gettingScheduleById,
         startingSchedule: scheduleOverview.startingTestSchedule,
         addingSchedule: scheduleOverview.addingTestSchedule,
         deletingSchedule: scheduleOverview.deletingTestScheduleById,
-        updatingConnection: connectionOverview.updatingConnection,
-        checkingConnectionTitle: connectionOverview.checkingConnectionTitle,
+        scheduleError: scheduleOverview.error,
     };
 }
 
 @connect(mapStateToProps, {
     setFullScreenFormSection, addTestConnection, addTestSchedule, startTestSchedule,
     deleteTestConnectionById, deleteTestScheduleById, setInitialTestScheduleState,
-    setInitialTestConnectionState,
+    setInitialTestConnectionState, getScheduleById,
 })
 class TestConnectionButton extends React.Component{
     constructor(props) {
@@ -68,8 +70,19 @@ class TestConnectionButton extends React.Component{
             startAddingConnection: false,
             startAddingSchedule: false,
             startTriggeringSchedule: false,
+            startGettingSchedule: false,
+            isFinishedTriggering: false,
+            isTriggerFailed: false,
             startDeletingConnection: false,
             startDeletingSchedule: false,
+        }
+        this.scheduleInterval = null;
+    }
+
+    componentWillUnmount() {
+        if(this.scheduleInterval){
+            clearInterval(this.scheduleInterval);
+            this.scheduleInterval = null;
         }
     }
 
@@ -79,13 +92,12 @@ class TestConnectionButton extends React.Component{
             addingSchedule, startingSchedule, addTestSchedule,
             startTestSchedule, deleteTestConnectionById, deletingConnection,
             connectionError, scheduleError, deletingSchedule, deleteTestScheduleById,
+            currentSchedule, gettingScheduleById, getScheduleById,
         } = this.props;
         const {
-            startAddingConnection,
-            startAddingSchedule,
-            startTriggeringSchedule,
-            startDeletingConnection,
-            startDeletingSchedule,
+            startAddingConnection, startAddingSchedule, startTriggeringSchedule,
+            startDeletingConnection, startDeletingSchedule, isFinishedTriggering,
+            startGettingSchedule,
         } = this.state;
         if(addingConnection === API_REQUEST_STATE.FINISH && testConnection && startAddingConnection){
             this.setState({
@@ -101,9 +113,36 @@ class TestConnectionButton extends React.Component{
             })
             setTimeout(() => {startTestSchedule(testSchedule)}, 300)
         }
-        if(startingSchedule === API_REQUEST_STATE.FINISH && testConnection && startTriggeringSchedule){
+        if(startingSchedule === API_REQUEST_STATE.FINISH && testConnection && startTriggeringSchedule && !isFinishedTriggering){
             this.setState({
                 startTriggeringSchedule: false,
+                startGettingSchedule: true,
+            }, () => {
+                this.scheduleInterval = setInterval(() => getScheduleById(testSchedule.schedulerId), 2000)
+            })
+        }
+        if(!isFinishedTriggering && gettingScheduleById === API_REQUEST_STATE.FINISH && currentSchedule && currentSchedule.schedulerId === testSchedule.schedulerId){
+            if(currentSchedule.lastExecution){
+                if(currentSchedule.lastExecution.success){
+                    clearInterval(this.scheduleInterval);
+                    this.scheduleInterval = null;
+                    this.setState({
+                        isFinishedTriggering: true,
+                    })
+                }
+                if(currentSchedule.lastExecution.fail){
+                    clearInterval(this.scheduleInterval);
+                    this.scheduleInterval = null;
+                    this.setState({
+                        isTriggerFailed: true,
+                        isFinishedTriggering: true,
+                    })
+                }
+            }
+        }
+        if(gettingScheduleById === API_REQUEST_STATE.FINISH && testConnection && isFinishedTriggering && startGettingSchedule){
+            this.setState({
+                startGettingSchedule: false,
                 startDeletingSchedule: true,
             })
             setTimeout(() => {deleteTestScheduleById(testSchedule.schedulerId)}, 300)
@@ -149,7 +188,12 @@ class TestConnectionButton extends React.Component{
             testingConnection, startAddingConnection,
             startAddingSchedule, startTriggeringSchedule,
             startDeletingConnection, startDeletingSchedule,
+            isFinishedTriggering, isTriggerFailed,
         } = this.state;
+        const isCreatingConnectionLoading = startAddingConnection;
+        const isCreatingScheduleLoading = isCreatingConnectionLoading || startAddingSchedule;
+        const isExecutionLoading = isCreatingScheduleLoading || !isFinishedTriggering;
+        const isCleaningLoading = isExecutionLoading || startDeletingConnection || startDeletingSchedule;
         return(
             <React.Fragment>
                 <TooltipButton
@@ -161,7 +205,9 @@ class TestConnectionButton extends React.Component{
                     handleClick={(e) => this.test(e)}
                     icon={'terminal'}
                     size={TextSize.Size_20}
+                    loadingSize={TextSize.Size_14}
                     isDisabled={testingConnection}
+                    isLoading={testingConnection}
                 />
                 {testingConnection && <CoverButtonStyled/>}
                 <UncontrolledPopover
@@ -177,20 +223,20 @@ class TestConnectionButton extends React.Component{
                         <div style={{justifyContent: 'center', display: 'grid', gridTemplateColumns: '100% auto'}}>
                             <div>{`Creating a test connection `}</div>
                             <FontIcon
-                                isLoading={startAddingConnection}
-                                value={startAddingConnection ? ' ' : 'done'} size={20}/>
+                                isLoading={isCreatingConnectionLoading}
+                                value={isCreatingConnectionLoading ? ' ' : 'done'} size={20}/>
                             <div>{`Creating a test schedule `}</div>
                             <FontIcon
-                                isLoading={startAddingConnection || startAddingSchedule}
-                                value={startAddingConnection || startAddingSchedule ? ' ' : 'done'} size={20}/>
+                                isLoading={isCreatingScheduleLoading}
+                                value={isCreatingScheduleLoading ? ' ' : 'done'} size={20}/>
                             <div>{`Execute the connection `}</div>
                             <FontIcon
-                                isLoading={startAddingConnection || startAddingSchedule || startTriggeringSchedule}
-                                value={startAddingConnection || startAddingSchedule || startTriggeringSchedule ? ' ' : 'done'} size={20}/>
+                                isLoading={isExecutionLoading}
+                                value={isExecutionLoading ? ' ' : isTriggerFailed ? 'close' : 'done'} size={20}/>
                             <div>{`Cleaning process `}</div>
                             <FontIcon
-                                isLoading={startAddingConnection || startAddingSchedule || startTriggeringSchedule || startDeletingConnection || startDeletingSchedule}
-                                value={startAddingConnection || startAddingSchedule || startTriggeringSchedule || startDeletingConnection || startDeletingSchedule ? ' ' : 'done'} size={20}/>
+                                isLoading={isCleaningLoading}
+                                value={isCleaningLoading ? ' ' : 'done'} size={20}/>
                         </div>
                     </PopoverBody>
                 </UncontrolledPopover>

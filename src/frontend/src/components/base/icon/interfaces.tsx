@@ -31,6 +31,7 @@ interface IconProps extends MaterialIconStyledProps{
     onMouseLeave?: (e?: any) => void,
     isLoading?: boolean,
     className?: string,
+    loadingSize?: string,
 }
 
 export {

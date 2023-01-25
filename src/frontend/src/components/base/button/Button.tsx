@@ -42,6 +42,7 @@ const Button: FC<ButtonProps> =
         href,
         className,
         iconSize,
+        loadingSize,
         ...styles
     }) => {
     const [isConfirmationOpened, toggleConfirmation] = useState<boolean>(false);
@@ -63,7 +64,7 @@ const Button: FC<ButtonProps> =
     }
     return (
         <ButtonStyled id={id} className={className} isDisabled={isDisabled} hasLabel={hasLabel} size={instanceSize.size} onClick={hasConfirmation ? () => toggleConfirmation(true) : onClick} color={color} background={background} disabled={isDisabled} hasBackground={hasBackground} isContentCentralized={isLabelHidden} {...styles}>
-            <Icon isLoading={isLoading} name={icon} size={iconSize || instanceSize.size} color={ hasBackground ? color || theme.button.color.quite : background || theme.button.background.quite}/>
+            <Icon isLoading={isLoading} name={icon} size={iconSize || instanceSize.size} loadingSize={loadingSize} color={ hasBackground ? color || theme.button.color.quite : background || theme.button.background.quite}/>
             {hasLabel && <Text value={<LabelStyled hasIcon={hasIcon} opacity={isLabelHidden ? 0 : 1} color={color} size={instanceSize.size} hasBackground={hasBackground}>{label}</LabelStyled>}/>}
             {
                 hasConfirmation &&
@@ -92,6 +93,7 @@ Button.defaultProps = {
     confirmationText: '',
     className: '',
     isLoading: false,
+    loadingSize: '',
 }
 
 export {
