@@ -211,7 +211,7 @@ export const addTestSchedule = createAsyncThunk(
             const date = new Date(now.getTime() + 10000);
             const schedule = {
                 cronExp: `0 0 0 1 JAN ? 2100`,
-                debugMode: false,
+                debugMode: true,
                 status: 1,
                 title: `!*test_schedule_${+ date}`,
                 connectionId: connection.connectionId,
