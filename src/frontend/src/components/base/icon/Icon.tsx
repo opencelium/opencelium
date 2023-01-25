@@ -29,6 +29,7 @@ const Icon: FC<IconProps> =
         onMouseLeave,
         color,
         size,
+        loadingSize,
         position,
         left,
         right,
@@ -40,7 +41,7 @@ const Icon: FC<IconProps> =
     const isLabelHidden = !name && isLoading;
     if(isLoading){
         return(
-            <SpinnerStyled className={className} left={left} top={top} size={size} color={color} position={position}>
+            <SpinnerStyled className={className} left={left} top={top} loadingSize={loadingSize} size={size} color={color} position={position}>
                 <Spinner type="grow" />
             </SpinnerStyled>
         )
@@ -70,6 +71,7 @@ const Icon: FC<IconProps> =
 }
 
 Icon.defaultProps = {
+    loadingSize: '',
     size: '20px',
     name: '',
     position: 'unset',

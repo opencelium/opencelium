@@ -82,8 +82,8 @@ const SpinnerStyled = styled.span<SpinnerStyledProps>`
     display: grid;
     place-items: center;
     & div{
-        width: ${({size}) => size ? isNumber(size) ? `${size}px` : size : '0.7em'};
-        height: ${({size}) => size ? isNumber(size) ? `${size}px` : size : '0.7em'};
+        width: ${({size, loadingSize}) => loadingSize ? loadingSize : size ? isNumber(size) ? `${size}px` : size : '0.7em'};
+        height: ${({size, loadingSize}) => loadingSize ? loadingSize : size ? isNumber(size) ? `${size}px` : size : '0.7em'};
     }
 `;
 

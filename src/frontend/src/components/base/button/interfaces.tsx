@@ -35,6 +35,7 @@ interface ButtonStyledProps{
 }
 
 interface SpinnerStyledProps{
+    loadingSize?: string,
     size: string | number,
     color: string,
     position: string,
@@ -78,6 +79,7 @@ interface ButtonProps {
     permission?: PermissionProps,
     className?: string,
     tabIndex?: any,
+    loadingSize?: string,
 }
 
 

@@ -146,14 +146,14 @@ export const getAllSchedules = createAsyncThunk(
         try {
             const request = new ScheduleRequest({endpoint: `/all`});
             const response = await request.getAllSchedules();
-            return response.data._embedded?.schedulerResourceList/*.filter((schedule) => {
-                if(schedule.title.indexOf('test_schedule_') === 0){
+            return response.data._embedded?.schedulerResourceList.filter((schedule) => {
+                if(schedule.title.indexOf('!*test_schedule_') === 0){
                     if(schedule.title.split('_').length >= 3){
                         return false;
                     }
                 }
                 return true;
-            })*/ || [];
+            }) || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -168,7 +168,7 @@ export const getCurrentSchedules = createAsyncThunk(
             const response = await request.getCurrentSchedules();
             // @ts-ignore
             return response.data._embedded?.runningJobsResourceList.filter((schedule) => {
-                if(schedule.title.indexOf('test_schedule_') === 0){
+                if(schedule.title.indexOf('!*test_schedule_') === 0){
                     if(schedule.title.split('_').length >= 3){
                         return false;
                     }
@@ -211,9 +211,9 @@ export const addTestSchedule = createAsyncThunk(
             const date = new Date(now.getTime() + 10000);
             const schedule = {
                 cronExp: `0 0 0 1 JAN ? 2100`,
-                debugMode: false,
+                debugMode: true,
                 status: 1,
-                title: `test_schedule_${+ date}`,
+                title: `!*test_schedule_${+ date}`,
                 connectionId: connection.connectionId,
             }
             const response = await addScheduleRequest.addSchedule(schedule);

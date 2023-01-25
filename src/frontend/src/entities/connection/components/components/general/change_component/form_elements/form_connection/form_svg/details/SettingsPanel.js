@@ -36,6 +36,7 @@ function mapStateToProps(state){
     const {connection} = mapItemsToClasses(state);
     return{
         connection,
+        addingConnection: connectionOverview.addingConnection,
         updatingConnection: connectionOverview.updatingConnection,
         checkingConnectionTitle: connectionOverview.checkingConnectionTitle,
     };
@@ -64,12 +65,12 @@ class SettingsPanel extends React.Component{
 
     render(){
         const {isFullScreen} = this.state;
-        const {togglePanel, isHidden, updatingConnection, checkingConnectionTitle} = this.props;
+        const {togglePanel, isHidden, addingConnection, updatingConnection, checkingConnectionTitle} = this.props;
         return(
             <div className={styles.details_settings_panel}>
                 <TestConnectionButton/>
-
                 <TooltipButton
+                    loadingSize={TextSize.Size_14}
                     size={TextSize.Size_20}
                     position={'bottom'}
                     className={styles.position_icon_left}
@@ -77,6 +78,8 @@ class SettingsPanel extends React.Component{
                     tooltip={'Save'}
                     target={`save_connection_button`}
                     hasBackground={false}
+                    isLoading={addingConnection === API_REQUEST_STATE.START || updatingConnection === API_REQUEST_STATE.START}
+                    isDisabled={addingConnection === API_REQUEST_STATE.START || updatingConnection === API_REQUEST_STATE.START}
                     handleClick={() => this.update()}
                 />
                 <ConfigurationsIcon/>

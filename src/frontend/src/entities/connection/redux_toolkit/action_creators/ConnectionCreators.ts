@@ -29,14 +29,14 @@ export const testConnection = createAsyncThunk(
             const now = new Date();
             const date = new Date(now.getTime() + 10000);
             const addConnectionRequest = new ConnectionRequest();
-            connection.title = `test_connection_${+ date}_${connection.title}`;
+            connection.title = `!*test_connection_${+ date}_${connection.title}`;
             const addConnectionResponse = await addConnectionRequest.addConnection(connection);
             const createdConnection = addConnectionResponse.data;
             const schedule = {
                 cronExp: `0 0 0 1 JAN ? 2100`,
                 debugMode: false,
                 status: 1,
-                title: `test_schedule_${+ date}_${createdConnection.title}`,
+                title: `!*test_schedule_${+ date}_${createdConnection.title}`,
                 connectionId: createdConnection.connectionId,
             }
             const addScheduleRequest = new ScheduleRequest();
@@ -86,7 +86,7 @@ export const addTestConnection = createAsyncThunk(
             const request = new ConnectionRequest();
             const now = new Date();
             const date = new Date(now.getTime() + 10000);
-            const title = `test_connection_${+ date}_${connection.title}`;
+            const title = `!*test_connection_${+ date}_${connection.title}`;
             delete connection.id;
             const response = await request.addConnection({...connection, title});
             return response.data;
@@ -168,7 +168,7 @@ export const getAllConnections = createAsyncThunk(
             const response = await request.getAllConnections();
             // @ts-ignore
             return response.data.filter((connection) => {
-                if(connection.title.indexOf('test_connection_') === 0){
+                if(connection.title.indexOf('!*test_connection_') === 0){
                     if(connection.title.split('_').length >= 3){
                         return false;
                     }
@@ -188,14 +188,14 @@ export const getAllMetaConnections = createAsyncThunk(
             const request = new ConnectionRequest({endpoint: `/all`});
             const response = await request.getAllMetaConnections();
             // @ts-ignore
-            return response.data/*.filter((connection) => {
-                if(connection.title.indexOf('test_connection_') === 0){
+            return response.data.filter((connection) => {
+                if(connection.title.indexOf('!*test_connection_') === 0){
                     if(connection.title.split('_').length >= 3){
                         return false;
                     }
                 }
                 return true;
-            }) */|| [];
+            }) || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
