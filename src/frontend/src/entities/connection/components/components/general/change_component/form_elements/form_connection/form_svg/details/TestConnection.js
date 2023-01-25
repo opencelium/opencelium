@@ -123,7 +123,7 @@ class TestConnectionButton extends React.Component{
                 this.scheduleInterval = setInterval(() => getScheduleById(testSchedule.schedulerId), 2000)
             })
         }
-        if(!isFinishedTriggering && gettingScheduleById === API_REQUEST_STATE.FINISH && currentSchedule && currentSchedule.schedulerId === testSchedule.schedulerId){
+        if(!isFinishedTriggering && gettingScheduleById === API_REQUEST_STATE.FINISH && currentSchedule && testSchedule && currentSchedule.schedulerId === testSchedule.schedulerId){
             if(currentSchedule.lastExecution){
                 if(currentSchedule.lastExecution.success){
                     clearInterval(this.scheduleInterval);
@@ -181,6 +181,8 @@ class TestConnectionButton extends React.Component{
             setTimeout(() => this.props.addTestConnection(connection.getObjectForBackend()), 500);
             newState.testingConnection = true;
             newState.startAddingConnection = true;
+            newState.isFinishedTriggering = false;
+            newState.isTriggerFailed = false;
         }
         this.setState(newState);
     }
