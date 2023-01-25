@@ -32,7 +32,7 @@ public class ConnectorNode {
 
     private Integer connectorId;
     private String name;
-    private String webService;
+    private String webService; // web service type: soap or rest, etc.
 
     @Relationship(type = "start_action", direction = Relationship.Direction.OUTGOING)
     private MethodNode startMethod;

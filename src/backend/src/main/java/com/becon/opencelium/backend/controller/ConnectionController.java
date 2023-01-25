@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.neo4j.entity.FieldNode;
 import com.becon.opencelium.backend.neo4j.entity.MethodNode;
+import com.becon.opencelium.backend.neo4j.repository.FieldNodeRepository;
 import com.becon.opencelium.backend.neo4j.service.*;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -114,9 +115,10 @@ public class ConnectionController {
     }
 
     @Autowired
-    private FieldNodeServiceImp fieldNodeServiceImp;
+    private FieldNodeRepository fieldNodeRepository;
     @GetMapping("/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId) {
+        FieldNode f = fieldNodeRepository.findNextField("nc_workstation", 1024L);
         Connection connection = connectionService.findById(connectionId).orElse(null);
         ConnectionResource connectionResource = connectionService.toNodeResource(connection);
         final EntityModel<ConnectionResource> resource = EntityModel.of(connectionResource);
