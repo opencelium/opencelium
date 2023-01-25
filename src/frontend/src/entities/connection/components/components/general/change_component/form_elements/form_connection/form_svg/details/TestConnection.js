@@ -32,6 +32,8 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 import {setInitialTestConnectionState} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {setInitialTestScheduleState} from "@entity/schedule/redux_toolkit/slices/ScheduleSlice";
+import Counter from "@app_component/base/counter/Counter";
+import Text from "@app_component/base/text/Text";
 
 
 function mapStateToProps(state){
@@ -188,7 +190,7 @@ class TestConnectionButton extends React.Component{
             testingConnection, startAddingConnection,
             startAddingSchedule, startTriggeringSchedule,
             startDeletingConnection, startDeletingSchedule,
-            isFinishedTriggering, isTriggerFailed,
+            isFinishedTriggering, isTriggerFailed, startGettingSchedule,
         } = this.state;
         const isCreatingConnectionLoading = startAddingConnection;
         const isCreatingScheduleLoading = isCreatingConnectionLoading || startAddingSchedule;
@@ -220,20 +222,34 @@ class TestConnectionButton extends React.Component{
                         {"Test Connection"}
                     </PopoverHeader>
                     <PopoverBody>
-                        <div style={{justifyContent: 'center', display: 'grid', gridTemplateColumns: '100% auto'}}>
-                            <div>{`Creating a test connection `}</div>
+                        <div style={{justifyContent: 'center', display: 'grid', gridTemplateColumns: '100% auto', padding: '5px'}}>
+                            <div>
+                                <Text value={`Creating a test connection `} size={TextSize.Size_14}/>
+                            </div>
                             <FontIcon
                                 isLoading={isCreatingConnectionLoading}
                                 value={isCreatingConnectionLoading ? ' ' : 'done'} size={20}/>
-                            <div>{`Creating a test schedule `}</div>
+                            <div>
+                                <Text value={`Creating a test schedule `} size={TextSize.Size_14}/>
+                            </div>
                             <FontIcon
                                 isLoading={isCreatingScheduleLoading}
                                 value={isCreatingScheduleLoading ? ' ' : 'done'} size={20}/>
-                            <div>{`Execute the connection `}</div>
+                            <div>
+                                <Text value={
+                                        <div>
+                                            {"Execute the connection ("}
+                                            <Counter shouldStart={startTriggeringSchedule || startGettingSchedule} shouldStop={!isExecutionLoading} size={TextSize.Size_12}/>
+                                            {")"}
+                                        </div>
+                                    } size={TextSize.Size_14}/>
+                            </div>
                             <FontIcon
                                 isLoading={isExecutionLoading}
                                 value={isExecutionLoading ? ' ' : isTriggerFailed ? 'close' : 'done'} size={20}/>
-                            <div>{`Cleaning process `}</div>
+                            <div>
+                                <Text value={`Cleaning process `} size={TextSize.Size_14}/>
+                            </div>
                             <FontIcon
                                 isLoading={isCleaningLoading}
                                 value={isCleaningLoading ? ' ' : 'done'} size={20}/>
