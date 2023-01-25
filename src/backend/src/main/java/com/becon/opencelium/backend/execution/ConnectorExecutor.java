@@ -258,7 +258,6 @@ public class ConnectorExecutor {
         String endpoint = methodNode.getRequestNode().getEndpoint();
         BodyNode b = methodNode.getRequestNode().getBodyNode();
         String format = b == null ? "json" : b.getFormat();
-        String requiredField;
         String refRegex = "\\{(.*?)\\}";
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(endpoint);
@@ -271,7 +270,7 @@ public class ConnectorExecutor {
             String strictlyEscapedQuery = StringUtils.replace(uri.getRawQuery(), "+", "%2B");
             uri = UriComponentsBuilder.fromUri(uri).replaceQuery(strictlyEscapedQuery).build(true).toUri();
         } catch (Exception e) {
-            new RuntimeException(e);
+            throw new RuntimeException(e);
         }
 
         return uri;
@@ -371,7 +370,6 @@ public class ConnectorExecutor {
 
     private String replaceRefValue(String url, String format) {
         String result = url;
-//        String refRegex = RegExpression.requiredData;
         String refRegex = "(\\{(.*?)\\}|\\$\\{(.*?)\\})";
         String refResRegex = RegExpression.responsePointer;
         Pattern pattern = Pattern.compile(refRegex);
