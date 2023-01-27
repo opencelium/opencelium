@@ -39,6 +39,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.*;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.net.URIBuilder;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -49,6 +50,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
 
@@ -59,6 +61,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.*;
@@ -264,16 +268,14 @@ public class ConnectorExecutor {
         if(matcher.find()) {
             endpoint = replaceRefValue(endpoint, format);
         }
-        URI uri = null;
         try {
-            uri = new URI(endpoint);
+            URI uri = new URI(endpoint);
             String strictlyEscapedQuery = StringUtils.replace(uri.getRawQuery(), "+", "%2B");
             uri = UriComponentsBuilder.fromUri(uri).replaceQuery(strictlyEscapedQuery).build(true).toUri();
+            return uri;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        return uri;
     }
 
     public String buildBody(BodyNode bodyNode){
