@@ -21,8 +21,9 @@ import {ResponseFormat} from "@entity/invoker/requests/models/Body";
 import CXmlEditor from "@app_component/base/input/xml_view/xml_editor/classes/CXmlEditor";
 import {withTheme} from "styled-components";
 import {getReactXmlStyles} from "@app_component/base/input/xml_view/styles";
-import 'ace-builds/src-noconflict/mode-xml';
+import "ace-builds/src-noconflict/snippets/javascript";
 import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-xml';
 import 'ace-builds/src-noconflict/theme-textmate';
 import 'ace-builds/src-noconflict/mode-livescript';
 import "ace-builds/src-noconflict/ext-language_tools";
@@ -66,8 +67,8 @@ const Body: FC<BodyProps> =
                 showGutter={true}
                 highlightActiveLine={true}
                 setOptions={{
-                    enableBasicAutocompletion: true,
-                    enableLiveAutocompletion: true,
+                    enableBasicAutocompletion: false,
+                    enableLiveAutocompletion: false,
                     enableSnippets: false,
                     showLineNumbers: false,
                     tabSize: 2,

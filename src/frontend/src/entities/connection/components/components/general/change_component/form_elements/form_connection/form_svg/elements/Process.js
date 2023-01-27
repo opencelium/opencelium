@@ -108,7 +108,7 @@ class Process extends React.Component{
                     process.isDragged = true;
                     process.isDraggedForCopy = e.altKey;
                 }
-                if(currentTechnicalItem.index === process.index){
+                if(currentTechnicalItem && currentTechnicalItem.index === process.index){
                     process.isSelectedAll = currentTechnicalItem.isSelectedAll;
                 }
                 setCurrentItem(process);

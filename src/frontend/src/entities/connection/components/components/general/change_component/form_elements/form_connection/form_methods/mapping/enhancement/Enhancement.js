@@ -17,13 +17,13 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import AceEditor from 'react-ace';
 
+import "ace-builds/src-noconflict/snippets/javascript";
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/theme-tomorrow';
 
 import {Row, Col} from "react-grid-system";
 
 import Input from '@entity/connection/components/components/general/basic_components/inputs/Input';
-import CEnhancement from "@entity/connection/components/classes/components/content/connection/field_binding/CEnhancement";
 import {setFocusById} from "@application/utils/utils";
 
 
@@ -166,7 +166,7 @@ class Enhancement extends Component{
 Enhancement.propTypes = {
     setEnhancement: PropTypes.func.isRequired,
     readOnly: PropTypes.bool,
-    enhancement: PropTypes.instanceOf(CEnhancement),
+    enhancement: PropTypes.any,
 };
 
 Enhancement.defaultProps = {

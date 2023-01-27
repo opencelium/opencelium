@@ -135,7 +135,7 @@ class Operator extends React.Component{
                     operator.isDragged = true;
                     operator.isDraggedForCopy = e.altKey;
                 }
-                if(currentTechnicalItem.index === operator.index){
+                if(currentTechnicalItem && currentTechnicalItem.index === operator.index){
                     operator.isSelectedAll = currentTechnicalItem.isSelectedAll;
                 }
                 setCurrentItem(operator);
