@@ -20,7 +20,7 @@ get_version()
 
 get_backend_port()
 {
-        echo $(grep -A2 'server:' /opt/src/backend/src/main/resources/application.yml | awk '{print $2}')
+        echo $(grep -A1 'server:' /opt/src/backend/src/main/resources/application.yml | awk '{print $2}')
 }
 
 refresh_db()
