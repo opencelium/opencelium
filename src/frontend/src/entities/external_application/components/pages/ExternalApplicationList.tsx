@@ -25,7 +25,8 @@ import {ExternalApplicationListProps} from "../pages/interfaces";
 import ExternalApplications from "../../collections/ExternalApplications";
 import {checkAllExternalApplications} from "../../redux_toolkit/action_creators/ExternalApplicationCreators";
 import {ExternalApplication} from "../../classes/ExternalApplication";
-import { ExternalApplicationPermissions } from '../../constants';
+import {ExternalApplicationPermissions} from '../../constants';
+import {ExternalApplicationStatus} from "@entity/external_application/requests/interfaces/IExternalApplication";
 
 const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(ExternalApplicationPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
@@ -34,14 +35,14 @@ const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(Ext
     useEffect(() => {
         dispatch(checkAllExternalApplications())
     }, []);
-    if(checkingAll === API_REQUEST_STATE.FINISH){
+    if((checkingAll === API_REQUEST_STATE.FINISH || checkingAll === API_REQUEST_STATE.ERROR) && actuatorHealth){
         externalApplications.push({
             id: 1, name: 'Kibana', icon: KibanaImagePath, link: kibanaUrl, value: 'elasticsearch',
-            status: actuatorHealth.details.elasticsearch.status
+            status: actuatorHealth.components?.elasticsearch?.status || ExternalApplicationStatus.DOWN,
         })
         externalApplications.push({
             id: 2, name: 'Neo4j', icon: Neo4jImagePath, link: neo4jUrl, value: 'neo4j',
-            status: actuatorHealth.details.neo4j.status,
+            status: actuatorHealth.components?.neo4j?.status || ExternalApplicationStatus.DOWN,
         })
     }
     const CExternalApplications = new ExternalApplications(externalApplications);
