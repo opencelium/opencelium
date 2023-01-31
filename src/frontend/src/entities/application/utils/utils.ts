@@ -1,57 +1,63 @@
 import {store} from "@application/utils/store";
 import {setLogoDataStatus, setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {LocalStorage} from "@application/classes/LocalStorage";
 
 /**
  * to create iframe for cross domain messaging
  *
  * @param src - iframe url
  */
-export function createIframe(src: string): void{
+export function bindWithServicePortalThemes(src: string): void{
     const iframe: any = document.createElement('iframe');
     iframe.id = 'iframe_messenger';
     iframe.style.display = 'none';
     iframe.src = src;
     document.body.appendChild(iframe);
-    function handleMessage(e: any) {
-        let {key, value, method} = e.data;
-        if (method === 'opencelium_themes_store') {
-            window.localStorage.setItem(key, value);
-        } else if (method === 'opencelium_themes_retrieve') {
-            let value = window.localStorage.getItem(key);
-            e.source.postMessage({
-                key,
-                value,
-                method: 'opencelium_themes_response'
-            }, '*');
-        }
-    }
-    function handleResponse(e: any) {
-        let {value, method, logoDataStatus} = e.data;
-        if (method === 'opencelium_themes_response') {
-            if(value !== null && JSON.stringify(store.getState().applicationReducer.themes) !== value){
-                store.dispatch(setThemes(value));
-            }
-            if(logoDataStatus && logoDataStatus !== store.getState().applicationReducer.logoDataStatus){
-                store.dispatch(setLogoDataStatus(logoDataStatus));
-            }
-        }
-    }
-    window.addEventListener("message", handleMessage, false);
-    window.addEventListener("message", handleResponse, false);
+    window.addEventListener("message", saveThemesHandler, false);
     setInterval(() => {
-        const iframe = document.getElementById('iframe_messenger');
-        if(iframe){
-            // @ts-ignore
-            const contentWindow = iframe.contentWindow;
-            contentWindow.postMessage({
-                method: 'opencelium_themes_retrieve',
-                key: 'key'
-            }, '*');
-        }
+        getThemesFromServicePortal();
     }, 1000);
 }
 
-export function removeIframe(){
+
+export const saveThemesHandler = (e: any) => {
+    let {themes, method} = e.data;
+    if (method === 'source.save_themes') {
+        const localThemes = store.getState().applicationReducer.themes;
+        if(themes && JSON.stringify(localThemes) !== themes){
+            store.dispatch(setThemes(themes));
+        }
+    }
+}
+
+export const getThemesFromServicePortal = () => {
+    const iframe = document.getElementById('iframe_messenger');
+    const hasSync = store.getState().authReducer.authUser?.userDetail?.themeSync || false;
+    //todo: uncomment when backend update user group will be ready
+    if(iframe/* && hasSync*/){
+        // @ts-ignore
+        const contentWindow = iframe.contentWindow;
+        contentWindow.postMessage({
+            method: 'service_portal.get_themes',
+        }, '*');
+    }
+}
+
+export const saveThemesInServicePortal = (themes: string) => {
+    const iframe = document.getElementById('iframe_messenger');
+    const hasSync = store.getState().authReducer.authUser?.userDetail?.themeSync || false;
+    //todo: uncomment when backend update user group will be ready
+    if(iframe/* && hasSync*/){
+        // @ts-ignore
+        const contentWindow = iframe.contentWindow;
+        contentWindow.postMessage({
+            method: 'source.save_themes',
+            themes,
+        }, '*');
+    }
+}
+
+export function unbindWithServicePortalThemes(){
     const iframe = document.getElementById('iframe_messenger');
     if(iframe){
         document.body.removeChild(iframe);
