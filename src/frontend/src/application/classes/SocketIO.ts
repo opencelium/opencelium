@@ -21,6 +21,12 @@ export default class SocketIO{
 
     static getInstance(query: any = {}) {
         return io(this.url, {
+            auth: {
+                'Authentication': 'Bearer sdasdasd',
+            },
+            extraHeaders: {
+                'x-access-token': 'Bearer sdasdasd',
+            },
             transports: ['websocket'],
             rejectUnauthorized: false,
             query,
