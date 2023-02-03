@@ -63,6 +63,29 @@ export const HighlightedMarkers = () => {
     );
 }
 
+export const DashedMarkers = () => {
+    return (
+        <React.Fragment>
+            <marker id="arrow_head_right_dashed" markerWidth="10" markerHeight="7"
+                    refX="0" refY="3.5" orient="auto" className={styles.dashed_marker}>
+                <polygon points="0 0, 10 3.5, 0 7" />
+            </marker>
+            <marker id="arrow_head_down_dashed" markerWidth="7" markerHeight="10"
+                    refX="0" refY="3.5" orient="auto" className={styles.dashed_marker}>
+                <polygon points="0 0, 7 0, 3.5 10" />
+            </marker>
+            <marker id="arrow_head_left_dashed" markerWidth="10" markerHeight="7"
+                    refX="0" refY="3.5" orient="auto" className={styles.dashed_marker}>
+                <polygon points="10 0, 0 3.5, 10 7" />
+            </marker>
+            <marker id="arrow_head_up_dashed" markerWidth="7" markerHeight="10"
+                    refX="0" refY="3.5" orient="auto" className={styles.dashed_marker}>
+                <polygon points="0 10, 3.5 0, 7 10" />
+            </marker>
+        </React.Fragment>
+    );
+}
+
 export const PlaceholderMarkers = () => {
     return (
         <React.Fragment>

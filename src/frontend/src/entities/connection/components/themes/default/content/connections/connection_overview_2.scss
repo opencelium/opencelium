@@ -23,6 +23,7 @@ $MOVE_HOVER_COLOR: #3c75b7;
 $MOVE_ACTIVE_COLOR: #263e5b;
 $SVG_DISABLED_HIGHLIGHT_COLOR: #499f54;
 $HIGHLIGHT_COLOR: #8a9dd7;
+$DASHED_COLOR: #58854d;
 
 .process_rect{
   stroke: #000;
@@ -198,6 +199,12 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   polygon {
     @extend .highlighting;
     fill: $HIGHLIGHT_COLOR;
+  }
+}
+.dashed_marker{
+  polygon {
+    fill: $DASHED_COLOR;
+    stroke: $DASHED_COLOR;
   }
 }
 .placeholder_marker{

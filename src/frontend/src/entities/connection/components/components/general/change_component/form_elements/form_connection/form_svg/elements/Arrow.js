@@ -21,6 +21,7 @@ import {mapItemsToClasses} from "@change_component/form_elements/form_connection
 import {connect} from "react-redux";
 import COperator from "@classes/content/connection_overview_2/operator/COperator";
 import {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
+import DashedElement from "@change_component/form_elements/form_connection/form_svg/elements/process/DashedElement";
 
 export const ARROW_WIDTH = 2;
 
@@ -39,6 +40,7 @@ class Arrow extends React.Component{
         this.state = {
             isMouseOver: false,
             isAvailableForDragging: false,
+            dashAnimation: '4,8,4',
         }
     }
 
@@ -102,14 +104,55 @@ class Arrow extends React.Component{
             markerStyle = '_rejected_placeholder';
             stroke = '#d24545';
         }
+        //const hasDashAnimation = `${from.id}_${to.id}` === 'toConnector_2_toConnector_2_0';
+        const hasDashAnimation = false;
+        if(hasDashAnimation){
+            markerStyle = '_dashed';
+        }
         return(
             <React.Fragment>
-                {line1 && <line id={`${from.id}_${to.id}_line1`} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`} x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2} stroke={stroke}
-                      strokeWidth={ARROW_WIDTH}/>}
-                {line2 && <line id={`${from.id}_${to.id}_line2`} strokeLinecap={"round"} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line2`} x1={line2.x1} y1={line2.y1} x2={line2.x2} y2={line2.y2} stroke={stroke}
-                      strokeWidth={ARROW_WIDTH}/>}
-                {arrow && <line id={`${from.id}_${to.id}_arrow`} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} arrow`} x1={arrow.x1} y1={arrow.y1} x2={arrow.x2} y2={arrow.y2} stroke={stroke}
-                                strokeWidth={ARROW_WIDTH} markerEnd={`url(#arrow_head_right${markerStyle})`}/>}
+                {line1 &&
+                    <DashedElement
+                        hasDashAnimation={hasDashAnimation}
+                        getElement={(props) => {
+                            return <line
+                                {...props}
+                                id={`${from.id}_${to.id}_line1`}
+                                className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
+                                x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2} stroke={stroke}
+                                strokeWidth={ARROW_WIDTH}
+                            />
+                        }}
+                    />
+                }
+                {line2 &&
+                    <DashedElement
+                        hasDashAnimation={hasDashAnimation}
+                        getElement={(props) => {
+                            return <line
+                                {...props}
+                                id={`${from.id}_${to.id}_line2`}
+                                className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line2`}
+                                x1={line2.x1} y1={line2.y1} x2={line2.x2} y2={line2.y2} stroke={stroke}
+                                strokeLinecap={"round"} strokeWidth={ARROW_WIDTH}
+                            />
+                        }}
+                    />
+                }
+                {arrow &&
+                    <DashedElement
+                        hasDashAnimation={hasDashAnimation}
+                        getElement={(props) => {
+                            return <line
+                                {...props}
+                                id={`${from.id}_${to.id}_arrow`}
+                                className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} arrow`}
+                                x1={arrow.x1} y1={arrow.y1} x2={arrow.x2} y2={arrow.y2} stroke={stroke}
+                                strokeWidth={ARROW_WIDTH} markerEnd={`url(#arrow_head_right${markerStyle})`}
+                            />
+                        }}
+                    />
+                }
                 {showPlaceholder ?
                     !isOperator ?
                         <rect className={styles.process_placeholder} stroke={stroke} rx={5} ry={5} x={processPlaceholderX} y={processPlaceholderY} width={30} height={20}/>

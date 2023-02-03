@@ -28,6 +28,7 @@ import COperator from "@entity/connection/components/classes/components/content/
 import ReactDOM from "react-dom";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_svg/elements/Arrow";
+import DashedElement from "@change_component/form_elements/form_connection/form_svg/elements/process/DashedElement";
 
 
 function mapStateToProps(state){
@@ -247,12 +248,27 @@ class Operator extends React.Component{
         const hasDraggableItem = currentTechnicalItem && currentTechnicalItem.isDragged;
         const hasDraggableOperator = isCurrent && hasDraggableItem;
         const isDraggableItemOperator = hasDraggableItem && currentTechnicalItem instanceof CTechnicalOperator;
+        const hasDashAnimation = false;
         return(
             <svg onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} id={operator.getHtmlIdName()} x={operator.x} y={operator.y} className={`${styles.operator} ${isDisabledStyle} ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={svgSize.width} height={svgSize.height}>
                 <rect x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'}/>
                 {operatorType === IF_OPERATOR &&
                     <React.Fragment>
-                        <polygon onMouseDown={(a) => this.onMouseDown(a)} onMouseUp={(a) => this.onMouseUp(a)} onDoubleClick={(a) => this.onDoubleClick(a)} onClick={(a) => this.onClick(a)} points={points} style={{...polygonStyle, ...errorStyles}} className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}/>
+                        <DashedElement
+                            hasDashAnimation={hasDashAnimation}
+                            getElement={(props) => {
+                                return <polygon
+                                    onMouseDown={(a) => this.onMouseDown(a)}
+                                    onMouseUp={(a) => this.onMouseUp(a)}
+                                    onDoubleClick={(a) => this.onDoubleClick(a)}
+                                    onClick={(a) => this.onClick(a)}
+                                    points={points}
+                                    style={{...polygonStyle, ...errorStyles}}
+                                    className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+                                    {...props}
+                                />;
+                            }}
+                        />
                         <text fontSize={20} dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY} style={errorStyles}>
                         {'if'}
                         </text>
@@ -261,7 +277,21 @@ class Operator extends React.Component{
                 }
                 {operatorType === LOOP_OPERATOR &&
                     <React.Fragment>
-                        <polygon onMouseDown={(a) => this.onMouseDown(a)} onMouseUp={(a) => this.onMouseUp(a)} onDoubleClick={(a) => this.onDoubleClick(a)} onClick={(a) => this.onClick(a)} style={{...polygonStyle, ...errorStyles}} className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} points={points}/>
+                        <DashedElement
+                            hasDashAnimation={hasDashAnimation}
+                            getElement={(props) => {
+                                return <polygon
+                                    onMouseDown={(a) => this.onMouseDown(a)}
+                                    onMouseUp={(a) => this.onMouseUp(a)}
+                                    onDoubleClick={(a) => this.onDoubleClick(a)}
+                                    onClick={(a) => this.onClick(a)}
+                                    points={points}
+                                    style={{...polygonStyle, ...errorStyles}}
+                                    className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+                                    {...props}
+                                />
+                            }}
+                        />
                         <svg style={{pointerEvents: 'none'}} className={`${isNotDraggable ? styles.not_draggable : ''} ${styles.operator_loop_icon}`} fill="#000000" width="30px" height="30px" viewBox="0 0 24 24" x="15px" y="14px">
                             <path style={errorStyles} d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
                             <path d="M0 0h24v24H0z" fill="none"/>

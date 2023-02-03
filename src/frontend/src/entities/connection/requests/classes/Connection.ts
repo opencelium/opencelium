@@ -36,10 +36,12 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
     }
 
     async getAllConnections(): Promise<AxiosResponse<IConnection[]>>{
+        this.endpoint = '/all';
         return super.get<IConnection[]>();
     }
 
     async getAllMetaConnections(): Promise<AxiosResponse<IConnection[]>>{
+        this.endpoint = '/all/meta';
         return super.get<IConnection[]>();
     }
 

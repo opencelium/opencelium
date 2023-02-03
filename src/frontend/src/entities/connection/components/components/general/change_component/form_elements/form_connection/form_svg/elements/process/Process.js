@@ -16,21 +16,18 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
-import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2.scss";
-import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
+import styles from "../../../../../../../../themes/default/content/connections/connection_overview_2.scss";
+import {CTechnicalProcess} from "@classes/content/connection_overview_2/process/CTechnicalProcess";
 import {isString} from "@application/utils/utils";
 import DeleteIcon from "@change_component/form_elements/form_connection/form_svg/elements/DeleteIcon";
-import {COLOR_MODE} from "@entity/connection/components/classes/components/content/connection_overview_2/CSvg";
+import {COLOR_MODE} from "@classes/content/connection_overview_2/CSvg";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import ReactDOM from "react-dom";
 import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_svg/elements/Arrow";
 import COperator from "@classes/content/connection_overview_2/operator/COperator";
 import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
 import {OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
-import {
-    addSelectAllAfterItemsKeyNavigation,
-    removeSelectAllAfterItemsKeyNavigation
-} from "@root/components/utils/key_navigation";
+import DashedElement from "./DashedElement";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
@@ -146,7 +143,10 @@ class Process extends React.Component{
     }
 
     render(){
-        const {technicalRectClassName, isMouseOverSvg, isMouseOverPlaceholder, isAvailableForDragging} = this.state;
+        const {
+            technicalRectClassName, isMouseOverSvg, isMouseOverPlaceholder,
+            isAvailableForDragging,
+        } = this.state;
         const {
             process, isNotDraggable, isCurrent, isHighlighted,
             isDisabled, colorMode, readOnly, connection, currentTechnicalItem, textSize,
@@ -190,12 +190,25 @@ class Process extends React.Component{
                 svgSize.width += 90;
             }
         }
+        const hasDashAnimation = false;
         return(
             <React.Fragment>
                 <svg id={process.getHtmlIdName()} data-movable={isAvailableForDragging} onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={svgSize.width} height={svgSize.height}>
                     <rect rx={borderRadius} ry={borderRadius} x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'}/>
-                    <rect fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color} onDoubleClick={(a) => this.onDoubleClick(a)} onClick={(a) => this.onClick(a)} onMouseDown={(a) => this.onMouseDown(a)} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
-                          className={`${technicalRectClassName} ${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+                    <DashedElement
+                        getElement={(props) => {
+                            return (
+                                <rect
+                                    {...props}
+                                    fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color}
+                                    onDoubleClick={(a) => {this.onDoubleClick(a)}}
+                                    onClick={(a) => {this.onClick(a)}}
+                                    onMouseDown={(a) => {this.onMouseDown(a)}}
+                                    x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
+                                    className={`${technicalRectClassName} ${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+                                />);
+                        }}
+                        hasDashAnimation={hasDashAnimation}
                     />
                     <svg x={0} y={0} width={process.width} height={process.height}>
                         <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY} fontSize={textSize}>

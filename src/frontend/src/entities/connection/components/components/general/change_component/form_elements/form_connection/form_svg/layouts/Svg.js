@@ -16,14 +16,13 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import {connect} from "react-redux";
-import Process from "../elements/Process";
+import Process from "../elements/process/Process";
 import Arrow from "../elements/Arrow";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import ConnectorPanels from "@change_component/form_elements/form_connection/form_svg/elements/ConnectorPanels";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {
-    HighlightedMarkers,
-    DefaultMarkers,
+    HighlightedMarkers, DefaultMarkers, DashedMarkers,
     PlaceholderMarkers, RejectedPlaceholderMarkers
 } from "@change_component/form_elements/form_connection/form_svg/elements/Markers";
 import Operator from "@change_component/form_elements/form_connection/form_svg/elements/Operator";
@@ -527,6 +526,7 @@ class Svg extends React.Component {
                     <defs>
                         <DefaultMarkers/>
                         <HighlightedMarkers/>
+                        <DashedMarkers/>
                         <PlaceholderMarkers/>
                         <RejectedPlaceholderMarkers/>
                     </defs>
