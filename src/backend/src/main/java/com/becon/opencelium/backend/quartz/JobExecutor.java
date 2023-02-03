@@ -19,6 +19,8 @@ package com.becon.opencelium.backend.quartz;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.execution.ExecutionContainer;
+import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.execution.socket.SocketLogMessage;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.Execution;
 import com.becon.opencelium.backend.mysql.entity.LastExecution;
@@ -31,6 +33,7 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -38,15 +41,15 @@ import org.springframework.web.client.RestTemplate;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class JobExecutor extends QuartzJobBean {
 
     private static final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
-
-    @Autowired
-    private ConnectionServiceImp connectionService;
 
     @Autowired
     private ConnectionNodeServiceImp connectionNodeService;
@@ -90,6 +93,9 @@ public class JobExecutor extends QuartzJobBean {
     @Autowired
     private VariableNodeServiceImp statementNodeService;
 
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         execution(context);
@@ -103,9 +109,9 @@ public class JobExecutor extends QuartzJobBean {
 
         boolean debugMode = scheduler.getDebugMode();
         ExecutionContainer executionContainer = new ExecutionContainer(enhancementServiceImp, fieldNodeServiceImp, methodNodeServiceImp);
-        if(debugMode) logger.info("Executing Job with key {}", context.getJobDetail().getKey());
-        if(debugMode) logger.info("Firing  Trigger with key {}", context.getTrigger().getKey());
-        if(debugMode) System.out.println("==================================================================");
+        if(debugMode) loggAndSend("Executing Job with key " + context.getJobDetail().getKey());
+        if(debugMode) loggAndSend("Firing  Trigger with key " + context.getTrigger().getKey());
+        if(debugMode) loggAndSend("==================================================================");
 
 
         Object queryParams = jobDataMap.getOrDefault("queryParams", null);
@@ -136,7 +142,7 @@ public class JobExecutor extends QuartzJobBean {
         try {
             ConnectorExecutor connectorExecutor = new ConnectorExecutor(invokerService, executionContainer,
                     fieldNodeServiceImp, methodNodeServiceImp,
-                    connectorService, statementNodeService);
+                    connectorService, statementNodeService, simpMessagingTemplate);
             ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,
                     executionContainer, connectorExecutor, debugMode);
             connectionExecutor.start(scheduler);
@@ -174,5 +180,12 @@ public class JobExecutor extends QuartzJobBean {
             lastExecution.setSuccessExecutionId(execution.getId());
             lastExecutionServiceImp.save(lastExecution);
         }
+    }
+
+    private void loggAndSend(String message){
+        logger.info(message);
+        SocketLogMessage socketLogMessage = new SocketLogMessage(message);
+        socketLogMessage.setType("info");
+        simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, socketLogMessage);
     }
 }

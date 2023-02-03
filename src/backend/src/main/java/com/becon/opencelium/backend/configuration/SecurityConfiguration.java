@@ -93,16 +93,15 @@ public class SecurityConfiguration {
                 .cors()
                 .and()
                 .csrf().disable()
-                .authorizeHttpRequests()
-                .anyRequest()
-                .authenticated()
-                .and()
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/websocket")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
                 .addFilter(authenticationFilter)
                 .addFilter(getAuthorizationFilter())
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .build();
+                .and().build();
     }
 
     @Bean

@@ -18,6 +18,8 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.OperatorType;
+import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.execution.socket.SocketLogMessage;
 import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
@@ -39,18 +41,19 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.*;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.core5.net.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
 
@@ -61,15 +64,17 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.net.URISyntaxException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class ConnectorExecutor {
+
+    private static final Logger logger = LoggerFactory.getLogger(ConnectorExecutor.class);
 
     private Invoker invoker;
 
@@ -80,17 +85,20 @@ public class ConnectorExecutor {
     private final MethodNodeServiceImp methodNodeServiceImp;
     private final ConnectorServiceImp connectorService;
     private final VariableNodeServiceImp statementNodeService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
     private boolean debugMode = false;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
                              FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeServiceImp,
-                             ConnectorServiceImp connectorService, VariableNodeServiceImp statementNodeService) {
+                             ConnectorServiceImp connectorService, VariableNodeServiceImp statementNodeService,
+                             SimpMessagingTemplate simpMessagingTemplate) {
         this.invokerService = invokerService;
         this.executionContainer = executionContainer;
         this.fieldNodeService = fieldNodeService;
         this.methodNodeServiceImp = methodNodeServiceImp;
         this.connectorService = connectorService;
         this.statementNodeService = statementNodeService;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
@@ -125,7 +133,6 @@ public class ConnectorExecutor {
             }
 // ==================================================================================
             ResponseEntity<String> responseEntity = sendRequest(methodNode);
-            if (debugMode) System.out.println("Response : " + responseEntity.getBody());
 
             messageContainer = executionContainer.getResponseData().stream()
                     .filter(m -> m.getMethodKey().equals(methodNode.getColor()))
@@ -168,33 +175,30 @@ public class ConnectorExecutor {
         } catch (Exception e){
             e.printStackTrace();
             //TODO: if error occurred write in logs
+            loggAndSend(e);
         }
 
         executeMethod(methodNode.getNextFunction());
         executeDecisionStatement(methodNode.getNextOperator());
     }
 
-    private ResponseEntity<String> sendRequest(MethodNode methodNode){
+    private ResponseEntity sendRequest(MethodNode methodNode) throws URISyntaxException{
+        if (debugMode) {
+            loggAndSend("============================================================================");
+            loggAndSend("Function: " + methodNode.getName() + " -- color: " + methodNode.getColor());
+        }
         FunctionInvoker functionInvoker = invoker.getOperations().stream()
                 .filter(m -> m.getName().equals(methodNode.getName())).findFirst()
                 .orElseThrow(() -> new RuntimeException("Method not found in Invoker"));
 
-        if (debugMode) {
-            System.out.println("============================================================");
-            System.out.println("Function: " + methodNode.getName() + " -- color: " + methodNode.getColor());
-        }
 
         HttpMethod method = getMethod(methodNode); // done
-        if (debugMode) System.out.println("Method: " + method.name());
-
         URI uri = buildUrl(methodNode); // done
-        if (debugMode) System.out.println("URL: " + uri);
-
         HttpHeaders header = buildHeader(functionInvoker); // done
-        if (debugMode) System.out.println("Header: " + header.toString());
         String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
-        if (debugMode) System.out.println("Body: " + body);
-        if (debugMode) System.out.println("============================================================");
+        if (debugMode) {
+            loggAndSend("============================================================");
+        }
 
         // TODO: added application/x-www-form-urlencoded support: need to refactor.
         Object data;
@@ -222,7 +226,9 @@ public class ConnectorExecutor {
             } else {
                 data = body;
             }
-            if (debugMode) System.out.println("Inside CheckMK body: " + data);
+            if (debugMode) {
+                loggAndSend("Inside CheckMK body: " + data);
+            }
         }
 
         // TODO: Changed string to object in httpEntity;
@@ -234,7 +240,11 @@ public class ConnectorExecutor {
 //        f (invoker.getName().equalsIgnoreCase("igel")){
 //            restTemplate = getRestTemplate();
 //        }i
-        return restTemplate.exchange(uri, method ,httpEntity, String.class);
+        ResponseEntity responseEntity = restTemplate.exchange(uri, method ,httpEntity, String.class);
+        if (debugMode) {
+            loggAndSend("Response : " + responseEntity.getBody());
+        }
+        return responseEntity;
     }
 
     private HttpMethod getMethod(MethodNode methodNode){
@@ -255,10 +265,14 @@ public class ConnectorExecutor {
             default:
                 throw new RuntimeException("Http method not found");
         }
+
+        if (debugMode) {
+            loggAndSend("Http Method: " + httpMethodType.name());
+        }
         return httpMethodType;
     }
 
-    public URI buildUrl(MethodNode methodNode){
+    public URI buildUrl(MethodNode methodNode) throws URISyntaxException {
         String endpoint = methodNode.getRequestNode().getEndpoint();
         BodyNode b = methodNode.getRequestNode().getBodyNode();
         String format = b == null ? "json" : b.getFormat();
@@ -268,18 +282,22 @@ public class ConnectorExecutor {
         if(matcher.find()) {
             endpoint = replaceRefValue(endpoint, format);
         }
-        try {
-            URI uri = new URI(endpoint);
-            String strictlyEscapedQuery = StringUtils.replace(uri.getRawQuery(), "+", "%2B");
-            uri = UriComponentsBuilder.fromUri(uri).replaceQuery(strictlyEscapedQuery).build(true).toUri();
-            return uri;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+
+        endpoint = endpoint.replace(" ", "+");
+        URI uri = new URI(endpoint);
+        String strictlyEscapedQuery = StringUtils.replace(uri.getRawQuery(), "+", "%2B");
+        uri = UriComponentsBuilder.fromUri(uri).replaceQuery(strictlyEscapedQuery).build(true).toUri();
+        if (debugMode) {
+            loggAndSend("URL: " + uri);
         }
+        return uri;
     }
 
     public String buildBody(BodyNode bodyNode){
         if (bodyNode == null){
+            if (debugMode) {
+                loggAndSend("Body: " + "null");
+            }
             return "null";
         }
         Map<String, Object> fields = replaceValues(bodyNode.getFields());
@@ -307,6 +325,9 @@ public class ConnectorExecutor {
             }
         } catch (JsonProcessingException e){
             throw new RuntimeException(e);
+        }
+        if (debugMode) {
+            loggAndSend("Body: " + result);
         }
         return result;
     }
@@ -343,6 +364,9 @@ public class ConnectorExecutor {
             headerItem.put(k, v);
         });
         httpHeaders.setAll(headerItem);
+        if (debugMode) {
+            loggAndSend("Header: " + httpHeaders.toString());
+        }
         return httpHeaders;
     }
 
@@ -513,13 +537,15 @@ public class ConnectorExecutor {
     }
 
     private void executeIfStatement(StatementNode ifStatement){
-        if (debugMode) System.out.println("=============== " + ifStatement.getOperand() + " ================= " + ifStatement.getIndex() );
+        if (debugMode) {
+            loggAndSend("=============== " + ifStatement.getOperand() + " ================= " + ifStatement.getIndex() );
+        }
         OperatorAbstractFactory factory = new OperatorAbstractFactory();
         Operator operator = factory.generateFactory(OperatorType.COMPARISON).getOperator(ifStatement.getOperand());
         Object leftVariable = getValue(ifStatement.getLeftStatementVariable(), "");
 
         if(leftVariable != null && debugMode){
-            System.out.println("Left Statement: " + leftVariable.toString());
+            loggAndSend("Left Statement: " + leftVariable);
         }
 
         String ref = statementNodeService.convertToRef(ifStatement.getLeftStatementVariable());
@@ -533,9 +559,9 @@ public class ConnectorExecutor {
 
         if (rightStatement != null && debugMode){
             if (rightStatement.getClass().isArray()) {
-                System.out.println("Right Statement: " + Arrays.toString((String[])rightStatement));
+                loggAndSend("Right Statement: " + Arrays.toString((String[])rightStatement));
             } else {
-                System.out.println("Right Statement: " + rightStatement.toString());
+                loggAndSend("Right Statement: " + rightStatement);
             }
 
         }
@@ -614,10 +640,14 @@ public class ConnectorExecutor {
         List<Object> array =
                 (List<Object>) message.getValue(condition, loopIndex);
 
-        if (debugMode) System.out.println("============================= LOOP ======================== " + statementNode.getIndex());
+        if (debugMode) {
+            loggAndSend("============================= LOOP ======================== ");
+        }
         String arr = ConditionUtility.getLastArray(condition);;
         for (int i = 0; i < array.size(); i++) {
-            if (debugMode) System.out.println("Loop " + condition + "-------- index : " + i);
+            if (debugMode) {
+                loggAndSend("Loop " + condition + "-------- index : " + i);
+            }
             loopIndex.put(arr, i);
             executeMethod(statementNode.getBodyFunction());
             executeDecisionStatement(statementNode.getBodyOperator());
@@ -674,5 +704,22 @@ public class ConnectorExecutor {
         RestTemplate restTemplate = restTemplateBuilder.build();
         restTemplate.setRequestFactory(requestFactory);
         return restTemplate;
+    }
+
+    private void loggAndSend(String message){
+        logger.info(message);
+        SocketLogMessage logMessage = new SocketLogMessage(message);
+        logMessage.setType("info");
+        simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, logMessage);
+    }
+
+    private void loggAndSend(Exception e){
+        logger.error(e.getMessage());
+        List<String> stackTrace = Stream.of(e.getStackTrace()).map(StackTraceElement::toString).toList();
+
+        SocketLogMessage socketLogMessage = new SocketLogMessage(e.getMessage());
+        socketLogMessage.setStackTrace(stackTrace);
+        socketLogMessage.setType("error");
+        simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, socketLogMessage);
     }
 }

@@ -55,7 +55,8 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 
         String url  = request.getRequestURI();
         System.out.println(url);
-        if (url.contains("api/webhook/execute") || url.contains("api/storage/files") || url.contains("api/webhook/health")){
+        if (url.contains("api/webhook/execute") || url.contains("api/storage/files") ||
+                url.contains("api/webhook/health")){
 
             response.setHeader("Access-Control-Allow-Origin", "*");
             response.setHeader("Access-Control-Allow-Credentials", "true");
@@ -67,7 +68,7 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = extractTokenFromRequest(request);
         if (token == null || !token.startsWith(SecurityConstant.BEARER)){
             chain.doFilter(request, response);
             throw new WrongHeaderAuthTypeException(token);
@@ -77,6 +78,14 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
         UsernamePasswordAuthenticationToken auth = getAuthentication(jwt);
         SecurityContextHolder.getContext().setAuthentication(auth);
         chain.doFilter(request, response);
+    }
+
+    private String extractTokenFromRequest(HttpServletRequest request) {
+        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (token == null) {
+            return request.getParameter("token");
+        }
+        return token;
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(String token) {
