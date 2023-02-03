@@ -51,6 +51,9 @@ export const checkAllExternalApplications = createAsyncThunk(
             const response = await request.checkAll();
             return response.data;
         } catch(e){
+            if(e?.response?.data){
+                return e.response.data;
+            }
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
     }

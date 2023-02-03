@@ -19,34 +19,35 @@ import {ThemeProvider, withTheme} from 'styled-components';
 import {getRoutes} from "@application/utils/routes";
 import {Application} from "@application/classes/Application";
 import {offlineServiceOpenCeliumUrls, onlineServiceOpenCeliumUrl} from '@entity/application/requests/classes/url';
-import {createIframe, removeIframe} from "@entity/application/utils/utils";
+import {bindWithServicePortalThemes, unbindWithServicePortalThemes} from "@entity/application/utils/utils";
 import Themes, {DefaultTheme, updateThemeWithColors} from "@style/Theme";
 import {Global} from "@style/global";
 import {Auth} from "@application/classes/Auth";
-import {useAppDispatch} from "@application/utils/store";
+import {AppDispatch, useAppDispatch} from "@application/utils/store";
 import { setThemes } from '@application/redux_toolkit/slices/ApplicationSlice';
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {getLogoName} from "@application/redux_toolkit/action_creators/ApplicationCreators";
+import {isArray} from "@application/utils/utils";
+import {updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
 
 
 const App = ({}) => {
     const dispatch = useAppDispatch();
     const {isAuth, authUser} = Auth.getReduxState();
     const {themes} = Application.getReduxState();
-    let selectedTheme: any = themes.find(theme => theme.isCurrent) || DefaultTheme;
+    let selectedTheme: any = themes && isArray(themes) ? themes.find(theme => theme.isCurrent) || DefaultTheme : DefaultTheme;
     const appTheme = updateThemeWithColors(Themes.default, selectedTheme);
     useEffect(() => {
         if(authUser) {
-            //todo: themesync is absent in service portal. move it out
-            if (authUser.userDetail.themeSync) {
+            //if (authUser.userDetail.themeSync) {
                 if (navigator.onLine) {
-                    createIframe(onlineServiceOpenCeliumUrl);
+                    bindWithServicePortalThemes(onlineServiceOpenCeliumUrl);
                 } else {
-                    createIframe(offlineServiceOpenCeliumUrls);
+                    bindWithServicePortalThemes(offlineServiceOpenCeliumUrls);
                 }
-            } else {
-                removeIframe();
-            }
+            //} else {
+                //unbindWithServicePortalThemes();
+            //}
         }
     }, [authUser?.userDetail?.themeSync || authUser])
     useEffect(() => {
@@ -54,7 +55,7 @@ const App = ({}) => {
             if(authUser.themes) {
                 const storage = LocalStorage.getStorage();
                 if (storage.get('themes') !== authUser.themes) {
-                    dispatch(setThemes(authUser.themes));
+                    //dispatch(updateAuthUser({...authUser, themes: storage.get('themes')}));
                 }
             }
             if(authUser.userDetail.sync){

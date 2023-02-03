@@ -82,7 +82,6 @@ class Description extends React.Component{
 Description.propTypes = {
     isExtended: PropTypes.bool,
     updateConnection: PropTypes.func.isRequired,
-    connection: PropTypes.instanceOf(CConnection).isRequired,
 };
 
 Description.defaultProps = {

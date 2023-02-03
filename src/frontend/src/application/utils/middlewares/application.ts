@@ -22,10 +22,12 @@ import {
     setCurrentPages,
     setGridViewType,
     setSearchFields,
+    setThemes,
     setViewType
 } from '@application/redux_toolkit/slices/ApplicationSlice';
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
+import {getThemesFromServicePortal, saveThemesInServicePortal} from "@entity/application/utils/utils";
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (getLogoName.fulfilled.type === action.type) {
@@ -35,6 +37,9 @@ export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next
         storage.set('authUser', authUser);
         const dispatch: AppDispatch = storeApi.dispatch;
         dispatch(updateAuthUser(authUser));
+    }
+    if(setThemes.type === action.type){
+        saveThemesInServicePortal(action.payload);
     }
     if(getVersion.fulfilled.type === action.type){
         const versionResponse: ApplicationVersionResponseProps = action.payload;

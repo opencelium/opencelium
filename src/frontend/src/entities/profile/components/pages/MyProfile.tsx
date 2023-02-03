@@ -29,7 +29,7 @@ import User from "@entity/user/classes/User";
 import { MyProfileListProps } from "./interfaces";
 import { MyProfilePermissions } from "../../constants";
 import InputSelect from "@app_component/base/input/select/InputSelect";
-import {ColorTheme, DefaultTheme} from "@style/Theme";
+import {ColorTheme, DefaultTheme, DefaultThemes} from "@style/Theme";
 import InputSwitch from "@app_component/base/input/switch/InputSwitch";
 import { updateUserDetail } from "@entity/user/redux-toolkit/action_creators/UserDetailCreators";
 import {ProfileImageStyled, DefaultImageStyled} from "./styles";
@@ -39,7 +39,10 @@ import AvatarDefault from "@image/application/avatar_default.png";
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
     const dispatch = useAppDispatch();
-    const {themes} = Application.getReduxState();
+    let {themes} = Application.getReduxState();
+    if(!themes || themes.length === 0){
+        themes = DefaultThemes;
+    }
     const {authUser} = Auth.getReduxState();
     const [themeSync, setThemeSync] = useState<boolean>(authUser?.userDetail?.themeSync || false);
     useEffect(() => {

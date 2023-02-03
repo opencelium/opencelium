@@ -164,7 +164,7 @@ export const getAllConnections = createAsyncThunk(
     'connection/get/all',
     async(data: never, thunkAPI) => {
         try {
-            const request = new ConnectionRequest({endpoint: `/all`});
+            const request = new ConnectionRequest();
             const response = await request.getAllConnections();
             // @ts-ignore
             return response.data.filter((connection) => {
@@ -185,7 +185,7 @@ export const getAllMetaConnections = createAsyncThunk(
     'connection/get/all/metadata',
     async(data: never, thunkAPI) => {
         try {
-            const request = new ConnectionRequest({endpoint: `/all`});
+            const request = new ConnectionRequest();
             const response = await request.getAllMetaConnections();
             // @ts-ignore
             return response.data.filter((connection) => {

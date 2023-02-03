@@ -465,9 +465,9 @@ export default class CConnectorItem{
         let subScopeStartIndex = subArrayToString(scopeElementIndexSplit, '_', 0, startIndexSplit.length - 1);
         const subScopeEndIndex = subArrayToString(scopeElementIndexSplit, '_', 0, endIndexSplit.length - 1);
         const checkStartIndex = startIndex <= scopeElement.index;
-        const checkEndIndex = (endIndex !== '' ? endIndex > endIndexSplit : true);
+        const checkEndIndex = (endIndex !== '' ? endIndex > scopeElement.index : true);
         let checkNextItemOfOperator = true;
-        if(draggableElement.index.split('_').length === scopeElementIndexSplit.length && mode === INSIDE_ITEM){
+        /*if(draggableElement.index.split('_').length === scopeElementIndexSplit.length && mode === INSIDE_ITEM){
             let nextScopeElementIndex = `${scopeElement.index}_0`;
             let subNextScopeStartIndex = subArrayToString(nextScopeElementIndex.split('_'), '_', 0, startIndexSplit.length - 1);
             checkNextItemOfOperator = subStartIndex === subNextScopeStartIndex && startIndex <= nextScopeElementIndex;
@@ -480,7 +480,7 @@ export default class CConnectorItem{
             let nextScopeElementIndex = tmpScopeElementIndexSplit.join('_');
             let subNextScopeEndIndex = subArrayToString(nextScopeElementIndex.split('_'), '_', 0, startIndexSplit.length - 1);
             checkNextItemOfOperator = (endIndex !== '' ? subEndIndex === subNextScopeEndIndex && endIndex > nextScopeElementIndex : true);
-        }
+        }*/
         return checkStartIndex && checkEndIndex && checkNextItemOfOperator;
     }
 

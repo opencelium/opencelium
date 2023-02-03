@@ -31,23 +31,9 @@ export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next
         dispatch(getResources());
     }
     if (setThemes.match(action)) {
-        const SecStorage = LocalStorage.getStorage(true);
-        const authUser = SecStorage.get('authUser');
         const storage = LocalStorage.getStorage();
         if (storage.get('themes') !== action.payload) {
             storage.set('themes', action.payload);
-            if(authUser.userDetail.themeSync) {
-                const iframe = document.getElementById('iframe_messenger');
-                if (iframe) {
-                    // @ts-ignore
-                    const contentWindow = iframe.contentWindow;
-                    contentWindow.postMessage({
-                        key: 'key',
-                        value: action.payload,
-                        method: 'opencelium_themes_store'
-                    }, '*');
-                }
-            }
         }
     }
     return next(action);

@@ -16,14 +16,13 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import {connect} from "react-redux";
-import Process from "../elements/Process";
+import Process from "../elements/process/Process";
 import Arrow from "../elements/Arrow";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import ConnectorPanels from "@change_component/form_elements/form_connection/form_svg/elements/ConnectorPanels";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {
-    HighlightedMarkers,
-    DefaultMarkers,
+    HighlightedMarkers, DefaultMarkers, DashedMarkers,
     PlaceholderMarkers, RejectedPlaceholderMarkers
 } from "@change_component/form_elements/form_connection/form_svg/elements/Markers";
 import Operator from "@change_component/form_elements/form_connection/form_svg/elements/Operator";
@@ -35,6 +34,7 @@ import CMethodItem from "@classes/content/connection/method/CMethodItem";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import CFieldBinding from "@classes/content/connection/field_binding/CFieldBinding";
+import {Dialog} from "@app_component/base/dialog/Dialog";
 
 function mapStateToProps(state){
     const {currentTechnicalItem} = mapItemsToClasses(state);
@@ -60,6 +60,7 @@ class Svg extends React.Component {
         //for panning and zooming
         this.state = {
             ratio: 1,
+            showDropErrorMessage: false,
         }
         this.svgRef = React.createRef();
         this.resetRatio = false;
@@ -256,6 +257,7 @@ class Svg extends React.Component {
     }
 
     endDrag(e){
+        const {showDropErrorMessage} = this.state;
         const {connection, currentTechnicalItem, updateConnection} = this.props;
         let shouldMoveItem = false;
         const targetElemId = e.target ? e.target.id : '';
@@ -280,6 +282,10 @@ class Svg extends React.Component {
                         if(e.target.getAttribute('data-movable') === 'true'){
                             shouldMoveItem = true;
                             this.moveItem(connector, sourceItem, targetLeftItem, mode, !e.altKey, currentTechnicalItem.isSelectedAll);
+                        } else{
+                            if(!showDropErrorMessage){
+                                this.setState({showDropErrorMessage: true});
+                            }
                         }
                     }
                 }
@@ -498,6 +504,7 @@ class Svg extends React.Component {
     }
 
     render(){
+        const {showDropErrorMessage} = this.state;
         const {
             svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened,
             isCreateElementPanelOpened, connection, createElementPanelConnectorType,
@@ -519,6 +526,7 @@ class Svg extends React.Component {
                     <defs>
                         <DefaultMarkers/>
                         <HighlightedMarkers/>
+                        <DashedMarkers/>
                         <PlaceholderMarkers/>
                         <RejectedPlaceholderMarkers/>
                     </defs>
@@ -537,6 +545,16 @@ class Svg extends React.Component {
                         this.renderItems()
                     }
                 </svg>
+                <Dialog
+                    actions={[{label: 'Close', onClick: () => this.setState({showDropErrorMessage: false}), id: 'show_drop_error_message_close'}]}
+                    active={showDropErrorMessage}
+                    toggle={() => this.setState({showDropErrorMessage: !showDropErrorMessage})}
+                    title={'Dependency Error'}
+                >
+                    <span>
+                        {'You cannot drop here an element, because it has a reference or other elements reference to it.'}
+                    </span>
+                </Dialog>
                 {isCreateElementPanelOpened && <div className={styles.disable_background} onClick={(a) => this.hideCreateElementPanel(a)}/>}
             </React.Fragment>
         );

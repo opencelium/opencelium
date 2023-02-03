@@ -31,7 +31,7 @@ export interface Neo4jResponseProps{
 }
 
 export interface ActuatorHealthResponseProps{
-    details:{
+    components: {
         elasticsearch: ElasticSearchResponseProps,
         neo4j: Neo4jResponseProps,
     },

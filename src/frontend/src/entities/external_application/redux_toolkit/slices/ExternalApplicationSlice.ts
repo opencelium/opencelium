@@ -82,8 +82,9 @@ export const externalApplicationSlice = createSlice({
             state.actuatorHealth = action.payload;
             state.error = null;
         },
-        [checkAllExternalApplications.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        [checkAllExternalApplications.rejected.type]: (state, action: PayloadAction<ActuatorHealthResponseProps>) => {
             state.checkingAll = API_REQUEST_STATE.ERROR;
+            state.actuatorHealth = action.payload;
             state.error = action.payload;
         },
     }
