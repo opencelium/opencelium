@@ -185,7 +185,7 @@ public class ConnectorExecutor {
     private ResponseEntity sendRequest(MethodNode methodNode) throws URISyntaxException{
         if (debugMode) {
             loggAndSend("============================================================================");
-            loggAndSend("Function: " + methodNode.getName() + " -- color: " + methodNode.getColor());
+            loggAndSend("Function: " + methodNode.getName() + " -- color: " + methodNode.getColor() + " -- index: " + methodNode.getIndex());
         }
         FunctionInvoker functionInvoker = invoker.getOperations().stream()
                 .filter(m -> m.getName().equals(methodNode.getName())).findFirst()
@@ -531,6 +531,10 @@ public class ConnectorExecutor {
                 executeLoopStatement(statementNode);
                 break;
             default:
+        }
+        if (debugMode) {
+            loggAndSend("============================================================================");
+            loggAndSend("Operator: " + statementNode.getIndex());
         }
         executeMethod(statementNode.getNextFunction());
         executeDecisionStatement(statementNode.getNextOperator());

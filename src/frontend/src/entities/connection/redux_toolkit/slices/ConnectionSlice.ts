@@ -32,7 +32,7 @@ import {
     testConnection,
     updateConnection,
 } from "../action_creators/ConnectionCreators";
-import {IConnection} from "../../interfaces/IConnection";
+import {ConnectionLogProps, IConnection} from "../../interfaces/IConnection";
 import {PANEL_LOCATION} from "../../components/utils/constants/app";
 
 const COLOR_MODE = {
@@ -73,6 +73,7 @@ export interface ConnectionState extends ICommonState{
     processTextSize: number,
     isCreateElementPanelOpened: boolean,
     isDraftOpenedOnce: boolean,
+    currentLogs: ConnectionLogProps[],
 }
 
 
@@ -105,6 +106,7 @@ let initialState: ConnectionState = {
     processTextSize: 20,
     isCreateElementPanelOpened: false,
     isDraftOpenedOnce: false,
+    currentLogs: [],
     ...CommonState,
 };
 const storage = LocalStorage.getStorage();
@@ -113,6 +115,16 @@ export const connectionSlice = createSlice({
     name: 'connection',
     initialState,
     reducers: {
+        addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
+            if(action.payload){
+                let index = action.payload.index ? action.payload.index : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].index : '';
+                let connectorType = action.payload.connectorType ? action.payload.connectorType : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].connectorType : '';
+                state.currentLogs = [...state.currentLogs, {...action.payload, index, connectorType}];
+            }
+        },
+        clearCurrentLogs: (state) => {
+            state.currentLogs = [];
+        },
         setColorMode: (state, action: PayloadAction<string>) => {
             state.colorMode = action.payload;
         },
@@ -322,6 +334,7 @@ export const connectionSlice = createSlice({
 })
 
 export const {
+    addCurrentLog, clearCurrentLogs,
     setColorMode, setPanelConfigurations,
     setConnectionData, setArrows, setItems, setCurrentTechnicalItem,
     setDetailsLocation, setTechnicalLayoutLocation,

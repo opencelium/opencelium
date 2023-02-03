@@ -35,6 +35,7 @@ function mapStateToProps(state){
     return{
         colorMode: connectionOverview.colorMode,
         textSize: connectionOverview.processTextSize,
+        currentLogs: connectionOverview.currentLogs,
         currentTechnicalItem,
     }
 }
@@ -148,7 +149,7 @@ class Process extends React.Component{
             isAvailableForDragging,
         } = this.state;
         const {
-            process, isNotDraggable, isCurrent, isHighlighted,
+            process, isNotDraggable, isCurrent, isHighlighted, currentLogs,
             isDisabled, colorMode, readOnly, connection, currentTechnicalItem, textSize,
         } = this.props;
         const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
@@ -190,7 +191,8 @@ class Process extends React.Component{
                 svgSize.width += 90;
             }
         }
-        const hasDashAnimation = false;
+        const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
+        const hasDashAnimation = currentLog && currentLog.message !== '============================================================================' &&  currentLog.index === process.entity.index && currentLog.message !== '';
         return(
             <React.Fragment>
                 <svg id={process.getHtmlIdName()} data-movable={isAvailableForDragging} onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={svgSize.width} height={svgSize.height}>

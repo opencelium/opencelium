@@ -34,6 +34,8 @@ import {setInitialTestConnectionState} from "@entity/connection/redux_toolkit/sl
 import {setInitialTestScheduleState} from "@entity/schedule/redux_toolkit/slices/ScheduleSlice";
 import Counter from "@app_component/base/counter/Counter";
 import Text from "@app_component/base/text/Text";
+import SyncLogs from "./SyncLogs";
+import {findTopLeft} from "@application/utils/utils";
 
 
 function mapStateToProps(state){
@@ -164,6 +166,8 @@ class TestConnectionButton extends React.Component{
                 this.setState({
                     testingConnection: false,
                 });
+
+                this.props.setFullScreenFormSection(false);
             }, 3500)
         }
         if(this.state.testingConnection && (connectionError || scheduleError)){
@@ -184,6 +188,7 @@ class TestConnectionButton extends React.Component{
             newState.isFinishedTriggering = false;
             newState.isTriggerFailed = false;
         }
+        this.props.setFullScreenFormSection(true);
         this.setState(newState);
     }
 
@@ -200,6 +205,7 @@ class TestConnectionButton extends React.Component{
         const isCleaningLoading = isExecutionLoading || startDeletingConnection || startDeletingSchedule;
         return(
             <React.Fragment>
+                <SyncLogs shouldClear={!testingConnection}/>
                 <TooltipButton
                     className={styles.test_connection_icon}
                     target={`test_connection_button`}

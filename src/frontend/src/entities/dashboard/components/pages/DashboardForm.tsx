@@ -42,7 +42,10 @@ import {
     TitleStyled,
     WidgetItemStyled
 } from './styles';
-import SocketIO from '@application/classes/SocketIO';
+import Socket from '@application/classes/Socket';
+import { Auth } from '@application/classes/Auth';
+import { Connection } from '@entity/connection/classes/Connection';
+import {addCurrentLog} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 export const HAS_DASHBOARD_WIDGET_ENGINE = true;
 
@@ -59,36 +62,13 @@ const DashboardForm: FC<DashboardFormProps> =
         * TODO: implement get subscription update
         */
         const dispatch = useAppDispatch();
+        const {authUser} = Auth.getReduxState();
         const {widgets, gettingAllWidgets} = Widget.getReduxState();
         const {gettingAllWidgetSettings, updatingAllWidgetSettings, widgetSettings} = WidgetSetting.getReduxState();
         const [isWidgetEditOn, setIsWidgetEditOn] = useState<boolean>(false);
         const [currentWidget, setCurrentWidget] = useState(null);
         const [layout, setLayout] = useState<IWidgetSetting[]>([]);
         const [toolbox, setToolbox] = useState([]);
-        const logRef = useRef(null);
-        const [logs, setLogs] = useState([]);
-        /*useEffect(() => {
-            const socket = SocketIO.getInstance({id: Math.floor(Math.random() * 10)});
-            socket.on('connect', () => {
-                console.log(`SocketIO Connected: ${socket.id}!`)
-            });
-            socket.on('connect_error', (error) => {
-                console.log('___________ERROR____________')
-                console.log(error.message)
-                console.log('___________ERROR____________')
-            })
-            socket.on('opencelium.logs', (data) => {
-                setLogs(data);
-                if(logRef && logRef.current){
-                    logRef.current.scrollTo(0, logRef.current.scrollHeight);
-                }
-            });
-            return () => {
-                const socket = SocketIO.getInstance();
-                socket.off('opencelium.logs');
-                socket.emit('opencelium.logs.clean')
-            };
-        }, [])*/
 
         useEffect(() => {
             dispatch(getAllWidgets());
@@ -188,13 +168,6 @@ const DashboardForm: FC<DashboardFormProps> =
         return (
             <DashboardFormStyled>
                 <TitleStyled title={'Dashboard'} icon={EditDashboardIcon}/>
-                {/*<div ref={logRef} style={{width: '70%', maxHeight: '300px', overflowY: 'auto', padding: '20px'}}>
-                    {logs.map((log) => {
-                        return (
-                            <div>{`${log.id}: ${log.date}`}</div>
-                        );
-                    })}
-                </div>*/}
                 <DashboardViewStyled>
                     <div>
                         {isWidgetEditOn &&

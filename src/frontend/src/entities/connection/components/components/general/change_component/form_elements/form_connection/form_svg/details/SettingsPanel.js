@@ -33,9 +33,11 @@ import {TextSize} from "@app_component/base/text/interfaces";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
+    const applicationOverview = state.applicationReducer;
     const {connection} = mapItemsToClasses(state);
     return{
         connection,
+        isFullScreen: applicationOverview.isFullScreen,
         addingConnection: connectionOverview.addingConnection,
         updatingConnection: connectionOverview.updatingConnection,
         checkingConnectionTitle: connectionOverview.checkingConnectionTitle,
@@ -47,7 +49,15 @@ class SettingsPanel extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            isFullScreen: false,
+            isFullScreen: props.isFullScreen,
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(this.props.isFullScreen !== this.state.isFullScreen){
+            this.setState({
+                isFullScreen: this.props.isFullScreen,
+            }, () => window.scrollTo({top: findTopLeft(`technical_layout_svg`).top - 4, behavior: "instant"}));
         }
     }
 

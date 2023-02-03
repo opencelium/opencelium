@@ -13,24 +13,18 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import io, {Socket} from 'socket.io-client';
+import styled from "styled-components";
 
-export default class SocketIO{
-
-    private static url: string = 'http://localhost:443/'
-
-    static getInstance(query: any = {}) {
-        return io(this.url, {
-            auth: {
-                'Authentication': 'Bearer sdasdasd',
-            },
-            extraHeaders: {
-                'x-access-token': 'Bearer sdasdasd',
-            },
-            transports: ['websocket'],
-            rejectUnauthorized: false,
-            query,
-            path: '/my_own_test',
-        });
-    }
-}
+export const LogPanelStyled = styled.div`
+    min-height: 300px;
+    padding: 10px;
+    background: white;
+    color: black;
+    width: 100%;
+    white-space: initial;
+    max-height: 300px;
+    overflow-y: auto;
+    position: absolute;
+    bottom: 0;
+    padding: 10px;
+`;

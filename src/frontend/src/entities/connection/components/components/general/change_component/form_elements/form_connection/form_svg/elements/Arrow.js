@@ -27,9 +27,11 @@ export const ARROW_WIDTH = 2;
 
 
 function mapStateToProps(state){
+    const connectionOverview = state.connectionReducer;
     const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
         currentTechnicalItem,
+        currentLogs: connectionOverview.currentLogs,
     }
 }
 
@@ -77,7 +79,7 @@ class Arrow extends React.Component{
 
     render(){
         const {isMouseOver, isAvailableForDragging} = this.state;
-        const {from, to, isHighlighted, isDisabled, currentTechnicalItem} = this.props;
+        const {from, to, isHighlighted, isDisabled, currentTechnicalItem, currentLogs} = this.props;
         if(!from || !to){
             return null;
         }
@@ -104,8 +106,8 @@ class Arrow extends React.Component{
             markerStyle = '_rejected_placeholder';
             stroke = '#d24545';
         }
-        //const hasDashAnimation = `${from.id}_${to.id}` === 'toConnector_2_toConnector_2_0';
-        const hasDashAnimation = false;
+        const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
+        const hasDashAnimation = currentLog && currentLog.message === '============================================================================' && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`;
         if(hasDashAnimation){
             markerStyle = '_dashed';
         }
