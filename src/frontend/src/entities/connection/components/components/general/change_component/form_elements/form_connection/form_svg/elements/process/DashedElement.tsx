@@ -13,21 +13,14 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC} from 'react';
 
 const DashedElement: FC<{hasDashAnimation: boolean, getElement: any}> = ({ hasDashAnimation, getElement}) => {
-    const [dashAnimation, setDashAnimation] = useState<string>('4,8,4');
-    let interval: any = null;
-    useEffect(() => {
-        if(hasDashAnimation){
-            interval = setInterval(() => setDashAnimation((dashAnimation) => dashAnimation === '4,8,4' ? '2,4,2' : '4,8,4'), 150);
-        } else{
-            clearInterval(interval);
-        }
-    }, [hasDashAnimation])
     const rectStyles: any = {};
     if(hasDashAnimation){
-        rectStyles.strokeDasharray = dashAnimation;
+        rectStyles.animation = 'dash 15s linear infinite';
+        rectStyles.strokeDasharray = 10;
+        rectStyles.animationDirection = 'reverse';
         rectStyles.stroke = '#58854d';
     }
     return getElement({style: rectStyles});

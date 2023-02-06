@@ -37,9 +37,11 @@ import CFieldBinding from "@classes/content/connection/field_binding/CFieldBindi
 import {Dialog} from "@app_component/base/dialog/Dialog";
 
 function mapStateToProps(state){
+    const connectionOverview = state.connectionReducer;
     const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
         currentTechnicalItem,
+        isTestingConnection: connectionOverview.isTestingConnection,
     };
 }
 
@@ -406,7 +408,7 @@ class Svg extends React.Component {
     renderItems(){
         const {
             isItemDraggable, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened,
-            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll,
+            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll, isTestingConnection,
         } = this.props;
         return items.map((item,key) => {
             let currentItem = null;
@@ -420,7 +422,7 @@ class Svg extends React.Component {
                     return(
                         <Operator
                             key={key}
-                            isItemDraggable={isItemDraggable}
+                            isItemDraggable={isItemDraggable && !isTestingConnection}
                             type={'if'}
                             readOnly={readOnly}
                             operator={item}
@@ -436,7 +438,7 @@ class Svg extends React.Component {
                     return(
                         <Operator
                             key={key}
-                            isItemDraggable={isItemDraggable}
+                            isItemDraggable={isItemDraggable && !isTestingConnection}
                             type={'loop'}
                             readOnly={readOnly}
                             operator={item}
@@ -452,7 +454,7 @@ class Svg extends React.Component {
                     return(
                         <Process
                             key={key}
-                            isItemDraggable={isItemDraggable}
+                            isItemDraggable={isItemDraggable && !isTestingConnection}
                             process={item}
                             deleteProcess={deleteProcess}
                             readOnly={readOnly}

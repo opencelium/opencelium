@@ -50,6 +50,7 @@ export interface ConnectionLogProps{
     index?: string,
     connectorType?: string,
     message: string,
+    backgroundColor?: string,
 }
 
 export type ConnectionProps = keyof IConnection | string;

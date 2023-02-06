@@ -72,7 +72,7 @@ class Details extends React.Component{
                     position={'bottom'}
                     className={styles.show_icon}
                     icon={isHidden ? 'chevron_left' : 'chevron_right'}
-                    tooltip={isHidden ? 'Show' : 'Hide'}
+                    tooltip={isHidden ? 'Show Details' : 'Hide'}
                     target={`show_connection_button`}
                     hasBackground={false}
                     handleClick={() => this.togglePanel()}

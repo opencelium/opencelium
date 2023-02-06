@@ -108,7 +108,7 @@ class SettingsPanel extends React.Component{
                     position={'bottom'}
                     className={styles.position_icon_left}
                     icon={isHidden ? 'chevron_left' : 'chevron_right'}
-                    tooltip={isHidden ? 'Show' : 'Hide'}
+                    tooltip={isHidden ? 'Show Details' : 'Hide'}
                     target={`toggle_connection_button`}
                     hasBackground={false}
                     handleClick={() => togglePanel()}

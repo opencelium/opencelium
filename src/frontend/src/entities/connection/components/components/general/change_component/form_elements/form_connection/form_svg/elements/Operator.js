@@ -29,12 +29,18 @@ import ReactDOM from "react-dom";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_svg/elements/Arrow";
 import DashedElement from "@change_component/form_elements/form_connection/form_svg/elements/process/DashedElement";
+import Socket from "@application/classes/socket/Socket";
+import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 
 
 function mapStateToProps(state){
+    const connectionOverview = state.connectionReducer;
     const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
         currentTechnicalItem,
+        isLogPanelOpened: connectionOverview.isLogPanelOpened,
+        isTestingConnection: connectionOverview.isTestingConnection,
+        currentLogs: connectionOverview.currentLogs,
     }
 }
 
@@ -155,7 +161,10 @@ class Operator extends React.Component{
     }
 
     onDoubleClick(){
-        this.props.setIsCreateElementPanelOpened(true);
+        const {isTestingConnection, setIsCreateElementPanelOpened} = this.props;
+        if(!isTestingConnection){
+            setIsCreateElementPanelOpened(true);
+        }
     }
 
     onClick(){
@@ -202,7 +211,11 @@ class Operator extends React.Component{
 
     renderOperator(operatorType){
         const {polygonStyle, isMouseOverSvg, isMouseOverBottomPlaceholder, isMouseOverRightPlaceholder, isAvailableForDragging} = this.state;
-        const {operator, isNotDraggable, isCurrent, currentTechnicalItem, isHighlighted, readOnly, isDisabled} = this.props;
+        const {
+            operator, isNotDraggable, isCurrent, currentTechnicalItem,
+            isHighlighted, readOnly, isDisabled, isLogPanelOpened,
+            currentLogs,
+        } = this.props;
         const hasBottomPlaceholder = this.shouldShowBottomPlaceholder();
         const hasRightPlaceholder = this.shouldShowRightPlaceholder();
         const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
@@ -248,7 +261,9 @@ class Operator extends React.Component{
         const hasDraggableItem = currentTechnicalItem && currentTechnicalItem.isDragged;
         const hasDraggableOperator = isCurrent && hasDraggableItem;
         const isDraggableItemOperator = hasDraggableItem && currentTechnicalItem instanceof CTechnicalOperator;
-        const hasDashAnimation = false;
+        const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
+        const hasDashAnimation = isLogPanelOpened && currentLog && currentLog.message !== ConnectionLogs.BreakMessage
+            && currentLog.index === operator.entity.index && currentLog.message !== '';
         return(
             <svg onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} id={operator.getHtmlIdName()} x={operator.x} y={operator.y} className={`${styles.operator} ${isDisabledStyle} ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={svgSize.width} height={svgSize.height}>
                 <rect x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'}/>

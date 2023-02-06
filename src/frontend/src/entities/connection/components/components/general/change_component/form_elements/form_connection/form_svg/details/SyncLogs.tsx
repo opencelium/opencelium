@@ -14,33 +14,48 @@
  */
 
 import {FC, useEffect, useState} from "react";
-import Socket from "@application/classes/Socket";
+import Socket, {Message} from "@application/classes/socket/Socket";
 import {addCurrentLog, clearCurrentLogs} from "@root/redux_toolkit/slices/ConnectionSlice";
 import { Auth } from "@application/classes/Auth";
 import {useAppDispatch} from "@application/utils/store";
+import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 
-const SyncLogs: FC<{shouldClear: boolean}> =
+const SyncLogs: FC<{shouldClear?: boolean}> =
     ({
         shouldClear,
-     }) => {
+    }) => {
         const dispatch = useAppDispatch();
         const {authUser} = Auth.getReduxState();
-        const [socket, setSocket] = useState(null);
-        useEffect(() => {
-            const socketInstance = Socket.createSocket(authUser.token);
-            socketInstance.subscribe('/execution/logs', (data) => {
-                const log = JSON.parse(data.body.toString());
-                const message = log && log.message ? log.message : '';
-                const indexSplit = message.split(' -- index: ');
-                let index = '';
-                if(indexSplit.length > 1){
-                    index = indexSplit[1];
-                }
-                dispatch(addCurrentLog({connectorType: 'fromConnector', index, message}))
+        const [socket, setSocket] = useState<Socket>(null);
+        const [pauseTime, setPauseTime] = useState<number>(0);
+        const saveLogs = (message: Message): void => {
+            const data = ConnectionLogs.parseMessage(message);
+            if(data.message === ConnectionLogs.BreakMessage){
+                setPauseTime(oldTime => {
+                    setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
+                    return oldTime + 500;
+                })
+            } else{
+                setPauseTime(oldTime => {
+                    setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
+                    return oldTime + 10;
+                })
+            }
+        }
+        const subscribeLogs = () => {
+            const socketInstance = socket ? socket : Socket.createSocket(authUser.token);
+            socketInstance.subscribe.ConnectionLogs((data) => {
+                saveLogs(data);
             })
             setSocket(socketInstance);
+        }
+        useEffect(() => {
+            subscribeLogs();
             return () => {
-                socket.disconnect();
+                if(socket){
+                    socket.unsubscribe.ConnectionLogs();
+                    socket.disconnect();
+                }
             };
         }, [])
         useEffect(() => {
@@ -49,6 +64,10 @@ const SyncLogs: FC<{shouldClear: boolean}> =
             }
         }, [shouldClear])
         return null;
-    }
+}
+
+SyncLogs.defaultProps = {
+    shouldClear: false,
+}
 
 export default SyncLogs;

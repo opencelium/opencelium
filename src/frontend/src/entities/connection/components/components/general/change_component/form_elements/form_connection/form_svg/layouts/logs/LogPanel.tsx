@@ -14,24 +14,50 @@
  */
 
 import React, {FC, useEffect} from 'react';
-import {LogPanelStyled} from "@change_component/form_elements/form_connection/form_svg/layouts/logs/styles";
 import { Connection } from '@entity/connection/classes/Connection';
+import { Application } from '@application/classes/Application';
+import {
+    HideButtonStyled, LogPanelStyled, NoLogsStyled, TopStyled,
+    HeaderStyled,
+    MessageStyled,
+} from "./styles";
+import {TextSize} from "@app_component/base/text/interfaces";
+import {useAppDispatch} from "@application/utils/store";
+import {toggleLogPanel} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 const LogPanel: FC = ({}) => {
-    const {currentLogs} = Connection.getReduxState();
+    const dispatch = useAppDispatch();
+    const {isFullScreen} = Application.getReduxState();
+    const {currentLogs, isLogPanelOpened} = Connection.getReduxState();
     useEffect(() => {
-        const logPanel = document.getElementById('connection_current_logs');
-        if(logPanel){
-            logPanel.scrollTo(0, logPanel.scrollHeight);
+        if(isLogPanelOpened) {
+            const logPanel = document.getElementById('connection_current_logs');
+            if (logPanel) {
+                logPanel.scrollTo(0, logPanel.scrollHeight);
+            }
         }
-    }, [currentLogs])
-    if(currentLogs.length === 0){
-        return null;
-    }
+    }, [currentLogs, isLogPanelOpened])
     return (
-        <LogPanelStyled id={'connection_current_logs'}>
-            {currentLogs.map(log => <div>{log.message}</div>)}
-        </LogPanelStyled>
+        <React.Fragment>
+            <TopStyled isLogPanelOpened={isLogPanelOpened}>
+                {isLogPanelOpened && <HeaderStyled value={'Logs'}/>}
+                <HideButtonStyled
+                    size={TextSize.Size_20}
+                    position={'right'}
+                    icon={isLogPanelOpened ? 'expand_more' : 'expand_less'}
+                    tooltip={isLogPanelOpened ? 'Hide' : 'Show Logs'}
+                    target={`toggle_log_panel`}
+                    hasBackground={false}
+                    handleClick={() => dispatch(toggleLogPanel(!isLogPanelOpened))}
+                />
+            </TopStyled>
+            {isLogPanelOpened &&
+                <LogPanelStyled id={'connection_current_logs'} isFullScreen={isFullScreen} noLogs={currentLogs.length === 0}>
+                    {currentLogs.length > 0 ? currentLogs.map(log => <MessageStyled style={{background: log.backgroundColor || '#fff'}}>{log.message}</MessageStyled>) :
+                    <NoLogsStyled value={"There is no any logs yet"} size={TextSize.Size_30}/>}
+                </LogPanelStyled>
+            }
+        </React.Fragment>
     );
 }
 

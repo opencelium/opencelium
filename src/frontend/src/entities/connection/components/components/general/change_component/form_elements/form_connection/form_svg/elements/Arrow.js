@@ -22,6 +22,8 @@ import {connect} from "react-redux";
 import COperator from "@classes/content/connection_overview_2/operator/COperator";
 import {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
 import DashedElement from "@change_component/form_elements/form_connection/form_svg/elements/process/DashedElement";
+import Socket from "@application/classes/socket/Socket";
+import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 
 export const ARROW_WIDTH = 2;
 
@@ -107,7 +109,8 @@ class Arrow extends React.Component{
             stroke = '#d24545';
         }
         const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
-        const hasDashAnimation = currentLog && currentLog.message === '============================================================================' && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`;
+        const hasDashAnimation = currentLog && currentLog.message === ConnectionLogs.BreakMessage
+            && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`;
         if(hasDashAnimation){
             markerStyle = '_dashed';
         }

@@ -20,17 +20,10 @@ import {CommonState} from "@application/utils/store";
 import {ICommonState} from "@application/interfaces/core";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {
-    addConnection, addTestConnection,
-    checkConnectionTitle,
-    deleteConnectionById,
-    deleteConnectionsById,
-    deleteTestConnectionById,
-    getAllConnections,
-    getAllMetaConnections,
-    getAndUpdateConnection,
-    getConnectionById,
-    testConnection,
-    updateConnection,
+    addConnection, addTestConnection, checkConnectionTitle,
+    deleteConnectionById, deleteConnectionsById, deleteTestConnectionById,
+    getAllConnections, getAllMetaConnections, getAndUpdateConnection,
+    getConnectionById, testConnection, updateConnection,
 } from "../action_creators/ConnectionCreators";
 import {ConnectionLogProps, IConnection} from "../../interfaces/IConnection";
 import {PANEL_LOCATION} from "../../components/utils/constants/app";
@@ -74,6 +67,8 @@ export interface ConnectionState extends ICommonState{
     isCreateElementPanelOpened: boolean,
     isDraftOpenedOnce: boolean,
     currentLogs: ConnectionLogProps[],
+    isTestingConnection: boolean,
+    isLogPanelOpened: boolean,
 }
 
 
@@ -107,6 +102,8 @@ let initialState: ConnectionState = {
     isCreateElementPanelOpened: false,
     isDraftOpenedOnce: false,
     currentLogs: [],
+    isTestingConnection: false,
+    isLogPanelOpened: false,
     ...CommonState,
 };
 const storage = LocalStorage.getStorage();
@@ -115,6 +112,16 @@ export const connectionSlice = createSlice({
     name: 'connection',
     initialState,
     reducers: {
+        toggleLogPanel: (state, action: PayloadAction<boolean>) => {
+            state.isLogPanelOpened = action.payload;
+        },
+        setTestingConnection: (state, action: PayloadAction<boolean>) => {
+            if(action.payload){
+                state.currentLogs = [];
+                state.isLogPanelOpened = true;
+            }
+            state.isTestingConnection = action.payload;
+        },
         addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
             if(action.payload){
                 let index = action.payload.index ? action.payload.index : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].index : '';
@@ -334,11 +341,12 @@ export const connectionSlice = createSlice({
 })
 
 export const {
-    addCurrentLog, clearCurrentLogs,
-    setColorMode, setPanelConfigurations,
-    setConnectionData, setArrows, setItems, setCurrentTechnicalItem,
+    addCurrentLog, clearCurrentLogs, setTestingConnection,
+    setColorMode, setPanelConfigurations, setConnectionData,
+    setArrows, setItems, setCurrentTechnicalItem,
     setDetailsLocation, setTechnicalLayoutLocation,
     setConnectionDraftWasOpened, setInitialTestConnectionState,
+    toggleLogPanel,
 } = connectionSlice.actions;
 
 export const actions = {

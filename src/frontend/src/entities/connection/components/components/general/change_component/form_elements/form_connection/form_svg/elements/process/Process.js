@@ -28,12 +28,16 @@ import COperator from "@classes/content/connection_overview_2/operator/COperator
 import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
 import {OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
 import DashedElement from "./DashedElement";
+import Socket from "@application/classes/socket/Socket";
+import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
     const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
+        isTestingConnection: connectionOverview.isTestingConnection,
         colorMode: connectionOverview.colorMode,
+        isLogPanelOpened: connectionOverview.isLogPanelOpened,
         textSize: connectionOverview.processTextSize,
         currentLogs: connectionOverview.currentLogs,
         currentTechnicalItem,
@@ -99,7 +103,10 @@ class Process extends React.Component{
     }
 
     onMouseDown(e){
-        const {connection, setCurrentItem, process, isDisabled, isItemDraggable, currentTechnicalItem} = this.props;
+        const {
+            connection, setCurrentItem, process, isDisabled, isItemDraggable,
+            currentTechnicalItem,
+        } = this.props;
         if(!isDisabled) {
             if (connection) {
                 if(isItemDraggable){
@@ -115,8 +122,8 @@ class Process extends React.Component{
     }
 
     onDoubleClick(){
-        const {isDisabled, connection} = this.props;
-        if(!isDisabled && connection) {
+        const {isDisabled, connection, isTestingConnection} = this.props;
+        if(!isDisabled && connection && !isTestingConnection) {
             this.props.setIsCreateElementPanelOpened(true);
         }
     }
@@ -149,7 +156,7 @@ class Process extends React.Component{
             isAvailableForDragging,
         } = this.state;
         const {
-            process, isNotDraggable, isCurrent, isHighlighted, currentLogs,
+            process, isNotDraggable, isCurrent, isHighlighted, currentLogs,isLogPanelOpened,
             isDisabled, colorMode, readOnly, connection, currentTechnicalItem, textSize,
         } = this.props;
         const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
@@ -192,7 +199,8 @@ class Process extends React.Component{
             }
         }
         const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
-        const hasDashAnimation = currentLog && currentLog.message !== '============================================================================' &&  currentLog.index === process.entity.index && currentLog.message !== '';
+        const hasDashAnimation = isLogPanelOpened && currentLog && currentLog.message !== ConnectionLogs.BreakMessage
+            && currentLog.index === process.entity.index && currentLog.message !== '';
         return(
             <React.Fragment>
                 <svg id={process.getHtmlIdName()} data-movable={isAvailableForDragging} onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={svgSize.width} height={svgSize.height}>

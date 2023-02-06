@@ -14,12 +14,22 @@
  */
 
 import SockJS from 'sockjs-client';
-import {Client, over, Frame, Message} from 'stompjs';
+import {Client, over, Frame, Message, Subscription} from 'stompjs';
+import ConnectionLogs from "./ConnectionLogs";
 
 export default class CSocket{
 
     private static url: string = 'http://localhost:9090/websocket'
+
     public client: Client = null;
+
+    public subscribe: {[name: string]: (callback: (message: Message) => void) => void} = {
+        ConnectionLogs: (callback: (message: Message) => void) => ConnectionLogs.subscribe(this, callback),
+    }
+
+    public unsubscribe: {[name: string]: () => void} = {
+        ConnectionLogs: ConnectionLogs.unsubscribe,
+    }
 
     constructor(client: Client) {
         this.client = client;
@@ -37,10 +47,21 @@ export default class CSocket{
         }
     }
 
-    subscribe(messageName: string, callback: (message: Message) => void): void{
+    _subscribe(messageName: string, callback: (message: Message) => void, post?: (subscription: Subscription) => void): void{
         this.connect((frame: Frame) => {
-            this.client.subscribe(messageName, callback);
+            if(this.client){
+                const subscription = this.client.subscribe(messageName, callback);
+                if(post){
+                    post(subscription);
+                }
+            }
         });
+    }
+
+    _unsubscribe(id: string): void{
+        if(this.client){
+            this.client.unsubscribe(id);
+        }
     }
 
     disconnect(): void{
@@ -48,4 +69,8 @@ export default class CSocket{
             this.client.disconnect(() => {});
         }
     }
+}
+
+export {
+    Message, Subscription, Client,
 }
