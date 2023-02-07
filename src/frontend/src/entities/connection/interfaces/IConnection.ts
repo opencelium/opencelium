@@ -51,6 +51,10 @@ export interface ConnectionLogProps{
     connectorType?: string,
     message: string,
     backgroundColor?: string,
+    hasNextItem: boolean,
+    operatorData?: {
+        isNextMethodOutside?: boolean,
+    }
 }
 
 export type ConnectionProps = keyof IConnection | string;

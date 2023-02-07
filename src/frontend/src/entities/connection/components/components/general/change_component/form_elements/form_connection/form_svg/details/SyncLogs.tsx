@@ -19,6 +19,7 @@ import {addCurrentLog, clearCurrentLogs} from "@root/redux_toolkit/slices/Connec
 import { Auth } from "@application/classes/Auth";
 import {useAppDispatch} from "@application/utils/store";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
+import { Connection } from "@entity/connection/classes/Connection";
 
 const SyncLogs: FC<{shouldClear?: boolean}> =
     ({
@@ -26,6 +27,7 @@ const SyncLogs: FC<{shouldClear?: boolean}> =
     }) => {
         const dispatch = useAppDispatch();
         const {authUser} = Auth.getReduxState();
+        const {isTestingConnection} = Connection.getReduxState();
         const [socket, setSocket] = useState<Socket>(null);
         const [pauseTime, setPauseTime] = useState<number>(0);
         const saveLogs = (message: Message): void => {
@@ -58,6 +60,11 @@ const SyncLogs: FC<{shouldClear?: boolean}> =
                 }
             };
         }, [])
+        useEffect(() => {
+            if(!isTestingConnection && pauseTime !== 0){
+                setPauseTime(0);
+            }
+        }, [isTestingConnection])
         useEffect(() => {
             if(shouldClear){
                 dispatch(clearCurrentLogs());

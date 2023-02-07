@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createSlice, PayloadAction, current} from "@reduxjs/toolkit";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {CommonState} from "@application/utils/store";
@@ -124,9 +124,12 @@ export const connectionSlice = createSlice({
         },
         addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
             if(action.payload){
+                const currentState = current(state);
                 let index = action.payload.index ? action.payload.index : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].index : '';
                 let connectorType = action.payload.connectorType ? action.payload.connectorType : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].connectorType : '';
-                state.currentLogs = [...state.currentLogs, {...action.payload, index, connectorType}];
+                let operatorData = action.payload.operatorData ? action.payload.operatorData : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].operatorData : null;
+                let hasNextItem = action.payload.index ? action.payload.hasNextItem : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].hasNextItem : false;
+                state.currentLogs = [...state.currentLogs, {...action.payload, index, connectorType, operatorData, hasNextItem}];
             }
         },
         clearCurrentLogs: (state) => {

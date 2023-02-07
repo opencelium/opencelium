@@ -30,7 +30,7 @@ import {PopoverBody, PopoverHeader, UncontrolledPopover} from "reactstrap";
 import FontIcon from "@basic_components/FontIcon";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
-import {setInitialTestConnectionState, setTestingConnection} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {setInitialTestConnectionState, setTestingConnection, clearCurrentLogs} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {setInitialTestScheduleState} from "@entity/schedule/redux_toolkit/slices/ScheduleSlice";
 import Counter from "@app_component/base/counter/Counter";
 import Text from "@app_component/base/text/Text";
@@ -64,6 +64,7 @@ function mapStateToProps(state){
     setFullScreenFormSection, addTestConnection, addTestSchedule, startTestSchedule,
     deleteTestConnectionById, deleteTestScheduleById, setInitialTestScheduleState,
     setInitialTestConnectionState, getScheduleById, setTestingConnection,
+    clearCurrentLogs,
 })
 class TestConnectionButton extends React.Component{
     constructor(props) {
@@ -88,6 +89,7 @@ class TestConnectionButton extends React.Component{
             clearInterval(this.scheduleInterval);
             this.scheduleInterval = null;
         }
+        this.props.clearCurrentLogs();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -200,7 +202,7 @@ class TestConnectionButton extends React.Component{
             isTriggerFailed, startGettingSchedule,
         } = this.state;
         const {
-            isTestingConnection
+            isTestingConnection,
         } = this.props;
         const isCreatingConnectionLoading = startAddingConnection;
         const isCreatingScheduleLoading = isCreatingConnectionLoading || startAddingSchedule;

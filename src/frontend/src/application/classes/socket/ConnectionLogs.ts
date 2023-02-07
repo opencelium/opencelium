@@ -14,6 +14,7 @@
  */
 
 import Socket, { Message, Subscription } from "./Socket";
+import {ConnectionLogProps} from "@root/interfaces/IConnection";
 
 export default class ConnectionLogs {
 
@@ -33,7 +34,7 @@ export default class ConnectionLogs {
         }
     }
 
-    static parseMessage(data: Message): any{
+    static parseMessage(data: Message): ConnectionLogProps{
         const log = JSON.parse(data.body.toString());
         let message = log && log.message ? log.message : '';
         const indexSplit = message.split(' -- index: ');
@@ -43,17 +44,35 @@ export default class ConnectionLogs {
             message = indexSplit[0];
         }
         const backgroundColorSplit = message.split(' -- color: ');
-        let backgroundColor = '#fff';
+        let backgroundColor = '';
         if(backgroundColorSplit.length > 1){
             backgroundColor = backgroundColorSplit[1].substring(0, 7);
             backgroundColorSplit[1] = backgroundColorSplit[1].substring(7);
             message = backgroundColorSplit.join('');
         }
+        let operatorData: any = null;
+        const methodData = {};
+        if(message.substr(0, 9) === 'Operator:'){
+            operatorData = {};
+            operatorData.isNextMethodOutside = true;
+        }
+        const nextFunctionSplit = message.split(' -- next function: ');
+        let isNextFunctionNull = false;
+        if(nextFunctionSplit.length > 1){
+            isNextFunctionNull = nextFunctionSplit[1].substring(0, 4) === 'null';
+        }
+        const nextOperatorSplit = message.split(' -- next operator: ');
+        let isNextOperatorNull = false;
+        if(nextOperatorSplit.length > 1){
+            isNextOperatorNull = nextOperatorSplit[1].substring(0, 4) === 'null';
+        }
         return {
             index,
             message,
             connectorType: 'fromConnector',
+            hasNextItem: !(isNextFunctionNull && isNextOperatorNull),
             backgroundColor,
+            operatorData,
         }
     }
 

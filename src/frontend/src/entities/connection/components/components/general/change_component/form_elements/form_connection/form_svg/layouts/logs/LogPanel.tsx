@@ -28,7 +28,7 @@ import {toggleLogPanel} from "@root/redux_toolkit/slices/ConnectionSlice";
 const LogPanel: FC = ({}) => {
     const dispatch = useAppDispatch();
     const {isFullScreen} = Application.getReduxState();
-    const {currentLogs, isLogPanelOpened} = Connection.getReduxState();
+    const {currentLogs, isLogPanelOpened, currentTechnicalItem} = Connection.getReduxState();
     useEffect(() => {
         if(isLogPanelOpened) {
             const logPanel = document.getElementById('connection_current_logs');
@@ -37,6 +37,15 @@ const LogPanel: FC = ({}) => {
             }
         }
     }, [currentLogs, isLogPanelOpened])
+    useEffect(() => {
+        if(isLogPanelOpened && currentTechnicalItem) {
+            const logPanel = document.getElementById('connection_current_logs');
+            const itemElement = document.getElementById(`log_panel_${currentTechnicalItem.connectorType}_${currentTechnicalItem.entity.index}`)
+            if (logPanel && itemElement) {
+                itemElement.scrollIntoView({behavior: 'smooth'});
+            }
+        }
+    }, [currentTechnicalItem])
     return (
         <React.Fragment>
             <TopStyled isLogPanelOpened={isLogPanelOpened}>
@@ -53,8 +62,24 @@ const LogPanel: FC = ({}) => {
             </TopStyled>
             {isLogPanelOpened &&
                 <LogPanelStyled id={'connection_current_logs'} isFullScreen={isFullScreen} noLogs={currentLogs.length === 0}>
-                    {currentLogs.length > 0 ? currentLogs.map(log => <MessageStyled style={{background: log.backgroundColor || '#fff'}}>{log.message}</MessageStyled>) :
-                    <NoLogsStyled value={"There is no any logs yet"} size={TextSize.Size_30}/>}
+                    {currentLogs.length > 0 ?
+                        currentLogs.map((log, key) => {
+                            const messageProps: React.HTMLAttributes<HTMLDivElement> = {};
+                            if(key > 0 && currentLogs[key - 1].index !== log.index){
+                                messageProps.id = `log_panel_${log.connectorType}_${log.index}`;
+                            }
+                            return (
+                                <MessageStyled
+                                    key={key}
+                                    {...messageProps}
+                                    style={{background: log.backgroundColor || '#fff'}}>
+                                    {log.message}
+                                </MessageStyled>
+                            );
+                        })
+                        :
+                        <NoLogsStyled value={"There is no any logs yet"} size={TextSize.Size_30}/>
+                    }
                 </LogPanelStyled>
             }
         </React.Fragment>
