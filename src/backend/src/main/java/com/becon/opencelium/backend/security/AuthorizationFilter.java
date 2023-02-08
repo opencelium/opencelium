@@ -73,7 +73,6 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             throw new WrongHeaderAuthTypeException(token);
         }
-
         String jwt = token.substring(7);
         UsernamePasswordAuthenticationToken auth = getAuthentication(jwt);
         SecurityContextHolder.getContext().setAuthentication(auth);
