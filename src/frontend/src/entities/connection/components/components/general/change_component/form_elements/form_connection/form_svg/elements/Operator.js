@@ -29,7 +29,6 @@ import ReactDOM from "react-dom";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_svg/elements/Arrow";
 import DashedElement from "@change_component/form_elements/form_connection/form_svg/elements/process/DashedElement";
-import Socket from "@application/classes/socket/Socket";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 
 
@@ -135,8 +134,8 @@ class Operator extends React.Component{
     }
 
     onMouseDown(e){
-        const {connection, setCurrentItem, operator, isDisabled, isItemDraggable, currentTechnicalItem} = this.props;
-        if(!isDisabled) {
+        const {connection, setCurrentItem, operator, isDisabled, isItemDraggable, currentTechnicalItem, readOnly} = this.props;
+        if(!isDisabled && !readOnly) {
             if (connection) {
                 if(isItemDraggable){
                     operator.isDragged = true;
@@ -151,8 +150,8 @@ class Operator extends React.Component{
     }
 
     onMouseUp(){
-        const {connection, setCurrentItem, operator, isDisabled} = this.props;
-        if(!isDisabled) {
+        const {connection, setCurrentItem, operator, isDisabled, readOnly} = this.props;
+        if(!isDisabled && !readOnly) {
             if (connection) {
                 operator.isDragged = false;
                 setCurrentItem(operator);
@@ -161,8 +160,8 @@ class Operator extends React.Component{
     }
 
     onDoubleClick(){
-        const {isTestingConnection, setIsCreateElementPanelOpened} = this.props;
-        if(!isTestingConnection){
+        const {isTestingConnection, setIsCreateElementPanelOpened, readOnly} = this.props;
+        if(!isTestingConnection && !readOnly){
             setIsCreateElementPanelOpened(true);
         }
     }
@@ -214,7 +213,7 @@ class Operator extends React.Component{
         const {
             operator, isNotDraggable, isCurrent, currentTechnicalItem,
             isHighlighted, readOnly, isDisabled, isLogPanelOpened,
-            currentLogs,
+            currentLogs, isTestingConnection,
         } = this.props;
         const hasBottomPlaceholder = this.shouldShowBottomPlaceholder();
         const hasRightPlaceholder = this.shouldShowRightPlaceholder();
@@ -264,6 +263,7 @@ class Operator extends React.Component{
         const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
         const hasDashAnimation = isLogPanelOpened && currentLog && currentLog.message !== ConnectionLogs.BreakMessage
             && currentLog.index === operator.entity.index && currentLog.message !== '';
+        const hasDeleteIcon = isCurrent && !readOnly && !isTestingConnection;
         return(
             <svg onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} id={operator.getHtmlIdName()} x={operator.x} y={operator.y} className={`${styles.operator} ${isDisabledStyle} ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={svgSize.width} height={svgSize.height}>
                 <rect x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'}/>
@@ -319,7 +319,7 @@ class Operator extends React.Component{
                         </title>
                     </React.Fragment>
                 }
-                {isCurrent && !readOnly &&
+                {hasDeleteIcon &&
                     <DeleteIcon svgX={closeX} svgY={closeY} onClick={(a) => this.deleteOperator(a)}/>
                 }
                 {

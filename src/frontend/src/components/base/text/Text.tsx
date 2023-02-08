@@ -18,7 +18,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import {withTheme} from 'styled-components';
 import {isString} from "@application/utils/utils";
 import { TextProps } from './interfaces';
-import { TextStyled } from './styles';
+import { TextStyled, LoadingStyled } from './styles';
 
 const Text: FC<TextProps> =
     ({
@@ -28,12 +28,16 @@ const Text: FC<TextProps> =
         size,
         hasTitle,
         isBold,
+        isLoading,
         ...styles
     }) => {
     const {t, i18n} = useTranslation();
     let textProps:any = {};
     const hasKey = !!transKey;
     let valueComponent = null;
+    if(isLoading){
+        return <LoadingStyled/>;
+    }
     if(hasKey){
         if(i18n.exists(transKey)){
             valueComponent = t(transKey);
@@ -63,6 +67,7 @@ Text.defaultProps = {
     hasTitle: false,
     value: '',
     isBold: false,
+    isLoading: false,
 }
 
 export {

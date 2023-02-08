@@ -89,7 +89,6 @@ class TestConnectionButton extends React.Component{
             clearInterval(this.scheduleInterval);
             this.scheduleInterval = null;
         }
-        this.props.clearCurrentLogs();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {

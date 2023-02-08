@@ -8,6 +8,9 @@ const ProfileImageStyled = styled(Gravatar)`
     & >img{
         border-radius: 50%;
     }
+    @media screen and (max-width: 950px) {
+        display: none;
+    }
 `;
 const DefaultImageStyled = styled.img`
     position: absolute;
@@ -15,6 +18,9 @@ const DefaultImageStyled = styled.img`
     right: 20px;
     & >img{
         border-radius: 50%;
+    }
+    @media screen and (max-width: 950px) {
+        display: none;
     }
 `;
 

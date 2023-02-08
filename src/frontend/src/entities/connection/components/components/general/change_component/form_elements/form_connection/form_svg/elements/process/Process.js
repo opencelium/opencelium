@@ -105,9 +105,9 @@ class Process extends React.Component{
     onMouseDown(e){
         const {
             connection, setCurrentItem, process, isDisabled, isItemDraggable,
-            currentTechnicalItem,
+            currentTechnicalItem, readOnly
         } = this.props;
-        if(!isDisabled) {
+        if(!isDisabled && !readOnly) {
             if (connection) {
                 if(isItemDraggable){
                     process.isDragged = true;
@@ -122,8 +122,8 @@ class Process extends React.Component{
     }
 
     onDoubleClick(){
-        const {isDisabled, connection, isTestingConnection} = this.props;
-        if(!isDisabled && connection && !isTestingConnection) {
+        const {isDisabled, connection, isTestingConnection, readOnly} = this.props;
+        if(!isDisabled && connection && !isTestingConnection && !readOnly) {
             this.props.setIsCreateElementPanelOpened(true);
         }
     }
@@ -158,6 +158,7 @@ class Process extends React.Component{
         const {
             process, isNotDraggable, isCurrent, isHighlighted, currentLogs,isLogPanelOpened,
             isDisabled, colorMode, readOnly, connection, currentTechnicalItem, textSize,
+            isTestingConnection,
         } = this.props;
         const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
         const method = process.entity;
@@ -186,7 +187,7 @@ class Process extends React.Component{
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
         const hasDraggableItem = isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
         const isSelected = isCurrent && !readOnly;
-        const hasDeleteIcon = isSelected;
+        const hasDeleteIcon = isSelected && !isTestingConnection;
         const showPlaceholder = this.shouldShowPlaceholder();
         const isDraggableItemOperator = showPlaceholder && currentTechnicalItem instanceof CTechnicalOperator;
         const svgSize = {
@@ -228,7 +229,7 @@ class Process extends React.Component{
                         </text>
                     </svg>
                     <title>{label}</title>
-                    {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && <rect className={styles.process_color_rect} fill={color} x={10} y={5} width={isSelected ? 95 : 110} height={15} rx={5} ry={5}/>}
+                    {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && <rect className={styles.process_color_rect} fill={color} x={10} y={5} width={isSelected && !isTestingConnection ? 95 : 110} height={15} rx={5} ry={5}/>}
                     {hasColor && colorMode === COLOR_MODE.CIRCLE_LEFT_TOP && <circle className={styles.process_color_circle} cx={15} cy={15} r="10" fill={color}/>}
                     {hasDeleteIcon &&
                         <DeleteIcon svgX={105} svgY={2} x={closeX} y={closeY} onClick={(a) => this.deleteProcess(a)}/>

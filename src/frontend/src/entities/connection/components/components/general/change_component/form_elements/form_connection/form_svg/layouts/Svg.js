@@ -509,7 +509,7 @@ class Svg extends React.Component {
         const {showDropErrorMessage} = this.state;
         const {
             svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened,
-            isCreateElementPanelOpened, connection, createElementPanelConnectorType,
+            isCreateElementPanelOpened, connection, createElementPanelConnectorType, readOnly,
         } = this.props;
         let svgStyle = this.props.style ? {...this.props.style} : {};
         return(
@@ -539,6 +539,7 @@ class Svg extends React.Component {
                             connection={connection}
                             setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
                             createElementPanelConnectorType={createElementPanelConnectorType}
+                            readOnly={readOnly}
                         />}
                     {
                         this.renderArrows()

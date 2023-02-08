@@ -24,6 +24,9 @@ const UserImageStyled = styled(Gravatar)`
     & >img{
         border-radius: 50%;
     }
+    @media screen and (max-width: 950px) {
+        display: none;
+    }
 `;
 
 export {

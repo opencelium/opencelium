@@ -21,6 +21,7 @@ import {mapItemsToClasses} from "../utils";
 import Description from "@change_component/form_elements/form_connection/form_svg/details/description/Description";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 import {TextSize} from "@app_component/base/text/interfaces";
+import {toggleDetails} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 
 function mapStateToProps(state){
@@ -30,6 +31,7 @@ function mapStateToProps(state){
         connectionOverviewState: connectionOverview,
         currentTechnicalItem,
         detailsLocation: connectionOverview.detailsLocation,
+        isDetailsOpened: connectionOverview.isDetailsOpened,
         connection,
         updatingConnection: connectionOverview.updatingConnection,
         checkingConnectionTitle: connectionOverview.checkingConnectionTitle,
@@ -37,13 +39,10 @@ function mapStateToProps(state){
 }
 
 
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {toggleDetails})
 class Details extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {
-            isHidden: false,
-        }
     }
 
     update(){
@@ -51,37 +50,33 @@ class Details extends React.Component{
         data.justUpdate(connection);
     }
 
-    togglePanel(){
-        this.setState({
-            isHidden: !this.state.isHidden,
-        })
-    }
-
     render(){
-        const {isHidden} = this.state;
-        const {readOnly, currentTechnicalItem, updateConnection, connection} = this.props;
+        const {
+            readOnly, currentTechnicalItem, updateConnection,
+            connection, isDetailsOpened, toggleDetails,
+        } = this.props;
         if(connection === null){
             return null;
         }
         let details = currentTechnicalItem ? currentTechnicalItem : null;
         let detailsStyle = {};
-        if(isHidden){
+        if(!isDetailsOpened){
             return (
                 <TooltipButton
                     size={TextSize.Size_20}
                     position={'bottom'}
                     className={styles.show_icon}
-                    icon={isHidden ? 'chevron_left' : 'chevron_right'}
-                    tooltip={isHidden ? 'Show Details' : 'Hide'}
+                    icon={'chevron_left'}
+                    tooltip={'Show Details'}
                     target={`show_connection_button`}
                     hasBackground={false}
-                    handleClick={() => this.togglePanel()}
+                    handleClick={toggleDetails}
                 />
             );
         }
         return(
             <div className={`${styles.details_maximized} ${styles.details_right}`} style={detailsStyle}>
-                <SettingsPanel {...this.props} togglePanel={() => this.togglePanel()} isHidden={isHidden}/>
+                <SettingsPanel {...this.props}/>
                 <div className={styles.details_data}>
                     <div className={styles.title}>
                         Details

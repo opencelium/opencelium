@@ -16,7 +16,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import {connect} from "react-redux";
+import {setFullScreen as setFullScreenFormSection} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {toggleDetails} from "@root/redux_toolkit/slices/ConnectionSlice";
 
+function mapStateToProps(state){
+    const connectionOverview = state.connectionReducer;
+    return{
+        isTestingConnection: connectionOverview.isTestingConnection,
+    };
+}
+
+@connect(mapStateToProps, {})
 class Panel extends React.Component{
     constructor(props) {
         super(props);
@@ -28,19 +40,24 @@ class Panel extends React.Component{
     }
 
     render(){
-        const {panelPosition, rectPosition, invokerName, namePosition, isEmpty, connectorType, createElementPanelConnectorType} = this.props;
+        const {
+            panelPosition, rectPosition, invokerName, namePosition,
+            isEmpty, connectorType, createElementPanelConnectorType,
+            readOnly, isTestingConnection,
+        } = this.props;
         const textX = namePosition === 'right' ? panelPosition.width : 2;
         const hasPanelText = isEmpty && createElementPanelConnectorType !== connectorType;
+        const hasAction = !readOnly && !isTestingConnection;
         return(
             <React.Fragment>
                 <svg id={`${connectorType}_panel`} x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
-                    <rect onClick={() => this.onClick()} x={rectPosition.x} y={rectPosition.y} width={rectPosition.width} height={rectPosition.height} className={styles.connector_item_panel} style={{cursor: isEmpty ? 'pointer' : 'move'}}/>
+                    <rect onClick={hasAction ? () => this.onClick() : () => {}} x={rectPosition.x} y={rectPosition.y} width={rectPosition.width} height={rectPosition.height} className={styles.connector_item_panel} style={{cursor: isEmpty && hasAction ? 'pointer' : 'move'}}/>
                     <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={rectPosition.y - 6} className={styles.connector_item_text}>
                         {invokerName}
                     </text>
-                    <text id={`${connectorType}_panel_text`} style={{opacity: hasPanelText ? 1 : 0}} onClick={() => this.onClick()} dominantBaseline={"middle"} textAnchor={"middle"} x={'50%'} y={'50%'} className={styles.connector_empty_text}>
+                    {hasAction && <text id={`${connectorType}_panel_text`} style={{opacity: hasPanelText ? 1 : 0}} onClick={() => this.onClick()} dominantBaseline={"middle"} textAnchor={"middle"} x={'50%'} y={'50%'} className={styles.connector_empty_text}>
                         {'Click here to create...'}
-                    </text>
+                    </text>}
                     {/*<rect x={1} y={1} width={'100%'} height={'100%'} fill={'none'} stroke={'red'}/>*/}
                 </svg>
             </React.Fragment>

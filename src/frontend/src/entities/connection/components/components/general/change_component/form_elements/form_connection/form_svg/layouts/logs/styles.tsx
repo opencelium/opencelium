@@ -21,12 +21,15 @@ export const MessageStyled = styled.div`
     padding: 2px;
 `;
 
-export const LogPanelStyled = styled.div<{isFullScreen: boolean, noLogs: boolean}>`
+export const ResponseMessage = styled.div`
+`;
+
+export const LogPanelStyled = styled.div<{isFullScreen: boolean, noLogs: boolean, isDetailsOpened: boolean}>`
     min-height: 270px;
     max-height: 270px;
     background: white;
     color: black;
-    width: calc(100% - ${({isFullScreen}) => isFullScreen ? '315px' : '300px'});
+    width: calc(100% - ${({isFullScreen, isDetailsOpened}) => isFullScreen ? isDetailsOpened ? '315px' : '15px' : isDetailsOpened ? '300px' : '0px'});
     white-space: initial;
     overflow-y: auto;
     position: absolute;
@@ -53,7 +56,6 @@ const PanelStyled = `
 `;
 
 export const HeaderStyled = styled(Text)`
-    width: calc(100% - 300px);
     text-align: center;
     color: #555;
 `;
@@ -77,15 +79,24 @@ export const TopStyled = styled.div<{isLogPanelOpened: boolean}>`
 export const NoLogsStyled = styled(Text)`
     width: 100%;
     height: 100%;
-    color: #eee;
     text-align: center;
+    color: #eee;
 }
 `;
 
 export const HideButtonStyled = styled(TooltipButton)`
     background: white;
     bottom: 0;
-    left: 0;
+    left: 2px;
+    display: flex;
+    position: absolute;
+    width: 24px;
+    height: 24px;
+`;
+
+export const ClearButtonStyled = styled(TooltipButton)`
+    background: white;
+    bottom: 0;
     display: flex;
     position: absolute;
     width: 24px;
