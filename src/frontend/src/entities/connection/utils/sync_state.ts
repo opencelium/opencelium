@@ -16,7 +16,7 @@
 import {
     setArrows, setConnectionData,
     setCurrentTechnicalItem, setDetailsLocation,
-    setItems
+    setItems, addCurrentLog, clearCurrentLogs,
 } from "../redux_toolkit/slices/ConnectionSlice";
 
 const whiteList = [
@@ -25,6 +25,8 @@ const whiteList = [
     setCurrentTechnicalItem.type,
     setDetailsLocation.type,
     setConnectionData.type,
+    addCurrentLog.type,
+    clearCurrentLogs.type,
 ]
 
 export {

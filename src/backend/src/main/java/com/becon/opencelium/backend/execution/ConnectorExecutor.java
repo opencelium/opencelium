@@ -186,8 +186,15 @@ public class ConnectorExecutor {
 
     private ResponseEntity sendRequest(MethodNode methodNode) throws URISyntaxException{
         if (debugMode) {
+            String nextFunctionIndex = methodNode.getNextFunction() != null ? methodNode.getNextFunction().getIndex() : "null";
+            String nextOperatorIndex = methodNode.getNextOperator() != null ? methodNode.getNextOperator().getIndex() : "null";
             loggAndSend("============================================================================");
-            loggAndSend("Function: " + methodNode.getName() + " -- color: " + methodNode.getColor());
+            loggAndSend("Function: " + methodNode.getName()
+                    + " -- next function: " + nextFunctionIndex
+                    + " -- next operator: " + nextOperatorIndex
+                    + " -- color: " + methodNode.getColor()
+                    + " -- index: " + methodNode.getIndex()
+            );
         }
         FunctionInvoker functionInvoker = invoker.getOperations().stream()
                 .filter(m -> m.getName().equals(methodNode.getName())).findFirst()
@@ -534,13 +541,32 @@ public class ConnectorExecutor {
                 break;
             default:
         }
+        if(debugMode) {
+            String nextFunctionIndex = statementNode.getNextFunction() != null ? statementNode.getNextFunction().getIndex() : "null";
+            String nextOperatorIndex = statementNode.getNextOperator() != null ? statementNode.getNextOperator().getIndex() : "null";
+            loggAndSend("============================================================================");
+            loggAndSend("Operator:"
+                    + " -- next function: " + nextFunctionIndex
+                    + " -- next operator: " + nextOperatorIndex
+                    + " -- type: " + statementNode.getType()
+                    + " -- index: " + statementNode.getIndex()
+            );
+        }
         executeMethod(statementNode.getNextFunction());
         executeDecisionStatement(statementNode.getNextOperator());
     }
 
     private void executeIfStatement(StatementNode ifStatement){
         if (debugMode) {
-            loggAndSend("=============== " + ifStatement.getOperand() + " ================= " + ifStatement.getIndex() );
+            String nextFunctionIndex = ifStatement.getNextFunction() != null ? ifStatement.getNextFunction().getIndex() : "null";
+            String nextOperatorIndex = ifStatement.getNextOperator() != null ? ifStatement.getNextOperator().getIndex() : "null";
+
+            loggAndSend("============================================================================");
+            loggAndSend("=============== " + ifStatement.getOperand() + " ================="
+                    + " -- next function: " + nextFunctionIndex
+                    + " -- next operator: " + nextOperatorIndex
+                    + " -- index: " + ifStatement.getIndex()
+            );
         }
         OperatorAbstractFactory factory = new OperatorAbstractFactory();
         Operator operator = factory.generateFactory(OperatorType.COMPARISON).getOperator(ifStatement.getOperand());

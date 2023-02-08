@@ -178,7 +178,10 @@ const getConfig = ({isBuild, envVar}) => {
                 '@validations': path.resolve(__dirname, './src/entities/connection/validations/components'),
                 '@update_assistant': path.resolve(__dirname, './src/entities/update_assistant/components/'),
             },
-            modules: ['node_modules', 'oc_modules']
+            modules: ['node_modules', 'oc_modules'],
+            fallback: {
+                net: false,
+            }
         },
         output: {
             filename: '[name].bundle.js',

@@ -30,10 +30,11 @@ import {PopoverBody, PopoverHeader, UncontrolledPopover} from "reactstrap";
 import FontIcon from "@basic_components/FontIcon";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
-import {setInitialTestConnectionState} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {setInitialTestConnectionState, setTestingConnection, clearCurrentLogs} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {setInitialTestScheduleState} from "@entity/schedule/redux_toolkit/slices/ScheduleSlice";
 import Counter from "@app_component/base/counter/Counter";
 import Text from "@app_component/base/text/Text";
+import SyncLogs from "./SyncLogs";
 
 
 function mapStateToProps(state){
@@ -47,6 +48,7 @@ function mapStateToProps(state){
         addingConnection: connectionOverview.addingTestConnection,
         deletingConnection: connectionOverview.deletingTestConnectionById,
         updatingConnection: connectionOverview.updatingConnection,
+        isTestingConnection: connectionOverview.isTestingConnection,
         checkingConnectionTitle: connectionOverview.checkingConnectionTitle,
         testSchedule: scheduleOverview.testSchedule,
         currentSchedule: scheduleOverview.currentSchedule,
@@ -61,14 +63,14 @@ function mapStateToProps(state){
 @connect(mapStateToProps, {
     setFullScreenFormSection, addTestConnection, addTestSchedule, startTestSchedule,
     deleteTestConnectionById, deleteTestScheduleById, setInitialTestScheduleState,
-    setInitialTestConnectionState, getScheduleById,
+    setInitialTestConnectionState, getScheduleById, setTestingConnection,
+    clearCurrentLogs,
 })
 class TestConnectionButton extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
             isFullScreen: false,
-            testingConnection: false,
             startAddingConnection: false,
             startAddingSchedule: false,
             startTriggeringSchedule: false,
@@ -83,18 +85,21 @@ class TestConnectionButton extends React.Component{
 
     componentWillUnmount() {
         if(this.scheduleInterval){
+            this.props.setTestingConnection(false);
             clearInterval(this.scheduleInterval);
             this.scheduleInterval = null;
         }
+        this.props.clearCurrentLogs();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const {
-            testConnection, testSchedule, addingConnection,
+            testConnection, testSchedule, addingConnection, setFullScreenFormSection,
             addingSchedule, startingSchedule, addTestSchedule,
             startTestSchedule, deleteTestConnectionById, deletingConnection,
             connectionError, scheduleError, deletingSchedule, deleteTestScheduleById,
-            currentSchedule, gettingScheduleById, getScheduleById,
+            currentSchedule, gettingScheduleById, getScheduleById, setTestingConnection,
+            isTestingConnection,
         } = this.props;
         const {
             startAddingConnection, startAddingSchedule, startTriggeringSchedule,
@@ -161,45 +166,51 @@ class TestConnectionButton extends React.Component{
                 startDeletingConnection: false,
             });
             setTimeout(() => {
-                this.setState({
-                    testingConnection: false,
-                });
+                setTestingConnection(false);
+                //setFullScreenFormSection(false);
             }, 3500)
         }
-        if(this.state.testingConnection && (connectionError || scheduleError)){
-            setTimeout(() => this.setState({testingConnection: false}), 3500);
+        if(isTestingConnection && (connectionError || scheduleError)){
+            setTimeout(() => setTestingConnection(false), 3500);
         }
     }
 
     test(e){
-        const {connection, setInitialTestConnectionState, setInitialTestScheduleState} = this.props;
-        const {testingConnection} = this.state;
+        const {
+            connection, setInitialTestConnectionState, setInitialTestScheduleState,
+            setTestingConnection, isTestingConnection, setFullScreenFormSection,
+            addTestConnection,
+        } = this.props;
         const newState = {};
-        if(!testingConnection) {
+        if(!isTestingConnection) {
             setInitialTestConnectionState();
             setInitialTestScheduleState();
-            setTimeout(() => this.props.addTestConnection(connection.getObjectForBackend()), 500);
-            newState.testingConnection = true;
+            setTimeout(() => addTestConnection(connection.getObjectForBackend()), 500);
+            setTestingConnection(true);
             newState.startAddingConnection = true;
             newState.isFinishedTriggering = false;
             newState.isTriggerFailed = false;
         }
+        setFullScreenFormSection(true);
         this.setState(newState);
     }
 
     render(){
         const {
-            testingConnection, startAddingConnection,
-            startAddingSchedule, startTriggeringSchedule,
-            startDeletingConnection, startDeletingSchedule,
-            isFinishedTriggering, isTriggerFailed, startGettingSchedule,
+            startAddingConnection, startAddingSchedule, startTriggeringSchedule,
+            startDeletingConnection, startDeletingSchedule, isFinishedTriggering,
+            isTriggerFailed, startGettingSchedule,
         } = this.state;
+        const {
+            isTestingConnection,
+        } = this.props;
         const isCreatingConnectionLoading = startAddingConnection;
         const isCreatingScheduleLoading = isCreatingConnectionLoading || startAddingSchedule;
         const isExecutionLoading = isCreatingScheduleLoading || !isFinishedTriggering;
         const isCleaningLoading = isExecutionLoading || startDeletingConnection || startDeletingSchedule;
         return(
             <React.Fragment>
+                <SyncLogs/>
                 <TooltipButton
                     className={styles.test_connection_icon}
                     target={`test_connection_button`}
@@ -210,15 +221,15 @@ class TestConnectionButton extends React.Component{
                     icon={'terminal'}
                     size={TextSize.Size_20}
                     loadingSize={TextSize.Size_14}
-                    isDisabled={testingConnection}
-                    isLoading={testingConnection}
+                    isDisabled={isTestingConnection}
+                    isLoading={isTestingConnection}
                 />
-                {testingConnection && <CoverButtonStyled/>}
+                {isTestingConnection && <CoverButtonStyled/>}
                 <UncontrolledPopover
                     placement="bottom"
                     target="test_connection_button"
                     trigger="click"
-                    isOpen={testingConnection}
+                    isOpen={isTestingConnection}
                 >
                     <PopoverHeader>
                         {"Test Connection"}

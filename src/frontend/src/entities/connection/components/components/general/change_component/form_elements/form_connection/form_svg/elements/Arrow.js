@@ -22,14 +22,18 @@ import {connect} from "react-redux";
 import COperator from "@classes/content/connection_overview_2/operator/COperator";
 import {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
 import DashedElement from "@change_component/form_elements/form_connection/form_svg/elements/process/DashedElement";
+import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
+import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 
 export const ARROW_WIDTH = 2;
 
 
 function mapStateToProps(state){
+    const connectionOverview = state.connectionReducer;
     const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
         currentTechnicalItem,
+        currentLogs: connectionOverview.currentLogs,
     }
 }
 
@@ -77,7 +81,7 @@ class Arrow extends React.Component{
 
     render(){
         const {isMouseOver, isAvailableForDragging} = this.state;
-        const {from, to, isHighlighted, isDisabled, currentTechnicalItem} = this.props;
+        const {from, to, isHighlighted, isDisabled, currentTechnicalItem, currentLogs} = this.props;
         if(!from || !to){
             return null;
         }
@@ -104,16 +108,33 @@ class Arrow extends React.Component{
             markerStyle = '_rejected_placeholder';
             stroke = '#d24545';
         }
-        //const hasDashAnimation = `${from.id}_${to.id}` === 'toConnector_2_toConnector_2_0';
-        const hasDashAnimation = false;
-        if(hasDashAnimation){
+        const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
+        let hasDashAnimation = currentLog && currentLog.message === ConnectionLogs.BreakMessage
+            && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`;
+        let hasDashAnimationHorizontal = false;
+        let hasDashAnimationVertical = false;
+        if(from && from.entity instanceof COperatorItem){
+            if(hasDashAnimation){
+                if(currentLog?.operatorData?.isNextMethodOutside){
+                    hasDashAnimationHorizontal = true;
+                } else{
+                    hasDashAnimationVertical = true;
+                }
+            }
+        } else{
+            hasDashAnimationHorizontal = hasDashAnimation;
+        }
+        const isArrowVertical = arrow.x1 === arrow.x2;
+        const isArrowHorizontal = arrow.y1 === arrow.y2;
+        let hasArrowDashAnimation = hasDashAnimationHorizontal && isArrowHorizontal || line1 && hasDashAnimationVertical && isArrowVertical;
+        if(hasArrowDashAnimation){
             markerStyle = '_dashed';
         }
         return(
             <React.Fragment>
                 {line1 &&
                     <DashedElement
-                        hasDashAnimation={hasDashAnimation}
+                        hasDashAnimation={hasDashAnimationVertical}
                         getElement={(props) => {
                             return <line
                                 {...props}
@@ -125,9 +146,9 @@ class Arrow extends React.Component{
                         }}
                     />
                 }
-                {line2 &&
+                {/*{line2 &&
                     <DashedElement
-                        hasDashAnimation={hasDashAnimation}
+                        hasDashAnimation={hasDashAnimationVertical}
                         getElement={(props) => {
                             return <line
                                 {...props}
@@ -138,10 +159,10 @@ class Arrow extends React.Component{
                             />
                         }}
                     />
-                }
+                }*/}
                 {arrow &&
                     <DashedElement
-                        hasDashAnimation={hasDashAnimation}
+                        hasDashAnimation={hasArrowDashAnimation}
                         getElement={(props) => {
                             return <line
                                 {...props}

@@ -40,6 +40,11 @@ export const Global = createGlobalStyle`
             outline: none;
         }
     }
+    @-webkit-keyframes dash {
+      to {
+        stroke-dashoffset: 1000;
+      }
+    }
     .fade{
         transition: none !important;
     }

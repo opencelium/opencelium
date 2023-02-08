@@ -26,6 +26,7 @@ import CreateElementPanel from "@change_component/form_elements/form_connection/
 import {setCurrentTechnicalItem, setConnectionData} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
+import LogPanel from "@change_component/form_elements/form_connection/form_svg/layouts/logs/LogPanel";
 
 
 export const HAS_LAYOUTS_SCALING = true;
@@ -139,6 +140,7 @@ class FormConnectionSvg extends Component{
                         updateConnection={(a, b) => this.updateEntity(a, b)}
                     />
                 }
+                <LogPanel/>
             </div>
         );
     }

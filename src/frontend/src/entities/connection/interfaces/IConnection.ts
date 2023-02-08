@@ -46,4 +46,15 @@ export interface IConnection extends IConnectionForm{
     getObjectForBackend?(): any;
 }
 
+export interface ConnectionLogProps{
+    index?: string,
+    connectorType?: string,
+    message: string,
+    backgroundColor?: string,
+    hasNextItem: boolean,
+    operatorData?: {
+        isNextMethodOutside?: boolean,
+    }
+}
+
 export type ConnectionProps = keyof IConnection | string;

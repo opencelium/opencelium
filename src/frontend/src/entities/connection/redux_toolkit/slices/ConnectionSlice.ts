@@ -13,26 +13,19 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createSlice, PayloadAction, current} from "@reduxjs/toolkit";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {CommonState} from "@application/utils/store";
 import {ICommonState} from "@application/interfaces/core";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {
-    addConnection, addTestConnection,
-    checkConnectionTitle,
-    deleteConnectionById,
-    deleteConnectionsById,
-    deleteTestConnectionById,
-    getAllConnections,
-    getAllMetaConnections,
-    getAndUpdateConnection,
-    getConnectionById,
-    testConnection,
-    updateConnection,
+    addConnection, addTestConnection, checkConnectionTitle,
+    deleteConnectionById, deleteConnectionsById, deleteTestConnectionById,
+    getAllConnections, getAllMetaConnections, getAndUpdateConnection,
+    getConnectionById, testConnection, updateConnection,
 } from "../action_creators/ConnectionCreators";
-import {IConnection} from "../../interfaces/IConnection";
+import {ConnectionLogProps, IConnection} from "../../interfaces/IConnection";
 import {PANEL_LOCATION} from "../../components/utils/constants/app";
 
 const COLOR_MODE = {
@@ -73,6 +66,9 @@ export interface ConnectionState extends ICommonState{
     processTextSize: number,
     isCreateElementPanelOpened: boolean,
     isDraftOpenedOnce: boolean,
+    currentLogs: ConnectionLogProps[],
+    isTestingConnection: boolean,
+    isLogPanelOpened: boolean,
 }
 
 
@@ -105,6 +101,9 @@ let initialState: ConnectionState = {
     processTextSize: 20,
     isCreateElementPanelOpened: false,
     isDraftOpenedOnce: false,
+    currentLogs: [],
+    isTestingConnection: false,
+    isLogPanelOpened: false,
     ...CommonState,
 };
 const storage = LocalStorage.getStorage();
@@ -113,6 +112,29 @@ export const connectionSlice = createSlice({
     name: 'connection',
     initialState,
     reducers: {
+        toggleLogPanel: (state, action: PayloadAction<boolean>) => {
+            state.isLogPanelOpened = action.payload;
+        },
+        setTestingConnection: (state, action: PayloadAction<boolean>) => {
+            if(action.payload){
+                state.currentLogs = [];
+                state.isLogPanelOpened = true;
+            }
+            state.isTestingConnection = action.payload;
+        },
+        addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
+            if(action.payload){
+                const currentState = current(state);
+                let index = action.payload.index ? action.payload.index : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].index : '';
+                let connectorType = action.payload.connectorType ? action.payload.connectorType : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].connectorType : '';
+                let operatorData = action.payload.operatorData ? action.payload.operatorData : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].operatorData : null;
+                let hasNextItem = action.payload.index ? action.payload.hasNextItem : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].hasNextItem : false;
+                state.currentLogs = [...state.currentLogs, {...action.payload, index, connectorType, operatorData, hasNextItem}];
+            }
+        },
+        clearCurrentLogs: (state) => {
+            state.currentLogs = [];
+        },
         setColorMode: (state, action: PayloadAction<string>) => {
             state.colorMode = action.payload;
         },
@@ -322,10 +344,12 @@ export const connectionSlice = createSlice({
 })
 
 export const {
-    setColorMode, setPanelConfigurations,
-    setConnectionData, setArrows, setItems, setCurrentTechnicalItem,
+    addCurrentLog, clearCurrentLogs, setTestingConnection,
+    setColorMode, setPanelConfigurations, setConnectionData,
+    setArrows, setItems, setCurrentTechnicalItem,
     setDetailsLocation, setTechnicalLayoutLocation,
     setConnectionDraftWasOpened, setInitialTestConnectionState,
+    toggleLogPanel,
 } = connectionSlice.actions;
 
 export const actions = {
