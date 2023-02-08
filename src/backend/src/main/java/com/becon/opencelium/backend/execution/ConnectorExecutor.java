@@ -87,11 +87,12 @@ public class ConnectorExecutor {
     private final VariableNodeServiceImp statementNodeService;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private boolean debugMode = false;
+    private boolean isSocketOpen = false;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
                              FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeServiceImp,
                              ConnectorServiceImp connectorService, VariableNodeServiceImp statementNodeService,
-                             SimpMessagingTemplate simpMessagingTemplate) {
+                             SimpMessagingTemplate simpMessagingTemplate, boolean isSocketOpen) {
         this.invokerService = invokerService;
         this.executionContainer = executionContainer;
         this.fieldNodeService = fieldNodeService;
@@ -99,6 +100,7 @@ public class ConnectorExecutor {
         this.connectorService = connectorService;
         this.statementNodeService = statementNodeService;
         this.simpMessagingTemplate = simpMessagingTemplate;
+        this.isSocketOpen = isSocketOpen;
     }
 
     public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
@@ -715,11 +717,13 @@ public class ConnectorExecutor {
 
     private void loggAndSend(Exception e){
         logger.error(e.getMessage());
-        List<String> stackTrace = Stream.of(e.getStackTrace()).map(StackTraceElement::toString).toList();
 
-        SocketLogMessage socketLogMessage = new SocketLogMessage(e.getMessage());
-        socketLogMessage.setStackTrace(stackTrace);
-        socketLogMessage.setType("error");
-        simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, socketLogMessage);
+        if (isSocketOpen) {
+            List<String> stackTrace = Stream.of(e.getStackTrace()).map(StackTraceElement::toString).toList();
+            SocketLogMessage socketLogMessage = new SocketLogMessage(e.getMessage());
+            socketLogMessage.setStackTrace(stackTrace);
+            socketLogMessage.setType("error");
+            simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, socketLogMessage);
+        }
     }
 }

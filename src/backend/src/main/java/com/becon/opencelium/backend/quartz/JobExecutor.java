@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.quartz;
 
+import com.becon.opencelium.backend.configuration.WebSocketConfig;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.execution.ExecutionContainer;
@@ -108,10 +109,11 @@ public class JobExecutor extends QuartzJobBean {
                 .orElseThrow(() -> new RuntimeException("Scheduler not found"));
 
         boolean debugMode = scheduler.getDebugMode();
+        boolean isSocketOpen = scheduler.getId() == WebSocketConfig.schedulerId;
         ExecutionContainer executionContainer = new ExecutionContainer(enhancementServiceImp, fieldNodeServiceImp, methodNodeServiceImp);
-        if(debugMode) loggAndSend("Executing Job with key " + context.getJobDetail().getKey());
-        if(debugMode) loggAndSend("Firing  Trigger with key " + context.getTrigger().getKey());
-        if(debugMode) loggAndSend("==================================================================");
+        if(debugMode) loggAndSend("Executing Job with key " + context.getJobDetail().getKey(), isSocketOpen);
+        if(debugMode) loggAndSend("Firing Trigger with key " + context.getTrigger().getKey(), isSocketOpen);
+        if(debugMode) loggAndSend("==================================================================", isSocketOpen);
 
 
         Object queryParams = jobDataMap.getOrDefault("queryParams", null);
@@ -140,9 +142,10 @@ public class JobExecutor extends QuartzJobBean {
         }
 
         try {
+
             ConnectorExecutor connectorExecutor = new ConnectorExecutor(invokerService, executionContainer,
                     fieldNodeServiceImp, methodNodeServiceImp,
-                    connectorService, statementNodeService, simpMessagingTemplate);
+                    connectorService, statementNodeService, simpMessagingTemplate, isSocketOpen);
             ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,
                     executionContainer, connectorExecutor, debugMode);
             connectionExecutor.start(scheduler);
@@ -182,10 +185,13 @@ public class JobExecutor extends QuartzJobBean {
         }
     }
 
-    private void loggAndSend(String message){
+    private void loggAndSend(String message, boolean isSocketOpen){
         logger.info(message);
-        SocketLogMessage socketLogMessage = new SocketLogMessage(message);
-        socketLogMessage.setType("info");
-        simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, socketLogMessage);
+
+        if (isSocketOpen) {
+            SocketLogMessage socketLogMessage = new SocketLogMessage(message);
+            socketLogMessage.setType("info");
+            simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, socketLogMessage);
+        }
     }
 }

@@ -93,8 +93,7 @@ public class SecurityConfiguration {
                 .cors()
                 .and()
                 .csrf().disable()
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/websocket")
-                        .permitAll()
+                .authorizeHttpRequests(auth -> auth
                         .anyRequest()
                         .authenticated())
                 .addFilter(authenticationFilter)
