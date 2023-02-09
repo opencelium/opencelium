@@ -152,6 +152,7 @@ public class JobExecutor extends QuartzJobBean {
             ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,
                     executionContainer, connectorExecutor, debugMode);
             connectionExecutor.start(scheduler);
+            loggAndSend("======================END_OF_EXECUTION======================", isSocketOpen);
         }catch (Exception e){
             e.printStackTrace();
             Date end_date= new Date();
