@@ -48,7 +48,7 @@ const SyncLogs: FC<{shouldClear?: boolean}> =
         }
         const subscribeLogs = () => {
             if(testSchedule) {
-                const socketInstance = socket ? socket : Socket.createSocket(authUser.token, `&schedulerId=${testSchedule.schedulerId}`);
+                const socketInstance = Socket.createSocket(authUser.token, `&schedulerId=${testSchedule.schedulerId}`);
                 socketInstance.subscribe.ConnectionLogs((data) => {
                     saveLogs(data);
                 })
@@ -65,9 +65,13 @@ const SyncLogs: FC<{shouldClear?: boolean}> =
         },[])
         useEffect(() => {
             if(testSchedule) {
+                if (socket) {
+                    socket.unsubscribe.ConnectionLogs();
+                    socket.disconnect();
+                }
                 subscribeLogs();
             }
-        }, [testSchedule]);
+        }, [testSchedule?.schedulerId]);
         useEffect(() => {
             if(!isTestingConnection && pauseTime !== 0){
                 setPauseTime(0);
