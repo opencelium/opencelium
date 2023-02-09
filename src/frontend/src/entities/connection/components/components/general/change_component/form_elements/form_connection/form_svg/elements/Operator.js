@@ -261,7 +261,8 @@ class Operator extends React.Component{
         const hasDraggableOperator = isCurrent && hasDraggableItem;
         const isDraggableItemOperator = hasDraggableItem && currentTechnicalItem instanceof CTechnicalOperator;
         const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
-        const hasDashAnimation = logPanelHeight !== 0 && currentLog && currentLog.message !== ConnectionLogs.BreakMessage
+        const hasDashAnimation = logPanelHeight !== 0 && currentLog
+            && (currentLog.message !== ConnectionLogs.BreakMessage || currentLog.message !== ConnectionLogs.EndOfExecutionMessage)
             && currentLog.index === operator.entity.index && currentLog.message !== '';
         const hasDeleteIcon = isCurrent && !readOnly && !isTestingConnection;
         return(

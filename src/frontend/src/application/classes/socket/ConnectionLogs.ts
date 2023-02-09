@@ -24,6 +24,8 @@ export default class ConnectionLogs {
 
     static MethodResponseMessage: string = '============================================================';
 
+    static EndOfExecutionMessage: string = '======================END_OF_EXECUTION======================';
+
     static subscription: Subscription = null;
 
     static subscribe(socket: Socket, callback: (message: Message) => void): void{
