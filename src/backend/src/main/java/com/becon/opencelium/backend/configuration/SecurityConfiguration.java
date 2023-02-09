@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.configuration;
 
+import com.becon.opencelium.backend.security.AuthExceptionHandler;
 import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
 import com.becon.opencelium.backend.security.JwtUserDetailsService;
@@ -53,6 +54,9 @@ public class SecurityConfiguration {
     @Lazy
     @Autowired
     private AuthenticationFilter authenticationFilter;
+
+    @Autowired
+    private AuthExceptionHandler authExceptionHandler;
 
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception{
@@ -100,6 +104,9 @@ public class SecurityConfiguration {
                 .addFilter(getAuthorizationFilter())
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(authExceptionHandler)
                 .and().build();
     }
 
