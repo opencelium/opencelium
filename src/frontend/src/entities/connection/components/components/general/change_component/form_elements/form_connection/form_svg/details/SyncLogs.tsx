@@ -20,6 +20,7 @@ import { Auth } from "@application/classes/Auth";
 import {useAppDispatch} from "@application/utils/store";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import { Connection } from "@entity/connection/classes/Connection";
+import { Schedule } from "@entity/schedule/classes/Schedule";
 
 const SyncLogs: FC<{shouldClear?: boolean}> =
     ({
@@ -27,6 +28,7 @@ const SyncLogs: FC<{shouldClear?: boolean}> =
     }) => {
         const dispatch = useAppDispatch();
         const {authUser} = Auth.getReduxState();
+        const {testSchedule} = Schedule.getReduxState();
         const {isTestingConnection} = Connection.getReduxState();
         const [socket, setSocket] = useState<Socket>(null);
         const [pauseTime, setPauseTime] = useState<number>(0);
@@ -45,21 +47,27 @@ const SyncLogs: FC<{shouldClear?: boolean}> =
             }
         }
         const subscribeLogs = () => {
-            const socketInstance = socket ? socket : Socket.createSocket(authUser.token);
-            socketInstance.subscribe.ConnectionLogs((data) => {
-                saveLogs(data);
-            })
-            setSocket(socketInstance);
+            if(testSchedule) {
+                const socketInstance = socket ? socket : Socket.createSocket(authUser.token, `&schedulerId=${testSchedule.schedulerId}`);
+                socketInstance.subscribe.ConnectionLogs((data) => {
+                    saveLogs(data);
+                })
+                setSocket(socketInstance);
+            }
         }
         useEffect(() => {
-            subscribeLogs();
             return () => {
-                if(socket){
+                if (socket) {
                     socket.unsubscribe.ConnectionLogs();
                     socket.disconnect();
                 }
             };
-        }, [])
+        },[])
+        useEffect(() => {
+            if(testSchedule) {
+                subscribeLogs();
+            }
+        }, [testSchedule]);
         useEffect(() => {
             if(!isTestingConnection && pauseTime !== 0){
                 setPauseTime(0);
