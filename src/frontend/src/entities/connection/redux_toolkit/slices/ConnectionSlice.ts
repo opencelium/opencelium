@@ -69,6 +69,7 @@ export interface ConnectionState extends ICommonState{
     currentLogs: ConnectionLogProps[],
     isTestingConnection: boolean,
     isLogPanelOpened: boolean,
+    isDetailsOpened: boolean,
 }
 
 
@@ -104,6 +105,7 @@ let initialState: ConnectionState = {
     currentLogs: [],
     isTestingConnection: false,
     isLogPanelOpened: false,
+    isDetailsOpened: true,
     ...CommonState,
 };
 const storage = LocalStorage.getStorage();
@@ -112,6 +114,9 @@ export const connectionSlice = createSlice({
     name: 'connection',
     initialState,
     reducers: {
+        toggleDetails: (state, action: PayloadAction<boolean | undefined>) => {
+            state.isDetailsOpened = typeof action.payload === "undefined" ? !state.isDetailsOpened : action.payload;
+        },
         toggleLogPanel: (state, action: PayloadAction<boolean>) => {
             state.isLogPanelOpened = action.payload;
         },
@@ -128,8 +133,9 @@ export const connectionSlice = createSlice({
                 let index = action.payload.index ? action.payload.index : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].index : '';
                 let connectorType = action.payload.connectorType ? action.payload.connectorType : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].connectorType : '';
                 let operatorData = action.payload.operatorData ? action.payload.operatorData : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].operatorData : null;
+                let methodData = action.payload.methodData ? action.payload.methodData : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].methodData : null;
                 let hasNextItem = action.payload.index ? action.payload.hasNextItem : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].hasNextItem : false;
-                state.currentLogs = [...state.currentLogs, {...action.payload, index, connectorType, operatorData, hasNextItem}];
+                state.currentLogs = [...state.currentLogs, {...action.payload, index, connectorType, operatorData, methodData, hasNextItem}];
             }
         },
         clearCurrentLogs: (state) => {
@@ -349,7 +355,7 @@ export const {
     setArrows, setItems, setCurrentTechnicalItem,
     setDetailsLocation, setTechnicalLayoutLocation,
     setConnectionDraftWasOpened, setInitialTestConnectionState,
-    toggleLogPanel,
+    toggleLogPanel, toggleDetails,
 } = connectionSlice.actions;
 
 export const actions = {

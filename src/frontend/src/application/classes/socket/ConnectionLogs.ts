@@ -22,6 +22,8 @@ export default class ConnectionLogs {
 
     static BreakMessage: string = '============================================================================';
 
+    static MethodResponseMessage: string = '============================================================';
+
     static subscription: Subscription = null;
 
     static subscribe(socket: Socket, callback: (message: Message) => void): void{
@@ -43,15 +45,15 @@ export default class ConnectionLogs {
             index = indexSplit[1];
             message = indexSplit[0];
         }
-        const backgroundColorSplit = message.split(' -- color: ');
-        let backgroundColor = '';
-        if(backgroundColorSplit.length > 1){
-            backgroundColor = backgroundColorSplit[1].substring(0, 7);
-            backgroundColorSplit[1] = backgroundColorSplit[1].substring(7);
-            message = backgroundColorSplit.join('');
+        const methodColorSplit = message.split(' -- color: ');
+        let methodColor = '';
+        if(methodColorSplit.length > 1){
+            methodColor = methodColorSplit[1].substring(0, 7);
+            methodColorSplit[1] = methodColorSplit[1].substring(7);
+            message = methodColorSplit.join('');
         }
         let operatorData: any = null;
-        const methodData = {};
+        const methodData = {color: methodColor};
         if(message.substr(0, 9) === 'Operator:'){
             operatorData = {};
             operatorData.isNextMethodOutside = true;
@@ -71,7 +73,7 @@ export default class ConnectionLogs {
             message,
             connectorType: 'fromConnector',
             hasNextItem: !(isNextFunctionNull && isNextOperatorNull),
-            backgroundColor,
+            methodData,
             operatorData,
         }
     }

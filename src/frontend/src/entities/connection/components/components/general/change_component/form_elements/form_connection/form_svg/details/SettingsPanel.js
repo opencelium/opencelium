@@ -14,13 +14,9 @@
  */
 
 import React from 'react';
-import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import {findTopLeft} from "@application/utils/utils";
 import {connect} from "react-redux";
-import {
-    testConnection,
-} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {setFullScreen as setFullScreenFormSection} from "@application/redux_toolkit/slices/ApplicationSlice";
 import ConfigurationsIcon
     from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/ConfigurationsIcon";
@@ -29,6 +25,7 @@ import {mapItemsToClasses} from "@change_component/form_elements/form_connection
 import TestConnectionButton from "@change_component/form_elements/form_connection/form_svg/details/TestConnection";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 import {TextSize} from "@app_component/base/text/interfaces";
+import {toggleDetails} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 
 function mapStateToProps(state){
@@ -41,10 +38,12 @@ function mapStateToProps(state){
         addingConnection: connectionOverview.addingConnection,
         updatingConnection: connectionOverview.updatingConnection,
         checkingConnectionTitle: connectionOverview.checkingConnectionTitle,
+        isDetailsOpened: connectionOverview.isDetailsOpened,
+        isTestingConnection: connectionOverview.isTestingConnection,
     };
 }
 
-@connect(mapStateToProps, {setFullScreenFormSection})
+@connect(mapStateToProps, {setFullScreenFormSection, toggleDetails})
 class SettingsPanel extends React.Component{
     constructor(props) {
         super(props);
@@ -75,23 +74,28 @@ class SettingsPanel extends React.Component{
 
     render(){
         const {isFullScreen} = this.state;
-        const {togglePanel, isHidden, addingConnection, updatingConnection, checkingConnectionTitle} = this.props;
+        const {
+            addingConnection, updatingConnection, readOnly,
+            isDetailsOpened, toggleDetails, isTestingConnection,
+        } = this.props;
         return(
             <div className={styles.details_settings_panel}>
                 <TestConnectionButton/>
-                <TooltipButton
-                    loadingSize={TextSize.Size_14}
-                    size={TextSize.Size_20}
-                    position={'bottom'}
-                    className={styles.position_icon_left}
-                    icon={'save'}
-                    tooltip={'Save'}
-                    target={`save_connection_button`}
-                    hasBackground={false}
-                    isLoading={addingConnection === API_REQUEST_STATE.START || updatingConnection === API_REQUEST_STATE.START}
-                    isDisabled={addingConnection === API_REQUEST_STATE.START || updatingConnection === API_REQUEST_STATE.START}
-                    handleClick={() => this.update()}
-                />
+                {!readOnly &&
+                    <TooltipButton
+                        loadingSize={TextSize.Size_14}
+                        size={TextSize.Size_20}
+                        position={'bottom'}
+                        className={styles.position_icon_left}
+                        icon={'save'}
+                        tooltip={'Save'}
+                        target={`save_connection_button`}
+                        hasBackground={false}
+                        isLoading={addingConnection === API_REQUEST_STATE.START || updatingConnection === API_REQUEST_STATE.START}
+                        isDisabled={isTestingConnection || addingConnection === API_REQUEST_STATE.START || updatingConnection === API_REQUEST_STATE.START}
+                        handleClick={() => this.update()}
+                    />
+                }
                 <ConfigurationsIcon/>
                 <TooltipButton
                     size={TextSize.Size_20}
@@ -104,14 +108,15 @@ class SettingsPanel extends React.Component{
                     handleClick={() => this.toggleFullScreen()}
                 />
                 <TooltipButton
+                    isDisabled={isTestingConnection}
                     size={TextSize.Size_20}
                     position={'bottom'}
                     className={styles.position_icon_left}
-                    icon={isHidden ? 'chevron_left' : 'chevron_right'}
-                    tooltip={isHidden ? 'Show Details' : 'Hide'}
+                    icon={!isDetailsOpened ? 'chevron_left' : 'chevron_right'}
+                    tooltip={!isDetailsOpened ? 'Show Details' : 'Hide'}
                     target={`toggle_connection_button`}
                     hasBackground={false}
-                    handleClick={() => togglePanel()}
+                    handleClick={toggleDetails}
                 />
             </div>
         );

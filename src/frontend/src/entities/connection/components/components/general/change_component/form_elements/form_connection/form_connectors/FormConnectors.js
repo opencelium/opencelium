@@ -185,8 +185,8 @@ class FormConnectors extends Component{
             toConnectorValue = toConnectorValue.title;
         }
         return(
-            <Row>
-                <Col md={5} className={`${styles.form_select_connector}`} style={{textAlign: 'right'}}>
+            <div className={styles.form_select_connector} style={{overflow: "hidden"}}>
+                <div>
                     <InputSelect
                         icon={'share'}
                         label={'Connectors'}
@@ -196,11 +196,11 @@ class FormConnectors extends Component{
                     />
                     {hasApiDocs && HAS_API_DOCS && <InvokerButton onClick={() => this.toggleFromInvoker()} tooltip={fromConnectorValue} isOpened={isFromInvokerOpened}/>}
                     {this.renderFromInvoker()}
-                </Col>
-                <Col md={2} style={{textAlign: 'center', alignSelf: 'center'}}>
+                </div>
+                <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
                     <ArrowRight className={styles.input_direction_arrow_readonly} style={{marginTop: '20px'}}/>
-                </Col>
-                <Col md={5} className={`${styles.form_select_connector}`}>
+                </div>
+                <div>
                     <InputSelect
                         label={' '}
                         value={{label: toConnectorValue, value: toConnectorValue}}
@@ -209,8 +209,8 @@ class FormConnectors extends Component{
                     />
                     {hasApiDocs && HAS_API_DOCS && <InvokerButton onClick={() => this.toggleToInvoker()} tooltip={toConnectorValue} position={'right'} isOpened={isToInvokerOpened}/>}
                     {this.renderToInvoker()}
-                </Col>
-            </Row>
+                </div>
+            </div>
         );
 
     }
@@ -223,8 +223,8 @@ class FormConnectors extends Component{
         const fromPlaceholder = placeholders && placeholders.length > 0 ? placeholders[0] : '';
         const toPlaceholder = placeholders && placeholders.length > 1 ? placeholders[1] : '';
         return(
-            <Row>
-                <Col md={5} className={`${styles.form_select_connector}`}>
+            <div className={styles.form_select_connector}>
+                <div>
                     <InputSelect
                         id={'input_fromConnector'}
                         icon={'share'}
@@ -246,11 +246,11 @@ class FormConnectors extends Component{
                         maxMenuHeight={200}
                         minMenuHeight={50}
                     />*/}
-                </Col>
-                <Col md={2} style={{textAlign: 'center'}}>
+                </div>
+                <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
                     <ArrowRight className={styles.input_direction_arrow_readonly} style={{marginTop: '20px'}}/>
-                </Col>
-                <Col md={5} className={`${styles.form_select_connector}`}>
+                </div>
+                <div>
                     <InputSelect
                         id={'input_toConnector'}
                         label={' '}
@@ -260,23 +260,27 @@ class FormConnectors extends Component{
                         options={source}
                         placeholder={toPlaceholder}
                     />
-                </Col>
-            </Row>
+                </div>
+            </div>
         );
     }
 
     render(){
         let {readOnly} = this.props.data;
         return (
-            <div>
+            <React.Fragment>
                 {
                     typeof readOnly === 'boolean' && readOnly
                     ?
-                        this.renderReadonlyConnectors()
+                        <div style={{overflow: "hidden"}}>
+                            {this.renderReadonlyConnectors()}
+                        </div>
                     :
-                        this.renderConnectors()
+                        <div>
+                            {this.renderConnectors()}
+                        </div>
                 }
-            </div>
+            </React.Fragment>
         );
     }
 }

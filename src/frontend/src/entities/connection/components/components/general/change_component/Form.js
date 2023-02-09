@@ -81,8 +81,8 @@ class Form extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const prevErrors = prevProps.contents[2].inputs[1]?.errors || {};
-        const curErrors = this.props.contents[2].inputs[1]?.errors || {};
+        const prevErrors = prevProps.contents.length > 2 ? prevProps.contents[2].inputs[1]?.errors || {} : {};
+        const curErrors = this.props.contents.length > 2 ? this.props.contents[2].inputs[1]?.errors || {} : {};
         if(prevProps.entity.id !== this.props.entity.id){
             this.setState({
                 entity: this.props.entity,

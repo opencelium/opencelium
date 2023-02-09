@@ -38,6 +38,7 @@ interface TextProps extends TextStyledProps{
     size?: TextSize,
     hasTitle?: boolean,
     theme?: ITheme,
+    isLoading?: boolean,
 }
 
 

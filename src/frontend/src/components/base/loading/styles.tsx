@@ -15,7 +15,7 @@
 
 import styled from "styled-components";
 import Icon from "../icon/Icon";
-import {Loading} from "./Loading";
+import Loading from "./Loading";
 
 const LoadingStyled = styled(Icon)`
     margin: 0 auto;

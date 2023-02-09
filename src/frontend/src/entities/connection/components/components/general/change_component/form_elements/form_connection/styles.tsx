@@ -18,15 +18,14 @@ import styled from "styled-components";
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
 
 const ExpertButtonStyled = styled(Button)`
-    margin: 0 110px 0 0;
     padding: 15px 10px;
-    width: 100px;
+    min-width: 100px;
     justify-content: center;
 `;
 
 const TemplateButtonStyled = styled(Button)`
     padding: 15px 10px;
-    width: 100px;
+    min-width: 100px;
     justify-content: center;
 `;
 

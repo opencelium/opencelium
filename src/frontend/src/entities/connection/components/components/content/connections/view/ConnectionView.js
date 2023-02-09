@@ -41,7 +41,7 @@ function mapStateToProps(state){
 /**
  * Component to View Connection
  */
-@connect(mapStateToProps, {fetchConnection})
+@connect(mapStateToProps, {fetchConnection, })
 @permission(ConnectionPermissions.READ, true)
 @withTranslation(['connections', 'app'])
 @ConnectionForm('view')

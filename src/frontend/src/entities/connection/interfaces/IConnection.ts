@@ -47,11 +47,14 @@ export interface IConnection extends IConnectionForm{
 }
 
 export interface ConnectionLogProps{
+    message: string,
     index?: string,
     connectorType?: string,
-    message: string,
     backgroundColor?: string,
-    hasNextItem: boolean,
+    hasNextItem?: boolean,
+    methodData?: {
+        color?: string,
+    },
     operatorData?: {
         isNextMethodOutside?: boolean,
     }

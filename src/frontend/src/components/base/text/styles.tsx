@@ -16,6 +16,7 @@
 import styled from "styled-components";
 import {ITheme} from "@style/Theme";
 import {TextStyledProps} from './interfaces';
+import ContentLoading from "@app_component/base/loading/ContentLoading";
 
 const TextStyled = styled.span<TextStyledProps>`
     color: ${({color, theme}:{color:string, theme: ITheme}) => color || 'inherit'};
@@ -28,6 +29,15 @@ const TextStyled = styled.span<TextStyledProps>`
     font-weight: ${({isBold}) => isBold ? '600' : 'unset'};
 `;
 
+const LoadingStyled = styled(ContentLoading)`
+    display: block;
+    position: relative;
+    transform: none;
+    left: unset;
+    top: unset;
+`;
+
 export {
     TextStyled,
+    LoadingStyled,
 }

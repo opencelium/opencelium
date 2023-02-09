@@ -309,7 +309,13 @@
 
 .form_select_connector{
   font-family: $FONT_FAMILY;
-  overflow: inherit !important;
+  display: grid;
+  grid-template-columns: 40% 20% 40%;
+  min-width: 300px;
+  input{
+    min-width: unset;
+    width: 100%;
+  }
 }
 
 .form_select_method{

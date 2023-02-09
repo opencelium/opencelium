@@ -106,11 +106,13 @@ export function ConnectionForm(type) {
                 if((this.props.fetchingConnection && prevProps.fetchingConnection === API_REQUEST_STATE.START && this.props.fetchingConnection === API_REQUEST_STATE.FINISH)
                 || (prevProps.connection === null && this.props.connection !== null)){
                     this.isFetchedConnection = true;
-                    this.type = 'update';
-                    this.translationKey = this.type.toUpperCase();
-                    this.isUpdate = this.type === 'update';
-                    this.isAdd = this.type === 'add';
-                    this.isView = this.type === 'view';
+                    if(!this.isView) {
+                        this.type = 'update';
+                        this.translationKey = this.type.toUpperCase();
+                        this.isUpdate = this.type === 'update';
+                        this.isAdd = this.type === 'add';
+                        this.isView = this.type === 'view';
+                    }
                     this.setState({
                         connection: CConnection.createConnection({...this.props.connection, error}),
                     })

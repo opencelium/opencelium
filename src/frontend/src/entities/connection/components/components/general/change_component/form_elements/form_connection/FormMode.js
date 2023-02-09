@@ -376,7 +376,7 @@ class FormMode extends Component{
         return (
             <React.Fragment>
                 <div className={`${tourStep}`} style={{margin: '20px 65px 0'}}>
-                    <div style={{textAlign: 'center'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-around', gap: '10px', textAlign: 'center'}}>
                         <ExpertButtonStyled
                             size={TextSize.Size_16}
                             isActive={mode === EXPERT_MODE}

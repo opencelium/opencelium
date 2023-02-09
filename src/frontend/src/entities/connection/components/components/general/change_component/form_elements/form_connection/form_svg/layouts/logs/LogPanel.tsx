@@ -18,17 +18,21 @@ import { Connection } from '@entity/connection/classes/Connection';
 import { Application } from '@application/classes/Application';
 import {
     HideButtonStyled, LogPanelStyled, NoLogsStyled, TopStyled,
-    HeaderStyled,
-    MessageStyled,
+    HeaderStyled, ClearButtonStyled, MessageStyled,
 } from "./styles";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {useAppDispatch} from "@application/utils/store";
-import {toggleLogPanel} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {toggleLogPanel, clearCurrentLogs} from "@root/redux_toolkit/slices/ConnectionSlice";
+import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
+import LogMessage from "@change_component/form_elements/form_connection/form_svg/layouts/logs/LogMessage";
 
 const LogPanel: FC = ({}) => {
     const dispatch = useAppDispatch();
     const {isFullScreen} = Application.getReduxState();
-    const {currentLogs, isLogPanelOpened, currentTechnicalItem} = Connection.getReduxState();
+    const {
+        currentLogs, isLogPanelOpened, currentTechnicalItem,
+        isTestingConnection, isDetailsOpened,
+    } = Connection.getReduxState();
     useEffect(() => {
         if(isLogPanelOpened) {
             const logPanel = document.getElementById('connection_current_logs');
@@ -49,9 +53,9 @@ const LogPanel: FC = ({}) => {
     return (
         <React.Fragment>
             <TopStyled isLogPanelOpened={isLogPanelOpened}>
-                {isLogPanelOpened && <HeaderStyled value={'Logs'}/>}
+                {isLogPanelOpened && <HeaderStyled value={'Logs'} width={isDetailsOpened ? 'calc(100% - 300px)' : '100%'}/>}
                 <HideButtonStyled
-                    size={TextSize.Size_20}
+                    iconSize={TextSize.Size_20}
                     position={'right'}
                     icon={isLogPanelOpened ? 'expand_more' : 'expand_less'}
                     tooltip={isLogPanelOpened ? 'Hide' : 'Show Logs'}
@@ -59,26 +63,40 @@ const LogPanel: FC = ({}) => {
                     hasBackground={false}
                     handleClick={() => dispatch(toggleLogPanel(!isLogPanelOpened))}
                 />
+                {isLogPanelOpened && <ClearButtonStyled
+                    right={isDetailsOpened ? 312 : 2}
+                    iconSize={TextSize.Size_20}
+                    position={'right'}
+                    isDisabled={currentLogs.length === 0}
+                    icon={'delete'}
+                    tooltip={'Clear Logs'}
+                    target={`clear_log_panel`}
+                    hasBackground={false}
+                    handleClick={() => dispatch(clearCurrentLogs())}
+                />}
             </TopStyled>
             {isLogPanelOpened &&
-                <LogPanelStyled id={'connection_current_logs'} isFullScreen={isFullScreen} noLogs={currentLogs.length === 0}>
+                <LogPanelStyled id={'connection_current_logs'} isFullScreen={isFullScreen} noLogs={currentLogs.length === 0} isDetailsOpened={isDetailsOpened}>
                     {currentLogs.length > 0 ?
                         currentLogs.map((log, key) => {
                             const messageProps: React.HTMLAttributes<HTMLDivElement> = {};
                             if(key > 0 && currentLogs[key - 1].index !== log.index){
                                 messageProps.id = `log_panel_${log.connectorType}_${log.index}`;
                             }
+                            if(log.message === ConnectionLogs.BreakMessage){
+                                return <hr/>;
+                            }
                             return (
-                                <MessageStyled
+                                <LogMessage
                                     key={key}
                                     {...messageProps}
-                                    style={{background: log.backgroundColor || '#fff'}}>
-                                    {log.message}
-                                </MessageStyled>
+                                    style={{background: log?.methodData?.color || '#fff'}}
+                                    message={log.message}
+                                />
                             );
                         })
                         :
-                        <NoLogsStyled value={"There is no any logs yet"} size={TextSize.Size_30}/>
+                        <NoLogsStyled isLoading={isTestingConnection} value={"There is no any logs yet"} size={TextSize.Size_30}/>
                     }
                 </LogPanelStyled>
             }
