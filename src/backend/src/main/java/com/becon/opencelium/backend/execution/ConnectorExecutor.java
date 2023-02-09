@@ -104,7 +104,7 @@ public class ConnectorExecutor {
     }
 
     public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
-                      String conn, boolean debugMode) throws Exception{
+                      String conn, boolean debugMode) {
         this.debugMode = debugMode;
         this.restTemplate = createRestTemplate(currentConnector);
         this.invoker = invokerService.findByName(currentConnector.getInvoker());
@@ -115,8 +115,16 @@ public class ConnectorExecutor {
         executionContainer.setRequestData(requestData);
         executionContainer.setLoopIndex(new LinkedHashMap<>());
 
-        executeMethod(connectorNode.getStartMethod());
-        executeDecisionStatement(connectorNode.getStartOperator());
+        try {
+            executeMethod(connectorNode.getStartMethod());
+            executeDecisionStatement(connectorNode.getStartOperator());
+        } catch (Exception e) {
+            e.printStackTrace();
+            //TODO: if error occurred write in logs
+            loggAndSend(e);
+//            throw new Exception(e);
+        }
+
     }
 
     private void executeMethod(MethodNode methodNode) throws Exception {
@@ -124,61 +132,52 @@ public class ConnectorExecutor {
             return;
         }
 
-        try {
 // ================================= remove =========================================
-            MessageContainer messageContainer;
-            HashMap<Integer, String> responseContainer;
-            List<String> arrayContainer = new ArrayList<>();
-            Map<String, Integer> loopStack = executionContainer.getLoopIndex();
-            if (!loopStack.isEmpty()) {
-                arrayContainer = new ArrayList<>(loopStack.keySet());
-            }
+        MessageContainer messageContainer;
+        HashMap<Integer, String> responseContainer;
+        List<String> arrayContainer = new ArrayList<>();
+        Map<String, Integer> loopStack = executionContainer.getLoopIndex();
+        if (!loopStack.isEmpty()) {
+            arrayContainer = new ArrayList<>(loopStack.keySet());
+        }
 // ==================================================================================
-            ResponseEntity<String> responseEntity = sendRequest(methodNode);
+        ResponseEntity<String> responseEntity = sendRequest(methodNode);
 
-            messageContainer = executionContainer.getResponseData().stream()
-                    .filter(m -> m.getMethodKey().equals(methodNode.getColor()))
-                    .findFirst()
-                    .orElse(null);
+        messageContainer = executionContainer.getResponseData().stream()
+                .filter(m -> m.getMethodKey().equals(methodNode.getColor()))
+                .findFirst()
+                .orElse(null);
 
-            int sizeArrayContainer = arrayContainer.size();
-            if(messageContainer != null){
-                // adding new response message into existing data.
-                HashMap<Integer, String> list = messageContainer.getData();
-                list.put(loopStack.get(arrayContainer.get(sizeArrayContainer - 1)),responseEntity.getBody());
-                messageContainer.setLoopingArrays(arrayContainer);
+        int sizeArrayContainer = arrayContainer.size();
+        if(messageContainer != null){
+            // adding new response message into existing data.
+            HashMap<Integer, String> list = messageContainer.getData();
+            list.put(loopStack.get(arrayContainer.get(sizeArrayContainer - 1)),responseEntity.getBody());
+            messageContainer.setLoopingArrays(arrayContainer);
+        }
+        else {
+            messageContainer = new MessageContainer();
+            responseContainer = new HashMap<>();
+
+            Integer loopIndex = 0;
+            if (!arrayContainer.isEmpty()) {
+                loopIndex = loopStack.getOrDefault(arrayContainer.get(sizeArrayContainer - 1), 0);
             }
-            else {
-                messageContainer = new MessageContainer();
-                responseContainer = new HashMap<>();
 
-                Integer loopIndex = 0;
-                if (!arrayContainer.isEmpty()) {
-                    loopIndex = loopStack.getOrDefault(arrayContainer.get(sizeArrayContainer - 1), 0);
-                }
+            responseContainer.put(loopIndex,responseEntity.getBody());
 
-                responseContainer.put(loopIndex,responseEntity.getBody());
-
-                messageContainer.setMethodKey(methodNode.getColor());
-                messageContainer.setResponseFormat(methodNode.getResponseNode().getSuccess().getBody().getFormat());
-                messageContainer.setExchangeType("response");
-                messageContainer.setResult("success");
+            messageContainer.setMethodKey(methodNode.getColor());
+            messageContainer.setResponseFormat(methodNode.getResponseNode().getSuccess().getBody().getFormat());
+            messageContainer.setExchangeType("response");
+            messageContainer.setResult("success");
 //                if (responseHasError(responseEntity)){
 //                    messageContainer.setResult("fail");
 //                }
-                messageContainer.setLoopingArrays(arrayContainer);
-                messageContainer.setData(responseContainer);
+            messageContainer.setLoopingArrays(arrayContainer);
+            messageContainer.setData(responseContainer);
 
-                List<MessageContainer> list = executionContainer.getResponseData();
-                list.add(messageContainer);
-            }
-
-
-        } catch (Exception e){
-            e.printStackTrace();
-            //TODO: if error occurred write in logs
-            loggAndSend(e);
-//            throw new Exception(e);
+            List<MessageContainer> list = executionContainer.getResponseData();
+            list.add(messageContainer);
         }
 
         executeMethod(methodNode.getNextFunction());
