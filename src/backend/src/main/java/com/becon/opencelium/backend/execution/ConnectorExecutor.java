@@ -598,10 +598,21 @@ public class ConnectorExecutor {
         if (ifStatement.getOperand().equals("DenyList")) {
             result = !result;
         }
+
+        if (debugMode) {
+            String msg = createOperatorResultMessage(result, ifStatement.getIndex());
+            loggAndSend(msg);
+        }
         if (result){
             executeMethod(ifStatement.getBodyFunction());
             executeDecisionStatement(ifStatement.getBodyOperator());
         }
+    }
+
+    private String createOperatorResultMessage(boolean conditionResult, String executionIndexOrder) {
+        String result = conditionResult ? "TRUE" : "FALSE";
+
+        return "OPERATOR_RESULT: " + result + " -- index: " + executionIndexOrder;
     }
 
 //    private String[] getArrayForAllowList(String s) {
@@ -670,8 +681,9 @@ public class ConnectorExecutor {
 
         if (debugMode) {
             loggAndSend("============================= LOOP ======================== ");
+            loggAndSend(createLoopMsgForLog(array.isEmpty(), statementNode.getIndex()));
         }
-        String arr = ConditionUtility.getLastArray(condition);;
+        String arr = ConditionUtility.getLastArray(condition);
         for (int i = 0; i < array.size(); i++) {
             if (debugMode) {
                 loggAndSend("Loop " + condition + "-------- index : " + i);
@@ -685,6 +697,11 @@ public class ConnectorExecutor {
         }
         executeMethod(statementNode.getNextFunction());
         executeDecisionStatement(statementNode.getNextOperator());
+    }
+
+    private String createLoopMsgForLog(boolean isEmpty, String executionOrderIndex) {
+        String loopSize = isEmpty ? "EMPTY" : "NOT_EMPTY";
+        return  "LOOP_OPERATOR_RESULT: " + loopSize + " -- index: " + executionOrderIndex;
     }
 
     public static CloseableHttpClient getDisabledHttpsClient() {
