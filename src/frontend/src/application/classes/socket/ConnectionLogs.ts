@@ -43,14 +43,12 @@ export default class ConnectionLogs {
         let index = '';
         if(indexSplit.length > 1){
             index = indexSplit[1];
-            message = indexSplit[0];
         }
         const methodColorSplit = message.split(' -- color: ');
         let methodColor = '';
         if(methodColorSplit.length > 1){
             methodColor = methodColorSplit[1].substring(0, 7);
             methodColorSplit[1] = methodColorSplit[1].substring(7);
-            message = methodColorSplit.join('');
         }
         let operatorData: any = null;
         const methodData = {color: methodColor};

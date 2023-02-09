@@ -16,10 +16,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
-import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {connect} from "react-redux";
-import {setFullScreen as setFullScreenFormSection} from "@application/redux_toolkit/slices/ApplicationSlice";
-import {toggleDetails} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;

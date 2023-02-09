@@ -37,7 +37,7 @@ function mapStateToProps(state){
     const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
         currentTechnicalItem,
-        isLogPanelOpened: connectionOverview.isLogPanelOpened,
+        logPanelHeight: connectionOverview.logPanelHeight,
         isTestingConnection: connectionOverview.isTestingConnection,
         currentLogs: connectionOverview.currentLogs,
     }
@@ -212,7 +212,7 @@ class Operator extends React.Component{
         const {polygonStyle, isMouseOverSvg, isMouseOverBottomPlaceholder, isMouseOverRightPlaceholder, isAvailableForDragging} = this.state;
         const {
             operator, isNotDraggable, isCurrent, currentTechnicalItem,
-            isHighlighted, readOnly, isDisabled, isLogPanelOpened,
+            isHighlighted, readOnly, isDisabled, logPanelHeight,
             currentLogs, isTestingConnection,
         } = this.props;
         const hasBottomPlaceholder = this.shouldShowBottomPlaceholder();
@@ -261,7 +261,7 @@ class Operator extends React.Component{
         const hasDraggableOperator = isCurrent && hasDraggableItem;
         const isDraggableItemOperator = hasDraggableItem && currentTechnicalItem instanceof CTechnicalOperator;
         const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
-        const hasDashAnimation = isLogPanelOpened && currentLog && currentLog.message !== ConnectionLogs.BreakMessage
+        const hasDashAnimation = logPanelHeight !== 0 && currentLog && currentLog.message !== ConnectionLogs.BreakMessage
             && currentLog.index === operator.entity.index && currentLog.message !== '';
         const hasDeleteIcon = isCurrent && !readOnly && !isTestingConnection;
         return(

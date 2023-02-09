@@ -34,6 +34,11 @@ const COLOR_MODE = {
     CIRCLE_LEFT_TOP: 'CIRCLE_LEFT_TOP',
 };
 
+export const LogPanelHeight = {
+    Medium: 270,
+    High: 350,
+}
+
 export interface ConnectionState extends ICommonState{
     connections: IConnection[],
     metaConnections: IConnection[],
@@ -68,7 +73,7 @@ export interface ConnectionState extends ICommonState{
     isDraftOpenedOnce: boolean,
     currentLogs: ConnectionLogProps[],
     isTestingConnection: boolean,
-    isLogPanelOpened: boolean,
+    logPanelHeight: number,
     isDetailsOpened: boolean,
 }
 
@@ -104,7 +109,7 @@ let initialState: ConnectionState = {
     isDraftOpenedOnce: false,
     currentLogs: [],
     isTestingConnection: false,
-    isLogPanelOpened: false,
+    logPanelHeight: 0,
     isDetailsOpened: true,
     ...CommonState,
 };
@@ -117,13 +122,15 @@ export const connectionSlice = createSlice({
         toggleDetails: (state, action: PayloadAction<boolean | undefined>) => {
             state.isDetailsOpened = typeof action.payload === "undefined" ? !state.isDetailsOpened : action.payload;
         },
-        toggleLogPanel: (state, action: PayloadAction<boolean>) => {
-            state.isLogPanelOpened = action.payload;
+        setLogPanelHeight: (state, action: PayloadAction<number>) => {
+            state.logPanelHeight = action.payload;
         },
         setTestingConnection: (state, action: PayloadAction<boolean>) => {
             if(action.payload){
                 state.currentLogs = [];
-                state.isLogPanelOpened = true;
+                if(state.logPanelHeight === 0){
+                    state.logPanelHeight = LogPanelHeight.Medium;
+                }
             }
             state.isTestingConnection = action.payload;
         },
@@ -355,7 +362,7 @@ export const {
     setArrows, setItems, setCurrentTechnicalItem,
     setDetailsLocation, setTechnicalLayoutLocation,
     setConnectionDraftWasOpened, setInitialTestConnectionState,
-    toggleLogPanel, toggleDetails,
+    setLogPanelHeight, toggleDetails,
 } = connectionSlice.actions;
 
 export const actions = {

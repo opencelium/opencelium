@@ -166,7 +166,6 @@ class TestConnectionButton extends React.Component{
             });
             setTimeout(() => {
                 setTestingConnection(false);
-                //setFullScreenFormSection(false);
             }, 3500)
         }
         if(isTestingConnection && (connectionError || scheduleError)){
