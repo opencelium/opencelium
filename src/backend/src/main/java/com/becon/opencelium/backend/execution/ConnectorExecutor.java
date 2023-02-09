@@ -104,7 +104,7 @@ public class ConnectorExecutor {
     }
 
     public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
-                      String conn, boolean debugMode){
+                      String conn, boolean debugMode) throws Exception{
         this.debugMode = debugMode;
         this.restTemplate = createRestTemplate(currentConnector);
         this.invoker = invokerService.findByName(currentConnector.getInvoker());
@@ -119,7 +119,7 @@ public class ConnectorExecutor {
         executeDecisionStatement(connectorNode.getStartOperator());
     }
 
-    private void executeMethod(MethodNode methodNode) {
+    private void executeMethod(MethodNode methodNode) throws Exception {
         if (methodNode == null){
             return;
         }
@@ -178,6 +178,7 @@ public class ConnectorExecutor {
             e.printStackTrace();
             //TODO: if error occurred write in logs
             loggAndSend(e);
+//            throw new Exception(e);
         }
 
         executeMethod(methodNode.getNextFunction());
@@ -527,7 +528,7 @@ public class ConnectorExecutor {
         return value;
     }
 // ======================================= OPERATOR =================================================== //
-    private void executeDecisionStatement(StatementNode statementNode) {
+    private void executeDecisionStatement(StatementNode statementNode) throws Exception {
         if (statementNode == null){
             return;
         }
@@ -556,7 +557,7 @@ public class ConnectorExecutor {
         executeDecisionStatement(statementNode.getNextOperator());
     }
 
-    private void executeIfStatement(StatementNode ifStatement){
+    private void executeIfStatement(StatementNode ifStatement) throws Exception{
         if (debugMode) {
             String nextFunctionIndex = ifStatement.getNextFunction() != null ? ifStatement.getNextFunction().getIndex() : "null";
             String nextOperatorIndex = ifStatement.getNextOperator() != null ? ifStatement.getNextOperator().getIndex() : "null";
@@ -653,7 +654,7 @@ public class ConnectorExecutor {
         return executionContainer.getValueFromResponseData(ref);
     }
 
-    private void executeLoopStatement(StatementNode statementNode){
+    private void executeLoopStatement(StatementNode statementNode) throws Exception{
         StatementVariable leftStatement = statementNode.getLeftStatementVariable();
         String methodKey = leftStatement.getColor();
         String condition = leftStatement.getColor() + ".(" + leftStatement.getType() + ")." + leftStatement.getFiled();

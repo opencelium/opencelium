@@ -109,7 +109,10 @@ public class JobExecutor extends QuartzJobBean {
                 .orElseThrow(() -> new RuntimeException("Scheduler not found"));
 
         boolean debugMode = scheduler.getDebugMode();
-        boolean isSocketOpen = scheduler.getId() == WebSocketConfig.schedulerId;
+        boolean isSocketOpen = false;
+        if (WebSocketConfig.schedulerId != null) {
+            isSocketOpen = scheduler.getId() == WebSocketConfig.schedulerId;
+        }
         ExecutionContainer executionContainer = new ExecutionContainer(enhancementServiceImp, fieldNodeServiceImp, methodNodeServiceImp);
         if(debugMode) loggAndSend("Executing Job with key " + context.getJobDetail().getKey(), isSocketOpen);
         if(debugMode) loggAndSend("Firing Trigger with key " + context.getTrigger().getKey(), isSocketOpen);
