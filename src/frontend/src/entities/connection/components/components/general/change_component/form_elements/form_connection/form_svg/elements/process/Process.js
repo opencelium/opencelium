@@ -202,7 +202,7 @@ class Process extends React.Component{
         const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
         const prevLog = currentLogs.length > 1 ? currentLogs[currentLogs.length - 2] : null;
         const hasDashAnimation = logPanelHeight !== 0 && currentLog
-            && (currentLog.message !== ConnectionLogs.BreakMessage || (currentLog.message === ConnectionLogs.BreakMessage && prevLog && !prevLog.hasNextItem))
+            && ((currentLog.message !== ConnectionLogs.BreakMessage || currentLog.message !== ConnectionLogs.EndOfExecutionMessage) || (currentLog.message === ConnectionLogs.BreakMessage && prevLog && !prevLog.hasNextItem))
             && currentLog.index === process.entity.index && currentLog.message !== '';
         return(
             <React.Fragment>
