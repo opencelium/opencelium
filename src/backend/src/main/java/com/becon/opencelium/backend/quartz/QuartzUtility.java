@@ -173,7 +173,7 @@ public class QuartzUtility {
         quartzScheduler.scheduleJob(trigger);
     }
 
-    public void runJob(Scheduler scheduler) throws Exception{
+    public void runJob(Scheduler scheduler) throws Exception {
         Long connectionId = scheduler.getConnection().getId();
         int schedulerId = scheduler.getId();
         String name = connectionId + "-" + schedulerId;

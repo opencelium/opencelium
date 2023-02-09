@@ -53,7 +53,7 @@ public class ConnectionExecutor {
         this.debugMode = debugMode;
     }
 
-    public void start(Scheduler scheduler){
+    public void start(Scheduler scheduler) throws Exception{
         executionContainer.setResponseData(new ArrayList<>());
 
         Connection connection = scheduler.getConnection();
