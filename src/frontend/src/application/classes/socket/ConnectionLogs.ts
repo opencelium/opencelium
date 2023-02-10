@@ -24,6 +24,8 @@ export default class ConnectionLogs {
 
     static MethodResponseMessage: string = '============================================================';
 
+    static OperatorResultFlag: string = 'OPERATOR_RESULT: ';
+
     static EndOfExecutionMessage: string = '======================END_OF_EXECUTION======================';
 
     static subscription: Subscription = null;
@@ -57,6 +59,20 @@ export default class ConnectionLogs {
         if(message.substr(0, 9) === 'Operator:'){
             operatorData = {};
             operatorData.isNextMethodOutside = true;
+            operatorData.conditionResult = true;
+        }
+        if(message.indexOf(ConnectionLogs.OperatorResultFlag) === 0){
+            if(message.substring(ConnectionLogs.OperatorResultFlag.length, ConnectionLogs.OperatorResultFlag.length + 5) === 'FALSE'){
+                if(!operatorData){
+                    operatorData = {};
+                }
+                operatorData.conditionResult = false;
+            } else{
+                if(!operatorData){
+                    operatorData = {};
+                }
+                operatorData.conditionResult = true;
+            }
         }
         const nextFunctionSplit = message.split(' -- next function: ');
         let isNextFunctionNull = false;

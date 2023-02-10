@@ -40,10 +40,17 @@ const SyncLogs: FC<{shouldClear?: boolean}> =
                     return oldTime + 500;
                 })
             } else{
-                setPauseTime(oldTime => {
-                    setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
-                    return oldTime + 10;
-                })
+                if(data.operatorData && data.operatorData.conditionResult === false){
+                    setPauseTime(oldTime => {
+                        setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
+                        return oldTime + 250;
+                    })
+                } else {
+                    setPauseTime(oldTime => {
+                        setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
+                        return oldTime + 10;
+                    })
+                }
             }
         }
         const subscribeLogs = () => {

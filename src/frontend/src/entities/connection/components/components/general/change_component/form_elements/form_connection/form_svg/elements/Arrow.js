@@ -113,6 +113,9 @@ class Arrow extends React.Component{
             && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`;
         let hasDashAnimationHorizontal = false;
         let hasDashAnimationVertical = false;
+        const isArrowVertical = arrow.x1 === arrow.x2;
+        const isArrowHorizontal = arrow.y1 === arrow.y2;
+        let hasArrowAlert = false;
         if(from && from.entity instanceof COperatorItem){
             if(hasDashAnimation){
                 if(currentLog?.operatorData?.isNextMethodOutside){
@@ -124,27 +127,53 @@ class Arrow extends React.Component{
         } else{
             hasDashAnimationHorizontal = hasDashAnimation;
         }
-        const isArrowVertical = arrow.x1 === arrow.x2;
-        const isArrowHorizontal = arrow.y1 === arrow.y2;
         let hasArrowDashAnimation = hasDashAnimationHorizontal && isArrowHorizontal || line1 && hasDashAnimationVertical && isArrowVertical;
         if(hasArrowDashAnimation){
             markerStyle = '_dashed';
         }
+        if(from && from.entity instanceof COperatorItem){
+            if(currentLog && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`){
+                if(isArrowVertical && currentLog.operatorData && currentLog.operatorData.conditionResult === false){
+                    stroke = '#d24545';
+                    hasArrowAlert = true;
+                    markerStyle = '_rejected_placeholder';
+                }
+            }
+        }
         return(
             <React.Fragment>
                 {line1 &&
-                    <DashedElement
-                        hasDashAnimation={hasDashAnimationVertical}
-                        getElement={(props) => {
-                            return <line
-                                {...props}
-                                id={`${from.id}_${to.id}_line1`}
-                                className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
-                                x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2} stroke={stroke}
-                                strokeWidth={ARROW_WIDTH}
-                            />
-                        }}
-                    />
+                    <React.Fragment>
+                        <DashedElement
+                            hasArrowAlert={hasArrowAlert}
+                            hasDashAnimation={hasDashAnimationVertical}
+                            getElement={(props) => {
+                                return <line
+                                    {...props}
+                                    id={`${from.id}_${to.id}_line1`}
+                                    className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
+                                    x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2} stroke={stroke}
+                                    strokeWidth={ARROW_WIDTH}
+                                />
+                            }}
+                        />
+                        {hasArrowAlert &&
+                            <React.Fragment>
+                                <line
+                                    id={`${from.id}_${to.id}_line1_alert`}
+                                    className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
+                                    x1={line1.x1 - 10} y1={line1.y1 + 20} x2={line1.x2 + 10} y2={line1.y2} stroke={'#d24545'}
+                                    strokeWidth={ARROW_WIDTH}
+                                />
+                                <line
+                                    id={`${from.id}_${to.id}_line1_alert`}
+                                    className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
+                                    x1={line1.x1 - 10} y1={line1.y1 + 40} x2={line1.x2 + 10} y2={line1.y2 - 20} stroke={'#d24545'}
+                                    strokeWidth={ARROW_WIDTH}
+                                />
+                            </React.Fragment>
+                        }
+                    </React.Fragment>
                 }
                 {/*{line2 &&
                     <DashedElement
@@ -162,6 +191,7 @@ class Arrow extends React.Component{
                 }*/}
                 {arrow &&
                     <DashedElement
+                        hasArrowAlert={hasArrowAlert}
                         hasDashAnimation={hasArrowDashAnimation}
                         getElement={(props) => {
                             return <line
