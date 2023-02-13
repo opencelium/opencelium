@@ -1,6 +1,7 @@
 import {store} from "@application/utils/store";
 import {setLogoDataStatus, setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {LocalStorage} from "@application/classes/LocalStorage";
+import { LocalStorageTheme } from "@application/interfaces/IApplication";
 
 /**
  * to create iframe for cross domain messaging
@@ -24,8 +25,13 @@ export const saveThemesHandler = (e: any) => {
     let {themes, method} = e.data;
     if (method === 'source.save_themes') {
         const localThemes = store.getState().applicationReducer.themes;
-        if(themes && JSON.stringify(localThemes) !== themes){
-            store.dispatch(setThemes(themes));
+        const jsonThemes = JSON.parse(themes);
+        const localCurrent = localThemes.find((t: LocalStorageTheme) => t.isCurrent === true);
+        const outsideCurrent = jsonThemes.find((t: LocalStorageTheme) => t.isCurrent === true);
+        if(localCurrent && outsideCurrent) {
+            if (localCurrent.name !== outsideCurrent.name) {
+                store.dispatch(setThemes(themes));
+            }
         }
     }
 }
