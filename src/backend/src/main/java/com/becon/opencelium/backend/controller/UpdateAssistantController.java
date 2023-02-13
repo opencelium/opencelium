@@ -131,11 +131,11 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(packageResource);
     }
 
-    @GetMapping("/oc/online/versions")
+    @GetMapping("/oc/online/version/all")
     public ResponseEntity<?> getOnlineVersion() {
 
-        List<AvailableUpdate> offVersions  = packageServiceImp.getOnVersions();
-        List<AvailableUpdateResource> packageResource = offVersions.stream()
+        List<AvailableUpdate> onVersions  = packageServiceImp.getOnVersions();
+        List<AvailableUpdateResource> packageResource = onVersions.stream()
                 .map(p -> packageServiceImp.toResource(p)).collect(Collectors.toList());
         return ResponseEntity.ok(packageResource);
     }
