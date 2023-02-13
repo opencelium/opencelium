@@ -15,7 +15,7 @@
 
 import React, {FC} from 'react';
 
-const DashedElement: FC<{hasDashAnimation: boolean, getElement: any, hasArrowAlert?: boolean}> = ({ hasDashAnimation, getElement, hasArrowAlert }) => {
+const DashedElement: FC<{hasDashAnimation: boolean, getElement: any, hasArrowAlert?: boolean, stroke?: string}> = ({ hasDashAnimation, getElement, hasArrowAlert, stroke }) => {
     const rectStyles: any = {};
     if(hasArrowAlert){
         rectStyles.stroke = '#d24545';
@@ -27,8 +27,14 @@ const DashedElement: FC<{hasDashAnimation: boolean, getElement: any, hasArrowAle
             rectStyles.stroke = '#58854d';
         }
     }
-
+    if(stroke){
+        rectStyles.stroke = stroke;
+    }
     return getElement({style: rectStyles});
+}
+
+DashedElement.defaultProps = {
+    stroke: '',
 }
 
 export default DashedElement;

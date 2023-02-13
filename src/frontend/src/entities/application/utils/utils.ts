@@ -29,7 +29,7 @@ export const saveThemesHandler = (e: any) => {
         const localCurrent = localThemes.find((t: LocalStorageTheme) => t.isCurrent === true);
         const outsideCurrent = jsonThemes.find((t: LocalStorageTheme) => t.isCurrent === true);
         if(localCurrent && outsideCurrent) {
-            if (localCurrent.name !== outsideCurrent.name) {
+            if (localCurrent?.name !== outsideCurrent?.name) {
                 store.dispatch(setThemes(themes));
             }
         }
