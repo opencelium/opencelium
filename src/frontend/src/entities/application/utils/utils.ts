@@ -1,6 +1,5 @@
 import {store} from "@application/utils/store";
-import {setLogoDataStatus, setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
-import {LocalStorage} from "@application/classes/LocalStorage";
+import {setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
 import { LocalStorageTheme } from "@application/interfaces/IApplication";
 
 /**
