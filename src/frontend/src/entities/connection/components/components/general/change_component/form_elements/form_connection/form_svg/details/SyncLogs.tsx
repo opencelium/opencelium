@@ -40,15 +40,22 @@ const SyncLogs: FC<{shouldClear?: boolean}> =
                     return oldTime + 500;
                 })
             } else{
-                setPauseTime(oldTime => {
-                    setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
-                    return oldTime + 10;
-                })
+                if(data.operatorData && data.operatorData.conditionResult === false){
+                    setPauseTime(oldTime => {
+                        setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
+                        return oldTime + 250;
+                    })
+                } else {
+                    setPauseTime(oldTime => {
+                        setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
+                        return oldTime + 10;
+                    })
+                }
             }
         }
         const subscribeLogs = () => {
             if(testSchedule) {
-                const socketInstance = socket ? socket : Socket.createSocket(authUser.token, `&schedulerId=${testSchedule.schedulerId}`);
+                const socketInstance = Socket.createSocket(authUser.token, `&schedulerId=${testSchedule.schedulerId}`);
                 socketInstance.subscribe.ConnectionLogs((data) => {
                     saveLogs(data);
                 })
@@ -65,9 +72,13 @@ const SyncLogs: FC<{shouldClear?: boolean}> =
         },[])
         useEffect(() => {
             if(testSchedule) {
+                if (socket) {
+                    socket.unsubscribe.ConnectionLogs();
+                    socket.disconnect();
+                }
                 subscribeLogs();
             }
-        }, [testSchedule]);
+        }, [testSchedule?.schedulerId]);
         useEffect(() => {
             if(!isTestingConnection && pauseTime !== 0){
                 setPauseTime(0);

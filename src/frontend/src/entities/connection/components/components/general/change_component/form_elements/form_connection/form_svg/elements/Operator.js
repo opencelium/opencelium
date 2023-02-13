@@ -262,9 +262,10 @@ class Operator extends React.Component{
         const isDraggableItemOperator = hasDraggableItem && currentTechnicalItem instanceof CTechnicalOperator;
         const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
         const hasDashAnimation = logPanelHeight !== 0 && currentLog
-            && (currentLog.message !== ConnectionLogs.BreakMessage && currentLog.message !== ConnectionLogs.EndOfExecutionMessage)
+            && (currentLog.message !== ConnectionLogs.BreakMessage || (currentLog.message === ConnectionLogs.BreakMessage && currentLog.operatorData && !currentLog.operatorData.conditionResult) && currentLog.message !== ConnectionLogs.EndOfExecutionMessage)
             && currentLog.index === operator.entity.index && currentLog.message !== '';
         const hasDeleteIcon = isCurrent && !readOnly && !isTestingConnection;
+        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index) !== -1 ? '#58854d' : '';
         return(
             <svg onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} id={operator.getHtmlIdName()} x={operator.x} y={operator.y} className={`${styles.operator} ${isDisabledStyle} ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={svgSize.width} height={svgSize.height}>
                 <rect x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'}/>
@@ -284,6 +285,7 @@ class Operator extends React.Component{
                                     {...props}
                                 />;
                             }}
+                            stroke={logStroke}
                         />
                         <text fontSize={20} dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY} style={errorStyles}>
                         {'if'}
@@ -307,6 +309,7 @@ class Operator extends React.Component{
                                     {...props}
                                 />
                             }}
+                            stroke={logStroke}
                         />
                         <svg style={{pointerEvents: 'none'}} className={`${isNotDraggable ? styles.not_draggable : ''} ${styles.operator_loop_icon}`} fill="#000000" width="30px" height="30px" viewBox="0 0 24 24" x="15px" y="14px">
                             <path style={errorStyles} d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>

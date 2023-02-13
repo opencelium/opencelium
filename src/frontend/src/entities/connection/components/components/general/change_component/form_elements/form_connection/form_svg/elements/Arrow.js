@@ -34,6 +34,7 @@ function mapStateToProps(state){
     return{
         currentTechnicalItem,
         currentLogs: connectionOverview.currentLogs,
+        logPanelHeight: connectionOverview.logPanelHeight,
     }
 }
 
@@ -79,9 +80,23 @@ class Arrow extends React.Component{
         }
     }
 
+    getPrevItemLog(){
+        const {currentLogs} = this.props;
+        let prevLog = null;
+        const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
+        if(currentLog){
+            for(let i = currentLogs.length - 1; i >= 0; i--){
+                if(currentLogs[i].index !== currentLog.index){
+                    return currentLogs[i];
+                }
+            }
+        }
+        return prevLog;
+    }
+
     render(){
         const {isMouseOver, isAvailableForDragging} = this.state;
-        const {from, to, isHighlighted, isDisabled, currentTechnicalItem, currentLogs} = this.props;
+        const {from, to, isHighlighted, isDisabled, currentTechnicalItem, currentLogs, logPanelHeight} = this.props;
         if(!from || !to){
             return null;
         }
@@ -108,11 +123,15 @@ class Arrow extends React.Component{
             markerStyle = '_rejected_placeholder';
             stroke = '#d24545';
         }
+        const prevItemLog = this.getPrevItemLog();
         const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
         let hasDashAnimation = currentLog && currentLog.message === ConnectionLogs.BreakMessage
             && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`;
         let hasDashAnimationHorizontal = false;
         let hasDashAnimationVertical = false;
+        const isArrowVertical = arrow.x1 === arrow.x2;
+        const isArrowHorizontal = arrow.y1 === arrow.y2;
+        let hasArrowAlert = false;
         if(from && from.entity instanceof COperatorItem){
             if(hasDashAnimation){
                 if(currentLog?.operatorData?.isNextMethodOutside){
@@ -124,27 +143,83 @@ class Arrow extends React.Component{
         } else{
             hasDashAnimationHorizontal = hasDashAnimation;
         }
-        const isArrowVertical = arrow.x1 === arrow.x2;
-        const isArrowHorizontal = arrow.y1 === arrow.y2;
         let hasArrowDashAnimation = hasDashAnimationHorizontal && isArrowHorizontal || line1 && hasDashAnimationVertical && isArrowVertical;
         if(hasArrowDashAnimation){
             markerStyle = '_dashed';
         }
+        if(from && from.entity instanceof COperatorItem){
+            if(currentLog && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`){
+                if(isArrowVertical && currentLog.operatorData && currentLog.operatorData.conditionResult === false){
+                    stroke = '#d24545';
+                    hasArrowAlert = true;
+                    markerStyle = '_rejected_placeholder';
+                }
+            }
+        }
+        let logStroke = '';
+        if(logPanelHeight !== 0) {
+            const logsWithoutLastItem = currentLogs.filter(l => l.index !== currentLog.index);
+            for (let i = 0; i < logsWithoutLastItem.length; i++) {
+                if (from.id === `${logsWithoutLastItem[i].connectorType}_${logsWithoutLastItem[i].index}`) {
+                    if (isArrowVertical && logsWithoutLastItem[i].operatorData && logsWithoutLastItem[i].operatorData.conditionResult === false) {
+                        logStroke = '#d24545';
+                        hasArrowAlert = true;
+                        markerStyle = '_rejected_placeholder';
+                    } else {
+                        logStroke = '#58854d';
+                        markerStyle = '_dashed';
+                    }
+                    break;
+                }
+            }
+            if(isArrowVertical) {
+                const logsWithFalseConditionResult = currentLogs.filter(l => l.operatorData && l.operatorData.conditionResult === false);
+                for (let i = 0; i < logsWithFalseConditionResult.length; i++) {
+                    if (from.id === `${logsWithFalseConditionResult[i].connectorType}_${logsWithFalseConditionResult[i].index}`) {
+                        logStroke = '#d24545';
+                        hasArrowAlert = true;
+                        markerStyle = '_rejected_placeholder';
+                        break;
+                    }
+                }
+            }
+        }
         return(
             <React.Fragment>
                 {line1 &&
-                    <DashedElement
-                        hasDashAnimation={hasDashAnimationVertical}
-                        getElement={(props) => {
-                            return <line
-                                {...props}
-                                id={`${from.id}_${to.id}_line1`}
-                                className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
-                                x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2} stroke={stroke}
-                                strokeWidth={ARROW_WIDTH}
-                            />
-                        }}
-                    />
+                    <React.Fragment>
+                        <DashedElement
+                            hasArrowAlert={hasArrowAlert}
+                            hasDashAnimation={hasDashAnimationVertical}
+                            stroke={logStroke}
+                            getElement={(props) => {
+                                return <line
+                                    {...props}
+                                    id={`${from.id}_${to.id}_line1`}
+                                    className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
+                                    x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2}
+                                    stroke={stroke}
+                                    strokeWidth={ARROW_WIDTH}
+                                />
+                            }}
+                        />
+                        {hasArrowAlert &&
+                            <React.Fragment>
+                                <line
+                                    id={`${from.id}_${to.id}_line1_alert`}
+                                    className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
+                                    x1={line1.x1 - 10} y1={line1.y1 + 20} x2={line1.x2 + 10} y2={line1.y2} stroke={'#d24545'}
+                                    strokeWidth={ARROW_WIDTH}
+                                />
+                                <line
+                                    id={`${from.id}_${to.id}_line1_alert`}
+                                    className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
+                                    x1={line1.x1 - 10} y1={line1.y1 + 40} x2={line1.x2 + 10} y2={line1.y2 - 20} stroke={'#d24545'}
+                                    strokeWidth={ARROW_WIDTH}
+                                />
+                            </React.Fragment>
+                        }
+                    </React.Fragment>
                 }
                 {/*{line2 &&
                     <DashedElement
@@ -162,16 +237,19 @@ class Arrow extends React.Component{
                 }*/}
                 {arrow &&
                     <DashedElement
+                        hasArrowAlert={hasArrowAlert}
                         hasDashAnimation={hasArrowDashAnimation}
                         getElement={(props) => {
                             return <line
                                 {...props}
                                 id={`${from.id}_${to.id}_arrow`}
                                 className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} arrow`}
-                                x1={arrow.x1} y1={arrow.y1} x2={arrow.x2} y2={arrow.y2} stroke={stroke}
+                                x1={arrow.x1} y1={arrow.y1} x2={arrow.x2} y2={arrow.y2}
+                                stroke={stroke}
                                 strokeWidth={ARROW_WIDTH} markerEnd={`url(#arrow_head_right${markerStyle})`}
                             />
                         }}
+                        stroke={logStroke}
                     />
                 }
                 {showPlaceholder ?

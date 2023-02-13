@@ -57,6 +57,7 @@ export interface ConnectionLogProps{
     },
     operatorData?: {
         isNextMethodOutside?: boolean,
+        conditionResult?: boolean,
     }
 }
 

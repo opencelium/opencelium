@@ -137,9 +137,14 @@ export const connectionSlice = createSlice({
         addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
             if(action.payload){
                 const currentState = current(state);
+                const lastLog = state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1] : null;
+                const isAnotherIndex = action.payload.index ? lastLog === null || action.payload.index !== lastLog.index : false;
                 let index = action.payload.index ? action.payload.index : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].index : '';
                 let connectorType = action.payload.connectorType ? action.payload.connectorType : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].connectorType : '';
-                let operatorData = action.payload.operatorData ? action.payload.operatorData : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].operatorData : null;
+                let operatorData = state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].operatorData : null;
+                if(action.payload.operatorData){
+                    operatorData = {...operatorData, ...action.payload.operatorData};
+                }
                 let methodData = action.payload.methodData ? action.payload.methodData : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].methodData : null;
                 let hasNextItem = action.payload.index ? action.payload.hasNextItem : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].hasNextItem : false;
                 state.currentLogs = [...state.currentLogs, {...action.payload, index, connectorType, operatorData, methodData, hasNextItem}];

@@ -28,7 +28,6 @@ import COperator from "@classes/content/connection_overview_2/operator/COperator
 import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
 import {OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
 import DashedElement from "./DashedElement";
-import Socket from "@application/classes/socket/Socket";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 
 function mapStateToProps(state){
@@ -204,6 +203,7 @@ class Process extends React.Component{
         const hasDashAnimation = logPanelHeight !== 0 && currentLog
             && ((currentLog.message !== ConnectionLogs.BreakMessage && currentLog.message !== ConnectionLogs.EndOfExecutionMessage) || (currentLog.message === ConnectionLogs.BreakMessage && prevLog && !prevLog.hasNextItem))
             && currentLog.index === process.entity.index && currentLog.message !== '';
+        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === process.entity.index) !== -1 ? '#58854d' : '';
         return(
             <React.Fragment>
                 <svg id={process.getHtmlIdName()} data-movable={isAvailableForDragging} onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={svgSize.width} height={svgSize.height}>
@@ -222,6 +222,7 @@ class Process extends React.Component{
                                 />);
                         }}
                         hasDashAnimation={hasDashAnimation}
+                        stroke={logStroke}
                     />
                     <svg x={0} y={0} width={process.width} height={process.height}>
                         <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY} fontSize={textSize}>

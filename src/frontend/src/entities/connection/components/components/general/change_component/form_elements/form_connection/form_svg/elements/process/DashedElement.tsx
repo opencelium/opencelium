@@ -15,15 +15,26 @@
 
 import React, {FC} from 'react';
 
-const DashedElement: FC<{hasDashAnimation: boolean, getElement: any}> = ({ hasDashAnimation, getElement}) => {
+const DashedElement: FC<{hasDashAnimation: boolean, getElement: any, hasArrowAlert?: boolean, stroke?: string}> = ({ hasDashAnimation, getElement, hasArrowAlert, stroke }) => {
     const rectStyles: any = {};
-    if(hasDashAnimation){
-        rectStyles.animation = 'dash 15s linear infinite';
-        rectStyles.strokeDasharray = 10;
-        rectStyles.animationDirection = 'reverse';
-        rectStyles.stroke = '#58854d';
+    if(hasArrowAlert){
+        rectStyles.stroke = '#d24545';
+    } else{
+        if(hasDashAnimation){
+            rectStyles.animation = 'dash 15s linear infinite';
+            rectStyles.strokeDasharray = 10;
+            rectStyles.animationDirection = 'reverse';
+            rectStyles.stroke = '#58854d';
+        }
+    }
+    if(stroke){
+        rectStyles.stroke = stroke;
     }
     return getElement({style: rectStyles});
+}
+
+DashedElement.defaultProps = {
+    stroke: '',
 }
 
 export default DashedElement;
