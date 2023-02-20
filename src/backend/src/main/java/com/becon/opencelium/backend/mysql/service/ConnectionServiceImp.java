@@ -18,15 +18,10 @@ package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.enums.ExecutionType;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
-import com.becon.opencelium.backend.rbmq_execution.executor.Execution;
-import com.becon.opencelium.backend.rbmq_execution.factory.ExecutionFactory;
-import com.becon.opencelium.backend.rbmq_execution.mediator.ExecutionContext;
-import com.becon.opencelium.backend.rbmq_execution.mediator.InitialData;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
-import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
 import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
@@ -110,26 +105,6 @@ public class ConnectionServiceImp implements ConnectionService{
     @Override
     public boolean existsByName(String name) {
         return connectionRepository.existsByName(name);
-    }
-
-    @Override
-    public void run(Long connectionId) throws Exception {
-
-        ConnectionNode ctionNode = connectionNodeService.findByConnectionId(connectionId)
-                .orElseThrow(() -> new ConnectionNotFoundException(connectionId));
-        List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
-        List<EnhancementNode> enhNodes = enhancementNodeServiceImp.findAllByConnectionId(connectionId);
-        Map<Integer, List<RequestData>> ctorsRequestData = getCtorsRequestData(ctionNode);
-
-        InitialData initialData = new InitialData.Builder()
-                .setConnectionNode(ctionNode)
-                .setEnhancementNodes(enhNodes)
-                .setEnhancements(enhancements)
-                .setRequestDataMap(ctorsRequestData)
-                .build();
-
-        Execution execution = ExecutionFactory.newExecution(ExecutionType.CONNECTION);
-        execution.start(new ExecutionContext(initialData));
     }
 
     private Map<Integer, List<RequestData>> getCtorsRequestData(ConnectionNode ctionNode) {

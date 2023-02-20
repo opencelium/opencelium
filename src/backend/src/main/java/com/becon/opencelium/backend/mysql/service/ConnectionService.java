@@ -37,8 +37,6 @@ public interface ConnectionService {
     boolean existsByName(String name);
     boolean existsById(Long id);
 
-    void run(Long connectionId) throws Exception;
-
     List<Connection> findAllByConnectorId(int connectorId);
 
     List<Connection> findAllByNameContains(String name);
