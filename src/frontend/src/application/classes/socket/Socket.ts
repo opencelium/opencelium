@@ -16,10 +16,11 @@
 import SockJS from 'sockjs-client';
 import {Client, over, Frame, Message, Subscription} from 'stompjs';
 import ConnectionLogs from "./ConnectionLogs";
+import {baseUrl} from "@entity/application/requests/classes/url";
 
 export default class CSocket{
 
-    private static url: string = 'http://localhost:9090/websocket'
+    private static url: string = `${baseUrl}websocket`
 
     public client: Client = null;
 
