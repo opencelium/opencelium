@@ -200,7 +200,7 @@ class TestConnectionButton extends React.Component{
             isTriggerFailed, startGettingSchedule,
         } = this.state;
         const {
-            isTestingConnection,
+            isTestingConnection, connection,
         } = this.props;
         const isCreatingConnectionLoading = startAddingConnection;
         const isCreatingScheduleLoading = isCreatingConnectionLoading || startAddingSchedule;
@@ -208,7 +208,7 @@ class TestConnectionButton extends React.Component{
         const isCleaningLoading = isExecutionLoading || startDeletingConnection || startDeletingSchedule;
         return(
             <React.Fragment>
-                <SyncLogs/>
+                <SyncLogs connection={connection}/>
                 <TooltipButton
                     className={styles.test_connection_icon}
                     target={`test_connection_button`}

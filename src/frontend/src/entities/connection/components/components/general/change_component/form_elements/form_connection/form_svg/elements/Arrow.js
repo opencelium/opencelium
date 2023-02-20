@@ -207,13 +207,13 @@ class Arrow extends React.Component{
                             <React.Fragment>
                                 <line
                                     id={`${from.id}_${to.id}_line1_alert`}
-                                    className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
+                                    className={`${isDisabledStyle}`}
                                     x1={line1.x1 - 10} y1={line1.y1 + 20} x2={line1.x2 + 10} y2={line1.y2} stroke={'#d24545'}
                                     strokeWidth={ARROW_WIDTH}
                                 />
                                 <line
                                     id={`${from.id}_${to.id}_line1_alert`}
-                                    className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
+                                    className={`${isDisabledStyle}`}
                                     x1={line1.x1 - 10} y1={line1.y1 + 40} x2={line1.x2 + 10} y2={line1.y2 - 20} stroke={'#d24545'}
                                     strokeWidth={ARROW_WIDTH}
                                 />
