@@ -573,7 +573,7 @@ public class ConnectorExecutor {
         Object leftVariable = getValue(ifStatement.getLeftStatementVariable(), "");
 
         if(leftVariable != null && debugMode){
-            loggAndSend("Left Statement: " + leftVariable);
+            //loggAndSend("Left Statement: " + leftVariable);
         }
 
         String ref = statementNodeService.convertToRef(ifStatement.getLeftStatementVariable());
@@ -587,9 +587,9 @@ public class ConnectorExecutor {
 
         if (rightStatement != null && debugMode){
             if (rightStatement.getClass().isArray()) {
-                loggAndSend("Right Statement: " + Arrays.toString((String[])rightStatement));
+                //loggAndSend("Right Statement: " + Arrays.toString((String[])rightStatement));
             } else {
-                loggAndSend("Right Statement: " + rightStatement);
+                //loggAndSend("Right Statement: " + rightStatement);
             }
 
         }

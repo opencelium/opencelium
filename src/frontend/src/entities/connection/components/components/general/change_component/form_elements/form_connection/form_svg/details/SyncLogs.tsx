@@ -21,10 +21,12 @@ import {useAppDispatch} from "@application/utils/store";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import { Connection } from "@entity/connection/classes/Connection";
 import { Schedule } from "@entity/schedule/classes/Schedule";
+import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 
-const SyncLogs: FC<{shouldClear?: boolean}> =
+const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
     ({
         shouldClear,
+        connection,
     }) => {
         const dispatch = useAppDispatch();
         const {authUser} = Auth.getReduxState();
@@ -33,22 +35,22 @@ const SyncLogs: FC<{shouldClear?: boolean}> =
         const [socket, setSocket] = useState<Socket>(null);
         const [pauseTime, setPauseTime] = useState<number>(0);
         const saveLogs = (message: Message): void => {
-            const data = ConnectionLogs.parseMessage(message);
+            const data = ConnectionLogs.parseMessage(connection, message);
             if(data.message === ConnectionLogs.BreakMessage){
                 setPauseTime(oldTime => {
                     setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
-                    return oldTime + 500;
+                    return oldTime + 4;
                 })
             } else{
                 if(data.operatorData && data.operatorData.conditionResult === false){
                     setPauseTime(oldTime => {
                         setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
-                        return oldTime + 250;
+                        return oldTime + 2;
                     })
                 } else {
                     setPauseTime(oldTime => {
                         setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
-                        return oldTime + 10;
+                        return oldTime + 1;
                     })
                 }
             }

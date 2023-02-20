@@ -27,6 +27,7 @@ import {
 } from "../action_creators/ConnectionCreators";
 import {ConnectionLogProps, IConnection} from "../../interfaces/IConnection";
 import {PANEL_LOCATION} from "../../components/utils/constants/app";
+import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 
 const COLOR_MODE = {
     RECTANGLE_TOP: 'RECTANGLE_TOP',
@@ -137,17 +138,41 @@ export const connectionSlice = createSlice({
         addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
             if(action.payload){
                 const currentState = current(state);
-                const lastLog = state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1] : null;
-                const isAnotherIndex = action.payload.index ? lastLog === null || action.payload.index !== lastLog.index : false;
+                let lastLog = state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1] : null;
+                let lastLogKey = lastLog ? state.currentLogs.length - 1 : -1;
+                if(lastLog && lastLog.message === ConnectionLogs.BreakMessage && state.currentLogs.length > 1 && lastLog.message !== action.payload.message){
+                    lastLog = state.currentLogs[state.currentLogs.length - 2];
+                    lastLogKey = state.currentLogs.length - 2;
+                }
                 let index = action.payload.index ? action.payload.index : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].index : '';
                 let connectorType = action.payload.connectorType ? action.payload.connectorType : state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1].connectorType : '';
                 let operatorData = state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].operatorData : null;
-                if(action.payload.operatorData){
+                if (action.payload.operatorData) {
                     operatorData = {...operatorData, ...action.payload.operatorData};
                 }
                 let methodData = action.payload.methodData ? action.payload.methodData : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].methodData : null;
                 let hasNextItem = action.payload.index ? action.payload.hasNextItem : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].hasNextItem : false;
-                state.currentLogs = [...state.currentLogs, {...action.payload, index, connectorType, operatorData, methodData, hasNextItem}];
+
+                if(!lastLog || lastLog.message !== action.payload.message) {
+                    state.currentLogs = [...state.currentLogs, {
+                        ...action.payload,
+                        index,
+                        connectorType,
+                        operatorData,
+                        methodData,
+                        hasNextItem
+                    }];
+                }
+                if(lastLog && lastLog.message === action.payload.message){
+                    state.currentLogs = state.currentLogs.map((currentLog, key) => key === lastLogKey ? {
+                        ...action.payload,
+                        index,
+                        connectorType,
+                        operatorData,
+                        methodData,
+                        hasNextItem
+                    } : currentLog);
+                }
             }
         },
         clearCurrentLogs: (state) => {

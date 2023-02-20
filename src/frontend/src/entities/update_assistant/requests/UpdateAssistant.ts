@@ -33,12 +33,12 @@ export class UpdateAssistantRequest extends Request implements IUpdateAssistantR
     }
 
     async getOnlineUpdates(): Promise<AxiosResponse<OnlineUpdateProps[]>>{
-        this.endpoint = '/online/versions';
+        this.endpoint = '/online/version/all';
         return super.get<OnlineUpdateProps[]>();
     }
 
     async getOfflineUpdates(): Promise<AxiosResponse<OfflineUpdateProps[]>>{
-        this.endpoint = '/offline/versions';
+        this.endpoint = '/offline/version/all';
         return super.get<OfflineUpdateProps[]>();
     }
 
