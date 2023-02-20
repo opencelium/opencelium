@@ -19,7 +19,7 @@ package com.becon.opencelium.backend.execution;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
-import com.becon.opencelium.backend.execution.socket.SocketLogMessage;
+import com.becon.opencelium.backend.execution.socket.msg.SocketLogMessage;
 import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;

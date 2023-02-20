@@ -21,7 +21,7 @@ import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.execution.ExecutionContainer;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
-import com.becon.opencelium.backend.execution.socket.SocketLogMessage;
+import com.becon.opencelium.backend.execution.socket.msg.SocketLogMessage;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.Execution;
 import com.becon.opencelium.backend.mysql.entity.LastExecution;
@@ -42,10 +42,7 @@ import org.springframework.web.client.RestTemplate;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class JobExecutor extends QuartzJobBean {
