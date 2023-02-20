@@ -67,28 +67,28 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public void save(Scheduler scheduler) {
         boolean update = scheduler.getId() != 0;
-        if(quartzUtility.validateCronExpression(scheduler.getCronExp())) {
-            schedulerRepository.save(scheduler);
+        if(scheduler.getCronExp() == null || scheduler.getCronExp().isEmpty()) {
+            // TODO: should be refactored
+            scheduler.setCronExp("59 59 23 31 12 ? 2123"); // never triggered job
         }
-        else{
+        if (quartzUtility.validateCronExpression(scheduler.getCronExp())) {
+            schedulerRepository.save(scheduler);
+        } else{
             throw new RuntimeException("BAD_CRON_EXPRESSION");
         }
 
-        if (update) {
-            try {
-                quartzUtility.rescheduleJob(scheduler);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
-                quartzUtility.addJob(scheduler);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+
+        if (scheduler.getCronExp() == null || scheduler.getCronExp().isEmpty()) {
         }
-
-
+        try {
+            if (update) {
+                quartzUtility.rescheduleJob(scheduler);
+            } else {
+                quartzUtility.addJob(scheduler);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
