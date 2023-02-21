@@ -40,6 +40,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -131,13 +132,11 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(packageResource);
     }
 
-    @GetMapping("/oc/online/version/all")
+    @GetMapping(value = "/oc/online/version/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getOnlineVersion() {
 
-        List<AvailableUpdate> onVersions  = packageServiceImp.getOnVersions();
-        List<AvailableUpdateResource> packageResource = onVersions.stream()
-                .map(p -> packageServiceImp.toResource(p)).collect(Collectors.toList());
-        return ResponseEntity.ok(packageResource);
+        String onVersions  = packageServiceImp.getOnVersions();
+        return ResponseEntity.ok(onVersions);
     }
 
     @GetMapping("/oc/repo/status")

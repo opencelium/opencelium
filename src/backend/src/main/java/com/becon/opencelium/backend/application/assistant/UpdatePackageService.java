@@ -9,7 +9,7 @@ import java.util.List;
 public interface UpdatePackageService {
 
     List<AvailableUpdate> getOffVersions();
-    List<AvailableUpdate> getOnVersions();
+    String getOnVersions();
     AvailableUpdate getAvailableUpdate(String version) throws Exception;
     String[] getDirectories();
     AvailableUpdateResource toResource(AvailableUpdate offVersions);

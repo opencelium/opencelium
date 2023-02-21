@@ -15,10 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -58,17 +62,17 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     }
 
     @Override
-    public List<AvailableUpdate> getOnVersions() {
+    public String getOnVersions() {
         try {
-            List<String> versions = getVersions();
-            List<AvailableUpdate> availableUpdates = versions.stream().map(v -> {
-                AvailableUpdate availableUpdate = new AvailableUpdate();
-                String status = getVersionStatus(v);
-                availableUpdate.setStatus(status);
-                availableUpdate.setVersion(v);
-                return availableUpdate;
-            }).collect(Collectors.toList());
-            return availableUpdates;
+            String jsonBody = getVersions();
+//            List<AvailableUpdate> availableUpdates = versions.stream().map(v -> {
+//                AvailableUpdate availableUpdate = new AvailableUpdate();
+//                String status = getVersionStatus(v);
+//                availableUpdate.setStatus(status);
+//                availableUpdate.setVersion(v);
+//                return availableUpdate;
+//            }).collect(Collectors.toList());
+            return jsonBody;
         } catch (Exception e) {
             throw  new RuntimeException(e);
         }
@@ -77,7 +81,6 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     // assistant/versions/{folder}
     @Override
     public AvailableUpdate getAvailableUpdate(String version) throws Exception {
-//        String version = assistantServiceImp.getVersionFromDir(pathTofolder);
         String status = getVersionStatus(version);
         version = version.replace(".", "_");
         AvailableUpdate availableUpdate = new AvailableUpdate();
@@ -146,14 +149,50 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         }
     }
 
-    private List<String> getVersions() throws Exception{
-        String url = "https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium/refs/tags";
+    private String getVersions() throws Exception {
+        String version  = assistantServiceImp.getCurrentVersion();
+        String endpoint = "p984zhugh3443g8-438ghi4uh34g83-03ugoigh498t53y-" +
+                "483hy4pgh438ty3948gh34p8g-34ug394gheklrghdgopwuew09327-89f/" + version;
+        long date = new Date().getTime();
+        String url = "https://service.opencelium.io:443/api/" + endpoint;
+
         HttpMethod method = HttpMethod.GET;
         HttpHeaders header = new HttpHeaders();
-        header.set("Content-Type", "application/json");
+        header.set("x-access-token", "qpoeqavncbms09248527qrkazmvbgw9328uq0akzvzncbjgwh3pw09r0iavlhgwe98y349t8ghergiueh49230ur29ut3hg9");
+        header.set("x-sp-timestamp", String.valueOf(date));
+
+        String signature = generateSignature("tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv", "GET", "/api/" + endpoint, String.valueOf(date)).toLowerCase();
+        header.set("x-sp-signature", signature);
         HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
         ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
-        String values = JsonPath.read(response.getBody(), "$.values[*].name").toString();
-        return new ObjectMapper().readValue(values, List.class);
+        return response.getBody();
+    }
+
+    //'tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv', 'GET', `/api/${endpoint}`, currentDate
+    private String generateSignature(String key, String httpMethod, String url, String currentDate) {
+        byte[] hmacSha256 = null;
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), "HmacSHA256");
+            mac.init(secretKeySpec);
+            String message = httpMethod.toUpperCase() + url + currentDate;
+            mac.update(message.getBytes());
+            hmacSha256 = mac.doFinal();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to calculate hmac-sha256", e);
+        }
+        return bytesToHex(hmacSha256);
+
+    }
+
+    private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes(StandardCharsets.US_ASCII);
+    public static String bytesToHex(byte[] bytes) {
+        byte[] hexChars = new byte[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars, StandardCharsets.UTF_8);
     }
 }
