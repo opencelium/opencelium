@@ -33,10 +33,11 @@ const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
         const {testSchedule} = Schedule.getReduxState();
         const {isTestingConnection} = Connection.getReduxState();
         const [socket, setSocket] = useState<Socket>(null);
-        const [pauseTime, setPauseTime] = useState<number>(0);
+        //const [pauseTime, setPauseTime] = useState<number>(0);
         const saveLogs = (message: Message): void => {
             const data = ConnectionLogs.parseMessage(connection, message);
-            if(data.message === ConnectionLogs.BreakMessage){
+            dispatch(addCurrentLog(data));
+            /*if(data.message === ConnectionLogs.BreakMessage){
                 setPauseTime(oldTime => {
                     setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
                     return oldTime + 4;
@@ -53,7 +54,7 @@ const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
                         return oldTime + 1;
                     })
                 }
-            }
+            }*/
         }
         const subscribeLogs = () => {
             if(testSchedule) {
@@ -81,11 +82,11 @@ const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
                 subscribeLogs();
             }
         }, [testSchedule?.schedulerId]);
-        useEffect(() => {
+        /*useEffect(() => {
             if(!isTestingConnection && pauseTime !== 0){
                 setPauseTime(0);
             }
-        }, [isTestingConnection])
+        }, [isTestingConnection])*/
         useEffect(() => {
             if(shouldClear){
                 dispatch(clearCurrentLogs());
