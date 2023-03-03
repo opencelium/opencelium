@@ -64,7 +64,7 @@ class Process extends React.Component{
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const {process, justCreatedItem, currentTechnicalItem} = this.props;
-        if(process && justCreatedItem){
+        if(process && justCreatedItem && currentTechnicalItem){
             if(currentTechnicalItem.entity.index !== justCreatedItem.index){
                 if(this.isJustCreatedItem()){
                     this.onClick();

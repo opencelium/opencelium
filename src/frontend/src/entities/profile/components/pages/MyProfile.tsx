@@ -35,12 +35,13 @@ import { updateUserDetail } from "@entity/user/redux-toolkit/action_creators/Use
 import {ProfileImageStyled, DefaultImageStyled} from "./styles";
 import {withTheme} from "styled-components";
 import AvatarDefault from "@image/application/avatar_default.png";
+import {isArray} from "@application/utils/utils";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
     const dispatch = useAppDispatch();
     let {themes} = Application.getReduxState();
-    if(!themes || themes.length === 0){
+    if(!themes || !isArray(themes) || themes.length === 0){
         themes = DefaultThemes;
     }
     const {authUser} = Auth.getReduxState();

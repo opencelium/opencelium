@@ -65,7 +65,7 @@ class Operator extends React.Component{
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const {operator, justCreatedItem, currentTechnicalItem} = this.props;
-        if(operator && justCreatedItem){
+        if(operator && justCreatedItem && currentTechnicalItem){
             if(currentTechnicalItem.entity.index !== justCreatedItem.index){
                 if(this.isJustCreatedItem()){
                     this.onClick();
