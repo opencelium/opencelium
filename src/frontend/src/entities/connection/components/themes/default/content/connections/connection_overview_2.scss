@@ -859,3 +859,31 @@ $DASHED_COLOR: #58854d;
   box-shadow: none !important;
   margin: 8px !important;
 }
+
+@keyframes AnItemAppear {
+  from {
+    opacity: 0.0;
+  }
+  to {
+    opacity: 1.0;
+  }
+}
+
+@keyframes AnItemDisappear {
+  from {
+    opacity: 1.0;
+  }
+  to {
+    opacity: 0.0;
+  }
+}
+.item_appear{
+  animation-name: AnItemAppear;
+  animation-duration: 0.8s;
+  animation-fill-mode: forwards;
+}
+.item_disappear{
+  animation-name: AnItemDisappear;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+}

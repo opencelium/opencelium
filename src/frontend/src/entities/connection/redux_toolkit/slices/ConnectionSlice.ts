@@ -76,6 +76,8 @@ export interface ConnectionState extends ICommonState{
     isTestingConnection: boolean,
     logPanelHeight: number,
     isDetailsOpened: boolean,
+    justCreatedItem: {index: string, connectorType: string},
+    justDeletedItem: {index: string, connectorType: string},
 }
 
 
@@ -112,6 +114,8 @@ let initialState: ConnectionState = {
     isTestingConnection: false,
     logPanelHeight: 0,
     isDetailsOpened: true,
+    justCreatedItem: null,
+    justDeletedItem: null,
     ...CommonState,
 };
 const storage = LocalStorage.getStorage();
@@ -120,6 +124,12 @@ export const connectionSlice = createSlice({
     name: 'connection',
     initialState,
     reducers: {
+        setJustCreatedItem: (state, action: PayloadAction<any>) => {
+            state.justCreatedItem = action.payload;
+        },
+        setJustDeletedItem: (state, action: PayloadAction<any>) => {
+            state.justDeletedItem = action.payload;
+        },
         toggleDetails: (state, action: PayloadAction<boolean | undefined>) => {
             state.isDetailsOpened = typeof action.payload === "undefined" ? !state.isDetailsOpened : action.payload;
         },
@@ -392,7 +402,8 @@ export const {
     setArrows, setItems, setCurrentTechnicalItem,
     setDetailsLocation, setTechnicalLayoutLocation,
     setConnectionDraftWasOpened, setInitialTestConnectionState,
-    setLogPanelHeight, toggleDetails,
+    setLogPanelHeight, toggleDetails, setJustCreatedItem,
+    setJustDeletedItem,
 } = connectionSlice.actions;
 
 export const actions = {

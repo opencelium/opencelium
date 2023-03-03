@@ -25,8 +25,19 @@ import {CreateIcon} from "@change_component/form_elements/form_connection/form_s
 import {setFocusById} from "@application/utils/utils";
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import CCreateElementPanel from "@entity/connection/components/classes/components/content/connection_overview_2/CCreateElementPanel";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import {connect} from "react-redux";
+import {setArrows, setJustCreatedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 
+function mapStateToProps(state){
+    const connectionOverview = state.connectionReducer;
+    return{
+        justCreatedItem: connectionOverview.justCreatedItem,
+    };
+}
+
+@connect(mapStateToProps, {setJustCreatedItem})
 class CreateProcess extends React.Component{
     constructor(props) {
         super(props);
@@ -74,6 +85,7 @@ class CreateProcess extends React.Component{
 
     create(){
         let {name, label} = this.state;
+        const {setJustCreatedItem} = this.props;
         if(name) {
             name = name.value;
             const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
@@ -83,14 +95,17 @@ class CreateProcess extends React.Component{
             let operation = connector.invoker.operations.find(o => o.name === name);
             method.request = operation.request.getObject({bodyOnlyConvert: true});
             method.response = operation.response.getObject({bodyOnlyConvert: true});
+            let newMethod;
             if (connectorType === CONNECTOR_FROM) {
-                connection.addFromConnectorMethod(method, itemPosition);
+                newMethod = connection.addFromConnectorMethod(method, itemPosition);
             } else {
-                connection.addToConnectorMethod(method, itemPosition);
+                newMethod = connection.addToConnectorMethod(method, itemPosition);
             }
+            setJustCreatedItem({index: newMethod.index, connectorType})
             updateConnection(connection);
             if (setCreateElementPanelPosition) setCreateElementPanelPosition({x: 0, y: 0});
             if (setIsCreateElementPanelOpened) setIsCreateElementPanelOpened(false);
+            setTimeout(() => {setJustCreatedItem(null)}, 800)
         } else{
             setFocusById('new_request_name')
         }
@@ -98,7 +113,7 @@ class CreateProcess extends React.Component{
 
     render(){
         const {name, label} = this.state;
-        const {connection, selectedItem, isTypeCreateOperator, createElementPanelConnectorType, hasBeforeLine} = this.props;
+        const {connection, selectedItem, isTypeCreateOperator, createElementPanelConnectorType, hasBeforeLine, itemPosition, itemType} = this.props;
         let connectorType = CCreateElementPanel.getConnectorType(this.props);
         const {isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
         let {x, y} = CCreateElementPanel.getCoordinates(this.props);
@@ -109,7 +124,8 @@ class CreateProcess extends React.Component{
             }
         }
         const hasBeforeItem = hasBeforeLine;
-        let {createIconStyles, afterItemLineStyles, beforeItemLineStyles, panelItemStyles} = ItemClass.getCreateElementPanelStyles(x, y, {isTypeCreateOperator, hasBeforeItem});
+        const isOnlyOneCreateElement = !!itemPosition && !!itemPosition;
+        let {createIconStyles, afterItemLineStyles, beforeItemLineStyles, panelItemStyles} = ItemClass.getCreateElementPanelStyles(x, y, {isTypeCreateOperator, hasBeforeItem, isOnlyOneCreateElement});
         const connector = connection.getConnectorByType(connectorType);
         const nameSource = connector.invoker.operations.map(operation => {
             return {label: operation.name, value: operation.name};

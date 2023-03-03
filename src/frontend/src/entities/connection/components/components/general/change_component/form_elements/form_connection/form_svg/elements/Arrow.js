@@ -35,6 +35,7 @@ function mapStateToProps(state){
         currentTechnicalItem,
         currentLogs: connectionOverview.currentLogs,
         logPanelHeight: connectionOverview.logPanelHeight,
+        justDeletedItem: connectionOverview.justDeletedItem,
     }
 }
 
@@ -96,7 +97,7 @@ class Arrow extends React.Component{
 
     render(){
         const {isMouseOver, isAvailableForDragging} = this.state;
-        const {from, to, isHighlighted, isDisabled, currentTechnicalItem, currentLogs, logPanelHeight} = this.props;
+        const {from, to, isHighlighted, isDisabled, currentTechnicalItem, currentLogs, logPanelHeight, justDeletedItem} = this.props;
         if(!from || !to){
             return null;
         }
@@ -184,6 +185,10 @@ class Arrow extends React.Component{
                 }
             }
         }
+        const isJustDeletedItem = justDeletedItem ? from.id === `${justDeletedItem.connectorType}_${justDeletedItem.index}` || to.id === `${justDeletedItem.connectorType}_${justDeletedItem.index}` || isHighlighted : false;
+        if(isJustDeletedItem){
+            debugger;
+        }
         return(
             <React.Fragment>
                 {line1 &&
@@ -196,7 +201,7 @@ class Arrow extends React.Component{
                                 return <line
                                     {...props}
                                     id={`${from.id}_${to.id}_line1`}
-                                    className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
+                                    className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`}
                                     x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2}
                                     stroke={stroke}
                                     strokeWidth={ARROW_WIDTH}
@@ -207,13 +212,13 @@ class Arrow extends React.Component{
                             <React.Fragment>
                                 <line
                                     id={`${from.id}_${to.id}_line1_alert`}
-                                    className={`${isDisabledStyle}`}
+                                    className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isDisabledStyle}`}
                                     x1={line1.x1 - 10} y1={line1.y1 + 20} x2={line1.x2 + 10} y2={line1.y2} stroke={'#d24545'}
                                     strokeWidth={ARROW_WIDTH}
                                 />
                                 <line
                                     id={`${from.id}_${to.id}_line1_alert`}
-                                    className={`${isDisabledStyle}`}
+                                    className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isDisabledStyle}`}
                                     x1={line1.x1 - 10} y1={line1.y1 + 40} x2={line1.x2 + 10} y2={line1.y2 - 20} stroke={'#d24545'}
                                     strokeWidth={ARROW_WIDTH}
                                 />
@@ -243,7 +248,7 @@ class Arrow extends React.Component{
                             return <line
                                 {...props}
                                 id={`${from.id}_${to.id}_arrow`}
-                                className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} arrow`}
+                                className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} arrow`}
                                 x1={arrow.x1} y1={arrow.y1} x2={arrow.x2} y2={arrow.y2}
                                 stroke={stroke}
                                 strokeWidth={ARROW_WIDTH} markerEnd={`url(#arrow_head_right${markerStyle})`}

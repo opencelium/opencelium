@@ -158,15 +158,15 @@ class Svg extends React.Component {
         }
     }
 
-    setCoordinatesForCreateElementPanel(e){
+    setCoordinatesForCreateElementPanel(e, type, itemPosition){
         const {setCreateElementPanelPosition, layoutPosition} = this.props;
         if(typeof setCreateElementPanelPosition === 'function'){
             const clientRect = e.target.getBoundingClientRect();
             let x = clientRect.x;
             let y = clientRect.y;
             x += clientRect.width + 8;
-            y -= 106;
-            setCreateElementPanelPosition({x, y});
+            y -= 126;
+            setCreateElementPanelPosition({x, y, itemPosition, type});
         }
     }
 
@@ -183,7 +183,7 @@ class Svg extends React.Component {
                     this.offset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
                 }
             } else{
-                this.setCoordinatesForCreateElementPanel(e);
+                //this.setCoordinatesForCreateElementPanel(e);
             }
         } else{
             if(isDraggable) {
@@ -295,7 +295,7 @@ class Svg extends React.Component {
         }
         if(this.selectedElement){
             this.selectedElement = null;
-            this.setCoordinatesForCreateElementPanel(e);
+            //this.setCoordinatesForCreateElementPanel(e);
             if(this.dragCoordinates !== null) {
                 if(!shouldMoveItem){
                     this.setItemCoordinates(this.dragCoordinates)
@@ -408,7 +408,7 @@ class Svg extends React.Component {
     renderItems(){
         const {
             isItemDraggable, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened,
-            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll, isTestingConnection,
+            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll, isTestingConnection, isCreateElementPanelOpened,
         } = this.props;
         return items.map((item,key) => {
             let currentItem = null;
@@ -428,10 +428,12 @@ class Svg extends React.Component {
                             operator={item}
                             setCurrentItem={setCurrentItem}
                             setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
+                            isCreateElementPanelOpened={isCreateElementPanelOpened}
                             isCurrent={isCurrent}
                             isHighlighted={isHighlighted}
                             connection={connection}
                             updateConnection={updateConnection}
+                            setCoordinatesForCreateElementPanel={(a, b, c) => this.setCoordinatesForCreateElementPanel(a, b ,c)}
                         />
                     );
                 case 'loop':
@@ -444,10 +446,12 @@ class Svg extends React.Component {
                             operator={item}
                             setCurrentItem={setCurrentItem}
                             setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
+                            isCreateElementPanelOpened={isCreateElementPanelOpened}
                             isCurrent={isCurrent}
                             isHighlighted={isHighlighted}
                             connection={connection}
                             updateConnection={updateConnection}
+                            setCoordinatesForCreateElementPanel={(a, b, c) => this.setCoordinatesForCreateElementPanel(a, b, c)}
                         />
                     );
                 default:
@@ -460,10 +464,12 @@ class Svg extends React.Component {
                             readOnly={readOnly}
                             setCurrentItem={setCurrentItem}
                             setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
+                            isCreateElementPanelOpened={isCreateElementPanelOpened}
                             isCurrent={isCurrent}
                             isHighlighted={isHighlighted}
                             connection={connection}
                             updateConnection={updateConnection}
+                            setCoordinatesForCreateElementPanel={(a, b, c) => this.setCoordinatesForCreateElementPanel(a, b, c)}
                         />
                     );
             }

@@ -24,9 +24,12 @@ class ItemPositionPanel extends React.Component{
     }
 
     render(){
-        const {itemPosition, onChangeItemPosition} = this.props;
+        let {itemPosition, onChangeItemPosition} = this.props;
         let {x, y} = CCreateElementPanel.getCoordinates(this.props);
         const panelItemPositionStyles = {top: `${y - 5}px`, left: `${x + 12}px`};
+        if(!itemPosition){
+            itemPosition = OUTSIDE_ITEM;
+        }
         return(
             <React.Fragment>
                 <div className={styles.create_element_panel} style={panelItemPositionStyles}>

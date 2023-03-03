@@ -25,8 +25,11 @@ import {CreateIcon} from "@change_component/form_elements/form_connection/form_s
 import CCreateElementPanel from "@entity/connection/components/classes/components/content/connection_overview_2/CCreateElementPanel";
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {setFocusById} from "@application/utils/utils";
+import {connect} from "react-redux";
+import {setJustCreatedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 
+@connect(null, {setJustCreatedItem})
 class CreateOperator extends React.Component{
     constructor(props) {
         super(props);
@@ -63,19 +66,23 @@ class CreateOperator extends React.Component{
 
     create(){
         let {type} = this.state;
+        const {setJustCreatedItem} = this.props;
         if(type) {
             type = type.value;
             const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
             let connectorType = CCreateElementPanel.getConnectorType(this.props);
             let operator = {type};
+            let newOperator;
             if (connectorType === CONNECTOR_FROM) {
-                connection.addFromConnectorOperator(operator, itemPosition);
+                newOperator = connection.addFromConnectorOperator(operator, itemPosition);
             } else {
-                connection.addToConnectorOperator(operator, itemPosition);
+                newOperator = connection.addToConnectorOperator(operator, itemPosition);
             }
+            setJustCreatedItem({index: newOperator.index, connectorType})
             updateConnection(connection);
             setCreateElementPanelPosition({x: 0, y: 0});
             setIsCreateElementPanelOpened(false);
+            setTimeout(() => {setJustCreatedItem(null)}, 800)
         } else{
             setFocusById('new_operator_type');
         }
@@ -83,8 +90,9 @@ class CreateOperator extends React.Component{
 
     render(){
         const {type} = this.state;
-        const {selectedItem, isTypeCreateOperator, createElementPanelConnectorType} = this.props;
+        const {selectedItem, isTypeCreateOperator, createElementPanelConnectorType, itemPosition, itemType} = this.props;
         let {x, y} = CCreateElementPanel.getCoordinates(this.props);
+        const isOnlyOneCreateElement = !!itemPosition && !!itemPosition;
         const {isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
         let ItemClass = selectedItem;
         if(selectedItem === null){
@@ -92,12 +100,12 @@ class CreateOperator extends React.Component{
                 ItemClass = CTechnicalProcess;
             }
         }
-        let {createIconStyles, afterItemLineStyles, beforeItemLineStyles, panelItemStyles} = ItemClass.getCreateElementPanelStyles(x, y, {isTypeCreateOperator});
+        let {createIconStyles, afterItemLineStyles, beforeItemLineStyles, panelItemStyles} = ItemClass.getCreateElementPanelStyles(x, y, {isOnlyOneCreateElement, isTypeCreateOperator});
         const typeSource = COperatorItem.getOperatorTypesForSelect();
         const isAddDisabled = type === null;
         return(
             <React.Fragment>
-                <Line style={beforeItemLineStyles}/>
+                {!itemPosition && !itemType ? <Line style={beforeItemLineStyles}/> : null}
                 <div className={styles.create_element_panel_for_item} style={panelItemStyles}>
                     <Select
                         id={'new_operator_type'}

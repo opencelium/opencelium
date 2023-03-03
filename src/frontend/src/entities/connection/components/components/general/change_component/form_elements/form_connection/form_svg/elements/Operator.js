@@ -30,6 +30,8 @@ import {mapItemsToClasses} from "@change_component/form_elements/form_connection
 import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_svg/elements/Arrow";
 import DashedElement from "@change_component/form_elements/form_connection/form_svg/elements/process/DashedElement";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
+import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
+import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 
 function mapStateToProps(state){
@@ -40,10 +42,12 @@ function mapStateToProps(state){
         logPanelHeight: connectionOverview.logPanelHeight,
         isTestingConnection: connectionOverview.isTestingConnection,
         currentLogs: connectionOverview.currentLogs,
+        justCreatedItem: connectionOverview.justCreatedItem,
+        justDeletedItem: connectionOverview.justDeletedItem,
     }
 }
 
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {setJustDeletedItem})
 class Operator extends React.Component{
     constructor(props) {
         super(props)
@@ -54,24 +58,77 @@ class Operator extends React.Component{
             isMouseOverRightPlaceholder: false,
             isMouseOverBottomPlaceholder: false,
             isAvailableForDragging: false,
+            isMouseOver: false,
+            showCreatePanel: false,
         }
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const {operator, justCreatedItem, currentTechnicalItem} = this.props;
+        if(operator && justCreatedItem){
+            if(currentTechnicalItem.entity.index !== justCreatedItem.index){
+                if(this.isJustCreatedItem()){
+                    this.onClick();
+                }
+            }
+        }
+    }
+
+    isJustCreatedItem(){
+        const {operator, justCreatedItem} = this.props;
+        if(operator && justCreatedItem){
+            return operator.entity.index === justCreatedItem.index
+                && operator.connectorType === justCreatedItem.connectorType;
+        }
+        return false;
+    }
+
+    isJustDeletedItem(){
+        const {operator, justDeletedItem} = this.props;
+        if(operator && justDeletedItem){
+            return operator.entity.index === justDeletedItem.index
+                && operator.connectorType === justDeletedItem.connectorType;
+        }
+        return false;
+    }
+
     onMouseOverSvg(){
-        const {currentTechnicalItem, operator} = this.props;
+        const {currentTechnicalItem, operator, isCreateElementPanelOpened} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
-        if(isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== operator.entity.index){
+        const isItemOver = isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== operator.entity.index;
+        if(isItemOver){
             this.setState({
                 isMouseOverSvg: true,
             })
         }
+        if(!this.state.isMouseOver){
+            this.setState({
+                isMouseOver: true,
+            }, () => {
+                setTimeout(() => {
+                    if(this.state.isMouseOver && !this.state.showCreatePanel && !operator.isDragged && !isCreateElementPanelOpened && !isItemOver && !(isCurrentItemDragged && currentTechnicalItem.entity.index === operator.entity.index)){
+                        this.setState({
+                            showCreatePanel: true,
+                        })
+                    }
+                }, 100)
+            })
+        }
     }
 
-    onMouseLeaveSvg(){
+    onMouseLeaveSvg(e){
         if(this.state.isMouseOverSvg) {
             this.setState({
                 isMouseOverSvg: false,
             })
+        }
+        if(this.state.isMouseOver){
+            if(!e || (e.relatedTarget.id !== 'create_panel_right' && e.relatedTarget.id !== 'create_panel_bottom')) {
+                this.setState({
+                    isMouseOver: false,
+                    showCreatePanel: false,
+                })
+            }
         }
     }
 
@@ -140,6 +197,11 @@ class Operator extends React.Component{
                 if(isItemDraggable){
                     operator.isDragged = true;
                     operator.isDraggedForCopy = e.altKey;
+                    if(this.state.showCreatePanel){
+                        this.setState({
+                            showCreatePanel: false,
+                        })
+                    }
                 }
                 if(currentTechnicalItem && currentTechnicalItem.index === operator.index){
                     operator.isSelectedAll = currentTechnicalItem.isSelectedAll;
@@ -159,13 +221,6 @@ class Operator extends React.Component{
         }
     }
 
-    onDoubleClick(){
-        const {isTestingConnection, setIsCreateElementPanelOpened, readOnly} = this.props;
-        if(!isTestingConnection && !readOnly){
-            setIsCreateElementPanelOpened(true);
-        }
-    }
-
     onClick(){
         const {setCurrentItem, operator, isDisabled} = this.props;
         if(!isDisabled) {
@@ -174,22 +229,31 @@ class Operator extends React.Component{
     }
 
     deleteOperator(e){
-        const {connection, operator, updateConnection, setCurrentItem} = this.props;
+        const {connection, operator, updateConnection, setCurrentItem, setJustDeletedItem} = this.props;
         const connector = connection.getConnectorByType(operator.connectorType);
-        if(connector){
-            if(connector.getConnectorType() === CONNECTOR_FROM){
-                connection.removeFromConnectorOperator(operator.entity);
-            } else{
-                connection.removeToConnectorOperator(operator.entity);
+        this.setState({
+            showCreatePanel: false,
+        })
+        setJustDeletedItem({index: operator.entity.index, connectorType: operator.connectorType});
+        setTimeout(() => {
+            setJustDeletedItem(null);
+            if(connector){
+                if(connector.getConnectorType() === CONNECTOR_FROM){
+                    connection.removeFromConnectorOperator(operator.entity);
+                } else{
+                    connection.removeToConnectorOperator(operator.entity);
+                }
+                updateConnection(connection);
+                const currentItem = connector.getCurrentItem();
+                if(currentItem){
+                    const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+                    setCurrentItem(currentSvgElement);
+                }
             }
-            updateConnection(connection);
-            const currentItem = connector.getCurrentItem();
-            if(currentItem){
-                const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
-                setCurrentItem(currentSvgElement);
-            }
+        }, 450);
+        if(e){
+            e.stopPropagation();
         }
-        e.stopPropagation();
     }
 
     shouldShowRightPlaceholder(){
@@ -213,7 +277,7 @@ class Operator extends React.Component{
         const {
             operator, isNotDraggable, isCurrent, currentTechnicalItem,
             isHighlighted, readOnly, isDisabled, logPanelHeight,
-            currentLogs, isTestingConnection,
+            currentLogs, isTestingConnection, justDeletedItem,
         } = this.props;
         const hasBottomPlaceholder = this.shouldShowBottomPlaceholder();
         const hasRightPlaceholder = this.shouldShowRightPlaceholder();
@@ -266,9 +330,11 @@ class Operator extends React.Component{
             && currentLog.index === operator.entity.index && currentLog.message !== '';
         const hasDeleteIcon = isCurrent && !readOnly && !isTestingConnection;
         const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index) !== -1 ? '#58854d' : '';
+        const isJustCreatedItem = this.isJustCreatedItem();
+        const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;
         return(
             <svg onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} id={operator.getHtmlIdName()} x={operator.x} y={operator.y} className={`${styles.operator} ${isDisabledStyle} ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={svgSize.width} height={svgSize.height}>
-                <rect x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'}/>
+                <rect x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'} id={`${operator.getHtmlIdName()}_rect`}/>
                 {operatorType === IF_OPERATOR &&
                     <React.Fragment>
                         <DashedElement
@@ -277,17 +343,17 @@ class Operator extends React.Component{
                                 return <polygon
                                     onMouseDown={(a) => this.onMouseDown(a)}
                                     onMouseUp={(a) => this.onMouseUp(a)}
-                                    onDoubleClick={(a) => this.onDoubleClick(a)}
                                     onClick={(a) => this.onClick(a)}
                                     points={points}
                                     style={{...polygonStyle, ...errorStyles}}
-                                    className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+                                    className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+                                    id={`${operator.getHtmlIdName()}_polygon`}
                                     {...props}
                                 />;
                             }}
                             stroke={logStroke}
                         />
-                        <text fontSize={20} dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY} style={errorStyles}>
+                        <text fontSize={20} dominantBaseline={"middle"} textAnchor={"middle"} className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.process_label}`} x={textX} y={textY} style={errorStyles}>
                         {'if'}
                         </text>
                         <title>{'if'}</title>
@@ -301,21 +367,21 @@ class Operator extends React.Component{
                                 return <polygon
                                     onMouseDown={(a) => this.onMouseDown(a)}
                                     onMouseUp={(a) => this.onMouseUp(a)}
-                                    onDoubleClick={(a) => this.onDoubleClick(a)}
                                     onClick={(a) => this.onClick(a)}
                                     points={points}
                                     style={{...polygonStyle, ...errorStyles}}
-                                    className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+                                    className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+                                    id={`${operator.getHtmlIdName()}_polygon`}
                                     {...props}
                                 />
                             }}
                             stroke={logStroke}
                         />
-                        <svg style={{pointerEvents: 'none'}} className={`${isNotDraggable ? styles.not_draggable : ''} ${styles.operator_loop_icon}`} fill="#000000" width="30px" height="30px" viewBox="0 0 24 24" x="15px" y="14px">
+                        <svg style={{pointerEvents: 'none'}} className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${isNotDraggable ? styles.not_draggable : ''} ${styles.operator_loop_icon}`} fill="#000000" width="30px" height="30px" viewBox="0 0 24 24" x="15px" y="14px">
                             <path style={errorStyles} d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
                             <path d="M0 0h24v24H0z" fill="none"/>
                         </svg>
-                        <text style={errorStyles} dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={'40'} y={'42'}>
+                        <text style={errorStyles} dominantBaseline={"middle"} textAnchor={"middle"} className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.process_label}`} x={'40'} y={'42'}>
                             {operator.entity.iterator}
                         </text>
                         <title>
@@ -324,7 +390,7 @@ class Operator extends React.Component{
                     </React.Fragment>
                 }
                 {hasDeleteIcon &&
-                    <DeleteIcon svgX={closeX} svgY={closeY} onClick={(a) => this.deleteOperator(a)}/>
+                    <DeleteIcon isJustCreatedItem={isJustCreatedItem} isJustDeletedItem={isJustDeletedItem} svgX={closeX} svgY={closeY} onClick={(a) => this.deleteOperator(a)}/>
                 }
                 {
                     hasBottomPlaceholder
@@ -424,10 +490,21 @@ class Operator extends React.Component{
     }
 
     render(){
-        const {type} = this.props;
+        const {showCreatePanel} = this.state;
+        const {type, setIsCreateElementPanelOpened, operator, setCoordinatesForCreateElementPanel, setCurrentItem} = this.props;
         return(
             <React.Fragment>
                 {this.renderOperator(type)}
+                {showCreatePanel &&
+                    <CreatePanel
+                        element={operator}
+                        onMouseLeave={(a) => this.onMouseLeaveSvg(a)}
+                        setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
+                        sourceId={`${operator.getHtmlIdName()}`}
+                        setCoordinatesForCreateElementPanel={setCoordinatesForCreateElementPanel}
+                        setCurrentItem={setCurrentItem}
+                    />
+                }
             </React.Fragment>
         );
     }
