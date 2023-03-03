@@ -90,11 +90,11 @@ const KeyframeCreatePanelRightContainerAppearance = keyframes`
 
 const KeyframeCreatePanelRightProcessAppearance = keyframes`
     0% {
-        x: -60;
+        transform: translate(-20px, 0px);
     }
     
     100% {
-        x: 9;
+        transform: translate(9px, 0px);
     }
 `;
 
@@ -120,11 +120,11 @@ const KeyframeCreatePanelBottomContainerAppearance = keyframes`
 
 const KeyframeCreatePanelBottomProcessAppearance = keyframes`
     0% {
-        y: -60;
+        transform: translate(0px, -20px);
     }
     
     100% {
-        y: 9;
+        transform: translate(0px, 5px);
     }
 `;
 

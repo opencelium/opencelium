@@ -45,6 +45,9 @@ export const CreateProcessStyled = styled.rect<React.ComponentProps<"rect"> & {i
     &:hover{
         fill: #fff;
     }
+`;
+
+export const CreateProcessContainerStyled = styled.g<React.ComponentProps<"g"> & {isBottom?: boolean, isRight?: boolean}>`
     ${({isBottom}) => isBottom ? CreatePanelBottomProcessAppearance : ''}
     ${({isRight}) => isRight ? CreatePanelRightProcessAppearance : ''}
 `;
