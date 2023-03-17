@@ -37,6 +37,7 @@ import InputSwitch from "@app_component/base/input/switch/InputSwitch";
 
 const OperationItem: FC<OperationItemProps> = (
     {
+        index,
         operationItem,
         isReadonly,
         updateOperation,
@@ -114,6 +115,7 @@ const OperationItem: FC<OperationItemProps> = (
         <React.Fragment>
             {showSwitch &&
                 <InputSwitch
+                    id={`operation_item_test_${index}`}
                     readOnly={isReadonly}
                     error={''}
                     onClick={toggleOperationAsTestConnection}
@@ -124,6 +126,7 @@ const OperationItem: FC<OperationItemProps> = (
                 />
             }
             <Name
+                id={`operation_item_name_${index}`}
                 required={true}
                 label={'Name'}
                 icon={'person'}
@@ -133,6 +136,7 @@ const OperationItem: FC<OperationItemProps> = (
                 updateOperation={updateOperation}
             />
             <Endpoint
+                id={`operation_item_endpoint_${index}`}
                 label={'Endpoint'}
                 icon={'http'}
                 readOnly={isReadonly}
@@ -146,18 +150,22 @@ const OperationItem: FC<OperationItemProps> = (
                 label={'Method'}
                 options={[
                     {
+                        id: `operation_item_method_post_${index}`,
                         label: 'POST',
                         value: REQUEST_METHOD.POST,
                         key: REQUEST_METHOD.POST,
                     },{
+                        id: `operation_item_method_get_${index}`,
                         label: 'GET',
                         value: REQUEST_METHOD.GET,
                         key: REQUEST_METHOD.GET,
                     },{
+                        id: `operation_item_method_put_${index}`,
                         label: 'PUT',
                         value: REQUEST_METHOD.PUT,
                         key: REQUEST_METHOD.PUT,
                     },{
+                        id: `operation_item_method_delete_${index}`,
                         label: 'DELETE',
                         value: REQUEST_METHOD.DELETE,
                         key: REQUEST_METHOD.DELETE,
@@ -175,13 +183,13 @@ const OperationItem: FC<OperationItemProps> = (
             />
             <Nav tabs style={{display: method ? 'flex' : 'none'}}>
                 <NavItem>
-                    <NavLinkStyled onClick={() => {setTab(1);}} active={tab === 1}>Request</NavLinkStyled>
+                    <NavLinkStyled onClick={() => {setTab(1);}} active={tab === 1} id={`operation_item_request_${index}`}>Request</NavLinkStyled>
                 </NavItem>
                 <NavItem>
-                    <NavLinkStyled onClick={() => {setTab(2);}} active={tab === 2}>Response (success)</NavLinkStyled>
+                    <NavLinkStyled onClick={() => {setTab(2);}} active={tab === 2} id={`operation_item_success_${index}`}>Response (success)</NavLinkStyled>
                 </NavItem>
                 <NavItem>
-                    <NavLinkStyled onClick={() => {setTab(3);}} active={tab === 3}>Response (fail)</NavLinkStyled>
+                    <NavLinkStyled onClick={() => {setTab(3);}} active={tab === 3} id={`operation_item_fail_${index}`}>Response (fail)</NavLinkStyled>
                 </NavItem>
             </Nav>
             {method && <TabContent activeTab={tab} style={{display: method ? 'block' : 'none', marginTop: '10px'}}>
@@ -192,6 +200,7 @@ const OperationItem: FC<OperationItemProps> = (
                         readOnly={isReadonly}
                     />
                     <Data
+                        index={index}
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
@@ -203,6 +212,7 @@ const OperationItem: FC<OperationItemProps> = (
                         value={operationItem.request.body.data}
                     />
                     <Format
+                        index={index}
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
@@ -214,6 +224,7 @@ const OperationItem: FC<OperationItemProps> = (
                         value={operationItem.request.body.format}
                     />
                     <Type
+                        index={index}
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
@@ -238,6 +249,7 @@ const OperationItem: FC<OperationItemProps> = (
                         readOnly={isReadonly}
                     />
                     <Data
+                        index={index}
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
@@ -249,6 +261,7 @@ const OperationItem: FC<OperationItemProps> = (
                         value={operationItem.response.success.body.data}
                     />
                     <Format
+                        index={index}
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
@@ -260,6 +273,7 @@ const OperationItem: FC<OperationItemProps> = (
                         value={operationItem.response.success.body.format}
                     />
                     <Type
+                        index={index}
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
@@ -271,6 +285,7 @@ const OperationItem: FC<OperationItemProps> = (
                         value={operationItem.response.success.body.type}
                     />
                     <SuccessStatus
+                        index={index}
                         type={InputTextType.Number}
                         label={'Status'}
                         icon={'all_inclusive'}
@@ -293,6 +308,7 @@ const OperationItem: FC<OperationItemProps> = (
                         readOnly={isReadonly}
                     />
                     <Data
+                        index={index}
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
@@ -304,6 +320,7 @@ const OperationItem: FC<OperationItemProps> = (
                         }}
                     />
                     <Format
+                        index={index}
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
@@ -315,6 +332,7 @@ const OperationItem: FC<OperationItemProps> = (
                         value={operationItem.response.fail.body.format}
                     />
                     <Type
+                        index={index}
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
@@ -326,6 +344,7 @@ const OperationItem: FC<OperationItemProps> = (
                         value={operationItem.response.fail.body.type}
                     />
                     <FailStatus
+                        index={index}
                         type={InputTextType.Number}
                         label={'Status'}
                         icon={'all_inclusive'}
@@ -348,6 +367,7 @@ const OperationItem: FC<OperationItemProps> = (
 }
 
 OperationItem.defaultProps = {
+    index: '',
     operationItem: null,
     isReadonly: false,
     hasTestConnectionSwitch: true,

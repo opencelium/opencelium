@@ -17,6 +17,7 @@ import {ITheme} from "@style/Theme";
 import {Operation} from "../../classes/Operation";
 
 interface OperationItemProps{
+    index?: string,
     theme?: ITheme,
     operationItem?: Operation,
     isReadonly?: boolean,

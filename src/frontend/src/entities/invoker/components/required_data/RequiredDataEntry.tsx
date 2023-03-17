@@ -37,7 +37,8 @@ const RequiredDataEntry: FC<RequiredDataEntryProps> =
     return (
         <RequiredDataEntryStyled>
             <InputText
-                minHeight={30   }
+                id={`required_data_name_${index || entry.key}`}
+                minHeight={30}
                 label={hasLabels ? 'Name' : ''}
                 error={validationMessageForName}
                 value={name}
@@ -45,6 +46,7 @@ const RequiredDataEntry: FC<RequiredDataEntryProps> =
                 onBlur={onBlur}
             />
             <InputSelect
+                id={`required_data_visibility_${index || entry.key}`}
                 minHeight={30   }
                 width={'30%'}
                 label={hasLabels ? 'Visibility' : ''}
@@ -63,6 +65,7 @@ const RequiredDataEntry: FC<RequiredDataEntryProps> =
             />
             <div style={{display: 'flex', width: '40%', gap: '5px'}}>
                 <InputText
+                    id={`required_data_value_${index || entry.key}`}
                     minHeight={30}
                     label={hasLabels ? 'Value' : ''}
                     value={value}
@@ -77,6 +80,7 @@ const RequiredDataEntry: FC<RequiredDataEntryProps> =
 
 RequiredDataEntry.defaultProps = {
     mode: 'update',
+    index: '',
     hasLabels: false,
 }
 

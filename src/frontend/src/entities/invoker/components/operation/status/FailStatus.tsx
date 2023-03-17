@@ -19,6 +19,7 @@ import {StatusProps} from "../interfaces";
 
 const FailStatus: FC<StatusProps> =
     ({
+        index,
          ...props
      }) => {
         const [newFailStatus, setNewFailStatus] = useState(props.operationItem.response.fail.status || '');
@@ -28,6 +29,7 @@ const FailStatus: FC<StatusProps> =
         return (
             <InputText
                 {...props}
+                id={`operation_item_success_status_${index}`}
                 onChange={(e:ChangeEvent<HTMLInputElement>) => {
                     setNewFailStatus(e.target.value);
                 }}

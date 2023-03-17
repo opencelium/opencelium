@@ -31,7 +31,7 @@ const Format: FC<StatusProps> =
                 onChange={onChange}
                 label={'Format'}
                 icon={'text_format'}
-                options={[{label: 'Json', value: ResponseFormat.Json, key: ResponseFormat.Json}, {label: 'Xml', value: ResponseFormat.Xml, key: ResponseFormat.Xml}]}
+                options={[{id: `operation_item_format_json_${props.index}`, label: 'Json', value: ResponseFormat.Json, key: ResponseFormat.Json}, {id: `operation_item_format_xml_${props.index}`, label: 'Xml', value: ResponseFormat.Xml, key: ResponseFormat.Xml}]}
                 readOnly={readOnly}
             />
 

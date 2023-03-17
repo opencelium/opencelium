@@ -85,6 +85,9 @@ export default {
         [getSchedulesById.rejected.type]: {
             "__DEFAULT__": "There is an error fetching schedules."
         },
+        [getAllSchedules.rejected.type]: {
+            "__DEFAULT__": "There is an error fetching schedules."
+        },
         [startSchedule.rejected.type]: {
             "__DEFAULT__": "The job was not triggered"
         },

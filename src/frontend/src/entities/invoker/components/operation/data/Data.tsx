@@ -31,7 +31,7 @@ const Data: FC<StatusProps> =
                 onChange={onChange}
                 label={'Data'}
                 icon={'save'}
-                options={[{label: 'Raw', value: DataType.Raw, key: DataType.Raw}, {label: 'GraphQL', value: DataType.GraphQL, key: DataType.GraphQL}]}
+                options={[{id: `operation_item_data_raw_${props.index}`,label: 'Raw', value: DataType.Raw, key: DataType.Raw}, {id: `operation_item_data_graphql_${props.index}`,label: 'GraphQL', value: DataType.GraphQL, key: DataType.GraphQL}]}
                 readOnly={readOnly}
             />
 
@@ -39,6 +39,7 @@ const Data: FC<StatusProps> =
     }
 
 Data.defaultProps = {
+    index: '',
 }
 
 
