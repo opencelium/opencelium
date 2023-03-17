@@ -34,13 +34,15 @@ const ListRow: FC<ListRowProps> =
     }) => {
         const ListRawComponent = collection.ListRawComponent ? collection.ListRawComponent : ListRowStyled;
         return (
-            <ListRawComponent entity={entity}>
+            <ListRawComponent entity={entity} url={collection.getListRawUrl ? collection.getListRawUrl(entity) : ''} id={collection.getListRawUrl ? `raw_${collection.getListRawUrl(entity).split('/').join('_')}` : ''}>
                 {collection.hasCheckboxes &&
                 <td>
-                    <input type={'checkbox'} checked={isChecked} onChange={() => check({
-                        value: entity[collection.keyPropName],
-                        isChecked: !checks[entity[collection.keyPropName]]
-                    })}/>
+                    <input type={'checkbox'} checked={isChecked} onChange={(e) => {
+                        check({
+                            value: entity[collection.keyPropName],
+                            isChecked: !checks[entity[collection.keyPropName]]
+                        })
+                    }}/>
                 </td>
                 }
                 {

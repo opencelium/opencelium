@@ -31,12 +31,15 @@ import {
 import ModelConnector from "../requests/models/Connector";
 import {ConnectorPermissions} from "../constants";
 import {InlineEditInput} from "@app_component/collection/collection_view/InlineEditInput";
+import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
 
 class Connectors extends ListCollection<ConnectorProps>{
     name: string = 'connectors';
     entities: IConnector[];
     title = 'Connectors';
     keyPropName: ConnectorProps ='id';
+    getListRawUrl = (entity: IConnector) => `${entity.id}/update`;
+    ListRawComponent = DefaultListRaw;
     sortingProps: ConnectorProps[] = ['title'];
     listProps: ListProp<ConnectorProps>[] = [
         {

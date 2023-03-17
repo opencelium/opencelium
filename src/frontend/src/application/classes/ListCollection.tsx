@@ -54,6 +54,8 @@ class ListCollection<EntityProps> implements IListCollection<EntityProps>{
     // component for raw in the list
     ListRawComponent: any = null;
 
+    getListRawUrl?: (entity: any) => string;
+
     // props of grid view
     gridProps: ListCollectionCardProps;
 

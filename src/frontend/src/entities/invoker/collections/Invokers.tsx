@@ -29,6 +29,7 @@ import {deleteInvokersByName} from "../redux_toolkit/action_creators/InvokerCrea
 import { InvokerPermissions } from "../constants";
 import {IInvoker, InvokerProps} from "../interfaces/IInvoker";
 import ImportInvokerButton from "../components/import_invoker_button/ImportInvokerButton";
+import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
 
 
 class Invokers extends ListCollection<InvokerProps>{
@@ -36,6 +37,8 @@ class Invokers extends ListCollection<InvokerProps>{
     entities: IInvoker[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Invokers'}];
     keyPropName: InvokerProps = 'name';
+    getListRawUrl = (entity: IInvoker) => `${entity.name}/view`;
+    ListRawComponent = DefaultListRaw;
     sortingProps: InvokerProps[] = ['name'];
     listProps: ListProp<InvokerProps>[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'authType', width: '10%'}, {propertyKey: 'operations[name]', width: '20%'}];
     gridProps = {

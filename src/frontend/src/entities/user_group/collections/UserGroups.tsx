@@ -27,12 +27,15 @@ import {IUserGroup, UserGroupProps} from "../interfaces/IUserGroup";
 import {UserGroup} from "../classes/UserGroup";
 import {deleteUserGroupsById} from "../redux_toolkit/action_creators/UserGroupCreators";
 import { UserGroupPermissions } from "../constants";
+import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
 
 class UserGroups extends ListCollection<UserGroupProps>{
     name: string = 'userGroups';
     entities: IUserGroup[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'User Groups'}];
     keyPropName: UserGroupProps ='id';
+    getListRawUrl = (entity: IUserGroup) => `${entity.id}/update`;
+    ListRawComponent = DefaultListRaw;
     sortingProps: UserGroupProps[] = ['name'];
     listProps: ListProp<UserGroupProps>[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'components[name]', width: '30%'}];
     gridProps = {

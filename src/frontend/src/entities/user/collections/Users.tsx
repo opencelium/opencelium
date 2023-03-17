@@ -27,6 +27,7 @@ import IAuthUser from "../interfaces/IAuthUser";
 import IUser, {UserProps} from "../interfaces/IUser";
 import { UserPermissions } from "../constants";
 import Gravatar from "react-gravatar";
+import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
 
 
 export default class Users extends ListCollection<UserProps>{
@@ -34,6 +35,8 @@ export default class Users extends ListCollection<UserProps>{
     entities: IUser[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Users'}];
     keyPropName: UserProps = 'id';
+    getListRawUrl = (entity: IUser) => `${entity.id}/update`;
+    ListRawComponent = DefaultListRaw;
     sortingProps: UserProps[] = ['email'];
     listProps: ListProp<UserProps>[] = [{propertyKey: 'email', width: '40%'}, {propertyKey: 'userGroup.name', width: '40%'}];
     gridProps = {
