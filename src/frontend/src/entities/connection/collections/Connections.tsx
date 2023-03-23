@@ -31,12 +31,15 @@ import {Connection} from "../classes/Connection";
 import {deleteConnectionsById, getAndUpdateConnection,} from "../redux_toolkit/action_creators/ConnectionCreators";
 import {ConnectionPermissions} from "../constants";
 import InlineEditInput from "@app_component/collection/collection_view/InlineEditInput";
+import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
 
 class Connections extends ListCollection<ConnectionProps>{
     name: string = 'connections';
     entities: IConnection[];
     title = 'Connections';
     keyPropName: ConnectionProps ='id';
+    getListRawUrl = (entity: IConnection) => `${entity.id}/update`;
+    ListRawComponent = DefaultListRaw;
     sortingProps: ConnectionProps[] = ['title'];
     listProps: ListProp<ConnectionProps>[] = [
         {propertyKey: 'title', width: '20%',
@@ -92,7 +95,7 @@ class Connections extends ListCollection<ConnectionProps>{
                 <DuplicateIcon listConnection={entity}/>
                 <PermissionTooltipButton target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} href={`${entity.id}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
                 <PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'top'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
-                {hasDeleteButton && <PermissionTooltipButton target={`delete_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
+                {hasDeleteButton && <PermissionTooltipButton target={`delete_entity_${entity.id.toString()}`} position={'top'} tooltip={'Delete'} hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
             </React.Fragment>
         );
     };

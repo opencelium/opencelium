@@ -23,6 +23,7 @@ import CXmlEditor from "@app_component/base/input/xml_view/xml_editor/classes/CX
 import {AceEditorProps} from "react-ace/types";
 
 interface DefaultProps{
+    index?: string,
     operationItem: Operation,
     updateOperation: (operation: Operation) => void,
 }

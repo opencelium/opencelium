@@ -46,10 +46,10 @@ import ScheduleNotificationsIcon
 import {ExecutionStatus} from "../components/execution_status/ExecutionStatus";
 import LastDurationExecution from "../components/last_duration_execution/LastDurationExecution";
 import LastFailExecution from "../components/last_fail_execution/LastFailExecution";
-import {updateConnector} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {InlineEditInput} from "@app_component/collection/collection_view/InlineEditInput";
 import SelectedNotificationButton
     from "@entity/schedule/components/selected_notification_button/SelectedNotificationButton";
+import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
 
 class Schedules extends ListCollection<ScheduleProps>{
     name: string = 'schedules';
@@ -57,6 +57,8 @@ class Schedules extends ListCollection<ScheduleProps>{
     entities: ISchedule[];
     title = 'Schedules';
     keyPropName: ScheduleProps ='id';
+    getListRawUrl = (entity: ISchedule) => `${entity.id}/update`;
+    ListRawComponent = DefaultListRaw;
     sortingProps: ScheduleProps[] = ['title'];
     listProps: ListProp<ScheduleProps>[] = [{
         propertyKey: 'title',

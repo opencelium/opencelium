@@ -78,6 +78,66 @@ const KeyframeSlideTop = keyframes`
     }
 `;
 
+const KeyframeCreatePanelRightContainerAppearance = keyframes`
+    0% {
+        x: -60;
+    }
+    
+    100% {
+        x: 0;
+    }
+`;
+
+const KeyframeCreatePanelRightProcessAppearance = keyframes`
+    0% {
+        transform: translate(-20px, 0px);
+    }
+    
+    100% {
+        transform: translate(9px, 0px);
+    }
+`;
+
+const KeyframeCreatePanelRightOperatorAppearance = keyframes`
+    0% {
+        transform: translate(-20px, 42.5px);
+    }
+    
+    100% {
+        transform: translate(14px, 42.5px);
+    }
+`;
+
+const KeyframeCreatePanelBottomContainerAppearance = keyframes`
+    0% {
+        y: -60;
+    }
+    
+    100% {
+        y: 0;
+    }
+`;
+
+const KeyframeCreatePanelBottomProcessAppearance = keyframes`
+    0% {
+        transform: translate(0px, -20px);
+    }
+    
+    100% {
+        transform: translate(0px, 5px);
+    }
+`;
+
+const KeyframeCreatePanelBottomOperatorAppearance = keyframes`
+    0% {
+        transform: translate(42.5px, -20px);
+    }
+    
+    100% {
+        transform: translate(42.5px, 30px);
+    }
+`;
+
 const KeyframeGridImageShow = keyframes`
     0% {
         opacity: 0;
@@ -98,6 +158,47 @@ export const SlideToTop = css`
     animation-fill-mode: forwards;
 `
 
+export const CreatePanelRightContainerAppearance = css`
+    animation-name: ${KeyframeCreatePanelRightContainerAppearance};
+    animation-duration: 0.3s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+`
+
+export const CreatePanelRightProcessAppearance = css`
+    animation-name: ${KeyframeCreatePanelRightProcessAppearance};
+    animation-duration: 0.3s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+`
+
+export const CreatePanelRightOperatorAppearance = css`
+    animation-name: ${KeyframeCreatePanelRightOperatorAppearance};
+    animation-duration: 0.3s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+`
+
+export const CreatePanelBottomContainerAppearance = css`
+    animation-name: ${KeyframeCreatePanelBottomContainerAppearance};
+    animation-duration: 0.3s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+`
+
+export const CreatePanelBottomProcessAppearance = css`
+    animation-name: ${KeyframeCreatePanelBottomProcessAppearance};
+    animation-duration: 0.3s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+`
+
+export const CreatePanelBottomOperatorAppearance = css`
+    animation-name: ${KeyframeCreatePanelBottomOperatorAppearance};
+    animation-duration: 0.3s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+`
 export const Appearance = css`
     animation: ${KeyframeAppearance} 0.5s linear;
     animation-fill-mode: forwards;

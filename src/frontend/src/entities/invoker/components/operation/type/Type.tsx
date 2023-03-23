@@ -31,7 +31,7 @@ const Type: FC<StatusProps> =
                 onChange={onChange}
                 label={'Type'}
                 icon={'title'}
-                options={[{label: 'Object', value: ResponseType.Object, key: ResponseType.Object}, {label: 'Array', value: ResponseType.Array, key: ResponseType.Array}]}
+                options={[{id: `operation_item_type_object_${props.index}`, label: 'Object', value: ResponseType.Object, key: ResponseType.Object}, {id: `operation_item_type_array_${props.index}`, label: 'Array', value: ResponseType.Array, key: ResponseType.Array}]}
                 readOnly={readOnly}
             />
 

@@ -84,8 +84,8 @@ class SystemOverview extends React.Component{
      */
     validateSystemRequirements(entity){
         const {t, checkResetFiles} = this.props;
-        const isNeo4jUp = entity.systemRequirements && entity.systemRequirements.hasOwnProperty('details') && entity.systemRequirements.details && entity.systemRequirements.details.hasOwnProperty('neo4j') && entity.systemRequirements.details.neo4j.status === APP_STATUS_UP;
-        const isOCVersionUnknown = !entity.systemRequirements.hasOwnProperty('details') || !entity.systemRequirements.details.hasOwnProperty(OC_NAME.toLowerCase()) || entity.systemRequirements.details[OC_NAME.toLowerCase()].details.version === '';
+        const isNeo4jUp = entity.systemRequirements && entity.systemRequirements.hasOwnProperty('components') && entity.systemRequirements.components && entity.systemRequirements.components.hasOwnProperty('neo4j') && entity.systemRequirements.components.neo4j.status === APP_STATUS_UP;
+        const isOCVersionUnknown = !entity.systemRequirements.hasOwnProperty('components') || !entity.systemRequirements.components.hasOwnProperty(OC_NAME.toLowerCase()) || entity.systemRequirements.components[OC_NAME.toLowerCase()].details.version === '';
         if(!isNeo4jUp) {
             this.setValidationMessage(t('FORM.VALIDATION_MESSAGES.NEO4j_DOWN'));
         }
@@ -105,10 +105,10 @@ class SystemOverview extends React.Component{
         return(
             <Container style={{position: 'unset'}}>
                 {
-                    systemRequirements &&
-                    <div style={{marginTop: '10px'}}>
+                    !!(systemRequirements && systemRequirements.components) &&
+                    <div style={{marginTop: '25px'}}>
                         {
-                            Object.entries(systemRequirements.details).map(line => {
+                            Object.entries(systemRequirements.components).map(line => {
                                 if (VISIBLE_SERVICES.indexOf(line[0]) !== -1) {
                                     let stringData = line[1].status === APP_STATUS_DOWN ? t('FORM.SERVICE_IS_DOWN') : line[1].details.name ? line[1].details.name : line[1].details.version;
                                     if (line[0] === OC_NAME.toLowerCase() && line[1].details.version === '') {

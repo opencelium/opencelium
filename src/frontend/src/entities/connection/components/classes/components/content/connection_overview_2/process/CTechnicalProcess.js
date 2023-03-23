@@ -60,7 +60,7 @@ export class CTechnicalProcess extends CProcess{
         return CTechnicalProcess.getCreateElementPanelStyles(...args);
     }
 
-    static getCreateElementPanelStyles(x, y, data = {isOnTheTopLayout: false, isTypeCreateOperator: false, noOperatorType: false, hasBeforeItem: false}){
+    static getCreateElementPanelStyles(x, y, data = {isOnTheTopLayout: false, isTypeCreateOperator: false, noOperatorType: false, hasBeforeItem: false, isOnlyOneCreateElement: false}){
         let result = {};
         let xIntend = data.hasBeforeItem ? 100 : 0;
         let panelItemYIntend = 0;
@@ -79,8 +79,16 @@ export class CTechnicalProcess extends CProcess{
         result.panelItemTypeStyles = {top: `${y + 2 + panelItemTypeYIntend}px`, left: `${x + 11}px`};
         result.beforeItemLineStyles = {top: `${y + 34}px`, left: `${x + 111}px`};
         result.panelItemStyles = {top: `${y - 24 + panelItemYIntend}px`, left: `${x + xIntend + 30}px`};
+        if(data.isOnlyOneCreateElement){
+            result.panelItemStyles = {top: `${y - 24 + panelItemYIntend}px`, left: `${x}px`};
+        }
         result.afterItemLineStyles = {top: `${y + 34}px`, left: `${x + xIntend + 230}px`};
         result.createIconStyles = {top: `${y + 23}px`, left: `${x + xIntend + 250}px`};
+        if(data.isOnlyOneCreateElement){
+            result.panelItemStyles = {top: `${y - 24 + panelItemYIntend}px`, left: `${x}px`};
+            result.afterItemLineStyles = {top: `${y + 34}px`, left: `${x + 200}px`};
+            result.createIconStyles = {top: `${y + 23}px`, left: `${x + 220}px`};
+        }
         if(data && data.noOperatorType){
             result.panelItemTypeStyles.top = `${y + 17}px`;
         }

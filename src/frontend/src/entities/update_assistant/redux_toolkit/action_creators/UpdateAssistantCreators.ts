@@ -61,7 +61,6 @@ export const getOnlineUpdates = createAsyncThunk(
     'application/get/online_updates',
     async(data: never, thunkAPI) => {
         try {
-            return [{name: 'v2.7', version: '2.7', status: 'old'}, {name: 'v3.0', version: '3.0', status: 'current'}, {name: 'v3.1', version: '3.1', status: 'available'}];
             const request = new UpdateAssistantRequest();
             const response = await request.getOnlineUpdates();
             return response.data;

@@ -29,6 +29,8 @@ import {CTechnicalOperator} from "@classes/content/connection_overview_2/operato
 import {OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
 import DashedElement from "./DashedElement";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
+import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
+import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
@@ -39,21 +41,54 @@ function mapStateToProps(state){
         logPanelHeight: connectionOverview.logPanelHeight,
         textSize: connectionOverview.processTextSize,
         currentLogs: connectionOverview.currentLogs,
+        justCreatedItem: connectionOverview.justCreatedItem,
+        justDeletedItem: connectionOverview.justDeletedItem,
         currentTechnicalItem,
     }
 }
 
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {setJustDeletedItem})
 class Process extends React.Component{
     constructor(props) {
         super(props)
 
         this.state = {
             technicalRectClassName: '',
-            isMouseOverSvg: false,
             isMouseOverPlaceholder: false,
             isAvailableForDragging: false,
+            isMouseOverSvg: false,
+            isMouseOver: false,
+            showCreatePanel: false,
         }
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const {process, justCreatedItem, currentTechnicalItem} = this.props;
+        if(process && justCreatedItem && currentTechnicalItem){
+            if(currentTechnicalItem.entity.index !== justCreatedItem.index){
+                if(this.isJustCreatedItem()){
+                    this.onClick();
+                }
+            }
+        }
+    }
+
+    isJustCreatedItem(){
+        const {process, justCreatedItem} = this.props;
+        if(process && justCreatedItem){
+            return process.entity.index === justCreatedItem.index
+                && process.connectorType === justCreatedItem.connectorType;
+        }
+        return false;
+    }
+
+    isJustDeletedItem(){
+        const {process, justDeletedItem} = this.props;
+        if(process && justDeletedItem){
+            return process.entity.index === justDeletedItem.index
+                && process.connectorType === justDeletedItem.connectorType;
+        }
+        return false;
     }
 
     onMouseOverPlaceholder(){
@@ -73,9 +108,23 @@ class Process extends React.Component{
     }
 
     onMouseOverSvg(){
-        const {currentTechnicalItem, connection, process, isItemDraggable} = this.props;
+        const {currentTechnicalItem, connection, process, isItemDraggable, isCreateElementPanelOpened} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
-        if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== process.entity.index){
+        const isItemOver = isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== process.entity.index;
+        if(!this.state.isMouseOver){
+            this.setState({
+                isMouseOver: true,
+            }, () => {
+                setTimeout(() => {
+                    if(this.state.isMouseOver && !this.state.showCreatePanel && !isCreateElementPanelOpened && !isItemOver && !(isCurrentItemDragged && currentTechnicalItem.entity.index === process.entity.index)){
+                        this.setState({
+                            showCreatePanel: true,
+                        })
+                    }
+                }, 100)
+            })
+        }
+        if(isItemOver){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
             let isAvailableForDragging = connector.areIndexesUnderScope(process.entity, currentTechnicalItem.entity, OUTSIDE_ITEM, currentTechnicalItem.isSelectedAll);
@@ -93,11 +142,19 @@ class Process extends React.Component{
         }
     }
 
-    onMouseLeaveSvg(){
+    onMouseLeaveSvg(e){
         if(this.state.isMouseOverSvg){
             this.setState({
                 isMouseOverSvg: false,
             })
+        }
+        if(this.state.isMouseOver){
+            if(!e || e.relatedTarget.id !== 'create_panel_right') {
+                this.setState({
+                    isMouseOver: false,
+                    showCreatePanel: false,
+                })
+            }
         }
     }
 
@@ -111,19 +168,17 @@ class Process extends React.Component{
                 if(isItemDraggable){
                     process.isDragged = true;
                     process.isDraggedForCopy = e.altKey;
+                    if(this.state.showCreatePanel){
+                        this.setState({
+                            showCreatePanel: false,
+                        })
+                    }
                 }
                 if(currentTechnicalItem && currentTechnicalItem.index === process.index){
                     process.isSelectedAll = currentTechnicalItem.isSelectedAll;
                 }
                 setCurrentItem(process);
             }
-        }
-    }
-
-    onDoubleClick(){
-        const {isDisabled, connection, isTestingConnection, readOnly} = this.props;
-        if(!isDisabled && connection && !isTestingConnection && !readOnly) {
-            this.props.setIsCreateElementPanelOpened(true);
         }
     }
 
@@ -136,9 +191,18 @@ class Process extends React.Component{
     }
 
     deleteProcess(e){
-        const {deleteProcess, process} = this.props;
-        deleteProcess(process);
-        e.stopPropagation();
+        const {deleteProcess, process, setJustDeletedItem} = this.props;
+        setJustDeletedItem({index: process.entity.index, connectorType: process.connectorType});
+        this.setState({
+            showCreatePanel: false,
+        })
+        setTimeout(() => {
+            setJustDeletedItem(null);
+            deleteProcess(process);
+        }, 450)
+        if(e){
+            e.stopPropagation();
+        }
     }
 
     shouldShowPlaceholder(){
@@ -152,12 +216,13 @@ class Process extends React.Component{
     render(){
         const {
             technicalRectClassName, isMouseOverSvg, isMouseOverPlaceholder,
-            isAvailableForDragging,
+            isAvailableForDragging, showCreatePanel,
         } = this.state;
         const {
             process, isNotDraggable, isCurrent, isHighlighted, currentLogs,logPanelHeight,
             isDisabled, colorMode, readOnly, connection, currentTechnicalItem, textSize,
-            isTestingConnection,
+            isTestingConnection, setIsCreateElementPanelOpened, setCoordinatesForCreateElementPanel,
+            setCurrentItem, justDeletedItem,
         } = this.props;
         const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
         const method = process.entity;
@@ -204,6 +269,8 @@ class Process extends React.Component{
             && ((currentLog.message !== ConnectionLogs.BreakMessage && currentLog.message !== ConnectionLogs.EndOfExecutionMessage) || (currentLog.message === ConnectionLogs.BreakMessage && prevLog && !prevLog.hasNextItem))
             && currentLog.index === process.entity.index && currentLog.message !== '';
         const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === process.entity.index) !== -1 ? '#58854d' : '';
+        const isJustCreatedItem = this.isJustCreatedItem();
+        const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;
         return(
             <React.Fragment>
                 <svg id={process.getHtmlIdName()} data-movable={isAvailableForDragging} onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={svgSize.width} height={svgSize.height}>
@@ -213,27 +280,27 @@ class Process extends React.Component{
                             return (
                                 <rect
                                     {...props}
+                                    id={`${process.getHtmlIdName()}_rect`}
                                     fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color}
-                                    onDoubleClick={(a) => {this.onDoubleClick(a)}}
                                     onClick={(a) => {this.onClick(a)}}
                                     onMouseDown={(a) => {this.onMouseDown(a)}}
                                     x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
-                                    className={`${technicalRectClassName} ${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+                                    className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${technicalRectClassName} ${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
                                 />);
                         }}
                         hasDashAnimation={hasDashAnimation}
                         stroke={logStroke}
                     />
                     <svg x={0} y={0} width={process.width} height={process.height}>
-                        <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY} fontSize={textSize}>
+                        <text dominantBaseline={"middle"} textAnchor={"middle"} className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.process_label}`} x={labelX} y={labelY} fontSize={textSize}>
                             {shortLabel}
                         </text>
                     </svg>
                     <title>{label}</title>
-                    {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && <rect className={styles.process_color_rect} fill={color} x={10} y={5} width={isSelected && !isTestingConnection ? 95 : 110} height={15} rx={5} ry={5}/>}
-                    {hasColor && colorMode === COLOR_MODE.CIRCLE_LEFT_TOP && <circle className={styles.process_color_circle} cx={15} cy={15} r="10" fill={color}/>}
+                    {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && <rect className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.process_color_rect}`} fill={color} x={10} y={5} width={isSelected && !isTestingConnection ? 95 : 110} height={15} rx={5} ry={5}/>}
+                    {hasColor && colorMode === COLOR_MODE.CIRCLE_LEFT_TOP && <circle className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.process_color_circle}`} cx={15} cy={15} r="10" fill={color}/>}
                     {hasDeleteIcon &&
-                        <DeleteIcon svgX={105} svgY={2} x={closeX} y={closeY} onClick={(a) => this.deleteProcess(a)}/>
+                        <DeleteIcon isJustDeletedItem={isJustDeletedItem} isJustCreatedItem={isJustCreatedItem} svgX={105} svgY={2} x={closeX} y={closeY} onClick={(a) => this.deleteProcess(a)}/>
                     }
                     {
                         showPlaceholder
@@ -290,6 +357,16 @@ class Process extends React.Component{
                         document.getElementById('technical_layout_svg')
                     )
                 }
+                {showCreatePanel &&
+                    <CreatePanel
+                        element={process}
+                        onMouseLeave={(a) => this.onMouseLeaveSvg(a)}
+                        setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
+                        sourceId={`${process.getHtmlIdName()}`}
+                        setCoordinatesForCreateElementPanel={setCoordinatesForCreateElementPanel}
+                        setCurrentItem={setCurrentItem}
+                    />
+                }
             </React.Fragment>
         );
     }
@@ -302,6 +379,7 @@ Process.propTypes = {
     isCurrent: PropTypes.bool,
     isHighlighted: PropTypes.bool,
     isDisabled: PropTypes.bool,
+    isCreateElementPanelOpened: PropTypes.bool,
 };
 
 Process.defaultProps = {

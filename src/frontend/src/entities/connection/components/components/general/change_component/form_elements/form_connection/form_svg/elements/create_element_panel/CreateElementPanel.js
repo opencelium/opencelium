@@ -50,22 +50,30 @@ function mapStateToProps(state){
 class CreateElementPanel extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {
-            type: CREATE_PROCESS,
-            itemPosition: OUTSIDE_ITEM,
-        }
         this.createElementPanel = document.createElement('div');
+        this.state = {
+            localType: props.type,
+            localItemPosition: props.itemPosition,
+        }
         document.body.appendChild(this.createElementPanel);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if((this.props.x === 0 && this.props.y === 0 && this.props.createElementPanelConnectorType === '')
-        || prevProps.x !== this.props.x || prevProps.y !== this.props.y){
-            if(this.state.type !== CREATE_PROCESS || this.state.itemPosition !== OUTSIDE_ITEM) {
+        if(prevProps.type !== this.props.type) {
+            if (this.props.type !== this.state.localType) {
                 this.setState({
-                    type: CREATE_PROCESS,
-                    itemPosition: OUTSIDE_ITEM,
-                });
+                    localType: this.props.type,
+                    localItemPosition: this.props.itemPosition,
+                })
+            }
+        }
+        if((this.props.x === 0 && this.props.y === 0 && this.props.createElementPanelConnectorType === '')
+        /*|| prevProps.x !== this.props.x || prevProps.y !== this.props.y*/){
+            if(this.state.localType !== CREATE_PROCESS || this.state.localItemPosition !== OUTSIDE_ITEM) {
+                this.setState({
+                    localItemPosition: OUTSIDE_ITEM,
+                    localType: CREATE_PROCESS,
+                })
             }
         }
     }
@@ -76,31 +84,29 @@ class CreateElementPanel extends React.Component{
         }
     }
 
-    changeType(type){
-        if(type === CREATE_PROCESS){
+    changeType(localType){
+        if(localType === CREATE_PROCESS){
             setFocusById('new_request_name');
         }
-        if(type === CREATE_OPERATOR){
+        if(localType === CREATE_OPERATOR){
             setFocusById('new_operator_type');
         }
-        this.setState({
-            type,
-        });
+        this.setState({localType})
     }
 
-    onChangeItemPosition(itemPosition){
+    onChangeItemPosition(localItemPosition){
         this.setState({
-            itemPosition,
+            localItemPosition,
         })
     }
 
     render(){
-        const {isCreateElementPanelOpened, createElementPanelConnectorType} = this.props;
+        const {localType, localItemPosition} = this.state
+        const {isCreateElementPanelOpened, createElementPanelConnectorType, type, itemPosition} = this.props;
         let {x, y} = this.props;
         if(!isCreateElementPanelOpened || (x === 0 && y === 0 && createElementPanelConnectorType === '')){
             return null;
         }
-        const {type, itemPosition} = this.state;
         let {currentTechnicalItem, connection} = this.props;
         const {hasLocation, isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
         let selectedItem = null;
@@ -110,15 +116,15 @@ class CreateElementPanel extends React.Component{
         let noOperatorType = isInTechnicalFromConnectorLayout;
         const isSelectedItemTechnicalOperator = selectedItem !== null && selectedItem instanceof CTechnicalOperator;
         const isSelectedItemTechnicalProcess = selectedItem !== null && selectedItem instanceof CTechnicalProcess;
-        const isTypeCreateOperator = type === CREATE_OPERATOR;
-        const isTypeCreateProcess = type === CREATE_PROCESS;
+        const isTypeCreateOperator = localType === CREATE_OPERATOR;
+        const isTypeCreateProcess = !isTypeCreateOperator ? localType === CREATE_PROCESS || !type : false;
 
         const isSelectedItemOperator = isSelectedItemTechnicalOperator;
         const isSelectedItemTechnical = isSelectedItemTechnicalOperator || isSelectedItemTechnicalProcess;
         const isForCreateTechnicalItem = isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout || isSelectedItemTechnical;
 
-        const hasItemPositionPanel = isForCreateTechnicalItem && isSelectedItemOperator;
-        let hasItemTypePanel = isForCreateTechnicalItem;
+        const hasItemPositionPanel = isForCreateTechnicalItem && isSelectedItemOperator && !itemPosition;
+        let hasItemTypePanel = isForCreateTechnicalItem && !type;
         let isFromConnectorEmpty = connection.fromConnector.svgItems.length === 0;
         if(isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout && isFromConnectorEmpty){
             hasItemTypePanel = false;
@@ -133,14 +139,14 @@ class CreateElementPanel extends React.Component{
                     {hasItemPositionPanel &&
                         <ItemPositionPanel
                             {...this.props}
-                            itemPosition={itemPosition}
+                            itemPosition={localItemPosition}
                             onChangeItemPosition={(a) => this.onChangeItemPosition(a)}
                         />
                     }
                     {hasItemTypePanel &&
                         <ItemTypePanel
                             {...this.props}
-                            type={type}
+                            type={localType}
                             changeType={(a) => this.changeType(a)}
                             selectedItem={selectedItem}
                             noOperatorType={noOperatorType}
@@ -152,6 +158,7 @@ class CreateElementPanel extends React.Component{
                             {...this.props}
                             hasBeforeLine={hasLineBeforeCreateProcess}
                             itemPosition={itemPosition}
+                            itemType={type}
                             selectedItem={selectedItem}
                             isTypeCreateOperator={isTypeCreateOperator}
                         />
@@ -159,6 +166,7 @@ class CreateElementPanel extends React.Component{
                     {hasCreateOperator &&
                         <CreateOperator
                             {...this.props}
+                            itemType={type}
                             itemPosition={itemPosition}
                             selectedItem={selectedItem}
                             isTypeCreateOperator={isTypeCreateOperator}

@@ -92,7 +92,7 @@ const OperationItems: FC<OperationItemsProps> =
                 </CardHeader>
                 <Collapse isOpen={collapseKey === 'operation_add'}>
                     <CardBody>
-                        <OperationItem methodValidationMessage={newMethodValidation} nameValidationMessage={newNameValidation} hasTestConnectionSwitch={hasTestConnectionSwitch} isReadonly={isReadonly} operationItem={newOperation} updateOperation={updateNewOperation}/>
+                        <OperationItem index={'operation_add'} methodValidationMessage={newMethodValidation} nameValidationMessage={newNameValidation} hasTestConnectionSwitch={hasTestConnectionSwitch} isReadonly={isReadonly} operationItem={newOperation} updateOperation={updateNewOperation}/>
                         <div style={{textAlign: 'right'}}><Button icon={'add'} handleClick={addOperation} label={'Add Operation'}/></div>
                     </CardBody>
                 </Collapse>
@@ -114,7 +114,7 @@ const OperationItems: FC<OperationItemsProps> =
                         </CardHeader>
                         <Collapse isOpen={collapseKey === operation.uniqueIndex}>
                             <CardBody>
-                                <OperationItem hasTestConnectionSwitch={hasTestConnectionSwitch} isReadonly={isReadonly} operationItem={operation} updateOperation={(operation: Operation) => updateExistOperation(operation, index)}/>
+                                <OperationItem index={`${index}`} hasTestConnectionSwitch={hasTestConnectionSwitch} isReadonly={isReadonly} operationItem={operation} updateOperation={(operation: Operation) => updateExistOperation(operation, index)}/>
                             </CardBody>
                         </Collapse>
                     </Card>

@@ -27,6 +27,8 @@ import {setCurrentTechnicalItem, setConnectionData} from "@entity/connection/red
 import {LocalStorage} from "@application/classes/LocalStorage";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import LogPanel from "@change_component/form_elements/form_connection/form_svg/layouts/logs/LogPanel";
+import {OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
+import {CREATE_PROCESS} from "@classes/content/connection_overview_2/CCreateElementPanel";
 
 
 export const HAS_LAYOUTS_SCALING = true;
@@ -132,6 +134,8 @@ class FormConnectionSvg extends Component{
                         createElementPanelConnectorType={createElementPanelConnectorType}
                         x={createElementPanelPosition.x}
                         y={createElementPanelPosition.y}
+                        type={createElementPanelPosition.type}
+                        itemPosition={createElementPanelPosition.itemPosition}
                         connectorType={currentTechnicalItem ? currentTechnicalItem.connectorType : ''}
                         connection={connection}
                         isCreateElementPanelOpened={isCreateElementPanelOpened}

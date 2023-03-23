@@ -55,6 +55,7 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
                 readOnly={isReadonly}
             />
             <InputTextarea
+                id={'invoker_description'}
                 icon={'notes'}
                 label={'Description'}
                 value={description}
@@ -67,6 +68,7 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
                 readOnly={isReadonly}
             />
             <InputText
+                id={'invoker_hint'}
                 icon={'label'}
                 label={'Hint'}
                 value={hint}
