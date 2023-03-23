@@ -16,6 +16,8 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
+import com.becon.opencelium.backend.constant.Constant;
+import com.becon.opencelium.backend.exception.WrongSchedulerStatus;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.mysql.repository.SchedulerRepository;
@@ -69,7 +71,10 @@ public class SchedulerServiceImp implements SchedulerService {
         boolean update = scheduler.getId() != 0;
         if(scheduler.getCronExp() == null || scheduler.getCronExp().isEmpty()) {
             // TODO: should be refactored
-            scheduler.setCronExp("59 59 23 31 12 ? 2123"); // never triggered job
+            if (scheduler.getStatus()) {
+                throw new WrongSchedulerStatus(scheduler.getId());
+            }
+            scheduler.setCronExp(Constant.NEVER_TRIGGERED_CRON); // never triggered job
         }
         if (quartzUtility.validateCronExpression(scheduler.getCronExp())) {
             schedulerRepository.save(scheduler);

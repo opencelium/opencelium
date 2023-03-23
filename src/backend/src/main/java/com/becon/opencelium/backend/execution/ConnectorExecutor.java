@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.execution.socket.msg.SocketLogMessage;
 import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorAbstractFactory;
+import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
@@ -249,7 +250,8 @@ public class ConnectorExecutor {
 //        f (invoker.getName().equalsIgnoreCase("igel")){
 //            restTemplate = getRestTemplate();
 //        }i
-        ResponseEntity responseEntity = restTemplate.exchange(uri, method ,httpEntity, String.class);
+        ResponseEntity responseEntity = InvokerRequestBuilder
+                .convertToStringResponse(restTemplate.exchange(uri, method ,httpEntity, Object.class));
         if (debugMode) {
             loggAndSend("Response : " + responseEntity.getBody());
         }
@@ -291,7 +293,6 @@ public class ConnectorExecutor {
         if(matcher.find()) {
             endpoint = replaceRefValue(endpoint, format);
         }
-
         endpoint = endpoint.replace(" ", "+");
         URI uri = new URI(endpoint);
         String strictlyEscapedQuery = StringUtils.replace(uri.getRawQuery(), "+", "%2B");
@@ -769,4 +770,4 @@ public class ConnectorExecutor {
             simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, socketLogMessage);
         }
     }
-}
+ }

@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
@@ -112,7 +113,8 @@ public class InvokerRequestBuilder {
                     new HttpComponentsClientHttpRequestFactory(getHttpClient());
             restTemplate.setRequestFactory(requestFactory);
         }
-        return restTemplate.exchange(url, method ,httpEntity, String.class);
+        ResponseEntity<Object> response = restTemplate.exchange(url, method ,httpEntity, Object.class);
+        return convertToStringResponse(response);
     }
 
     private CloseableHttpClient getHttpClient() {
@@ -241,5 +243,16 @@ public class InvokerRequestBuilder {
             parserException.printStackTrace();
             throw new RuntimeException(parserException);
         }
+    }
+
+    public static ResponseEntity<String> convertToStringResponse(ResponseEntity response) {
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = "";
+        try {
+            json = ow.writeValueAsString(response.getBody());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new ResponseEntity<>(json, response.getStatusCode());
     }
 }

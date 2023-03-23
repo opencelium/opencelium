@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.resource.schedule;
 
+import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.execution.LastExecutionResource;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
@@ -81,7 +82,10 @@ public class SchedulerResource {
     }
 
     public void setCronExp(String cronExp) {
-        this.cronExp = cronExp;
+        this.cronExp = "";
+        if (!cronExp.equals(Constant.NEVER_TRIGGERED_CRON)) {
+            this.cronExp = cronExp;
+        }
     }
 
     public LastExecutionResource getLastExecution() {
