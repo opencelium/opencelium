@@ -131,7 +131,6 @@ export class Schedule extends HookStateClass implements ISchedule{
         return <InputCronExp
             icon={'schedule'}
             label={'Cron Expression'}
-            required={true}
             id={`input_${propertyName.toString()}`}
             key={propertyName.toString()}
             readOnly={this._readOnly}
@@ -221,6 +220,9 @@ export class Schedule extends HookStateClass implements ISchedule{
         };
         if(this.id !== 0){
             mappedSchedule.schedulerId = this.id;
+        }
+        if(!this.cronExp){
+            mappedSchedule.status = 0;
         }
         if(!isForApiRequest){
             mappedSchedule.connection = this.connection;

@@ -24,6 +24,7 @@ const ExecutionStatus: FC<ExecutionStatusProps> =
         schedule,
         hasActions,
         onClick,
+        readOnly,
     }) => {
         const [lastStatusColor, setLastStatusColor] = useState('');
         useEffect(() => {
@@ -44,13 +45,14 @@ const ExecutionStatus: FC<ExecutionStatusProps> =
         }
         return (
             <td key={'status'} style={{background: lastStatusColor}}>
-                <InputSwitch color={ColorTheme.Turquoise} isChecked={!!schedule.status} position={'middle'} onClick={onClick}/>
+                <InputSwitch readOnly={readOnly} color={ColorTheme.Turquoise} isChecked={!!schedule.status} position={'middle'} onClick={onClick}/>
             </td>
         );
 }
 
 ExecutionStatus.defaultProps = {
     hasActions: true,
+    readOnly: false,
 }
 
 
