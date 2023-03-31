@@ -16,7 +16,10 @@
 import React from 'react';
 import styles from "@entity/connection/components/themes/default/general/form_methods";
 import Select from "@entity/connection/components/components/general/basic_components/inputs/Select";
-import {FUNCTIONAL_OPERATORS} from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
+import {
+    FUNCTIONAL_OPERATORS_FOR_IF,
+    FUNCTIONAL_OPERATORS_FOR_LOOP
+} from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
 
 
 class RelationalOperator extends React.Component{
@@ -31,13 +34,16 @@ class RelationalOperator extends React.Component{
     }
 
     getOptions(){
-        return FUNCTIONAL_OPERATORS.map(operator => {return {value: operator.value, label: operator.hasOwnProperty('label') ? operator.label : operator.value};});
+        const {isLoopOperator} = this.props;
+        const options = isLoopOperator ? FUNCTIONAL_OPERATORS_FOR_LOOP : FUNCTIONAL_OPERATORS_FOR_IF;
+        return options.map(operator => {return {value: operator.value, label: operator.hasOwnProperty('label') ? operator.label : operator.value};});
     }
 
     getLabel(){
-        const {relationalOperator} = this.props;
+        const {relationalOperator, isLoopOperator} = this.props;
         if(relationalOperator) {
-            let functionalOperator = FUNCTIONAL_OPERATORS.find(o => o.value === relationalOperator.value);
+            const options = isLoopOperator ? FUNCTIONAL_OPERATORS_FOR_LOOP : FUNCTIONAL_OPERATORS_FOR_IF;
+            let functionalOperator = options.find(o => o.value === relationalOperator.value);
             if (functionalOperator && functionalOperator.hasOwnProperty('placeholderValue')) {
                 return functionalOperator.placeholderValue;
             }

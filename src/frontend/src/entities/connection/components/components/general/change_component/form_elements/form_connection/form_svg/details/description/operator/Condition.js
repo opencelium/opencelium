@@ -24,7 +24,7 @@ import Dialog from "@entity/connection/components/components/general/basic_compo
 import {EditIcon, ViewIcon} from "../Icons";
 import LeftStatement
     from "./condition/LeftStatement";
-import CCondition, {FUNCTIONAL_OPERATORS} from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
+import CCondition, {FUNCTIONAL_OPERATORS_FOR_IF, FUNCTIONAL_OPERATORS_FOR_LOOP} from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import COperatorItem, {IF_OPERATOR, LOOP_OPERATOR} from "@entity/connection/components/classes/components/content/connection/operator/COperatorItem";
 import RelationalOperator
@@ -194,11 +194,12 @@ class Condition extends React.Component{
         })
     }
 
-    checkIfOperatorHasThreeParams(){
+    checkIfOperatorHasThreeParams(isForLoop = false){
         const {condition} = this.state;
         let relationalOperatorValue = condition.relationalOperator ? condition.relationalOperator.value : null;
         if(relationalOperatorValue) {
-            let functionalOperator = FUNCTIONAL_OPERATORS.find(o => o.value === relationalOperatorValue);
+            const operatorOptions = isForLoop ? FUNCTIONAL_OPERATORS_FOR_LOOP : FUNCTIONAL_OPERATORS_FOR_IF;
+            let functionalOperator = operatorOptions.find(o => o.value === relationalOperatorValue);
             if (functionalOperator && functionalOperator.hasOwnProperty('hasThreeValues')) {
                 return functionalOperator.hasThreeValues;
             }
@@ -206,7 +207,7 @@ class Condition extends React.Component{
         return false;
     }
 
-    isOperatorHasValue(){
+    isOperatorHasValue(isForLoop = false){
         let hasValue = false;
         let isRightStatementText = false;
         let isRightStatementOption = false;
@@ -216,7 +217,8 @@ class Condition extends React.Component{
         const {condition} = this.state;
         let value = condition.relationalOperator ? condition.relationalOperator.value : null;
         if(value) {
-            let hasValueItem = FUNCTIONAL_OPERATORS.find(fo => fo.value === value);
+            const operatorOptions = isForLoop ? FUNCTIONAL_OPERATORS_FOR_LOOP : FUNCTIONAL_OPERATORS_FOR_IF;
+            let hasValueItem = operatorOptions.find(fo => fo.value === value);
             if (hasValueItem) {
                 hasValue = hasValueItem.hasValue;
                 isRightStatementText = hasValueItem.isRightStatementText;
@@ -245,6 +247,7 @@ class Condition extends React.Component{
         const operator = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
         const isLoopOperator = operator.type === LOOP_OPERATOR;
+        const isLeftInputStringForLoopOperator = true;
         const isIfOperator = operator.type === IF_OPERATOR;
         return(
             <React.Fragment>
@@ -253,22 +256,24 @@ class Condition extends React.Component{
                     operator={operator}
                     condition={condition}
                     connector={connector}
-                    isLoopOperator={isLoopOperator}
+                    isLoopOperator={false}
                     hasLeftMethod={this.hasLeftMethod()}
-                    isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams()}
+                    isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams(isLoopOperator)}
                     updateCondition={(a) => this.updateCondition(a)}
                     getConditionFromProps={(a) => this.getConditionFromProps(a)}
-                    isOperatorHasValue={(a) => this.isOperatorHasValue(a)}
+                    isOperatorHasValue={() => this.isOperatorHasValue(isLoopOperator)}
                 />
-                {isIfOperator &&
+                {(isIfOperator || isLeftInputStringForLoopOperator) &&
                 <React.Fragment>
                     <RelationalOperator
+                        isLoopOperator={isLoopOperator}
+                        isIfOperator={isIfOperator}
                         relationalOperator={condition.relationalOperator}
                         readOnly={readOnly}
                         hasMethod={this.hasLeftMethod()}
-                        isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams()}
+                        isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams(isLoopOperator)}
                         updateRelationalOperator={(a) => this.updateRelationalOperator(a)}
-                        isOperatorHasValue={(a) => this.isOperatorHasValue(a)}
+                        isOperatorHasValue={() => this.isOperatorHasValue(isLoopOperator)}
                     />
                     <RightStatement
                         {...this.props}
@@ -278,10 +283,10 @@ class Condition extends React.Component{
                         hasLeftMethod={this.hasLeftMethod()}
                         hasRightMethod={this.hasRightMethod()}
                         hasRightParam={this.hasRightParam()}
-                        isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams()}
+                        isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams(isLoopOperator)}
                         updateCondition={(a) => this.updateCondition(a)}
                         getConditionFromProps={(a) => this.getConditionFromProps(a)}
-                        isOperatorHasValue={(a) => this.isOperatorHasValue(a)}
+                        isOperatorHasValue={() => this.isOperatorHasValue(isLoopOperator)}
                     />
                 </React.Fragment>
                 }
@@ -295,7 +300,6 @@ class Condition extends React.Component{
             </React.Fragment>
         );
     }
-
 
     render(){
         const {isMouseOver, isOpenEditDialog} = this.state;

@@ -161,7 +161,7 @@ export default class CStatement{
                 field = newField;
             }
             if(this._color === DEFAULT_COLOR){         //for static values
-                if(isNumber(field)){
+                if(field !== ' ' && isNumber(field)){
                     field = parseInt(field);
                 }
                 return {
