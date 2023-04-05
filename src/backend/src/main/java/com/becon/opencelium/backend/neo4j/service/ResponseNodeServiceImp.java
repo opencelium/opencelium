@@ -28,7 +28,7 @@ public class ResponseNodeServiceImp implements ResponseNodeService{
 
     public static ResponseResource toResource(ResponseNode entity){
         ResponseResource responseResource = new ResponseResource();
-        responseResource.setNodeId(entity.getId());
+//        responseResource.setNodeId(entity.getId());
         responseResource.setFail(ResultNodeServiceImp.toResource(entity.getFail()));
         responseResource.setSuccess(ResultNodeServiceImp.toResource(entity.getSuccess()));
         return responseResource;

@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.test;
 
-import com.becon.opencelium.backend.execution.MessageContainer;
+import com.becon.opencelium.backend.execution.MethodResponse;
 import com.becon.opencelium.backend.execution.statement.operator.Operator;
 import com.becon.opencelium.backend.execution.statement.operator.factory.ComparisonOperatorFactory;
 import com.becon.opencelium.backend.neo4j.entity.StatementNode;
@@ -70,7 +70,7 @@ public class TOperatorExecutor {
 //        String exchangeType = ConditionUtility.getExchangeType(condition);
 
         Map<String, Integer> loopStack = executionMediator.getLoopIndex();
-        MessageContainer message = executionMediator.getResponseData().stream()
+        MethodResponse message = executionMediator.getResponseData().stream()
                 .filter(m -> m.getMethodKey().equals(methodKey))
                 .findFirst()
                 .orElse(null);

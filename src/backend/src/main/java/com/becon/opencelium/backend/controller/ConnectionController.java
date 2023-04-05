@@ -95,8 +95,6 @@ public class ConnectionController {
     @GetMapping("/all")
     public ResponseEntity<?> getAll(){
         List<Connection> connections = connectionService.findAll();
-//        List<ConnectionResource> connectionResources = connections.stream()
-//                .map(c -> connectionService.toResource(c)).collect(Collectors.toList());
         List<ConnectionResource> connectionResources = connections.stream()
                 .map(c -> connectionService.toNodeResource(c)).collect(Collectors.toList());
         return ResponseEntity.ok().body(connectionResources);
@@ -107,8 +105,6 @@ public class ConnectionController {
     @GetMapping("/all/meta")
     public ResponseEntity<?> getAllMeta(){
         List<Connection> connections = connectionService.findAll();
-//        List<ConnectionResource> connectionResources = connections.stream()
-//                .map(c -> connectionService.toResource(c)).collect(Collectors.toList());
         List<ConnectionResource> connectionResources = connections.stream()
                 .map(c -> connectionService.toResource(c)).collect(Collectors.toList());
         return ResponseEntity.ok().body(connectionResources);
@@ -124,6 +120,12 @@ public class ConnectionController {
 
     @PostMapping
     public ResponseEntity<?> add(@RequestBody ConnectionResource connectionResource) throws Exception{
+//        throw new RuntimeException("Test exceptinog and migration");
+//        if (connectionResource.getConnectionId() == 45) {
+//            throw new RuntimeException("Test exception and migration");
+//        }
+//        System.out.println(connectionResource.getConnectionId());
+//        return ResponseEntity.ok().build();
         Connection connection = connectionService.toEntity(connectionResource);
         if (connectionService.existsByName(connection.getName())){
             throw new RuntimeException("CONNECTION_NAME_ALREADY_EXISTS");

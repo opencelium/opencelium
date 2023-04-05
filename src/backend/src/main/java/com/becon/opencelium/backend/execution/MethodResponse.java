@@ -35,17 +35,19 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MessageContainer {
+import static com.becon.opencelium.backend.execution.ExecutionContainer.buildSeqIndexes;
+
+public class MethodResponse {
 
     private String methodKey;
     private String exchangeType;
     private String result;
     private String responseFormat;
-    private List<String> loopingArrays; // level of loops
-    private HashMap<Integer, String> data; // data from last loop if loop is nested
-    private String currentLoopArr;
+    // contains all responses <indexes, response>
+    // where indexes are from loop statement represented as i, j, k -> 0, 3, 1
+    private HashMap<String, String> data;
 
-    public MessageContainer() {
+    public MethodResponse() {
     }
 
     public String getMethodKey() {
@@ -64,20 +66,12 @@ public class MessageContainer {
         this.exchangeType = exchangeType;
     }
 
-    public HashMap<Integer, String> getData() {
+    public HashMap<String, String> getData() {
         return data;
     }
 
-    public void setData(HashMap<Integer, String> data) {
+    public void setData(HashMap<String, String> data) {
         this.data = data;
-    }
-
-    public List<String> getLoopingArrays() {
-        return loopingArrays;
-    }
-
-    public void setLoopingArrays(List<String> loopingArrays) {
-        this.loopingArrays = loopingArrays;
     }
 
     public String getResult() {
@@ -86,14 +80,6 @@ public class MessageContainer {
 
     public void setResult(String result) {
         this.result = result;
-    }
-
-    public String getCurrentLoopArr() {
-        return currentLoopArr;
-    }
-
-    public void setCurrentLoopArr(String currentLoopArr) {
-        this.currentLoopArr = currentLoopArr;
     }
 
     public String getResponseFormat() {
@@ -109,67 +95,50 @@ public class MessageContainer {
     //#ffffff.(response).result[index].id
     //#ffffff.(response).result[index] - get data from result where index = to current arr.index
     //#ffffff.(response).arr0[index].arr1[]
-    public Object getValue(String value, Map<String, Integer> loopStack){
+    public Object getValue(String ref, Map<String, Integer> loopStack){
 
         if (responseFormat.equals("xml")) {
-            return xmlPathFinder(value, loopStack);
+            return xmlPathFinder(ref, loopStack);
         } else if (responseFormat.equals("text")) {
-            return textPathFinder(value, loopStack);
+            return textPathFinder(ref, loopStack);
         } else {
-            return jsonPathFinder(value, loopStack);
+            return jsonPathFinder(ref, loopStack);
         }
     }
 
     private Object textPathFinder(String value, Map<String, Integer> loopStack) {
-        String ref = value.replaceFirst("\\$", "");
-
-
         String message = "";
-        if (loopingArrays == null || loopingArrays.isEmpty()){
-            message = data.get(0);
+        if (loopStack == null || loopStack.isEmpty()){
+            message = data.get("0");
         } else {
-
-            String arr = loopingArrays.stream().reduce((f,s)->s).get();
-            int responseIndex = loopStack.get(arr); // determining index of response data
-            message = data.get(responseIndex);
+            String indexes = buildSeqIndexes(loopStack);
+            message = data.get(indexes);
         }
-
         return message;
     }
 
-    private Object xmlPathFinder(String value, Map<String, Integer> loopStack){
+    private Object xmlPathFinder(String value, Map<String, Integer> loopIterator){
         String ref = value.replaceFirst("\\$", "");
         String xpathQuery = "//";
         String condition = ConditionUtility.getPathToValue(ref);
         String refValue = ConditionUtility.getRefValue(ref);
-
-        List<String> conditionParts =  Arrays.asList(refValue.split("\\."));
-        int loopIndex = 0;
+        String[] conditionParts = refValue.split("\\.");
 
         String message = "";
-        if (loopingArrays == null || loopingArrays.isEmpty()){
-            message = data.get(loopIndex);
-        } else {
-            String arr = loopingArrays.stream().reduce((f,s)->s).get();
-            loopIndex = loopStack.get(arr);
-            message = data.get(loopIndex);
+        String indexes = "null";
+        if (loopIterator != null && !loopIterator.isEmpty()){
+            indexes = buildSeqIndexes(loopIterator);
         }
-
-        int size = conditionParts.size() - 1;
-        int i = 0;
+        message = data.get(indexes);
         for (String part : conditionParts){
             if(part.isEmpty()){
                 continue;
             }
             condition = condition + "." + part;
             part = part.contains(":") ? part.split(":")[1] : part;
-            String array = ConditionUtility.getLastArray(condition);// need to find index
-            int index = 0;
             boolean hasLoop = false;
-
-            if (loopStack.containsKey(array)){
+            if (!loopIterator.isEmpty()){
                 hasLoop = true;
-                index = loopStack.get(array);
             }
 
             Pattern pattern = Pattern.compile(RegExpression.arrayWithLetterIndex);
@@ -180,7 +149,7 @@ public class MessageContainer {
                 hasIndex = true;
                 condIndexArr = m.group(1);
             }
-            int xmlIndex = index + 1;
+            int xmlIndex = loopIterator.get(condIndexArr) + 1;
             if ((part.contains("[]") || hasIndex) && hasLoop){
                 part = part.replace("[]", ""); // removed [index] and put []
                 if (hasIndex) {
@@ -190,9 +159,7 @@ public class MessageContainer {
             } else if((part.contains("[]") || part.contains("[*]")) && !hasLoop){
                 part = part.contains("[*]") ? part : part.replace("[]", "") + "[*]";
             }
-
             xpathQuery = xpathQuery + part + "/";
-            i++;
         }
 
         xpathQuery = removeLastCharOptional(xpathQuery);
@@ -251,41 +218,29 @@ public class MessageContainer {
         return null;
     }
 
-    private Object jsonPathFinder( String value, Map<String, Integer> loopStack) {
-//        String ref = value.("\\$", "");
+    private Object jsonPathFinder( String ref, Map<String, Integer> loopIterator) {
         String jsonPath = "$";
-        String condition = ConditionUtility.getPathToValue(value);
-        String refValue = ConditionUtility.getRefValue(value);
+        String condition = ConditionUtility.getPathToValue(ref);
+        String refValue = ConditionUtility.getRefValue(ref);
+        String[] conditionParts = refValue.split("\\.");
 
-        List<String> conditionParts =  Arrays.asList(refValue.split("\\."));
-        int responseIndex = 0;
-
+        String indexes = "null";
         String message = "";
-        if (loopingArrays == null || loopingArrays.isEmpty()){
-            message = data.get(responseIndex);
-        } else {
-
-            String arr = loopingArrays.stream().reduce((f,s)->s).get();
-            responseIndex = loopStack.get(arr); // determining index of response data
-            message = data.get(responseIndex);
+        if (loopIterator != null && !loopIterator.isEmpty() && !data.containsKey("null")){
+            indexes = buildSeqIndexes(loopIterator);
         }
 
-        int size = conditionParts.size() - 1;
-        int i = 0;
+        message = data.get(indexes);
+        // creating json path query
         for (String part : conditionParts){
             if(part.isEmpty()){
                 continue;
             }
             condition = condition + "." + part;
-
             // Getting current index of current loop
-            String array = ConditionUtility.getLastArray(condition);// need to find index
-            int index = 0;
             boolean hasLoop = false;
-
-            if (loopStack.containsKey(array)){
+            if (!loopIterator.isEmpty()){
                 hasLoop = true;
-                index = loopStack.get(array);
             }
 
             // TODO added size and index i. for checking is next element after an array
@@ -298,20 +253,18 @@ public class MessageContainer {
                 condIndexArr = m.group(1);
             }
             if ((part.contains("[]") || hasIndex) && hasLoop && !part.contains("[*]")){
-                part = part.replace("[]", ""); // removed [index] and put []
+                part = part.replace("[]", ""); // remove [index] and put []
                 if (hasIndex) {
                     part = part.replace("[" + condIndexArr + "]", "");
                 }
-                part = part + "[" + index + "]";
+                part = part + "[" + loopIterator.get(condIndexArr) + "]";
             } else if((part.contains("[]") || part.contains("[*]")) && !hasLoop){
                 if (part.contains("[]")){
                     part = part.replace("[]", "");
                     part = part + "[*]";
                 }
             }
-
             jsonPath = jsonPath + "." + part;
-            i++;
         }
         return JsonPath.read(message, jsonPath);
     }

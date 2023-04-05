@@ -27,7 +27,7 @@ public class ResultNodeServiceImp implements ResultNodeService{
             return null;
         }
         ResultResource resultResource = new ResultResource();
-        resultResource.setNodeId(entity.getId());
+//        resultResource.setNodeId(entity.getId());
         resultResource.setStatus(entity.getStatus());
         resultResource.setHeader(null);
         if (entity.getBody() != null){
