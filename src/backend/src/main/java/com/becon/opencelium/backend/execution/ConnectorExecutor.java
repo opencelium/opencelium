@@ -34,7 +34,6 @@ import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.VariableNodeServiceImp;
 import com.becon.opencelium.backend.execution.statement.operator.Operator;
-import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -71,7 +70,10 @@ import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.becon.opencelium.backend.execution.ExecutionContainer.buildSeqIndexes;
 
 public class ConnectorExecutor {
 
@@ -88,7 +90,7 @@ public class ConnectorExecutor {
     private final VariableNodeServiceImp statementNodeService;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private boolean debugMode = false;
-    private boolean isSocketOpen = false;
+    private boolean isSocketOpen;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
                              FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeServiceImp,
@@ -114,78 +116,70 @@ public class ConnectorExecutor {
         executionContainer.setConn(conn);
         executionContainer.setSupportRequestData(supportRequestData);
         executionContainer.setRequestData(requestData);
-        executionContainer.setLoopIndex(new LinkedHashMap<>());
+        executionContainer.setLoopIterators(new LinkedHashMap<>());
 
         try {
             executeMethod(connectorNode.getStartMethod());
             executeDecisionStatement(connectorNode.getStartOperator());
         } catch (Exception e) {
             e.printStackTrace();
-            //TODO: if error occurred write in logs
             loggAndSend(e);
 //            throw new Exception(e);
         }
-
     }
 
     private void executeMethod(MethodNode methodNode) throws Exception {
         if (methodNode == null){
             return;
         }
-
 // ================================= remove =========================================
-        MessageContainer messageContainer;
-        HashMap<Integer, String> responseContainer;
+        MethodResponse methodResponse;
+        HashMap<String, String> responseContainer;
         List<String> arrayContainer = new ArrayList<>();
-        Map<String, Integer> loopStack = executionContainer.getLoopIndex();
-        if (!loopStack.isEmpty()) {
-            arrayContainer = new ArrayList<>(loopStack.keySet());
+        Map<String, Integer> loopsWithCurrIndex = executionContainer.getLoopIterators();
+        if (!loopsWithCurrIndex.isEmpty()) {
+            arrayContainer = new ArrayList<>(loopsWithCurrIndex.keySet());
         }
 // ==================================================================================
         ResponseEntity<String> responseEntity = sendRequest(methodNode);
 
-        messageContainer = executionContainer.getResponseData().stream()
+        methodResponse = executionContainer.getMethodResponses().stream()
                 .filter(m -> m.getMethodKey().equals(methodNode.getColor()))
                 .findFirst()
                 .orElse(null);
 
-        int sizeArrayContainer = arrayContainer.size();
-        if(messageContainer != null){
+        String responseIndex = buildSeqIndexes(loopsWithCurrIndex);
+        if(methodResponse != null){
+            if(methodResponse.getData().containsKey("null")) {
+                responseIndex = null;
+            }
             // adding new response message into existing data.
-            HashMap<Integer, String> list = messageContainer.getData();
-            list.put(loopStack.get(arrayContainer.get(sizeArrayContainer - 1)),responseEntity.getBody());
-            messageContainer.setLoopingArrays(arrayContainer);
+            methodResponse.getData()
+                    .put(responseIndex, responseEntity.getBody());
+//            methodResponse.setLoopingArrays(arrayContainer);
         }
         else {
-            messageContainer = new MessageContainer();
-            responseContainer = new HashMap<>();
+            methodResponse = new MethodResponse();
+            responseContainer = new LinkedHashMap<>();
+            responseContainer.put(responseIndex,responseEntity.getBody());
 
-            Integer loopIndex = 0;
-            if (!arrayContainer.isEmpty()) {
-                loopIndex = loopStack.getOrDefault(arrayContainer.get(sizeArrayContainer - 1), 0);
-            }
+            methodResponse.setMethodKey(methodNode.getColor());
+            methodResponse.setResponseFormat(methodNode.getResponseNode().getSuccess().getBody().getFormat());
+            methodResponse.setExchangeType("response");
+            methodResponse.setResult("success");
+            methodResponse.setData(responseContainer);
 
-            responseContainer.put(loopIndex,responseEntity.getBody());
-
-            messageContainer.setMethodKey(methodNode.getColor());
-            messageContainer.setResponseFormat(methodNode.getResponseNode().getSuccess().getBody().getFormat());
-            messageContainer.setExchangeType("response");
-            messageContainer.setResult("success");
-//                if (responseHasError(responseEntity)){
-//                    messageContainer.setResult("fail");
-//                }
-            messageContainer.setLoopingArrays(arrayContainer);
-            messageContainer.setData(responseContainer);
-
-            List<MessageContainer> list = executionContainer.getResponseData();
-            list.add(messageContainer);
+            List<MethodResponse> list = executionContainer.getMethodResponses();
+            list.add(methodResponse);
         }
 
         executeMethod(methodNode.getNextFunction());
         executeDecisionStatement(methodNode.getNextOperator());
     }
 
-    private ResponseEntity sendRequest(MethodNode methodNode) throws URISyntaxException{
+
+
+    private ResponseEntity<String> sendRequest(MethodNode methodNode) throws URISyntaxException{
         if (debugMode) {
             String nextFunctionIndex = methodNode.getNextFunction() != null ? methodNode.getNextFunction().getIndex() : "null";
             String nextOperatorIndex = methodNode.getNextOperator() != null ? methodNode.getNextOperator().getIndex() : "null";
@@ -672,30 +666,27 @@ public class ConnectorExecutor {
 //        // TODO: Need to rework for "request" types too.
 //        String exchangeType = ConditionUtility.getExchangeType(condition);
 
-        Map<String, Integer> loopIndex = executionContainer.getLoopIndex();
-        MessageContainer message = executionContainer.getResponseData().stream()
+        // getting iterators of loops;
+        Map<String, Integer> loopIterators = executionContainer.getLoopIterators();
+        MethodResponse message = executionContainer.getMethodResponses().stream()
                 .filter(m -> m.getMethodKey().equals(methodKey))
                 .findFirst()
                 .orElse(null);
         List<Object> array =
-                (List<Object>) message.getValue(condition, loopIndex);
-
+                (List<Object>) message.getValue(condition, loopIterators);
         if (debugMode) {
             loggAndSend("============================= LOOP ======================== ");
             loggAndSend(createLoopMsgForLog(array.isEmpty(), statementNode.getIndex()));
         }
-        String arr = ConditionUtility.getLastArray(condition);
         for (int i = 0; i < array.size(); i++) {
             if (debugMode) {
                 loggAndSend("Loop " + condition + "-------- index : " + i);
             }
-            loopIndex.put(arr, i);
+            loopIterators.put(statementNode.getIterator(), i);
             executeMethod(statementNode.getBodyFunction());
             executeDecisionStatement(statementNode.getBodyOperator());
         }
-        if (loopIndex.containsKey(arr)){
-            loopIndex.remove(arr);
-        }
+        loopIterators.remove(statementNode.getIterator());
         executeMethod(statementNode.getNextFunction());
         executeDecisionStatement(statementNode.getNextOperator());
     }

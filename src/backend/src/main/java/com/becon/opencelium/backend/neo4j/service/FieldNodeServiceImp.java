@@ -91,9 +91,10 @@ public class FieldNodeServiceImp implements FieldNodeService {
         LinkedList<String> path = new LinkedList<>(Arrays.asList(field.split("\\.")));
         String result;
         String format = "";
+        String firstField = "";
         if (type.equals("response")){
             result = path.pop();
-            String firstField = path.pop();
+            firstField = path.pop();
             firstField = StringUtility.removeSquareBraces(firstField);
             if (firstField.isEmpty()) {
                 firstField = path.pop();
@@ -102,7 +103,6 @@ public class FieldNodeServiceImp implements FieldNodeService {
             firstField = StringUtility.removeSquareBraces(firstField);
             currentField = fieldNodeRepository.findFirstFieldInResponse(connectionId,color,result,firstField);
         } else {
-            String firstField;
             if (path.isEmpty()){
                 firstField = field;
             } else {
@@ -114,7 +114,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
         }
 
         if (currentField == null){
-            throw new RuntimeException("Field path is incorrect in method with color: " + color);
+            throw new RuntimeException("Field " + firstField + " not found in DB for method: " + color);
         }
 
 //        for (String nextField : path) {

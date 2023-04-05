@@ -54,7 +54,7 @@ public class ConnectionExecutor {
     }
 
     public void start(Scheduler scheduler) throws Exception{
-        executionContainer.setResponseData(new ArrayList<>());
+        executionContainer.setMethodResponses(new ArrayList<>());
 
         Connection connection = scheduler.getConnection();
         ConnectionNode connectionNode = connectionNodeService.findByConnectionId(connection.getId())

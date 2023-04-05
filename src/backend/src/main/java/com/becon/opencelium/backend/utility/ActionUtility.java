@@ -323,7 +323,7 @@ public class ActionUtility {
         return left + operator + right;
     }
 
-    // TODO: need to refactor sorting of indexes. Doesn't works when index more than 10
+    // TODO: need to refactor sorting of indexes. Doesn't work when index more than 10
     private LinkedList<String> getIndexes(List<MethodResource> methodResources, List<OperatorResource> operatorResources){
         LinkedList<String> indexes = new LinkedList<>();
         if (!methodResources.isEmpty()){

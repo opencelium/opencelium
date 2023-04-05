@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.execution.test;
 
 import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.execution.ExecutionMediator;
-import com.becon.opencelium.backend.execution.MessageContainer;
+import com.becon.opencelium.backend.execution.MethodResponse;
 import com.becon.opencelium.backend.execution.test.entity.TConnection;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
@@ -49,7 +49,7 @@ public class TExecutionMediator implements ExecutionMediator {
     private MethodNode currentMethod;
 
     private List<RequestData> supportRequestData = new LinkedList<>();
-    private ArrayList<MessageContainer> responseData = new ArrayList<>();
+    private ArrayList<MethodResponse> responseData = new ArrayList<>();
     private Map<String, Integer> loopIndex = new HashMap<>();
     private String conn;
 
@@ -108,11 +108,11 @@ public class TExecutionMediator implements ExecutionMediator {
         this.supportRequestData = supportRequestData;
     }
 
-    public ArrayList<MessageContainer> getResponseData() {
+    public ArrayList<MethodResponse> getResponseData() {
         return responseData;
     }
 
-    public void setResponseData(ArrayList<MessageContainer> responseData) {
+    public void setResponseData(ArrayList<MethodResponse> responseData) {
         this.responseData = responseData;
     }
 
@@ -201,7 +201,7 @@ public class TExecutionMediator implements ExecutionMediator {
     public Object getValueFromResponseData(String ref) {
         String color = ConditionUtility.getMethodKey(ref);
 
-        MessageContainer messageContainer = responseData
+        MethodResponse messageContainer = responseData
                 .stream()
                 .filter(m -> m.getMethodKey().equals(color))
                 .findFirst().orElse(null);
@@ -268,11 +268,11 @@ public class TExecutionMediator implements ExecutionMediator {
                     throw new RuntimeException("Method not found");
                 }
                 String inFieldPath = getPath(inMethod, f);
-                MessageContainer messageContainer = responseData
+                MethodResponse methodResponse = responseData
                         .stream()
                         .filter(m -> m.getMethodKey().equals(inMethod.getColor()))
                         .findFirst().orElse(null);
-                Object o = messageContainer.getValue(inFieldPath, getLoopIndex());
+                Object o = methodResponse.getValue(inFieldPath, getLoopIndex());
                 String inFieldValue = o instanceof String ? o.toString() : mapperObj.writeValueAsString(o);
                 expertVarProperties.put(inFieldPath, inFieldValue);
             } catch (JsonProcessingException e){

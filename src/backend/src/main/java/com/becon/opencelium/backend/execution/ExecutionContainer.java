@@ -26,15 +26,12 @@ import com.becon.opencelium.backend.neo4j.entity.MethodNode;
 import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
 import com.becon.opencelium.backend.utility.ConditionUtility;
-import com.becon.opencelium.backend.utility.StringUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.openjdk.nashorn.api.scripting.JSObject;
 import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -50,8 +47,11 @@ public class ExecutionContainer {
     private Invoker invoker;
     private List<RequestData> requestData = new LinkedList<>();
     private List<RequestData> supportRequestData = new LinkedList<>();
-    private ArrayList<MessageContainer> responseData = new ArrayList<>();
-    private LinkedHashMap<String, Integer> loopIndex = new LinkedHashMap<>();
+    private ArrayList<MethodResponse> methodResponses = new ArrayList<>();
+
+    // Contains iterators with current indexes of loop statement
+    // e.g. (i, 1) -> i = 0; (j, 2) -> j = 2 -----> [i][j] -> [0][2];
+    private LinkedHashMap<String, Integer> loopIterators = new LinkedHashMap<>();
     private String taId;
     private String conn;
     private int order;
@@ -86,13 +86,6 @@ public class ExecutionContainer {
 
         MethodNode outMethod = methodNodeService.getByFieldNodeId(outgoingFiled.getId())
                 .orElseThrow(() -> new RuntimeException("Method not found"));
-//        String outFieldPath = fieldNodeService.getPath(outMethod, outgoingFiled);
-//        String outFieldPath = enhVars.entrySet().stream()
-//                .filter(e -> e.getValue().equals("RESULT_VAR"))
-//                .map(e -> e.getKey()).findFirst().get();
-//        String outFieldValue = fieldNodeService.getFieldValue(outgoingFiled);
-//        outFieldPath = outFieldPath.replace("__oc__attributes.", "@").replace(".__oc__value", "");
-//        expertVarProperties.put(outFieldPath, outFieldValue);
 
         List<String> incomeRef = Arrays.asList(outgoingFiled.getValue().split(";"));
         String format = outMethod.getRequestNode().getBodyNode().getFormat();
@@ -103,11 +96,11 @@ public class ExecutionContainer {
                     incRef = incrementIndexes(ref);
                 }
                 String methodKey = ConditionUtility.getMethodKey(incRef);
-                MessageContainer messageContainer = responseData
+                MethodResponse methodResponse = methodResponses
                         .stream()
                         .filter(m -> m.getMethodKey().equals(methodKey))
                         .findFirst().orElse(null);
-                Object o = messageContainer.getValue(incRef, getLoopIndex());
+                Object o = methodResponse.getValue(incRef, this.getLoopIterators());
                 String inFieldValue = o instanceof String ? o.toString() : mapperObj.writeValueAsString(o);
                 inFieldValue = inFieldValue.replace("__oc__attributes.", "@").replace(".__oc__value", "");
                 expertVarProperties.put(ref, inFieldValue);
@@ -138,7 +131,6 @@ public class ExecutionContainer {
         try {
             engine.eval(enhancement.getExpertCode());
 
-//            String v = enhVars.get("RESULT_VAR");
             Object o = engine.get("RESULT_VAR");
             ScriptObjectMirror JSON = (ScriptObjectMirror) engine.eval("JSON");
             Object stringified = JSON.callMember("stringify", o);
@@ -155,11 +147,6 @@ public class ExecutionContainer {
                 }
                 return convertToArray(result);
             } else {
-//                result = result.replace("\"", "");
-//                if(o.getClass() == Double.class) {
-//                    Double dd = (Double) o;
-//                    return dd.intValue();
-//                }
                 return o;
             }
         } catch (ScriptException | IOException e){
@@ -194,11 +181,11 @@ public class ExecutionContainer {
     public Object getValueFromResponseData(String ref){
         String color = ConditionUtility.getMethodKey(ref);
 
-        MessageContainer messageContainer = responseData
+        MethodResponse methodResponse = methodResponses
                 .stream()
                 .filter(m -> m.getMethodKey().equals(color))
                 .findFirst().orElse(null);
-        return messageContainer.getValue(ref, getLoopIndex());
+        return methodResponse.getValue(ref, this.getLoopIterators());
     }
 
     public String getValueFromQueryParams(String exp) {
@@ -223,14 +210,6 @@ public class ExecutionContainer {
                 Object val = JsonPath.read(message, s);
                 exp = exp.replace(m.group(), val.toString());
             }
-
-//            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
-//                String pointer = "${" + entry.getKey() + "}";
-//                if (!result.contains(pointer)){
-//                    continue;
-//                }
-//                result = result.replace(pointer, entry.getValue().toString());
-//            }
             return exp;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -254,8 +233,6 @@ public class ExecutionContainer {
             }
 
             String message = new ObjectMapper().writeValueAsString(queryParams);
-//        JsonPath.read(message, jsonPath)
-
             Pattern r = Pattern.compile(RegExpression.webhook);
             Matcher m = r.matcher(exp);
             while (m.find()) {
@@ -263,14 +240,6 @@ public class ExecutionContainer {
                 Object val = JsonPath.read(message, s);
                 result = !type.isEmpty() ? convertToType(val, type) : getProperTypeOfValue(val);
             }
-//            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
-//                String pointer = "${" + entry.getKey() + "}";
-//                if (!exp.contains(pointer)){
-//                    continue;
-//                }
-//                result = !type.isEmpty() ? convertToType(entry.getValue(), type) : getProperTypeOfValue(entry.getValue());
-//                break;
-//            }
             return result;
         } catch (JsonProcessingException ex) {
             throw new RuntimeException();
@@ -322,7 +291,6 @@ public class ExecutionContainer {
             return "";
         }
         List<RequestData> request = new ArrayList<>();
-//        String conn = exp.substring(1, 6);
         if ((exp.contains("CONN1.") && !conn.equals("CONN1")) || (exp.contains("CONN2.") && !conn.equals("CONN1"))){
             request = supportRequestData;
         } else {
@@ -345,10 +313,6 @@ public class ExecutionContainer {
         return result;
     }
 
-    public Integer getIndexOfArray(String array) {
-        return loopIndex.get(array);
-    }
-
     public Invoker getInvoker() {
         return invoker;
     }
@@ -365,8 +329,8 @@ public class ExecutionContainer {
         this.requestData = requestData;
     }
 
-    public ArrayList<MessageContainer> getResponseData() {
-        return responseData;
+    public ArrayList<MethodResponse> getMethodResponses() {
+        return methodResponses;
     }
 
     public List<RequestData> getSupportRequestData() {
@@ -393,16 +357,16 @@ public class ExecutionContainer {
         this.conn = conn;
     }
 
-    public void setResponseData(ArrayList<MessageContainer> responseData) {
-        this.responseData = responseData;
+    public void setMethodResponses(ArrayList<MethodResponse> methodResponses) {
+        this.methodResponses = methodResponses;
     }
 
-    public LinkedHashMap<String, Integer> getLoopIndex() {
-        return loopIndex;
+    public LinkedHashMap<String, Integer> getLoopIterators() {
+        return loopIterators;
     }
 
-    public void setLoopIndex(LinkedHashMap<String, Integer> loopIndex) {
-        this.loopIndex = loopIndex;
+    public void setLoopIterators(LinkedHashMap<String, Integer> loopIterators) {
+        this.loopIterators = loopIterators;
     }
 
     public String getTaId() {
@@ -453,5 +417,15 @@ public class ExecutionContainer {
         }
 
         return result;
+    }
+
+    // Incoming value i = 0; j = 1; k = 12; ....
+    // Returns - i, j, k ---- > 0, 1, 12, ....
+    public static String buildSeqIndexes(Map<String, Integer> loopsWithCurrIndex) {
+        if (loopsWithCurrIndex.isEmpty()) {
+            return "null";
+        }
+        return loopsWithCurrIndex.values().stream()
+                .map(i -> Integer.toString(i)).collect(Collectors.joining(","));
     }
 }
