@@ -25,6 +25,7 @@ interface ExecutionStatusProps{
     schedule: ISchedule,
     hasActions?: boolean,
     onClick: any,
+    readOnly?: boolean,
 }
 
 export {

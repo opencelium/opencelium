@@ -30,10 +30,7 @@ import {ISchedule, ScheduleProps} from "../interfaces/ISchedule";
 import {Schedule} from "../classes/Schedule";
 import {
     deleteSchedulesById,
-    disableSchedules,
-    enableSchedules,
     startSchedule,
-    startSchedules,
     switchScheduleStatus, updateSchedule
 } from "../redux_toolkit/action_creators/ScheduleCreators";
 import {deleteWebhook, getWebhook} from "../redux_toolkit/action_creators/WebhookCreators";
@@ -106,6 +103,13 @@ class Schedules extends ListCollection<ScheduleProps>{
     }, {
         propertyKey: 'cronExp',
         width: '10%',
+        getValue: (schedule: ISchedule) => {
+            if(!schedule.cronExp){
+                return '-';
+            } else{
+                return schedule.cronExp;
+            }
+        }
     }, {
         propertyKey: 'lastSuccessExecution',
         getValue: (schedule: ISchedule) => {
@@ -128,7 +132,16 @@ class Schedules extends ListCollection<ScheduleProps>{
         width: '10%',
     }, {
         propertyKey: 'status',
-        getValue: (schedule: ISchedule) => {return <ExecutionStatus key={schedule.id} schedule={schedule} hasActions={this.hasActions} onClick={() => {schedule.status = schedule.status === 0 ? 1 : 0; this.dispatch(switchScheduleStatus(schedule.getModel()))}}/>},
+        getValue: (schedule: ISchedule) => {
+            return (
+                <ExecutionStatus
+                    readOnly={!schedule.cronExp}
+                    key={schedule.id}
+                    schedule={schedule}
+                    hasActions={this.hasActions}
+                    onClick={() => {schedule.status = schedule.status === 0 ? 1 : 0; this.dispatch(switchScheduleStatus(schedule.getModel()))}}
+                />
+            )},
         replace: true,
         width: '10%',
     }, {

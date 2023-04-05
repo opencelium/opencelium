@@ -18,14 +18,17 @@ import {withTheme} from 'styled-components';
 import InputSwitch from "@app_component/base/input/switch/InputSwitch";
 import {ColorTheme} from "@style/Theme";
 import {ExecutionStatusProps } from './interfaces';
+import {Dialog} from "@app_component/base/dialog/Dialog";
 
 const ExecutionStatus: FC<ExecutionStatusProps> =
     ({
         schedule,
         hasActions,
         onClick,
+        readOnly,
     }) => {
         const [lastStatusColor, setLastStatusColor] = useState('');
+        const [showCanceledActionMessage, toggleCanceledActionMessage] = useState(false);
         useEffect(() => {
             const lastExecutionFailTime = schedule.lastExecution?.fail?.startTime || 0;
             const lastExecutionSuccessTime = schedule.lastExecution?.success?.startTime || 0;
@@ -42,15 +45,33 @@ const ExecutionStatus: FC<ExecutionStatusProps> =
             let status = schedule.status ? 'on' : 'off';
             return <td key={'status'} title={status}>{status}</td>;
         }
+        const action = () => {
+            if(readOnly){
+                toggleCanceledActionMessage(true);
+            } else{
+                onClick();
+            }
+        }
         return (
             <td key={'status'} style={{background: lastStatusColor}}>
-                <InputSwitch color={ColorTheme.Turquoise} isChecked={!!schedule.status} position={'middle'} onClick={onClick}/>
+                <InputSwitch readOnly={false} color={ColorTheme.Turquoise} isChecked={!!schedule.status} position={'middle'} onClick={action}/>
+                <Dialog
+                    actions={[{label: 'Close', onClick: () => toggleCanceledActionMessage(false), id: `show_cancel_action_message_${schedule.id}`}]}
+                    active={showCanceledActionMessage}
+                    toggle={() => toggleCanceledActionMessage(!showCanceledActionMessage)}
+                    title={'Action is canceled'}
+                >
+                    <span>
+                        {'The schedule cannot be enabled, because cron expression is missing.'}
+                    </span>
+                </Dialog>
             </td>
         );
 }
 
 ExecutionStatus.defaultProps = {
     hasActions: true,
+    readOnly: false,
 }
 
 

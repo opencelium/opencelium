@@ -28,7 +28,7 @@ export default class COperatorItem{
         this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._type = this.checkType(type) ? type : '';
-        this._condition = CCondition.createCondition(condition);
+        this._condition = CCondition.createCondition(condition, this._type);
         this._error = this.checkError(error);
         this._isMinimized = isMinimized;
         this._isToggled = isToggled;

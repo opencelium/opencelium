@@ -24,7 +24,9 @@ import FormSection from "@app_component/form/form_section/FormSection";
 import FormComponent from "@app_component/form/form/Form";
 import {OptionProps} from "@app_component/base/input/select/interfaces";
 import {Connection} from "@entity/connection/classes/Connection";
-import {getAllConnections} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
+import {
+    getAllMetaConnections
+} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import { setCurrentSchedule } from "../../redux_toolkit/slices/ScheduleSlice";
 import {Schedule} from "../../classes/Schedule";
 import {ISchedule} from "../../interfaces/ISchedule";
@@ -35,8 +37,8 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
         addingSchedule, gettingScheduleById, currentSchedule, updatingSchedule, error,
     } = Schedule.getReduxState();
     const dispatch = useAppDispatch();
-    const {gettingConnections, connections} = Connection.getReduxState()
-    const connectionOptions: OptionProps[] = connections.map(connection => {return {label: connection.title, value: connection.connectionId.toString(), data: connection.description}});
+    const {gettingConnections, metaConnections} = Connection.getReduxState()
+    const connectionOptions: OptionProps[] = metaConnections.map(connection => {return {label: connection.title, value: connection.connectionId.toString(), data: connection.description}});
     const didMount = useRef(false);
     let navigate = useNavigate();
     let urlParams = useParams();
@@ -52,7 +54,7 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
         if(shouldFetchConnection){
             schedule.getById()
         }
-        dispatch(getAllConnections());
+        dispatch(getAllMetaConnections());
         return () => {
             dispatch(setCurrentSchedule(null));
         }

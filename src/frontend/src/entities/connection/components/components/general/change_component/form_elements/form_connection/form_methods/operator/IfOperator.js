@@ -22,7 +22,7 @@ import {DEFAULT_COLOR} from "@entity/connection/components/classes/components/co
 import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 import COperatorItem from "@entity/connection/components/classes/components/content/connection/operator/COperatorItem";
 import CConnectorItem from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
-import CCondition, {FUNCTIONAL_OPERATORS} from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
+import CCondition, {FUNCTIONAL_OPERATORS_FOR_IF} from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import SelectSearch from "@entity/connection/components/components/general/basic_components/inputs/SelectSearch";
 import {
@@ -141,7 +141,7 @@ class IfOperator extends Component{
     getOperatorLabel(){
         const {operator} = this.props;
         let value = operator.condition.relationalOperator;
-        let functionalOperator = FUNCTIONAL_OPERATORS.find(o => o.value === value);
+        let functionalOperator = FUNCTIONAL_OPERATORS_FOR_IF.find(o => o.value === value);
         if(functionalOperator && functionalOperator.hasOwnProperty('placeholderValue')){
             return functionalOperator.placeholderValue;
         }
@@ -151,7 +151,7 @@ class IfOperator extends Component{
     checkIfOperatorHasThreeParams(){
         const {operator} = this.props;
         let relationalOperatorValue = operator.condition.relationalOperator;
-        let functionalOperator = FUNCTIONAL_OPERATORS.find(o => o.value === relationalOperatorValue);
+        let functionalOperator = FUNCTIONAL_OPERATORS_FOR_IF.find(o => o.value === relationalOperatorValue);
         if(functionalOperator && functionalOperator.hasOwnProperty('hasThreeValues')){
             return functionalOperator.hasThreeValues;
         }
@@ -271,7 +271,7 @@ class IfOperator extends Component{
         let options = [];
         const {operator} = this.props;
         let value = operator.condition.relationalOperator;
-        let hasValueItem = FUNCTIONAL_OPERATORS.find(fo => fo.value === value);
+        let hasValueItem = FUNCTIONAL_OPERATORS_FOR_IF.find(fo => fo.value === value);
         if(hasValueItem){
             hasValue = hasValueItem.hasValue;
             isRightStatementText = hasValueItem.isRightStatementText;
@@ -527,7 +527,7 @@ class IfOperator extends Component{
         const {operator, readOnly} = this.props;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let value = operator.condition.relationalOperator;
-        let operators = FUNCTIONAL_OPERATORS.map(operator => {return {value: operator.value, label: operator.hasOwnProperty('label') ? operator.label : operator.value};});
+        let operators = FUNCTIONAL_OPERATORS_FOR_IF.map(operator => {return {value: operator.value, label: operator.hasOwnProperty('label') ? operator.label : operator.value};});
         let {hasValue} = this.isOperatorHasValue();
         let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
         let inputTheme = {inputElement: styles.input_element_pointer_compare_statement_visible};
