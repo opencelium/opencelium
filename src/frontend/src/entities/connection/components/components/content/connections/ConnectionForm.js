@@ -15,7 +15,6 @@
 
 import React from "react";
 import {INPUTS} from "@entity/connection/components/utils/constants/inputs";
-import {CONNECTION_VIEW_TYPE} from "@entity/connection/components/utils/constants/app";
 import Form from "@change_component/Form";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import {EXPERT_MODE, TEMPLATE_MODE} from "@entity/connection/components/classes/components/content/connection/CTemplate";
