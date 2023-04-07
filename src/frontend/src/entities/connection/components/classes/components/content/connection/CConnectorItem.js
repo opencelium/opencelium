@@ -545,17 +545,20 @@ export default class CConnectorItem{
         if(item){
             let itemIndex = item.index;
             let indexes = itemIndex.split('_');
-            indexes.pop();
+            const isFirstLevel = indexes.length <= 1;
+            if(!isFirstLevel){
+                indexes.pop();
+            }
             let rootIndex = indexes.join('_');
             this._methods.forEach((method) => {
                 let index = method.index;
-                if(index.indexOf(`${rootIndex}_`) === 0 && index > itemIndex && itemIndex.split('_').length === index.split('_').length){
+                if((isFirstLevel ? true : index.indexOf(`${rootIndex}_`) === 0) && index > itemIndex && itemIndex.split('_').length === index.split('_').length){
                     result.push(method);
                 }
             })
             this._operators.forEach((operator) => {
                 let index = operator.index;
-                if(index.indexOf(`${rootIndex}_`) === 0 && index > itemIndex && itemIndex.split('_').length === index.split('_').length){
+                if((isFirstLevel ? true : index.indexOf(`${rootIndex}_`) === 0) && index > itemIndex && itemIndex.split('_').length === index.split('_').length){
                     result.push(operator);
                 }
             })
