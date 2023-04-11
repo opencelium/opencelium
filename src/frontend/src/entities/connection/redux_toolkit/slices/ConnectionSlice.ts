@@ -147,6 +147,9 @@ export const connectionSlice = createSlice({
         },
         addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
             if(action.payload){
+                if(!action.payload.hasNextItem){
+                    console.log(action.payload)
+                }
                 const currentState = current(state);
                 let lastLog = state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1] : null;
                 let lastLogKey = lastLog ? state.currentLogs.length - 1 : -1;

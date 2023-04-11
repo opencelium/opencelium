@@ -2,7 +2,7 @@
 Connectors
 ##################
 
-Connector is a core component in Open Celium. It is a system to which we
+Connector is a core component in OpenCelium. It is a system to which we
 will send requests and get responses. They can be different throw
 different protocols: HTTP, JSON-RPC, SOAP, and so on. Currently, HTTP
 and JSON-RPC are available. Connector uses invokers. Invoker is a
@@ -19,10 +19,16 @@ description, hint, and operations.
 
 |image1|
 
+The *title* you can change directly inline double clicking on its text.
+
+|image6|
+
 Adding/Updating connector consists of two steps: general data and
 credentials. General data step has four input fields: *title*,
-*description*, *invoker* and *icon*. The *title* and *invoker* are required
-fields. The *icon* can be unset setting checkbox as uncheck.
+*description*, *invoker*, *invoker description*, *timeout*, *ssl certificate* and *icon*.
+The *title* and *invoker* are required fields. The *timeout* is a
+timeout for connection; has a default value equals to 1000.
+The *ssl certificate* flag enables/disables the secure protocol; disabled as a default.
 
 |image2|
 
@@ -61,4 +67,6 @@ to the list pressing on the *cancel* button.
 .. |image4| image:: ../img/connector/4.png
    :align: middle
 .. |image5| image:: ../img/connector/5.png
+   :align: middle
+.. |image6| image:: ../img/connector/6.png
    :align: middle
