@@ -119,10 +119,8 @@ the operator you will see the scope of their influence.
 .. |image8| image:: ../img/connection/8.png
    :align: middle
 .. |image9| image:: ../img/connection/9.png
-   :align: middle
-   :width: 400
+   :width: 45%
 .. |image10| image:: ../img/connection/10.png
-   :align: middle
-   :width: 400
+   :width: 45%
 .. |image11| image:: ../img/connection/11.png
    :align: middle
