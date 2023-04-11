@@ -87,6 +87,7 @@ Current triggering schedules are displayed down after the list. You can follow t
    :align: middle
 .. |image6| image:: ../img/schedule/6.png
    :align: middle
+   :width: 400
 .. |image7| image:: ../img/schedule/7.png
    :align: middle
 .. |image8| image:: ../img/schedule/8.png

@@ -59,7 +59,6 @@ to the list pressing on the *cancel* button.
 .. |image0| image:: ../img/connector/0.png
    :align: middle
 .. |image1| image:: ../img/connector/1.png
-   :align: middle
 .. |image2| image:: ../img/connector/2.png
    :align: middle
 .. |image3| image:: ../img/connector/3.png
@@ -70,3 +69,4 @@ to the list pressing on the *cancel* button.
    :align: middle
 .. |image6| image:: ../img/connector/6.png
    :align: middle
+   :width: 400
