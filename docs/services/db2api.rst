@@ -61,14 +61,14 @@ FAQ
 **SQL Server does not support TLSv1 or TLSv1.0**
 Go to folder java/security and in file java.security find option jdk.tls.disabledAlgorithms and delete TLSv1
 
-.. |image0| image:: ../img/services/addDb2APIConnector.png
+.. |image0| image:: ../img/services/db2api/addDb2APIConnector.png
    :align: middle
 
-.. |image1| image:: ../img/services/DBQuery.png
+.. |image1| image:: ../img/services/db2api/DBQuery.png
    :align: middle
 
-.. |image2| image:: ../img/services/addTablenameAsEndpoint.png
+.. |image2| image:: ../img/services/db2api/addTablenameAsEndpoint.png
    :align: middle
 
-.. |image3| image:: ../img/services/insomniaOutput.png
+.. |image3| image:: ../img/services/db2api/insomniaOutput.png
    :align: middle

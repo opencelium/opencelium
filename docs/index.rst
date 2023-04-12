@@ -41,6 +41,7 @@ This documentation is organized into a couple of sections:
    :maxdepth: 2
 
    services/db2api
+   services/csv2api
 
 .. toctree::
    :caption: Tools
