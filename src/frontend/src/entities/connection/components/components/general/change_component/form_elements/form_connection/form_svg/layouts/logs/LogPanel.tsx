@@ -76,27 +76,7 @@ const LogPanel: FC = ({}) => {
                             hasBackground={false}
                             handleClick={() => dispatch(setLogPanelHeight(LogPanelHeight.High))}
                         />
-                        <ToggleSmallButtonStyled
-                            iconSize={TextSize.Size_12}
-                            position={'bottom'}
-                            icon={'expand_more'}
-                            tooltip={'Hide'}
-                            target={`toggle_less_log_panel`}
-                            hasBackground={false}
-                            handleClick={() => dispatch(setLogPanelHeight(0))}
-                        />
                     </ToggleSmallButtonContainerStyled>
-                }
-                {logPanelHeight === 0 &&
-                    <ToggleButtonStyled
-                        iconSize={TextSize.Size_20}
-                        position={'right'}
-                        icon={'expand_less'}
-                        tooltip={'Show Logs'}
-                        target={`toggle_log_panel`}
-                        hasBackground={false}
-                        handleClick={() => dispatch(setLogPanelHeight(LogPanelHeight.Medium))}
-                    />
                 }
                 {logPanelHeight !== 0 && <ClearButtonStyled
                     right={isDetailsOpened ? isFullScreen ? 312 : 300 : isFullScreen ? 12 : 2}
@@ -119,7 +99,7 @@ const LogPanel: FC = ({}) => {
                                 messageProps.id = `log_panel_${log.connectorType}_${log.index}`;
                             }
                             if(log.message === ConnectionLogs.BreakMessage){
-                                return <hr/>;
+                                return <hr key={key}/>;
                             }
                             return (
                                 <LogMessage

@@ -323,7 +323,7 @@ $DASHED_COLOR: #58854d;
   .icon{
     cursor: pointer;
     background: white;
-    height: 22px;
+    height: 32px;
     z-index: 1;
     >span{
       vertical-align: top;
@@ -859,6 +859,46 @@ $DASHED_COLOR: #58854d;
   box-shadow: none !important;
   margin: 8px !important;
 }
+
+.button_panel{
+  position: absolute;
+  bottom: 48px;
+  z-index: 999;
+  padding-left: 50px;
+  display: flex;
+  align-items: flex-end;
+  button > span:first-child{
+    font-size: 34px;
+    color: #777;
+  }
+  .test_connection_icon > span:first-child{
+    font-size: 100px;
+  }
+  .button_panel_controls{
+    font-size: 16px;
+    font-weight: bold;
+  }
+  .button_panel_help{
+    @extend .button_panel_controls;
+    margin-left: 100px;
+  }
+}
+
+.test_connection_icon{
+  display: flex !important;
+  align-items: center !important;
+  margin-right: 120px !important;
+  // margin-bottom: 170px !important;
+  transition: all 0.3ms !important;
+  span span{
+    color: #000;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration:  none !important;
+    margin-left: 15px;
+  }
+}
+
 
 @keyframes AnItemAppear {
   from {
