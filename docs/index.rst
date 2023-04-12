@@ -15,7 +15,6 @@ This documentation is organized into a couple of sections:
    gettinginvolved/installation
    gettinginvolved/updating
    gettinginvolved/administration
-   gettinginvolved/activate_subscription   
 
 .. toctree::
    :caption: Usage
