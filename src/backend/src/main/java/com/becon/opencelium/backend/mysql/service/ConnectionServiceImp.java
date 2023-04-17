@@ -36,7 +36,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ConnectionServiceImp implements ConnectionService{
+public class ConnectionServiceImp implements ConnectionService {
 
     @Autowired
     private ConnectionRepository connectionRepository;

@@ -120,12 +120,6 @@ public class ConnectionController {
 
     @PostMapping
     public ResponseEntity<?> add(@RequestBody ConnectionResource connectionResource) throws Exception{
-//        throw new RuntimeException("Test exceptinog and migration");
-//        if (connectionResource.getConnectionId() == 45) {
-//            throw new RuntimeException("Test exception and migration");
-//        }
-//        System.out.println(connectionResource.getConnectionId());
-//        return ResponseEntity.ok().build();
         Connection connection = connectionService.toEntity(connectionResource);
         if (connectionService.existsByName(connection.getName())){
             throw new RuntimeException("CONNECTION_NAME_ALREADY_EXISTS");
