@@ -20,9 +20,9 @@ import com.becon.opencelium.backend.configuration.WebSocketConfig;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.execution.ExecutionContainer;
-import com.becon.opencelium.backend.execution.socket.SocketConstant;
-import com.becon.opencelium.backend.execution.socket.msg.SocketLogMessage;
+import com.becon.opencelium.backend.execution.log.msg.ExecutionLog;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
+import com.becon.opencelium.backend.logger.OcLogger;
 import com.becon.opencelium.backend.mysql.entity.Execution;
 import com.becon.opencelium.backend.mysql.entity.LastExecution;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
@@ -31,8 +31,6 @@ import com.becon.opencelium.backend.neo4j.service.*;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -46,8 +44,6 @@ import java.util.Map;
 
 @Component
 public class JobExecutor extends QuartzJobBean {
-
-    private static final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
 
     @Autowired
     private ConnectionNodeServiceImp connectionNodeService;
@@ -100,20 +96,26 @@ public class JobExecutor extends QuartzJobBean {
     }
 
     private void execution(JobExecutionContext context) {
+
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         Object schedulerId = jobDataMap.getIntValue("schedulerId");
         Scheduler scheduler = schedulerServiceImp.findById((int)schedulerId)
                 .orElseThrow(() -> new RuntimeException("Scheduler not found"));
 
-        boolean debugMode = scheduler.getDebugMode();
         boolean isSocketOpen = false;
         if (WebSocketConfig.schedulerId != null) {
             isSocketOpen = scheduler.getId() == WebSocketConfig.schedulerId;
         }
+        ExecutionLog executionLogMsg = new ExecutionLog();
+        OcLogger<ExecutionLog> logger = new OcLogger<>(isSocketOpen,simpMessagingTemplate,
+                                                          executionLogMsg,JobExecutor.class);
+        if (!scheduler.getDebugMode()) {
+            logger.disable();
+        }
         ExecutionContainer executionContainer = new ExecutionContainer(enhancementServiceImp, fieldNodeServiceImp, methodNodeServiceImp);
-        if(debugMode) loggAndSend("Executing Job with key " + context.getJobDetail().getKey(), isSocketOpen);
-        if(debugMode) loggAndSend("Firing Trigger with key " + context.getTrigger().getKey(), isSocketOpen);
-        if(debugMode) loggAndSend("==================================================================", isSocketOpen);
+        logger.logAndSend("Executing Job with key " + context.getJobDetail().getKey());
+        logger.logAndSend("Firing Trigger with key " + context.getTrigger().getKey());
+        logger.logAndSend("==================================================================");
 
 
         Object queryParams = jobDataMap.getOrDefault("queryParams", null);
@@ -142,14 +144,14 @@ public class JobExecutor extends QuartzJobBean {
         }
 
         try {
-
             ConnectorExecutor connectorExecutor = new ConnectorExecutor(invokerService, executionContainer,
                     fieldNodeServiceImp, methodNodeServiceImp,
-                    connectorService, statementNodeService, simpMessagingTemplate, isSocketOpen);
+                    connectorService, statementNodeService, logger);
             ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,
-                    executionContainer, connectorExecutor, debugMode);
+                    executionContainer, connectorExecutor);
             connectionExecutor.start(scheduler);
-            loggAndSend("======================END_OF_EXECUTION======================", isSocketOpen);
+
+            logger.logAndSend("======================END_OF_EXECUTION======================");
         }catch (Exception e){
             e.printStackTrace();
             Date end_date= new Date();
@@ -183,16 +185,6 @@ public class JobExecutor extends QuartzJobBean {
             lastExecution.setSuccessDuration(diffInMillSeconds);
             lastExecution.setSuccessExecutionId(execution.getId());
             lastExecutionServiceImp.save(lastExecution);
-        }
-    }
-
-    private void loggAndSend(String message, boolean isSocketOpen){
-        logger.info(message);
-
-        if (isSocketOpen) {
-            SocketLogMessage socketLogMessage = new SocketLogMessage(message);
-            socketLogMessage.setType("info");
-            simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, socketLogMessage);
         }
     }
 }

@@ -17,15 +17,16 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.constant.RegExpression;
+import com.becon.opencelium.backend.enums.LogType;
 import com.becon.opencelium.backend.enums.OperatorType;
-import com.becon.opencelium.backend.execution.socket.SocketConstant;
-import com.becon.opencelium.backend.execution.socket.msg.SocketLogMessage;
+import com.becon.opencelium.backend.execution.log.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
+import com.becon.opencelium.backend.logger.OcLogger;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
@@ -41,15 +42,12 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.*;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -70,14 +68,12 @@ import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.becon.opencelium.backend.execution.ExecutionContainer.buildSeqIndexes;
 
 public class ConnectorExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConnectorExecutor.class);
+
 
     private Invoker invoker;
 
@@ -88,27 +84,23 @@ public class ConnectorExecutor {
     private final MethodNodeServiceImp methodNodeServiceImp;
     private final ConnectorServiceImp connectorService;
     private final VariableNodeServiceImp statementNodeService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
-    private boolean debugMode = false;
-    private boolean isSocketOpen;
+    private final OcLogger<ExecutionLog> logger;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
                              FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeServiceImp,
                              ConnectorServiceImp connectorService, VariableNodeServiceImp statementNodeService,
-                             SimpMessagingTemplate simpMessagingTemplate, boolean isSocketOpen) {
+                             OcLogger<ExecutionLog> logger) {
         this.invokerService = invokerService;
         this.executionContainer = executionContainer;
         this.fieldNodeService = fieldNodeService;
         this.methodNodeServiceImp = methodNodeServiceImp;
         this.connectorService = connectorService;
         this.statementNodeService = statementNodeService;
-        this.simpMessagingTemplate = simpMessagingTemplate;
-        this.isSocketOpen = isSocketOpen;
+        this.logger = logger;
     }
 
     public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
-                      String conn, boolean debugMode) {
-        this.debugMode = debugMode;
+                      String conn) {
         this.restTemplate = createRestTemplate(currentConnector);
         this.invoker = invokerService.findByName(currentConnector.getInvoker());
         List<RequestData> requestData = connectorService.buildRequestData(currentConnector);
@@ -118,13 +110,12 @@ public class ConnectorExecutor {
         executionContainer.setRequestData(requestData);
         executionContainer.setLoopIterators(new LinkedHashMap<>());
 
+        logger.getLogEntity().setType(LogType.INFO);
         try {
             executeMethod(connectorNode.getStartMethod());
             executeDecisionStatement(connectorNode.getStartOperator());
         } catch (Exception e) {
-            e.printStackTrace();
-            loggAndSend(e);
-//            throw new Exception(e);
+            logger.logAndSend(e, LogType.ERROR);
         }
     }
 
@@ -135,11 +126,7 @@ public class ConnectorExecutor {
 // ================================= remove =========================================
         MethodResponse methodResponse;
         HashMap<String, String> responseContainer;
-        List<String> arrayContainer = new ArrayList<>();
         Map<String, Integer> loopsWithCurrIndex = executionContainer.getLoopIterators();
-        if (!loopsWithCurrIndex.isEmpty()) {
-            arrayContainer = new ArrayList<>(loopsWithCurrIndex.keySet());
-        }
 // ==================================================================================
         ResponseEntity<String> responseEntity = sendRequest(methodNode);
 
@@ -156,7 +143,6 @@ public class ConnectorExecutor {
             // adding new response message into existing data.
             methodResponse.getData()
                     .put(responseIndex, responseEntity.getBody());
-//            methodResponse.setLoopingArrays(arrayContainer);
         }
         else {
             methodResponse = new MethodResponse();
@@ -180,29 +166,25 @@ public class ConnectorExecutor {
 
 
     private ResponseEntity<String> sendRequest(MethodNode methodNode) throws URISyntaxException{
-        if (debugMode) {
-            String nextFunctionIndex = methodNode.getNextFunction() != null ? methodNode.getNextFunction().getIndex() : "null";
-            String nextOperatorIndex = methodNode.getNextOperator() != null ? methodNode.getNextOperator().getIndex() : "null";
-            loggAndSend("============================================================================");
-            loggAndSend("Function: " + methodNode.getName()
-                    + " -- next function: " + nextFunctionIndex
-                    + " -- next operator: " + nextOperatorIndex
-                    + " -- color: " + methodNode.getColor()
-                    + " -- index: " + methodNode.getIndex()
-            );
-        }
+        String nextFunctionIndex = methodNode.getNextFunction() != null ? methodNode.getNextFunction().getIndex() : "null";
+        String nextOperatorIndex = methodNode.getNextOperator() != null ? methodNode.getNextOperator().getIndex() : "null";
+        logger.logAndSend("============================================================================");
+        logger.logAndSend("Function: " + methodNode.getName()
+                + " -- next function: " + nextFunctionIndex
+                + " -- next operator: " + nextOperatorIndex
+                + " -- index: " + methodNode.getIndex()
+        );
+
         FunctionInvoker functionInvoker = invoker.getOperations().stream()
                 .filter(m -> m.getName().equals(methodNode.getName())).findFirst()
                 .orElseThrow(() -> new RuntimeException("Method not found in Invoker"));
-
 
         HttpMethod method = getMethod(methodNode); // done
         URI uri = buildUrl(methodNode); // done
         HttpHeaders header = buildHeader(functionInvoker); // done
         String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
-        if (debugMode) {
-            loggAndSend("============================================================");
-        }
+
+        logger.logAndSend("============================================================");
 
         // TODO: added application/x-www-form-urlencoded support: need to refactor.
         Object data;
@@ -230,9 +212,8 @@ public class ConnectorExecutor {
             } else {
                 data = body;
             }
-            if (debugMode) {
-                loggAndSend("Inside CheckMK body: " + data);
-            }
+
+            logger.logAndSend("Inside CheckMK body: " + data);
         }
 
         // TODO: Changed string to object in httpEntity;
@@ -246,9 +227,7 @@ public class ConnectorExecutor {
 //        }i
         ResponseEntity responseEntity = InvokerRequestBuilder
                 .convertToStringResponse(restTemplate.exchange(uri, method ,httpEntity, Object.class));
-        if (debugMode) {
-            loggAndSend("Response : " + responseEntity.getBody());
-        }
+        logger.logAndSend("Response : " + responseEntity.getBody());
         return responseEntity;
     }
 
@@ -271,9 +250,7 @@ public class ConnectorExecutor {
                 throw new RuntimeException("Http method not found");
         }
 
-        if (debugMode) {
-            loggAndSend("Http Method: " + httpMethodType.name());
-        }
+        logger.logAndSend("Http Method: " + httpMethodType.name());
         return httpMethodType;
     }
 
@@ -291,17 +268,13 @@ public class ConnectorExecutor {
         URI uri = new URI(endpoint);
         String strictlyEscapedQuery = StringUtils.replace(uri.getRawQuery(), "+", "%2B");
         uri = UriComponentsBuilder.fromUri(uri).replaceQuery(strictlyEscapedQuery).build(true).toUri();
-        if (debugMode) {
-            loggAndSend("URL: " + uri);
-        }
+        logger.logAndSend("URL: " + uri);
         return uri;
     }
 
     public String buildBody(BodyNode bodyNode){
         if (bodyNode == null){
-            if (debugMode) {
-                loggAndSend("Body: " + "null");
-            }
+            logger.logAndSend("Body: " + "null");
             return "null";
         }
         Map<String, Object> fields = replaceValues(bodyNode.getFields());
@@ -330,9 +303,7 @@ public class ConnectorExecutor {
         } catch (JsonProcessingException e){
             throw new RuntimeException(e);
         }
-        if (debugMode) {
-            loggAndSend("Body: " + result);
-        }
+        logger.logAndSend("Body: " + result);
         return result;
     }
 
@@ -368,9 +339,7 @@ public class ConnectorExecutor {
             headerItem.put(k, v);
         });
         httpHeaders.setAll(headerItem);
-        if (debugMode) {
-            loggAndSend("Header: " + httpHeaders.toString());
-        }
+        logger.logAndSend("Header: " + httpHeaders.toString());
         return httpHeaders;
     }
 
@@ -536,39 +505,38 @@ public class ConnectorExecutor {
                 break;
             default:
         }
-        if(debugMode) {
-            String nextFunctionIndex = statementNode.getNextFunction() != null ? statementNode.getNextFunction().getIndex() : "null";
-            String nextOperatorIndex = statementNode.getNextOperator() != null ? statementNode.getNextOperator().getIndex() : "null";
-            loggAndSend("============================================================================");
-            loggAndSend("Operator:"
-                    + " -- next function: " + nextFunctionIndex
-                    + " -- next operator: " + nextOperatorIndex
-                    + " -- type: " + statementNode.getType()
-                    + " -- index: " + statementNode.getIndex()
-            );
-        }
+
+        String nextFunctionIndex = statementNode.getNextFunction() != null ? statementNode.getNextFunction().getIndex() : "null";
+        String nextOperatorIndex = statementNode.getNextOperator() != null ? statementNode.getNextOperator().getIndex() : "null";
+        logger.logAndSend("============================================================================");
+        logger.logAndSend("Operator:"
+                + " -- next function: " + nextFunctionIndex
+                + " -- next operator: " + nextOperatorIndex
+                + " -- type: " + statementNode.getType()
+                + " -- index: " + statementNode.getIndex()
+        );
+
         executeMethod(statementNode.getNextFunction());
         executeDecisionStatement(statementNode.getNextOperator());
     }
 
     private void executeIfStatement(StatementNode ifStatement) throws Exception{
-        if (debugMode) {
-            String nextFunctionIndex = ifStatement.getNextFunction() != null ? ifStatement.getNextFunction().getIndex() : "null";
-            String nextOperatorIndex = ifStatement.getNextOperator() != null ? ifStatement.getNextOperator().getIndex() : "null";
+        String nextFunctionIndex = ifStatement.getNextFunction() != null ? ifStatement.getNextFunction().getIndex() : "null";
+        String nextOperatorIndex = ifStatement.getNextOperator() != null ? ifStatement.getNextOperator().getIndex() : "null";
 
-            loggAndSend("============================================================================");
-            loggAndSend("=============== " + ifStatement.getOperand() + " ================="
-                    + " -- next function: " + nextFunctionIndex
-                    + " -- next operator: " + nextOperatorIndex
-                    + " -- index: " + ifStatement.getIndex()
-            );
-        }
+        logger.logAndSend("============================================================================");
+        logger.logAndSend("=============== " + ifStatement.getOperand() + " ================="
+                + " -- next function: " + nextFunctionIndex
+                + " -- next operator: " + nextOperatorIndex
+                + " -- index: " + ifStatement.getIndex()
+        );
+
         OperatorAbstractFactory factory = new OperatorAbstractFactory();
         Operator operator = factory.generateFactory(OperatorType.COMPARISON).getOperator(ifStatement.getOperand());
         Object leftVariable = getValue(ifStatement.getLeftStatementVariable(), "");
 
-        if(leftVariable != null && debugMode){
-            //loggAndSend("Left Statement: " + leftVariable);
+        if(leftVariable != null){
+            logger.logAndSend("Left Statement: " + leftVariable);
         }
 
         String ref = statementNodeService.convertToRef(ifStatement.getLeftStatementVariable());
@@ -580,11 +548,11 @@ public class ConnectorExecutor {
             rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
         }
 
-        if (rightStatement != null && debugMode){
+        if (rightStatement != null){
             if (rightStatement.getClass().isArray()) {
-                //loggAndSend("Right Statement: " + Arrays.toString((String[])rightStatement));
+                logger.logAndSend("Right Statement: " + Arrays.toString((String[])rightStatement));
             } else {
-                //loggAndSend("Right Statement: " + rightStatement);
+                logger.logAndSend("Right Statement: " + rightStatement);
             }
 
         }
@@ -594,10 +562,9 @@ public class ConnectorExecutor {
             result = !result;
         }
 
-        if (debugMode) {
-            String msg = createOperatorResultMessage(result, ifStatement.getIndex());
-            loggAndSend(msg);
-        }
+        String msg = createOperatorResultMessage(result, ifStatement.getIndex());
+        logger.logAndSend(msg);
+
         if (result){
             executeMethod(ifStatement.getBodyFunction());
             executeDecisionStatement(ifStatement.getBodyOperator());
@@ -674,14 +641,13 @@ public class ConnectorExecutor {
                 .orElse(null);
         List<Object> array =
                 (List<Object>) message.getValue(condition, loopIterators);
-        if (debugMode) {
-            loggAndSend("============================= LOOP ======================== ");
-            loggAndSend(createLoopMsgForLog(array.isEmpty(), statementNode.getIndex()));
-        }
+
+        logger.logAndSend("============================= LOOP ======================== ");
+        logger.logAndSend(createLoopMsgForLog(array.isEmpty(), statementNode.getIndex()));
+
         for (int i = 0; i < array.size(); i++) {
-            if (debugMode) {
-                loggAndSend("Loop " + condition + "-------- index : " + i);
-            }
+            logger.logAndSend("Loop " + condition + "-------- index : " + i);
+
             loopIterators.put(statementNode.getIterator(), i);
             executeMethod(statementNode.getBodyFunction());
             executeDecisionStatement(statementNode.getBodyOperator());
@@ -741,24 +707,5 @@ public class ConnectorExecutor {
         RestTemplate restTemplate = restTemplateBuilder.build();
         restTemplate.setRequestFactory(requestFactory);
         return restTemplate;
-    }
-
-    private void loggAndSend(String message){
-        logger.info(message);
-        SocketLogMessage logMessage = new SocketLogMessage(message);
-        logMessage.setType("info");
-        simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, logMessage);
-    }
-
-    private void loggAndSend(Exception e){
-        logger.error(e.getMessage());
-
-        if (isSocketOpen) {
-            List<String> stackTrace = Stream.of(e.getStackTrace()).map(StackTraceElement::toString).toList();
-            SocketLogMessage socketLogMessage = new SocketLogMessage(e.getMessage());
-            socketLogMessage.setStackTrace(stackTrace);
-            socketLogMessage.setType("error");
-            simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, socketLogMessage);
-        }
     }
  }
