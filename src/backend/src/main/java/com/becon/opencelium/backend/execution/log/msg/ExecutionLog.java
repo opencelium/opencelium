@@ -9,9 +9,9 @@ public class ExecutionLog implements LogMessage {
     private String message;
     private LogType type = LogType.INFO; // error, info, warning
     private List<String> stackTrace; // exception stacktrace
+    private MethodData methodData;
 //    private String index; // order of execution
 //    private Connector connector; // data flow direction from connector or to connector;
-//    private MethodData methodData;
 //    private OperatorData operatorData;
 
 
@@ -65,6 +65,14 @@ public class ExecutionLog implements LogMessage {
     public <T extends LogType> void setType(T type) {
         this.type = type;
     }
+
+    public MethodData getMethodData() {
+        return methodData;
+    }
+
+    public void setMethodData(MethodData methodData) {
+        this.methodData = methodData;
+    }
 //
 //    public String getIndex() {
 //        return index;
@@ -82,13 +90,6 @@ public class ExecutionLog implements LogMessage {
 //        this.connector = connector;
 //    }
 //
-//    public MethodData getMethodData() {
-//        return methodData;
-//    }
-//
-//    public void setMethodData(MethodData methodData) {
-//        this.methodData = methodData;
-//    }
 //
 //    public OperatorData getOperatorData() {
 //        return operatorData;

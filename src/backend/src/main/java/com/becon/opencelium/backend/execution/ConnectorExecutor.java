@@ -127,6 +127,7 @@ public class ConnectorExecutor {
         MethodResponse methodResponse;
         HashMap<String, String> responseContainer;
         Map<String, Integer> loopsWithCurrIndex = executionContainer.getLoopIterators();
+        logger.getLogEntity().getMethodData().setColor(methodNode.getColor());
 // ==================================================================================
         ResponseEntity<String> responseEntity = sendRequest(methodNode);
 
