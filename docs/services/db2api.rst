@@ -20,7 +20,7 @@ Please read default documentation here https://github.com/opencelium/db2api#user
 Usage
 """""""""""""""""
 
-First of all add a connector to your db.
+First of all add a connector to your target csv file.
 
 |image0|
 
