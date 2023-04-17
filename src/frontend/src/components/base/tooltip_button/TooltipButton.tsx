@@ -29,9 +29,10 @@ const TooltipButton: FC<TooltipButtonProps & ButtonProps & Partial<TooltipProps>
          component,
          ...buttonProps
      }) => {
+        const id = target.toString().replace(new RegExp('\\W|^_*', 'g'), '_');
         return (
-            <Tooltip target={target.toString()} tooltip={tooltip} position={position} component={
-                <Button id={target.toString()} {...buttonProps}/>}
+            <Tooltip target={id} tooltip={tooltip} position={position} component={
+                <Button id={id} {...buttonProps}/>}
             />
         )
     }

@@ -12,7 +12,7 @@ Navigation
 
 On the left side you can see the menu for navigation. It displays only icons
 until you mouseover it. After it expands and shows the labels. The admin item
-has subitems, that can be (un)folded clicking on the arrow.
+has sub items, that can be (un)folded clicking on the arrow.
 
 |menu|
 
@@ -51,31 +51,28 @@ optional checkboxes for multiple actions and a column with single actions.
 
 |list_view|
 
-There is a possibility also to sort data (asc/desc) by name or by title |title_sort_icon|. User
-has a possibility to see data in a grid view clicking on the icon |grid_icon| and setting
+There is a possibility also to sort data (asc/desc) by name or by title |title_sort_icon|.
+In Connector / Connection / Schedule List you can update a name / a title and a description (if exists)
+directly there just double clicking on the text.
+
+|connector_inline_name_update|
+
+User has a possibility to see data in a grid view clicking on the icon |grid_icon| and setting
 a number of elements pro row:
 
 |grid_view|
 
-The user can navigate in the grid view using keyboard arrows. The selected icon underlines
-the first letter of the actions, that means pressing: *v* - opens view, *u* - opens update and
-*d* - performs delete. If the amount of data does not fit to the page, here comes
-a paginator for navigating |paginator|. The grid view displays an icon of the element that can
-be replaced, if you mouseover the icon and click on it |upload_image_icon|. Checking items in
-the list view you can apply an operation to all of them, for instance *Delete Selected*.
-There can be more operations depending of the entity.
-
-|more_multiple_actions|
-
-The action columns provides such manipulations like: *view*, *update*, and *delete*.
-Also, you can search by all possible parameters that has the corresponded entity typing
-in the search input.
+If the amount of data does not fit to the page, here comes a pagination for navigating |paginator|.
+The grid view displays an icon of the element that can be replaced, if you mouseover the icon and
+click on it |upload_image_icon|. Checking items in the list view you can apply an operation to all of them,
+for instance *Delete Selected*. The action columns provides such manipulations like: *view*, *update*, and *delete*.
+Also, you can search by all possible parameters that has the corresponded entity typing in the search input.
 
 Add/Update Element
 =========
 
 You are on the page with list of elements. To add a new one, you need to
-click on the *Add <Element>* button or press **Alt + '+'**. The application
+click on the *Add <Element>* button. The application
 shows the same forms for adding and updating of the concrete element.
 
 Add/Update element has several form sections. The validation process is fulfilled
@@ -96,6 +93,8 @@ The reason is a dependency of your selection.
 .. |form_section| image:: ../img/management/form_section.png
    :align: middle
 .. |grid_icon| image:: ../img/management/grid_icon.png
+.. |connector_inline_name_update| image:: ../img/management/connector_inline_name_update.png
+   :align: middle
 .. |grid_view| image:: ../img/management/grid_view.png
    :align: middle
 .. |list_view| image:: ../img/management/list_view.png

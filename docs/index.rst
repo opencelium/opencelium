@@ -15,7 +15,6 @@ This documentation is organized into a couple of sections:
    gettinginvolved/installation
    gettinginvolved/updating
    gettinginvolved/administration
-   gettinginvolved/activate_subscription   
 
 .. toctree::
    :caption: Usage
@@ -41,6 +40,7 @@ This documentation is organized into a couple of sections:
    :maxdepth: 2
 
    services/db2api
+   services/csv2api
 
 .. toctree::
    :caption: Tools
