@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.LogType;
 import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.execution.log.msg.ExecutionLog;
+import com.becon.opencelium.backend.execution.log.msg.MethodData;
 import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
 import com.becon.opencelium.backend.invoker.entity.Body;
@@ -127,7 +128,7 @@ public class ConnectorExecutor {
         MethodResponse methodResponse;
         HashMap<String, String> responseContainer;
         Map<String, Integer> loopsWithCurrIndex = executionContainer.getLoopIterators();
-        logger.getLogEntity().getMethodData().setColor(methodNode.getColor());
+        logger.getLogEntity().setMethodData(new MethodData(methodNode.getColor()));
 // ==================================================================================
         ResponseEntity<String> responseEntity = sendRequest(methodNode);
 
@@ -159,7 +160,7 @@ public class ConnectorExecutor {
             List<MethodResponse> list = executionContainer.getMethodResponses();
             list.add(methodResponse);
         }
-
+        logger.getLogEntity().setMethodData(null);
         executeMethod(methodNode.getNextFunction());
         executeDecisionStatement(methodNode.getNextOperator());
     }

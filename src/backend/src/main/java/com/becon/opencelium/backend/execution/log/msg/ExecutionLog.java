@@ -17,19 +17,14 @@ public class ExecutionLog implements LogMessage {
 
 
     public ExecutionLog() {
-        this.methodData = new MethodData();
-        this.stackTrace = new ArrayList<>();
     }
 
     public ExecutionLog(String message) {
         this.message = message;
-        this.methodData = new MethodData();
-        this.stackTrace = new ArrayList<>();
     }
 
     public ExecutionLog(Exception e) {
         this.message = e.getMessage();
-        this.methodData = new MethodData();
         this.stackTrace = Stream.of(e.getStackTrace()).map(StackTraceElement::toString).toList();
     }
 
