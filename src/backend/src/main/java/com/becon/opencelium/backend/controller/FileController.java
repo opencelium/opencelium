@@ -232,8 +232,6 @@ public class FileController {
                         "Cannot store file with relative path outside current directory "
                                 + filename);
             }
-
-            List<InputStream> files = new ArrayList<>();
             if (extension.equals("zip")) {
                 InputStream inputStream = file.getInputStream();
                 ZipInputStream zis = new ZipInputStream(inputStream);
@@ -241,15 +239,10 @@ public class FileController {
                 while (zipEntry != null) {
                     System.out.println(zipEntry.getName());
                     zipEntry = zis.getNextEntry();
-                    DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                    Document doc = dBuilder.parse(zis);
-                    doc.setDocumentURI(PathConstant.INVOKER + filename);
-                    Xml xml = new Xml(doc, filename);
-                    xml.save();
-                    invokerServiceImp.save(doc);
+                    saveXmlFile(zis, filename);
                 }
             } else {
-                files.add(file.getInputStream());
+                saveXmlFile(file.getInputStream(), filename);
             }
         }
         catch (Exception e) {
@@ -258,8 +251,22 @@ public class FileController {
         }
 
         Invoker invoker = invokerServiceImp.findByName(FileNameUtils.removeExtension(filename));
-        InvokerResource invokerResource = invokerServiceImp.toResource(invoker);
         return ResponseEntity.ok().build();
+    }
+
+    private void saveXmlFile(InputStream inputStream, String filename) {
+        try {
+            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = dBuilder.parse(inputStream);
+            doc.setDocumentURI(PathConstant.INVOKER + filename);
+            Xml xml = new Xml(doc, filename);
+            xml.save(); // TODO: add to invokerServiceImpl
+            invokerServiceImp.save(doc);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
     }
 
     @PostMapping(value = "/connector")

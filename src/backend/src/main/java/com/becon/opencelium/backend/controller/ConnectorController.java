@@ -106,7 +106,7 @@ public class ConnectorController {
         Connector entity = connectorService.toEntity(connectorResource);
         connectorService.save(entity);
 
-        return ResponseEntity.ok().body(connectorService.toResource(connector));
+        return ResponseEntity.ok().body(connectorService.toResource(entity));
     }
 
     @DeleteMapping("/{id}")

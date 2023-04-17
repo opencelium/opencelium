@@ -45,7 +45,7 @@ public class ConnectionExecutor {
     private boolean debugMode;
 
     public ConnectionExecutor(ConnectionNodeServiceImp connectionNodeService, ConnectorServiceImp connectorService,
-                              ExecutionContainer executionContainer, ConnectorExecutor connectorExecutor, boolean debugMode) {
+                              ExecutionContainer executionContainer, ConnectorExecutor connectorExecutor) {
         this.connectionNodeService = connectionNodeService;
         this.connectorService = connectorService;
         this.executionContainer = executionContainer;
@@ -68,8 +68,8 @@ public class ConnectionExecutor {
 
 
         connectorExecutor.start(connectionNode.getFromConnector(), fromConnector, toConnector,
-                                Constant.CONN_FROM, debugMode);
+                                Constant.CONN_FROM);
         connectorExecutor.start(connectionNode.getToConnector(), toConnector, fromConnector,
-                                Constant.CONN_TO, debugMode);
+                                Constant.CONN_TO);
     }
 }
