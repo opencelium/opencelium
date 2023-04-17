@@ -269,8 +269,8 @@ export function updateThemeWithColors(theme: ITheme, localStorageTheme: LocalSto
 }
 
 export const DefaultThemes: LocalStorageTheme[] = [
-    {name: 'Default', isCurrent: true, colors: {action: '#007bff', header: '#00ACC2', menu: '#012E55'}},
-    {name: 'Green Day', colors: {action: '#007bff', header: '#00ACC2', menu: '#01553d'}},
+    {name: 'Default', isCurrent: true, colors: {action: '#2372ba', header: '#00ACC2', menu: '#012E55'}},
+    {name: 'Green Day', colors: {action: '#2372ba', header: '#00ACC2', menu: '#01553d'}},
     {name: 'Becon Classic', colors: {action: '#2372ba', header: '#fac000', menu: '#e8b200'}}
 ]
 export const DefaultTheme = DefaultThemes.find(theme => theme.isCurrent);
