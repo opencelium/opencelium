@@ -42,7 +42,11 @@ const DefaultListRaw: FC<DefaultListRawProps> =
                             if(element.onclick || element.tagName.toLowerCase() === 'input'){
                                 break;
                             } else{
-                                element = element.parentElement;
+                                if(element.parentElement){
+                                    element = element.parentElement;
+                                } else{
+                                    break;
+                                }
                             }
                         }
                     }
