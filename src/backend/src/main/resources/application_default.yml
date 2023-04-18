@@ -32,7 +32,7 @@ spring:
     url: bolt://localhost:7687
     authentication:
       username: neo4j
-      password: secret
+      password: secretsecret
 ###########################################################################
 #                                                                         #
 #   Mail configuration section                                            #
