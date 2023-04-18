@@ -173,7 +173,7 @@ class TestConnectionButton extends React.Component{
         }
     }
 
-    test(){
+    test(e){
         const {
             connection, setInitialTestConnectionState, setInitialTestScheduleState,
             setTestingConnection, isTestingConnection, setFullScreenFormSection,
@@ -215,13 +215,12 @@ class TestConnectionButton extends React.Component{
                     position={'bottom'}
                     tooltip={'Test'}
                     hasBackground={false}
-                    handleClick={() => this.test()}
+                    handleClick={(e) => this.test(e)}
                     icon={'terminal'}
                     size={TextSize.Size_20}
                     loadingSize={TextSize.Size_14}
                     isDisabled={isTestingConnection}
                     isLoading={isTestingConnection}
-                    label="Test Run"
                 />
                 {isTestingConnection && <CoverButtonStyled/>}
                 <UncontrolledPopover
