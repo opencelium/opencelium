@@ -41,7 +41,6 @@ export const LogPanelHeight = {
 }
 
 export interface ConnectionState extends ICommonState{
-    moveTestButton: number,
     connections: IConnection[],
     metaConnections: IConnection[],
     isCurrentConnectionHasUniqueTitle: TRIPLET_STATE,
@@ -83,7 +82,6 @@ export interface ConnectionState extends ICommonState{
 
 
 let initialState: ConnectionState = {
-    moveTestButton: 0,
     connections: [],
     metaConnections: [],
     isCurrentConnectionHasUniqueTitle: TRIPLET_STATE.INITIAL,
@@ -139,18 +137,12 @@ export const connectionSlice = createSlice({
             state.logPanelHeight = action.payload;
         },
         setTestingConnection: (state, action: PayloadAction<boolean>) => {
-            
             if(action.payload){
                 state.currentLogs = [];
                 if(state.logPanelHeight === 0){
                     state.logPanelHeight = LogPanelHeight.Medium;
                 }
             }
-            
-            if(!action.payload){
-                state.moveTestButton = 0;
-            }
-            
             state.isTestingConnection = action.payload;
         },
         addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
@@ -236,7 +228,6 @@ export const connectionSlice = createSlice({
             state.isDraftOpenedOnce = true;
         },
         setInitialTestConnectionState: (state) => {
-            state.moveTestButton = 170;
             state.testConnection = null;
             state.addingTestConnection = API_REQUEST_STATE.INITIAL;
             state.deletingTestConnectionById = API_REQUEST_STATE.INITIAL;
