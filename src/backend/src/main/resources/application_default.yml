@@ -38,25 +38,25 @@ spring:
   #   Mail configuration section                                            # 
   #                                                                         #
   ###########################################################################
-mail:
-  opencelium:
-    from: noreply@opencelium.io
+  mail:
+    opencelium:
+      from: noreply@opencelium.io
   #    enabled: false
-  host: imap4s.becon.de
-  port: 25
-  username: oc.io.salesdemo
-  password: omedselas.oi.oc
-  properties:
-    mail:
-      smtp:
-        auth: true
-        connectiontimeout: 5000
-        timeout: 5000
-        writetimeout: 5000
-        starttls:
-          enable: true
-        ssl:
-          trust: imap4s.becon.de
+    host: imap4s.becon.de
+    port: 25
+    username: oc.io.salesdemo
+    password: omedselas.oi.oc
+    properties:
+      mail:
+        smtp:
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+          starttls:
+            enable: true
+          ssl:
+            trust: imap4s.becon.de
   ###########################################################################
   #                                                                         #
   #   Configuration of third part tools                                     # 
@@ -79,43 +79,48 @@ mail:
 #   configuration.                                                        #
 #                                                                         #
 ###########################################################################
-main:
-  banner-mode: "off"
-data:
-  rest:
-    basePath: /api
-jpa:
-  properties:
+  main:
+    banner-mode: "off"
+  data:
+    rest:
+      basePath: /api
+  jpa:
+    properties:
+      hibernate:
+        id:
+          new_generator_mappings: false
     hibernate:
-      id:
-        new_generator_mappings: false
-  hibernate:
-    dll-auto: validate
-  open-in-view: false
-servlet:
-  multipart:
-    max-file-size: 1000000KB
-    max-request-size: 1000000KB
-http:
-  multipart:
-    enabled: false
-quartz:
-  properties:
-    org:
-      quartz:
-        threadPool:
-          threadCount: 5
-        jobStore:
-          tablePrefix: QRTZ_
-  job-store-type: jdbc
-liquibase:
-  change-log: classpath:/db/changelog/changelog-master.xml
+      dll-auto: validate
+    open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 1000000KB
+      max-request-size: 1000000KB
+  http:
+    multipart:
+      enabled: false
+  quartz:
+    properties:
+      org:
+        quartz:
+          threadPool:
+            threadCount: 5
+          jobStore:
+            tablePrefix: QRTZ_
+    job-store-type: jdbc
+  liquibase:
+    change-log: classpath:/db/changelog/changelog-master.xml
+
 logging:
+  file: src/main/resources/logs
+    pattern:
+      console: "%d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) %logger.%M - %msg%n"
   level:
     org:
       springframework:
         data:
           neo4j: OFF
+
 management:
   health:
     defaults:
@@ -127,6 +132,7 @@ management:
   endpoint:
     health:
       show-details: always
+
 opencelium:
   version: 3.1.0
   debug_mode: true
