@@ -19,7 +19,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendMessage(String to, String subject, String text) {
 
-        String senderName = env.getProperty("mail.opencelium.from");
+        String senderName = env.getProperty("spring.mail.opencelium.from");
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
