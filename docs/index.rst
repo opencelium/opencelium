@@ -2,11 +2,6 @@
 Welcome to OpenCelium documentation
 ##################
 
-.. note::
-	This is our official community documentation. The installation starts with the uncompiled version. There are a few tasks required to run Opencelium. For all subscribers we provide all installations and necessary information on `Service Portal`_. Please contact our `Sales Department`_ if you would like to start with a subscription.
- 
-.. _Service Portal: https://service.opencelium.io
-.. _Sales Department: mailto:info@opencelium.io
 ------------
 
 This documentation is organized into a couple of sections:
@@ -20,7 +15,6 @@ This documentation is organized into a couple of sections:
    gettinginvolved/installation
    gettinginvolved/updating
    gettinginvolved/administration
-   gettinginvolved/activate_subscription   
 
 .. toctree::
    :caption: Usage
@@ -46,6 +40,7 @@ This documentation is organized into a couple of sections:
    :maxdepth: 2
 
    services/db2api
+   services/csv2api
 
 .. toctree::
    :caption: Tools
@@ -78,7 +73,7 @@ This documentation is organized into a couple of sections:
 License
 ##################
 
-`becon`_ © 2013-2022 becon GmbH
+`becon`_ © 2013-2023 becon GmbH
 
 .. _becon: LICENSE.html
       
