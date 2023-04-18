@@ -95,7 +95,7 @@ public class ExecutionAspect {
                         .filter(c -> c.getLanguage().equals(lang)).findFirst().orElse(null);
                 if (content == null) {
                     content = en.getEventMessage().getEventContents().stream()
-                            .filter(c -> c.getLanguage().equals("eng")).findFirst()
+                            .filter(c -> c.getLanguage().equals("en")).findFirst()
                             .orElseThrow(() -> new RuntimeException("Default language of content not found"));
                 }
 

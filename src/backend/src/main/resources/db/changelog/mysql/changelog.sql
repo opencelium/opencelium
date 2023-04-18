@@ -308,3 +308,6 @@ SELECT VERSION();
 --changeset 3.1:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 SELECT VERSION();
 
+--changeset 3.1:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+UPDATE event_content SET language="en" where language="eng";
+
