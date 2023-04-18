@@ -33,11 +33,11 @@ spring:
     authentication:
       username: neo4j
       password: secret
-  ###########################################################################
-  #                                                                         #
-  #   Mail configuration section                                            # 
-  #                                                                         #
-  ###########################################################################
+###########################################################################
+#                                                                         #
+#   Mail configuration section                                            #
+#                                                                         #
+###########################################################################
   mail:
     opencelium:
       from: noreply@opencelium.io
@@ -57,22 +57,22 @@ spring:
             enable: true
           ssl:
             trust: imap4s.becon.de
-  ###########################################################################
-  #                                                                         #
-  #   Configuration of third part tools                                     # 
-  #                                                                         #
-  ###########################################################################
-  #  ldap:
-  #    embedded:
-  #      base-dn: dc=springframework,dc=org
-  #      ldif: classpath:test-server.ldif
-  #      port: 8389
-  #      url: ldap://localhost:8389/
-  #  rabbitmq:
-  #    host: localhost
-  #    port: 5672
-  #    username: guest
-  #    password: guest
+###########################################################################
+#                                                                         #
+#   Configuration of third part tools                                     #
+#                                                                         #
+###########################################################################
+#  ldap:
+#    embedded:
+#      base-dn: dc=springframework,dc=org
+#      ldif: classpath:test-server.ldif
+#      port: 8389
+#      url: ldap://localhost:8389/
+#  rabbitmq:
+#    host: localhost
+#    port: 5672
+#    username: guest
+#    password: guest
 ###########################################################################
 #                                                                         #
 #   Basic configuration section. Do not change the following              #
@@ -113,8 +113,8 @@ spring:
 
 logging:
   file: src/main/resources/logs
-    pattern:
-      console: "%d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) %logger.%M - %msg%n"
+  pattern:
+    console: "%d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) %logger.%M - %msg%n"
   level:
     org:
       springframework:
