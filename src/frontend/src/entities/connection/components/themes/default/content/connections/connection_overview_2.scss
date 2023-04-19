@@ -866,12 +866,10 @@ $DASHED_COLOR: #58854d;
   transform: translateX(-50%);
   bottom: 34px;
   z-index: 999;
-  background-color: #f0f0f0;
   padding: 50px 150px 70px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.12), 0 0 3px rgba(0, 0, 0, 0.24);
   transition: all 0.3s;
 
   &_active {
@@ -882,7 +880,7 @@ $DASHED_COLOR: #58854d;
     left: 42%;
   }
 
-  &_active.button_panel_details_opened{
+  &_active.button_panel_details_opened {
     left: 42%;
   }
 
@@ -918,11 +916,6 @@ $DASHED_COLOR: #58854d;
     }
   }
 }
-
-
-
-
-
 
 @keyframes AnItemAppear {
   from {
