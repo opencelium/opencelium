@@ -29,7 +29,7 @@ class SettingsPanel extends React.Component {
       <div className={styles.details_settings_panel}>
         <TooltipButton
           isDisabled={isTestingConnection}
-          size={TextSize.Size_20}
+          size={TextSize.Size_18}
           position={'bottom'}
           className={styles.position_icon_left}
           icon={!isDetailsOpened ? 'chevron_left' : 'chevron_right'}

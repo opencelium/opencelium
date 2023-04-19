@@ -54,30 +54,6 @@ const LogPanel: FC = ({}) => {
         <React.Fragment>
             <TopStyled logPanelHeight={logPanelHeight}>
                 {logPanelHeight !== 0 && <HeaderStyled value={'Logs'} width={isDetailsOpened ? 'calc(100% - 300px)' : '100%'}/>}
-                {logPanelHeight === LogPanelHeight.High &&
-                    <ToggleButtonStyled
-                        iconSize={TextSize.Size_20}
-                        position={'top'}
-                        icon={'expand_more'}
-                        tooltip={'Show less'}
-                        target={`toggle_log_panel`}
-                        hasBackground={false}
-                        handleClick={() => dispatch(setLogPanelHeight(LogPanelHeight.Medium))}
-                    />
-                }
-                {logPanelHeight === LogPanelHeight.Medium &&
-                    <ToggleSmallButtonContainerStyled>
-                        <ToggleSmallButtonStyled
-                            iconSize={TextSize.Size_12}
-                            position={'top'}
-                            icon={'expand_less'}
-                            tooltip={'Show More'}
-                            target={`toggle_more_log_panel`}
-                            hasBackground={false}
-                            handleClick={() => dispatch(setLogPanelHeight(LogPanelHeight.High))}
-                        />
-                    </ToggleSmallButtonContainerStyled>
-                }
                 {logPanelHeight !== 0 && <ClearButtonStyled
                     right={isDetailsOpened ? isFullScreen ? 312 : 300 : isFullScreen ? 12 : 2}
                     iconSize={TextSize.Size_20}
