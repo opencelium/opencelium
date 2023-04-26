@@ -41,7 +41,6 @@ import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
-import com.becon.opencelium.backend.neo4j.entity.relation.Linked;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.error.validation.ErrorMessageDataResource;
@@ -51,8 +50,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
@@ -84,9 +81,6 @@ public class ConnectionController {
 
     @Autowired
     private MethodNodeServiceImp methodNodeServiceImp;
-
-//    @Autowired
-//    private TConnectionServiceImp tConnectionServiceImp;
 
     @Autowired
     private RestTemplate restTemplate;

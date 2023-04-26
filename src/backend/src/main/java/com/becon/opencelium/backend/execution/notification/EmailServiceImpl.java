@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmailServiceImpl implements EmailService {
 
-    @Autowired
+    @Autowired(required = false)
     private JavaMailSender emailSender;
 
     @Autowired
@@ -18,6 +18,9 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendMessage(String to, String subject, String text) {
+        if (emailSender == null) {
+            return;
+        }
 
         String senderName = env.getProperty("spring.mail.opencelium.from");
 

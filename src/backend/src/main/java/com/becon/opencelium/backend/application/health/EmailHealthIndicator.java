@@ -9,13 +9,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmailHealthIndicator extends AbstractHealthIndicator {
 
-    @Autowired
+    @Autowired(required = false)
     private JavaMailSenderImpl mailSender;
 
     @Override
     protected void doHealthCheck(Health.Builder builder) throws Exception {
         builder.withDetail("location", this.mailSender.getHost() + ":" + this.mailSender.getPort());
-        this.mailSender.testConnection();
-        builder.up();
+        try {
+            this.mailSender.testConnection();
+            builder.up();
+        } catch (Exception e) {
+            builder.down(e);
+        }
     }
 }
