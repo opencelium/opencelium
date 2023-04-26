@@ -73,7 +73,7 @@ This documentation is organized into a couple of sections:
 License
 ##################
 
-`becon`_ © 2013-2022 becon GmbH
+`becon`_ © 2013-2023 becon GmbH
 
 .. _becon: LICENSE.html
       
