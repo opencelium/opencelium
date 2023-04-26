@@ -6,7 +6,7 @@ Installation
 	Please check the software requirements, before installing OC. 
 
 
-Debian/Ubuntu (example for 20.04 LTS)
+Debian/Ubuntu (example for 22.04 LTS)
 """""""""""""""""
 **Prepare environment:**
 
@@ -25,7 +25,7 @@ Debian/Ubuntu (example for 20.04 LTS)
 	:linenos:
 	
 	root@shell> sudo apt install curl (if debian)
-	root@shell> curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+	root@shell> curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 	root@shell> apt-get install -y nodejs
 	root@shell> node -v // to check
 
@@ -52,8 +52,8 @@ Debian/Ubuntu (example for 20.04 LTS)
 .. code-block:: sh
 	:linenos:
 
-	root@shell> apt install openjdk-8-jdk
-	root@shell> apt install openjdk-8-jre (can be optional)
+	root@shell> apt install openjdk-17-jdk
+	root@shell> apt install openjdk-17-jre (can be optional)
 	root@shell> java -version // to check
 
 6. Install gradle:
@@ -72,11 +72,11 @@ Debian/Ubuntu (example for 20.04 LTS)
 .. code-block:: sh
 	:linenos:
 
-	root@shell> wget --no-check-certificate -O - https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
-	root@shell> echo 'deb http://debian.neo4j.org/repo stable/' > /etc/apt/sources.list.d/neo4j.list
+	root@shell> wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
+	root@shell> echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
 	root@shell> apt update
 	root@shell> apt install neo4j
-	root@shell> /usr/bin/neo4j-admin set-initial-password secret // change password if you want
+	root@shell> /usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
 	root@shell> service neo4j status  // to check
 	root@shell> sed -i '/#dbms.connectors.default_listen_address=0.0.0.0/c\dbms.connectors.default_listen_address=0.0.0.0' /etc/neo4j/neo4j.conf
 	root@shell> sed -i '/#dbms.security.auth_enabled=false/c\dbms.security.auth_enabled=false' /etc/neo4j/neo4j.conf	
@@ -90,61 +90,9 @@ Debian/Ubuntu (example for 20.04 LTS)
 
 	root@shell> apt install mariadb-server mariadb-client
 	root@shell> mysql_secure_installation // set password
-	root@shell> mysql -u root -e "UPDATE mysql.user SET plugin = 'mysql_native_password' WHERE User = 'root';"
-	root@shell> mysql -u root -e "FLUSH PRIVILEGES"
+	root@shell> mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"  // change password if you want
 	root@shell> mysql --version // to check
 
-9. Install MY-NETDATA:
-
-.. code-block:: sh
-	:linenos:
-
-	if debian
-	root@shell> sudo apt-get install zlib1g-dev uuid-dev libmnl-dev pkg-config gcc make autoconf autoconf-archive autogen automake python python-yaml python-mysqldb nodejs lm-sensors python-psycopg2 netcat
-	root@shell> git clone https://github.com/firehol/netdata.git --depth=1 /usr/lib/netdata
-	root@shell> cd /usr/lib/netdata
-	root@shell> sudo ./netdata-installer.sh
-
-	if ubuntu
-	root@shell> apt-get install netdata -y
-
-	root@shell> sed -i '/\tbind socket to IP = 127.0.0.1/c\\tbind socket to IP = 0.0.0.0' /etc/netdata/netdata.conf
-	root@shell> wget https://bitbucket.org/becon_gmbh/opencelium/raw/cf5b43c102cca25d0a7abe778f1de0fe0c4e40c7/docs/netdata/oc-mode.html -O /usr/share/netdata/web/oc-mode.html
-	
-	 (if debian)
-	root@shell> chown netdata:netdata /usr/share/netdata/web/oc-mode.html
-	
-	root@shell> systemctl restart netdata
-
-10. Install Elasticsearch (optional)
-
-.. code-block:: sh
-	:linenos:
-
-	 root@shell> apt-get install apt-transport-https
-	 root@shell> wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-	 root@shell> add-apt-repository "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
-	 root@shell> apt-get update
-	 root@shell> apt-get install elasticsearch
-	 root@shell> sed -i '/\#cluster.name: my-application/c\cluster.name: opencelium' /etc/elasticsearch/elasticsearch.yml
-	 root@shell> sed -i '/\#network.host: 192.168.0.1/c\network.host: 0.0.0.0' /etc/elasticsearch/elasticsearch.yml
-	 root@shell> echo "cluster.initial_master_nodes: node-1" >> /etc/elasticsearch/elasticsearch.yml 
-	 root@shell> /bin/systemctl enable elasticsearch.service
-	 root@shell> systemctl start elasticsearch.service
-
-.. note::
-        If elasticsearch is not running, check if "transport.host: localhost" is set in /etc/elasticsearch/elasticsearch.yml
-
-11. Install Kibana (optional)
-
-.. code-block:: sh
-	:linenos:
-
-	 root@shell> apt-get install kibana
-	 root@shell> sed -i '/\#server.host: "localhost"/c\server.host: "0.0.0.0"' /etc/kibana/kibana.yml
-	 root@shell> sed -i '/\#elasticsearch.hosts: ["http://localhost:9200"]/c\elasticsearch.hosts: ["http://localhost:9200"]' /etc/kibana/kibana.yml
-	 root@shell> /bin/systemctl enable kibana.service
-	 root@shell> service kibana start
 
 **Install Application:**
 
@@ -153,7 +101,7 @@ Debian/Ubuntu (example for 20.04 LTS)
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
+	root@shell> git clone -b v3.1 https://github.com/opencelium/opencelium.git . // Get stable versions here https://github.com/opencelium/opencelium/tags
 
 2. Build frontend project
 
@@ -291,50 +239,6 @@ SUSE Linux Enterprise Server (example for SLES 15 SP1)
 	root@shell> rcmysql start
 	root@shell> mysql_secure_installation // set password	
 	root@shell> mysql --version // to check
-
-9. Install MY-NETDATA:
-
-.. code-block:: sh
-	:linenos:
-
-	root@shell> zypper addrepo https://download.opensuse.org/repositories/devel:libraries:c_c++/SLE_15_SP1/devel:libraries:c_c++.repo
-	root@shell> zypper refresh
-	root@shell> zypper install zlib-devel libuv-devel libuuid-devel pkg-config gcc make autoconf autoconf-archive autogen automake python python-yaml nodejs netcat 
-	root@shell> git clone https://github.com/firehol/netdata.git --depth=1 /usr/lib/netdata
-	root@shell> cd /usr/lib/netdata
-	root@shell> sudo ./netdata-installer.sh
-	root@shell> wget https://bitbucket.org/becon_gmbh/opencelium/raw/cf5b43c102cca25d0a7abe778f1de0fe0c4e40c7/docs/netdata/oc-mode.html -O /usr/share/netdata/web/oc-mode.html
-	root@shell> chown netdata:netdata /usr/share/netdata/web/oc-mode.html
-	root@shell> service netdata status
-
-10. Install Elasticsearch (optional)
-
-.. code-block:: sh
-	:linenos:
-
-	 root@shell> rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
-	 root@shell> echo -e "[elasticsearch-7.x]\nname=Elasticsearch repository for 7.x packages\nbaseurl=https://artifacts.elastic.co/packages/oss-7.x/yum\ngpgcheck=1\ngpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch\nenabled=1\nautorefresh=1\ntype=rpm-md" >> /etc/zypp/repos.d/elasticsearch.repo 
-	 root@shell> zypper install elasticsearch-oss
-	 root@shell> sed -i '/\#cluster.name: my-application/c\cluster.name: opencelium' /etc/elasticsearch/elasticsearch.yml
-	 root@shell> sed -i '/\#network.host: 192.168.0.1/c\network.host: 0.0.0.0' /etc/elasticsearch/elasticsearch.yml
-	 root@shell> echo "cluster.initial_master_nodes: node-1" >> /etc/elasticsearch/elasticsearch.yml 
-	 root@shell> chkconfig elasticsearch on
-	 root@shell> systemctl daemon-reload
- 	 root@shell> systemctl restart elasticsearch.service
-
-
-11. Install Kibana (optional)
-
-.. code-block:: sh
-	:linenos:
-
-	 root@shell> echo -e "[kibana-7.x]\nname=Kibana repository for 7.x packages\nbaseurl=https://artifacts.elastic.co/packages/7.x/yum\ngpgcheck=1\ngpgkey=https://artifacts.elastic.co/\GPG-KEY-elasticsearch\nenabled=1\nautorefresh=1\ntype=rpm-md" >> /etc/zypp/repos.d/kibana.repo
-	 root@shell> zypper install kibana
-	 root@shell> sed -i '/\#server.host: "localhost"/c\server.host: "0.0.0.0"' /etc/kibana/kibana.yml
-	 root@shell> sed -i '/\#elasticsearch.hosts: ["http://localhost:9200"]/c\elasticsearch.hosts: ["http://localhost:9200"]' /etc/kibana/kibana.yml
-	 root@shell> chkconfig kibana on
-	 root@shell> systemctl daemon-reload
- 	 root@shell> systemctl restart kibana.service
 
 
 **Install Application:**
@@ -492,20 +396,6 @@ Red Hat Enterprise Linux
 	root@shell> mysql_secure_installation // set password
 	root@shell> mysql --version // to check
 
-9. Install MY-NETDATA:
-
-.. code-block:: sh
-	:linenos:
-
-	if debian
-	root@shell> yum install zlib-devel libuuid-devel libmnl-devel gcc make git autoconf autogen automake pkgconfig
-	root@shell> git clone https://github.com/firehol/netdata.git --depth=1 /usr/lib/netdata
-	root@shell> cd /usr/lib/netdata
-	root@shell> sudo ./netdata-installer.sh
-	root@shell> sed -i '/\tbind socket to IP = 127.0.0.1/c\\tbind socket to IP = 0.0.0.0' /etc/netdata/netdata.conf
-	root@shell> wget https://bitbucket.org/becon_gmbh/opencelium/raw/cf5b43c102cca25d0a7abe778f1de0fe0c4e40c7/docs/netdata/oc-mode.html -O /usr/share/netdata/web/oc-mode.html
-	root@shell> chown netdata:netdata /usr/share/netdata/web/oc-mode.html
-	root@shell> systemctl restart netdata
 
 **Install Application:**
 
