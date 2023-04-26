@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.exception.EmailAlreadyExistException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
 import com.becon.opencelium.backend.exception.UserNotFoundException;
@@ -41,6 +42,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @RestController
@@ -96,8 +98,10 @@ public class UserController {
 
         UserDetailResource userDetailResource = userRequestResource.getUserDetail();
         if(userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()){
-            userDetailResource.setLang("en");
+            userDetailResource.setLang(LangEnum.EN.getCode());
             userRequestResource.setUserDetail(userDetailResource);
+        } else {
+            LangEnum.valueOf(userDetailResource.getLang().toUpperCase(Locale.ROOT));
         }
 
         User user = userService.requestToEntity(userRequestResource);

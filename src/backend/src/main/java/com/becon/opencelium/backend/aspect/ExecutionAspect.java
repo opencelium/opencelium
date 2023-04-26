@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.aspect;
 
 
+import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
@@ -94,9 +95,10 @@ public class ExecutionAspect {
                 EventContent content = en.getEventMessage().getEventContents().stream()
                         .filter(c -> c.getLanguage().equals(lang)).findFirst().orElse(null);
                 if (content == null) {
+                    String defaultLang = LangEnum.EN.getCode();
                     content = en.getEventMessage().getEventContents().stream()
-                            .filter(c -> c.getLanguage().equals("en")).findFirst()
-                            .orElseThrow(() -> new RuntimeException("Default language of content not found"));
+                            .filter(c -> c.getLanguage().equals(defaultLang)).findFirst()
+                            .orElseThrow(() -> new RuntimeException("Default language(" + defaultLang + ") of content not found"));
                 }
 
                 message = replaceConstants(content.getBody(), user, ex, en);

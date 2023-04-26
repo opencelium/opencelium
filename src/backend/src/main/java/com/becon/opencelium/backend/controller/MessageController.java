@@ -1,18 +1,22 @@
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.mysql.entity.EventContent;
 import com.becon.opencelium.backend.mysql.entity.EventMessage;
 import com.becon.opencelium.backend.mysql.service.ContentServiceImpl;
 import com.becon.opencelium.backend.mysql.service.MessageServiceImpl;
+import com.becon.opencelium.backend.resource.notification.LanguageDTO;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
+import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping(value = "/api/message", produces = "application/hal+json", consumes = {"application/json"})
@@ -49,6 +53,9 @@ public class MessageController {
         messageService.save(eventMessage);
 
         List<EventContent> eventContents = eventMessage.getEventContents();
+        eventContents.forEach(ec -> {
+            LangEnum.valueOf(ec.getLanguage().toUpperCase(Locale.ROOT));
+        });
         for (int i = 0; i < eventContents.size(); i++) {
             contentService.save(eventContents.get(i));
         }
@@ -93,6 +100,15 @@ public class MessageController {
                 .collect(Collectors.toList());
         final CollectionModel<MessageResource> resources = CollectionModel.of(messageResources);
         return ResponseEntity.ok(resources);
+    }
+
+    @GetMapping("/languages")
+    public ResponseEntity<?> getSupportedLanguages() {
+        List<LanguageDTO> languages = Stream.of(LangEnum.values())
+                .map(e -> new LanguageDTO(e.getName(), e.getCode())).toList();
+        Map<String, Object> body = new HashMap<>();
+        body.put("languages", languages);
+        return ResponseEntity.ok().body(body);
     }
 
 }
