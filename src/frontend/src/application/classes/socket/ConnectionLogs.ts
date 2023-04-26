@@ -52,12 +52,7 @@ export default class ConnectionLogs {
         if(indexSplit.length > 1){
             index = indexSplit[1];
         }
-        const methodColorSplit = message.split(' -- color: ');
-        let methodColor = '';
-        if(methodColorSplit.length > 1){
-            methodColor = methodColorSplit[1].substring(0, 7);
-            methodColorSplit[1] = methodColorSplit[1].substring(7);
-        }
+        let methodColor = log?.methodData?.color || '';
         let operatorData: any = null;
         const methodData = {color: methodColor};
         if(message.substr(0, 9) === 'Operator:'){

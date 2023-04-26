@@ -32,7 +32,7 @@ spring:
     url: bolt://localhost:7687
     authentication:
       username: neo4j
-      password: secretsecret
+      password: secret1234
 ###########################################################################
 #                                                                         #
 #   Mail configuration section                                            #
@@ -42,10 +42,10 @@ spring:
     opencelium:
       from: noreply@opencelium.io
   #    enabled: false
-    host: imap4s.becon.de
-    port: 25
-    username: oc.io.salesdemo
-    password: omedselas.oi.oc
+    host: smtp.gmail.com
+    port: 587
+    username:
+    password:
     properties:
       mail:
         smtp:
@@ -55,8 +55,8 @@ spring:
           writetimeout: 5000
           starttls:
             enable: true
-          ssl:
-            trust: imap4s.becon.de
+  #        ssl:
+  #          trust: example.host.de
 ###########################################################################
 #                                                                         #
 #   Configuration of third part tools                                     #

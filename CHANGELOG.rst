@@ -2,7 +2,49 @@
 Changelog
 *********
 
-Major Release :loudspeaker:
+3.1
+===
+:Date: April 26, 2023
+
+Features
+--------
+
+* Update from Java 8 to Java 17 (latest lts version)
+* Update from Neo4j 3.5 to Neo4j 5.6 (latest lts version)
+* Update from Spring Boot 2.0 to Spring Boot 3.0 (latest lts version)
+* Connection Edior improvements:
+* Show connection logs on the web interface
+* Added test run
+* Allow changing size of items
+* Saving connection on fullscreen
+* Copy methods with dependencies to duplicate them
+* Move methods or operators with automatic dependency checking
+* Show label instead of api method name in the reference browser
+* Service Portal new features:
+* CSV Generator to easily generates/manage your own CSV-Invoker files
+* Sends automatic notifications when subscription is extended
+
+Connector
+---------
+
+* RedmineCRM
+* Dell Warrenty Check
+* StarFace
+* Weclapp
+
+
+Fixes
+-----
+
+* js error in developer tools (OC-483)
+* clicking on external apps doesnt work (OC-533)
+* themes from service portal are not synced to opencelium (OC-557)
+* cant update a connection (OC-563)
+* after login into opencelium a git error appears in logs (OC-565)
+* waiting to long to get connections on frontend (OC-566)
+
+
+Major Relase :loudspeaker:
 ============
 
 3.0
