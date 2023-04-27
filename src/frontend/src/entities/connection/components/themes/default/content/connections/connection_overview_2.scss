@@ -866,7 +866,7 @@ $DASHED_COLOR: #58854d;
   transform: translateX(-50%);
   bottom: 34px;
   z-index: 999;
-  padding: 50px 150px 70px;
+  padding-bottom: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -914,6 +914,32 @@ $DASHED_COLOR: #58854d;
     &:disabled span:last-child {
       color: #fff;
     }
+  }
+}
+
+.help_dialog {
+  background: #000;
+  height: 90vh;
+  max-width: 80%;
+  color: #b7b9b8;
+  border-radius: 20px;
+  border: 1px solid #000;
+
+  &_content {
+    border-radius: 20px;
+    height: 100%;
+  }
+
+  &_body {
+    padding: 10px;
+  }
+
+  &_footer {
+    display: none;
+  }
+
+  &_backdrop {
+    background: #fff;
   }
 }
 

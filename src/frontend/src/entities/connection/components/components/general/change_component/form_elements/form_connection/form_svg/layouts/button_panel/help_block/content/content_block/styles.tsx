@@ -14,21 +14,24 @@
  */
 
 import styled from "styled-components";
-import { HelpBlockStyledProps } from "./interfaces";
+import { ContentBlockStyledProps } from "./interfaces";
 
-const HelpBlockStyled = styled.div<HelpBlockStyledProps>`
-  display: ${(props) => (!props.isButtonPanelOpened ? "none" : "flex")};
-  gap: 10px;
+const ContentBlockStyled = styled.div<ContentBlockStyledProps>`
+  padding: 15px 0 50px;
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 15px;
   position: relative;
 
   &::after {
-    content: "Help";
+    content: "${(props) => props.label}";
+    text-transform: capitalize;
+    color: #000;
+    font-weight: bold;
     position: absolute;
-    left: 0;
-    bottom: -150%;
-    font-size: 14px;
+    bottom: 15px;
   }
-
 `;
 
-export { HelpBlockStyled };
+export { ContentBlockStyled };

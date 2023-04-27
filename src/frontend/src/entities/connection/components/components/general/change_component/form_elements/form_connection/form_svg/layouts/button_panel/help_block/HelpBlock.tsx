@@ -24,6 +24,11 @@ import { ColorTheme } from "@style/Theme";
 import { useAppSelector } from "@application/utils/store";
 import Dialog from "@app_component/base/dialog/Dialog";
 
+// @ts-ignore
+import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
+
+import Content from "./content/Content";
+
 const HelpBlock = () => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -37,52 +42,55 @@ const HelpBlock = () => {
 
   return (
     <HelpBlockStyled isButtonPanelOpened={isButtonPanelOpened}>
-      <div style={{display: 'flex', gap: '10px'}}>
-      <TooltipButton
-        size={TextSize.Size_40}
-        position={"bottom"}
-        icon={"video_library"}
-        tooltip={"Help"}
-        target={`help_connection_button`}
-        hasBackground={true}
-        background={ColorTheme.White}
-        color={ColorTheme.Gray}
-        padding="2px"
-        handleClick={() => toggleVisible()}
-      />
-      <Dialog
-        actions={[
-          {
-            label: "Close",
-            id: "close_dialog",
-            onClick: () => setIsVisible(!isVisible),
-          },
-        ]}
-        title="Help"
-        active={isVisible}
-        toggle={() => setIsVisible(!isVisible)}
-      ></Dialog>
+      <div style={{ display: "flex", gap: "10px" }}>
+        <TooltipButton
+          size={TextSize.Size_40}
+          position={"bottom"}
+          icon={"video_library"}
+          tooltip={"Help"}
+          target={`help_connection_button`}
+          hasBackground={true}
+          background={ColorTheme.White}
+          color={ColorTheme.Gray}
+          padding="2px"
+          handleClick={() => toggleVisible()}
+        />
+        <Dialog
+          actions={[]}
+          title="Videoanimations"
+          active={isVisible}
+          toggle={() => setIsVisible(!isVisible)}
+          dialogTheme={{
+            content: `${styles.help_dialog_content}`,
+            body: `${styles.help_dialog_body}`,
+            footer: `${styles.help_dialog_footer}`,
+            backdrop: `${styles.help_dialog_backdrop}`,
+          }}
+          dialogClassname={`${styles.help_dialog}`}
+        >
+          <Content/>
+        </Dialog>
 
-      <TooltipButton
-        position={"bottom"}
-        icon={"menu_book"}
-        tooltip={"Documentation"}
-        target={`documentation`}
-        hasBackground={true}
-        background={ColorTheme.White}
-        color={ColorTheme.Gray}
-        padding="2px"
-      />
-      <TooltipButton
-        position={"bottom"}
-        icon={"keyboard"}
-        tooltip={"Shortcuts"}
-        target={`shortcuts`}
-        hasBackground={true}
-        background={ColorTheme.White}
-        color={ColorTheme.Gray}
-        padding="2px"
-      />
+        <TooltipButton
+          position={"bottom"}
+          icon={"menu_book"}
+          tooltip={"Documentation"}
+          target={`documentation`}
+          hasBackground={true}
+          background={ColorTheme.White}
+          color={ColorTheme.Gray}
+          padding="2px"
+        />
+        <TooltipButton
+          position={"bottom"}
+          icon={"keyboard"}
+          tooltip={"Shortcuts"}
+          target={`shortcuts`}
+          hasBackground={true}
+          background={ColorTheme.White}
+          color={ColorTheme.Gray}
+          padding="2px"
+        />
       </div>
     </HelpBlockStyled>
   );

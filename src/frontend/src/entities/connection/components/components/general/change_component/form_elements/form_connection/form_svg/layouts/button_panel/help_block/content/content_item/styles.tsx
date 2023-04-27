@@ -14,21 +14,19 @@
  */
 
 import styled from "styled-components";
-import { HelpBlockStyledProps } from "./interfaces";
+import { ContentItemStyledProps } from "./interfaces";
 
-const HelpBlockStyled = styled.div<HelpBlockStyledProps>`
-  display: ${(props) => (!props.isButtonPanelOpened ? "none" : "flex")};
-  gap: 10px;
-  position: relative;
-
-  &::after {
-    content: "Help";
-    position: absolute;
-    left: 0;
-    bottom: -150%;
-    font-size: 14px;
+const ContentItemStyled = styled.div<ContentItemStyledProps>`
+  margin-bottom: 20px;
+  cursor: pointer;
+  p {
+    margin-bottom: 0.5rem;
+    color: #000;
   }
-
+  img {
+    width: 120px;
+    height: 80px;
+  }
 `;
 
-export { HelpBlockStyled };
+export { ContentItemStyled };

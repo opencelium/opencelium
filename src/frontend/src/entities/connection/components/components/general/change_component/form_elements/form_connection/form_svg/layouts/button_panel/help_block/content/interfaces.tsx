@@ -13,22 +13,15 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from "styled-components";
-import { HelpBlockStyledProps } from "./interfaces";
+import { ITheme } from "@style/Theme";
 
-const HelpBlockStyled = styled.div<HelpBlockStyledProps>`
-  display: ${(props) => (!props.isButtonPanelOpened ? "none" : "flex")};
-  gap: 10px;
-  position: relative;
+interface ContentProps {}
 
-  &::after {
-    content: "Help";
-    position: absolute;
-    left: 0;
-    bottom: -150%;
-    font-size: 14px;
-  }
+interface ContentStyledProps {}
 
-`;
+interface ContentData {
+  title: string;
+  image: string;
+}
 
-export { HelpBlockStyled };
+export { ContentProps, ContentStyledProps, ContentData };

@@ -13,22 +13,17 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from "styled-components";
-import { HelpBlockStyledProps } from "./interfaces";
+import React, { FC, useState } from "react";
+import { withTheme } from "styled-components";
 
-const HelpBlockStyled = styled.div<HelpBlockStyledProps>`
-  display: ${(props) => (!props.isButtonPanelOpened ? "none" : "flex")};
-  gap: 10px;
-  position: relative;
+import { ContentBlockProps } from "./interfaces";
+import { ContentBlockStyled } from "./styles";
 
-  &::after {
-    content: "Help";
-    position: absolute;
-    left: 0;
-    bottom: -150%;
-    font-size: 14px;
-  }
+const ContentBlock: FC<ContentBlockProps> = (props) => {
+  const { label } = props;
+  return (
+    <ContentBlockStyled label={label}>{props.children}</ContentBlockStyled>
+  );
+};
 
-`;
-
-export { HelpBlockStyled };
+export default ContentBlock;

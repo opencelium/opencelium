@@ -57,12 +57,12 @@ const Dialog: FC<DialogProps> =
             }}, 500);
     }
     return (
-        <Modal id={`modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} style={styles.modal} className={dialogClassname} modalClassName={dialogTheme.modal} contentClassName={dialogTheme.content} wrapClassName={dialogTheme.wrapper}>
+        <Modal id={`modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} style={styles.modal} className={dialogClassname} modalClassName={dialogTheme.modal} contentClassName={dialogTheme.content} wrapClassName={dialogTheme.wrapper} backdropClassName={dialogTheme.backdrop}>
             {title && <ModalHeader toggle={toggle} className={dialogTheme.title} style={styles.header}><Text value={title} size={TextSize.Size_20} isBold={true}/></ModalHeader>}
-            <ModalBody style={styles.body}>
+            <ModalBody style={styles.body} className={dialogTheme.body}>
                 {children}
             </ModalBody>
-            <ModalFooter style={{borderTop: 'none'}}>
+            <ModalFooter style={{borderTop: 'none'}} className={dialogTheme.footer}>
                 <ActionsStyled>
                 {
                     actions.map((action: ActionProps) => {
