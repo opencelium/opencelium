@@ -32,12 +32,14 @@ public interface FieldNodeRepository extends Neo4jRepository<FieldNode, Long> {
 
     @Query("match (:Connection{connectionId:$connectionId})-[*]->(f:Method{color:$function})-[:has_response]->" +
             "(:Response)-[:has_success|has_fail]->(:Result{name:$result})-[has_body]->" +
-            "(:Body)-[:has_field]->(fi:Field{name:$field}) return fi;")
-    FieldNode findFirstFieldInResponse(Long connectionId, String function, String result, String field);
+            "(:Body)-[:has_field]->(fi:Field{name:$field}) optional match p=((fi)-[:has_field]->()) " +
+            "return p")
+    List<FieldNode> findFirstFieldInResponse(Long connectionId, String function, String result, String field);
 
     @Query("match (:Connection{connectionId:$connectionId})-[*]->(f:Method{color:$function})-[:has_request]->" +
-            "(:Request)-[has_body]->(:Body)-[:has_field]->(fi:Field{name:$field}) return fi;")
-    FieldNode findFirstFieldInRequest(Long connectionId, String function, String field);
+            "(:Request)-[has_body]->(:Body)-[:has_field]->(fi:Field{name:$field}) optional match p=((fi)-[:has_field]->()) " +
+            "return p")
+    List<FieldNode> findFirstFieldInRequest(Long connectionId, String function, String field);
 
     @Query("match (f1:Field)-[:has_field]->(f2:Field{name:$fieldName}) where ID(f1)=$pervFieldId return f2")
     FieldNode findNextField(String fieldName, Long pervFieldId);
