@@ -101,7 +101,8 @@ public class FieldNodeServiceImp implements FieldNodeService {
             }
             format = methodNode.getResponseNode().getSuccess().getBody().getFormat();
             firstField = StringUtility.removeSquareBraces(firstField);
-            currentField = fieldNodeRepository.findFirstFieldInResponse(connectionId,color,result,firstField).get(0);
+            currentField = fieldNodeRepository.findFirstFieldInResponse(connectionId,color,result,firstField)
+                    .stream().findFirst().orElse(null);
         } else {
             if (path.isEmpty()){
                 firstField = field;
@@ -110,7 +111,8 @@ public class FieldNodeServiceImp implements FieldNodeService {
             }
             format = methodNode.getRequestNode().getBodyNode().getFormat();
             firstField = StringUtility.removeSquareBraces(firstField);
-            currentField = fieldNodeRepository.findFirstFieldInRequest(connectionId,color,firstField).get(0);
+            currentField = fieldNodeRepository.findFirstFieldInRequest(connectionId,color,firstField)
+                    .stream().findFirst().orElse(null);
         }
 
         if (currentField == null){
