@@ -138,7 +138,8 @@ public class ConnectorExecutor {
                 .findFirst()
                 .orElse(null);
 
-        String responseIndex = buildSeqIndexes(loopsWithCurrIndex);
+        int loopDepth = loopsWithCurrIndex.size();
+        String responseIndex = buildSeqIndexes(loopsWithCurrIndex, loopDepth);
         if(methodResponse != null){
             if(methodResponse.getData().containsKey("null")) {
                 responseIndex = null;
@@ -157,6 +158,7 @@ public class ConnectorExecutor {
             methodResponse.setExchangeType("response");
             methodResponse.setResult("success");
             methodResponse.setData(responseContainer);
+            methodResponse.setLoopDepth(loopDepth);
 
             List<MethodResponse> list = executionContainer.getMethodResponses();
             list.add(methodResponse);

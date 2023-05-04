@@ -50,16 +50,16 @@ public class ExecutionContainer {
     private ArrayList<MethodResponse> methodResponses = new ArrayList<>();
 
     // Contains iterators with current indexes of loop statement
-    // e.g. (i, 1) -> i = 0; (j, 2) -> j = 2 -----> [i][j] -> [0][2];
+    // e.g. (i, 1) -> i = 1; (j, 2) -> j = 2 -----> [i][j] -> [0][2];
     private LinkedHashMap<String, Integer> loopIterators = new LinkedHashMap<>();
     private String taId;
     private String conn;
     private int order;
     private Map<String, Object> queryParams = new HashMap<>();
 
-    private EnhancementServiceImp enhancementService;
-    private FieldNodeServiceImp fieldNodeService;
-    private MethodNodeServiceImp methodNodeService;
+    private final EnhancementServiceImp enhancementService;
+    private final FieldNodeServiceImp fieldNodeService;
+    private final MethodNodeServiceImp methodNodeService;
 
     public ExecutionContainer(EnhancementServiceImp enhancementService, FieldNodeServiceImp fieldNodeService,
                               MethodNodeServiceImp methodNodeService) {
@@ -421,11 +421,14 @@ public class ExecutionContainer {
 
     // Incoming value i = 0; j = 1; k = 12; ....
     // Returns - i, j, k ---- > 0, 1, 12, ....
-    public static String buildSeqIndexes(Map<String, Integer> loopsWithCurrIndex) {
+    public static String buildSeqIndexes(Map<String, Integer> loopsWithCurrIndex, long depth) {
+        if (depth == 0) {
+            return "null";
+        }
         if (loopsWithCurrIndex.isEmpty()) {
             return "null";
         }
-        return loopsWithCurrIndex.values().stream()
+        return loopsWithCurrIndex.values().stream().limit(depth)
                 .map(i -> Integer.toString(i)).collect(Collectors.joining(","));
     }
 }

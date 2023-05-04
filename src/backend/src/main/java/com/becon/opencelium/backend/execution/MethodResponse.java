@@ -45,6 +45,7 @@ public class MethodResponse {
     private String responseFormat;
     // contains all responses <indexes, response>
     // where indexes are from loop statement represented as i, j, k -> 0, 3, 1
+    private int loopDepth; // indicates how many nested loops are used to execute this method
     private HashMap<String, String> data;
 
     public MethodResponse() {
@@ -82,6 +83,14 @@ public class MethodResponse {
         this.result = result;
     }
 
+    public int getLoopDepth() {
+        return loopDepth;
+    }
+
+    public void setLoopDepth(int loopDepth) {
+        this.loopDepth = loopDepth;
+    }
+
     public String getResponseFormat() {
         return responseFormat;
     }
@@ -111,7 +120,7 @@ public class MethodResponse {
         if (loopStack == null || loopStack.isEmpty()){
             message = data.get("0");
         } else {
-            String indexes = buildSeqIndexes(loopStack);
+            String indexes = buildSeqIndexes(loopStack, this.loopDepth);
             message = data.get(indexes);
         }
         return message;
@@ -127,7 +136,7 @@ public class MethodResponse {
         String message = "";
         String indexes = "null";
         if (loopIterator != null && !loopIterator.isEmpty()){
-            indexes = buildSeqIndexes(loopIterator);
+            indexes = buildSeqIndexes(loopIterator, this.loopDepth);
         }
         message = data.get(indexes);
         for (String part : conditionParts){
@@ -227,7 +236,7 @@ public class MethodResponse {
         String indexes = "null";
         String message = "";
         if (loopIterator != null && !loopIterator.isEmpty() && !data.containsKey("null")){
-            indexes = buildSeqIndexes(loopIterator);
+            indexes = buildSeqIndexes(loopIterator, this.loopDepth);
         }
 
         message = data.get(indexes);
