@@ -66,6 +66,7 @@ start_backend(){
 
 restart_backend(){
 	stop_backend
+        sleep 1
 	start_backend
 }
 
