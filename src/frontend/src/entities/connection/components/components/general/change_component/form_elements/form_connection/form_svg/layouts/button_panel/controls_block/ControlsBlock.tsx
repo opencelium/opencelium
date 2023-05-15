@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect } from "react";
+import React, { FC, useEffect } from "react";
 
 import { withTheme } from "styled-components";
 import { ControlsBlockProps } from "./interfaces";
@@ -31,7 +31,7 @@ import {
 } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import { ColorTheme } from "@style/Theme";
 
-const ControlsBlock = (props: any) => {
+const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
   const dispatch = useAppDispatch();
 
   const {

@@ -36,16 +36,17 @@ import ItemTypePanel
 import ItemPositionPanel
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/ItemPositionPanel";
 import ReactDOM from "react-dom";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-
-function mapStateToProps(state){
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {currentTechnicalItem} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
     };
 }
 
+@GetModalProp()
 @connect(mapStateToProps, {setArrows})
 class CreateElementPanel extends React.Component{
     constructor(props) {

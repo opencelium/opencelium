@@ -28,15 +28,17 @@ import CCreateElementPanel from "@entity/connection/components/classes/component
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {connect} from "react-redux";
 import {setArrows, setJustCreatedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-function mapStateToProps(state){
+function mapStateToProps(state, props){
     const connectionOverview = state.connectionReducer;
     return{
         justCreatedItem: connectionOverview.justCreatedItem,
     };
 }
 
+@GetModalProp()
 @connect(mapStateToProps, {setJustCreatedItem})
 class CreateProcess extends React.Component{
     constructor(props) {

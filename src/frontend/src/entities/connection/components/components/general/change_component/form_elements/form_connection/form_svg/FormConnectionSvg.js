@@ -34,13 +34,15 @@ import ButtonPanel from './layouts/button_panel/ButtonPanel';
 import { OUTSIDE_ITEM } from '@classes/content/connection/CConnectorItem';
 import { CREATE_PROCESS } from '@classes/content/connection_overview_2/CCreateElementPanel';
 
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+
 export const HAS_LAYOUTS_SCALING = true;
 
-function mapStateToProps(state) {
+function mapStateToProps(state, props) {
   const isFullScreen = state.applicationReducer.isFullScreen;
   const authUser = state.authReducer.authUser;
   const connectionOverview = state.connectionReducer;
-  const { currentTechnicalItem, connection } = mapItemsToClasses(state);
+  const { currentTechnicalItem, connection } = mapItemsToClasses(state, props.isModal);
   return {
     authUser,
     technicalLayoutLocation: connectionOverview.technicalLayoutLocation,
@@ -53,6 +55,7 @@ function mapStateToProps(state) {
 /**
  * Form for ConnectionSvg
  */
+@GetModalProp()
 @withTranslation('basic_components')
 @connect(mapStateToProps, { setCurrentTechnicalItem, setConnectionData })
 class FormConnectionSvg extends Component {

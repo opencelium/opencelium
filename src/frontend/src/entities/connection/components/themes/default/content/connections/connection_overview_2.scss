@@ -866,11 +866,24 @@ $DASHED_COLOR: #58854d;
   transform: translateX(-50%);
   bottom: 34px;
   z-index: 999;
-  padding-bottom: 40px;
+  padding: 40px 40px 60px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s;
+  background: #ffffffee;
+  &::after{
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    box-shadow: inset 0 0 0 3000px rgba(204, 203, 203, 0.3);
+    filter: blur(10px);
+  }
 
   &_active {
     padding: 0;
@@ -918,15 +931,10 @@ $DASHED_COLOR: #58854d;
 }
 
 .help_dialog {
-  background: #000;
   height: 90vh;
   max-width: 80%;
-  color: #b7b9b8;
-  border-radius: 20px;
-  border: 1px solid #000;
 
   &_content {
-    border-radius: 20px;
     height: 100%;
   }
 
@@ -938,8 +946,16 @@ $DASHED_COLOR: #58854d;
     display: none;
   }
 
-  &_backdrop {
-    background: #fff;
+  .connection_editor{
+    height: 70vh;
+  }
+
+  .button_panel{
+    display: none;
+  }
+
+  .details_maximized {
+    height: calc(70vh - 2px);
   }
 }
 

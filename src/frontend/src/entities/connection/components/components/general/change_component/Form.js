@@ -30,16 +30,18 @@ import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/C
 import Title from "@app_component/collection/collection_title/Title";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import CSvg from "@classes/content/connection_overview_2/CSvg";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-function mapStateToProps(state){
+function mapStateToProps(state, props){
     const authUser = state.authReducer.authUser;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+    const {currentTechnicalItem} = mapItemsToClasses(state, props.isModal);
     return {
         authUser,
         currentTechnicalItem,
     }
 }
 
+@GetModalProp()
 @connect(mapStateToProps, {setConnectionData, setCurrentTechnicalItem})
 class Form extends React.Component{
     constructor(props) {

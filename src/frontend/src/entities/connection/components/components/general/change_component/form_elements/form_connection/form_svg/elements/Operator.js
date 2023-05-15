@@ -32,11 +32,12 @@ import DashedElement from "@change_component/form_elements/form_connection/form_
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
 import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-function mapStateToProps(state){
+function mapStateToProps(state, props){
     const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+    const {currentTechnicalItem} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
         logPanelHeight: connectionOverview.logPanelHeight,
@@ -47,6 +48,7 @@ function mapStateToProps(state){
     }
 }
 
+@GetModalProp()
 @connect(mapStateToProps, {setJustDeletedItem})
 class Operator extends React.Component{
     constructor(props) {

@@ -24,13 +24,14 @@ import {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorI
 import DashedElement from "@change_component/form_elements/form_connection/form_svg/elements/process/DashedElement";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 export const ARROW_WIDTH = 2;
 
 
-function mapStateToProps(state){
+function mapStateToProps(state, props){
     const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+    const {currentTechnicalItem} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
         currentLogs: connectionOverview.currentLogs,
@@ -39,6 +40,7 @@ function mapStateToProps(state){
     }
 }
 
+@GetModalProp()
 @connect(mapStateToProps, {})
 class Arrow extends React.Component{
     constructor(props) {

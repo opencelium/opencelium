@@ -16,10 +16,12 @@
 import { ITheme } from "@style/Theme";
 
 interface ContentBlockProps {
+  theme?: ITheme;
   label: string;
 }
 
 interface ContentBlockStyledProps {
+  theme?: ITheme;
   label: string;
 }
 

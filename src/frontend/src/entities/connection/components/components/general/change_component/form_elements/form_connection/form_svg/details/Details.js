@@ -22,10 +22,12 @@ import Description from '@change_component/form_elements/form_connection/form_sv
 import { TooltipButton } from '@app_component/base/tooltip_button/TooltipButton';
 import { TextSize } from '@app_component/base/text/interfaces';
 import { toggleDetails } from '@root/redux_toolkit/slices/ConnectionSlice';
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-function mapStateToProps(state) {
+function mapStateToProps(state, props) {
   const connectionOverview = state.connectionReducer;
-  const { currentTechnicalItem, connection } = mapItemsToClasses(state);
+  const { currentTechnicalItem, connection } = mapItemsToClasses(state, props.isModal);
+  
   return {
     connectionOverviewState: connectionOverview,
     currentTechnicalItem,
@@ -36,11 +38,12 @@ function mapStateToProps(state) {
     checkingConnectionTitle: connectionOverview.checkingConnectionTitle,
   };
 }
-
+@GetModalProp()
 @connect(mapStateToProps, { toggleDetails })
 class Details extends React.Component {
   constructor(props) {
     super(props);
+    console.log(props.isModal)
   }
 
   render() {
@@ -51,7 +54,9 @@ class Details extends React.Component {
       connection,
       isDetailsOpened,
       toggleDetails,
+      toggleDetailsModal
     } = this.props;
+    
     if (connection === null) {
       return null;
     }

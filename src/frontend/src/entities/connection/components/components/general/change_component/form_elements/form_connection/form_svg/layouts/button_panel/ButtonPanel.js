@@ -21,11 +21,12 @@ import { mapItemsToClasses } from "@change_component/form_elements/form_connecti
 import TestBlock from "./test_block/TestBlock";
 import ControlsBlock from "./controls_block/ControlsBlock";
 import HelpBlock from "./help_block/HelpBlock";
+import GetModalProp from "@entity/connection/components/decorators/GetModalProp";
 
-function mapStateToProps(state) {
+function mapStateToProps(state, props) {
   const connectionOverview = state.connectionReducer;
   const applicationOverview = state.applicationReducer;
-  const { connection } = mapItemsToClasses(state);
+  const { connection } = mapItemsToClasses(state, props.isModal);
 
   return {
     connection,
@@ -37,6 +38,7 @@ function mapStateToProps(state) {
   };
 }
 
+@GetModalProp()
 @connect(mapStateToProps)
 class ButtonPanel extends React.Component {
   constructor(props) {

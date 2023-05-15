@@ -13,17 +13,19 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import { withTheme } from "styled-components";
 
 import { ContentBlockProps } from "./interfaces";
 import { ContentBlockStyled } from "./styles";
 
 const ContentBlock: FC<ContentBlockProps> = (props) => {
-  const { label } = props;
+  const { label, children } = props;
   return (
-    <ContentBlockStyled label={label}>{props.children}</ContentBlockStyled>
+    <ContentBlockStyled label={label}>{children}</ContentBlockStyled>
   );
 };
 
-export default ContentBlock;
+export { ContentBlock };
+
+export default withTheme(ContentBlock);

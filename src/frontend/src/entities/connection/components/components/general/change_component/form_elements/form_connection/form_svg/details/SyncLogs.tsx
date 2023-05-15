@@ -89,7 +89,7 @@ const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
         }, [isTestingConnection])*/
         useEffect(() => {
             if(shouldClear){
-                dispatch(clearCurrentLogs());
+                dispatch(clearCurrentLogs([]));
             }
         }, [shouldClear])
         return null;

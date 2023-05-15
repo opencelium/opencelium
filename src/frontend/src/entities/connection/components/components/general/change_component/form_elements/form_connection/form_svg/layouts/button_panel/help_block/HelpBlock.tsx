@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from "react";
+import React, { useState, createContext } from "react";
 import { withTheme } from "styled-components";
 import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
 import { TextSize } from "@app_component/base/text/interfaces";
@@ -21,24 +21,26 @@ import { HelpBlockProps } from "./interfaces";
 import { HelpBlockStyled } from "./styles";
 
 import { ColorTheme } from "@style/Theme";
-import { useAppSelector } from "@application/utils/store";
+import { useAppDispatch, useAppSelector } from "@application/utils/store";
 import Dialog from "@app_component/base/dialog/Dialog";
 
 // @ts-ignore
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 
 import Content from "./content/Content";
+import FormConnectionSvg from "../../../FormConnectionSvg";
+import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
+import { HelpBlockData } from "./HelpBlockData";
 
 const HelpBlock = () => {
   const [isVisible, setIsVisible] = useState(false);
-
-  const { isButtonPanelOpened } = useAppSelector(
-    (state) => state.connectionReducer
-  );
-
   function toggleVisible() {
     setIsVisible(!isVisible);
   }
+
+  const { isButtonPanelOpened, videoAnimationName } = useAppSelector(
+    (state) => state.connectionReducer
+  );
 
   return (
     <HelpBlockStyled isButtonPanelOpened={isButtonPanelOpened}>
@@ -68,7 +70,15 @@ const HelpBlock = () => {
           }}
           dialogClassname={`${styles.help_dialog}`}
         >
-          <Content/>
+          <ModalContext.Provider value={{ isModal: true }}>
+            {
+              <FormConnectionSvg
+                data={{ readOnly: false }}
+                entity={HelpBlockData}
+              />
+            }
+          </ModalContext.Provider>
+          <Content />
         </Dialog>
 
         <TooltipButton

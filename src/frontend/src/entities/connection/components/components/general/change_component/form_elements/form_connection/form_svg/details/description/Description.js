@@ -28,14 +28,16 @@ import {withTheme} from "styled-components";
 import {ITheme} from "@style/Theme";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {connect} from "react-redux";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-function mapStateToProps(state){
-    const {connection} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {connection} = mapItemsToClasses(state, props.isModal);
     return{
         connection,
     };
 }
 
+@GetModalProp()
 @connect(mapStateToProps, {})
 class Description extends React.Component{
     constructor(props) {

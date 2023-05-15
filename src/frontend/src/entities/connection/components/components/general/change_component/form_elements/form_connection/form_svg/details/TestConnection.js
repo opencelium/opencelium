@@ -44,11 +44,12 @@ import Counter from "@app_component/base/counter/Counter";
 import Text from "@app_component/base/text/Text";
 import SyncLogs from "./SyncLogs";
 import { ColorTheme } from "@style/Theme";
+import GetModalProp from "@entity/connection/components/decorators/GetModalProp";
 
-function mapStateToProps(state) {
+function mapStateToProps(state, props) {
   const connectionOverview = state.connectionReducer;
   const scheduleOverview = state.scheduleReducer;
-  const { connection } = mapItemsToClasses(state);
+  const { connection } = mapItemsToClasses(state, props.isModal);
   return {
     connection,
     connectionError: connectionOverview.error,
@@ -68,6 +69,7 @@ function mapStateToProps(state) {
   };
 }
 
+@GetModalProp()
 @connect(mapStateToProps, {
   setFullScreenFormSection,
   addTestConnection,

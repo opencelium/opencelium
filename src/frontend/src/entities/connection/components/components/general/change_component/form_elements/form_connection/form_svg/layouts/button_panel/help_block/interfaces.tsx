@@ -15,9 +15,12 @@
 
 import { ITheme } from "@style/Theme";
 
-interface HelpBlockProps {}
+interface HelpBlockProps {
+  theme?: ITheme;
+}
 
 interface HelpBlockStyledProps {
+  theme?: ITheme;
   readonly isButtonPanelOpened: boolean;
 }
 

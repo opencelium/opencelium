@@ -21,12 +21,31 @@ const ContentStyled = styled.div<ContentStyledProps>`
   border-radius: 10px;
   padding: 30px 70px;
   position: absolute;
+  z-index: 2;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: flex-end;
+
+  ${props => !props.isPreviewPanelOpened && `
+    padding: 0;
+
+    & > div{
+      display: none;
+    }
+  `}
+
+  .toggle_preview_button{
+    position: absolute;
+    top: ${props => !props.isPreviewPanelOpened ? '-35px' : 0};
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 333;
+    width: 30px;
+  }
 `;
 
 export { ContentStyled };

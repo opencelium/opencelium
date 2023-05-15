@@ -28,10 +28,11 @@ import {
     addSelectAllAfterItemsKeyNavigation,
     removeSelectAllAfterItemsKeyNavigation
 } from "@root/components/utils/key_navigation";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-function mapStateToProps(state){
-    const {connectionOverview, currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {connectionOverview, currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state, props.isModal);
     return{
         connectionOverviewState: connectionOverview,
         currentTechnicalItem,
@@ -40,6 +41,7 @@ function mapStateToProps(state){
     };
 }
 
+@GetModalProp()
 @connect(mapStateToProps, {setCurrentTechnicalItem, setTechnicalLayoutLocation})
 class TechnicalLayout extends React.Component{
 

@@ -16,9 +16,9 @@
 import { ITheme } from "@style/Theme";
 
 interface ContentItemProps {
+  theme?: ITheme;
   title: string;
   image: string;
-
 }
 
 interface ContentItemStyledProps {}

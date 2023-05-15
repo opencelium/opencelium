@@ -14,17 +14,32 @@
  */
 
 import React, { FC } from "react";
+import { withTheme } from "styled-components";
 
 import { ContentItemProps } from "./interfaces";
 import { ContentItemStyled } from "./styles";
 
+import { useAppDispatch, useAppSelector } from "@application/utils/store";
+import { setAnimationPreviewPanelVisibility, setVideoAnimationName } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+
 const ContentItem: FC<ContentItemProps> = (props) => {
   const { image, title } = props;
-  
-  return <ContentItemStyled onClick={() => alert(props.title)}>
-    <p>{title}</p>
-    <img src={image} alt=""/>
-  </ContentItemStyled>;
+
+  const dispatch = useAppDispatch();
+
+  const { videoAnimationName } = useAppSelector(
+    (state) => state.connectionReducer
+  ); 
+
+
+  return (
+    <ContentItemStyled onClick={() => (dispatch(setAnimationPreviewPanelVisibility(false)), dispatch(setVideoAnimationName(title)))}>
+      <p>{title}</p>
+      <img src={image} alt="" />
+    </ContentItemStyled>
+  );
 };
 
-export default ContentItem;
+export { ContentItem };
+
+export default withTheme(ContentItem);

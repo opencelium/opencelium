@@ -63,7 +63,7 @@ const LogPanel: FC = ({}) => {
                     tooltip={'Clear Logs'}
                     target={`clear_log_panel`}
                     hasBackground={false}
-                    handleClick={() => dispatch(clearCurrentLogs())}
+                    handleClick={() => dispatch(clearCurrentLogs([]))}
                 />}
             </TopStyled>
             {logPanelHeight !== 0 &&

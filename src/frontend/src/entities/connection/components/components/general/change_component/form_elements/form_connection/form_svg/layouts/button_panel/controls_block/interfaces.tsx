@@ -15,9 +15,12 @@
 
 import { ITheme } from "@style/Theme";
 
-interface ControlsBlockProps {}
+interface ControlsBlockProps {
+  theme?: ITheme;
+}
 
 interface ControlsBlockStyledProps {
+  theme?: ITheme;
   readonly isButtonPanelOpened: boolean;
 }
 

@@ -15,9 +15,14 @@
 
 import { ITheme } from "@style/Theme";
 
-interface ContentProps {}
+interface ContentProps {
+  theme?: ITheme;
+}
 
-interface ContentStyledProps {}
+interface ContentStyledProps {
+  theme?: ITheme;
+  isPreviewPanelOpened: boolean;
+}
 
 interface ContentData {
   title: string;

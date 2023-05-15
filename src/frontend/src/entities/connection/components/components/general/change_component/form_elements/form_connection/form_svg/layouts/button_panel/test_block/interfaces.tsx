@@ -15,9 +15,12 @@
 
 import { ITheme } from "@style/Theme";
 
-interface TestBlockProps {}
+interface TestBlockProps {
+  theme?: ITheme;
+}
 
 interface TestBlockStyledProps {
+  theme?: ITheme;
   readonly isButtonPanelOpened: boolean;
 }
 

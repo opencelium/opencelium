@@ -35,16 +35,18 @@ import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import CFieldBinding from "@classes/content/connection/field_binding/CFieldBinding";
 import {Dialog} from "@app_component/base/dialog/Dialog";
+import GetModalProp from "@entity/connection/components/decorators/GetModalProp";
 
-function mapStateToProps(state){
+function mapStateToProps(state, props){
     const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+    const {currentTechnicalItem} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
         isTestingConnection: connectionOverview.isTestingConnection,
     };
 }
 
+@GetModalProp()
 @connect(mapStateToProps, {setCurrentTechnicalItem})
 class Svg extends React.Component {
     constructor(props) {

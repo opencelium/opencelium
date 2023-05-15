@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSlice, PayloadAction, current } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction, current, SliceCaseReducers, CaseReducers } from "@reduxjs/toolkit";
 import {
   API_REQUEST_STATE,
   TRIPLET_STATE,
@@ -42,6 +42,7 @@ import {
 import { ConnectionLogProps, IConnection } from "../../interfaces/IConnection";
 import { PANEL_LOCATION } from "../../components/utils/constants/app";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
+import { NoInfer } from "@reduxjs/toolkit/dist/tsHelpers";
 
 const COLOR_MODE = {
   RECTANGLE_TOP: "RECTANGLE_TOP",
@@ -55,6 +56,8 @@ export const LogPanelHeight = {
 };
 
 export interface ConnectionState extends ICommonState {
+  videoAnimationName: string;
+  isAnimationPreviewPanelOpened: boolean;
   isButtonPanelOpened: boolean;
   moveTestButton: number;
   connections: IConnection[];
@@ -97,6 +100,8 @@ export interface ConnectionState extends ICommonState {
 }
 
 let initialState: ConnectionState = {
+  videoAnimationName: '',
+  isAnimationPreviewPanelOpened: true,
   isButtonPanelOpened: false,
   moveTestButton: 0,
   connections: [],
@@ -137,10 +142,8 @@ let initialState: ConnectionState = {
 };
 const storage = LocalStorage.getStorage();
 
-export const connectionSlice = createSlice({
-  name: "connection",
-  initialState,
-  reducers: {
+const connectionReducers = (isModal: boolean = false) => {
+  const reducers: SliceCaseReducers<ConnectionState> = {
     setJustCreatedItem: (state, action: PayloadAction<any>) => {
       state.justCreatedItem = action.payload;
     },
@@ -158,6 +161,12 @@ export const connectionSlice = createSlice({
     },
     setButtonPanelVisibility: (state, action: PayloadAction<boolean>) => {
       state.isButtonPanelOpened = action.payload;
+    },
+    setAnimationPreviewPanelVisibility: (state, action: PayloadAction<boolean>) => {
+      state.isAnimationPreviewPanelOpened = action.payload;
+    },
+    setVideoAnimationName: (state, action: PayloadAction<string>) => {
+      state.videoAnimationName = action.payload;
     },
     setTestingConnection: (state, action: PayloadAction<boolean>) => {
       if (action.payload) {
@@ -250,7 +259,7 @@ export const connectionSlice = createSlice({
         }
       }
     },
-    clearCurrentLogs: (state) => {
+    clearCurrentLogs: (state, action: PayloadAction<any>) => {
       state.currentLogs = [];
     },
     setColorMode: (state, action: PayloadAction<string>) => {
@@ -294,298 +303,313 @@ export const connectionSlice = createSlice({
       state.testConnection = null;
       state.addingTestConnection = API_REQUEST_STATE.INITIAL;
       state.deletingTestConnectionById = API_REQUEST_STATE.INITIAL;
-    },
-  },
-  extraReducers: {
-    [testConnection.pending.type]: (state) => {
-      state.testingConnection = API_REQUEST_STATE.START;
-    },
-    [testConnection.fulfilled.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.testingConnection = API_REQUEST_STATE.FINISH;
-      state.error = null;
-    },
-    [testConnection.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.testingConnection = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-    [checkConnectionTitle.pending.type]: (state) => {
-      state.checkingConnectionTitle = API_REQUEST_STATE.START;
-      state.isCurrentConnectionHasUniqueTitle = TRIPLET_STATE.INITIAL;
-    },
-    [checkConnectionTitle.fulfilled.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.checkingConnectionTitle = API_REQUEST_STATE.FINISH;
-      state.isCurrentConnectionHasUniqueTitle =
-        action.payload.message === ResponseMessages.NOT_EXISTS
-          ? TRIPLET_STATE.TRUE
-          : TRIPLET_STATE.FALSE;
-      state.error = null;
-    },
-    [checkConnectionTitle.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.checkingConnectionTitle = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-    [addConnection.pending.type]: (
-      state,
-      action: PayloadAction<IConnection>
-    ) => {
-      state.addingConnection = API_REQUEST_STATE.START;
-    },
-    [addConnection.fulfilled.type]: (
-      state,
-      action: PayloadAction<IConnection>
-    ) => {
-      state.addingConnection = API_REQUEST_STATE.FINISH;
-      state.connections.push(action.payload);
-      state.metaConnections.push(action.payload);
-      state.currentConnection = action.payload;
-      state.error = null;
-    },
-    [addConnection.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.addingConnection = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-    [addTestConnection.pending.type]: (
-      state,
-      action: PayloadAction<IConnection>
-    ) => {
-      state.addingTestConnection = API_REQUEST_STATE.START;
-    },
-    [addTestConnection.fulfilled.type]: (
-      state,
-      action: PayloadAction<IConnection>
-    ) => {
-      state.addingTestConnection = API_REQUEST_STATE.FINISH;
-      state.testConnection = action.payload;
-      state.error = null;
-    },
-    [addTestConnection.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.addingTestConnection = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-    [getAndUpdateConnection.pending.type]: (state, action: any) => {
-      state.updatingConnection = API_REQUEST_STATE.START;
-    },
-    [getAndUpdateConnection.fulfilled.type]: (
-      state,
-      action: PayloadAction<IConnection>
-    ) => {
-      state.updatingConnection = API_REQUEST_STATE.FINISH;
-      state.connections = state.connections.map((connection) =>
-        connection.connectionId === action.payload.connectionId
-          ? action.payload
-          : connection
-      );
-      state.metaConnections = state.metaConnections.map((connection) =>
-        connection.connectionId === action.payload.connectionId
-          ? action.payload
-          : connection
-      );
-      state.error = null;
-    },
-    [getAndUpdateConnection.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.updatingConnection = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-    [updateConnection.pending.type]: (state) => {
-      state.updatingConnection = API_REQUEST_STATE.START;
-    },
-    [updateConnection.fulfilled.type]: (
-      state,
-      action: PayloadAction<IConnection>
-    ) => {
-      state.updatingConnection = API_REQUEST_STATE.FINISH;
-      state.connections = state.connections.map((connection) =>
-        connection.connectionId === action.payload.connectionId
-          ? action.payload
-          : connection
-      );
-      state.metaConnections = state.metaConnections.map((connection) =>
-        connection.connectionId === action.payload.connectionId
-          ? action.payload
-          : connection
-      );
-      if (
-        state.currentConnection &&
-        state.currentConnection.connectionId === action.payload.connectionId
-      ) {
+    }
+  }
+
+  if(!isModal){
+    const extraReducers: CaseReducers<NoInfer<ConnectionState>, any>  = {
+      [testConnection.pending.type]: (state) => {
+        state.testingConnection = API_REQUEST_STATE.START;
+      },
+      [testConnection.fulfilled.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.testingConnection = API_REQUEST_STATE.FINISH;
+        state.error = null;
+      },
+      [testConnection.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.testingConnection = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [checkConnectionTitle.pending.type]: (state) => {
+        state.checkingConnectionTitle = API_REQUEST_STATE.START;
+        state.isCurrentConnectionHasUniqueTitle = TRIPLET_STATE.INITIAL;
+      },
+      [checkConnectionTitle.fulfilled.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.checkingConnectionTitle = API_REQUEST_STATE.FINISH;
+        state.isCurrentConnectionHasUniqueTitle =
+          action.payload.message === ResponseMessages.NOT_EXISTS
+            ? TRIPLET_STATE.TRUE
+            : TRIPLET_STATE.FALSE;
+        state.error = null;
+      },
+      [checkConnectionTitle.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.checkingConnectionTitle = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [addConnection.pending.type]: (
+        state,
+        action: PayloadAction<IConnection>
+      ) => {
+        state.addingConnection = API_REQUEST_STATE.START;
+      },
+      [addConnection.fulfilled.type]: (
+        state,
+        action: PayloadAction<IConnection>
+      ) => {
+        state.addingConnection = API_REQUEST_STATE.FINISH;
+        state.connections.push(action.payload);
+        state.metaConnections.push(action.payload);
         state.currentConnection = action.payload;
-      }
-      state.error = null;
-    },
-    [updateConnection.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.updatingConnection = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-    [getConnectionById.pending.type]: (state) => {
-      state.currentConnection = null;
-      state.gettingConnection = API_REQUEST_STATE.START;
-    },
-    [getConnectionById.fulfilled.type]: (
-      state,
-      action: PayloadAction<IConnection>
-    ) => {
-      state.gettingConnection = API_REQUEST_STATE.FINISH;
-      state.currentConnection = action.payload;
-      state.error = null;
-    },
-    [getConnectionById.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.gettingConnection = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-    [getAllConnections.pending.type]: (state) => {
-      state.gettingConnections = API_REQUEST_STATE.START;
-    },
-    [getAllConnections.fulfilled.type]: (
-      state,
-      action: PayloadAction<IConnection[]>
-    ) => {
-      state.gettingConnections = API_REQUEST_STATE.FINISH;
-      state.connections = action.payload;
-      state.error = null;
-    },
-    [getAllConnections.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.gettingConnections = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-    [getAllMetaConnections.pending.type]: (state) => {
-      state.gettingMetaConnections = API_REQUEST_STATE.START;
-    },
-    [getAllMetaConnections.fulfilled.type]: (
-      state,
-      action: PayloadAction<IConnection[]>
-    ) => {
-      state.gettingMetaConnections = API_REQUEST_STATE.FINISH;
-      state.metaConnections = action.payload;
-      state.error = null;
-    },
-    [getAllMetaConnections.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.gettingMetaConnections = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-    [deleteConnectionById.pending.type]: (state) => {
-      state.deletingConnectionById = API_REQUEST_STATE.START;
-    },
-    [deleteConnectionById.fulfilled.type]: (
-      state,
-      action: PayloadAction<number>
-    ) => {
-      state.deletingConnectionById = API_REQUEST_STATE.FINISH;
-      state.connections = state.connections.filter(
-        (connection) => connection.connectionId !== action.payload
-      );
-      state.metaConnections = state.metaConnections.filter(
-        (connection) => connection.connectionId !== action.payload
-      );
-      if (
-        state.currentConnection &&
-        state.currentConnection.connectionId === action.payload
-      ) {
+        state.error = null;
+      },
+      [addConnection.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.addingConnection = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [addTestConnection.pending.type]: (
+        state,
+        action: PayloadAction<IConnection>
+      ) => {
+        state.addingTestConnection = API_REQUEST_STATE.START;
+      },
+      [addTestConnection.fulfilled.type]: (
+        state,
+        action: PayloadAction<IConnection>
+      ) => {
+        state.addingTestConnection = API_REQUEST_STATE.FINISH;
+        state.testConnection = action.payload;
+        state.error = null;
+      },
+      [addTestConnection.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.addingTestConnection = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [getAndUpdateConnection.pending.type]: (state, action: any) => {
+        state.updatingConnection = API_REQUEST_STATE.START;
+      },
+      [getAndUpdateConnection.fulfilled.type]: (
+        state,
+        action: PayloadAction<IConnection>
+      ) => {
+        state.updatingConnection = API_REQUEST_STATE.FINISH;
+        state.connections = state.connections.map((connection) =>
+          connection.connectionId === action.payload.connectionId
+            ? action.payload
+            : connection
+        );
+        state.metaConnections = state.metaConnections.map((connection) =>
+          connection.connectionId === action.payload.connectionId
+            ? action.payload
+            : connection
+        );
+        state.error = null;
+      },
+      [getAndUpdateConnection.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.updatingConnection = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [updateConnection.pending.type]: (state) => {
+        state.updatingConnection = API_REQUEST_STATE.START;
+      },
+      [updateConnection.fulfilled.type]: (
+        state,
+        action: PayloadAction<IConnection>
+      ) => {
+        state.updatingConnection = API_REQUEST_STATE.FINISH;
+        state.connections = state.connections.map((connection) =>
+          connection.connectionId === action.payload.connectionId
+            ? action.payload
+            : connection
+        );
+        state.metaConnections = state.metaConnections.map((connection) =>
+          connection.connectionId === action.payload.connectionId
+            ? action.payload
+            : connection
+        );
+        if (
+          state.currentConnection &&
+          state.currentConnection.connectionId === action.payload.connectionId
+        ) {
+          state.currentConnection = action.payload;
+        }
+        state.error = null;
+      },
+      [updateConnection.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.updatingConnection = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [getConnectionById.pending.type]: (state) => {
         state.currentConnection = null;
-      }
-      state.error = null;
-    },
-    [deleteConnectionById.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.deletingConnectionById = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-    [deleteTestConnectionById.pending.type]: (state) => {
-      state.deletingTestConnectionById = API_REQUEST_STATE.START;
-    },
-    [deleteTestConnectionById.fulfilled.type]: (
-      state,
-      action: PayloadAction<number>
-    ) => {
-      state.deletingTestConnectionById = API_REQUEST_STATE.FINISH;
-      if (
-        state.testConnection &&
-        state.testConnection.connectionId === action.payload
-      ) {
-        state.testConnection = null;
-      }
-      state.error = null;
-    },
-    [deleteTestConnectionById.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.deletingTestConnectionById = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-    [deleteConnectionsById.pending.type]: (state) => {
-      state.deletingConnectionsById = API_REQUEST_STATE.START;
-    },
-    [deleteConnectionsById.fulfilled.type]: (
-      state,
-      action: PayloadAction<number[]>
-    ) => {
-      state.deletingConnectionsById = API_REQUEST_STATE.FINISH;
-      state.connections = state.connections.filter(
-        (connection) =>
+        state.gettingConnection = API_REQUEST_STATE.START;
+      },
+      [getConnectionById.fulfilled.type]: (
+        state,
+        action: PayloadAction<IConnection>
+      ) => {
+        state.gettingConnection = API_REQUEST_STATE.FINISH;
+        state.currentConnection = action.payload;
+        state.error = null;
+      },
+      [getConnectionById.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.gettingConnection = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [getAllConnections.pending.type]: (state) => {
+        state.gettingConnections = API_REQUEST_STATE.START;
+      },
+      [getAllConnections.fulfilled.type]: (
+        state,
+        action: PayloadAction<IConnection[]>
+      ) => {
+        state.gettingConnections = API_REQUEST_STATE.FINISH;
+        state.connections = action.payload;
+        state.error = null;
+      },
+      [getAllConnections.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.gettingConnections = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [getAllMetaConnections.pending.type]: (state) => {
+        state.gettingMetaConnections = API_REQUEST_STATE.START;
+      },
+      [getAllMetaConnections.fulfilled.type]: (
+        state,
+        action: PayloadAction<IConnection[]>
+      ) => {
+        state.gettingMetaConnections = API_REQUEST_STATE.FINISH;
+        state.metaConnections = action.payload;
+        state.error = null;
+      },
+      [getAllMetaConnections.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.gettingMetaConnections = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [deleteConnectionById.pending.type]: (state) => {
+        state.deletingConnectionById = API_REQUEST_STATE.START;
+      },
+      [deleteConnectionById.fulfilled.type]: (
+        state,
+        action: PayloadAction<number>
+      ) => {
+        state.deletingConnectionById = API_REQUEST_STATE.FINISH;
+        state.connections = state.connections.filter(
+          (connection) => connection.connectionId !== action.payload
+        );
+        state.metaConnections = state.metaConnections.filter(
+          (connection) => connection.connectionId !== action.payload
+        );
+        if (
+          state.currentConnection &&
+          state.currentConnection.connectionId === action.payload
+        ) {
+          state.currentConnection = null;
+        }
+        state.error = null;
+      },
+      [deleteConnectionById.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.deletingConnectionById = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [deleteTestConnectionById.pending.type]: (state) => {
+        state.deletingTestConnectionById = API_REQUEST_STATE.START;
+      },
+      [deleteTestConnectionById.fulfilled.type]: (
+        state,
+        action: PayloadAction<number>
+      ) => {
+        state.deletingTestConnectionById = API_REQUEST_STATE.FINISH;
+        if (
+          state.testConnection &&
+          state.testConnection.connectionId === action.payload
+        ) {
+          state.testConnection = null;
+        }
+        state.error = null;
+      },
+      [deleteTestConnectionById.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.deletingTestConnectionById = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [deleteConnectionsById.pending.type]: (state) => {
+        state.deletingConnectionsById = API_REQUEST_STATE.START;
+      },
+      [deleteConnectionsById.fulfilled.type]: (
+        state,
+        action: PayloadAction<number[]>
+      ) => {
+        state.deletingConnectionsById = API_REQUEST_STATE.FINISH;
+        state.connections = state.connections.filter(
+          (connection) =>
+            action.payload.findIndex(
+              (id) => `${id}` === `${connection.connectionId}`
+            ) === -1
+        );
+        state.metaConnections = state.metaConnections.filter(
+          (connection) =>
+            action.payload.findIndex(
+              (id) => `${id}` === `${connection.connectionId}`
+            ) === -1
+        );
+        if (
+          state.currentConnection &&
           action.payload.findIndex(
-            (id) => `${id}` === `${connection.connectionId}`
-          ) === -1
-      );
-      state.metaConnections = state.metaConnections.filter(
-        (connection) =>
-          action.payload.findIndex(
-            (id) => `${id}` === `${connection.connectionId}`
-          ) === -1
-      );
-      if (
-        state.currentConnection &&
-        action.payload.findIndex(
-          (id) => `${id}` === `${state.currentConnection.connectionId}`
-        ) !== -1
-      ) {
-        state.currentConnection = null;
+            (id) => `${id}` === `${state.currentConnection.connectionId}`
+          ) !== -1
+        ) {
+          state.currentConnection = null;
+        }
+        state.error = null;
+      },
+      [deleteConnectionsById.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.deletingConnectionsById = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
       }
-      state.error = null;
-    },
-    [deleteConnectionsById.rejected.type]: (
-      state,
-      action: PayloadAction<IResponse>
-    ) => {
-      state.deletingConnectionsById = API_REQUEST_STATE.ERROR;
-      state.error = action.payload;
-    },
-  },
+    }
+
+    return {reducers, extraReducers}
+  }
+
+
+  return {reducers}
+}
+
+export const connectionSlice = createSlice({
+  name: "connection",
+  initialState,
+  ...connectionReducers()
 });
+
 
 export const {
   addCurrentLog,
@@ -605,8 +629,11 @@ export const {
   toggleDetails,
   setJustCreatedItem,
   setJustDeletedItem,
-  setButtonPanelVisibility
+  setButtonPanelVisibility,
+  setAnimationPreviewPanelVisibility,
+  setVideoAnimationName
 } = connectionSlice.actions;
+
 
 export const actions = {
   setInitialTestConnectionState,
