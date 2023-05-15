@@ -18,9 +18,8 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {Col} from "react-grid-system";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
-import {isString, setFocusById} from "@application/utils/utils";
+import {setFocusById} from "@application/utils/utils";
 import Input from "@entity/connection/components/components/general/basic_components/inputs/Input";
-import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {
     ApplyIcon,
     CancelIcon,
@@ -28,7 +27,7 @@ import {
 } from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
 
 
-@connect(null, {setCurrentTechnicalItem})
+@connect(null, {})
 class Label extends React.Component{
     constructor(props) {
         super(props);

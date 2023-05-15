@@ -24,7 +24,6 @@ import {
 } from "@application/requests/interfaces/IResponse";
 import { CommonState } from "@application/utils/store";
 import { ICommonState } from "@application/interfaces/core";
-import { LocalStorage } from "@application/classes/LocalStorage";
 import {
   addConnection,
   addTestConnection,
@@ -43,12 +42,8 @@ import { ConnectionLogProps, IConnection } from "../../interfaces/IConnection";
 import { PANEL_LOCATION } from "../../components/utils/constants/app";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import { NoInfer } from "@reduxjs/toolkit/dist/tsHelpers";
+import {COLOR_MODE} from "@classes/content/connection_overview_2/CSvg";
 
-const COLOR_MODE = {
-  RECTANGLE_TOP: "RECTANGLE_TOP",
-  BACKGROUND: "BACKGROUND_COLOR",
-  CIRCLE_LEFT_TOP: "CIRCLE_LEFT_TOP",
-};
 
 export const LogPanelHeight = {
   Medium: 270,
@@ -82,11 +77,8 @@ export interface ConnectionState extends ICommonState {
   connection: any;
   testConnection: any;
   updateConnection: any;
-  items: any[];
-  arrows: any[];
   notificationData: any;
   detailsLocation: string;
-  technicalLayoutLocation: string;
   colorMode: string;
   processTextSize: number;
   isCreateElementPanelOpened: boolean;
@@ -123,11 +115,8 @@ let initialState: ConnectionState = {
   connection: null,
   testConnection: null,
   updateConnection: null,
-  items: [],
-  arrows: [],
   notificationData: {},
   detailsLocation: PANEL_LOCATION.SAME_WINDOW,
-  technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
   colorMode: COLOR_MODE.RECTANGLE_TOP,
   processTextSize: 20,
   isCreateElementPanelOpened: false,
@@ -140,7 +129,6 @@ let initialState: ConnectionState = {
   justDeletedItem: null,
   ...CommonState,
 };
-const storage = LocalStorage.getStorage();
 
 const connectionReducers = (isModal: boolean = false) => {
   const reducers: SliceCaseReducers<ConnectionState> = {
@@ -279,21 +267,12 @@ const connectionReducers = (isModal: boolean = false) => {
         state.updateConnection = action.payload.updateConnection;
       }
     },
-    setArrows: (state, action: PayloadAction<any[]>) => {
-      state.arrows = action.payload;
-    },
-    setItems: (state, action: PayloadAction<any[]>) => {
-      state.items = action.payload;
-    },
     setCurrentTechnicalItem: (state, action: PayloadAction<any>) => {
       state.currentTechnicalItem = action.payload;
       state.isCreateElementPanelOpened = action.payload !== null;
     },
     setDetailsLocation: (state, action: PayloadAction<any>) => {
       state.detailsLocation = action.payload.location;
-    },
-    setTechnicalLayoutLocation: (state, action: PayloadAction<any>) => {
-      state.technicalLayoutLocation = action.payload.location;
     },
     setConnectionDraftWasOpened: (state, action: PayloadAction<never>) => {
       state.isDraftOpenedOnce = true;
@@ -618,11 +597,8 @@ export const {
   setColorMode,
   setPanelConfigurations,
   setConnectionData,
-  setArrows,
-  setItems,
   setCurrentTechnicalItem,
   setDetailsLocation,
-  setTechnicalLayoutLocation,
   setConnectionDraftWasOpened,
   setInitialTestConnectionState,
   setLogPanelHeight,

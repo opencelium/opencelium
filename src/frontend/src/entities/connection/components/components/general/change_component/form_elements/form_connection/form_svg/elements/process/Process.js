@@ -31,11 +31,11 @@ import DashedElement from "./DashedElement";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
 import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {setModalJustDeletedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 function mapStateToProps(state, props){
-    const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state, props.isModal);
+    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         isTestingConnection: connectionOverview.isTestingConnection,
         colorMode: connectionOverview.colorMode,
@@ -49,7 +49,7 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {setJustDeletedItem})
+@connect(mapStateToProps, {setJustDeletedItem, setModalJustDeletedItem})
 class Process extends React.Component{
     constructor(props) {
         super(props)
@@ -62,6 +62,7 @@ class Process extends React.Component{
             isMouseOver: false,
             showCreatePanel: false,
         }
+        this.setJustDeletedItem = props.isModal ? props.setModalJustDeletedItem : props.setJustDeletedItem;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -193,13 +194,13 @@ class Process extends React.Component{
     }
 
     deleteProcess(e){
-        const {deleteProcess, process, setJustDeletedItem} = this.props;
-        setJustDeletedItem({index: process.entity.index, connectorType: process.connectorType});
+        const {deleteProcess, process} = this.props;
+        this.setJustDeletedItem({index: process.entity.index, connectorType: process.connectorType});
         this.setState({
             showCreatePanel: false,
         })
         setTimeout(() => {
-            setJustDeletedItem(null);
+            this.setJustDeletedItem(null);
             deleteProcess(process);
         }, 450)
         if(e){

@@ -22,12 +22,12 @@ import Description from '@change_component/form_elements/form_connection/form_sv
 import { TooltipButton } from '@app_component/base/tooltip_button/TooltipButton';
 import { TextSize } from '@app_component/base/text/interfaces';
 import { toggleDetails } from '@root/redux_toolkit/slices/ConnectionSlice';
+import { toggleModalDetails } from '@root/redux_toolkit/slices/ModalConnectionSlice';
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 function mapStateToProps(state, props) {
-  const connectionOverview = state.connectionReducer;
-  const { currentTechnicalItem, connection } = mapItemsToClasses(state, props.isModal);
-  
+  const { currentTechnicalItem, connection, connectionOverview } = mapItemsToClasses(state, props.isModal);
+
   return {
     connectionOverviewState: connectionOverview,
     currentTechnicalItem,
@@ -39,11 +39,11 @@ function mapStateToProps(state, props) {
   };
 }
 @GetModalProp()
-@connect(mapStateToProps, { toggleDetails })
+@connect(mapStateToProps, { toggleDetails, toggleModalDetails })
 class Details extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props.isModal)
+    this.toggleDetails = props.isModal ? props.toggleModalDetails : props.toggleDetails;
   }
 
   render() {
@@ -53,10 +53,8 @@ class Details extends React.Component {
       updateConnection,
       connection,
       isDetailsOpened,
-      toggleDetails,
-      toggleDetailsModal
     } = this.props;
-    
+
     if (connection === null) {
       return null;
     }
@@ -72,7 +70,7 @@ class Details extends React.Component {
           tooltip={'Show Details'}
           target={`show_connection_button`}
           hasBackground={false}
-          handleClick={toggleDetails}
+          handleClick={this.toggleDetails}
         />
       );
     }

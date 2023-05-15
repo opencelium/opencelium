@@ -383,7 +383,7 @@ class FormSection extends Component {
         }`}
         style={style}
       >
-        {hasHeader && <Label value={content.header} position={"absolute"} />}
+        {hasHeader && <Label id={content.header} value={content.header} position={"absolute"} />}
         {hasIcons && (
           <div className={styles.form_methods_icons}>
             <FormSectionIconsStyled>

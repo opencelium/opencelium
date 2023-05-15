@@ -23,7 +23,6 @@ import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
 import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
 import { useAppDispatch, useAppSelector } from "@application/utils/store";
 import { setFullScreen as setFullScreenFormSection } from "@application/redux_toolkit/slices/ApplicationSlice";
-import { findTopLeft } from "@application/utils/utils";
 import {
   setLogPanelHeight,
   LogPanelHeight,

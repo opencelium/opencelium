@@ -30,8 +30,7 @@ export const ARROW_WIDTH = 2;
 
 
 function mapStateToProps(state, props){
-    const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state, props.isModal);
+    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
         currentLogs: connectionOverview.currentLogs,

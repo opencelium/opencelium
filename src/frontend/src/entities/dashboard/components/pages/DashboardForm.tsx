@@ -42,10 +42,7 @@ import {
     TitleStyled,
     WidgetItemStyled
 } from './styles';
-import Socket from '@application/classes/socket/Socket';
 import { Auth } from '@application/classes/Auth';
-import { Connection } from '@entity/connection/classes/Connection';
-import {addCurrentLog} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 export const HAS_DASHBOARD_WIDGET_ENGINE = true;
 

@@ -17,14 +17,21 @@ import React from 'react';
 import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2';
 import { TooltipButton } from '@app_component/base/tooltip_button/TooltipButton';
 import { TextSize } from '@app_component/base/text/interfaces';
+import { toggleDetails } from '@root/redux_toolkit/slices/ConnectionSlice';
+import { toggleModalDetails } from '@root/redux_toolkit/slices/ModalConnectionSlice';
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import {connect} from "react-redux";
 
+@GetModalProp()
+@connect(null, { toggleDetails, toggleModalDetails })
 class SettingsPanel extends React.Component {
   constructor(props) {
     super(props);
+    this.toggleDetails = props.isModal ? props.toggleModalDetails : props.toggleDetails;
   }
 
   render() {
-    const { isDetailsOpened, toggleDetails, isTestingConnection } = this.props;
+    const { isDetailsOpened, isTestingConnection } = this.props;
     return (
       <div className={styles.details_settings_panel}>
         <TooltipButton
@@ -36,7 +43,7 @@ class SettingsPanel extends React.Component {
           tooltip={!isDetailsOpened ? 'Show Details' : 'Hide'}
           target={`toggle_connection_button`}
           hasBackground={false}
-          handleClick={toggleDetails}
+          handleClick={this.toggleDetails}
         />
       </div>
     );

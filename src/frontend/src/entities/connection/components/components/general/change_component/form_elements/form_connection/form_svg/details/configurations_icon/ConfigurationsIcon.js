@@ -15,25 +15,28 @@
 
 import React from "react";
 import PropTypes from "prop-types";
-import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import Dialog from "@entity/connection/components/components/general/basic_components/Dialog";
 import { connect } from "react-redux";
 import { setPanelConfigurations } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { setModalPanelConfigurations } from "@entity/connection/redux_toolkit/slices/ModalConnectionSlice";
 import ColorMode from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/ColorMode";
 import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
 import { TextSize } from "@app_component/base/text/interfaces";
 import LabelSize from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/LabelSize";
 import { ColorTheme } from "@style/Theme";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 
-function mapStateToProps(store) {
-  const connectionOverview = store.connectionReducer;
+function mapStateToProps(state, props) {
+  const { connectionOverview } = mapItemsToClasses(state, props.isModal);
   return {
     colorMode: connectionOverview.colorMode,
   };
 }
 
-@connect(mapStateToProps, { setPanelConfigurations })
+@GetModalProp()
+@connect(mapStateToProps, { setPanelConfigurations, setModalPanelConfigurations })
 class ConfigurationsIcon extends React.Component {
   constructor(props) {
     super(props);
@@ -65,8 +68,12 @@ class ConfigurationsIcon extends React.Component {
 
   save() {
     const { colorMode } = this.state;
-    const { setPanelConfigurations } = this.props;
-    setPanelConfigurations({ colorMode });
+    const { setPanelConfigurations, setModalPanelConfigurations, isModal } = this.props;
+    if(isModal){
+      setModalPanelConfigurations({colorMode});
+    } else{
+      setPanelConfigurations({ colorMode });
+    }
     this.toggleIsVisibleSettingsWindow();
   }
 

@@ -63,7 +63,7 @@ $DASHED_COLOR: #58854d;
   z-index: 1;
 }
 .create_element_panel_line {
-  z-index: 1000;
+  z-index: 100000;
   position: absolute;
   width: 20px;
   height: 3px;
@@ -71,12 +71,12 @@ $DASHED_COLOR: #58854d;
   box-shadow: 0 4px 2px rgba(0, 0, 0, 0.12), 0 3px 10px rgba(0, 0, 0, 0.24);
 }
 .add_icon {
-  z-index: 1000;
+  z-index: 100000;
   position: absolute;
   cursor: pointer;
 }
 .create_element_panel {
-  z-index: 1000;
+  z-index: 100000;
   background: white;
   position: absolute;
   width: 100px;
@@ -129,7 +129,7 @@ $DASHED_COLOR: #58854d;
 .create_element_panel_for_item {
   @extend .create_element_panel;
   width: 200px;
-  z-index: 1000;
+  z-index: 100000;
 }
 .technical_layout {
   width: 100%;

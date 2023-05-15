@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState, createContext } from "react";
+import React, { useState, createContext, useEffect } from "react";
 import { withTheme } from "styled-components";
 import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
 import { TextSize } from "@app_component/base/text/interfaces";
@@ -31,11 +31,46 @@ import Content from "./content/Content";
 import FormConnectionSvg from "../../../FormConnectionSvg";
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
 import { HelpBlockData } from "./HelpBlockData";
+import CConnection from "@classes/content/connection/CConnection";
+import {setModalConnectionData} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import {CONNECTOR_FROM} from "@classes/content/connection/CConnectorItem";
+import { Connector } from "@entity/connector/classes/Connector";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 const HelpBlock = () => {
+  const dispatch = useAppDispatch();
+  const {connectors, gettingConnectors} = Connector.getReduxState();
+  const [connection, setConnection] = useState(CConnection.createConnection(HelpBlockData));
   const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+      if(gettingConnectors === API_REQUEST_STATE.FINISH) {
+          let fromConnector = connectors.find(c => c.connectorId === HelpBlockData.fromConnector.connectorId);
+          let toConnector = connectors.find(c => c.connectorId === HelpBlockData.toConnector.connectorId);
+          if (fromConnector && toConnector) {
+              connection.fromConnector.id = fromConnector.connectorId;
+              connection.fromConnector.title = fromConnector.title;
+              //@ts-ignore
+              connection.fromConnector.invoker = fromConnector.invoker;
+              connection.fromConnector.setConnectorType(CONNECTOR_FROM);
+              connection.toConnector.id = toConnector.connectorId;
+              connection.toConnector.title = toConnector.title;
+              //@ts-ignore
+              connection.toConnector.invoker = toConnector.invoker;
+              connection.toConnector.setConnectorType(CONNECTOR_FROM);
+              setConnection(connection);
+          }
+      }
+  }, [gettingConnectors]);
+
   function toggleVisible() {
     setIsVisible(!isVisible);
+  }
+
+  const updateEntity = (updatedEntity: any) => {
+      setConnection(updatedEntity);
+      let connection = updatedEntity instanceof CConnection ? updatedEntity.getObjectForConnectionOverview() : updatedEntity;
+      dispatch(setModalConnectionData({connection}));
   }
 
   const { isButtonPanelOpened, videoAnimationName } = useAppSelector(
@@ -74,7 +109,8 @@ const HelpBlock = () => {
             {
               <FormConnectionSvg
                 data={{ readOnly: false }}
-                entity={HelpBlockData}
+                entity={connection}
+                updateEntity={updateEntity}
               />
             }
           </ModalContext.Provider>

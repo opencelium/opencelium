@@ -37,8 +37,11 @@ import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton"
 import {
   setInitialTestConnectionState,
   setTestingConnection,
-  clearCurrentLogs,
 } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {
+    setModalInitialTestConnectionState,
+    setModalTestingConnection
+} from "@entity/connection/redux_toolkit/slices/ModalConnectionSlice";
 import { setInitialTestScheduleState } from "@entity/schedule/redux_toolkit/slices/ScheduleSlice";
 import Counter from "@app_component/base/counter/Counter";
 import Text from "@app_component/base/text/Text";
@@ -47,9 +50,8 @@ import { ColorTheme } from "@style/Theme";
 import GetModalProp from "@entity/connection/components/decorators/GetModalProp";
 
 function mapStateToProps(state, props) {
-  const connectionOverview = state.connectionReducer;
   const scheduleOverview = state.scheduleReducer;
-  const { connection } = mapItemsToClasses(state, props.isModal);
+  const { connection, connectionOverview } = mapItemsToClasses(state, props.isModal);
   return {
     connection,
     connectionError: connectionOverview.error,
@@ -81,7 +83,8 @@ function mapStateToProps(state, props) {
   setInitialTestConnectionState,
   getScheduleById,
   setTestingConnection,
-  clearCurrentLogs,
+  setModalInitialTestConnectionState,
+  setModalTestingConnection
 })
 class TestConnectionButton extends React.Component {
   constructor(props) {
@@ -98,11 +101,13 @@ class TestConnectionButton extends React.Component {
       startDeletingSchedule: false,
     };
     this.scheduleInterval = null;
+    this.setInitialTestScheduleState = props.isModal ? props.setModalInitialTestConnectionState : props.setInitialTestConnectionState;
+    this.setTestingConnection = props.isModal ? props.setModalTestingConnection : props.setTestingConnection;
   }
 
   componentWillUnmount() {
     if (this.scheduleInterval) {
-      this.props.setTestingConnection(false);
+      this.setTestingConnection(false);
       clearInterval(this.scheduleInterval);
       this.scheduleInterval = null;
     }
@@ -127,7 +132,6 @@ class TestConnectionButton extends React.Component {
       currentSchedule,
       gettingScheduleById,
       getScheduleById,
-      setTestingConnection,
       isTestingConnection,
     } = this.props;
     const {
@@ -243,33 +247,31 @@ class TestConnectionButton extends React.Component {
         startDeletingConnection: false,
       });
       setTimeout(() => {
-        setTestingConnection(false);
+        this.setTestingConnection(false);
       }, 3500);
     }
     if (isTestingConnection && (connectionError || scheduleError)) {
-      setTimeout(() => setTestingConnection(false), 3500);
+      setTimeout(() => this.setTestingConnection(false), 3500);
     }
   }
 
   test() {
     const {
       connection,
-      setInitialTestConnectionState,
       setInitialTestScheduleState,
-      setTestingConnection,
       isTestingConnection,
       setFullScreenFormSection,
       addTestConnection,
     } = this.props;
     const newState = {};
     if (!isTestingConnection) {
-      setInitialTestConnectionState();
+      this.setInitialTestConnectionState();
       setInitialTestScheduleState();
       setTimeout(
         () => addTestConnection(connection.getObjectForBackend()),
         500
       );
-      setTestingConnection(true);
+      this.setTestingConnection(true);
       newState.startAddingConnection = true;
       newState.isFinishedTriggering = false;
       newState.isTriggerFailed = false;

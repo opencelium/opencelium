@@ -15,7 +15,6 @@
 
 import React from 'react';
 import {setFocusById} from "@application/utils/utils";
-import {setArrows} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {connect} from "react-redux";
 import CreateProcess
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateProcess";
@@ -47,7 +46,7 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {setArrows})
+@connect(mapStateToProps, {})
 class CreateElementPanel extends React.Component{
     constructor(props) {
         super(props);

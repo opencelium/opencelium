@@ -17,14 +17,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import {connect} from "react-redux";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-function mapStateToProps(state){
-    const connectionOverview = state.connectionReducer;
+function mapStateToProps(state, props){
+    const {connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         isTestingConnection: connectionOverview.isTestingConnection,
     };
 }
 
+@GetModalProp()
 @connect(mapStateToProps, {})
 class Panel extends React.Component{
     constructor(props) {

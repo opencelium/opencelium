@@ -27,19 +27,20 @@ import {CTechnicalProcess} from "@entity/connection/components/classes/component
 import CCreateElementPanel from "@entity/connection/components/classes/components/content/connection_overview_2/CCreateElementPanel";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {connect} from "react-redux";
-import {setArrows, setJustCreatedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {setJustCreatedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {setModalJustCreatedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
 function mapStateToProps(state, props){
-    const connectionOverview = state.connectionReducer;
+    const { connectionOverview } = mapItemsToClasses(state, props.isModal);
     return{
         justCreatedItem: connectionOverview.justCreatedItem,
     };
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {setJustCreatedItem})
+@connect(mapStateToProps, {setJustCreatedItem, setModalJustCreatedItem})
 class CreateProcess extends React.Component{
     constructor(props) {
         super(props);
@@ -48,6 +49,7 @@ class CreateProcess extends React.Component{
             name: '',
             label: '',
         }
+        this.setJustCreatedItem = props.isModal ? props.setModalJustCreatedItem : props.setJustCreatedItem;
     }
 
     componentDidMount() {
@@ -87,7 +89,6 @@ class CreateProcess extends React.Component{
 
     create(){
         let {name, label} = this.state;
-        const {setJustCreatedItem} = this.props;
         if(name) {
             name = name.value;
             const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
@@ -103,11 +104,11 @@ class CreateProcess extends React.Component{
             } else {
                 newMethod = connection.addToConnectorMethod(method, itemPosition);
             }
-            setJustCreatedItem({index: newMethod.index, connectorType})
+            this.setJustCreatedItem({index: newMethod.index, connectorType})
             updateConnection(connection);
             if (setCreateElementPanelPosition) setCreateElementPanelPosition({x: 0, y: 0});
             if (setIsCreateElementPanelOpened) setIsCreateElementPanelOpened(false);
-            setTimeout(() => {setJustCreatedItem(null)}, 800)
+            setTimeout(() => {this.setJustCreatedItem(null)}, 800)
         } else{
             setFocusById('new_request_name')
         }

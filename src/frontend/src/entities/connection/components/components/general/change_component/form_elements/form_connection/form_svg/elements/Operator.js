@@ -32,12 +32,12 @@ import DashedElement from "@change_component/form_elements/form_connection/form_
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
 import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {setModalJustDeletedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
 function mapStateToProps(state, props){
-    const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state, props.isModal);
+    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
         logPanelHeight: connectionOverview.logPanelHeight,
@@ -49,7 +49,7 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {setJustDeletedItem})
+@connect(mapStateToProps, {setJustDeletedItem, setModalJustDeletedItem})
 class Operator extends React.Component{
     constructor(props) {
         super(props)
@@ -63,6 +63,7 @@ class Operator extends React.Component{
             isMouseOver: false,
             showCreatePanel: false,
         }
+        this.setJustDeletedItem = props.isModal ? props.setModalJustDeletedItem : props.setJustDeletedItem;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -231,14 +232,14 @@ class Operator extends React.Component{
     }
 
     deleteOperator(e){
-        const {connection, operator, updateConnection, setCurrentItem, setJustDeletedItem} = this.props;
+        const {connection, operator, updateConnection, setCurrentItem} = this.props;
         const connector = connection.getConnectorByType(operator.connectorType);
         this.setState({
             showCreatePanel: false,
         })
-        setJustDeletedItem({index: operator.entity.index, connectorType: operator.connectorType});
+        this.setJustDeletedItem({index: operator.entity.index, connectorType: operator.connectorType});
         setTimeout(() => {
-            setJustDeletedItem(null);
+            this.setJustDeletedItem(null);
             if(connector){
                 if(connector.getConnectorType() === CONNECTOR_FROM){
                     connection.removeFromConnectorOperator(operator.entity);

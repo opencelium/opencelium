@@ -22,12 +22,15 @@ import {
 } from "./styles";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {useAppDispatch} from "@application/utils/store";
-import {setLogPanelHeight, clearCurrentLogs, LogPanelHeight} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {clearCurrentLogs} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {clearModalCurrentLogs} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import LogMessage from "@change_component/form_elements/form_connection/form_svg/layouts/logs/LogMessage";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-const LogPanel: FC = ({}) => {
+const LogPanel: FC<{isModal?: boolean}> = ({isModal}) => {
     const dispatch = useAppDispatch();
+    const clearLogs = isModal ? clearModalCurrentLogs : clearCurrentLogs;
     const {isFullScreen} = Application.getReduxState();
     const {
         currentLogs, logPanelHeight, currentTechnicalItem,
@@ -63,7 +66,7 @@ const LogPanel: FC = ({}) => {
                     tooltip={'Clear Logs'}
                     target={`clear_log_panel`}
                     hasBackground={false}
-                    handleClick={() => dispatch(clearCurrentLogs([]))}
+                    handleClick={() => dispatch(clearLogs([]))}
                 />}
             </TopStyled>
             {logPanelHeight !== 0 &&
@@ -95,4 +98,4 @@ const LogPanel: FC = ({}) => {
     );
 }
 
-export default LogPanel;
+export default GetModalProp()(LogPanel);

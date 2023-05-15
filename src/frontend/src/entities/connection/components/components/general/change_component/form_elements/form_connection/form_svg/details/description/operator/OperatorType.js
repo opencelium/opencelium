@@ -19,18 +19,22 @@ import SelectableInput
 import {CONNECTOR_FROM} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 import {connect} from "react-redux";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import COperatorItem from "@entity/connection/components/classes/components/content/connection/operator/COperatorItem";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-@connect(null, {setCurrentTechnicalItem})
+@GetModalProp()
+@connect(null, {setCurrentTechnicalItem, setModalCurrentTechnicalItem})
 class OperatorType extends React.Component{
     constructor(props) {
         super(props);
+        this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
     }
 
     changeType(optionValue){
         if(optionValue) {
-            const {details, connection, updateConnection, setCurrentTechnicalItem} = this.props;
+            const {details, connection, updateConnection} = this.props;
             const operatorItem = details.entity;
             let connector = connection.getConnectorByType(details.connectorType);
             if(connector) {
@@ -46,7 +50,7 @@ class OperatorType extends React.Component{
                     currentTechnicalItem = connection.toConnector.getSvgElementByIndex(operator.index);
                 }
                 updateConnection(connection);
-                setCurrentTechnicalItem(currentTechnicalItem.getObject());
+                this.setCurrentTechnicalItem(currentTechnicalItem.getObject());
             }
         }
     }

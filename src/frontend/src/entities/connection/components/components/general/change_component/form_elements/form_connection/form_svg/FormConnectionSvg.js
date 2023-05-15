@@ -20,19 +20,14 @@ import TechnicalLayout from './layouts/TechnicalLayout';
 
 import Details from './details/Details';
 import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2.scss';
-import { PANEL_LOCATION } from '@entity/connection/components/utils/constants/app';
 import { mapItemsToClasses } from '@change_component/form_elements/form_connection/form_svg/utils';
 import CreateElementPanel from '@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel';
-import {
-  setCurrentTechnicalItem,
-  setConnectionData,
-} from '@entity/connection/redux_toolkit/slices/ConnectionSlice';
+import { setCurrentTechnicalItem, setConnectionData } from '@entity/connection/redux_toolkit/slices/ConnectionSlice';
+import { setModalConnectionData, setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import { LocalStorage } from '@application/classes/LocalStorage';
 import CConnection from '@entity/connection/components/classes/components/content/connection/CConnection';
 import LogPanel from '@change_component/form_elements/form_connection/form_svg/layouts/logs/LogPanel';
 import ButtonPanel from './layouts/button_panel/ButtonPanel';
-import { OUTSIDE_ITEM } from '@classes/content/connection/CConnectorItem';
-import { CREATE_PROCESS } from '@classes/content/connection_overview_2/CCreateElementPanel';
 
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
@@ -41,8 +36,7 @@ export const HAS_LAYOUTS_SCALING = true;
 function mapStateToProps(state, props) {
   const isFullScreen = state.applicationReducer.isFullScreen;
   const authUser = state.authReducer.authUser;
-  const connectionOverview = state.connectionReducer;
-  const { currentTechnicalItem, connection } = mapItemsToClasses(state, props.isModal);
+  const { currentTechnicalItem, connection, connectionOverview } = mapItemsToClasses(state, props.isModal);
   return {
     authUser,
     technicalLayoutLocation: connectionOverview.technicalLayoutLocation,
@@ -57,7 +51,7 @@ function mapStateToProps(state, props) {
  */
 @GetModalProp()
 @withTranslation('basic_components')
-@connect(mapStateToProps, { setCurrentTechnicalItem, setConnectionData })
+@connect(mapStateToProps, { setCurrentTechnicalItem, setConnectionData, setModalConnectionData, setModalCurrentTechnicalItem })
 class FormConnectionSvg extends Component {
   constructor(props) {
     super(props);
@@ -66,6 +60,8 @@ class FormConnectionSvg extends Component {
       createElementPanelConnectorType: '',
       createElementPanelPosition: { x: 0, y: 0 },
     };
+    this.setData = props.isModal ? props.setModalConnectionData : props.setConnectionData;
+    this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
   }
 
   setCreateElementPanelPosition(position) {
@@ -85,28 +81,28 @@ class FormConnectionSvg extends Component {
   }
 
   componentDidMount() {
-    const { entity, setConnectionData } = this.props;
+    const { entity } = this.props;
     let connectionData =
       entity instanceof CConnection
         ? entity.getObjectForConnectionOverview()
         : entity;
-    setConnectionData({ connection: connectionData });
+    this.setData({ connection: connectionData });
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    const { entity, setConnectionData } = this.props;
+    const { entity } = this.props;
     if (prevProps.entity.id !== this.props.entity.id) {
       let connectionData =
         entity instanceof CConnection
           ? entity.getObjectForConnectionOverview()
           : entity;
-      setConnectionData({ connection: connectionData });
+      this.setData({ connection: connectionData });
     }
   }
 
   componentWillUnmount() {
-    const { setCurrentTechnicalItem, currentTechnicalItem } = this.props;
-    if (currentTechnicalItem !== null) setCurrentTechnicalItem(null);
+    const { currentTechnicalItem } = this.props;
+    if (currentTechnicalItem !== null) this.setCurrentTechnicalItem(null);
   }
 
   updateEntity(entity = null, settings = { hasPostMessage: true }) {
@@ -114,7 +110,6 @@ class FormConnectionSvg extends Component {
       authUser,
       connection,
       updateEntity,
-      setConnectionData,
     } = this.props;
     if (connection) {
       const storage = LocalStorage.getStorage();
@@ -128,7 +123,7 @@ class FormConnectionSvg extends Component {
             ? entity.getObjectForConnectionOverview()
             : entity;
         updateEntity(entity);
-        setConnectionData({ connection: connectionData });
+        this.setData({ connection: connectionData });
       }
     }
   }

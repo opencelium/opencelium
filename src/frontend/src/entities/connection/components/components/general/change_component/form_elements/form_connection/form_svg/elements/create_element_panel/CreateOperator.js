@@ -27,9 +27,12 @@ import {CTechnicalProcess} from "@entity/connection/components/classes/component
 import {setFocusById} from "@application/utils/utils";
 import {connect} from "react-redux";
 import {setJustCreatedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {setModalJustCreatedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-@connect(null, {setJustCreatedItem})
+@GetModalProp()
+@connect(null, {setJustCreatedItem, setModalJustCreatedItem})
 class CreateOperator extends React.Component{
     constructor(props) {
         super(props);
@@ -37,6 +40,7 @@ class CreateOperator extends React.Component{
         this.state = {
             type: null,
         }
+        this.setJustCreatedItem = props.isModal ? props.setModalJustCreatedItem : props.setJustCreatedItem;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -66,7 +70,6 @@ class CreateOperator extends React.Component{
 
     create(){
         let {type} = this.state;
-        const {setJustCreatedItem} = this.props;
         if(type) {
             type = type.value;
             const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
@@ -78,11 +81,11 @@ class CreateOperator extends React.Component{
             } else {
                 newOperator = connection.addToConnectorOperator(operator, itemPosition);
             }
-            setJustCreatedItem({index: newOperator.index, connectorType})
+            this.setJustCreatedItem({index: newOperator.index, connectorType})
             updateConnection(connection);
             setCreateElementPanelPosition({x: 0, y: 0});
             setIsCreateElementPanelOpened(false);
-            setTimeout(() => {setJustCreatedItem(null)}, 800)
+            setTimeout(() => {this.setJustCreatedItem(null)}, 800)
         } else{
             setFocusById('new_operator_type');
         }

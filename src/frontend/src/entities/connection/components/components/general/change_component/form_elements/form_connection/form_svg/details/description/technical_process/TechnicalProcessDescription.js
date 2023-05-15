@@ -27,8 +27,11 @@ import Header
 import Body from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Body";
 import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-@connect(null, {setCurrentTechnicalItem})
+@GetModalProp()
+@connect(null, {setCurrentTechnicalItem, setModalCurrentTechnicalItem})
 class TechnicalProcessDescription extends React.Component{
     constructor(props) {
         super(props);
@@ -36,6 +39,7 @@ class TechnicalProcessDescription extends React.Component{
         this.state = {
             isResponseVisible: false,
         };
+        this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
     }
 
     toggleResponseVisibleIcon(){
@@ -45,22 +49,22 @@ class TechnicalProcessDescription extends React.Component{
     }
 
     changeLabel(label){
-        const {connection, details, updateConnection, setCurrentTechnicalItem} = this.props;
+        const {connection, details, updateConnection}= this.props;
         const connector = connection.getConnectorByType(details.connectorType);
         const method = connector.getMethodByColor(details.entity.color);
         method.label = label;
         const currentTechnicalItem = connector.getSvgElementByIndex(method.index);
         updateConnection(connection);
-        setCurrentTechnicalItem(currentTechnicalItem.getObject());
+        this.setCurrentTechnicalItem(currentTechnicalItem.getObject());
     }
 
     updateBody(connection){
-        const {details, updateConnection, setCurrentTechnicalItem} = this.props;
+        const {details, updateConnection} = this.props;
         const connector = connection.getConnectorByType(details.connectorType);
         const method = connector.getMethodByColor(details.entity.color);
         const currentTechnicalItem = connector.getSvgElementByIndex(method.index);
         updateConnection(connection);
-        setCurrentTechnicalItem(currentTechnicalItem.getObject());
+        this.setCurrentTechnicalItem(currentTechnicalItem.getObject());
     }
 
     render(){

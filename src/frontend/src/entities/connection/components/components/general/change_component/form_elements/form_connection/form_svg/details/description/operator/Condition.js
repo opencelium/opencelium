@@ -20,6 +20,7 @@ import {Col} from "react-grid-system";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import {setFocusById} from "@application/utils/utils";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {setModalCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ModalConnectionSlice";
 import Dialog from "@entity/connection/components/components/general/basic_components/Dialog";
 import {EditIcon, ViewIcon} from "../Icons";
 import LeftStatement
@@ -37,9 +38,11 @@ import COperator from "@entity/connection/components/classes/components/content/
 import ReactDOM from "react-dom";
 import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
 import {withTheme} from "styled-components";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-@connect(null, {setCurrentTechnicalItem})
+@GetModalProp()
+@connect(null, {setCurrentTechnicalItem, setModalCurrentTechnicalItem})
 class Condition extends React.Component{
     constructor(props) {
         super(props);
@@ -50,6 +53,7 @@ class Condition extends React.Component{
                 ...this.getConditionFromProps(props),
             }
         }
+        this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
     }
 
     hasLeftMethod(){
@@ -167,7 +171,7 @@ class Condition extends React.Component{
 
     updateConnection(){
         const {condition} = this.state;
-        const {connection, details, updateConnection, setCurrentTechnicalItem} = this.props;
+        const {connection, details, updateConnection} = this.props;
         const operator = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
         const operatorItem = connector.getOperatorByIndex(operator.index);
@@ -187,7 +191,7 @@ class Condition extends React.Component{
         operatorItem.error = null;
         updateConnection(connection);
         let currentTechnicalItem = connector.getSvgElementByIndex(operator.index);
-        setCurrentTechnicalItem(currentTechnicalItem.getObject());
+        this.setCurrentTechnicalItem(currentTechnicalItem.getObject());
         this.setState({
             isOpenEditDialog: !this.state.isOpenEditDialog,
             isMouseOver: false,

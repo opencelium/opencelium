@@ -24,9 +24,8 @@ import HelpBlock from "./help_block/HelpBlock";
 import GetModalProp from "@entity/connection/components/decorators/GetModalProp";
 
 function mapStateToProps(state, props) {
-  const connectionOverview = state.connectionReducer;
   const applicationOverview = state.applicationReducer;
-  const { connection } = mapItemsToClasses(state, props.isModal);
+  const { connection, connectionOverview } = mapItemsToClasses(state, props.isModal);
 
   return {
     connection,
