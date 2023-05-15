@@ -42,7 +42,9 @@ export const checkConnectorTitle = createAsyncThunk(
     'connector/exist/title',
     async(title: string, thunkAPI) => {
         try {
-            const request = new ConnectorRequest({endpoint: `/exists/${title}`});
+            title = title.split('/').join('//');
+            title = encodeURIComponent(title);
+            const request = new ConnectorRequest({endpoint: `/${title}`});
             const response = await request.checkConnectorTitle();
             return response.data;
         } catch(e){
@@ -55,7 +57,9 @@ export const addConnector = createAsyncThunk(
     'connector/add',
     async({entityData, iconFile, shouldDeleteIcon} : IEntityWithImage<ModelConnectorPoust>, thunkAPI) => {
         try {
-            const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${entityData.title}`});
+            let title = entityData.title.split('/').join('//');
+            title = encodeURIComponent(title);
+            const checkTitleRequest = new ConnectorRequest({endpoint: `/${title}`});
             const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
             if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
@@ -91,7 +95,9 @@ export const updateConnector = createAsyncThunk(
             // @ts-ignore
             const connectorState = thunkAPI.getState().connectorReducer;
             if(connectorState.currentConnector && connectorState.currentConnector.title !== entityData.title){
-                const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${entityData.title}`});
+                let title = entityData.title.split('/').join('//');
+                title = encodeURIComponent(title);
+                const checkTitleRequest = new ConnectorRequest({endpoint: `/${title}`});
                 const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
                 if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
                     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
