@@ -38,12 +38,12 @@ const Content: FC<ContentProps> = () => {
 
   const { isAnimationPreviewPanelOpened } = useAppSelector(
     (state) => state.connectionReducer
-  ); 
+  );
 
   return (
     <ContentStyled isPreviewPanelOpened={isAnimationPreviewPanelOpened}>
       <ContentBlock label="basics">
-        {basicsContentData.map((item, index) => (
+        {basicsContentData.map((item: any, index: number) => (
           <ContentItem key={index} {...item} />
         ))}
       </ContentBlock>

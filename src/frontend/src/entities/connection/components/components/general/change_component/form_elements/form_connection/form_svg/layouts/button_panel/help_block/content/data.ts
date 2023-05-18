@@ -1,5 +1,5 @@
 import DefaulHelpImagePath from "@image/entities/connection/default_help_preview.png";
-const basicsContentData = [
+const basicsContentData: any = [
   {
     title: "First steps",
     image: DefaulHelpImagePath,

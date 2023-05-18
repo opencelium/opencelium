@@ -30,104 +30,96 @@ import styles from "@entity/connection/components/themes/default/content/connect
 import Content from "./content/Content";
 import FormConnectionSvg from "../../../FormConnectionSvg";
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
-import { HelpBlockData } from "./HelpBlockData";
+import {HelpBlockAllData} from "./HelpBlockData";
 import CConnection from "@classes/content/connection/CConnection";
 import {setModalConnectionData, setModalCurrentTechnicalItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
-import {CONNECTOR_FROM} from "@classes/content/connection/CConnectorItem";
+import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/content/connection/CConnectorItem";
 import { Connector } from "@entity/connector/classes/Connector";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {sortByIndex} from "@application/utils/utils";
 import {setVideoAnimationName} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 
+const prepareConnection = (connection: any, connectors: any,) => {
+    if(connection) {
+        let fromConnector = connectors.find((c: any) => c.connectorId === connection.fromConnector.id);
+        let toConnector = connectors.find((c: any) => c.connectorId === connection.toConnector.id);
+        connection.fromConnector.methods = [];
+        connection.fromConnector.operators = [];
+        //@ts-ignore
+        connection.fromConnector.invoker = fromConnector.invoker;
+        connection.fromConnector.setConnectorType(CONNECTOR_FROM);
+        connection.toConnector.methods = [];
+        connection.toConnector.operators = [];
+        //@ts-ignore
+        connection.toConnector.invoker = toConnector.invoker;
+        connection.toConnector.setConnectorType(CONNECTOR_TO);
+    }
+    return connection;
+}
+
+
 const HelpBlock = () => {
     const dispatch = useAppDispatch();
-    const [index, setIndex] = useState<number>(-1);
+    const [animationProps, setAnimationProps] = useState<any>({index: -1, connection: CConnection.createConnection(), allItems: {fromConnector: [], toConnector: []}})
     const {connectors, gettingConnectors} = Connector.getReduxState();
-    const [connection, setConnection] = useState(CConnection.createConnection(HelpBlockData));
     const [isVisible, setIsVisible] = useState(false);
-    const [allItems, setAllItems] = useState({fromConnector: [], toConnector: []});
-
     const { isButtonPanelOpened, videoAnimationName } = useAppSelector(
         (state) => state.connectionReducer
     );
-
+    const [timeOutId, setTimeOutId] = useState(null);
     useEffect(() => {
-        if(!isButtonPanelOpened){
-            setIndex(-1);
-            dispatch(setVideoAnimationName(''));
-        }
-    }, [isButtonPanelOpened]);
-    useEffect(() => {
-        if(isButtonPanelOpened && videoAnimationName) {
-            if (index >= 0 && index < allItems.fromConnector.length + allItems.toConnector.length) {
-                if (index < allItems.fromConnector.length) {
-                    if (allItems.fromConnector[index].hasOwnProperty('type')) {
-                        connection.fromConnector.operators.push(allItems.fromConnector[index]);
-                    } else {
-                        connection.fromConnector.methods.push(allItems.fromConnector[index]);
-                    }
-                    connection.fromConnector.setSvgItems();
-                    dispatch(setModalCurrentTechnicalItem(connection.fromConnector.getSvgElementByIndex(allItems.fromConnector[index].index).getObject()))
-                } else {
-                    if (allItems.toConnector[index - allItems.fromConnector.length].hasOwnProperty('type')) {
-                        connection.toConnector.operators.push(allItems.toConnector[index - allItems.fromConnector.length]);
-                    } else {
-                        connection.toConnector.methods.push(allItems.toConnector[index - allItems.fromConnector.length]);
-                    }
-                    connection.toConnector.setSvgItems();
-                    dispatch(setModalCurrentTechnicalItem(connection.toConnector.getSvgElementByIndex(allItems.toConnector[index - allItems.fromConnector.length].index).getObject()))
-                }
-                updateEntity(connection);
-                setTimeout(() => setIndex(index + 1), 1000);
-            }
-        }
-    }, [index, isButtonPanelOpened, videoAnimationName])
-
-    useEffect(() => {
-        if(allItems.fromConnector.length === 0 && allItems.toConnector.length === 0){
-            setAllItems({
+        if(videoAnimationName !== ''){
+            let connection = CConnection.createConnection(HelpBlockAllData[videoAnimationName]);
+            let allItems = {
                 fromConnector: sortByIndex([...connection.fromConnector.methods, ...connection.fromConnector.operators]),
                 toConnector: sortByIndex([...connection.toConnector.methods, ...connection.toConnector.operators])
-            });
+            }
+            setAnimationProps({
+                index: 0,
+                connection: prepareConnection(connection, connectors),
+                allItems,
+            })
         }
-    }, [])
+        if(timeOutId) {
+            clearTimeout(timeOutId);
+            setTimeOutId(null);
+        }
+    }, [videoAnimationName])
     useEffect(() => {
-      if(gettingConnectors === API_REQUEST_STATE.FINISH) {
-          let fromConnector = connectors.find(c => c.connectorId === HelpBlockData.fromConnector.connectorId);
-          let toConnector = connectors.find(c => c.connectorId === HelpBlockData.toConnector.connectorId);
-          if (fromConnector && toConnector) {
-              connection.fromConnector.id = fromConnector.connectorId;
-              connection.fromConnector.title = fromConnector.title;
-              connection.fromConnector.methods = [];
-              connection.fromConnector.operators = [];
-              //@ts-ignore
-              connection.fromConnector.invoker = fromConnector.invoker;
-              connection.fromConnector.setConnectorType(CONNECTOR_FROM);
-              connection.toConnector.id = toConnector.connectorId;
-              connection.toConnector.title = toConnector.title;
-              connection.toConnector.methods = [];
-              connection.toConnector.operators = [];
-              //@ts-ignore
-              connection.toConnector.invoker = toConnector.invoker;
-              connection.toConnector.setConnectorType(CONNECTOR_FROM);
-              setConnection(connection);
-          }
-      }
-    }, [gettingConnectors]);
+        if(isButtonPanelOpened && videoAnimationName) {
+            if (animationProps.index >= 0 && animationProps.index < animationProps.allItems.fromConnector.length + animationProps.allItems.toConnector.length) {
+                if (animationProps.index < animationProps.allItems.fromConnector.length) {
+                    if (animationProps.allItems.fromConnector[animationProps.index].hasOwnProperty('type')) {
+                        animationProps.connection.fromConnector.operators.push(animationProps.allItems.fromConnector[animationProps.index]);
+                    } else {
+                        animationProps.connection.fromConnector.methods.push(animationProps.allItems.fromConnector[animationProps.index]);
+                    }
+                    animationProps.connection.fromConnector.setSvgItems();
+                    dispatch(setModalCurrentTechnicalItem(animationProps.connection.fromConnector.getSvgElementByIndex(animationProps.allItems.fromConnector[animationProps.index].index).getObject()))
+                } else {
+                    if (animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length].hasOwnProperty('type')) {
+                        animationProps.connection.toConnector.operators.push(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length]);
+                    } else {
+                        animationProps.connection.toConnector.methods.push(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length]);
+                    }
+                    animationProps.connection.toConnector.setSvgItems();
+                    const currentItem = animationProps.connection.toConnector.getSvgElementByIndex(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length].index).getObject();
+                    dispatch(setModalCurrentTechnicalItem(animationProps.connection.toConnector.getSvgElementByIndex(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length].index).getObject()))
+                }
+                updateEntity(animationProps.connection);
+                setTimeOutId(setTimeout(() => setAnimationProps({...animationProps, connection: animationProps.connection, index: animationProps.index + 1}), 1000))
+            }
+        }
+    }, [animationProps.index])
 
-    useEffect(() => {
-        if(index === -1){
-            setIndex(0)
-        }
-    }, [connection])
 
   function toggleVisible() {
     setIsVisible(!isVisible);
   }
 
   const updateEntity = (updatedEntity: any) => {
-      setConnection(updatedEntity);
+      setAnimationProps({...animationProps, connection: updatedEntity});
       let connection = updatedEntity instanceof CConnection ? updatedEntity.getObjectForConnectionOverview() : updatedEntity;
       dispatch(setModalConnectionData({connection}));
   }
@@ -165,7 +157,7 @@ const HelpBlock = () => {
             {
               <FormConnectionSvg
                 data={{ readOnly: false }}
-                entity={connection}
+                entity={animationProps.connection}
                 updateEntity={updateEntity}
               />
             }
