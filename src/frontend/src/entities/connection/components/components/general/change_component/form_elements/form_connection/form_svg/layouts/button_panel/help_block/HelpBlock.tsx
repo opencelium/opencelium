@@ -32,7 +32,7 @@ import FormConnectionSvg from "../../../FormConnectionSvg";
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
 import { HelpBlockData } from "./HelpBlockData";
 import CConnection from "@classes/content/connection/CConnection";
-import {setModalConnectionData} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import {setModalConnectionData, setModalCurrentTechnicalItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import {CONNECTOR_FROM} from "@classes/content/connection/CConnectorItem";
 import { Connector } from "@entity/connector/classes/Connector";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
@@ -57,7 +57,7 @@ const HelpBlock = () => {
             setIndex(-1);
             dispatch(setVideoAnimationName(''));
         }
-    }), [isButtonPanelOpened];
+    }, [isButtonPanelOpened]);
     useEffect(() => {
         if(isButtonPanelOpened && videoAnimationName) {
             if (index >= 0 && index < allItems.fromConnector.length + allItems.toConnector.length) {
@@ -67,12 +67,16 @@ const HelpBlock = () => {
                     } else {
                         connection.fromConnector.methods.push(allItems.fromConnector[index]);
                     }
+                    connection.fromConnector.setSvgItems();
+                    dispatch(setModalCurrentTechnicalItem(connection.fromConnector.getSvgElementByIndex(allItems.fromConnector[index].index).getObject()))
                 } else {
                     if (allItems.toConnector[index - allItems.fromConnector.length].hasOwnProperty('type')) {
                         connection.toConnector.operators.push(allItems.toConnector[index - allItems.fromConnector.length]);
                     } else {
                         connection.toConnector.methods.push(allItems.toConnector[index - allItems.fromConnector.length]);
                     }
+                    connection.toConnector.setSvgItems();
+                    dispatch(setModalCurrentTechnicalItem(connection.toConnector.getSvgElementByIndex(allItems.toConnector[index - allItems.fromConnector.length].index).getObject()))
                 }
                 updateEntity(connection);
                 setTimeout(() => setIndex(index + 1), 1000);
