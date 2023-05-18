@@ -1,54 +1,65 @@
 import DefaulHelpImagePath from "@image/entities/connection/default_help_preview.png";
 const basicsContentData = [
   {
-    title: "First steps",
-    image: DefaulHelpImagePath,
+    animationTitle: "First steps",
+    animationImage: DefaulHelpImagePath,
+    animationName: "firstSteps"
   },
   {
-    title: "Configure API",
-    image: DefaulHelpImagePath,
+    animationTitle: "Configure API",
+    animationImage: DefaulHelpImagePath,
+    animationName: "configureAPI"
   },
   {
-    title: "Using Operators",
-    image: DefaulHelpImagePath,
+    animationTitle: "Using Operators",
+    animationImage: DefaulHelpImagePath,
+    animationName: "usingOperators"
   },
   {
-    title: "Lorem Ipsum",
-    image: DefaulHelpImagePath,
+    animationTitle: "Lorem Ipsum",
+    animationImage: DefaulHelpImagePath,
+    animationName: "loremIpsum"
   },
   {
-    title: "Methods",
-    image: DefaulHelpImagePath,
+    animationTitle: "Methods",
+    animationImage: DefaulHelpImagePath,
+    animationName: "methods"
   },
   {
-    title: "Operators",
-    image: DefaulHelpImagePath,
+    animationTitle: "Operators",
+    animationImage: DefaulHelpImagePath,
+    animationName: "operators"
   },
 ];
 
 const expertsContentData = [
   {
-    title: "Field mapping",
-    image: DefaulHelpImagePath,
+    animationTitle: "Field mapping",
+    animationImage: DefaulHelpImagePath,
+    animationName: "fieldMapping"
   },
   {
-    title: "Remove API",
-    image: DefaulHelpImagePath,
+    animationTitle: "Remove API",
+    animationImage: DefaulHelpImagePath,
+    animationName: "removeAPI"
   },
   {
-    title: "Move API Meth",
-    image: DefaulHelpImagePath,
+    animationTitle: "Move API Meth",
+    animationImage: DefaulHelpImagePath,
+    animationName: "moveAPI"
   },
 ];
 
 const advancedContentData = [
   {
-    title: "Webhook",
-    image: DefaulHelpImagePath,
+    animationTitle: "Webhook",
+    animationImage: DefaulHelpImagePath,
+    animationName: "webhook"
   },
   {
-    title: "Add Fields",
-    image: DefaulHelpImagePath,
+    animationTitle: "Add Fields",
+    animationImage: DefaulHelpImagePath,
+    animationName: "addFields"
   },
 ];
 

@@ -25,8 +25,9 @@ interface ContentStyledProps {
 }
 
 interface ContentData {
-  title: string;
-  image: string;
+  animationTitle: string;
+  animationImage: string;
+  animationName: string;
 }
 
 export { ContentProps, ContentStyledProps, ContentData };

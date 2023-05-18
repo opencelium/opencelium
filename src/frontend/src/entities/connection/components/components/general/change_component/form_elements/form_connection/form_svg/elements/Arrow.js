@@ -187,9 +187,6 @@ class Arrow extends React.Component{
             }
         }
         const isJustDeletedItem = justDeletedItem ? from.id === `${justDeletedItem.connectorType}_${justDeletedItem.index}` || to.id === `${justDeletedItem.connectorType}_${justDeletedItem.index}` || isHighlighted : false;
-        if(isJustDeletedItem){
-            debugger;
-        }
         return(
             <React.Fragment>
                 {line1 &&

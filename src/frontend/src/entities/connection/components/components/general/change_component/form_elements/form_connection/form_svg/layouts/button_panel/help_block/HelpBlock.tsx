@@ -30,7 +30,7 @@ import styles from "@entity/connection/components/themes/default/content/connect
 import Content from "./content/Content";
 import FormConnectionSvg from "../../../FormConnectionSvg";
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
-import { HelpBlockData } from "./HelpBlockData";
+import { animations } from "./HelpBlockData";
 import CConnection from "@classes/content/connection/CConnection";
 import {setModalConnectionData, setModalCurrentTechnicalItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import {CONNECTOR_FROM} from "@classes/content/connection/CConnectorItem";
@@ -38,28 +38,34 @@ import { Connector } from "@entity/connector/classes/Connector";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {sortByIndex} from "@application/utils/utils";
 import {setVideoAnimationName} from "@root/redux_toolkit/slices/ConnectionSlice";
-
+import { setAnimationPaused } from "@root/redux_toolkit/slices/ModalConnectionSlice";
 
 const HelpBlock = () => {
     const dispatch = useAppDispatch();
-    const [index, setIndex] = useState<number>(-1);
-    const {connectors, gettingConnectors} = Connector.getReduxState();
-    const [connection, setConnection] = useState(CConnection.createConnection(HelpBlockData));
-    const [isVisible, setIsVisible] = useState(false);
-    const [allItems, setAllItems] = useState({fromConnector: [], toConnector: []});
-
     const { isButtonPanelOpened, videoAnimationName } = useAppSelector(
         (state) => state.connectionReducer
     );
+    const { isAnimationPaused } = useAppSelector(
+        (state) => state.modalConnectionReducer
+    );
+    
+    const animation = videoAnimationName ? animations[videoAnimationName] : animations.firstSteps;
+
+    const [index, setIndex] = useState<number>(-1);
+    const {connectors, gettingConnectors} = Connector.getReduxState();
+    const [connection, setConnection] = useState(CConnection.createConnection(animation));
+    const [isVisible, setIsVisible] = useState(false);
+    const [allItems, setAllItems] = useState({fromConnector: [], toConnector: []});
 
     useEffect(() => {
-        if(!isButtonPanelOpened){
+        if(!isVisible){
             setIndex(-1);
             dispatch(setVideoAnimationName(''));
+            setAllItems({fromConnector: [], toConnector: []});
         }
-    }, [isButtonPanelOpened]);
+    }, [isVisible]);
     useEffect(() => {
-        if(isButtonPanelOpened && videoAnimationName) {
+        if(isVisible && videoAnimationName && !isAnimationPaused) {
             if (index >= 0 && index < allItems.fromConnector.length + allItems.toConnector.length) {
                 if (index < allItems.fromConnector.length) {
                     if (allItems.fromConnector[index].hasOwnProperty('type')) {
@@ -82,7 +88,7 @@ const HelpBlock = () => {
                 setTimeout(() => setIndex(index + 1), 1000);
             }
         }
-    }, [index, isButtonPanelOpened, videoAnimationName])
+    }, [index, isVisible, videoAnimationName, isAnimationPaused])
 
     useEffect(() => {
         if(allItems.fromConnector.length === 0 && allItems.toConnector.length === 0){
@@ -94,8 +100,8 @@ const HelpBlock = () => {
     }, [])
     useEffect(() => {
       if(gettingConnectors === API_REQUEST_STATE.FINISH) {
-          let fromConnector = connectors.find(c => c.connectorId === HelpBlockData.fromConnector.connectorId);
-          let toConnector = connectors.find(c => c.connectorId === HelpBlockData.toConnector.connectorId);
+          let fromConnector = connectors.find(c => c.connectorId === animation.fromConnector.connectorId);
+          let toConnector = connectors.find(c => c.connectorId === animation.toConnector.connectorId);
           if (fromConnector && toConnector) {
               connection.fromConnector.id = fromConnector.connectorId;
               connection.fromConnector.title = fromConnector.title;
@@ -161,6 +167,19 @@ const HelpBlock = () => {
           }}
           dialogClassname={`${styles.help_dialog}`}
         >
+          <TooltipButton
+          style={{position: "absolute", top:0, left:0, right: 'auto', zIndex: 100000}}
+          size={TextSize.Size_40}
+          position={"bottom"}
+          icon={isAnimationPaused ? "play_arrow" : "pause"}
+          tooltip={isAnimationPaused ? "play animation" : 'pause animation'}
+          target={`animation_play_button`}
+          hasBackground={true}
+          background={ColorTheme.White}
+          color={ColorTheme.Gray}
+          padding="2px"
+          handleClick={() => dispatch(setAnimationPaused(!isAnimationPaused))}
+        />
           <ModalContext.Provider value={{ isModal: true }}>
             {
               <FormConnectionSvg

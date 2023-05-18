@@ -30,12 +30,16 @@ import CSvg from "@entity/connection/components/classes/components/content/conne
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {CTechnicalOperator} from "@entity/connection/components/classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CONNECTOR_FROM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
+import CMethodItem from "@classes/content/connection/method/CMethodItem";
+import COperatorItem from "@classes/content/connection/operator/COperatorItem";
+import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import CFieldBinding from "@classes/content/connection/field_binding/CFieldBinding";
 import {Dialog} from "@app_component/base/dialog/Dialog";
 import GetModalProp from "@entity/connection/components/decorators/GetModalProp";
 
 function mapStateToProps(state, props){
-    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
+    const connectionOverview = state.connectionReducer;
+    const {currentTechnicalItem} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
         isTestingConnection: connectionOverview.isTestingConnection,
@@ -43,7 +47,7 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {setCurrentTechnicalItem})
 class Svg extends React.Component {
     constructor(props) {
         super(props);

@@ -17,8 +17,9 @@ import { ITheme } from "@style/Theme";
 
 interface ContentItemProps {
   theme?: ITheme;
-  title: string;
-  image: string;
+  animationTitle: string;
+  animationImage: string;
+  animationName: string;
 }
 
 interface ContentItemStyledProps {}
