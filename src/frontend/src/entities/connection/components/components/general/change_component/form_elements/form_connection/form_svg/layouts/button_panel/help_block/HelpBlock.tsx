@@ -13,15 +13,14 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState, createContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { withTheme } from "styled-components";
 import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
 import { TextSize } from "@app_component/base/text/interfaces";
-import { HelpBlockProps } from "./interfaces";
 import { HelpBlockStyled } from "./styles";
 
 import { ColorTheme } from "@style/Theme";
-import { useAppDispatch, useAppSelector } from "@application/utils/store";
+import { useAppDispatch,  } from "@application/utils/store";
 import Dialog from "@app_component/base/dialog/Dialog";
 
 // @ts-ignore
@@ -32,12 +31,12 @@ import FormConnectionSvg from "../../../FormConnectionSvg";
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
 import {HelpBlockAllData} from "./HelpBlockData";
 import CConnection from "@classes/content/connection/CConnection";
-import {setModalConnectionData, setModalCurrentTechnicalItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import {setAnimationPaused, setModalConnectionData, setModalCurrentTechnicalItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/content/connection/CConnectorItem";
 import { Connector } from "@entity/connector/classes/Connector";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {sortByIndex} from "@application/utils/utils";
-import {setVideoAnimationName} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {ModalConnection} from "@root/classes/ModalConnection";
+import { Connection } from "@entity/connection/classes/Connection";
 
 
 const prepareConnection = (connection: any, connectors: any,) => {
@@ -64,9 +63,8 @@ const HelpBlock = () => {
     const [animationProps, setAnimationProps] = useState<any>({index: -1, connection: CConnection.createConnection(), allItems: {fromConnector: [], toConnector: []}})
     const {connectors, gettingConnectors} = Connector.getReduxState();
     const [isVisible, setIsVisible] = useState(false);
-    const { isButtonPanelOpened, videoAnimationName } = useAppSelector(
-        (state) => state.connectionReducer
-    );
+    const { isButtonPanelOpened, videoAnimationName } = Connection.getReduxState();
+    const { isAnimationPaused } = ModalConnection.getReduxState();
     const [timeOutId, setTimeOutId] = useState(null);
     useEffect(() => {
         if(videoAnimationName !== ''){
@@ -87,7 +85,7 @@ const HelpBlock = () => {
         }
     }, [videoAnimationName])
     useEffect(() => {
-        if(isButtonPanelOpened && videoAnimationName) {
+        if(isButtonPanelOpened && videoAnimationName && !isAnimationPaused) {
             if (animationProps.index >= 0 && animationProps.index < animationProps.allItems.fromConnector.length + animationProps.allItems.toConnector.length) {
                 if (animationProps.index < animationProps.allItems.fromConnector.length) {
                     if (animationProps.allItems.fromConnector[animationProps.index].hasOwnProperty('type')) {
@@ -111,7 +109,7 @@ const HelpBlock = () => {
                 setTimeOutId(setTimeout(() => setAnimationProps({...animationProps, connection: animationProps.connection, index: animationProps.index + 1}), 1000))
             }
         }
-    }, [animationProps.index])
+    }, [animationProps.index, isAnimationPaused])
 
 
   function toggleVisible() {
@@ -153,6 +151,19 @@ const HelpBlock = () => {
           }}
           dialogClassname={`${styles.help_dialog}`}
         >
+            <TooltipButton
+                style={{position: "absolute", top:0, left:0, right: 'auto', zIndex: 100000}}
+                size={TextSize.Size_40}
+                position={"bottom"}
+                icon={isAnimationPaused ? "play_arrow" : "pause"}
+                tooltip={isAnimationPaused ? "play animation" : 'pause animation'}
+                target={`animation_play_button`}
+                hasBackground={true}
+                background={ColorTheme.White}
+                color={ColorTheme.Gray}
+                padding="2px"
+                handleClick={() => dispatch(setAnimationPaused(!isAnimationPaused))}
+            />
           <ModalContext.Provider value={{ isModal: true }}>
             {
               <FormConnectionSvg
