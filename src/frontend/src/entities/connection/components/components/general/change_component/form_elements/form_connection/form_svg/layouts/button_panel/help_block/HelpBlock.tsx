@@ -40,19 +40,21 @@ import { Connection } from "@entity/connection/classes/Connection";
 
 
 const prepareConnection = (connection: any, connectors: any,) => {
-    if(connection) {
+    if(connection && connection.fromConnector && connection.toConnector) {
         let fromConnector = connectors.find((c: any) => c.connectorId === connection.fromConnector.id);
         let toConnector = connectors.find((c: any) => c.connectorId === connection.toConnector.id);
-        connection.fromConnector.methods = [];
-        connection.fromConnector.operators = [];
-        //@ts-ignore
-        connection.fromConnector.invoker = fromConnector.invoker;
-        connection.fromConnector.setConnectorType(CONNECTOR_FROM);
-        connection.toConnector.methods = [];
-        connection.toConnector.operators = [];
-        //@ts-ignore
-        connection.toConnector.invoker = toConnector.invoker;
-        connection.toConnector.setConnectorType(CONNECTOR_TO);
+        if(fromConnector && toConnector) {
+            connection.fromConnector.methods = [];
+            connection.fromConnector.operators = [];
+            //@ts-ignore
+            connection.fromConnector.invoker = fromConnector.invoker;
+            connection.fromConnector.setConnectorType(CONNECTOR_FROM);
+            connection.toConnector.methods = [];
+            connection.toConnector.operators = [];
+            //@ts-ignore
+            connection.toConnector.invoker = toConnector.invoker;
+            connection.toConnector.setConnectorType(CONNECTOR_TO);
+        }
     }
     return connection;
 }
