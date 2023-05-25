@@ -20,6 +20,14 @@ import com.becon.opencelium.backend.neo4j.entity.MethodNode;
 import com.becon.opencelium.backend.neo4j.repository.FieldNodeRepository;
 import com.becon.opencelium.backend.neo4j.service.*;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
@@ -58,6 +66,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
+@Tag(name = "Connection", description = "Manages operations related to Connection management")
 @RequestMapping(value = "/api/connection", produces = "application/hal+json", consumes = "application/json")
 public class ConnectionController {
 
@@ -85,7 +94,18 @@ public class ConnectionController {
     @Autowired
     private RestTemplate restTemplate;
 
-    //
+    @Operation(summary = "Retrieves all connections from database")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Connections have been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/all")
     public ResponseEntity<?> getAll(){
         List<Connection> connections = connectionService.findAll();
@@ -94,8 +114,18 @@ public class ConnectionController {
         return ResponseEntity.ok().body(connectionResources);
     }
 
-    // Swagger
-    // id
+    @Operation(summary = "Retrieves all Metadata of connections from database")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Metadata of connections have been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/all/meta")
     public ResponseEntity<?> getAllMeta(){
         List<Connection> connections = connectionService.findAll();
@@ -104,6 +134,18 @@ public class ConnectionController {
         return ResponseEntity.ok().body(connectionResources);
     }
 
+    @Operation(summary = "Retrieves a connection from database by provided connection ID")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Connection has been successfully retrieved",
+                    content = @Content(schema = @Schema(implementation = ConnectionResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId) {
         Connection connection = connectionService.findById(connectionId).orElse(null);
@@ -112,6 +154,18 @@ public class ConnectionController {
         return ResponseEntity.ok().body(resource);
     }
 
+    @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Connection has been successfully created",
+                content = @Content(schema = @Schema(implementation = ConnectionResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping
     public ResponseEntity<?> add(@RequestBody ConnectionResource connectionResource) throws Exception{
         Connection connection = connectionService.toEntity(connectionResource);
@@ -164,6 +218,17 @@ public class ConnectionController {
         }
     }
 
+    @Operation(summary = "Validates a connection for correctly constructed structure")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Connection has been successfully validated"),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping("/validate")
     public ResponseEntity<?> validate(@RequestBody ConnectionResource connectionResource) throws Exception{
         Connection connection = connectionService.toEntity(connectionResource);
@@ -185,6 +250,18 @@ public class ConnectionController {
         }
     }
 
+    @Operation(summary = "Modifies a connection by provided connection ID and accepting connection data in request body.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Connection has been successfully modified",
+                    content = @Content(schema = @Schema(implementation = ConnectionResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PutMapping("/{connectionId}")
     public ResponseEntity<?> update(@PathVariable Long connectionId,
                                     @RequestBody ConnectionResource connectionResource) throws Exception{
@@ -231,6 +308,17 @@ public class ConnectionController {
         }
     }
 
+    @Operation(summary = "Deletes a connection by provided connection ID")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "204",
+                    description = "Connection has been successfully deleted."),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @DeleteMapping("{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id){
         connectionService.deleteById(id);
@@ -238,6 +326,18 @@ public class ConnectionController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Validates name of connection for uniqueness")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Connection Name has been successfully validate. Return EXISTS or NOT_EXISTS values in 'message' property.",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/check/{name}")
     public ResponseEntity<?> existsByName(@PathVariable("name") String name) throws IOException {
         RuntimeException ex;
@@ -281,6 +381,18 @@ public class ConnectionController {
     }
 
 
+    @Operation(summary = "Sends request to remote api by accepting api data in request body.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Returns json string. Structure of json could be different depending on api.",
+                    content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping("/remoteapi")
     public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) throws Exception {
 
@@ -303,6 +415,18 @@ public class ConnectionController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "Deletes a collection of connections based on the provided list of their corresponding IDs")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "204",
+                    description = "Collection on connection have been deleted from database",
+                    content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @DeleteMapping
     public ResponseEntity<?> deleteCtionByIdIn(@RequestBody List<Long> ids) throws Exception {
 

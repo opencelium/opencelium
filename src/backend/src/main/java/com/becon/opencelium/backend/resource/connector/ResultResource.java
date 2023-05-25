@@ -24,7 +24,7 @@ import org.springframework.hateoas.RepresentationModel;
 import java.util.Map;
 
 @Resource
-public class ResultResource extends RepresentationModel {
+public class ResultResource {
 
     private Long nodeId;
     private String status;

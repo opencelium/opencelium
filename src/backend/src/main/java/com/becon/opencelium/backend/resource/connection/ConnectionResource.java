@@ -27,7 +27,7 @@ import java.util.List;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ConnectionResource extends RepresentationModel {
+public class ConnectionResource {
 
     private Long nodeId;
     private Long connectionId;

@@ -27,9 +27,16 @@ import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.resource.connector.FunctionResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerXMLResource;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.PathUtility;
 import com.becon.opencelium.backend.utility.Xml;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -62,6 +69,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
+@Tag(name = "Invoker", description = "Manages operations related to Invoker management")
 @RequestMapping(value = "/api/invoker", produces = "application/hal+json", consumes = {"application/json"})
 public class InvokerController {
 
@@ -71,12 +79,36 @@ public class InvokerController {
     @Autowired
     private InvokerContainer invokerContainer;
 
+    @Operation(summary = "Retrieves an 'invoker' based on the provided invoker 'name'")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Invoker has been successfully retrieved",
+                content = @Content(schema = @Schema(implementation = InvokerResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/{name}")
     public ResponseEntity<?> get(@PathVariable String name) throws Exception {
         InvokerResource invokerResources = invokerService.toResource(invokerService.findByName(name));
         return ResponseEntity.ok(invokerResources);
     }
 
+    @Operation(summary = "Retrieves all invokers")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "List of Invokers have been successfully retrieved",
+                    content = @Content(schema = @Schema(implementation = InvokerResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/all")
     public ResponseEntity<?> getAll() throws Exception {
 
@@ -88,6 +120,18 @@ public class InvokerController {
         return ResponseEntity.ok(resources);
     }
 
+    @Operation(summary = "Creates new invoker")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Invoker has been successfully created",
+                content = @Content(schema = @Schema(implementation = InvokerResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping
     public ResponseEntity<?> save(@RequestBody InvokerXMLResource invokerXMLResource)  {
         Document doc = convertStringToXMLDocument(invokerXMLResource.getXml());
@@ -126,20 +170,54 @@ public class InvokerController {
         return ResponseEntity.ok().body(resource);
     }
 
+    @Operation(summary = "Deletes an invoker by provided invoker 'name'")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Invoker has been successfully removed"),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @DeleteMapping("/{name}")
     public ResponseEntity<?> delete(@PathVariable String name){
         invokerService.delete(name);
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Deletes a collection of invokers based on the provided list of their corresponding 'names'.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "204",
+                    description = "List of Invokers have been successfully removed"),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @DeleteMapping
     public ResponseEntity<?> deleteInvokerByNameIn(@RequestBody List<String> invokerNames){
         invokerNames.forEach(name -> {
             invokerService.delete(name);
         });
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Modifies fields in operations by providing invoker name and by accepting 'Operation' data in the request body")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Field in operation hase been successfully modified",
+                content = @Content(schema = @Schema(implementation = FunctionResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping("/{invokerName}/xml")
     public ResponseEntity<FunctionResource> updateField(@PathVariable String invokerName,
                                                         @RequestBody OperationResource operationResource) {

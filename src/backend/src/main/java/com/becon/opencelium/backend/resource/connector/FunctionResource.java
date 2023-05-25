@@ -21,7 +21,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class FunctionResource extends RepresentationModel {
+public class FunctionResource {
 
     private String name;
     private String type;

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MessageResource extends RepresentationModel {
+public class MessageResource {
 
     private int templateId;
     private String name;

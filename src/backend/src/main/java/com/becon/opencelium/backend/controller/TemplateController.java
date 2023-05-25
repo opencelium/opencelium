@@ -22,10 +22,19 @@ import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.hateoas.CollectionModel;
@@ -44,6 +53,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@Tag(name = "Template", description = "Manages operations related to template")
 @RequestMapping(value = "/api/template", produces = "application/hal+json", consumes = {"application/json"})
 public class TemplateController {
 
@@ -53,6 +63,18 @@ public class TemplateController {
     @Autowired
     private ConnectorServiceImp connectorService;
 
+    @Operation(summary = "Retrieves a template from the database based on the provided template 'id'")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Template has been retrieved successfully",
+                content = @Content(schema = @Schema(implementation = TemplateResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable String id){
 
@@ -60,10 +82,22 @@ public class TemplateController {
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("TEMPLATE_NOT_FOUND"));
         TemplateResource templateResource = templateService.toResource(template);
-        final EntityModel<TemplateResource> resource = EntityModel.of(templateResource);
-        return ResponseEntity.ok().body(template);
+        return ResponseEntity.ok().body(templateResource);
     }
 
+
+    @Operation(summary = "Retrieves templates from database based on 'from' and 'to' connector 'id's")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Templates for connectors have been retrieved successfully",
+                content = @Content(array = @ArraySchema(schema = @Schema(implementation = TemplateResource.class)))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/all/{fromConnectorId}/{toConnectorId}")
     public ResponseEntity<?> getAllByConnectors(@PathVariable int fromConnectorId, @PathVariable int toConnectorId){
         Connector fromConnector = connectorService.findById(fromConnectorId)
@@ -87,10 +121,21 @@ public class TemplateController {
         });
 
         final CollectionModel<TemplateResource> resources = CollectionModel.of(templateResources);
-        final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        return ResponseEntity.created(uri).body(resources);
+        return ResponseEntity.ok().body(resources);
     }
 
+    @Operation(summary = "Retrieves all templates from database")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "All templates have been retrieved successfully",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = TemplateResource.class)))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/all")
     public ResponseEntity<?> getAll(){
 
@@ -110,8 +155,7 @@ public class TemplateController {
         });
 
         final CollectionModel<TemplateResource> resources = CollectionModel.of(templateResources);
-        final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        return ResponseEntity.created(uri).body(resources);
+        return ResponseEntity.ok().body(resources);
     }
 
     @PostMapping
@@ -132,8 +176,26 @@ public class TemplateController {
         }
     }
 
-    @GetMapping("/file/{filename:.+}")
+    @Operation(summary = "Downloads template by given filename")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Template has been successfully downloaded",
+                    content = @Content(schema = @Schema(implementation = byte[].class)),
+                    headers = {
+                        @Header(
+                            name = "Content-Disposition",
+                            description = "attachment; filename=\"example-file.json\""
+                        )
+                    }),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @ResponseBody
+    @GetMapping("/file/{filename:.+}")
     public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String filename) {
 
         try {
@@ -151,6 +213,18 @@ public class TemplateController {
         }
     }
 
+    @Operation(summary = "Modifies template by given id")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Template has been successfully modified",
+                content = @Content(schema = @Schema(implementation = TemplateResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PutMapping("/{id}")
     public ResponseEntity<?> modify(@RequestBody TemplateResource templateResource) throws JsonProcessingException {
         Template template = templateService.toEntity(templateResource);
@@ -162,6 +236,18 @@ public class TemplateController {
         return ResponseEntity.ok().body(resource);
     }
 
+    @Operation(summary = "Modifies a list of templates")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Template has been successfully modified",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = TemplateResource.class)))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PutMapping("/all")
     public ResponseEntity<?> modifyAll(@RequestBody List<TemplateResource> templateResources) throws JsonProcessingException {
 
@@ -177,12 +263,34 @@ public class TemplateController {
         return ResponseEntity.ok().body(resource);
     }
 
+    @Operation(summary = "Removes a template by given id")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "201",
+                description = "Template has been successfully removed"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable String id){
         templateService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Removes templates by given list of ids")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "201",
+                description = "Templates have been successfully removed"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @DeleteMapping
     public ResponseEntity<?> deleteTemplateByIdIn(@RequestBody List<String> ids){
 

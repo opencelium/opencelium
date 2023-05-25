@@ -22,7 +22,8 @@ public class AuthExceptionHandler implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         String path = request.getRequestURI();
-        ErrorResource errorResource =  new ErrorResource(new WrongHeaderAuthTypeException("token"), HttpStatus.FORBIDDEN, path);
+        authException.printStackTrace();
+        ErrorResource errorResource =  new ErrorResource(authException, HttpStatus.FORBIDDEN, path);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         OutputStream responseStream = response.getOutputStream();

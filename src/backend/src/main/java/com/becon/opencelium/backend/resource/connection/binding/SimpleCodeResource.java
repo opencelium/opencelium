@@ -22,7 +22,7 @@ import org.springframework.hateoas.RepresentationModel;
 import java.util.List;
 
 @Resource
-public class SimpleCodeResource extends RepresentationModel {
+public class SimpleCodeResource {
 
     private int pointer;
     private List<CodeResource> code;

@@ -22,7 +22,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 
 @Resource
-public class EnhancementResource extends RepresentationModel {
+public class EnhancementResource {
 
     private Integer enhanceId;
     private String name;

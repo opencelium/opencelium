@@ -26,7 +26,7 @@ import java.net.URI;
 import java.util.Date;
 
 @Resource
-public class UserDetailResource extends RepresentationModel {
+public class UserDetailResource {
 
     private String name;
     private String surname;

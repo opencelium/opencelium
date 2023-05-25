@@ -68,9 +68,9 @@ public class EnhancementServiceImp implements EnhancementService{
     @Override
     public Enhancement findByFieldId(Long fieldId) {
         EnhancementNode enhancementNode = enhancementNodeService.findByFieldId(fieldId)
-                .orElseThrow(() -> new RuntimeException("Field not found"));
+                .orElseThrow(() -> new RuntimeException("Field(" + fieldId + ") not found"));
         return enhancementRepository.findById(enhancementNode.getEnhanceId())
-                .orElseThrow(() -> new RuntimeException("Enhancement not found"));
+                .orElseThrow(() -> new RuntimeException("Enhancement " + enhancementNode.getEnhanceId() + " not found in MariaDB"));
     }
 
     @Override

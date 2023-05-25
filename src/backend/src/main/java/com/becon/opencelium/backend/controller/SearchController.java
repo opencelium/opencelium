@@ -3,7 +3,15 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.search.SearchResource;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
+@Tag(name = "Search", description = "Manages operations related to search function")
 @RequestMapping(value = "/api/search", produces = "application/hal+json", consumes = "application/json")
 public class SearchController {
 
@@ -27,26 +36,35 @@ public class SearchController {
     @Autowired
     private SchedulerServiceImp schedulerServiceImp;
 
-
+    @Operation(summary = "Collects connection, connector and scheduler by given title")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Success",
+                content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/{title}")
     public ResponseEntity<?> searchByTitle(@PathVariable String title){
 
         List<SearchResource> results = new ArrayList<>();
         results.addAll(
-                connectionServiceImp.findAllByNameContains(title).stream().filter(Objects::nonNull).map(SearchResource::new).collect(Collectors.toList())
+                connectionServiceImp.findAllByNameContains(title).stream()
+                        .filter(Objects::nonNull).map(SearchResource::new).toList()
         );
-
         results.addAll(
-                connectorServiceImp.findAllByTitleContains(title).stream().filter(Objects::nonNull).map(SearchResource::new).collect(Collectors.toList())
+                connectorServiceImp.findAllByTitleContains(title).stream()
+                        .filter(Objects::nonNull).map(SearchResource::new).toList()
         );
-
         results.addAll(
-                schedulerServiceImp.findAllByTitleContains(title).stream().filter(Objects::nonNull).map(SearchResource::new).collect(Collectors.toList())
+                schedulerServiceImp.findAllByTitleContains(title).stream()
+                        .filter(Objects::nonNull).map(SearchResource::new).toList()
         );
-
-
-        Map<String, List> resp = new HashMap<>();
-        resp.put("result", results);
-        return ResponseEntity.ok().body(resp);
+        ResultDTO resultDTO = new ResultDTO(results);
+        return ResponseEntity.ok().body(resultDTO);
     }
 }

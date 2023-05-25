@@ -22,7 +22,7 @@ import org.springframework.hateoas.RepresentationModel;
 import java.util.Map;
 
 @Resource
-public class ConnectorResource extends RepresentationModel {
+public class ConnectorResource {
 
     private int connectorId;
     private String title;

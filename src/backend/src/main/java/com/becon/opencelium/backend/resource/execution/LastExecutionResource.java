@@ -21,7 +21,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class LastExecutionResource extends RepresentationModel {
+public class LastExecutionResource {
 
     private long lastExecutionId;
     private  ExecutionResource success;

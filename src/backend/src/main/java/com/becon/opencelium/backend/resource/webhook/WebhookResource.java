@@ -22,7 +22,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class WebhookResource extends RepresentationModel {
+public class WebhookResource {
     private int webhookId;
     private String url;
 

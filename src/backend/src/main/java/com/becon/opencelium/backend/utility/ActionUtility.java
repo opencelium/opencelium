@@ -337,8 +337,30 @@ public class ActionUtility {
                 indexes.add(o.getIndex());
             });
         }
-        Collections.sort(indexes);
+        indexes.sort(Comparator.comparing(ActionUtility::splitAndCompare));
         return indexes;
+    }
+
+    private static int splitAndCompare(String str) {
+        String[] parts1 = str.split("_");
+        String[] parts2 = str.split("_");
+
+        int length = Math.min(parts1.length, parts2.length);
+        for (int i = 0; i < length; i++) {
+            int num1 = Integer.parseInt(parts1[i]);
+            int num2 = Integer.parseInt(parts2[i]);
+
+            if (num1 != num2) {
+                return Integer.compare(num1, num2);
+            }
+        }
+
+        // Check if one string has remaining parts
+        if (parts1.length != parts2.length) {
+            return Integer.compare(parts1.length, parts2.length);
+        }
+
+        return 0;
     }
 
     private boolean startsWithMethod(String index, List<MethodResource> methodResources){
