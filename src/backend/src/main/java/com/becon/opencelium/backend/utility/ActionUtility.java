@@ -324,6 +324,33 @@ public class ActionUtility {
     }
 
     // TODO: need to refactor sorting of indexes. Doesn't work when index more than 10
+    Comparator<String> comparator = new Comparator<>() {
+        public int compare(String a, String b) {
+            //count entrances of "_" to get length of an index
+            int length1 = (int) a.chars().filter(ch -> ch == '_').count() + 1;
+            int length2 = (int) b.chars().filter(ch -> ch == '_').count() + 1;
+            int limit = Math.min(length1, length2);
+            String v1 = a;
+            String v2 = b;
+            int i = 0;
+            while (i < limit) {
+                String[] arrOfStr = v1.split("_", 2);
+                String[] arrOfStr2 = v2.split("_", 2);
+                int ch1 = Integer.parseInt(arrOfStr[0]);
+                int ch2 = Integer.parseInt(arrOfStr2[0]);
+                if (ch1 != ch2) {
+                    return ch1 - ch2;
+                }
+                i++;
+                if (i == limit)
+                    return length1 - length2;
+                v1 = arrOfStr[1];
+                v2 = arrOfStr2[1];
+            }
+            //will not really reach here, but to avoid error return is needed
+            return length1 - length2;
+        }
+    };
     private LinkedList<String> getIndexes(List<MethodResource> methodResources, List<OperatorResource> operatorResources){
         LinkedList<String> indexes = new LinkedList<>();
         if (!methodResources.isEmpty()){
@@ -337,7 +364,7 @@ public class ActionUtility {
                 indexes.add(o.getIndex());
             });
         }
-        Collections.sort(indexes);
+        Collections.sort(indexes, comparator);
         return indexes;
     }
 
