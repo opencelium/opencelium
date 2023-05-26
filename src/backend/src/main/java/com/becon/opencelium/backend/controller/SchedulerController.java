@@ -20,11 +20,20 @@ import com.becon.opencelium.backend.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.mysql.service.WebhookServiceImp;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -39,6 +48,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
+@Tag(name = "Search", description = "Manages operations related to Scheduler management")
 @RequestMapping(value = "/api/scheduler", produces = "application/hal+json", consumes = {"application/json"})
 public class SchedulerController {
 
@@ -48,19 +58,39 @@ public class SchedulerController {
     @Autowired
     private WebhookServiceImp webhookServiceImp;
 
+    @Operation(summary = "Retrieves a list of schedulers from database")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Success",
+                content = @Content(array = @ArraySchema(schema = @Schema(implementation = SchedulerResource.class)))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/all")
     public ResponseEntity<?> getAll() throws Exception {
         List<Scheduler> schedulers = schedulerService.findAll();
         List<SchedulerResource> scheduleList = schedulers.stream()
-//                .map(s -> {
-//            s.setWebhook(webhookServiceImp.findBySchedulerId(s.getId()).orElse(null));
-//            return s;
-//        })
-        .map(s -> schedulerService.toResource(s)).collect(Collectors.toList());
+            .map(s -> schedulerService.toResource(s)).collect(Collectors.toList());
         final CollectionModel<SchedulerResource> resources = CollectionModel.of(scheduleList);
         return ResponseEntity.ok(resources);
     }
 
+    @Operation(summary = "Retrieves a scheduler from database by provided id")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Success",
+                content = @Content(schema = @Schema(implementation = SchedulerResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable int id) throws Exception {
         Scheduler scheduler = schedulerService.findById(id).orElseThrow(() -> new RuntimeException("SCHEDULER_NOT_FOUND"));
@@ -70,11 +100,22 @@ public class SchedulerController {
         return ResponseEntity.ok(resource);
     }
 
+    @Operation(summary = "Creates a new scheduler in the system by accepting scheduler data in the request body")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "201",
+                description = "Scheduler is successfully created. The 'id' property will include newly created scheduler's 'id'",
+                content = @Content(schema = @Schema(implementation = SchedulerResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping
     public ResponseEntity<?> scheduleJob(@RequestBody SchedulerRequestResource resource) throws Exception{
         Scheduler scheduler = schedulerService.toEntity(resource);
         schedulerService.save(scheduler);
-
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .path("/{id}")
@@ -82,6 +123,18 @@ public class SchedulerController {
         return ResponseEntity.created(uri).body(schedulerService.toResource(scheduler));
     }
 
+    @Operation(summary = "Changes or Reschedules Scheduler")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "201",
+                description = "Scheduler is successfully modified.",
+                content = @Content(schema = @Schema(implementation = SchedulerResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PutMapping("/{id}")
     public ResponseEntity<?> reschedule(@PathVariable("id") int id,
                                         @RequestBody SchedulerRequestResource resource) throws Exception{
@@ -106,6 +159,18 @@ public class SchedulerController {
         return ResponseEntity.created(uri).body(schedulerResource);
     }
 
+    @Operation(summary = "Changes only title of scheduler by provided scheduler id")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "201",
+                description = "Scheduler title is successfully modified.",
+                content = @Content(schema = @Schema(implementation = SchedulerResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PutMapping("/{id}/title")
     public ResponseEntity<?> changeTitle(@PathVariable("id") int id,
                                          @RequestBody SchedulerRequestResource schedulerRequestResource) throws Exception{
@@ -121,18 +186,39 @@ public class SchedulerController {
         return ResponseEntity.ok(resource);
     }
 
+    @Operation(summary = "Delete a scheduler by provided id")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "204",
+                description = "Scheduler is successfully deleted."),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSchedule(@PathVariable int id){
         schedulerService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
+
+    @Operation(summary = "Runs all schedulers provided in request body")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Schedulers have been successfully started"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PutMapping("/startAll")
     public ResponseEntity<?> startAll(@RequestBody Map<String, Object> response) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
         ArrayList<Integer> schedulerIds = (ArrayList<Integer>) response.get("schedulerIds");
         List<Scheduler> schedulers = schedulerService.findAllById(schedulerIds);
-
         schedulers.parallelStream().forEach(scheduler -> {
             try{
                 schedulerService.startNow(scheduler);
@@ -143,6 +229,17 @@ public class SchedulerController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Changes status(ON/OFF) of a scheduler by provided scheduler id")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Scheduler status has been successfully changed"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PutMapping("/{schedulerId}/status")
     public ResponseEntity<?> changeStatus(@PathVariable int schedulerId,
                                           @RequestBody Scheduler scheduler) throws Exception{
@@ -165,6 +262,17 @@ public class SchedulerController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Sets the status of the provided schedulers to (ON) in the list of schedulers.")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Schedulers have been successfully enabled"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PutMapping("/enableAll")
     public ResponseEntity<?> enableAll(@RequestBody  Map<String, Object> response) throws Exception {
         ArrayList<Integer> schedulerIds = (ArrayList<Integer>) response.get("schedulerIds");
@@ -190,6 +298,17 @@ public class SchedulerController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Sets the status of the provided schedulers to (OFF) in the list of schedulers.")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Schedulers have been successfully disabled"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PutMapping("/disableAll")
     public ResponseEntity<?> disableAll(@RequestBody Map<String, Object> response) throws Exception {
         ArrayList<Integer> schedulerIds = (ArrayList<Integer>) response.get("schedulerIds");
@@ -210,12 +329,34 @@ public class SchedulerController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Deletes a collection of schedulers based on the provided list of their corresponding IDs.")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "204",
+                description = "Schedulers have been successfully deleted"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @DeleteMapping
     public ResponseEntity<?> deleteSchedularByIdIn(@RequestBody List<Integer> ids) throws Exception {
         schedulerService.deleteAllById(ids);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Executes a scheduler by provided scheduler ID")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Scheduler has been started"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/execute/{schedulerId}")
     public ResponseEntity<?> execute(@PathVariable int schedulerId){
         try {
@@ -231,6 +372,18 @@ public class SchedulerController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Retrieves list of running schedulers")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Scheduler has been started",
+                content = @Content(array = @ArraySchema(schema = @Schema(implementation = RunningJobsResource.class)))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/running/all")
     public ResponseEntity<?> getRunningAll(){
         List<RunningJobsResource> runningJobResources;
@@ -247,6 +400,18 @@ public class SchedulerController {
         return ResponseEntity.ok(resources);
     }
 
+    @Operation(summary = "Retrieves a collection of schedulers based on the provided list of their corresponding IDs.")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Schedulers have been retrieved successfully",
+                content = @Content(array = @ArraySchema(schema = @Schema(implementation = SchedulerResource.class)))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping("/ids")
     public ResponseEntity<?> getSchedulersByIds(@RequestBody Map<String, Object> response){
         ArrayList<Integer> schedulerIds = (ArrayList<Integer>) response.get("schedulerIds");
@@ -258,6 +423,18 @@ public class SchedulerController {
     }
 
 
+    @Operation(summary = "Retrieves all notifications associated with a scheduler by provided scheduler ID.")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Notifications have been retrieved successfully",
+                content = @Content(array = @ArraySchema(schema = @Schema(implementation = NotificationResource.class)))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/{schedulerId}/notification/all")
     public ResponseEntity<?> getAllNotifications(@PathVariable int schedulerId) throws Exception {
         List<NotificationResource> notificationResource = schedulerService.getAllNotifications(schedulerId)
@@ -266,6 +443,18 @@ public class SchedulerController {
         return ResponseEntity.ok(resources);
     }
 
+    @Operation(summary = "Retrieves a notification associated with a scheduler by provided scheduler ID and notification ID.")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Notification has been retrieved successfully",
+                content = @Content(schema = @Schema(implementation = NotificationResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/{schedulerId}/notification/{notificationId}")
     public ResponseEntity<?> getNotification(@PathVariable int schedulerId,
                                              @PathVariable int notificationId) throws Exception{
@@ -277,6 +466,18 @@ public class SchedulerController {
         return ResponseEntity.ok(resource);
     }
 
+    @Operation(summary = "Creates a notification for a scheduler by provided scheduler ID.")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Notification has been created successfully for scheduler",
+                content = @Content(schema = @Schema(implementation = NotificationResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping("/{schedulerId}/notification")
     public ResponseEntity<?> createNotification(@PathVariable int schedulerId,
                                                 @RequestBody NotificationResource notificationResource) throws Exception{
@@ -287,18 +488,53 @@ public class SchedulerController {
         return ResponseEntity.ok(schedulerService.toNotificationResource(eventNotification));
     }
 
+    @Operation(summary = "Deletes a notification for a scheduler by provided scheduler ID and notification ID.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "204",
+                    description = "Notification has been deleted successfully from scheduler"),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @DeleteMapping("/{schedulerId}/notification/{notificationId}")
     public ResponseEntity<?> deleteNotification(@PathVariable int schedulerId,@PathVariable int notificationId){
         schedulerService.deleteNotificationById(notificationId);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Deletes a list of notifications associated with a scheduler by provided scheduler ID " +
+            "and a list of notification IDs.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "204",
+                    description = "Notifications have been deleted successfully from scheduler"),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @DeleteMapping("/{schedulerId}/notification")
     public ResponseEntity<?> deleteNotification(@RequestBody List<Integer> schedulerIds,@RequestBody List<Integer> notificationIds){
         notificationIds.forEach(nId -> schedulerService.deleteNotificationById(nId));
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Modifies a notification associated with a scheduler by provided scheduler ID and notification ID.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "204",
+                    description = "Notification has been created successfully for scheduler",
+                    content = @Content(schema = @Schema(implementation = NotificationResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PutMapping("/{schedulerId}/notification/{notificationId}")
     public ResponseEntity<?> updateNotification(@PathVariable int schedulerId,@PathVariable int notificationId,
                                                 @RequestBody NotificationResource notificationResource) throws Exception{

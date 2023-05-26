@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InvokerResource extends RepresentationModel {
+public class InvokerResource {
 
     private String name;
     private String description;

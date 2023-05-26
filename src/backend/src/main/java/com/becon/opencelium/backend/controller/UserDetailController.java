@@ -21,8 +21,17 @@ import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -31,9 +40,11 @@ import java.io.IOException;
 import java.net.URI;
 
 
+
 @RestController
-@RequestMapping(value = "/api/userDetail", produces = "application/hal+json",
-                                           consumes = {"multipart/form-data", "application/json"})
+@Tag(name = "User Details", description = "Stores detailed information about users")
+@RequestMapping(value = "/api/userDetail", produces = "application/json",
+                                           consumes = {"application/json", "multipart/form-data"})
 public class UserDetailController {
 
     @Autowired
@@ -42,8 +53,18 @@ public class UserDetailController {
     @Autowired
     private UserServiceImpl userService;
 
+    @Operation(summary = "Updates user details")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "401",
+                      description = "Unauthorized",
+                      content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                      description = "Internal Error",
+                      content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @ResponseStatus(HttpStatus.CREATED)
     @PutMapping("/{id}")
-    public ResponseEntity<UserDetailResource> put( @PathVariable("id") int id,
+    public ResponseEntity<UserDetailResource> put( @Parameter(description = "Unique identifier of User") @PathVariable("id") int id,
                                                    @RequestBody UserDetailResource userDetailResource) throws IOException {
 
         if (!userDetailService.existsById(id)){

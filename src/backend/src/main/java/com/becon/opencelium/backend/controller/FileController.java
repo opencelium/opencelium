@@ -33,12 +33,20 @@ import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -64,6 +72,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 @Controller
+@Tag(name = "File", description = "Manages operations related to File management")
 @RequestMapping(value = "/api/storage")
 public class FileController {
 
@@ -101,6 +110,17 @@ public class FileController {
         this.storageService = storageService;
     }
 
+    @Operation(summary = "Uploads profile picture of a user by provided user email")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Profile picture has been successfully uploaded"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping(value = "/profilePicture")
     public ResponseEntity<?> profilePictureUpload(@RequestParam("file") MultipartFile file,
                                                   @RequestParam("email") String email) {
@@ -138,6 +158,17 @@ public class FileController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Uploads role's(group) icon by provided user role(group) ID")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Profile picture has been successfully uploaded"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping("/groupIcon")
     public ResponseEntity<?> groupPictureUpload(@RequestParam("file") MultipartFile file,
                                                 @RequestParam("userGroupId") int userGroupId) {
@@ -173,6 +204,17 @@ public class FileController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Uploads template json file")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Template has been successfully uploaded"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping(value = "/template")
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
         // Get extension
@@ -218,6 +260,17 @@ public class FileController {
         }
     }
 
+    @Operation(summary = "Uploads invoker xml file")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Invoker has been successfully uploaded"),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping("/invoker")
     public ResponseEntity<?> uploadInvoker(@RequestParam("file") MultipartFile file) {
         String filename = file.getOriginalFilename();
@@ -269,6 +322,18 @@ public class FileController {
 
     }
 
+    @Operation(summary = "Uploads connector json file")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Connector has been successfully uploaded",
+                content = @Content(schema = @Schema(implementation = ConnectorResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping(value = "/connector")
     public ResponseEntity<?> connectorUpload(@RequestParam("file") MultipartFile file,
                                              @RequestParam("connectorId") int connectorId) {

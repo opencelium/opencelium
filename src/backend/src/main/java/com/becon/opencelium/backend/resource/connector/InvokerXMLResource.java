@@ -20,7 +20,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class InvokerXMLResource extends RepresentationModel {
+public class InvokerXMLResource {
     String xml;
 
     public String getXml() {

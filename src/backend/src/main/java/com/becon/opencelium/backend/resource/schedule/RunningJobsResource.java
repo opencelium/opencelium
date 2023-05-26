@@ -20,7 +20,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class RunningJobsResource extends RepresentationModel {
+public class RunningJobsResource {
 
     private int schedulerId;
     private String title;

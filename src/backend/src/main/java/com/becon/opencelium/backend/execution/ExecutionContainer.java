@@ -114,7 +114,7 @@ public class ExecutionContainer {
             try {
                 String var = enhVars.get(k);
                 if(var == null) {
-                    throw new RuntimeException(k + "not found in enhancement variables");
+                    throw new RuntimeException(k + " not found in enhancement variables");
                 }
                 if (fieldNodeService.valueIsJSON(v)){
                     engine.put("dataModel", v);

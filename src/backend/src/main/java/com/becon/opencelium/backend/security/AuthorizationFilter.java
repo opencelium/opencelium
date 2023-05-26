@@ -32,6 +32,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import java.io.IOException;
+import java.util.*;
 
 public class AuthorizationFilter extends BasicAuthenticationFilter {
 
@@ -44,6 +45,9 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
     @Autowired
     private ActivityServiceImpl activityService;
 
+    private final static List<String> ignorList = Arrays.asList("api/webhook/execute", "api/storage/files",
+            "api/webhook/health", "/swagger-ui", "/v3/api-docs");
+
     public AuthorizationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
@@ -55,16 +59,8 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 
         String url  = request.getRequestURI();
         System.out.println(url);
-        if (url.contains("api/webhook/execute") || url.contains("api/storage/files") ||
-                url.contains("api/webhook/health")){
-
-            response.setHeader("Access-Control-Allow-Origin", "*");
-            response.setHeader("Access-Control-Allow-Credentials", "true");
-            response.setHeader("Access-Control-Allow-Methods",
-                    "ACL, CANCELUPLOAD, CHECKIN, CHECKOUT, COPY, DELETE, GET, HEAD, LOCK, MKCALENDAR, MKCOL, MOVE, OPTIONS, POST, PROPFIND, PROPPATCH, PUT, REPORT, SEARCH, UNCHECKOUT, UNLOCK, UPDATE, VERSION-CONTROL");
-            response.setHeader("Access-Control-Max-Age", "3600");
-            response.setHeader("Access-Control-Allow-Headers",
-                    "Origin, X-Requested-With, Content-Type, Accept, Key, Authorization");
+        if (containsInIgnoreList(url)){
+            disableCrosOrigin(response);
             chain.doFilter(request, response);
             return;
         }
@@ -79,7 +75,22 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
         chain.doFilter(request, response);
     }
 
-    private String extractTokenFromRequest(HttpServletRequest request) {
+    private void disableCrosOrigin(HttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Allow-Methods",
+                "ACL, CANCELUPLOAD, CHECKIN, CHECKOUT, COPY, DELETE, GET, HEAD, LOCK, MKCALENDAR, MKCOL, MOVE, OPTIONS, POST, PROPFIND, PROPPATCH, PUT, REPORT, SEARCH, UNCHECKOUT, UNLOCK, UPDATE, VERSION-CONTROL");
+        response.setHeader("Access-Control-Max-Age", "3600");
+        response.setHeader("Access-Control-Allow-Headers",
+                "Origin, X-Requested-With, Content-Type, Accept, Key, Authorization");
+        response.setHeader("Content-Type", "application/json");
+    }
+
+    private boolean containsInIgnoreList(String s) {
+        return ignorList.stream().anyMatch(s::contains);
+    }
+
+    private static String extractTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (token == null) {
             return request.getParameter("token");

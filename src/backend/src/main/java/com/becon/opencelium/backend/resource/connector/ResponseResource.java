@@ -21,7 +21,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class ResponseResource extends RepresentationModel {
+public class ResponseResource {
 
     private Long nodeId;
 

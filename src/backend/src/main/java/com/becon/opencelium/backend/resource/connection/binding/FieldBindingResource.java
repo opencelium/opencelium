@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Resource
-public class FieldBindingResource extends RepresentationModel {
+public class FieldBindingResource {
     private List<LinkedFieldResource> from = new ArrayList<>();
     private EnhancementResource enhancement;
     private List<LinkedFieldResource> to = new ArrayList<>();

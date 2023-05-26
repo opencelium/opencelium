@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Resource
-public class NotificationResource extends RepresentationModel {
+public class NotificationResource {
 
     private int notificationId;
     private int schedulerId; // should be array

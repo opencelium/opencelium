@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Resource
-public class UserResource  extends RepresentationModel {
+public class UserResource {
 
     private int userId;
     private String email;
