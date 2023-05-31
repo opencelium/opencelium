@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,7 @@ public class LoginController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
+    @ConditionalOnExpression("false")
     @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
     public ResponseEntity<UserResource> login(@RequestBody UserCredentialDTO userCredentialDTO) {
         return ResponseEntity.ok().build();
