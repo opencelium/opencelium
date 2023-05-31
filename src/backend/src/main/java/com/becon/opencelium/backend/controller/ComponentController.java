@@ -38,25 +38,26 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Application Components", description = "Manages operations related to Application Components management")
-@RequestMapping(value = "/api/component", produces = "application/hal+json", consumes = {"application/json"})
+@RequestMapping(value = "/api/component", produces = "application/json", consumes = "application/json")
 public class ComponentController {
 
     @Autowired
     private ComponentServiceImpl componentService;
 
-    @Operation(summary = "Retrieves all Components of Application.")
+    @Operation(summary = "Retrieves all Components of Application."
+            )
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "200",
-                    description = "Application Components have been successfully retrieved.",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ComponentResource.class)))),
-            @ApiResponse( responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "200",
+                description = "Application Components have been successfully retrieved.",
+                content = @Content(array = @ArraySchema(schema = @Schema(implementation = ComponentResource.class)))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping("/all")
+    @GetMapping(value = "/all", consumes = "application/json")
     public ResponseEntity<CollectionModel<ComponentResource>> all(){
 
         final List<ComponentResource> collection =

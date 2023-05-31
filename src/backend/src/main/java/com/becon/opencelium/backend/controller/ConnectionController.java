@@ -415,11 +415,11 @@ public class ConnectionController {
         return ResponseEntity.ok().body(response);
     }
 
-    @Operation(summary = "Deletes a collection of connections based on the provided list of their corresponding IDs")
+    @Operation(summary = "Deletes a list of connections based on the provided list of their corresponding IDs")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "204",
-                    description = "Collection on connection have been deleted from database",
-                    content = @Content(schema = @Schema(implementation = String.class))),
+                    description = "List of connections have been deleted from database",
+                    content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
