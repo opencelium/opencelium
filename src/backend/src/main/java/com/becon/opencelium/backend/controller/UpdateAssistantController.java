@@ -70,7 +70,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Update Assistant", description = "Manages version control operations.")
-@RequestMapping(value = "/api/assistant")
+@RequestMapping(value = "/api/assistant", produces = MediaType.APPLICATION_JSON_VALUE)
 public class UpdateAssistantController {
 
     @Autowired
@@ -302,7 +302,7 @@ public class UpdateAssistantController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping("/oc/migrate")
+    @PostMapping(value = "/oc/migrate", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> migrate(@RequestBody MigrateDataResource migrateDataResource) {
 
         // do backup
@@ -381,7 +381,7 @@ public class UpdateAssistantController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping(value = "/zipfile")
+    @PostMapping(value = "/zipfile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
         try {
             String zipedAppVersion = assistantServiceImp.getVersion(file.getInputStream()).replace(".", "_");
@@ -398,7 +398,8 @@ public class UpdateAssistantController {
     @Operation(summary = "Deletes zip file that contains OpenCelium versions")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "204",
-                    description = "Deletion has been done successfully"),
+                    description = "Deletion has been done successfully",
+                    content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -411,7 +412,6 @@ public class UpdateAssistantController {
 
         Path zipPath = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + filename);
         assistantServiceImp.deleteZipFile(zipPath);
-
         return ResponseEntity.noContent().build();
     }
 

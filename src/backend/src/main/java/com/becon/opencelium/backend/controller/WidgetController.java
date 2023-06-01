@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Widget", description = "Manages operations related to Widget.")
-@RequestMapping(value = "/api/widget", produces = "application/hal+json", consumes = {"application/json"})
+@RequestMapping(value = "/api/widget", produces = MediaType.APPLICATION_JSON_VALUE)
 public class WidgetController {
 
     @Autowired
@@ -43,7 +44,7 @@ public class WidgetController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> save(@RequestBody WidgetResource widgetResource){
         Widget widget = widgetServiceImp.toEntity(widgetResource);
         widgetServiceImp.save(widget);
@@ -59,7 +60,8 @@ public class WidgetController {
     @Operation(summary = "Deletes a widget by 'id' ")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "204",
-                    description = "Widget is successfully deleted."),
+                    description = "Widget is successfully deleted.",
+                    content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),

@@ -21,6 +21,7 @@ import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +31,7 @@ import java.util.stream.Stream;
 
 @RestController
 @Tag(name = "Event Message", description = "Manages operations related to Event Messages management")
-@RequestMapping(value = "/api/message", produces = "application/hal+json", consumes = {"application/json"})
+@RequestMapping(value = "/api/message", produces = MediaType.APPLICATION_JSON_VALUE)
 public class MessageController {
 
     @Autowired
@@ -94,7 +95,7 @@ public class MessageController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createMessage(@RequestBody MessageResource messageResource) throws Exception{
         EventMessage eventMessage = messageService.toEntity(messageResource);
         messageService.save(eventMessage);
@@ -114,7 +115,8 @@ public class MessageController {
     @Operation(summary = "Deletes an event message in the system by providing ID")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "204",
-                    description = "Event Message has been successfully deleted"),
+                    description = "Event Message has been successfully deleted",
+                    content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -131,7 +133,8 @@ public class MessageController {
     @Operation(summary = "Deletes an event message in the system by providing ID")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "204",
-                description = "Event Message has been successfully deleted"),
+                description = "Event Message has been successfully deleted",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -139,7 +142,7 @@ public class MessageController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping
+    @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteMessageByIdIn(@RequestBody List<Integer> ids) throws Exception{
         ids.forEach(id -> messageService.deleteById(id));
         return ResponseEntity.ok().build();
@@ -157,7 +160,7 @@ public class MessageController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateMessage(@PathVariable int id, @RequestBody MessageResource messageResource) throws Exception{
         messageResource.setTemplateId(id);
         EventMessage eventMessage = messageService.toEntity(messageResource);

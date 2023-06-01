@@ -25,6 +25,7 @@ import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.service.ActivityServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
@@ -40,6 +41,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -54,7 +56,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "User", description = "Manages operations related to user management")
-@RequestMapping(value = "/api/user", produces = "application/hal+json", consumes = {"application/json"})
+@RequestMapping(value = "/api/user", produces = MediaType.APPLICATION_JSON_VALUE)
 public class UserController {
 
     @Autowired
@@ -142,7 +144,7 @@ public class UserController {
                       description = "Internal Error",
                       content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> post(@RequestBody UserRequestResource userRequestResource) throws IOException {
 
         if (userService.existsByEmail(userRequestResource.getEmail())){
@@ -191,7 +193,7 @@ public class UserController {
     })
     // due to frontend requirements, for all changes need to send all user data. if something will be missed it will
     // save empty values
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update( @PathVariable("id") int id,
                                      @RequestBody UserRequestResource userRequestResource) throws IOException {
 
@@ -214,7 +216,8 @@ public class UserController {
     @Operation(summary = "Deletes a user by 'id' ")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "201",
-                description = "User is successfully deleted."),
+                description = "User is successfully deleted.",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -242,7 +245,8 @@ public class UserController {
     @Operation(summary = "Deletes users by ids ")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "204",
-                description = "Users are successfully deleted."),
+                description = "Users are successfully deleted.",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = Integer.class))),
@@ -250,9 +254,9 @@ public class UserController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping
-    public ResponseEntity<?> deleteUsersById(@RequestBody List<Integer> ids) {
-        ids.forEach(id -> {
+    @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> deleteUsersById(@RequestBody IdentifiersDTO<Integer> payload) {
+        payload.getIdentifiers().forEach(id -> {
             User p = userService.findById(id).orElseThrow(() -> new UserNotFoundException(id));
             if (p.getUserDetail().getProfilePicture() != null){
                 storageService.delete(p.getUserDetail().getProfilePicture());
@@ -266,7 +270,8 @@ public class UserController {
     @Operation(summary = "Logs out the currently authenticated user.")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
-                description = "User is successfully logged out."),
+                description = "User is successfully logged out.",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),

@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 // This controller was created only for openapi documentation.
 @RestController
-@Tag(name = "Authorization", description = "Authorizes user")
+@Tag(name = "# Authorization", description = "Authorizes user")
 public class LoginController {
     @Operation(summary = "Authorizes user and send in header JWT token")
     @ApiResponses(value = {

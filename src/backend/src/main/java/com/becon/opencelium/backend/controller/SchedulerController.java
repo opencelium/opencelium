@@ -20,13 +20,12 @@ import com.becon.opencelium.backend.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.mysql.service.WebhookServiceImp;
-import com.becon.opencelium.backend.resource.application.ResultDTO;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,9 +33,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
@@ -48,8 +49,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@Tag(name = "Search", description = "Manages operations related to Scheduler management")
-@RequestMapping(value = "/api/scheduler", produces = "application/hal+json", consumes = {"application/json"})
+@Tag(name = "Scheduler", description = "Manages operations related to Scheduler management")
+@RequestMapping(value = "/api/scheduler", produces = MediaType.APPLICATION_JSON_VALUE)
 public class SchedulerController {
 
     @Autowired
@@ -112,7 +113,7 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> scheduleJob(@RequestBody SchedulerRequestResource resource) throws Exception{
         Scheduler scheduler = schedulerService.toEntity(resource);
         schedulerService.save(scheduler);
@@ -135,7 +136,7 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> reschedule(@PathVariable("id") int id,
                                         @RequestBody SchedulerRequestResource resource) throws Exception{
         if (id != resource.getSchedulerId()){
@@ -171,7 +172,7 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/{id}/title")
+    @PutMapping(value = "/{id}/title", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> changeTitle(@PathVariable("id") int id,
                                          @RequestBody SchedulerRequestResource schedulerRequestResource) throws Exception{
         schedulerRequestResource.setSchedulerId(id);
@@ -189,7 +190,8 @@ public class SchedulerController {
     @Operation(summary = "Delete a scheduler by provided id")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "204",
-                description = "Scheduler is successfully deleted."),
+                description = "Scheduler is successfully deleted.",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -207,7 +209,8 @@ public class SchedulerController {
     @Operation(summary = "Runs all schedulers provided in request body")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
-                description = "Schedulers have been successfully started"),
+                description = "Schedulers have been successfully started",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -215,12 +218,11 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/startAll")
-    public ResponseEntity<?> startAll(@RequestBody Map<String, Object> response) throws Exception {
-        ArrayList<Integer> schedulerIds = (ArrayList<Integer>) response.get("schedulerIds");
-        List<Scheduler> schedulers = schedulerService.findAllById(schedulerIds);
+    @PutMapping(value = "/startAll", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> startAll(@RequestBody IdentifiersDTO<Integer> ids) throws Exception {
+        List<Scheduler> schedulers = schedulerService.findAllById(ids.getIdentifiers());
         schedulers.parallelStream().forEach(scheduler -> {
-            try{
+            try {
                 schedulerService.startNow(scheduler);
             } catch (Exception e){
                 throw new RuntimeException(e);
@@ -232,7 +234,8 @@ public class SchedulerController {
     @Operation(summary = "Changes status(ON/OFF) of a scheduler by provided scheduler id")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
-                description = "Scheduler status has been successfully changed"),
+                description = "Scheduler status has been successfully changed",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -240,7 +243,7 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/{schedulerId}/status")
+    @PutMapping(value = "/{schedulerId}/status", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> changeStatus(@PathVariable int schedulerId,
                                           @RequestBody Scheduler scheduler) throws Exception{
 
@@ -265,7 +268,8 @@ public class SchedulerController {
     @Operation(summary = "Sets the status of the provided schedulers to (ON) in the list of schedulers.")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
-                description = "Schedulers have been successfully enabled"),
+                description = "Schedulers have been successfully enabled",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -273,9 +277,9 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/enableAll")
-    public ResponseEntity<?> enableAll(@RequestBody  Map<String, Object> response) throws Exception {
-        ArrayList<Integer> schedulerIds = (ArrayList<Integer>) response.get("schedulerIds");
+    @PutMapping(value = "/enableAll", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> enableAll(@RequestBody  IdentifiersDTO<Integer> payload) throws Exception {
+        ArrayList<Integer> schedulerIds = payload.getIdentifiers();
         List<Scheduler> schedulers = schedulerService.findAllById(schedulerIds);
 
         schedulers.forEach(scheduler -> {
@@ -301,7 +305,8 @@ public class SchedulerController {
     @Operation(summary = "Sets the status of the provided schedulers to (OFF) in the list of schedulers.")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
-                description = "Schedulers have been successfully disabled"),
+                description = "Schedulers have been successfully disabled",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -310,8 +315,8 @@ public class SchedulerController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping("/disableAll")
-    public ResponseEntity<?> disableAll(@RequestBody Map<String, Object> response) throws Exception {
-        ArrayList<Integer> schedulerIds = (ArrayList<Integer>) response.get("schedulerIds");
+    public ResponseEntity<?> disableAll(@RequestBody IdentifiersDTO<Integer> payload) throws Exception {
+        ArrayList<Integer> schedulerIds = payload.getIdentifiers();
         List<Scheduler> schedulers = schedulerService.findAllById(schedulerIds);
 
         schedulers.forEach(scheduler -> {
@@ -332,7 +337,8 @@ public class SchedulerController {
     @Operation(summary = "Deletes a collection of schedulers based on the provided list of their corresponding IDs.")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "204",
-                description = "Schedulers have been successfully deleted"),
+                description = "Schedulers have been successfully deleted",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -340,16 +346,17 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping
-    public ResponseEntity<?> deleteSchedularByIdIn(@RequestBody List<Integer> ids) throws Exception {
-        schedulerService.deleteAllById(ids);
+    @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> deleteSchedulerByIdIn(@RequestBody IdentifiersDTO<Integer> payload) throws Exception {
+        schedulerService.deleteAllById(payload.getIdentifiers());
         return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Executes a scheduler by provided scheduler ID")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
-                description = "Scheduler has been started"),
+                description = "Scheduler has been started",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -412,7 +419,7 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping("/ids")
+    @PostMapping(value = "/ids", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getSchedulersByIds(@RequestBody Map<String, Object> response){
         ArrayList<Integer> schedulerIds = (ArrayList<Integer>) response.get("schedulerIds");
         List<Scheduler> schedulers = schedulerService.findAllById(schedulerIds);
@@ -455,9 +462,8 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping("/{schedulerId}/notification/{notificationId}")
-    public ResponseEntity<?> getNotification(@PathVariable int schedulerId,
-                                             @PathVariable int notificationId) throws Exception{
+    @GetMapping("/notification/{notificationId}")
+    public ResponseEntity<?> getNotification(@PathVariable int notificationId) throws Exception{
         EventNotification en = schedulerService.getNotification(notificationId)
                 .orElseThrow(()->new RuntimeException("Notification not found"));
         NotificationResource notificationResource = schedulerService.toNotificationResource(en);
@@ -478,7 +484,7 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping("/{schedulerId}/notification")
+    @PostMapping(value = "/{schedulerId}/notification", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createNotification(@PathVariable int schedulerId,
                                                 @RequestBody NotificationResource notificationResource) throws Exception{
 
@@ -491,7 +497,8 @@ public class SchedulerController {
     @Operation(summary = "Deletes a notification for a scheduler by provided scheduler ID and notification ID.")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "204",
-                    description = "Notification has been deleted successfully from scheduler"),
+                    description = "Notification has been deleted successfully from scheduler",
+                    content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -499,8 +506,8 @@ public class SchedulerController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping("/{schedulerId}/notification/{notificationId}")
-    public ResponseEntity<?> deleteNotification(@PathVariable int schedulerId,@PathVariable int notificationId){
+    @DeleteMapping(value = "/notification/{notificationId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> deleteNotification(@PathVariable int notificationId){
         schedulerService.deleteNotificationById(notificationId);
         return ResponseEntity.noContent().build();
     }
@@ -509,7 +516,8 @@ public class SchedulerController {
             "and a list of notification IDs.")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "204",
-                    description = "Notifications have been deleted successfully from scheduler"),
+                    description = "Notifications have been deleted successfully from scheduler",
+                    content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -517,9 +525,9 @@ public class SchedulerController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping("/{schedulerId}/notification")
-    public ResponseEntity<?> deleteNotification(@RequestBody List<Integer> schedulerIds,@RequestBody List<Integer> notificationIds){
-        notificationIds.forEach(nId -> schedulerService.deleteNotificationById(nId));
+    @PutMapping(value = "/notification", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> deleteNotification(@RequestBody IdentifiersDTO<Integer> payload){
+        payload.getIdentifiers().forEach(nId -> schedulerService.deleteNotificationById(nId));
         return ResponseEntity.noContent().build();
     }
 
@@ -535,8 +543,8 @@ public class SchedulerController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/{schedulerId}/notification/{notificationId}")
-    public ResponseEntity<?> updateNotification(@PathVariable int schedulerId,@PathVariable int notificationId,
+    @PutMapping(value = "/notification/{notificationId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateNotification(@PathVariable int notificationId,
                                                 @RequestBody NotificationResource notificationResource) throws Exception{
         notificationResource.setNotificationId(notificationId);
         EventNotification eventNotification = schedulerService.toNotificationEntity(notificationResource);

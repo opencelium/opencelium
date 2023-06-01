@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -98,7 +99,8 @@ public class WebhookController {
     @Operation(summary = "Accepts a webhook and executes the associated connection. Additional params are sent as a json in body")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
-                    description = "Webhook has been successfully executed"),
+                    description = "Webhook has been successfully executed",
+                    content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -144,7 +146,8 @@ public class WebhookController {
     @Operation(summary = "Checks if the remote server is up and running.")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
-                    description = "Server is up and running"),
+                    description = "Server is up and running",
+                    content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -169,7 +172,7 @@ public class WebhookController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping(value = "/url/{userId}/{schedulerId}", produces = "application/hal+json")
+    @GetMapping(value = "/url/{userId}/{schedulerId}")
     public ResponseEntity<?> generateUrl(@PathVariable("userId") int userId,
                                          @PathVariable("schedulerId") int schedulerId){
 
@@ -191,7 +194,8 @@ public class WebhookController {
     @Operation(summary = "Removes webhook")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "204",
-                    description = "Webhook has been successfully deleted"),
+                    description = "Webhook has been successfully deleted",
+                    content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),

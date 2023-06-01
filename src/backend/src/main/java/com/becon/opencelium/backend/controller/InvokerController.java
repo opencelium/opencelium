@@ -32,14 +32,17 @@ import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.PathUtility;
 import com.becon.opencelium.backend.utility.Xml;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.w3c.dom.Document;
@@ -65,12 +68,13 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
 @Tag(name = "Invoker", description = "Manages operations related to Invoker management")
-@RequestMapping(value = "/api/invoker", produces = "application/hal+json", consumes = {"application/json"})
+@RequestMapping(value = "/api/invoker", produces = MediaType.APPLICATION_JSON_VALUE)
 public class InvokerController {
 
     @Autowired
@@ -101,7 +105,7 @@ public class InvokerController {
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "List of Invokers have been successfully retrieved",
-                    content = @Content(schema = @Schema(implementation = InvokerResource.class))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = InvokerResource.class)))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -132,9 +136,10 @@ public class InvokerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> save(@RequestBody InvokerXMLResource invokerXMLResource)  {
         Document doc = convertStringToXMLDocument(invokerXMLResource.getXml());
+        Objects.requireNonNull(doc);
         NodeList nodeList = doc.getChildNodes();
         Node node = nodeList.item(0);
         Node nameNode = node.getChildNodes().item(1);
@@ -173,7 +178,8 @@ public class InvokerController {
     @Operation(summary = "Deletes an invoker by provided invoker 'name'")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
-                    description = "Invoker has been successfully removed"),
+                    description = "Invoker has been successfully removed",
+                    content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -198,7 +204,7 @@ public class InvokerController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping
+    @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteInvokerByNameIn(@RequestBody List<String> invokerNames){
         invokerNames.forEach(name -> {
             invokerService.delete(name);
@@ -218,7 +224,7 @@ public class InvokerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping("/{invokerName}/xml")
+    @PostMapping(value = "/{invokerName}/xml", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<FunctionResource> updateField(@PathVariable String invokerName,
                                                         @RequestBody OperationResource operationResource) {
         try {

@@ -66,8 +66,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping(value = "/api/connection", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Connection", description = "Manages operations related to Connection management")
-@RequestMapping(value = "/api/connection", produces = "application/hal+json", consumes = "application/json")
 public class ConnectionController {
 
     @Autowired
@@ -106,7 +106,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping("/all")
+    @GetMapping(path = "/all")
     public ResponseEntity<?> getAll(){
         List<Connection> connections = connectionService.findAll();
         List<ConnectionResource> connectionResources = connections.stream()
@@ -126,7 +126,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping("/all/meta")
+    @GetMapping(path = "/all/meta")
     public ResponseEntity<?> getAllMeta(){
         List<Connection> connections = connectionService.findAll();
         List<ConnectionResource> connectionResources = connections.stream()
@@ -146,7 +146,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping("/{connectionId}")
+    @GetMapping(path = "/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId) {
         Connection connection = connectionService.findById(connectionId).orElse(null);
         ConnectionResource connectionResource = connectionService.toNodeResource(connection);
@@ -166,7 +166,7 @@ public class ConnectionController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> add(@RequestBody ConnectionResource connectionResource) throws Exception{
         Connection connection = connectionService.toEntity(connectionResource);
         if (connectionService.existsByName(connection.getName())){
@@ -229,7 +229,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping("/validate")
+    @PostMapping(path = "/validate", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> validate(@RequestBody ConnectionResource connectionResource) throws Exception{
         Connection connection = connectionService.toEntity(connectionResource);
         if (connectionService.existsByName(connection.getName())){
@@ -262,7 +262,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/{connectionId}")
+    @PutMapping(path = "/{connectionId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable Long connectionId,
                                     @RequestBody ConnectionResource connectionResource) throws Exception{
         connectionResource.setConnectionId(connectionId);
@@ -311,7 +311,8 @@ public class ConnectionController {
     @Operation(summary = "Deletes a connection by provided connection ID")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "204",
-                    description = "Connection has been successfully deleted."),
+                    description = "Connection has been successfully deleted.",
+                    content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -319,7 +320,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping("{id}")
+    @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id){
         connectionService.deleteById(id);
         connectionNodeService.deleteById(id);
@@ -393,7 +394,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping("/remoteapi")
+    @PostMapping(path = "/remoteapi", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) throws Exception {
 
         String url = apiDataResource.getUrl();
@@ -427,7 +428,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping
+    @PutMapping(path = "/list/delete")
     public ResponseEntity<?> deleteCtionByIdIn(@RequestBody List<Long> ids) throws Exception {
 
         ids.forEach(id -> {

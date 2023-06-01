@@ -32,6 +32,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -43,8 +44,7 @@ import java.net.URI;
 
 @RestController
 @Tag(name = "User Details", description = "Stores detailed information about users")
-@RequestMapping(value = "/api/userDetail", produces = "application/json",
-                                           consumes = {"application/json", "multipart/form-data"})
+@RequestMapping(value = "/api/userDetail", produces = MediaType.APPLICATION_JSON_VALUE)
 public class UserDetailController {
 
     @Autowired
@@ -55,6 +55,9 @@ public class UserDetailController {
 
     @Operation(summary = "Updates user details")
     @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                      description = "User detail has been modified successfully.",
+                      content = @Content(schema = @Schema(implementation = UserDetailResource.class))),
         @ApiResponse( responseCode = "401",
                       description = "Unauthorized",
                       content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -62,8 +65,7 @@ public class UserDetailController {
                       description = "Internal Error",
                       content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @ResponseStatus(HttpStatus.CREATED)
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDetailResource> put( @Parameter(description = "Unique identifier of User") @PathVariable("id") int id,
                                                    @RequestBody UserDetailResource userDetailResource) throws IOException {
 

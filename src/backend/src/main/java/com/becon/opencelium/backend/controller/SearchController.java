@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Search", description = "Manages operations related to search function")
-@RequestMapping(value = "/api/search", produces = "application/hal+json", consumes = "application/json")
+@RequestMapping(value = "/api/search", produces = "application/json")
 public class SearchController {
 
     @Autowired

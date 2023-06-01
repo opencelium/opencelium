@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
@@ -40,6 +41,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -54,7 +56,7 @@ import java.util.UUID;
 
 @RestController
 @Tag(name = "Template", description = "Manages operations related to template")
-@RequestMapping(value = "/api/template", produces = "application/hal+json", consumes = {"application/json"})
+@RequestMapping(value = "/api/template", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TemplateController {
 
     @Autowired
@@ -158,7 +160,7 @@ public class TemplateController {
         return ResponseEntity.ok().body(resources);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> save(@RequestBody TemplateResource templateResource) throws JsonProcessingException {
 
         String templateId = "";
@@ -225,7 +227,7 @@ public class TemplateController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> modify(@RequestBody TemplateResource templateResource) throws JsonProcessingException {
         Template template = templateService.toEntity(templateResource);
         if (templateService.existsById(template.getTemplateId())) {
@@ -248,7 +250,7 @@ public class TemplateController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/all")
+    @PutMapping(value = "/all", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> modifyAll(@RequestBody List<TemplateResource> templateResources) throws JsonProcessingException {
 
         templateResources.forEach(tr -> {
@@ -266,7 +268,8 @@ public class TemplateController {
     @Operation(summary = "Removes a template by given id")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "201",
-                description = "Template has been successfully removed"),
+                description = "Template has been successfully removed",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -283,7 +286,8 @@ public class TemplateController {
     @Operation(summary = "Removes templates by given list of ids")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "201",
-                description = "Templates have been successfully removed"),
+                description = "Templates have been successfully removed",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -291,10 +295,10 @@ public class TemplateController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping
-    public ResponseEntity<?> deleteTemplateByIdIn(@RequestBody List<String> ids){
+    @PutMapping(path = "/list/delete")
+    public ResponseEntity<?> deleteTemplateByIdIn(@RequestBody IdentifiersDTO<String> ids){
 
-        ids.forEach(id -> {
+        ids.getIdentifiers().forEach(id -> {
             templateService.deleteById(id);
         });
         return ResponseEntity.noContent().build();

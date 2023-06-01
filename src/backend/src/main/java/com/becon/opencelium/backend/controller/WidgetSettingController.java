@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @Tag(name = "Widget Settings", description = "Manages operations related to WidgetSetting that contains coordinates of widget for frontend")
-@RequestMapping(value = "/api/widget_setting", produces = "application/hal+json", consumes = {"application/json"})
+@RequestMapping(value = "/api/widget_setting", produces = MediaType.APPLICATION_JSON_VALUE)
 public class WidgetSettingController {
 
     @Autowired
@@ -48,7 +49,7 @@ public class WidgetSettingController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> create(@RequestBody UserWidgetsResource userWidgetsResource){
         int userId = userWidgetsResource.getUserId();
         User user  = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));

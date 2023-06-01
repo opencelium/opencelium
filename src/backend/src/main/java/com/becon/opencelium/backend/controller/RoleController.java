@@ -35,6 +35,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,7 +48,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "User Role(Group)", description = "Manages operations related to User Roles management")
-@RequestMapping(value = "/api/role", produces = "application/hal+json", consumes = {"application/json"})
+@RequestMapping(value = "/api/role", produces = "application/json")
 public class RoleController {
 
     @Autowired
@@ -114,7 +115,7 @@ public class RoleController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserRoleResource> post(@RequestBody UserRoleResource userRoleResource){
 
         if (userRoleService.existsByRole(userRoleResource.getName())){
@@ -157,7 +158,7 @@ public class RoleController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("{id}/component")
+    @PutMapping(value = "{id}/component", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserRoleResource> changeComponent(@PathVariable("id") int id,
                                                              @RequestBody UserRoleResource userRoleResource) throws IOException {
 
@@ -194,9 +195,9 @@ public class RoleController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserRoleResource> put(@PathVariable("id") int id,
-                                                 @RequestBody UserRoleResource roleResource) throws IOException{
+                                                @RequestBody UserRoleResource roleResource) throws IOException{
 
         UserRole userRole = userRoleService.findById(id).orElseThrow(() -> new RuntimeException("UserGroup id: " + id + "not found"));
         boolean isIdenticalName = userRole.getName().equals(roleResource.getName());
@@ -241,7 +242,8 @@ public class RoleController {
     @Operation(summary = "Deletes an User Role from system by provided role ID")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "204",
-                description = "User Role has been successfully deleted."),
+                description = "User Role has been successfully deleted.",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -269,7 +271,8 @@ public class RoleController {
     @Operation(summary = "Deletes a collection of User Roles based on the provided list of their corresponding IDs.")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "204",
-                description = "List of User Roles have been successfully deleted."),
+                description = "List of User Roles have been successfully deleted.",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -277,7 +280,7 @@ public class RoleController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping
+    @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteRoleByIdIn(@RequestBody List<Integer> ids) {
 
         ids.forEach(id -> {
@@ -294,7 +297,8 @@ public class RoleController {
     @Operation(summary = "Deletes an icon of User Roles based on the provided role ID.")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "204",
-                description = "Icon of User Role has been successfully deleted."),
+                description = "Icon of User Role has been successfully deleted.",
+                content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),

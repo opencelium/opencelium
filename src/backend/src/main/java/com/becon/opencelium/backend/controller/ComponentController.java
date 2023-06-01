@@ -21,6 +21,8 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.ComponentResource;
 import com.becon.opencelium.backend.resource.user.UserWidgetsResource;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,6 +31,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -38,7 +41,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Application Components", description = "Manages operations related to Application Components management")
-@RequestMapping(value = "/api/component", produces = "application/json", consumes = "application/json")
+@RequestMapping(value = "/api/component", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ComponentController {
 
     @Autowired
@@ -57,7 +60,7 @@ public class ComponentController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping(value = "/all", consumes = "application/json")
+    @GetMapping(path = "/all")
     public ResponseEntity<CollectionModel<ComponentResource>> all(){
 
         final List<ComponentResource> collection =

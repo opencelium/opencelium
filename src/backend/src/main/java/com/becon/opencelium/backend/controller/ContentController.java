@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Event Content", description = "Manages operations related to Event Content management")
-@RequestMapping(value = "/api/content", produces = "application/hal+json", consumes = {"application/json"})
+@RequestMapping(value = "/api/content", produces = "application/json")
 public class ContentController {
 
     @Autowired
@@ -83,7 +84,7 @@ public class ContentController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> createContent(@RequestBody ContentResource contentResource) throws Exception{
         EventContent eventContent = contentService.toEntity(contentResource);
         contentService.save(eventContent);
