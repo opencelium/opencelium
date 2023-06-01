@@ -96,11 +96,10 @@ public class RoleController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<CollectionModel<UserRoleResource>> all(){
+    public ResponseEntity<List<UserRoleResource>> all(){
         final List<UserRoleResource> collection =
                 userRoleService.findAll().stream().map(UserRoleResource::new).collect(Collectors.toList());
-        final CollectionModel<UserRoleResource> resources = CollectionModel.of(collection);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(collection);
     }
 
     @Operation(summary = "Creates new User Role")

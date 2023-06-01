@@ -61,13 +61,11 @@ public class ComponentController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping(path = "/all")
-    public ResponseEntity<CollectionModel<ComponentResource>> all(){
+    public ResponseEntity<List<ComponentResource>> all(){
 
         final List<ComponentResource> collection =
                 componentService.findAll().stream().map(ComponentResource::new).collect(Collectors.toList());
-
-        final CollectionModel<ComponentResource> resources = CollectionModel.of(collection);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(collection);
     }
 
 //    @PostMapping

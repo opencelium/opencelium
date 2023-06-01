@@ -189,13 +189,12 @@ public class MessageController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all/{type}")
-    public ResponseEntity<?> getAllTemplatesByNotificationType(@PathVariable String type) throws Exception{
+    public ResponseEntity<List<MessageResource>> getAllTemplatesByNotificationType(@PathVariable String type) throws Exception{
         List<EventMessage> eventMessageList = messageService.findAllByType(type);
         List<MessageResource> messageResources = eventMessageList.stream()
                 .map(message -> messageService.toResource(message))
                 .collect(Collectors.toList());
-        final CollectionModel<MessageResource> resources = CollectionModel.of(messageResources);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(messageResources);
     }
 
     @Operation(summary = "Retrieves a list of supported languages")

@@ -38,13 +38,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -101,7 +99,7 @@ public class TemplateController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all/{fromConnectorId}/{toConnectorId}")
-    public ResponseEntity<?> getAllByConnectors(@PathVariable int fromConnectorId, @PathVariable int toConnectorId){
+    public ResponseEntity<List<TemplateResource>> getAllByConnectors(@PathVariable int fromConnectorId, @PathVariable int toConnectorId){
         Connector fromConnector = connectorService.findById(fromConnectorId)
                 .orElseThrow(() -> new ConnectorNotFoundException(fromConnectorId));
         Connector toConnector = connectorService.findById(toConnectorId)
@@ -122,8 +120,7 @@ public class TemplateController {
             templateResources.add(templateResource);
         });
 
-        final CollectionModel<TemplateResource> resources = CollectionModel.of(templateResources);
-        return ResponseEntity.ok().body(resources);
+        return ResponseEntity.ok().body(templateResources);
     }
 
     @Operation(summary = "Retrieves all templates from database")
@@ -139,7 +136,7 @@ public class TemplateController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<?> getAll(){
+    public ResponseEntity<List<TemplateResource>> getAll(){
 
         List<Template> templates = templateService.findAll();
 
@@ -156,8 +153,7 @@ public class TemplateController {
             templateResources.add(templateResource);
         });
 
-        final CollectionModel<TemplateResource> resources = CollectionModel.of(templateResources);
-        return ResponseEntity.ok().body(resources);
+        return ResponseEntity.ok().body(templateResources);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -260,9 +256,7 @@ public class TemplateController {
             }
             templateService.save(template);
         });
-
-        final CollectionModel<TemplateResource> resource = CollectionModel.of(templateResources);
-        return ResponseEntity.ok().body(resource);
+        return ResponseEntity.ok().body(templateResources);
     }
 
     @Operation(summary = "Removes a template by given id")

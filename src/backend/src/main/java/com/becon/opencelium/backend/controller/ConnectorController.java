@@ -29,7 +29,6 @@ import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,9 +38,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -107,13 +104,11 @@ public class ConnectorController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<?> getAll(){
+    public ResponseEntity<List<ConnectorResource>> getAll(){
         List<ConnectorResource> connectorResources = connectorService.findAll()
                 .stream().map(c -> connectorService.toResource(c))
                 .collect(Collectors.toList());
-
-        final CollectionModel<ConnectorResource> resources = CollectionModel.of(connectorResources);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(connectorResources);
     }
 
     @Operation(summary = "Creates new connector in the system by accepting Connector data in the request body")

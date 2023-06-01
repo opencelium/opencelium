@@ -33,9 +33,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -72,12 +70,11 @@ public class SchedulerController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<?> getAll() throws Exception {
+    public ResponseEntity<List<SchedulerResource>> getAll() throws Exception {
         List<Scheduler> schedulers = schedulerService.findAll();
         List<SchedulerResource> scheduleList = schedulers.stream()
             .map(s -> schedulerService.toResource(s)).collect(Collectors.toList());
-        final CollectionModel<SchedulerResource> resources = CollectionModel.of(scheduleList);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(scheduleList);
     }
 
     @Operation(summary = "Retrieves a scheduler from database by provided id")
@@ -392,7 +389,7 @@ public class SchedulerController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/running/all")
-    public ResponseEntity<?> getRunningAll(){
+    public ResponseEntity<List<RunningJobsResource>> getRunningAll(){
         List<RunningJobsResource> runningJobResources;
         try{
             runningJobResources = schedulerService.getAllRunningJobs();
@@ -403,8 +400,7 @@ public class SchedulerController {
         if (runningJobResources == null){
             return ResponseEntity.noContent().build();
         }
-        final CollectionModel<RunningJobsResource> resources = CollectionModel.of(runningJobResources);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(runningJobResources);
     }
 
     @Operation(summary = "Retrieves a collection of schedulers based on the provided list of their corresponding IDs.")
@@ -419,14 +415,13 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping(value = "/ids", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getSchedulersByIds(@RequestBody Map<String, Object> response){
-        ArrayList<Integer> schedulerIds = (ArrayList<Integer>) response.get("schedulerIds");
+    @PostMapping(value = "/list/get", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<SchedulerResource>> getSchedulersByIds(@RequestBody IdentifiersDTO<Integer> payload){
+        ArrayList<Integer> schedulerIds = payload.getIdentifiers();
         List<Scheduler> schedulers = schedulerService.findAllById(schedulerIds);
         List<SchedulerResource> scheduleList = schedulers.stream()
                 .map(sch -> schedulerService.toResource(sch)).collect(Collectors.toList());
-        final CollectionModel<SchedulerResource> resources = CollectionModel.of(scheduleList);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(scheduleList);
     }
 
 
@@ -443,11 +438,10 @@ public class SchedulerController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/{schedulerId}/notification/all")
-    public ResponseEntity<?> getAllNotifications(@PathVariable int schedulerId) throws Exception {
+    public ResponseEntity<List<NotificationResource>> getAllNotifications(@PathVariable int schedulerId) throws Exception {
         List<NotificationResource> notificationResource = schedulerService.getAllNotifications(schedulerId)
                 .stream().map(e -> schedulerService.toNotificationResource(e)).collect(Collectors.toList());
-        final CollectionModel<NotificationResource> resources = CollectionModel.of(notificationResource);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(notificationResource);
     }
 
     @Operation(summary = "Retrieves a notification associated with a scheduler by provided scheduler ID and notification ID.")

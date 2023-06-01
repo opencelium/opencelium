@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -42,14 +41,13 @@ public class ContentController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    ResponseEntity<?> getAll() throws Exception{
+    ResponseEntity<List<ContentResource>> getAll() throws Exception{
         List<EventContent> eventContentList = contentService.findAll();
 
         List<ContentResource> contentResources = eventContentList.stream()
                 .map(content -> contentService.toResource(content))
                 .collect(Collectors.toList());
-        final CollectionModel<ContentResource> resources = CollectionModel.of(contentResources);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(contentResources);
     }
 
     @Operation(summary = "Retrieves an Event Content by provided event content ID")

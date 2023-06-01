@@ -38,9 +38,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -114,14 +112,12 @@ public class InvokerController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<?> getAll() throws Exception {
+    public ResponseEntity<List<InvokerResource>> getAll() throws Exception {
 
         List<InvokerResource> invokerResources = invokerService.findAll()
                 .stream().map(inv -> invokerService.toResource(inv))
                 .collect(Collectors.toList());
-
-        final CollectionModel<InvokerResource> resources = CollectionModel.of(invokerResources);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(invokerResources);
     }
 
     @Operation(summary = "Creates new invoker")

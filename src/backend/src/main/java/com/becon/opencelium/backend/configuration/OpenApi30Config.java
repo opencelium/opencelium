@@ -23,6 +23,7 @@ public class OpenApi30Config {
         final String securitySchemeName = "bearerAuth";
         final String apiTitle = String.format("%s API", StringUtils.capitalize("OpenCelium"));
         return new OpenAPI()
+                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(
                     new Components()
                         .addSecuritySchemes(securitySchemeName,

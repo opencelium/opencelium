@@ -39,7 +39,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -124,12 +123,11 @@ public class UserController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<CollectionModel<UserResource>> all(){
+    public ResponseEntity<List<UserResource>> all(){
         final List<UserResource> userResources =
                 userService.findAll().stream().map(UserResource::new).collect(Collectors.toList());
-        final CollectionModel<UserResource> resources = CollectionModel.of(userResources);
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        return ResponseEntity.created(uri).body(resources);
+        return ResponseEntity.created(uri).body(userResources);
     }
 //
     @Operation(summary = "Creates a new user in the system by accepting user data in the request body")
