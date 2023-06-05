@@ -343,7 +343,7 @@ public class SchedulerController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteSchedulerByIdIn(@RequestBody IdentifiersDTO<Integer> payload) throws Exception {
         schedulerService.deleteAllById(payload.getIdentifiers());
         return ResponseEntity.noContent().build();
