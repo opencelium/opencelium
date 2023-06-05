@@ -46,7 +46,7 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
     private ActivityServiceImpl activityService;
 
     private final static List<String> ignorList = Arrays.asList("api/webhook/execute", "api/storage/files",
-            "api/webhook/health", "/swagger-ui", "/v3/api-docs");
+            "api/webhook/health", "/swagger-ui", "/v3/api-docs", "/docs");
 
     public AuthorizationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);

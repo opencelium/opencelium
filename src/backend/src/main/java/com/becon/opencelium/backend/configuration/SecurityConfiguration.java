@@ -118,7 +118,7 @@ public class SecurityConfiguration {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
                 .requestMatchers("/api/storage/files/**", "/api/webhook/execute/**", "/api/webhook/health",
-                        "/v3/api-docs", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**");
+                        "/v3/api-docs", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/docs");
     }
 
 
