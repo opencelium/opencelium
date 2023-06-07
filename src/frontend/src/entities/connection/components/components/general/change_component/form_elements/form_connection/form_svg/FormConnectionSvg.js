@@ -50,8 +50,8 @@ function mapStateToProps(state, props) {
  * Form for ConnectionSvg
  */
 @GetModalProp()
-@withTranslation('basic_components')
-@connect(mapStateToProps, { setCurrentTechnicalItem, setConnectionData, setModalConnectionData, setModalCurrentTechnicalItem })
+@withTranslation('basic_components', {withRef: true})
+@connect(mapStateToProps, { setCurrentTechnicalItem, setConnectionData, setModalConnectionData, setModalCurrentTechnicalItem }, null, {forwardRef: true})
 class FormConnectionSvg extends Component {
   constructor(props) {
     super(props);
@@ -62,6 +62,7 @@ class FormConnectionSvg extends Component {
     };
     this.setData = props.isModal ? props.setModalConnectionData : props.setConnectionData;
     this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
+    this.technicalLayoutRef = React.createRef();
   }
 
   setCreateElementPanelPosition(position) {
@@ -129,7 +130,7 @@ class FormConnectionSvg extends Component {
   }
 
   render() {
-    const { data, connection, currentTechnicalItem, isFullScreen } = this.props;
+    const { data, connection, currentTechnicalItem, isFullScreen, setRef } = this.props;
     const {
       isCreateElementPanelOpened,
       createElementPanelConnectorType,
@@ -145,6 +146,7 @@ class FormConnectionSvg extends Component {
           updateConnection={(a, b) => this.updateEntity(a, b)}
         />
         <TechnicalLayout
+          ref={this.technicalLayoutRef}
           readOnly={data.readOnly}
           setIsCreateElementPanelOpened={(a, b) =>
             this.setIsCreateElementPanelOpened(a, b)

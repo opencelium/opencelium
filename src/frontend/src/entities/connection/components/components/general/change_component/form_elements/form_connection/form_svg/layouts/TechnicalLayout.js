@@ -39,13 +39,14 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {setCurrentTechnicalItem, setModalCurrentTechnicalItem})
+@connect(mapStateToProps, {setCurrentTechnicalItem, setModalCurrentTechnicalItem}, null, {forwardRef: true})
 class TechnicalLayout extends React.Component{
 
     constructor(props) {
         super(props);
         this.layoutId = `${props.isModal ? 'modal_' : ''}technical_layout`;
         this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
+        this.svgRef = React.createRef();
     }
 
     componentDidMount() {
@@ -111,7 +112,7 @@ class TechnicalLayout extends React.Component{
     render(){
         const {setCreateElementPanelPosition} = this.props;
         const {
-            connection, currentTechnicalItem, ...svgProps
+            setRef, connection, currentTechnicalItem, ...svgProps
         } = this.props;
         const items = connection ? [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems] : [];
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams(items);
@@ -121,6 +122,7 @@ class TechnicalLayout extends React.Component{
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <Svg
                     {...svgProps}
+                    ref={this.svgRef}
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
                     isDraggable={true}

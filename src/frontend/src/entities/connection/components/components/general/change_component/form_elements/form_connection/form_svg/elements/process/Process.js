@@ -49,11 +49,10 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {setJustDeletedItem, setModalJustDeletedItem})
+@connect(mapStateToProps, {setJustDeletedItem, setModalJustDeletedItem}, null, {forwardRef: true})
 class Process extends React.Component{
     constructor(props) {
         super(props)
-
         this.state = {
             technicalRectClassName: '',
             isMouseOverPlaceholder: false,
@@ -62,6 +61,7 @@ class Process extends React.Component{
             isMouseOver: false,
             showCreatePanel: false,
         }
+        this.createPanelRef = React.createRef();
         this.setJustDeletedItem = props.isModal ? props.setModalJustDeletedItem : props.setJustDeletedItem;
     }
 
@@ -362,6 +362,7 @@ class Process extends React.Component{
                 }
                 {showCreatePanel &&
                     <CreatePanel
+                        ref={this.createPanelRef}
                         element={process}
                         onMouseLeave={(a) => this.onMouseLeaveSvg(a)}
                         setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}

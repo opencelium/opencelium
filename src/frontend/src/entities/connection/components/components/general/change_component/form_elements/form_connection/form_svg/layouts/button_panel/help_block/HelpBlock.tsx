@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { withTheme } from "styled-components";
 import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
 import { TextSize } from "@app_component/base/text/interfaces";
@@ -68,6 +68,11 @@ const HelpBlock = () => {
     const { isButtonPanelOpened, videoAnimationName } = Connection.getReduxState();
     const { isAnimationPaused } = ModalConnection.getReduxState();
     const [timeOutId, setTimeOutId] = useState(null);
+
+    const ref = React.useRef(null);
+
+    const ref2 = React.useRef(null);
+
     useEffect(() => {
         if(videoAnimationName !== ''){
             let connection = CConnection.createConnection(HelpBlockAllData[videoAnimationName]);
@@ -92,11 +97,31 @@ const HelpBlock = () => {
                 if (animationProps.index < animationProps.allItems.fromConnector.length) {
                     if (animationProps.allItems.fromConnector[animationProps.index].hasOwnProperty('type')) {
                         animationProps.connection.fromConnector.operators.push(animationProps.allItems.fromConnector[animationProps.index]);
-                    } else {
+                        console.log('operator')
+                      } else {
                         animationProps.connection.fromConnector.methods.push(animationProps.allItems.fromConnector[animationProps.index]);
+                        console.log('process')
                     }
                     animationProps.connection.fromConnector.setSvgItems();
                     dispatch(setModalCurrentTechnicalItem(animationProps.connection.fromConnector.getSvgElementByIndex(animationProps.allItems.fromConnector[animationProps.index].index).getObject()))
+                    if(animationProps.index === 0){
+                      console.log(ref.current)
+                      if(ref.current !== null) {
+                        dispatch(setAnimationPaused(true))
+                        setTimeout(() => {
+                          ref.current.technicalLayoutRef.current.svgRef.current.processRef.current.onMouseOverSvg()
+                          setTimeout(() => {
+                            const event = new Event('click');
+                            const createPanelElement = document.querySelector('#create_panel_right').nextElementSibling;
+                            const createProcess = ref.current.technicalLayoutRef.current.svgRef.current.processRef.current.createPanelRef.current.createProcess;
+                            console.log(createPanelElement)
+                            createProcess(createPanelElement)
+                            // ref.current.technicalLayoutRef.current.svgRef.current.processRef.current.onMouseLeaveSvg()
+                            // dispatch(setAnimationPaused(false))
+                          }, 1000)
+                        }, 1000)
+                      }
+                    }
                 } else {
                     if (animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length].hasOwnProperty('type')) {
                         animationProps.connection.toConnector.operators.push(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length]);
@@ -111,7 +136,7 @@ const HelpBlock = () => {
                 setTimeOutId(setTimeout(() => setAnimationProps({...animationProps, connection: animationProps.connection, index: animationProps.index + 1}), 1000))
             }
         }
-    }, [animationProps.index, isAnimationPaused])
+    }, [animationProps.index, isAnimationPaused, ref])
 
 
   function toggleVisible() {
@@ -124,6 +149,9 @@ const HelpBlock = () => {
       dispatch(setModalConnectionData({connection}));
   }
 
+  const handleClick = () => {
+    ref.current.technicalLayoutRef.current.svgRef.current.processRef.current.onMouseOverSvg()
+  }
 
   return (
     <HelpBlockStyled isButtonPanelOpened={isButtonPanelOpened}>
@@ -169,6 +197,7 @@ const HelpBlock = () => {
           <ModalContext.Provider value={{ isModal: true }}>
             {
               <FormConnectionSvg
+                ref={ref}
                 data={{ readOnly: false }}
                 entity={animationProps.connection}
                 updateEntity={updateEntity}

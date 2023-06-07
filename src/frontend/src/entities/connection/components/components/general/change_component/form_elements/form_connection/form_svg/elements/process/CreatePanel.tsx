@@ -14,7 +14,7 @@
  */
 
 import COperator from '@entity/connection/components/classes/components/content/connection_overview_2/operator/COperator';
-import React, {FC, useState} from 'react';
+import React, {FC, forwardRef, useImperativeHandle, useState} from 'react';
 import {
     CreatePanelStyled, CreateOperatorStyled, CreateProcessStyled,
     CreateOperatorContainerStyled, CreateProcessContainerStyled,
@@ -29,7 +29,7 @@ const CreatePanel: FC<{
     sourceId: string,
     setCoordinatesForCreateElementPanel?: any,
     setCurrentItem: any,
-}> = ({element, onMouseLeave, setIsCreateElementPanelOpened, sourceId, setCoordinatesForCreateElementPanel, setCurrentItem}) => {
+}> = forwardRef(({element, onMouseLeave, setIsCreateElementPanelOpened, sourceId, setCoordinatesForCreateElementPanel, setCurrentItem}, ref) => {
     const [isMouseOverRight, setIsMouseOverRight] = useState<boolean>(false);
     const [isMouseOverBottom, setIsMouseOverBottom] = useState<boolean>(false);
     const isOperator = element instanceof COperator;
@@ -43,6 +43,21 @@ const CreatePanel: FC<{
         y: element.y + element.height,
     }
     const points = `${operatorPlaceholderSize / 2},1 ${operatorPlaceholderSize - 1},${operatorPlaceholderSize / 2} ${operatorPlaceholderSize / 2},${operatorPlaceholderSize - 1} 1,${operatorPlaceholderSize / 2}`;
+
+    useImperativeHandle(ref, () => ({
+        createProcess(e: any, itemPosition: string){
+            setCurrentItem(element);
+            setCoordinatesForCreateElementPanel(e, CREATE_PROCESS, itemPosition);
+            setIsCreateElementPanelOpened(true);
+            onMouseLeave();
+        },
+        createOperator(e: any, itemPosition: string){
+            setCurrentItem(element);
+            setIsCreateElementPanelOpened(true);
+            setCoordinatesForCreateElementPanel(e, CREATE_OPERATOR, itemPosition);
+            onMouseLeave();
+        }
+    }));
 
     const createProcess = (e: any, itemPosition: string) => {
         setCurrentItem(element);
@@ -105,7 +120,7 @@ const CreatePanel: FC<{
                 <svg {...containerCoordinatesBottom} onMouseOver={onMouseOverSvgBottom} onMouseLeave={onMouseLeaveSvgBottom}>
                     <CreatePanelStyled id={'create_panel_bottom'} style={{opacity: isMouseOverBottom ? 0.5 : 0.2}} isBottom={true}/>
                     <CreateProcessContainerStyled isBottom={true}>
-                        <CreateProcessStyled x={37.5} onClick={(e) => createProcess(e, INSIDE_ITEM)} style={{opacity: isMouseOverBottom ? 1 : 0.2}} isBottom={true}>
+                        <CreateProcessStyled x={37.5} onClick={(e) => (createProcess(e, INSIDE_ITEM), console.log(e))} style={{opacity: isMouseOverBottom ? 1 : 0.2}} isBottom={true}>
                             <title>{"Process"}</title>
                         </CreateProcessStyled>
                     </CreateProcessContainerStyled>
@@ -122,6 +137,6 @@ const CreatePanel: FC<{
             }
         </React.Fragment>
     )
-}
+})
 
 export default CreatePanel;

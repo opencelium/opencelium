@@ -24,15 +24,11 @@ import {ModalContext} from "@change_component/FormSection";
  */
 export default function GetModalProp(){
     return function (Component) {
-        return class extends React.Component{
-            render(){
-                return (
-                    <ModalContext.Consumer>{({isModal}) => (
-                        <Component {...this.props} isModal={isModal}/>
-                    )}
-                    </ModalContext.Consumer>
-                );
-            }
-        };
+        return React.forwardRef((props, ref) => (
+            <ModalContext.Consumer>{({isModal}) => (
+                <Component {...props} ref={ref} isModal={isModal}/>
+            )}
+            </ModalContext.Consumer>
+        ));
     };
 }

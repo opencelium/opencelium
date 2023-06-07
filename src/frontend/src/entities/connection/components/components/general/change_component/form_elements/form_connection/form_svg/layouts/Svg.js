@@ -43,7 +43,7 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {}, null, {forwardRef: true})
 class Svg extends React.Component {
     constructor(props) {
         super(props);
@@ -64,6 +64,7 @@ class Svg extends React.Component {
         }
         this.svgRef = React.createRef();
         this.resetRatio = false;
+        this.processRef = React.createRef();
     }
 
 
@@ -159,7 +160,7 @@ class Svg extends React.Component {
     setCoordinatesForCreateElementPanel(e, type, itemPosition){
         const {setCreateElementPanelPosition, layoutPosition} = this.props;
         if(typeof setCreateElementPanelPosition === 'function'){
-            const clientRect = e.target.getBoundingClientRect();
+            const clientRect = e instanceof SVGGElement ? e.getBoundingClientRect() : e.target.getBoundingClientRect();
             let x = clientRect.x;
             let y = clientRect.y;
             x += clientRect.width + 8;
@@ -406,7 +407,7 @@ class Svg extends React.Component {
     renderItems(){
         const {
             isItemDraggable, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened,
-            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll, isTestingConnection, isCreateElementPanelOpened,
+            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll, isTestingConnection, isCreateElementPanelOpened, setRef
         } = this.props;
         return items.map((item,key) => {
             let currentItem = null;
@@ -455,6 +456,7 @@ class Svg extends React.Component {
                 default:
                     return(
                         <Process
+                            ref={this.processRef}
                             key={key}
                             isItemDraggable={isItemDraggable && !isTestingConnection}
                             process={item}
