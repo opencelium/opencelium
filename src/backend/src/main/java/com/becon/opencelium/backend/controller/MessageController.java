@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.mysql.entity.EventContent;
 import com.becon.opencelium.backend.mysql.entity.EventMessage;
 import com.becon.opencelium.backend.mysql.service.ContentServiceImpl;
 import com.becon.opencelium.backend.mysql.service.MessageServiceImpl;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.LanguageDTO;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
@@ -143,8 +144,8 @@ public class MessageController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> deleteMessageByIdIn(@RequestBody List<Integer> ids) throws Exception{
-        ids.forEach(id -> messageService.deleteById(id));
+    public ResponseEntity<?> deleteMessageByIdIn(@RequestBody IdentifiersDTO<Integer> ids) throws Exception{
+        ids.getIdentifiers().forEach(id -> messageService.deleteById(id));
         return ResponseEntity.ok().build();
     }
 
