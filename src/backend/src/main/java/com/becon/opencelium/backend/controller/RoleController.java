@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.mysql.entity.UserRole;
 import com.becon.opencelium.backend.mysql.service.PermissionServiceImpl;
 import com.becon.opencelium.backend.mysql.service.RoleHasPermissionServiceImp;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
 import com.becon.opencelium.backend.storage.StorageService;
@@ -280,9 +281,9 @@ public class RoleController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> deleteRoleByIdIn(@RequestBody List<Integer> ids) {
+    public ResponseEntity<?> deleteRoleByIdIn(@RequestBody IdentifiersDTO<Integer> ids) {
 
-        ids.forEach(id -> {
+        ids.getIdentifiers().forEach(id -> {
             UserRole p = userRoleService.findById(id).get();
             if (p.getIcon() != null){
                 storageService.delete(p.getIcon());
