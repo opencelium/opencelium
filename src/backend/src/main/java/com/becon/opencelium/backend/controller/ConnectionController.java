@@ -207,7 +207,7 @@ public class ConnectionController {
             e.printStackTrace();
 //            enhancementService.deleteAllByConnectionId(connectionId);
             connectionService.deleteById(connectionId);
-//            connectionNodeService.deleteById(connectionId);
+            connectionNodeService.deleteById(connectionId);
 
             ErrorMessageDataResource errorMessageDataResource =
                     new ErrorMessageDataResource(validationContext.get(connection.getName()));
@@ -324,7 +324,7 @@ public class ConnectionController {
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id){
         connectionService.deleteById(id);
-//        connectionNodeService.deleteById(id);
+        connectionNodeService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -434,7 +434,7 @@ public class ConnectionController {
 
         ids.getIdentifiers().forEach(id -> {
             connectionService.deleteById(id);
-//            connectionNodeService.deleteById(id);
+            connectionNodeService.deleteById(id);
         });
         return ResponseEntity.noContent().build();
     }
