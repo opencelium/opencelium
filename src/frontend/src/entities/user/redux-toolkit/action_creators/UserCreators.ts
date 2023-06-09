@@ -106,7 +106,7 @@ export const getAllUsers = createAsyncThunk(
         try {
             const request = new UserRequest({endpoint: `/all`});
             const response = await request.getAllUsers();
-            return response.data._embedded?.userResourceList || [];
+            return response.data || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

@@ -141,7 +141,7 @@ export const getAllInvokers = createAsyncThunk(
         try {
             const request = new InvokerRequest({endpoint: `/all`});
             const response = await request.getAllInvokers();
-            return response.data._embedded?.invokerResourceList || [];
+            return response.data || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

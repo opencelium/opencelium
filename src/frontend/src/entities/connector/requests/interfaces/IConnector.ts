@@ -30,7 +30,7 @@ export interface IConnectorRequest{
     getConnectorById(): Promise<AxiosResponse<ModelConnector>>,
 
     //to get all connectors of authorized user
-    getAllConnectors(): Promise<AxiosResponse<ModelConnectorHateoas | null>>,
+    getAllConnectors(): Promise<AxiosResponse<ModelConnector[] | null>>,
 
     //to add connector
     addConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnector>>,

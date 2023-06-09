@@ -120,7 +120,7 @@ export const getTemplatesByConnectors = createAsyncThunk(
             const request = new TemplateRequest({endpoint: `/all/${from}/${to}`});
             const response = await request.getAllTemplates();
             // @ts-ignore
-            return response.data._embedded?.templateResourceList || [];
+            return response.data || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -134,7 +134,7 @@ export const getAllTemplates = createAsyncThunk(
             const request = new TemplateRequest({endpoint: `/all`});
             const response = await request.getAllTemplates();
             // @ts-ignore
-            return response.data._embedded?.templateResourceList || [];
+            return response.data || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

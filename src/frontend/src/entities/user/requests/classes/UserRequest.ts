@@ -37,8 +37,8 @@ export default class UserRequest extends Request implements IUserRequest{
         return super.get<ModelUser>();
     }
 
-    async getAllUsers(): Promise<AxiosResponse<ModelUserHateoas | null>>{
-        return super.get<ModelUserHateoas | null>();
+    async getAllUsers(): Promise<AxiosResponse<ModelUser[] | null>>{
+        return super.get<ModelUser[] | null>();
     }
 
     async addUser(user: ModelUserPoust): Promise<AxiosResponse<ModelUser>>{

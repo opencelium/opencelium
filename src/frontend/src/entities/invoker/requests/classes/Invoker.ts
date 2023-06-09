@@ -21,6 +21,7 @@ import {IInvoker} from "../../interfaces/IInvoker";
 import {IOperation} from "../../interfaces/IOperation";
 import {IInvokerRequest, UpdateMethodProps} from "../interfaces/IInvoker";
 import ModelInvokerHateoas from "../models/InvokerHateoas";
+import ModelInvoker from "../models/Invoker";
 
 
 export class InvokerRequest extends Request implements IInvokerRequest{
@@ -46,8 +47,8 @@ export class InvokerRequest extends Request implements IInvokerRequest{
         return super.get<IInvoker>();
     }
 
-    async getAllInvokers(): Promise<AxiosResponse<ModelInvokerHateoas | null>>{
-        return super.get<ModelInvokerHateoas | null>();
+    async getAllInvokers(): Promise<AxiosResponse<ModelInvoker[] | null>>{
+        return super.get<ModelInvoker[] | null>();
     }
 
     async addInvoker(invoker: IInvoker): Promise<AxiosResponse<IInvoker>>{

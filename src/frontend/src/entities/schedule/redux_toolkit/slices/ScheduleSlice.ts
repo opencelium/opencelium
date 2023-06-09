@@ -169,8 +169,8 @@ export const scheduleSlice = createSlice({
         },
         [enableSchedules.fulfilled.type]: (state, action: PayloadAction<SchedulesIdRequestProps>) => {
             state.enablingSchedules = API_REQUEST_STATE.FINISH;
-            state.schedules = state.schedules.map(schedule => action.payload.schedulerIds.findIndex(id => id === schedule.schedulerId) !== -1 ? {...schedule, status: 1} : schedule);
-            if(state.currentSchedule && action.payload.schedulerIds.findIndex(id => id === state.currentSchedule.schedulerId) !== -1){
+            state.schedules = state.schedules.map(schedule => action.payload.identifires.findIndex(id => id === schedule.schedulerId) !== -1 ? {...schedule, status: 1} : schedule);
+            if(state.currentSchedule && action.payload.identifires.findIndex(id => id === state.currentSchedule.schedulerId) !== -1){
                 state.currentSchedule = {...state.currentSchedule, status: 1};
             }
             state.error = null;
@@ -184,8 +184,8 @@ export const scheduleSlice = createSlice({
         },
         [disableSchedules.fulfilled.type]: (state, action: PayloadAction<SchedulesIdRequestProps>) => {
             state.disablingSchedules = API_REQUEST_STATE.FINISH;
-            state.schedules = state.schedules.map(schedule => action.payload.schedulerIds.findIndex(id => id === schedule.schedulerId) !== -1 ? {...schedule, status: 0} : schedule);
-            if(state.currentSchedule && action.payload.schedulerIds.findIndex(id => id === state.currentSchedule.schedulerId) !== -1){
+            state.schedules = state.schedules.map(schedule => action.payload.identifires.findIndex(id => id === schedule.schedulerId) !== -1 ? {...schedule, status: 0} : schedule);
+            if(state.currentSchedule && action.payload.identifires.findIndex(id => id === state.currentSchedule.schedulerId) !== -1){
                 state.currentSchedule = {...state.currentSchedule, status: 0};
             }
             state.error = null;

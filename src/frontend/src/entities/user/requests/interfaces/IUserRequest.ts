@@ -28,7 +28,7 @@ export default interface IUserRequest{
     getUserById(): Promise<AxiosResponse<ModelUser>>,
 
     //to get all users of authorized user
-    getAllUsers(): Promise<AxiosResponse<ModelUserHateoas | null>>,
+    getAllUsers(): Promise<AxiosResponse<ModelUser[] | null>>,
 
     //to add user
     addUser(user: ModelUserPoust): Promise<AxiosResponse<ModelUser>>,

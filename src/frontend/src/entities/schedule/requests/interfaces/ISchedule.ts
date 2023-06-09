@@ -25,7 +25,7 @@ export interface ScheduleStatusRequestProps{
 }
 
 export interface SchedulesIdRequestProps{
-    schedulerIds: number[],
+    identifires: number[],
 }
 
 export interface IScheduleRequest{
@@ -58,7 +58,7 @@ export interface IScheduleRequest{
     getSchedulesById(data: SchedulesIdRequestProps): Promise<AxiosResponse<ModelSchedule[]>>,
 
     //to get all schedules of authorized user
-    getAllSchedules(): Promise<AxiosResponse<ModelScheduleHateoas | null>>,
+    getAllSchedules(): Promise<AxiosResponse<ModelSchedule[] | null>>,
 
     //to get schedules of authorized user that currently working on
     getCurrentSchedules(): Promise<AxiosResponse<ModelCurrentSchedule[]>>,

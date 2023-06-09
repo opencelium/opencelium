@@ -41,8 +41,8 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
         return super.get<ModelConnector>();
     }
 
-    async getAllConnectors(): Promise<AxiosResponse<ModelConnectorHateoas | null>>{
-        return super.get<ModelConnectorHateoas | null>();
+    async getAllConnectors(): Promise<AxiosResponse<ModelConnector[] | null>>{
+        return super.get<ModelConnector[] | null>();
     }
 
     async addConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnector>>{

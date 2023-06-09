@@ -37,8 +37,8 @@ export class UserGroupRequest extends Request implements IUserGroupRequest{
         return super.get<IUserGroup>();
     }
 
-    async getAllUserGroups(): Promise<AxiosResponse<ModelUserGroupHateoas | null>>{
-        return super.get<ModelUserGroupHateoas | null>();
+    async getAllUserGroups(): Promise<AxiosResponse<ModelUserGroup[] | null>>{
+        return super.get<ModelUserGroup[] | null>();
     }
 
     async addUserGroup(userGroup: ModelUserGroup): Promise<AxiosResponse<ModelUserGroup>>{

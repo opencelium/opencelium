@@ -112,7 +112,7 @@ export const getAllUserGroups = createAsyncThunk(
         try {
             const request = new UserGroupRequest({endpoint: `/all`});
             const response = await request.getAllUserGroups();
-            return response.data._embedded?.userRoleResourceList || [];
+            return response.data || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
