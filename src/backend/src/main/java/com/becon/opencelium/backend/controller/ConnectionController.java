@@ -19,6 +19,7 @@ import com.becon.opencelium.backend.neo4j.entity.FieldNode;
 import com.becon.opencelium.backend.neo4j.entity.MethodNode;
 import com.becon.opencelium.backend.neo4j.repository.FieldNodeRepository;
 import com.becon.opencelium.backend.neo4j.service.*;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -429,9 +430,9 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "/list/delete")
-    public ResponseEntity<?> deleteCtionByIdIn(@RequestBody List<Long> ids) throws Exception {
+    public ResponseEntity<?> deleteCtionByIdIn(@RequestBody IdentifiersDTO<Long> ids) throws Exception {
 
-        ids.forEach(id -> {
+        ids.getIdentifiers().forEach(id -> {
             connectionService.deleteById(id);
             connectionNodeService.deleteById(id);
         });
