@@ -59,7 +59,7 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
 
     async deleteConnectionsById(connectionIds: number[]): Promise<AxiosResponse<number[]>>{
         this.endpoint = '/list/delete';
-        return super.put<number[]>({identifires: connectionIds});
+        return super.put<number[]>({identifiers: connectionIds});
     }
 
     backendMap(connection: IConnection){
