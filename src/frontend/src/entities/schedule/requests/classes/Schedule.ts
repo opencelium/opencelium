@@ -90,6 +90,6 @@ export class ScheduleRequest extends Request implements IScheduleRequest{
 
     async deleteSchedulesById(scheduleIds: number[]): Promise<AxiosResponse<number[]>>{
         this.endpoint = '/list/delete';
-        return super.put<number[]>({data: scheduleIds});
+        return super.put<number[]>({identifiers: scheduleIds});
     }
 }

@@ -54,7 +54,8 @@ export class UserGroupRequest extends Request implements IUserGroupRequest{
     }
 
     async deleteUserGroupsById(userGroupIds: number[]): Promise<AxiosResponse<number[]>>{
-        return super.delete<number[]>({data: userGroupIds});
+        this.endpoint = '/list/delete';
+        return super.put<number[]>({identifiers: userGroupIds});
     }
 
     async uploadUserGroupImage(data: FormData): Promise<AxiosResponse<any>>{
