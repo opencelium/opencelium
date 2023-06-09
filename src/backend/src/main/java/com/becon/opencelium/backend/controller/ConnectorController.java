@@ -27,6 +27,7 @@ import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -182,7 +183,7 @@ public class ConnectorController {
         List<Connection> connections = connectionService.findAllByConnectorId(id);
         connections.forEach(c -> {
             connectionService.deleteById(c.getId());
-            connectionNodeService.deleteById(c.getId());
+//            connectionNodeService.deleteById(c.getId());
         });
         connectorService.deleteById(id);
         return ResponseEntity.noContent().build();
@@ -201,12 +202,12 @@ public class ConnectorController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> deleteCtorByIdIn(@RequestBody List<Integer> ids){
-        ids.forEach(id -> {
+    public ResponseEntity<?> deleteCtorByIdIn(@RequestBody IdentifiersDTO<Integer> ids){
+        ids.getIdentifiers().forEach(id -> {
             List<Connection> connections = connectionService.findAllByConnectorId(id);
             connections.forEach(c -> {
                 connectionService.deleteById(c.getId());
-                connectionNodeService.deleteById(c.getId());
+//                connectionNodeService.deleteById(c.getId());
             });
             connectorService.deleteById(id);
         });
