@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ComponentResource extends RepresentationModel {
+public class ComponentResource {
 
     private int componentId;// TODO: perhaps need to change from componentId to id;
     private String name;

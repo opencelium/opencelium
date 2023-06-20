@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Resource
-public class SchedulerRequestResource extends RepresentationModel {
+public class SchedulerRequestResource {
 
     private int schedulerId;
     private Long connectionId;

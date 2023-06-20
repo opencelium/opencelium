@@ -33,15 +33,24 @@ import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -56,6 +65,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,6 +74,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 @Controller
+@Tag(name = "File", description = "Manages operations related to File management")
 @RequestMapping(value = "/api/storage")
 public class FileController {
 
@@ -101,7 +112,19 @@ public class FileController {
         this.storageService = storageService;
     }
 
-    @PostMapping(value = "/profilePicture")
+    @Operation(summary = "Uploads profile picture of a user by provided user email")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Profile picture has been successfully uploaded",
+                content = @Content),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(value = "/profilePicture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> profilePictureUpload(@RequestParam("file") MultipartFile file,
                                                   @RequestParam("email") String email) {
         // Get extension
@@ -138,13 +161,25 @@ public class FileController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/groupIcon")
+    @Operation(summary = "Uploads role's(group) icon by provided user role(group) ID")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Profile picture has been successfully uploaded",
+                content = @Content),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/groupIcon", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> groupPictureUpload(@RequestParam("file") MultipartFile file,
                                                 @RequestParam("userGroupId") int userGroupId) {
 
         // Get extension of file
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
-
+        Objects.requireNonNull(extension);
         // Check image extension. It should be JPEG, PNG or JPG
         if (!checkImageExtension(extension)){
             throw new StorageException("File should be jpg or png");
@@ -173,7 +208,19 @@ public class FileController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(value = "/template")
+    @Operation(summary = "Uploads template json file")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Template has been successfully uploaded",
+                content = @Content),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(value = "/template", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
         // Get extension
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
@@ -218,7 +265,19 @@ public class FileController {
         }
     }
 
-    @PostMapping("/invoker")
+    @Operation(summary = "Uploads invoker xml file")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Invoker has been successfully uploaded",
+                content = @Content),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/invoker", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadInvoker(@RequestParam("file") MultipartFile file) {
         String filename = file.getOriginalFilename();
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
@@ -226,12 +285,14 @@ public class FileController {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file " + filename);
             }
+            Objects.requireNonNull(filename);
             if (filename.contains("..")) {
                 // This is a security check
                 throw new StorageException(
                         "Cannot store file with relative path outside current directory "
                                 + filename);
             }
+            Objects.requireNonNull(extension);
             if (extension.equals("zip")) {
                 InputStream inputStream = file.getInputStream();
                 ZipInputStream zis = new ZipInputStream(inputStream);
@@ -249,8 +310,6 @@ public class FileController {
             invokerServiceImp.delete(FileNameUtils.removeExtension(filename));
             throw new StorageException("Failed to store file " + filename, e);
         }
-
-        Invoker invoker = invokerServiceImp.findByName(FileNameUtils.removeExtension(filename));
         return ResponseEntity.ok().build();
     }
 
@@ -269,7 +328,19 @@ public class FileController {
 
     }
 
-    @PostMapping(value = "/connector")
+    @Operation(summary = "Uploads connector json file")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Connector has been successfully uploaded",
+                content = @Content(schema = @Schema(implementation = ConnectorResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(value = "/connector", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> connectorUpload(@RequestParam("file") MultipartFile file,
                                              @RequestParam("connectorId") int connectorId) {
 
@@ -277,6 +348,7 @@ public class FileController {
                 new RuntimeException("CONNECTOR_NOT_FOUND"));
         // Get extension
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
+        Objects.requireNonNull(extension);
         if (!checkImageExtension(extension)){
             throw new StorageException("File should be jpg or png");
         }
@@ -294,41 +366,6 @@ public class FileController {
             throw new RuntimeException(e);
         }
     }
-
-////    @Autowired
-////    private SystemOverviewRepository systemOverviewRepository;
-//
-//    @PostMapping(value = "/assistant/zipfile")
-//    public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
-//        try {
-////            systemOverviewRepository.getCurrentVersionFromDb();
-////            return ResponseEntity.ok().build();
-//
-//            String zipedAppVersion = assistantServiceImp.getVersion(file.getInputStream()).replace(".", "_");
-//            Path target = Paths.get(PathConstant.ASSISTANT + "versions/" + zipedAppVersion);
-//            assistantServiceImp.uploadZipFile(file, target);
-//            AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(zipedAppVersion);
-//            AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
-//            return ResponseEntity.ok(availableUpdateResource);
-////            Path target = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + zipedAppVersion
-////                               .replace(".", "_"));
-////            Path pathToFolder = assistantServiceImp.unzipFolder(file.getInputStream(), target);
-////            Path pathToZip = Paths.get(PathConstant.ASSISTANT + "zipfile/" + file.getOriginalFilename());
-////            assistantServiceImp.deleteZipFile(pathToZip);
-////            String folder = pathToFolder.toString().replace(pathToFolder.getParent().toString() + File.separator, "");
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-
-//    @DeleteMapping(value = "/assistant/zipfile/{filename}")
-//    public ResponseEntity<?> assistantDeleteFile(@PathVariable String filename) {
-//
-//        Path zipPath = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + filename);
-//        assistantServiceImp.deleteZipFile(zipPath);
-//
-//        return ResponseEntity.noContent().build();
-//    }
 
     private boolean checkJsonExtension(String extension){
         if (!(extension.equals("json") || extension.equals("JSON"))){

@@ -37,8 +37,8 @@ export class UserGroupRequest extends Request implements IUserGroupRequest{
         return super.get<IUserGroup>();
     }
 
-    async getAllUserGroups(): Promise<AxiosResponse<ModelUserGroupHateoas | null>>{
-        return super.get<ModelUserGroupHateoas | null>();
+    async getAllUserGroups(): Promise<AxiosResponse<ModelUserGroup[] | null>>{
+        return super.get<ModelUserGroup[] | null>();
     }
 
     async addUserGroup(userGroup: ModelUserGroup): Promise<AxiosResponse<ModelUserGroup>>{
@@ -54,7 +54,8 @@ export class UserGroupRequest extends Request implements IUserGroupRequest{
     }
 
     async deleteUserGroupsById(userGroupIds: number[]): Promise<AxiosResponse<number[]>>{
-        return super.delete<number[]>({data: userGroupIds});
+        this.endpoint = '/list/delete';
+        return super.put<number[]>({identifiers: userGroupIds});
     }
 
     async uploadUserGroupImage(data: FormData): Promise<AxiosResponse<any>>{

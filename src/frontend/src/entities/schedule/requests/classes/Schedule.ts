@@ -68,8 +68,8 @@ export class ScheduleRequest extends Request implements IScheduleRequest{
         return super.post<ModelSchedule[]>(data);
     }
 
-    async getAllSchedules(): Promise<AxiosResponse<ModelScheduleHateoas | null>>{
-        return super.get<ModelScheduleHateoas | null>();
+    async getAllSchedules(): Promise<AxiosResponse<ModelSchedule[] | null>>{
+        return super.get<ModelSchedule[] | null>();
     }
 
     async getCurrentSchedules(): Promise<AxiosResponse<ModelCurrentSchedule[]>>{
@@ -89,6 +89,7 @@ export class ScheduleRequest extends Request implements IScheduleRequest{
     }
 
     async deleteSchedulesById(scheduleIds: number[]): Promise<AxiosResponse<number[]>>{
-        return super.delete<number[]>({data: scheduleIds});
+        this.endpoint = '/list/delete';
+        return super.put<number[]>({identifiers: scheduleIds});
     }
 }

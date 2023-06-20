@@ -110,7 +110,7 @@ export const getAllComponents = createAsyncThunk(
             const request = new ApplicationRequest();
             const response = await request.getAllComponents();
             // @ts-ignore
-            return response.data._embedded?.componentResourceList || [];
+            return response.data || [];
         }catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

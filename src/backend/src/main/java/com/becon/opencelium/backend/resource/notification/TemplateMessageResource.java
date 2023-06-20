@@ -4,7 +4,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class TemplateMessageResource extends RepresentationModel {
+public class TemplateMessageResource {
     private int templateId;
     private String name;
 

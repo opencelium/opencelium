@@ -161,7 +161,7 @@ class Schedules extends ListCollection<ScheduleProps>{
         debugMode: 'Logs',
     };
     getTopActions = (viewType: ViewType, checkedIds: number[] = []) => {
-        const scheduleIds: SchedulesIdRequestProps = {schedulerIds: checkedIds};
+        const scheduleIds: SchedulesIdRequestProps = {identifires: checkedIds};
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
             <React.Fragment>

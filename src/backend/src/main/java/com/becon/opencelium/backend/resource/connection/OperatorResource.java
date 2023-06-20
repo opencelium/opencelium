@@ -20,7 +20,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class OperatorResource extends RepresentationModel {
+public class OperatorResource {
 
     private Long nodeId;
     private String type;

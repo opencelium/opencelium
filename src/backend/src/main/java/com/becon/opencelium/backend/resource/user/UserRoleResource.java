@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Resource
-public class UserRoleResource extends RepresentationModel {
+public class UserRoleResource {
 
     private int groupId;
     private String name; //TODO: change from role to name

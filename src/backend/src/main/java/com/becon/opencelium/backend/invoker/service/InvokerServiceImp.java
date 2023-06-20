@@ -151,7 +151,8 @@ public class InvokerServiceImp implements InvokerService {
         } else if (exchangeType.equals("request")) {
             Invoker invoker = invokerContainer.getByName(invokerName);
             FunctionInvoker functionInvoker = invoker.getOperations().stream()
-                    .filter(o -> o.getName().equals(methodName)).findFirst().get();
+                    .filter(o -> o.getName().equals(methodName)).findFirst()
+                    .orElseThrow(()->new RuntimeException(methodName + " not found in invoker file " + "'" + invokerName + "'"));
             body = functionInvoker.getRequest().getBody();
         }
 

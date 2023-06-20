@@ -59,11 +59,11 @@ export const addConnector = createAsyncThunk(
         try {
             let title = entityData.title.split('/').join('//');
             title = encodeURIComponent(title);
-            const checkTitleRequest = new ConnectorRequest({endpoint: `/${title}`});
-            const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
-            if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
-                return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
-            }
+            // const checkTitleRequest = new ConnectorRequest({endpoint: `/${title}`});
+            // const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
+            // if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
+            //     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
+            // }
             const testDataRequest = new ConnectorRequest({endpoint: '/check'});
             const responseDataRequest = await testDataRequest.testRequestData(entityData);
             if(responseDataRequest.data.message === ResponseMessages.CONNECTOR_COMMUNICATION_FAILED || parseInt(responseDataRequest.data.status.toString()) > 299){
@@ -148,7 +148,7 @@ export const getAllConnectors = createAsyncThunk(
         try {
             const request = new ConnectorRequest({endpoint: `/all`});
             const response = await request.getAllConnectors();
-            return response.data._embedded?.connectorResourceList || [];
+            return response.data || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

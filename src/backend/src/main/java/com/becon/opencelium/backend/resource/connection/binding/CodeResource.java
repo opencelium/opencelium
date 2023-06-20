@@ -21,7 +21,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class CodeResource extends RepresentationModel {
+public class CodeResource {
 
     private String name;
     private String value;

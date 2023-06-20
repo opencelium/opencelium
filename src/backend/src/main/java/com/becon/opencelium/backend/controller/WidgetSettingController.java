@@ -4,10 +4,18 @@ import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.entity.WidgetSetting;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.mysql.service.WidgetSettingServiceImp;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.UserWidgetsResource;
 import com.becon.opencelium.backend.resource.user.WidgetResource;
 import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
@@ -19,7 +27,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping(value = "/api/widget_setting", produces = "application/hal+json", consumes = {"application/json"})
+@Tag(name = "Widget Settings", description = "Manages operations related to WidgetSetting that contains coordinates of widget for frontend")
+@RequestMapping(value = "/api/widget_setting", produces = MediaType.APPLICATION_JSON_VALUE)
 public class WidgetSettingController {
 
     @Autowired
@@ -27,8 +36,20 @@ public class WidgetSettingController {
 
     @Autowired
     private UserServiceImpl userService;
-//
-    @PostMapping
+
+    @Operation(summary = "Creates a new widget setting related to user")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "201",
+                    description = "Widget Settings are successfully created.",
+                    content = @Content(schema = @Schema(implementation = UserWidgetsResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> create(@RequestBody UserWidgetsResource userWidgetsResource){
         int userId = userWidgetsResource.getUserId();
         User user  = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
@@ -119,6 +140,19 @@ public class WidgetSettingController {
 //        return ResponseEntity.ok().body(widgetSetting);
 //    }
 //
+
+    @Operation(summary = "Return single widget by provided userId")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "201",
+                    description = "Widget has been successfully retrieved.",
+                    content = @Content(schema = @Schema(implementation = UserWidgetsResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getByUserId(@PathVariable("id") int id){
         List<WidgetSetting> widgetSetting = widgetSettingServiceImp.findByUserId(id);

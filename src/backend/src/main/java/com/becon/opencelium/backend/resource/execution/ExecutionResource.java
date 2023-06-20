@@ -21,7 +21,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class ExecutionResource extends RepresentationModel {
+public class ExecutionResource {
 
     private String taId;
     private long startTime;

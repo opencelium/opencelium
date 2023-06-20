@@ -133,7 +133,7 @@ export const getSchedulesById = createAsyncThunk(
             const request = new ScheduleRequest({endpoint: `/ids`});
             const response = await request.getSchedulesById(data);
             // @ts-ignore
-            return response.data._embedded?.schedulerResourceList || [];
+            return response.data || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -146,7 +146,7 @@ export const getAllSchedules = createAsyncThunk(
         try {
             const request = new ScheduleRequest({endpoint: `/all`});
             const response = await request.getAllSchedules();
-            return response.data._embedded?.schedulerResourceList.filter((schedule) => {
+            return response.data.filter((schedule) => {
                 if(schedule.title.indexOf('!*test_schedule_') === 0){
                     if(schedule.title.split('_').length >= 3){
                         return false;
@@ -167,7 +167,7 @@ export const getCurrentSchedules = createAsyncThunk(
             const request = new ScheduleRequest({endpoint: `/running/all`});
             const response = await request.getCurrentSchedules();
             // @ts-ignore
-            return response.data._embedded?.runningJobsResourceList.filter((schedule) => {
+            return response.data.filter((schedule) => {
                 if(schedule.title.indexOf('!*test_schedule_') === 0){
                     if(schedule.title.split('_').length >= 3){
                         return false;

@@ -100,7 +100,7 @@ export const getNotificationTemplatesByType = createAsyncThunk(
             const request = new NotificationTemplateRequest({endpoint: `/all/${type}`});
             const response = await request.getAllNotificationTemplatesByType();
             // @ts-ignore
-            return response.data._embedded?.messageResourceList || [];
+            return response.data || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -114,7 +114,7 @@ export const getAllNotificationTemplates = createAsyncThunk(
             const request = new NotificationTemplateRequest({endpoint: `/all`});
             const response = await request.getAllNotificationTemplates();
             // @ts-ignore
-            return response.data._embedded?.messageResourceList || [];
+            return response.data || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

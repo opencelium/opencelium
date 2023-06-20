@@ -34,6 +34,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -92,19 +94,21 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception{
-        return httpSecurity
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception{
+        return http
                 .cors()
                 .and()
                 .csrf().disable()
+//                .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(getAuthorizationFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest()
                         .authenticated())
-                .addFilter(authenticationFilter)
-                .addFilter(getAuthorizationFilter())
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
+                .addFilter(authenticationFilter)
+                .addFilter(getAuthorizationFilter())
                 .exceptionHandling()
                 .authenticationEntryPoint(authExceptionHandler)
                 .and().build();
@@ -113,8 +117,10 @@ public class SecurityConfiguration {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers("/api/storage/files/**", "/api/webhook/execute/**", "/api/webhook/health");
+                .requestMatchers("/api/storage/files/**", "/api/webhook/execute/**", "/api/webhook/health",
+                        "/v3/api-docs", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/docs");
     }
+
 
 //    @Bean
 //    public RestTemplate getRestTemplate() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {

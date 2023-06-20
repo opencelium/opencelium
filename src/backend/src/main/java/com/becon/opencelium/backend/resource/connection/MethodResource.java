@@ -22,7 +22,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class MethodResource extends RepresentationModel {
+public class MethodResource {
 
     private Long nodeId;
     private String index;

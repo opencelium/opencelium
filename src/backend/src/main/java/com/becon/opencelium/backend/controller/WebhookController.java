@@ -20,8 +20,16 @@ import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.mysql.entity.Webhook;
 import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.mysql.service.WebhookServiceImp;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,7 +39,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.Map;
 
-@Controller
+@RestController
+@Tag(name = "Webhook", description = "Manages operations related to webhook management")
 @RequestMapping(value = "/api/webhook")
 public class WebhookController {
 
@@ -41,7 +50,17 @@ public class WebhookController {
     @Autowired
     private WebhookServiceImp webhookService;
 
-    //    @ResponseBody
+    @Operation(summary = "Accepts a webhook and executes the associated connection. Additional params are sent in url query params")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Webhook has been successfully executed"),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("execute/{token}")
     public ResponseEntity<?> executeConnection(@PathVariable("token") String token, @RequestParam Map<String, Object> queryParam) {
         WebhookTokenResource webhookToken = webhookService.getTokenObject(token).orElse(null);
@@ -77,6 +96,18 @@ public class WebhookController {
         return  ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Accepts a webhook and executes the associated connection. Additional params are sent as a json in body")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Webhook has been successfully executed",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping("execute/{token}")
     public ResponseEntity<?> executeConn(@PathVariable("token") String token, @RequestBody Map<String, Object> queryParam) {
         WebhookTokenResource webhookToken = webhookService.getTokenObject(token).orElse(null);
@@ -112,12 +143,36 @@ public class WebhookController {
         return  ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Checks if the remote server is up and running.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Server is up and running",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/health")
     public ResponseEntity<?> checkHealth(){
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value = "/url/{userId}/{schedulerId}", produces = "application/hal+json")
+    @Operation(summary = "Generates webhook by given user and scheduler")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Webhook has been successfully executed",
+                    content = @Content(schema = @Schema(implementation = WebhookResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(value = "/url/{userId}/{schedulerId}")
     public ResponseEntity<?> generateUrl(@PathVariable("userId") int userId,
                                          @PathVariable("schedulerId") int schedulerId){
 
@@ -131,13 +186,23 @@ public class WebhookController {
         }
 
         Webhook webhook = webhookService.save(userId, scheduler);
-//        String response = "{" + "\"url\":\"" + webhookService.buildUrl(webhook) + "\"}";
-
         WebhookResource resource = webhookService.toResource(webhook);
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         return ResponseEntity.created(uri).body(resource);
     }
 
+    @Operation(summary = "Removes webhook")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "204",
+                    description = "Webhook has been successfully deleted",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @DeleteMapping("/{webhookId}")
     public ResponseEntity<?> deleteWebhook(@PathVariable int webhookId){
         webhookService.deleteById(webhookId);

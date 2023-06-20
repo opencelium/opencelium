@@ -19,7 +19,7 @@ package com.becon.opencelium.backend.resource.connection;
 import com.becon.opencelium.backend.neo4j.entity.StatementVariable;
 import org.springframework.hateoas.RepresentationModel;
 
-public class StatementResource extends RepresentationModel {
+public class StatementResource {
 
     private String color;
     private String field;

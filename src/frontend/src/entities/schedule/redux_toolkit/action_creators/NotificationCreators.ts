@@ -105,7 +105,7 @@ export const getNotificationsByScheduleId = createAsyncThunk(
             const request = new NotificationRequest({endpoint: `/${scheduleId}/notification/all`});
             const response = await request.getAllNotificationsByScheduleId();
             // @ts-ignore
-            return response.data._embedded?.notificationResourceList || [];
+            return response.data || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -119,7 +119,7 @@ export const getNotificationRecipients = createAsyncThunk(
             const request = new NotificationRequest();
             const response = await request.getNotificationRecipients();
             // @ts-ignore
-            return response.data._embedded?.userResourceList || [];
+            return response.data || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -130,7 +130,7 @@ export const deleteNotificationById = createAsyncThunk(
     'schedule/notification/delete/byId',
     async(notificationTemplate: INotification, thunkAPI) => {
         try {
-            const request = new NotificationRequest({endpoint: `/${notificationTemplate.scheduleId}/notification/${notificationTemplate.id}`});
+            const request = new NotificationRequest({endpoint: `/notification/${notificationTemplate.id}`});
             await request.deleteNotificationById();
             return notificationTemplate;
         } catch(e){

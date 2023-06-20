@@ -22,7 +22,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 
 @Resource
-public class LinkedFieldResource extends RepresentationModel {
+public class LinkedFieldResource {
 
     private String color;
     private String type;

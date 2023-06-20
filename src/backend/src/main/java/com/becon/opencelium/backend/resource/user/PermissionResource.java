@@ -22,7 +22,7 @@ import org.springframework.hateoas.RepresentationModel;
 import java.util.List;
 
 @Resource
-public class PermissionResource extends RepresentationModel {
+public class PermissionResource {
 
     private List<String> name;
 }

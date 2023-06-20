@@ -28,7 +28,7 @@ export interface IUserGroupRequest{
     getUserGroupById(): Promise<AxiosResponse<IUserGroup>>,
 
     //to get all user groups of authorized user
-    getAllUserGroups(): Promise<AxiosResponse<ModelUserGroupHateoas | null>>,
+    getAllUserGroups(): Promise<AxiosResponse<ModelUserGroup[] | null>>,
 
     //to add user group
     addUserGroup(userGroup: ModelUserGroup): Promise<AxiosResponse<ModelUserGroup>>,

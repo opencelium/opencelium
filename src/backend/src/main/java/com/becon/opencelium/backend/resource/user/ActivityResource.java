@@ -23,7 +23,7 @@ import org.springframework.hateoas.RepresentationModel;
 import java.util.Date;
 
 @Resource
-public class ActivityResource extends RepresentationModel {
+public class ActivityResource {
 
     private Date requestTime;
 

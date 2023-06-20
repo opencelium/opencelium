@@ -22,7 +22,7 @@ import jakarta.annotation.Resource;
 import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class ConditionResource extends RepresentationModel {
+public class ConditionResource {
 
     private String relationalOperator;
     private StatementResource leftStatement;

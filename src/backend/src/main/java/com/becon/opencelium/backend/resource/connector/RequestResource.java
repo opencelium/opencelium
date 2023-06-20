@@ -23,7 +23,7 @@ import org.springframework.hateoas.RepresentationModel;
 import java.util.Map;
 
 @Resource
-public class RequestResource extends RepresentationModel {
+public class RequestResource {
 
     private Long nodeId;
     private String endpoint;

@@ -111,6 +111,24 @@ spring:
   liquibase:
     change-log: classpath:/db/changelog/changelog-master.xml
 
+springdoc:
+  swagger-ui:
+    path: /docs
+    supportedSubmitMethods:
+      - get
+      - put
+      - post
+      - delete
+      - options
+      - head
+      - patch
+      - trace
+    tagsSorter: alpha
+    open-api-custom-settings:
+      extensions:
+        x-links-enabled: false
+  default-produces-media-type: application/json
+
 logging:
   file: src/main/resources/logs
   pattern:

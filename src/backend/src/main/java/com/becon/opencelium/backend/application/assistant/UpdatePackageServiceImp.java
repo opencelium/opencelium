@@ -64,15 +64,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     @Override
     public String getOnVersions() {
         try {
-            String jsonBody = getVersions();
-//            List<AvailableUpdate> availableUpdates = versions.stream().map(v -> {
-//                AvailableUpdate availableUpdate = new AvailableUpdate();
-//                String status = getVersionStatus(v);
-//                availableUpdate.setStatus(status);
-//                availableUpdate.setVersion(v);
-//                return availableUpdate;
-//            }).collect(Collectors.toList());
-            return jsonBody;
+            return getVersions();
         } catch (Exception e) {
             throw  new RuntimeException(e);
         }

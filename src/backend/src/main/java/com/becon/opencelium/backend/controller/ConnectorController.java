@@ -27,12 +27,21 @@ import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -45,7 +54,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/api/connector", produces = "application/hal+json", consumes = {"application/json"})
+@Tag(name = "Connector", description = "Manages operations related to Connector management")
+@RequestMapping(value = "/api/connector", produces = "application/json")
 public class ConnectorController {
 
     @Autowired
@@ -63,23 +73,58 @@ public class ConnectorController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @GetMapping("/{id}")
+    @Operation(summary = "Retrieves a connector from database by provided connector ID")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Connector has been successfully retrieved",
+                content = @Content(schema = @Schema(implementation = ConnectorResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/{id}")
     public ResponseEntity<?> get(@PathVariable int id){
         return connectorService.findById(id)
                 .map(c -> ResponseEntity.ok().body(connectorService.toResource(c)))
                 .orElseThrow(() -> new ConnectorNotFoundException(id));
     }
 
+    @Operation(summary = "Retrieves all connectors from database")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Connectors have been successfully retrieved",
+                content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectorResource.class)))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/all")
-    public ResponseEntity<?> getAll(){
+    public ResponseEntity<List<ConnectorResource>> getAll(){
         List<ConnectorResource> connectorResources = connectorService.findAll()
                 .stream().map(c -> connectorService.toResource(c))
                 .collect(Collectors.toList());
-
-        final CollectionModel<ConnectorResource> resources = CollectionModel.of(connectorResources);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(connectorResources);
     }
-    @PostMapping
+
+    @Operation(summary = "Creates new connector in the system by accepting Connector data in the request body")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Connector has been successfully created",
+                content = @Content(schema = @Schema(implementation = ConnectorResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> add(@RequestBody ConnectorResource connectorResource){
         if (connectorService.existByTitle(connectorResource.getTitle())){
             throw new ConnectorAlreadyExistsException("CONNECTOR_ALREADY_EXISTS");
@@ -90,7 +135,19 @@ public class ConnectorController {
         return ResponseEntity.ok().body(connectorService.toResource(connector));
     }
 
-    @PutMapping("/{id}")
+    @Operation(summary = "Modifies a connector in the system by providing connector ID and accepting Connector data in the request body")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Connector has been successfully modified",
+                content = @Content(schema = @Schema(implementation = ConnectorResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable int id, @RequestBody ConnectorResource connectorResource){
 
         if (!connectorService.existById(id)){
@@ -109,31 +166,66 @@ public class ConnectorController {
         return ResponseEntity.ok().body(connectorService.toResource(entity));
     }
 
-    @DeleteMapping("/{id}")
+    @Operation(summary = "Deletes a connector in the system by providing connector ID")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "204",
+                description = "Connector has been successfully deleted",
+                content = @Content),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> delete(@PathVariable int id){
         List<Connection> connections = connectionService.findAllByConnectorId(id);
         connections.forEach(c -> {
             connectionService.deleteById(c.getId());
-            connectionNodeService.deleteById(c.getId());
+//            connectionNodeService.deleteById(c.getId());
         });
         connectorService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteCtorByIdIn(@RequestBody List<Integer> ids){
-        ids.forEach(id -> {
+    @Operation(summary = "Deletes a collection of connector based on the provided list of their corresponding IDs.")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "204",
+                description = "Connectors have been successfully deleted",
+                content = @Content),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> deleteCtorByIdIn(@RequestBody IdentifiersDTO<Integer> ids){
+        ids.getIdentifiers().forEach(id -> {
             List<Connection> connections = connectionService.findAllByConnectorId(id);
             connections.forEach(c -> {
                 connectionService.deleteById(c.getId());
-                connectionNodeService.deleteById(c.getId());
+//                connectionNodeService.deleteById(c.getId());
             });
             connectorService.deleteById(id);
         });
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/check")
+    @Operation(summary = "Checks connection to a remote application where credential are set in connector")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Connection has been successfully established to a remote connector"),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/check", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> checkCommunication(@RequestBody ConnectorResource connectorResource) throws JsonProcessingException, IOException {
         Connector connector = connectorService.toEntity(connectorResource);
         Invoker invoker = invokerService.findByName(connector.getInvoker());
@@ -194,6 +286,18 @@ public class ConnectorController {
         return true;
     }
 
+    @Operation(summary = "Verifies uniqueness of connector title")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Returns EXISTS or NOT_EXISTS",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @GetMapping("/exists/{title}")
     public ResponseEntity<?> titleExists(@PathVariable("title") String title) throws IOException{
         if (connectorService.existByTitle(title)){
