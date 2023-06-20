@@ -28,7 +28,7 @@ export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);
         dispatch(getVersion());
-        dispatch(getResources());
+        //dispatch(getResources());
     }
     if (setThemes.match(action)) {
         const storage = LocalStorage.getStorage();

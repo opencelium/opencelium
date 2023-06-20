@@ -24,7 +24,6 @@ import {
 } from "../interfaces/ISchedule";
 import ModelSchedule from "../models/Schedule";
 import ModelCurrentSchedule from "../models/CurrentSchedule";
-import ModelScheduleHateoas from "../models/ScheduleHateoas";
 
 
 export class ScheduleRequest extends Request implements IScheduleRequest{

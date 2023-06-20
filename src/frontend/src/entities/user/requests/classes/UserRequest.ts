@@ -20,7 +20,6 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 import IUserRequest from "../interfaces/IUserRequest";
 import ModelUser from "../models/User";
 import ModelUserPoust from "../models/UserPoust";
-import ModelUserHateoas from "../models/UserHateoas";
 
 
 export default class UserRequest extends Request implements IUserRequest{

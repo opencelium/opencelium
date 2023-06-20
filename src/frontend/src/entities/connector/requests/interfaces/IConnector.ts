@@ -17,7 +17,6 @@ import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import ModelConnectorPoust from "../models/ConnectorPoust";
 import ModelConnector from "../models/Connector";
-import ModelConnectorHateoas from "../models/ConnectorHateoas";
 
 export interface IConnectorRequest{
     //to test validity of request data

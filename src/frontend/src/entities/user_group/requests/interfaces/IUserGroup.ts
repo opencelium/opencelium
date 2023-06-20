@@ -15,7 +15,6 @@
 
 import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import ModelUserGroupHateoas from "../models/UserGroupHateoas";
 import ModelUserGroup from "../models/UserGroup";
 import { IUserGroup } from "../../interfaces/IUserGroup";
 

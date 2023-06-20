@@ -19,7 +19,6 @@ import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IUserGroup} from "../../interfaces/IUserGroup";
 import {IUserGroupRequest} from "../../requests/interfaces/IUserGroup";
-import ModelUserGroupHateoas from "../../requests/models/UserGroupHateoas";
 import ModelUserGroup from "../../requests/models/UserGroup";
 
 
