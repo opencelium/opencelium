@@ -9,7 +9,7 @@ public class ConnectorLog {
 
     public ConnectorLog(String name, String dir) {
         this.name = name;
-        this.dir = dir;
+        this.dir = dir.equals("CONN1") ? "from" : "to";
     }
 
     public String getName() {
