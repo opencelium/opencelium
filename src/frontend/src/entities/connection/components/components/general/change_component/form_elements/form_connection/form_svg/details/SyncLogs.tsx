@@ -33,23 +33,8 @@ const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
         const {authUser} = Auth.getReduxState();
         const {testSchedule} = Schedule.getReduxState();
         const [socket, setSocket] = useState<Socket>(null);
-        let hasStartedParsing = false;
         const saveLogs = (message: Message): void => {
-            let connector = connection.fromConnector;
-            const log = JSON.parse(message.body.toString());
-            let parsedMessage = log && log.message ? log.message : '';
-            const indexSplit = parsedMessage.split(' -- index: ');
-            let index = '';
-            if(indexSplit.length > 1){
-                index = indexSplit[1];
-            }
-            if(hasStartedParsing && index === '0'){
-                connector = connection.toConnector;
-            }
-            const data = ConnectionLogs.parseMessage(connector, message);
-            if(index === '0'){
-                hasStartedParsing = true;
-            }
+            const data = ConnectionLogs.parseMessage(connection, message);
             dispatch(addCurrentLog(data));
         }
         const subscribeLogs = () => {

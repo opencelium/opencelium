@@ -42,8 +42,9 @@ export default class ConnectionLogs {
         }
     }
 
-    static parseMessage(connector: CConnectorItem, data: Message): ConnectionLogProps{
+    static parseMessage(connection: CConnection, data: Message): ConnectionLogProps{
         const log = JSON.parse(data.body.toString());
+        const connector = log.connector && log.connector.direction ? log.connector.direction === 'from' ? connection.fromConnector : connection.toConnector : null;
         let message = log && log.message ? log.message : '';
         const indexSplit = message.split(' -- index: ');
         let index = '';
