@@ -1,20 +1,20 @@
 package com.becon.opencelium.backend.resource.application;
 
-public class ResultDTO {
-    private Object result;
+public class ResultDTO<T> {
+    private T result;
 
     public ResultDTO() {
     }
 
-    public ResultDTO(Object result) {
+    public ResultDTO(T result) {
         this.result = result;
     }
 
-    public Object getResult() {
+    public T getResult() {
         return result;
     }
 
-    public void setResult(Object result) {
+    public void setResult(T result) {
         this.result = result;
     }
 }

@@ -79,6 +79,7 @@ public class ConnectionServiceImp implements ConnectionService {
             });
         }
         connectionRepository.deleteById(id);
+        connectionNodeService.deleteById(id);
     }
 
     @Override

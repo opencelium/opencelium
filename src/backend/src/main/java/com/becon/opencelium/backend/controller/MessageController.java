@@ -60,8 +60,7 @@ public class MessageController {
         List<MessageResource> messageResources = eventMessageList.stream()
                 .map(message -> messageService.toResource(message))
                 .collect(Collectors.toList());
-        final CollectionModel<MessageResource> resources = CollectionModel.of(messageResources);
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(messageResources);
     }
 
     @Operation(summary = "Retrieves an event messages from database by provided Event Message ID")

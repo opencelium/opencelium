@@ -23,6 +23,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {

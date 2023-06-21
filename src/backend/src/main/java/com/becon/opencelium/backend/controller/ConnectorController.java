@@ -183,7 +183,7 @@ public class ConnectorController {
         List<Connection> connections = connectionService.findAllByConnectorId(id);
         connections.forEach(c -> {
             connectionService.deleteById(c.getId());
-//            connectionNodeService.deleteById(c.getId());
+            connectionNodeService.deleteById(c.getId());
         });
         connectorService.deleteById(id);
         return ResponseEntity.noContent().build();

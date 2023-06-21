@@ -24,6 +24,12 @@ import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.invoker.resource.OperationResource;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
+import com.becon.opencelium.backend.mysql.entity.Connection;
+import com.becon.opencelium.backend.mysql.entity.Connector;
+import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connector.FunctionResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerXMLResource;
@@ -57,12 +63,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +84,12 @@ public class InvokerController {
 
     @Autowired
     private InvokerContainer invokerContainer;
+
+    @Autowired
+    private ConnectorServiceImp connectorService;
+
+    @Autowired
+    private ConnectionServiceImp connectionService;
 
     @Operation(summary = "Retrieves an 'invoker' based on the provided invoker 'name'")
     @ApiResponses(value = {
@@ -171,7 +181,55 @@ public class InvokerController {
         return ResponseEntity.ok().body(resource);
     }
 
-    @Operation(summary = "Deletes an invoker by provided invoker 'name'")
+    @Operation(summary = "Validates whether an invoker is used in connection or in connector")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Property 'result' contains a boolean value true(has dependency) or false(no dependency)",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/{name}/dependency")
+    public ResponseEntity<?> hasDependency(@PathVariable String name){
+        ResultDTO<String> resultDTO = connectorService.existByInvoker(name)
+                ? new ResultDTO<>("true") : new ResultDTO<>("false");
+        return ResponseEntity.ok(resultDTO);
+    }
+
+    @Operation(summary = "Deletes an invoker by provided invoker 'name' and removes all dependencies")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Invoker has been successfully removed",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping("/{invokerName}/force")
+    public ResponseEntity<?> deleteForce(@PathVariable String invokerName){
+        List<Connector> connector = connectorService.findAllByInvoker(invokerName);
+        connectorService.deleteByInvoker(invokerName);
+        connector.forEach(ctor -> {
+            List<Connection> ctions = connectionService.findAllByConnectorId(ctor.getId());
+            if (ctions == null) {
+                return;
+            }
+            ctions.forEach(ction -> {
+                connectionService.deleteById(ction.getId());
+            });
+        });
+        invokerService.delete(invokerName);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Deletes an invoker by provided invoker 'name'. If invoker has dependencies then throws exception.")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Invoker has been successfully removed",
@@ -185,6 +243,9 @@ public class InvokerController {
     })
     @DeleteMapping("/{name}")
     public ResponseEntity<?> delete(@PathVariable String name){
+        if(connectorService.existByInvoker(name)) {
+            throw new RuntimeException("Couldn't delete because invoker '" + name + "' has references to connector and connection. ");
+        }
         invokerService.delete(name);
         return ResponseEntity.ok().build();
     }
@@ -201,8 +262,8 @@ public class InvokerController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> deleteInvokerByNameIn(@RequestBody List<String> invokerNames){
-        invokerNames.forEach(name -> {
+    public ResponseEntity<?> deleteInvokerListByNames(@RequestBody IdentifiersDTO<String> invokerNames){
+        invokerNames.getIdentifiers().forEach(name -> {
             invokerService.delete(name);
         });
         return ResponseEntity.noContent().build();
