@@ -20,7 +20,6 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IConnectorRequest} from "../interfaces/IConnector";
 import ModelConnectorPoust from "../models/ConnectorPoust";
 import ModelConnector from "../models/Connector";
-import ModelConnectorHateoas from "../models/ConnectorHateoas";
 
 
 export class ConnectorRequest extends Request implements IConnectorRequest{

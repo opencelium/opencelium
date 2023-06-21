@@ -17,7 +17,6 @@ import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import { IInvoker } from "../../interfaces/IInvoker";
 import {IOperation} from "../../interfaces/IOperation";
-import ModelInvokerHateoas from "../models/InvokerHateoas";
 import ModelInvoker from "../models/Invoker";
 
 interface FieldProps{

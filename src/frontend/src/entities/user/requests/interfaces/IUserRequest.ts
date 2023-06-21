@@ -17,7 +17,6 @@ import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import ModelUser from "../models/User";
 import ModelUserPoust from "../models/UserPoust";
-import ModelUserHateoas from "../models/UserHateoas";
 
 export default interface IUserRequest{
 

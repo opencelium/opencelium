@@ -20,7 +20,6 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IInvoker} from "../../interfaces/IInvoker";
 import {IOperation} from "../../interfaces/IOperation";
 import {IInvokerRequest, UpdateMethodProps} from "../interfaces/IInvoker";
-import ModelInvokerHateoas from "../models/InvokerHateoas";
 import ModelInvoker from "../models/Invoker";
 
 
