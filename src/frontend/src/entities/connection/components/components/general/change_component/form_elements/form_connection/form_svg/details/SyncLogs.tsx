@@ -22,6 +22,7 @@ import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import { Connection } from "@entity/connection/classes/Connection";
 import { Schedule } from "@entity/schedule/classes/Schedule";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
+import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/content/connection/CConnectorItem";
 
 const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
     ({
@@ -31,30 +32,25 @@ const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
         const dispatch = useAppDispatch();
         const {authUser} = Auth.getReduxState();
         const {testSchedule} = Schedule.getReduxState();
-        const {isTestingConnection} = Connection.getReduxState();
         const [socket, setSocket] = useState<Socket>(null);
-        //const [pauseTime, setPauseTime] = useState<number>(0);
+        let hasStartedParsing = false;
         const saveLogs = (message: Message): void => {
-            const data = ConnectionLogs.parseMessage(connection, message);
+            let connector = connection.fromConnector;
+            const log = JSON.parse(message.body.toString());
+            let parsedMessage = log && log.message ? log.message : '';
+            const indexSplit = parsedMessage.split(' -- index: ');
+            let index = '';
+            if(indexSplit.length > 1){
+                index = indexSplit[1];
+            }
+            if(hasStartedParsing && index === '0'){
+                connector = connection.toConnector;
+            }
+            const data = ConnectionLogs.parseMessage(connector, message);
+            if(index === '0'){
+                hasStartedParsing = true;
+            }
             dispatch(addCurrentLog(data));
-            /*if(data.message === ConnectionLogs.BreakMessage){
-                setPauseTime(oldTime => {
-                    setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
-                    return oldTime + 4;
-                })
-            } else{
-                if(data.operatorData && data.operatorData.conditionResult === false){
-                    setPauseTime(oldTime => {
-                        setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
-                        return oldTime + 2;
-                    })
-                } else {
-                    setPauseTime(oldTime => {
-                        setTimeout(() => dispatch(addCurrentLog(data)), oldTime);
-                        return oldTime + 1;
-                    })
-                }
-            }*/
         }
         const subscribeLogs = () => {
             if(testSchedule) {
@@ -82,11 +78,6 @@ const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
                 subscribeLogs();
             }
         }, [testSchedule?.schedulerId]);
-        /*useEffect(() => {
-            if(!isTestingConnection && pauseTime !== 0){
-                setPauseTime(0);
-            }
-        }, [isTestingConnection])*/
         useEffect(() => {
             if(shouldClear){
                 dispatch(clearCurrentLogs());

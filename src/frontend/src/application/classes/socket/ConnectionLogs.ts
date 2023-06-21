@@ -16,7 +16,7 @@
 import Socket, { Message, Subscription } from "./Socket";
 import {ConnectionLogProps} from "@root/interfaces/IConnection";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
-import {CONNECTOR_FROM} from "@classes/content/connection/CConnectorItem";
+import CConnectorItem, {CONNECTOR_FROM} from "@classes/content/connection/CConnectorItem";
 
 export default class ConnectionLogs {
 
@@ -42,13 +42,11 @@ export default class ConnectionLogs {
         }
     }
 
-    static parseMessage(connection: CConnection, data: Message): ConnectionLogProps{
+    static parseMessage(connector: CConnectorItem, data: Message): ConnectionLogProps{
         const log = JSON.parse(data.body.toString());
-        const connectorType = CONNECTOR_FROM;
         let message = log && log.message ? log.message : '';
         const indexSplit = message.split(' -- index: ');
         let index = '';
-        const connector = connectorType === CONNECTOR_FROM ? connection.fromConnector : connection.toConnector;
         if(indexSplit.length > 1){
             index = indexSplit[1];
         }
@@ -92,7 +90,7 @@ export default class ConnectionLogs {
         return {
             index,
             message,
-            connectorType,
+            connectorType: connector.getConnectorType(),
             hasNextItem: !(isNextFunctionNull && isNextOperatorNull),
             methodData,
             operatorData,

@@ -268,7 +268,7 @@ class Process extends React.Component{
         // || (currentLog.message === ConnectionLogs.BreakMessage && prevLog && !prevLog.hasNextItem)
         const hasDashAnimation = logPanelHeight !== 0 && currentLog
             && ((currentLog.message !== ConnectionLogs.BreakMessage && currentLog.message !== ConnectionLogs.EndOfExecutionMessage))
-            && currentLog.index === process.entity.index && currentLog.message !== '';
+            && currentLog.index === process.entity.index && currentLog.connectorType === process.connectorType && currentLog.message !== '';
         const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === process.entity.index) !== -1 ? '#58854d' : '';
         const isJustCreatedItem = this.isJustCreatedItem();
         const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;

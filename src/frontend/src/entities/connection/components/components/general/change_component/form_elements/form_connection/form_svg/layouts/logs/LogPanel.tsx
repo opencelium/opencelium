@@ -119,7 +119,7 @@ const LogPanel: FC = ({}) => {
                                 messageProps.id = `log_panel_${log.connectorType}_${log.index}`;
                             }
                             if(log.message === ConnectionLogs.BreakMessage){
-                                return <hr/>;
+                                return <hr key={key}/>;
                             }
                             return (
                                 <LogMessage
