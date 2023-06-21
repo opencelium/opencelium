@@ -250,12 +250,16 @@ public class ConnectorExecutor {
                 break;
             case "GET":
                 httpMethodType = HttpMethod.GET;
+                break;
             case "PATCH":
                 httpMethodType = HttpMethod.PATCH;
+                break;
             case "OPTIONS":
                 httpMethodType = HttpMethod.OPTIONS;
+                break;
             case "TRACE":
                 httpMethodType = HttpMethod.TRACE;
+                break;
             case "HEAD":
                 httpMethodType = HttpMethod.HEAD;
                 break;
