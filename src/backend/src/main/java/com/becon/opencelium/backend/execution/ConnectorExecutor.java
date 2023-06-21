@@ -250,6 +250,14 @@ public class ConnectorExecutor {
                 break;
             case "GET":
                 httpMethodType = HttpMethod.GET;
+            case "PATCH":
+                httpMethodType = HttpMethod.PATCH;
+            case "OPTIONS":
+                httpMethodType = HttpMethod.OPTIONS;
+            case "TRACE":
+                httpMethodType = HttpMethod.TRACE;
+            case "HEAD":
+                httpMethodType = HttpMethod.HEAD;
                 break;
             default:
                 throw new RuntimeException("Http method not found");
