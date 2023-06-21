@@ -36,9 +36,15 @@ public interface ConnectorService {
 
     void deleteById(int id);
 
+    void deleteByInvoker(String invokerName);
+
     boolean existById(int id);
 
     boolean existByTitle(String title);
+
+    boolean existByInvoker(String invokerName);
+
+    List<Connector> findAllByInvoker(String title);
 
     List<RequestData> getRequestData(Integer ctorId);
 

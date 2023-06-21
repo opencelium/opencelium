@@ -19,13 +19,24 @@ package com.becon.opencelium.backend.mysql.repository;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ConnectorRepository extends JpaRepository<Connector, Integer> {
 
     boolean existsByTitle(String title);
 
+    Optional<Connector> findByTitle(String name);
+
+    boolean existsByInvoker(String title);
+
+    @Transactional
+    void deleteByInvoker(String invokerName);
+
     List<Connector> findAllByTitleContains(String title);
+
+    List<Connector> findAllByInvoker(String invokerName);
 }

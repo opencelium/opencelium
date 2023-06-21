@@ -519,7 +519,7 @@ public class SchedulerController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping(value = "/notification", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/notification/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteNotification(@RequestBody IdentifiersDTO<Integer> payload){
         payload.getIdentifiers().forEach(nId -> schedulerService.deleteNotificationById(nId));
         return ResponseEntity.noContent().build();

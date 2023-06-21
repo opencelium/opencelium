@@ -16,12 +16,9 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
-import com.becon.opencelium.backend.constant.DataRef;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
-import com.becon.opencelium.backend.execution.rdata.extractor.Extractor;
-import com.becon.opencelium.backend.execution.rdata.extractor.ExtractorFactory;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
@@ -61,9 +58,6 @@ public class ConnectorServiceImp implements ConnectorService{
     private RequestDataServiceImp requestDataService;
 
     @Autowired
-    private InvokerServiceImp invokerServiceImp;
-
-    @Autowired
     private MethodNodeServiceImp methodNodeService;
 
     @Autowired
@@ -96,6 +90,11 @@ public class ConnectorServiceImp implements ConnectorService{
     }
 
     @Override
+    public void deleteByInvoker(String invokerName) {
+        connectorRepository.deleteByInvoker(invokerName);
+    }
+
+    @Override
     public boolean existById(int id) {
         return connectorRepository.existsById(id);
     }
@@ -103,6 +102,16 @@ public class ConnectorServiceImp implements ConnectorService{
     @Override
     public boolean existByTitle(String title) {
         return connectorRepository.existsByTitle(title);
+    }
+
+    @Override
+    public boolean existByInvoker(String invokerName) {
+        return connectorRepository.existsByInvoker(invokerName);
+    }
+
+    @Override
+    public List<Connector> findAllByInvoker(String invokerName) {
+        return connectorRepository.findAllByInvoker(invokerName);
     }
 
     @Override
@@ -144,7 +153,7 @@ public class ConnectorServiceImp implements ConnectorService{
             r.setConnector(connector);
         });
 
-        List<RequiredData> requiredData = invokerServiceImp.findByName(resource.getInvoker().getName()).getRequiredData();
+        List<RequiredData> requiredData = invokerService.findByName(resource.getInvoker().getName()).getRequiredData();
 
         requestData.forEach(data -> {
             String visibility = requiredData.stream()
@@ -172,8 +181,8 @@ public class ConnectorServiceImp implements ConnectorService{
         connectorResource.setSslCert(entity.isSslCert());
         connectorResource.setTimeout(entity.getTimeout());
 
-        Invoker invoker = invokerServiceImp.findByName(entity.getInvoker());
-        connectorResource.setInvoker(invokerServiceImp.toResource(invoker));
+        Invoker invoker = invokerService.findByName(entity.getInvoker());
+        connectorResource.setInvoker(invokerService.toResource(invoker));
         connectorResource.setRequestData(requestDataService.toResource(entity.getRequestData()));
         return connectorResource;
     }
@@ -184,7 +193,7 @@ public class ConnectorServiceImp implements ConnectorService{
          String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
          ConnectorNodeResource connectorNodeResource = new ConnectorNodeResource();
          connectorNodeResource.setConnectorId(entity.getId());
-         InvokerResource invokerResource = invokerServiceImp.toResource(invokerServiceImp.findByName(entity.getInvoker()));
+         InvokerResource invokerResource = invokerService.toResource(invokerService.findByName(entity.getInvoker()));
          connectorNodeResource.setInvoker(invokerResource);
          connectorNodeResource.setTitle(entity.getTitle());
          connectorNodeResource.setIcon(imagePath + entity.getIcon());
@@ -209,7 +218,7 @@ public class ConnectorServiceImp implements ConnectorService{
         String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
         ConnectorNodeResource connectorNodeResource = new ConnectorNodeResource();
         connectorNodeResource.setConnectorId(entity.getId());
-        InvokerResource invokerResource = invokerServiceImp.toMetaResource(invokerServiceImp.findByName(entity.getInvoker()));
+        InvokerResource invokerResource = invokerService.toMetaResource(invokerService.findByName(entity.getInvoker()));
         connectorNodeResource.setInvoker(invokerResource);
         connectorNodeResource.setTitle(entity.getTitle());
         connectorNodeResource.setIcon(imagePath + entity.getIcon());
@@ -221,7 +230,7 @@ public class ConnectorServiceImp implements ConnectorService{
     @Override
     public ResponseEntity<?> checkCommunication(Connector connector) {
         InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder(restTemplate);
-        FunctionInvoker function = invokerServiceImp.getTestFunction(connector.getInvoker());
+        FunctionInvoker function = invokerService.getTestFunction(connector.getInvoker());
         List<RequestData> requestData = buildRequestData(connector);
 
         return invokerRequestBuilder
@@ -234,7 +243,7 @@ public class ConnectorServiceImp implements ConnectorService{
     @Override
     public ResponseEntity<?> getAuthorization(Connector connector) {
         InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder(restTemplate);
-        FunctionInvoker function = invokerServiceImp.getAuthFunction(connector.getInvoker());
+        FunctionInvoker function = invokerService.getAuthFunction(connector.getInvoker());
         return invokerRequestBuilder.setFunction(function).setRequestData(connector.getRequestData()).sendRequest();
     }
 

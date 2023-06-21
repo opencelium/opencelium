@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.execution.log.msg;
 
 import com.becon.opencelium.backend.enums.LogType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -12,7 +11,7 @@ public class ExecutionLog implements LogMessage {
     private List<String> stackTrace; // exception stacktrace
     private MethodData methodData;
 //    private String index; // order of execution
-//    private Connector connector; // data flow direction from connector or to connector;
+    private ConnectorLog connector; // data flow direction from connector or to connector;
 //    private OperatorData operatorData;
 
 
@@ -83,13 +82,13 @@ public class ExecutionLog implements LogMessage {
 //        this.index = index;
 //    }
 
-//    public Connector getConnector() {
-//        return connector;
-//    }
-//
-//    public void setConnector(Connector connector) {
-//        this.connector = connector;
-//    }
+    public ConnectorLog getConnector() {
+        return connector;
+    }
+
+    public void setConnector(ConnectorLog connector) {
+        this.connector = connector;
+    }
 //
 //
 //    public OperatorData getOperatorData() {

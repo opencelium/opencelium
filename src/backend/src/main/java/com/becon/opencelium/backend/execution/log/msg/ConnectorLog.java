@@ -1,8 +1,16 @@
 package com.becon.opencelium.backend.execution.log.msg;
 
-public class Connector {
+public class ConnectorLog {
     private String name;
     private String dir;
+
+    public ConnectorLog() {
+    }
+
+    public ConnectorLog(String name, String dir) {
+        this.name = name;
+        this.dir = dir;
+    }
 
     public String getName() {
         return name;
@@ -16,7 +24,7 @@ public class Connector {
         return dir;
     }
 
-    public Connector setDir(String dir) {
+    public ConnectorLog setDir(String dir) {
         this.dir = dir;
         return this;
     }

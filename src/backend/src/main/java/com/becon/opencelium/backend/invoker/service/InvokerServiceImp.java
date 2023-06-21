@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.invoker.service;
 
-import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.WrongEncode;
@@ -25,6 +24,9 @@ import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
+import com.becon.opencelium.backend.mysql.entity.Connection;
+import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.storage.StorageService;
@@ -36,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -48,10 +52,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.nio.file.Files.exists;
 
 @Service
 public class InvokerServiceImp implements InvokerService {
@@ -112,20 +116,41 @@ public class InvokerServiceImp implements InvokerService {
 
     @Override
     public void delete(String name) {
-        invokerContainer.remove(name);
-        if(name.equals("")){
+        Objects.requireNonNull(name);
+        deleteInvoker(name);
+    }
+
+    // Deletes all entries from the database where the invoker is referenced.
+//    @Override
+//    public void forceDelete(String name) {
+//        Objects.requireNonNull(name);
+//        Consumer<String> refDeletion = invokerName -> {
+////            if (connectorService.existByInvoker(invokerName)) {
+////                Connector connector = connectorService.
+////                Connection connection = connectionServiceImp.findAllByConnectorId()
+////                connectionServiceImp.deleteById();
+////                connectorService.deleteByInvoker(invokerName);
+////            }
+//
+//        };
+//        deleteInvoker(name, refDeletion);
+//    }
+
+    private void deleteInvoker(String name) {
+        Objects.requireNonNull(name);
+        Invoker backup = invokerContainer.getByName(name);
+        if(name.isEmpty()) {
             throw new RuntimeException("INVOKER_NOT_FOUND");
         }
-        String location = "src/backend/src/main/resources/invoker/";
-        Path rootLocation = Paths.get(location);
         try {
-
-            Path file = rootLocation.resolve(name + ".xml");
+            Path file = findFileByInvokerName(name).toPath();
             if(exists(file)){
+                invokerContainer.remove(name);
                 Files.delete(file);
             }
         }
         catch (IOException e){
+            invokerContainer.add(backup.getName(), backup);
             throw new StorageException("Failed to delete stored file", e);
         }
     }
@@ -238,8 +263,8 @@ public class InvokerServiceImp implements InvokerService {
     public UpdateInvokerResource toUpdateInvokerResource(Map.Entry<String, String> entry) {
         UpdateInvokerResource updateInvokerResource = new UpdateInvokerResource();
         XPathFactory xpathfactory = XPathFactory.newInstance();
-        XPath xpath = xpathfactory.newXPath();
-        String xpathQuery = "/invoker/name";
+//        XPath xpath = xpathfactory.newXPath();
+//        String xpathQuery = "/invoker/name";
         String fileName = entry.getKey();
         String inv = entry.getValue();
 
@@ -271,7 +296,54 @@ public class InvokerServiceImp implements InvokerService {
         File f = new File(document.getDocumentURI());
         String invoker = FileNameUtils.removeExtension(f.getName());
         invoker = invoker.replace("%20", " ");
-        invokerContainer.update(invoker, parser.parse());
+        invokerContainer.add(invoker, parser.parse());
+    }
+
+    @Override
+    public File findFileByInvokerName(String invokerName) {
+        File directory = new File(PathConstant.INVOKER);
+        File[] files = directory.listFiles((dir, name) -> name.endsWith(".xml"));
+
+        if (files != null) {
+            Optional<File> foundFile = Arrays.stream(files)
+                    .filter(file -> hasInvokerName(file, invokerName))
+                    .findFirst();
+
+            if (foundFile.isEmpty()) {
+                throw new RuntimeException("Invoker " + "'" + invokerName + "' not found.");
+            }
+            return foundFile.get();
+        }
+        throw new RuntimeException("Invokers not found.");
+    }
+
+    private Boolean hasInvokerName(File file, String nodeName) {
+        try {
+            String xPathExpr = "/invoker/name";
+            String nodeValue = getNodeValue(file, xPathExpr);
+            Objects.requireNonNull(nodeValue);
+            return nodeValue.equals(nodeName);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String getNodeValue(File xmlFile, String xpathExpression) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(xmlFile);
+
+            XPathFactory xPathFactory = XPathFactory.newInstance();
+            XPath xpath = xPathFactory.newXPath();
+            XPathExpression expression = xpath.compile(xpathExpression);
+
+            return expression.evaluate(doc);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     private static Document convertStringToXMLDocument(String xmlString)

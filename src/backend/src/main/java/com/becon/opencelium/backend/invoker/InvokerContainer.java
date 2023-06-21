@@ -18,9 +18,7 @@ package com.becon.opencelium.backend.invoker;
 
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -58,7 +56,7 @@ public class InvokerContainer {
         this.invokers = invokers;
     }
 
-    public void update(String name, Invoker invoker) {
+    public void add(String name, Invoker invoker) {
         invokers.put(name, invoker);
     }
 

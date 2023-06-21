@@ -24,6 +24,7 @@ import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,8 @@ public interface InvokerService {
     FunctionInvoker getTestFunction(String invokerName);
 
     FunctionInvoker getAuthFunction(String invokerName);
+
+    File findFileByInvokerName(String invokerName);
 
     Invoker findByName(String name);
 

@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.execution;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.LogType;
 import com.becon.opencelium.backend.enums.OperatorType;
+import com.becon.opencelium.backend.execution.log.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.log.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.log.msg.MethodData;
 import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorAbstractFactory;
@@ -113,12 +114,17 @@ public class ConnectorExecutor {
         executionContainer.setLoopIterators(new LinkedHashMap<>());
 
         logger.getLogEntity().setType(LogType.INFO);
+        logger.getLogEntity().setConnector(getConnectorInfo(currentConnector, conn));
         try {
             executeMethod(connectorNode.getStartMethod());
             executeDecisionStatement(connectorNode.getStartOperator());
         } catch (Exception e) {
             logger.logAndSend(e, LogType.ERROR);
         }
+    }
+
+    private ConnectorLog getConnectorInfo(Connector connector, String dir) {
+        return new ConnectorLog(connector.getTitle(), dir);
     }
 
     private void executeMethod(MethodNode methodNode) throws Exception {
@@ -250,6 +256,18 @@ public class ConnectorExecutor {
                 break;
             case "GET":
                 httpMethodType = HttpMethod.GET;
+                break;
+            case "PATCH":
+                httpMethodType = HttpMethod.PATCH;
+                break;
+            case "OPTIONS":
+                httpMethodType = HttpMethod.OPTIONS;
+                break;
+            case "TRACE":
+                httpMethodType = HttpMethod.TRACE;
+                break;
+            case "HEAD":
+                httpMethodType = HttpMethod.HEAD;
                 break;
             default:
                 throw new RuntimeException("Http method not found");
