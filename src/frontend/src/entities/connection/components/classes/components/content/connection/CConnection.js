@@ -175,7 +175,7 @@ export default class CConnection{
         if (sourceItem instanceof CMethodItem) {
             if (connector.getConnectorType() === CONNECTOR_FROM) {
                 if(shouldDelete){
-                    this.removeFromConnectorMethod(sourceItem);
+                    this.removeFromConnectorMethod(sourceItem, true, false);
                     sourceItem.index = '';
                     sourceItem.isDragged = false;
                     connector.setCurrentItem(targetLeftItem);
@@ -187,7 +187,7 @@ export default class CConnection{
                 }
             } else {
                 if(shouldDelete) {
-                    this.removeToConnectorMethod(sourceItem);
+                    this.removeToConnectorMethod(sourceItem, true, false);
                     sourceItem.index = '';
                     sourceItem.isDragged = false;
                     connector.setCurrentItem(targetLeftItem);
@@ -214,9 +214,9 @@ export default class CConnection{
             connector.updateIndexesForOperator(sourceItem, newIndex, this, shouldDelete);
             if(shouldDelete) {
                 if (connector.getConnectorType() === CONNECTOR_FROM) {
-                    this.removeFromConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
+                    this.removeFromConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex), false);
                 } else {
-                    this.removeToConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
+                    this.removeToConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex), false);
                 }
             } else{
                 const existedChildren = connector.getOperatorChildren(sourceItem, true);
@@ -533,7 +533,7 @@ export default class CConnection{
         return connector.addMethod(method, mode);
     }
 
-    removeConnectorMethod(connectorType, method, withRefactorIndexes = true){
+    removeConnectorMethod(connectorType, method, withRefactorIndexes = true, withCleanFieldBinding = true){
         let connector = null;
         let bindingItem = {from: [], to: []};
         switch(connectorType){
@@ -550,11 +550,13 @@ export default class CConnection{
         }
         let color = method.color;
         this.addRestColor(color);
-        this.cleanFieldBinding(connectorType, bindingItem);
+        if(withCleanFieldBinding){
+            this.cleanFieldBinding(connectorType, bindingItem);
+        }
         connector.removeMethod(method, withRefactorIndexes);
     }
 
-    removeConnectorOperator(connectorType, operator){
+    removeConnectorOperator(connectorType, operator, withCleanFieldBinding){
         let connector = null;
         switch(connectorType){
             case CONNECTOR_FROM:
@@ -571,7 +573,7 @@ export default class CConnection{
         for(let i = methods.length - 1; i >= 0; i--){
             let methodIndex = methods[i].index;
             if(methodIndex.substring(0, operator.index.length) === operator.index){
-                this.removeConnectorMethod(connectorType, methods[i], false);
+                this.removeConnectorMethod(connectorType, methods[i], false, withCleanFieldBinding);
             }
         }
         for(let i = operators.length - 1; i >= 0; i--){
@@ -606,24 +608,24 @@ export default class CConnection{
         return this.addConnectorMethod(CONNECTOR_TO, method, mode);
     }
 
-    removeFromConnectorMethod(method, withRefactorIndexes = true){
-        this.removeConnectorMethod(CONNECTOR_FROM, method, withRefactorIndexes);
+    removeFromConnectorMethod(method, withRefactorIndexes = true, withCleanFieldBinding = true){
+        this.removeConnectorMethod(CONNECTOR_FROM, method, withRefactorIndexes, withCleanFieldBinding);
         this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
         this.toConnector.setSvgItems();
     }
 
-    removeToConnectorMethod(method, withRefactorIndexes = true){
-        this.removeConnectorMethod(CONNECTOR_TO, method, withRefactorIndexes);
+    removeToConnectorMethod(method, withRefactorIndexes = true, withCleanFieldBinding = true){
+        this.removeConnectorMethod(CONNECTOR_TO, method, withRefactorIndexes, withCleanFieldBinding);
     }
 
-    removeFromConnectorOperator(operator){
-        this.removeConnectorOperator(CONNECTOR_FROM, operator);
+    removeFromConnectorOperator(operator, withCleanFieldBinding = true){
+        this.removeConnectorOperator(CONNECTOR_FROM, operator, withCleanFieldBinding);
         this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
         this.toConnector.setSvgItems();
     }
 
-    removeToConnectorOperator(operator){
-        this.removeConnectorOperator(CONNECTOR_TO, operator);
+    removeToConnectorOperator(operator, withCleanFieldBinding = true){
+        this.removeConnectorOperator(CONNECTOR_TO, operator, withCleanFieldBinding);
     }
 
     checkIfExistSuchFields(fields, connectorType){

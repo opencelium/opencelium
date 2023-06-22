@@ -148,7 +148,7 @@ class Arrow extends React.Component{
         if(hasArrowDashAnimation){
             markerStyle = '_dashed';
         }
-        if(from && from.entity instanceof COperatorItem){
+        if(logPanelHeight !== 0 && from && from.entity instanceof COperatorItem){
             if(currentLog && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`){
                 if(isArrowVertical && currentLog.operatorData && currentLog.operatorData.conditionResult === false){
                     stroke = '#d24545';

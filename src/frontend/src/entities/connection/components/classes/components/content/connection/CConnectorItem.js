@@ -224,9 +224,11 @@ export default class CConnectorItem{
             }
             if(insideReferences.length !== 0){
                 insideReferences = insideReferences.map(m => m.index);
-                if(loopOperatorReference){
-                    insideReferences.push(loopOperatorReference);
-                }
+            }
+            if(loopOperatorReference){
+                insideReferences.push(loopOperatorReference);
+            }
+            if(insideReferences.length !== 0){
                 references.push({
                     element: this._methods[i].index,
                     references: insideReferences
