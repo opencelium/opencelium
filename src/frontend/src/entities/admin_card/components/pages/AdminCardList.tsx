@@ -19,6 +19,7 @@ import CollectionView from "@app_component/collection/collection_view/Collection
 import AdminCards from "../../collections/AdminCards";
 import { AdminCardPermissions } from '../../constants';
 import {AdminCardListProps} from "./interfaces";
+import { baseUrl } from '@entity/application/requests/classes/url';
 
 const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.READ)(({}) => {
     const adminCards = [
@@ -30,6 +31,7 @@ const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.RE
         //{id: 6, name: 'Converter', link: '/template_converter'},
         {id: 7, name: 'Notification Templates', link: '/notification_templates'},
         {id: 8, name: 'Update Assistant', link: '/update_assistant'},
+        {id: 9, name: 'Swagger API Docs', link: `${baseUrl}docs`, isExternalHref: true},
     ];
     const CAdminCards = new AdminCards(adminCards);
     return (

@@ -26,7 +26,9 @@ export const checkScheduleTitle = createAsyncThunk(
     'schedule/exist/title',
     async(schedule: ModelSchedule, thunkAPI) => {
         try {
-            const request = new ScheduleRequest({endpoint: `/exists/${schedule.title}`});
+            let title = schedule.title.split('/').join('//');
+            title = encodeURIComponent(title);
+            const request = new ScheduleRequest({endpoint: `/exists/${title}`});
             const response = await request.checkScheduleTitle();
             return response.data;
         } catch(e){

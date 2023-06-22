@@ -27,10 +27,13 @@ export class AdminCard implements IAdminCard{
 
     permission?: string = '';
 
+    isExternalHref?: boolean = false;
+
     constructor(adminCard?: IAdminCard) {
         this.id = adminCard?.id || 0;
         this.name = adminCard?.name || '';
         this.link = adminCard?.link || '';
         this.permission = adminCard?.permission || '';
+        this.isExternalHref = adminCard?.isExternalHref || false;
     }
 }

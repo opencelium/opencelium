@@ -23,7 +23,7 @@ class ParamSelect extends React.Component{
     }
 
     render(){
-        const {readOnly, param, style, id, options, updateParam} = this.props;
+        const {readOnly, param, style, id, options, updateParam, styleParams} = this.props;
         let inputTheme = {};
         inputTheme.input = styles.input_pointer_param_if;
         return(
@@ -90,9 +90,13 @@ class ParamSelect extends React.Component{
                             };
                         },
                         placeholder: (styles, {data}) => {
+                            let width = '70%';
+                            if(styleParams && styleParams.hasOwnProperty('hasPlaceholderFullWidth')){
+                                width = '100%';
+                            }
                             return {
                                 ...styles,
-                                width: '70%',
+                                width,
                                 textAlign: 'center',
                             };
                         },

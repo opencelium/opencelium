@@ -145,7 +145,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                     <InputSwitch
                         name={`Theme synchronization and Gravatar is ${themeSync ? 'enabled' : 'disabled'}`}
                         icon={'corporate_fare'}
-                        label={'Theme sync'}
+                        label={'Online Service Sync'}
                         isChecked={themeSync} onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}
                         hasConfirmation={true}
                         confirmationText={'Are you agree to share your E-mail with Opencelium Service Portal?'}

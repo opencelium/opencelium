@@ -24,12 +24,12 @@ export default {
     },
     rejected: {
         [checkNeo4j.rejected.type]: {
-            "DOWN": "Neo4j is down",
-            "__DEFAULT__": "Neo4j could not be checked"
+            "DOWN": "Neo4j is down.",
+            "__DEFAULT__": "Neo4j is down."
         },
         [checkElasticsearch.rejected.type]: {
-            "DOWN": "Elasticsearch is down",
-            "__DEFAULT__": "Neo4j could not be checked"
+            "DOWN": "Elasticsearch is down.",
+            "__DEFAULT__": "Elasticsearch is down."
         },
     },
 }

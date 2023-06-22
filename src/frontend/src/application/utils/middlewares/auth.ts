@@ -31,7 +31,7 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
     const response: IResponse = action.payload;
     if(isRequestRejected){
         const applicationState = storeApi.getState().applicationReducer;
-        isAccessDenied = applicationState.openingExternalUrl !== API_REQUEST_STATE.START && (response?.status === 403 || response?.message === ResponseMessages.ACCESS_DENIED || response?.message === ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE || (response?.message === ResponseMessages.NETWORK_ERROR && login.rejected.type === action.type) || false);
+        isAccessDenied = applicationState.openingExternalUrl !== API_REQUEST_STATE.START && (response?.status === 403 || response?.message === ResponseMessages.ACCESS_DENIED || response?.message === ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE || response?.message === ResponseMessages.TOKEN_IS_NOT_VALID || (response?.message === ResponseMessages.NETWORK_ERROR && login.rejected.type === action.type) || false);
     }
     if(isAccessDenied){
         const authState = storeApi.getState().authReducer;

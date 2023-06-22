@@ -81,6 +81,7 @@ class Condition extends React.Component{
         if(props) {
             const {connection, details} = props;
             const operator = details.entity;
+            const isLoopOperator = operator.type === LOOP_OPERATOR;
             if(connection instanceof CConnection && operator instanceof COperatorItem) {
                 const connector = connection.getConnectorByType(details.connectorType);
                 leftMethod = connection.getMethodByColor(operator.condition.leftStatement.color);
@@ -100,6 +101,19 @@ class Condition extends React.Component{
                 }
                 property = operator.condition.rightStatement.getRightPropertyValueWithoutArrayBrackets();
                 rightParam = operator.condition.rightStatement.getFieldWithoutArrayBrackets();
+                let value = relationalOperator ? relationalOperator.value : null;
+                if(value) {
+                    const operatorOptions = isLoopOperator ? FUNCTIONAL_OPERATORS_FOR_LOOP : FUNCTIONAL_OPERATORS_FOR_IF;
+                    let hasValueItem = operatorOptions.find(fo => fo.value === value);
+                    if (hasValueItem) {
+                        if(hasValueItem.hasOwnProperty('options')){
+                            const option = hasValueItem.options.find(o => o.value === rightParam);
+                            if(option){
+                                rightParam = option;
+                            }
+                        }
+                    }
+                }
             }
         }
         return{
@@ -180,7 +194,7 @@ class Condition extends React.Component{
         if(relationalOperator) operatorItem.setRelationalOperator(relationalOperator.value);
         if(rightMethod) operatorItem.setRightStatementColor(rightMethod.color);
         if(rightParam){
-            operatorItem.setRightStatementField(rightParam);
+            operatorItem.setRightStatementField(rightParam?.value || rightParam);
             if(rightMethod) operatorItem.setRightStatementParent(connection.getMethodByColor(rightMethod.color).response.success);
         }
         if(property) operatorItem.setRightStatementRightPropertyValue(property);

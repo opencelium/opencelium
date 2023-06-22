@@ -25,7 +25,10 @@ import OpenCeliumImagePath from "@image/logo.png";
 import DefaultConnectorImagePath from "@image/application/default_image.png";
 import OpenCeliumBackgroundImagePath from "@image/application/oc_connection_widget_background.png"
 import {Connection} from "@entity/connection/classes/Connection";
-import {getAllConnections} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
+import {
+    getAllConnections,
+    getAllMetaConnections
+} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {ConnectionOverviewTitle, ConnectionOverviewWidgetStyled} from './styles';
 
 const ConnectionOverviewWidget: FC =
@@ -33,16 +36,16 @@ const ConnectionOverviewWidget: FC =
 
     }) => {
     const dispatch = useAppDispatch();
-    const {connections, gettingConnections} = Connection.getReduxState();
+    const {metaConnections, gettingMetaConnections} = Connection.getReduxState();
     const [nodes, setNodes] = useState([]);
     const [graph, setGraph] = useState({nodes: [], edges: []});
     const [hasConnections, setHasConnections] = useState<boolean>(false);
     useEffect(() => {
-        dispatch(getAllConnections());
+        dispatch(getAllMetaConnections());
     }, [])
     useEffect(() => {
-        if(gettingConnections === API_REQUEST_STATE.FINISH) {
-            const usedConnectors: any[] = [...connections.map(connection => connection.fromConnector), ...connections.map(connection => connection.toConnector)];
+        if(gettingMetaConnections === API_REQUEST_STATE.FINISH) {
+            const usedConnectors: any[] = [...metaConnections.map(connection => connection.fromConnector), ...metaConnections.map(connection => connection.toConnector)];
             let newNodes = [];
             for (let i = 0; i < usedConnectors.length; i++) {
                 if (newNodes.findIndex(c => c.id === usedConnectors[i].connectorId) === -1) {
@@ -79,7 +82,7 @@ const ConnectionOverviewWidget: FC =
             setGraph(newGrapth);
             setHasConnections(true);
         }
-    }, [connections]);
+    }, [metaConnections]);
 
     const options = {
         physics: {

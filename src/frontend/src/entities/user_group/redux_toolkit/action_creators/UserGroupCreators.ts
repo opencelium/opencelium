@@ -24,6 +24,8 @@ export const checkUserGroupName = createAsyncThunk(
     'user_group/exist/name',
     async(name: string, thunkAPI) => {
         try {
+            name = name.split('/').join('//');
+            name = encodeURIComponent(name);
             const request = new UserGroupRequest({endpoint: `/exists/${name}`});
             const response = await request.checkUserGroupName();
             return response.data;
@@ -37,7 +39,9 @@ export const addUserGroup = createAsyncThunk(
     'user_group/add',
     async({entityData, iconFile, shouldDeleteIcon} : IEntityWithImage<ModelUserGroup>, thunkAPI) => {
         try {
-            const checkNameRequest = new UserGroupRequest({endpoint: `/exists/${entityData.name}`});
+            let name = entityData.name.split('/').join('//');
+            name = encodeURIComponent(name);
+            const checkNameRequest = new UserGroupRequest({endpoint: `/exists/${name}`});
             const responseNameRequest = await checkNameRequest.checkUserGroupName();
             if (responseNameRequest.data.message === ResponseMessages.EXISTS) {
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));
@@ -68,7 +72,9 @@ export const updateUserGroup = createAsyncThunk(
             // @ts-ignore
             const userGroupState = thunkAPI.getState().userGroupReducer;
             if(userGroupState.currentUserGroup.name !== entityData.name) {
-                const checkNameRequest = new UserGroupRequest({endpoint: `/exists/${entityData.name}`});
+                let name = entityData.name.split('/').join('//');
+                name = encodeURIComponent(name);
+                const checkNameRequest = new UserGroupRequest({endpoint: `/exists/${name}`});
                 const responseNameRequest = await checkNameRequest.checkUserGroupName();
                 if (responseNameRequest.data.message === ResponseMessages.EXISTS) {
                     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));

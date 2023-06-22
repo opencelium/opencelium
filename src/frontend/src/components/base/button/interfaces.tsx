@@ -80,6 +80,7 @@ interface ButtonProps {
     className?: string,
     tabIndex?: any,
     loadingSize?: string,
+    isExternalHref?: boolean,
 }
 
 

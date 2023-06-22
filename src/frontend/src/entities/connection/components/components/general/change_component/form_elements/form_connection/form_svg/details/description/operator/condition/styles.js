@@ -17,7 +17,7 @@ const LikePercentageStyled = styled.div`
         align-items: center;
     }
     &>div:hover{
-        cursor: pointer;
+        cursor: ${({isLikeOperator}) => isLikeOperator ? 'pointer' : 'default'};
     }
     &>div:active{
         font-weight: 500;

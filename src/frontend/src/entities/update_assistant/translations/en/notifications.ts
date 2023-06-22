@@ -30,7 +30,7 @@ export default {
     },
     rejected: {
         [checkForUpdates.rejected.type]: {
-            "__DEFAULT__": "OC Update available"
+            "__DEFAULT__": "OC Update is not available. Please, check your connection."
         },
         [getOnlineUpdates.rejected.type]: {
             "__DEFAULT__": "There is an error fetching online updates"

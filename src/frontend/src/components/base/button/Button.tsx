@@ -43,6 +43,7 @@ const Button: FC<ButtonProps> =
         className,
         iconSize,
         loadingSize,
+        isExternalHref,
         ...styles
     }) => {
     const [isConfirmationOpened, toggleConfirmation] = useState<boolean>(false);
@@ -52,7 +53,11 @@ const Button: FC<ButtonProps> =
     let navigate = useNavigate();
     let onClick = () => {
         if(href){
-            navigate(href, { replace: false });
+            if(isExternalHref){
+                window.open(href, '_blank').focus()
+            } else{
+                navigate(href, { replace: false });
+            }
         } else{
             handleClick();
         }
@@ -94,6 +99,7 @@ Button.defaultProps = {
     className: '',
     isLoading: false,
     loadingSize: '',
+    isExternalHref: false,
 }
 
 export {

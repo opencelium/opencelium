@@ -101,21 +101,21 @@ class RightStatement extends React.Component{
 
     getParamStyles(){
         const {isOperatorHasThreeParams, isOperatorHasValue, hasRightMethod, hasRightParam, condition} = this.props;
-        let {hasValue, isRightStatementText} = isOperatorHasValue();
+        let {hasValue, isRightStatementText, isRightStatementOption} = isOperatorHasValue();
         const isLikeOperator = this.isLikeOperator();
         let isMethodSelectRightInvisible = !hasRightMethod && hasRightParam || isRightStatementText;
-        let width = hasValue ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '25.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0';
+        let width = hasValue && !isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '25.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0';
         if(isLikeOperator){
             width = '25%';
         }
-        return {transition: hasValue ? 'width 0.3s ease 0s' : 'none', width, float: 'left'};
+        return {transition: hasValue && !isRightStatementOption ? 'width 0.3s ease 0s' : 'none', width, float: 'left'};
     }
 
     getParamSelectStyles(){
         const {isOperatorHasThreeParams, isOperatorHasValue, hasRightMethod, hasRightParam} = this.props;
-        let {hasValue, isRightStatementText} = isOperatorHasValue();
-        let isMethodSelectRightInvisible = !hasRightMethod && hasRightParam || isRightStatementText;
-        return {transition: hasValue ? 'width 0.3s ease 0s' : 'none', width: hasValue ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '45%' : '0', float: 'left'};
+        let {hasValue, isRightStatementOption} = isOperatorHasValue();
+        let isMethodSelectRightInvisible = !hasRightMethod && hasRightParam || isRightStatementOption;
+        return {transition: hasValue && isRightStatementOption ? 'width 0.3s ease 0s' : 'none', width: hasValue && isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '45%' : '0', float: 'left'};
     }
 
     isLikeOperator(){
@@ -124,53 +124,57 @@ class RightStatement extends React.Component{
     }
 
     setLeftLikeSign(){
-        const {condition, updateCondition, getConditionFromProps} = this.props;
-        let rightParam = condition.rightParam;
-        const splitRightParam = rightParam.split('{');
-        if(splitRightParam.length > 1){
-            if(splitRightParam[1][0] === '}'){
-                return;
+        if(this.isLikeOperator()) {
+            const {condition, updateCondition, getConditionFromProps} = this.props;
+            let rightParam = condition.rightParam;
+            const splitRightParam = rightParam.split('{');
+            if (splitRightParam.length > 1) {
+                if (splitRightParam[1][0] === '}') {
+                    return;
+                }
             }
+            if (rightParam[0] === '%') {
+                rightParam = rightParam.substring(1);
+            } else {
+                rightParam = `%${rightParam}`;
+            }
+            updateCondition({
+                ...getConditionFromProps(),
+                leftMethod: condition.leftMethod,
+                leftParam: condition.leftParam,
+                relationalOperator: condition.relationalOperator,
+                property: condition.property,
+                rightMethod: condition.rightMethod,
+                rightParam: rightParam,
+            });
         }
-        if(rightParam[0] === '%'){
-            rightParam = rightParam.substring(1);
-        } else{
-            rightParam = `%${rightParam}`;
-        }
-        updateCondition({
-            ...getConditionFromProps(),
-            leftMethod: condition.leftMethod,
-            leftParam: condition.leftParam,
-            relationalOperator: condition.relationalOperator,
-            property: condition.property,
-            rightMethod: condition.rightMethod,
-            rightParam: rightParam,
-        });
     }
 
     setRightLikeSign(){
-        const {condition, updateCondition, getConditionFromProps} = this.props;
-        let rightParam = condition.rightParam;
-        const splitRightParam = rightParam.split('{');
-        if(splitRightParam.length > 1){
-            if(splitRightParam[1][0] === '}'){
-                return;
+        if(this.isLikeOperator()) {
+            const {condition, updateCondition, getConditionFromProps} = this.props;
+            let rightParam = condition.rightParam;
+            const splitRightParam = rightParam.split('{');
+            if (splitRightParam.length > 1) {
+                if (splitRightParam[1][0] === '}') {
+                    return;
+                }
             }
+            if (rightParam[rightParam.length - 1] === '%') {
+                rightParam = rightParam.substr(0, rightParam.length - 1);
+            } else {
+                rightParam += '%';
+            }
+            updateCondition({
+                ...getConditionFromProps(),
+                leftMethod: condition.leftMethod,
+                leftParam: condition.leftParam,
+                relationalOperator: condition.relationalOperator,
+                property: condition.property,
+                rightMethod: condition.rightMethod,
+                rightParam: rightParam,
+            });
         }
-        if(rightParam[rightParam.length - 1] === '%'){
-            rightParam = rightParam.substr(0, rightParam.length - 1);
-        } else{
-            rightParam += '%';
-        }
-        updateCondition({
-            ...getConditionFromProps(),
-            leftMethod: condition.leftMethod,
-            leftParam: condition.leftParam,
-            relationalOperator: condition.relationalOperator,
-            property: condition.property,
-            rightMethod: condition.rightMethod,
-            rightParam: rightParam,
-        });
     }
 
     render(){
@@ -237,7 +241,6 @@ class RightStatement extends React.Component{
                     isDisabled={isMethodDisabled}
                     isSearchable={isMethodSearchable}
                 />
-                {isRightStatementOption ?
                     <ParamSelect
                         id={paramId}
                         readOnly={readOnly}
@@ -247,7 +250,8 @@ class RightStatement extends React.Component{
                         options={options}
                         updateParam={(a) => this.updateParam(a)}
                         style={this.getParamSelectStyles()}
-                    /> :
+                        styleParams={{hasPlaceholderFullWidth: true}}
+                    />
                     <ParamInput
                         id={paramId}
                         selectedMethod={condition.rightMethod ? connection.getMethodByColor(condition.rightMethod.color) : null}
@@ -263,7 +267,6 @@ class RightStatement extends React.Component{
                         style={this.getParamStyles()}
                         isMultiline={isMultiline}
                     />
-                }
                 <LikePercentageStyled isLikeOperator={isLikeOperator} hasSign={hasRightLikeSign}>
                     <div onClick={() => this.setRightLikeSign()}>%</div>
                 </LikePercentageStyled>

@@ -57,7 +57,9 @@ export const checkConnectionTitle = createAsyncThunk(
     'connection/exist/title',
     async(connection: IConnection, thunkAPI) => {
         try {
-            const request = new ConnectionRequest({endpoint: `/check/${connection.title}`});
+            let title = connection.title.split('/').join('//');
+            title = encodeURIComponent(title);
+            const request = new ConnectionRequest({endpoint: `/check/${title}`});
             const response = await request.checkConnectionTitle();
             return response.data;
         } catch(e){
@@ -100,7 +102,9 @@ export const getAndUpdateConnection = createAsyncThunk(
     'connection/getAndUpdate',
     async(connection: IConnection, thunkAPI) => {
         try {
-            const request = new ConnectionRequest({endpoint: `/check/${connection.title}`});
+            let title = connection.title.split('/').join('//');
+            title = encodeURIComponent(title);
+            const request = new ConnectionRequest({endpoint: `/check/${title}`});
             const response = await request.checkConnectionTitle();
             if (response.data.message === ResponseMessages.EXISTS) {
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
