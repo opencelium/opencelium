@@ -22,6 +22,7 @@ import {IResponse, ResponseMessages} from "@application/requests/interfaces/IRes
 import {LogoutProps} from "@application/interfaces/IAuth";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {clearCurrentPages, clearSearchFields } from '@application/redux_toolkit/slices/ApplicationSlice';
+import {clearWidgetSettings} from "@entity/dashboard/redux_toolkit/slices/WidgetSettingSlice";
 
 export const authMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     const dispatch: AppDispatch = storeApi.dispatch;
@@ -51,6 +52,7 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
         const dispatch: AppDispatch = storeApi.dispatch;
         dispatch(clearSearchFields({}));
         dispatch(clearCurrentPages({}));
+        dispatch(clearWidgetSettings());
     }
     return next(action);
 }

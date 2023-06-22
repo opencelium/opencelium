@@ -38,6 +38,9 @@ export const widgetSettingSlice = createSlice({
     name: 'widgetSetting',
     initialState,
     reducers: {
+        clearWidgetSettings: (state) => {
+            state.widgetSettings = [];
+        },
     },
     extraReducers: {
         [getAllWidgetSettings.pending.type]: (state) => {
@@ -66,5 +69,9 @@ export const widgetSettingSlice = createSlice({
         },
     }
 })
+
+export const {
+    clearWidgetSettings
+} = widgetSettingSlice.actions;
 
 export default widgetSettingSlice.reducer;
