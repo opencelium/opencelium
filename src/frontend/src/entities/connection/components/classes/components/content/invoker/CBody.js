@@ -43,7 +43,7 @@ export default class CBody{
         this._type = this.checkType(type) ? type : FIELD_TYPE_OBJECT;
         this._format = this.checkFormat(format) ? format : BODY_FORMAT.JSON;
         this._data = this.checkData(data) ? data : BODY_DATA.RAW;
-        this._fields = fields === null ? {} : fields;
+        this._fields = fields === null ? {} : this._type === FIELD_TYPE_ARRAY && !isArray(fields) ? [fields] : fields;
     }
 
     static createBody(body){
@@ -289,7 +289,7 @@ export default class CBody{
             type: this._type,
             format: this._format,
             data: this._data,
-            fields: isEmptyObject(this._fields) ? null : this._fields,
+            fields: isEmptyObject(this._fields) ? null : isArray(this._fields) ? this._fields[0] : this._fields,
         };
     }
 

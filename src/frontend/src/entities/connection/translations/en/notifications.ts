@@ -43,7 +43,9 @@ export default {
         [getAllMetaConnections.rejected.type]: {
             "__DEFAULT__": "There is an error fetching connections."
         },
-        [addConnection.rejected.type]: "The connection was not added",
+        [addConnection.rejected.type]: {
+            "__DEFAULT__": "The connection was not added"
+        },
         [updateConnection.rejected.type]: {
             "__DEFAULT__": "The connection was not updated"
         },
