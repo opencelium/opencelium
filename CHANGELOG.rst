@@ -2,6 +2,16 @@
 Changelog
 *********
 
+3.1.1
+===
+:Date: June 23, 2023
+
+HotFix
+--------
+
+* i-doit->OTRS "config item create/update" doesn't work (OC-616)
+
+
 3.1
 ===
 :Date: April 26, 2023
@@ -149,7 +159,7 @@ Fixes
 * can't save the template (OC-444)
 * increment index on arrays in xml (OC-440)
 * new invokers and templates are available (OC-443)
-* new frontend engine has some issuesâ€¦ (OC-438)
+* new frontend engine has some issuesÃ¢â‚¬Â¦ (OC-438)
 * error during updateing a connector (OC-439)
 
 2.1
@@ -323,3 +333,4 @@ Connector
 * Zabbix
 * Icinga2
 * OTRS/Znuny/OTOBO
+
