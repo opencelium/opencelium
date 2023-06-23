@@ -25,7 +25,9 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -56,12 +58,12 @@ public class User {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL,  mappedBy = "user")
-    private Set<WidgetSetting> widgetSettings = new HashSet<>();
+    private List<WidgetSetting> widgetSettings = new ArrayList<>();
 
     public User() {
     }
 
-    public User(UserResource userResource, Set<WidgetSetting> widgetSettings) {
+    public User(UserResource userResource, List<WidgetSetting> widgetSettings) {
         this.id = userResource.getUserId();
         this.email = userResource.getEmail();
         this.userDetail = new UserDetail(userResource.getUserDetail());
@@ -117,11 +119,11 @@ public class User {
         this.userRole = userRole;
     }
 
-    public Set<WidgetSetting> getWidgetSettings() {
+    public List<WidgetSetting> getWidgetSettings() {
         return widgetSettings;
     }
 
-    public void setWidgetSettings(Set<WidgetSetting> widgetSettings) {
+    public void setWidgetSettings(List<WidgetSetting> widgetSettings) {
         this.widgetSettings = widgetSettings;
     }
 }

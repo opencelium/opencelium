@@ -141,9 +141,9 @@ public class WidgetSettingController {
 //    }
 //
 
-    @Operation(summary = "Return single widget by provided userId")
+    @Operation(summary = "Return widgets of user by provided userId")
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "201",
+            @ApiResponse( responseCode = "200",
                     description = "Widget has been successfully retrieved.",
                     content = @Content(schema = @Schema(implementation = UserWidgetsResource.class))),
             @ApiResponse( responseCode = "401",
