@@ -245,6 +245,7 @@ public class MethodResponse {
             if(part.isEmpty()){
                 continue;
             }
+            part = part.replace("[]", "[*]");
             condition = condition + "." + part;
             // Getting current index of current loop
             boolean hasLoop = false;
@@ -274,9 +275,6 @@ public class MethodResponse {
                 }
             }
             jsonPath = jsonPath + "." + part;
-        }
-        if (jsonPath.contains("null")) {
-            jsonPath += jsonPath.replace("null", "*");
         }
         return JsonPath.read(message, jsonPath);
     }
