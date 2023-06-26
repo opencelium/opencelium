@@ -143,8 +143,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public User toEntity(UserResource resource) {
 
-        Set<WidgetSetting> widgetSettings = resource.getWidgetSettings().stream()
-                .map(wsr -> widgetSettingServiceImp.toEntity(wsr, resource.getUserId())).collect(Collectors.toSet());
+        List<WidgetSetting> widgetSettings = resource.getWidgetSettings().stream()
+                .map(wsr -> widgetSettingServiceImp.toEntity(wsr, resource.getUserId())).collect(Collectors.toList());
         return new User(resource, widgetSettings);
     }
 

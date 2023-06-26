@@ -245,6 +245,7 @@ public class MethodResponse {
             if(part.isEmpty()){
                 continue;
             }
+            part = part.replace("[]", "[*]");
             condition = condition + "." + part;
             // Getting current index of current loop
             boolean hasLoop = false;

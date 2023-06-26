@@ -29,7 +29,7 @@ public class Activity {
     private int id;
 
     @MapsId
-    @OneToOne
+    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
