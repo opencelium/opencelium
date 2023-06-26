@@ -59,7 +59,8 @@ class Body extends React.Component{
         const {connection, method} = this.props;
         return connection.fieldBinding.find(item => {
             return item.to.findIndex(elem => {
-                let name = elem.field.replace('[]', '');
+                let name = elem.field.split('[]').join('');
+                name = name.split('[*]').join('');
                 return elem.color === method.color && name === fieldName;
             }) !== -1;
         });

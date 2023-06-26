@@ -13,6 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {putAsterixInEmptyBrackets} from "@change_component/form_elements/form_connection/form_svg/utils";
+
 /**
  * Binding Item class for Connection FieldBinding object
  */
@@ -20,7 +22,7 @@ export default class CBindingItem{
 
     constructor(color = '', field = '', type = ''){
         this._color = color;
-        this._field = field;
+        this._field = putAsterixInEmptyBrackets(field);
         this._type = type;
     }
 

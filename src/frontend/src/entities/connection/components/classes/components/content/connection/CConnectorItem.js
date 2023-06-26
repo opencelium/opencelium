@@ -443,7 +443,18 @@ export default class CConnectorItem{
         })
         return result;
     }
-
+    checkSubindexOfScopeElement(startIndex, elementIndex) {
+        const subIndex = elementIndex.substring(0, startIndex.length);
+        const subIndexSplit = subIndex.split('_');
+        const reducedIndex = [...subIndexSplit]
+        for(let i = subIndexSplit[subIndexSplit.length - 1]; i >= 0; i--){
+            reducedIndex[reducedIndex.length - 1] = i;
+            if(startIndex === reducedIndex.join('_')){
+                return true;
+            }
+        }
+        return false;
+    }
     areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode, isSelectedAll = false){
         let indexes = this.getReferencesForItem(draggableElement, isSelectedAll);
         let startIndex = '0';
@@ -466,19 +477,8 @@ export default class CConnectorItem{
         const subEndIndex = subArrayToString(endIndexSplit, '_', 0, endIndexSplit.length - 1);
         let subScopeStartIndex = subArrayToString(scopeElementIndexSplit, '_', 0, startIndexSplit.length - 1);
         const subScopeEndIndex = subArrayToString(scopeElementIndexSplit, '_', 0, endIndexSplit.length - 1);
-        const checkSubindexOfScopeElement = () => {
-            const subIndex = scopeElement.index.substring(0, startIndex.length);
-            const subIndexSplit = subIndex.split('_');
-            const reducedIndex = [...subIndexSplit]
-            for(let i = subIndexSplit[subIndexSplit.length - 1]; i >= 0; i--){
-                reducedIndex[reducedIndex.length - 1] = i;
-                if(startIndex === reducedIndex.join('_')){
-                    return true;
-                }
-            }
-            return false;
-        }
-        const checkStartIndex = startIndex <= scopeElement.index && checkSubindexOfScopeElement();
+
+        const checkStartIndex = startIndex <= scopeElement.index && this.checkSubindexOfScopeElement(startIndex, scopeElement.index);
         const checkEndIndex = (endIndex !== '' ? endIndex > scopeElement.index : true);
         let checkNextItemOfOperator = true;
         /*if(draggableElement.index.split('_').length === scopeElementIndexSplit.length && mode === INSIDE_ITEM){
