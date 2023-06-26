@@ -275,6 +275,9 @@ public class MethodResponse {
             }
             jsonPath = jsonPath + "." + part;
         }
+        if (jsonPath.contains("null")) {
+            jsonPath += jsonPath.replace("null", "*");
+        }
         return JsonPath.read(message, jsonPath);
     }
 }
