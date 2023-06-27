@@ -17,6 +17,7 @@ import React, {FC} from 'react';
 import {withTheme} from 'styled-components';
 import { OptionProps } from './interfaces';
 import { OptionStyled } from './styles';
+import { capitalize } from '@application/utils/utils';
 
 const Option: FC<OptionProps> =
     ({
@@ -27,7 +28,7 @@ const Option: FC<OptionProps> =
         return (
             <React.Fragment>
                 <div style={{position: 'relative'}}>
-                    <OptionStyled readOnly={true} {...props}/>
+                    <OptionStyled readOnly={true} {...props} value={capitalize(props.value)}/>
                     {OptionRightComponent}
                 </div>
             </React.Fragment>
