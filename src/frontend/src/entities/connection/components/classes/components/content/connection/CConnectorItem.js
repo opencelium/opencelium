@@ -1082,7 +1082,7 @@ export default class CConnectorItem{
             if(splitMethodIndex.length >= splitIndex.length){
                 //if index except last number equals to prefix of method index
                 if(splitMethodIndex.slice(0, splitIndex.length - 1).join('_') === splitIndex.slice(0, splitIndex.length - 1).join('_')){
-                    if(splitMethodIndex[splitIndex.length - 1] >= splitIndex[splitIndex.length - 1]){
+                    if(+splitMethodIndex[splitIndex.length - 1] >= +splitIndex[splitIndex.length - 1]){
                         switch (refactorMode){
                             case REFACTOR_ADD:
                                 splitMethodIndex[splitIndex.length - 1] = parseInt(splitMethodIndex[splitIndex.length - 1]) + 1;
