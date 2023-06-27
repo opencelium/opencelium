@@ -175,7 +175,7 @@ export default class CConnection{
         if (sourceItem instanceof CMethodItem) {
             if (connector.getConnectorType() === CONNECTOR_FROM) {
                 if(shouldDelete){
-                    this.removeFromConnectorMethod(sourceItem, true, false);
+                    this.removeFromConnectorMethod(sourceItem, true, true);
                     sourceItem.index = '';
                     sourceItem.isDragged = false;
                     connector.setCurrentItem(targetLeftItem);
@@ -187,7 +187,7 @@ export default class CConnection{
                 }
             } else {
                 if(shouldDelete) {
-                    this.removeToConnectorMethod(sourceItem, true, false);
+                    this.removeToConnectorMethod(sourceItem, true, true);
                     sourceItem.index = '';
                     sourceItem.isDragged = false;
                     connector.setCurrentItem(targetLeftItem);
@@ -214,9 +214,9 @@ export default class CConnection{
             connector.updateIndexesForOperator(sourceItem, newIndex, this, shouldDelete);
             if(shouldDelete) {
                 if (connector.getConnectorType() === CONNECTOR_FROM) {
-                    this.removeFromConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex), false);
+                    this.removeFromConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex), true);
                 } else {
-                    this.removeToConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex), false);
+                    this.removeToConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex), true);
                 }
             } else{
                 const existedChildren = connector.getOperatorChildren(sourceItem, true);
