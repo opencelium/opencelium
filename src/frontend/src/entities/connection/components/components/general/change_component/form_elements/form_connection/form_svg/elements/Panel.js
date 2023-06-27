@@ -28,7 +28,7 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {}, null, {forwardRef: true})
 class Panel extends React.Component{
     constructor(props) {
         super(props);

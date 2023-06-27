@@ -63,6 +63,7 @@ class FormConnectionSvg extends Component {
     this.setData = props.isModal ? props.setModalConnectionData : props.setConnectionData;
     this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
     this.technicalLayoutRef = React.createRef();
+    this.createElementPalenRef = React.createRef();
   }
 
   setCreateElementPanelPosition(position) {
@@ -160,6 +161,7 @@ class FormConnectionSvg extends Component {
         />
         {!data.readOnly && (
           <CreateElementPanel
+            ref={this.createElementPalenRef}
             createElementPanelConnectorType={createElementPanelConnectorType}
             x={createElementPanelPosition.x}
             y={createElementPanelPosition.y}

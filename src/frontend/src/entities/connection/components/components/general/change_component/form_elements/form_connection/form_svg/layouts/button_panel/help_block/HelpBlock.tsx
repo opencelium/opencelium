@@ -38,6 +38,14 @@ import {sortByIndex} from "@application/utils/utils";
 import {ModalConnection} from "@root/classes/ModalConnection";
 import { Connection } from "@entity/connection/classes/Connection";
 
+import { setFocusById } from "@application/utils/utils";
+import { setVideoAnimationName } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { setAnimationPreviewPanelVisibility } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+
+
+//@ts-ignore
+const connectionData = {"nodeId":null,"connectionId":null,"title":"title","description":"desc","fromConnector":{"nodeId":null,"connectorId":2,"title":null,"invoker":{"name":"trello"},"methods":[{"name":"GetBoards","request":{"endpoint":"{url}/1/members/{username}/boards?key={key}&token={token}","body":null,"method":"GET","header":{"Content-Type":"application/json"}},"response":{"success":{"status":"200","body":{"type":"array","format":"json","data":"raw","fields":{"name":"","id":""}}},"fail":{"status":"401","body":null}},"index":"0","color":"#FFCFB5"}],"operators":[]},"toConnector":{"nodeId":null,"connectorId":2,"title":null,"invoker":{"name":"trello"},"methods":[],"operators":[]},"fieldBinding":[]}
+
 
 const prepareConnection = (connection: any, connectors: any,) => {
     if(connection && connection.fromConnector && connection.toConnector) {
@@ -62,81 +70,274 @@ const prepareConnection = (connection: any, connectors: any,) => {
 
 const HelpBlock = () => {
     const dispatch = useAppDispatch();
-    const [animationProps, setAnimationProps] = useState<any>({index: -1, connection: CConnection.createConnection(), allItems: {fromConnector: [], toConnector: []}})
+    const [animationProps, setAnimationProps] = useState<any>({connection: CConnection.createConnection()})
     const {connectors, gettingConnectors} = Connector.getReduxState();
     const [isVisible, setIsVisible] = useState(false);
     const { isButtonPanelOpened, videoAnimationName } = Connection.getReduxState();
     const { isAnimationPaused } = ModalConnection.getReduxState();
-    const [timeOutId, setTimeOutId] = useState(null);
+    const [ timeOutId, setTimeOutId ] = useState(null);
+    const [index, setIndex] = useState(0);
+    const [stopTimer, setStopTimer] = useState(false);
 
     const ref = React.useRef(null);
 
-    const ref2 = React.useRef(null);
+    // console.log(HelpBlockAllData)
+
+    // useEffect(() => {
+    //     if(videoAnimationName !== ''){
+    //         let connection = CConnection.createConnection(HelpBlockAllData[videoAnimationName]);
+    //         let allItems = {
+    //             fromConnector: sortByIndex([...connection.fromConnector.methods, ...connection.fromConnector.operators]),
+    //             toConnector: sortByIndex([...connection.toConnector.methods, ...connection.toConnector.operators])
+    //         }
+    //         setAnimationProps({
+    //             index: 0,
+    //             connection: prepareConnection(connection, connectors),
+    //             allItems,
+    //         })
+    //     }
+    //     if(timeOutId) {
+    //         clearTimeout(timeOutId);
+    //         setTimeOutId(null);
+    //     }
+    // }, [videoAnimationName])
+
+    // useEffect(() => {
+    //     if(isButtonPanelOpened && videoAnimationName && !isAnimationPaused) {
+    //         if (animationProps.index >= 0 && animationProps.index < animationProps.allItems.fromConnector.length + animationProps.allItems.toConnector.length) {
+    //             if (animationProps.index < animationProps.allItems.fromConnector.length) {
+    //                 if (animationProps.allItems.fromConnector[animationProps.index].hasOwnProperty('type')) {
+    //                     animationProps.connection.fromConnector.operators.push(animationProps.allItems.fromConnector[animationProps.index]);
+    //                   } else {
+    //                     animationProps.connection.fromConnector.methods.push(animationProps.allItems.fromConnector[animationProps.index]);
+    //                 }
+    //                 animationProps.connection.fromConnector.setSvgItems();
+    //                 dispatch(setModalCurrentTechnicalItem(animationProps.connection.fromConnector.getSvgElementByIndex(animationProps.allItems.fromConnector[animationProps.index].index).getObject()))
+
+    //                 if(ref.current !== null) {
+    //                   // dispatch(setAnimationPaused(true))
+    //                   setTimeout(() => {
+    //                     ref.current.technicalLayoutRef.current.svgRef.current.processRef.current.onMouseOverSvg()
+    //                     setTimeout(() => {
+    //                       const createPanelElement = document.querySelector('#create_panel_right').nextElementSibling;
+    //                       const createProcess = ref.current.technicalLayoutRef.current.svgRef.current.processRef.current.createPanelRef.current.createProcess;
+    //                       createProcess(createPanelElement);
+    //                       ref.current.createElementPalenRef.current.createProcessRef.current.changeName({label: "GetBoards", value: "GetBoards"})
+    //                       ref.current.createElementPalenRef.current.createProcessRef.current.changeLabel('test')
+    //                       setTimeout(() => {
+    //                         ref.current.createElementPalenRef.current.createProcessRef.current.create()
+    //                         // dispatch(setAnimationPaused(false))
+    //                       }, 1000)
+    //                     }, 1000)
+    //                   }, 1000)
+    //                 }
+                    
+    //             } else {
+    //                 if (animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length].hasOwnProperty('type')) {
+    //                     animationProps.connection.toConnector.operators.push(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length]);
+    //                 } else {
+    //                     animationProps.connection.toConnector.methods.push(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length]);
+    //                 }
+    //                 animationProps.connection.toConnector.setSvgItems();
+    //                 const currentItem = animationProps.connection.toConnector.getSvgElementByIndex(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length].index).getObject();
+    //                 dispatch(setModalCurrentTechnicalItem(animationProps.connection.toConnector.getSvgElementByIndex(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length].index).getObject()))
+    //             }
+    //             updateEntity(animationProps.connection);
+    //             setTimeOutId(setTimeout(() => setAnimationProps({...animationProps, connection: animationProps.connection, index: animationProps.index + 1}), 1000))
+    //         }
+    //     }
+    // }, [animationProps.index, isAnimationPaused])
+
+    const animationData: any = {
+      "firstSteps": {
+        "fromConnector": [
+          {
+            "type": "process",
+            "name": "GetBoards",
+            "label": "test"
+          },
+          {
+            "type": "operator",
+            "name": "if",
+            "direction": "right"
+          },
+          {
+            "type": "process",
+            "name": "GetBoardList",
+            "label": "test3"
+          },
+          {
+            "type": "operator",
+            "name": "if",
+            "direction": "bottom"
+          },
+          {
+            "type": "process",
+            "name": "GetBoardList",
+            "label": "test2"
+          },
+        ],
+        "toConnector": [
+          {
+            "type": "process",
+            "name": "GetBoardList",
+            "label": "test4"
+          }
+        ]
+      },
+      "configureAPI": {
+
+      }
+    }
+
+    function delay(ms: number) {
+      return new Promise((resolve, reject) => {
+        if (!stopTimer) {
+          setTimeout(resolve, ms);
+        } else {
+          reject();
+        }
+      });
+    }
+
+    const animationFunction = (panel: string) => {
+      const duration = 500;
+
+      const type = animationData[videoAnimationName][panel][index].type;
+      const name = animationData[videoAnimationName][panel][index].name;
+      const label = animationData[videoAnimationName][panel][index].label;
+      const prevElementType = animationData[videoAnimationName][panel][index > 0 ? index - 1 : index].type;
+
+      const svgRef = ref.current.technicalLayoutRef.current.svgRef.current;
+
+      const connectorPanel = svgRef.connectorPanelsRef.current;
+
+
+      delay(duration)
+      .then(() => {
+        if(index <= 0){
+          connectorPanel.onClick()
+        }
+        else{
+          const operatorRef = svgRef.operatorRef.current;
+          const processRef = svgRef.processRef.current;
+          
+            if(prevElementType === "operator"){
+              operatorRef.onMouseOverSvg()
+            }
+            else{
+              processRef.onMouseOverSvg()
+            }
+
+          }
+          return delay(duration);
+        })
+        .then(() => {
+          if(index >= 1){
+            const createPanelElement = document.querySelector(`#create_panel_right`).nextElementSibling;
+            
+            if(type === "process" && prevElementType === "operator"){
+              const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
+
+              operatorCreatePanel.createProcess(createPanelElement);
+            }
+            
+            else if(type === "process" && prevElementType === "process"){
+              const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
+
+              processCreatePanel.createProcess(createPanelElement);
+            }
+            
+            else if(type === "operator" && prevElementType === "process"){
+              const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
+
+              processCreatePanel.createOperator(createPanelElement);
+            }
+
+            else if(type === "operator" && prevElementType === "operator"){
+              const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
+
+              operatorCreatePanel.createOperator(createPanelElement);
+            }
+
+            return delay(duration);
+          }
+        })
+        .then(() => {
+          const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
+          const createOperatorRef = ref.current.createElementPalenRef.current.createOperatorRef.current;
+
+          if(type === "process"){
+            createProcessRef.changeName({label: name, value: name})
+          }
+          else{
+            createOperatorRef.changeType({label: name, value: name})
+          }
+          return delay(duration);
+        })
+        .then(() => {
+          if(type === "process"){
+            setFocusById('new_request_label');
+            return delay(duration);
+          }
+        })
+        .then(() => {
+          const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
+
+          if(type === "process"){
+            createProcessRef.changeLabel(label)
+            return delay(duration);
+          }
+
+        })
+        .then(() => {
+          const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
+          const createOperatorRef = ref.current.createElementPalenRef.current.createOperatorRef.current;
+
+          if(type === "process"){
+            createProcessRef.create()
+          }
+          else{
+            createOperatorRef.create()
+          }
+
+          setIndex(index + 1);
+        })
+        .catch(() => {})
+    }
+
 
     useEffect(() => {
-        if(videoAnimationName !== ''){
-            let connection = CConnection.createConnection(HelpBlockAllData[videoAnimationName]);
-            let allItems = {
-                fromConnector: sortByIndex([...connection.fromConnector.methods, ...connection.fromConnector.operators]),
-                toConnector: sortByIndex([...connection.toConnector.methods, ...connection.toConnector.operators])
-            }
-            setAnimationProps({
-                index: 0,
-                connection: prepareConnection(connection, connectors),
-                allItems,
-            })
+      if(ref.current){
+        if(videoAnimationName && index <= 0){
+          let connection = CConnection.createConnection(connectionData);
+          setAnimationProps({
+              connection: prepareConnection(connection, connectors)
+          })
         }
-        if(timeOutId) {
-            clearTimeout(timeOutId);
-            setTimeOutId(null);
-        }
-    }, [videoAnimationName])
-    useEffect(() => {
         if(isButtonPanelOpened && videoAnimationName && !isAnimationPaused) {
-            if (animationProps.index >= 0 && animationProps.index < animationProps.allItems.fromConnector.length + animationProps.allItems.toConnector.length) {
-                if (animationProps.index < animationProps.allItems.fromConnector.length) {
-                    if (animationProps.allItems.fromConnector[animationProps.index].hasOwnProperty('type')) {
-                        animationProps.connection.fromConnector.operators.push(animationProps.allItems.fromConnector[animationProps.index]);
-                        console.log('operator')
-                      } else {
-                        animationProps.connection.fromConnector.methods.push(animationProps.allItems.fromConnector[animationProps.index]);
-                        console.log('process')
-                    }
-                    animationProps.connection.fromConnector.setSvgItems();
-                    dispatch(setModalCurrentTechnicalItem(animationProps.connection.fromConnector.getSvgElementByIndex(animationProps.allItems.fromConnector[animationProps.index].index).getObject()))
-                    if(animationProps.index === 0){
-                      console.log(ref.current)
-                      if(ref.current !== null) {
-                        dispatch(setAnimationPaused(true))
-                        setTimeout(() => {
-                          ref.current.technicalLayoutRef.current.svgRef.current.processRef.current.onMouseOverSvg()
-                          setTimeout(() => {
-                            const event = new Event('click');
-                            const createPanelElement = document.querySelector('#create_panel_right').nextElementSibling;
-                            const createProcess = ref.current.technicalLayoutRef.current.svgRef.current.processRef.current.createPanelRef.current.createProcess;
-                            console.log(createPanelElement)
-                            createProcess(createPanelElement)
-                            // ref.current.technicalLayoutRef.current.svgRef.current.processRef.current.onMouseLeaveSvg()
-                            // dispatch(setAnimationPaused(false))
-                          }, 1000)
-                        }, 1000)
-                      }
-                    }
-                } else {
-                    if (animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length].hasOwnProperty('type')) {
-                        animationProps.connection.toConnector.operators.push(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length]);
-                    } else {
-                        animationProps.connection.toConnector.methods.push(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length]);
-                    }
-                    animationProps.connection.toConnector.setSvgItems();
-                    const currentItem = animationProps.connection.toConnector.getSvgElementByIndex(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length].index).getObject();
-                    dispatch(setModalCurrentTechnicalItem(animationProps.connection.toConnector.getSvgElementByIndex(animationProps.allItems.toConnector[animationProps.index - animationProps.allItems.fromConnector.length].index).getObject()))
-                }
-                updateEntity(animationProps.connection);
-                setTimeOutId(setTimeout(() => setAnimationProps({...animationProps, connection: animationProps.connection, index: animationProps.index + 1}), 1000))
+          if(index < animationData[videoAnimationName].fromConnector.length + animationData[videoAnimationName].toConnector.length) {
+            if(index < animationData[videoAnimationName].fromConnector.length){
+              animationFunction('fromConnector');
             }
+            // else{
+            //   animationFunction(animationData[videoAnimationName].toConnector[index - animationData[videoAnimationName].fromConnector.length].type, animationData[videoAnimationName].toConnector[index - animationData[videoAnimationName].fromConnector.length].name, animationData[videoAnimationName].toConnector[index - animationData[videoAnimationName].fromConnector.length].label);
+            // }
+          }
         }
-    }, [animationProps.index, isAnimationPaused, ref])
+      }
+    }, [videoAnimationName, isAnimationPaused, index])
+
+    useEffect(() => {
+      if(!isVisible){
+        setStopTimer(true);
+      }
+      else{
+        setStopTimer(false);
+        dispatch(setVideoAnimationName(''));
+        dispatch(setAnimationPreviewPanelVisibility(true))
+      }
+    }, [isVisible])
 
 
   function toggleVisible() {

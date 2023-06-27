@@ -46,7 +46,7 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {}, null, {forwardRef: true})
 class CreateElementPanel extends React.Component{
     constructor(props) {
         super(props);
@@ -56,6 +56,8 @@ class CreateElementPanel extends React.Component{
             localItemPosition: props.itemPosition,
         }
         document.body.appendChild(this.createElementPanel);
+        this.createProcessRef = React.createRef();
+        this.createOperatorRef = React.createRef();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -155,6 +157,7 @@ class CreateElementPanel extends React.Component{
                     }
                     {hasCreateProcess &&
                         <CreateProcess
+                            ref={this.createProcessRef}
                             {...this.props}
                             hasBeforeLine={hasLineBeforeCreateProcess}
                             itemPosition={itemPosition}
@@ -165,6 +168,7 @@ class CreateElementPanel extends React.Component{
                     }
                     {hasCreateOperator &&
                         <CreateOperator
+                            ref={this.createOperatorRef}
                             {...this.props}
                             itemType={type}
                             itemPosition={itemPosition}

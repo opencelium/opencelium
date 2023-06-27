@@ -40,7 +40,7 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {setJustCreatedItem, setModalJustCreatedItem})
+@connect(mapStateToProps, {setJustCreatedItem, setModalJustCreatedItem}, null, {forwardRef: true})
 class CreateProcess extends React.Component{
     constructor(props) {
         super(props);

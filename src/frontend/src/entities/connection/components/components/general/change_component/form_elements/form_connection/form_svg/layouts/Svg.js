@@ -65,6 +65,8 @@ class Svg extends React.Component {
         this.svgRef = React.createRef();
         this.resetRatio = false;
         this.processRef = React.createRef();
+        this.operatorRef = React.createRef();
+        this.connectorPanelsRef = React.createRef();
     }
 
 
@@ -420,6 +422,7 @@ class Svg extends React.Component {
                 case 'if':
                     return(
                         <Operator
+                            ref={this.operatorRef}
                             key={key}
                             isItemDraggable={isItemDraggable && !isTestingConnection}
                             type={'if'}
@@ -540,6 +543,7 @@ class Svg extends React.Component {
                     </defs>
                     {fromConnectorPanelParams && toConnectorPanelParams &&
                         <ConnectorPanels
+                            ref={this.connectorPanelsRef}
                             fromConnectorPanelParams={fromConnectorPanelParams}
                             toConnectorPanelParams={toConnectorPanelParams}
                             connection={connection}

@@ -32,7 +32,7 @@ import GetModalProp from '@entity/connection/components/decorators/GetModalProp'
 
 
 @GetModalProp()
-@connect(null, {setJustCreatedItem, setModalJustCreatedItem})
+@connect(null, {setJustCreatedItem, setModalJustCreatedItem}, null, {forwardRef: true})
 class CreateOperator extends React.Component{
     constructor(props) {
         super(props);

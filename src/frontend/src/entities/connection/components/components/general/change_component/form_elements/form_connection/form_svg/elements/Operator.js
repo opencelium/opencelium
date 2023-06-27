@@ -49,7 +49,7 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {setJustDeletedItem, setModalJustDeletedItem})
+@connect(mapStateToProps, {setJustDeletedItem, setModalJustDeletedItem}, null, {forwardRef: true})
 class Operator extends React.Component{
     constructor(props) {
         super(props)
@@ -63,6 +63,7 @@ class Operator extends React.Component{
             isMouseOver: false,
             showCreatePanel: false,
         }
+        this.createPanelRef = React.createRef();
         this.setJustDeletedItem = props.isModal ? props.setModalJustDeletedItem : props.setJustDeletedItem;
     }
 
@@ -500,6 +501,7 @@ class Operator extends React.Component{
                 {this.renderOperator(type)}
                 {showCreatePanel &&
                     <CreatePanel
+                        ref={this.createPanelRef}
                         element={operator}
                         onMouseLeave={(a) => this.onMouseLeaveSvg(a)}
                         setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
