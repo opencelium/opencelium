@@ -9,6 +9,7 @@ assistant/
 src/main/resources/application.yml
 src/main/resources/upload-dir
 src/main/resources/invoker/i-doit.xml
+src/main/resources/invoker/baramundi.xml
 src/test/
 
 ### STS ###
