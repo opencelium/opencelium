@@ -229,7 +229,7 @@ export default class CBody{
         let result = [];
         let cleanedSearchValue = this._cleanSearchValue(searchValue);
         let properties = cleanedSearchValue.split('.');
-        let fields = this._fields;
+        let fields = isArray(this._fields) && this._fields.length > 0 ? this._fields[0] : this._fields;
         if(fields) {
             for (let i = 0; i < properties.length; i++) {
                 let property = this._getProperty(properties[i]);
