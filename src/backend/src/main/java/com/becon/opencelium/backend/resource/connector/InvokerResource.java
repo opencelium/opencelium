@@ -48,7 +48,6 @@ public class InvokerResource {
         String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
 
         this.name = invoker.getName();
-        System.out.println(this.name + "-------------------------------");
         this.description = invoker.getDescription();
         this.hint = invoker.getHint();
         this.icon =imagePath + invoker.getIcon();
