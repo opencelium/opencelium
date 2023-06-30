@@ -228,7 +228,7 @@ public class ConnectorController {
     @PostMapping(path = "/check", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> checkCommunication(@RequestBody ConnectorResource connectorResource) throws JsonProcessingException, IOException {
         Connector connector = connectorService.toEntity(connectorResource);
-        Invoker invoker = invokerService.findByName(connector.getInvoker());
+//        Invoker invoker = invokerService.findByName(connector.getInvoker());
 //        AuthFactory authFactory = new AuthFactory();
 //        ApiAuth authenticationType = authFactory.generateAuth(invoker);
 //        authenticationType.getAccessCredentials(connector);

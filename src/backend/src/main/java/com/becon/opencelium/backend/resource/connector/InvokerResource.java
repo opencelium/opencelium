@@ -21,11 +21,11 @@ import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Resource
@@ -37,7 +37,7 @@ public class InvokerResource {
     private String hint;
     private String icon;
     private String authType;
-    private List<String> requiredData;
+    private Map<String, String> requiredData;
     private List<FunctionResource> operations;
 
     public InvokerResource() {
@@ -48,12 +48,13 @@ public class InvokerResource {
         String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
 
         this.name = invoker.getName();
+        System.out.println(this.name + "-------------------------------");
         this.description = invoker.getDescription();
         this.hint = invoker.getHint();
         this.icon =imagePath + invoker.getIcon();
         this.authType = invoker.getAuthType();
         this.requiredData = invoker.getRequiredData().stream().filter(d->!d.getVisibility().equals("private"))
-                .map(RequiredData::getName).collect(Collectors.toList());
+                .collect(Collectors.toMap(RequiredData::getName, RequiredData::getValue));
         this.operations = invoker.getOperations().stream().map(FunctionResource::new).collect(Collectors.toList());
     }
 
@@ -89,11 +90,11 @@ public class InvokerResource {
         this.icon = icon;
     }
 
-    public List<String> getRequiredData() {
+    public Map<String, String> getRequiredData() {
         return requiredData;
     }
 
-    public void setRequiredData(List<String> requiredData) {
+    public void setRequiredData(Map<String, String> requiredData) {
         this.requiredData = requiredData;
     }
 
