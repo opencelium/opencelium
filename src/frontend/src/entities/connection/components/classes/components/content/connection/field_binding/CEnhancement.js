@@ -15,6 +15,7 @@
 
 import {isId} from "@application/utils/utils";
 import {consoleLog} from "@application/utils/utils";
+import {putAsterixInEmptyBrackets} from "@change_component/form_elements/form_connection/form_svg/utils";
 
 /**
  * Enhancement class for Field Binding class
@@ -51,7 +52,7 @@ export default class CEnhancement{
         if(result === ''){
             result = this.getExpertVar();
         }
-        return result;
+        return putAsterixInEmptyBrackets(result);
     }
     getVariables(){
         const binding = this._fieldBinding;

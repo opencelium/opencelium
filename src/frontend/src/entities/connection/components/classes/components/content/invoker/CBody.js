@@ -20,6 +20,7 @@ import {
     FIELD_TYPE_STRING
 } from "@entity/connection/components/classes/components/content/connection/method/CMethodItem";
 import {WHOLE_ARRAY} from "@entity/connection/components/classes/components/content/invoker/response/CResponseResult";
+import {putAsterixInEmptyBrackets} from "@change_component/form_elements/form_connection/form_svg/utils";
 
 export const BODY_FORMAT = {
     JSON: 'json',
@@ -44,6 +45,7 @@ export default class CBody{
         this._format = this.checkFormat(format) ? format : BODY_FORMAT.JSON;
         this._data = this.checkData(data) ? data : BODY_DATA.RAW;
         this._fields = fields === null ? {} : this._type === FIELD_TYPE_ARRAY && !isArray(fields) ? [fields] : fields;
+        this._fields = putAsterixInEmptyBrackets(this._fields);
     }
 
     static createBody(body){
@@ -227,7 +229,7 @@ export default class CBody{
         let result = [];
         let cleanedSearchValue = this._cleanSearchValue(searchValue);
         let properties = cleanedSearchValue.split('.');
-        let fields = this._fields;
+        let fields = isArray(this._fields) && this._fields.length > 0 ? this._fields[0] : this._fields;
         if(fields) {
             for (let i = 0; i < properties.length; i++) {
                 let property = this._getProperty(properties[i]);

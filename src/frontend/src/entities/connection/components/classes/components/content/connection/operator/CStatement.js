@@ -17,6 +17,7 @@ import {isNumber, isString} from "@application/utils/utils";
 import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../../invoker/response/CResponse";
 import {ARRAY_SIGN} from "@entity/connection/components/classes/components/content/invoker/response/CResponseResult";
 import {markFieldNameAsArray} from "@change_component//form_elements/form_connection/form_methods/help";
+import {putAsterixInEmptyBrackets} from "@change_component/form_elements/form_connection/form_svg/utils";
 
 export const STATEMENT_REQUEST = 'request';
 export const STATEMENT_RESPONSE = 'response';
@@ -31,7 +32,7 @@ export default class CStatement{
     constructor(color = '', responseType = RESPONSE_SUCCESS, field = '', type = STATEMENT_RESPONSE, parent = null, rightPropertyValue = ''){
         this._color = this.checkColor(color) ? color : DEFAULT_COLOR;
         this._responseType = this.checkResponseType(responseType) ? responseType : RESPONSE_SUCCESS;
-        this._field = field;
+        this._field = putAsterixInEmptyBrackets(field);
         this._type = this.checkType(type) ? type : STATEMENT_RESPONSE;
         this._parent = parent;
         this._rightPropertyValue = rightPropertyValue;

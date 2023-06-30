@@ -308,6 +308,7 @@ class Svg extends React.Component {
     moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete = true, isSelectedAll = false){
         const {connection, updateConnection, setCurrentItem} = this.props;
         const nextSiblingItems = connector.getNextSiblings(sourceItem);
+        const connectionFieldBinding = [...connection.fieldBinding.map(f=> f.getObject())];
         const result = connection.moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete);
         let colorMapping = {[sourceItem.color]: result.currentItem.color};
         let targetItem = result.currentItem;
@@ -319,7 +320,6 @@ class Svg extends React.Component {
             })
         }
         const allNextItems = connector.getAllNextItems(result.currentItem);
-        const connectionFieldBinding = [...connection.fieldBinding];
         for (const colorMappingKey in colorMapping) {
             allNextItems.methods.forEach(method => {
                 method.request.endpoint = method.request.endpoint.replace(new RegExp(colorMappingKey, 'g'), colorMapping[colorMappingKey]);
@@ -338,7 +338,7 @@ class Svg extends React.Component {
         const fieldBindings = [...connectionFieldBinding].filter(f => f.from.findIndex(from => !!colorMapping.hasOwnProperty(from.color)) !== -1 || f.to.findIndex(to => !!colorMapping.hasOwnProperty(to.color)) !== -1);
         fieldBindings.forEach(fieldBinding => {
             let localColorMapping = {};
-            let newFieldBinding = {...fieldBinding.getObject()}
+            let newFieldBinding = {...fieldBinding}
             newFieldBinding.from = newFieldBinding.from.map(from => {
                 if(colorMapping.hasOwnProperty(from.color)){
                     localColorMapping[from.color] = colorMapping[from.color];

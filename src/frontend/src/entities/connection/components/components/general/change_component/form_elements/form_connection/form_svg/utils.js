@@ -36,3 +36,17 @@ export function mapItemsToClasses(state){
         updateConnection,
     }
 }
+
+export function putAsterixInEmptyBrackets(data){
+    if(data){
+        try {
+            data = JSON.stringify(data);
+            data = data.split('[]').join('[*]');
+            data = data.split(':[*]').join(':[]');
+            return JSON.parse(data);
+        } catch(e){
+            console.log(data);
+        }
+    }
+    return data;
+}

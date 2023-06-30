@@ -892,3 +892,10 @@ export const generateSignature = (token, method, url, timestamp) => {
     hmac.update(`${method.toUpperCase()}${url}${timestamp}`);
     return hmac.digest('hex');
 }
+
+export const sortAlphabeticallyByKey = (array, key) => {
+    return array.sort(function(a, b) {
+        const x = a[key].toLowerCase(); const y = b[key].toLowerCase();
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
+}

@@ -30,7 +30,8 @@ import {
 } from "./styles";
 import {Option} from "./Option";
 import Button from "../../button/Button";
-
+import { capitalize } from '@application/utils/utils';
+import { sortAlphabeticallyByKey } from '@application/utils/utils';
 
 const InputSelect: FC<InputSelectProps> = ({
     id,
@@ -73,6 +74,8 @@ const InputSelect: FC<InputSelectProps> = ({
     const [localOptions, setLocalOptions] = useState(!isMultiple ? source : source.filter(option => multipleValue.findIndex(v => v === option.value) === -1));
     const [isToggled, toggle] = useState(false);
     const [isHidden, hide] = useState(!value);
+
+
     useEffect(() => {
         setCurrentOption(value);
         setSearchValue(value && !isMultiple ? value.label : '');
@@ -242,7 +245,7 @@ const InputSelect: FC<InputSelectProps> = ({
                             ref={inputSelectRef}
                             onFocus={() => toggleOptions(true)}
                             onClick={() => toggleOptions(true)}
-                            value={searchValue} onChange={filter}/>
+                            value={capitalize(searchValue)} onChange={filter}/>
                     }
                 </MultipleValuesStyled>
                 {
@@ -259,7 +262,7 @@ const InputSelect: FC<InputSelectProps> = ({
             <LineStyled/>
             <OptionsStyled ref={selectRef} isVisible={isHidden} height={height} color={ColorTheme.DarkBlue}>
                 {
-                    localOptions.length > 0 ? localOptions.map((option, key) => {
+                    localOptions.length > 0 ? sortAlphabeticallyByKey(localOptions, 'label').map((option:any, key:any) => {
                         return (
                             <Option key={option.value}
                                 onKeyDown={(e: any) => focusNextOption(e, option)}
