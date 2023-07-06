@@ -99,7 +99,6 @@ export class Connector extends HookStateClass implements IConnector{
                 data: this.invoker.requiredData
             };
         }
-        console.log(this.invoker)
         this.shouldDeleteIcon = connector?.shouldDeleteIcon || false;
         this.requestData = connector?.requestData || null;
         // @ts-ignore
