@@ -24,6 +24,7 @@ import jakarta.annotation.Resource;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ public class InvokerResource {
     private String hint;
     private String icon;
     private String authType;
-    private Map<String, String> requiredData;
+    private LinkedHashMap<String, String> requiredData;
     private List<FunctionResource> operations;
 
     public InvokerResource() {
@@ -53,7 +54,8 @@ public class InvokerResource {
         this.icon =imagePath + invoker.getIcon();
         this.authType = invoker.getAuthType();
         this.requiredData = invoker.getRequiredData().stream().filter(d->!d.getVisibility().equals("private"))
-                .collect(Collectors.toMap(RequiredData::getName, RequiredData::getValue));
+                .collect(Collectors.toMap(RequiredData::getName, RequiredData::getValue,
+                        (existingValue, newValue) -> existingValue, LinkedHashMap::new));
         this.operations = invoker.getOperations().stream().map(FunctionResource::new).collect(Collectors.toList());
     }
 
@@ -93,7 +95,7 @@ public class InvokerResource {
         return requiredData;
     }
 
-    public void setRequiredData(Map<String, String> requiredData) {
+    public void setRequiredData(LinkedHashMap<String, String> requiredData) {
         this.requiredData = requiredData;
     }
 

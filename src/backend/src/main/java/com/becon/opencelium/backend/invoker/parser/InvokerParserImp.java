@@ -254,7 +254,7 @@ public class InvokerParserImp {
     private List<RequiredData> getRequestDataItems(NodeList nodeList){
         InvokerParserFactory<List<RequiredData>> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, List<RequiredData>> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
-        List<RequiredData> items = new ArrayList<>();
+        LinkedList<RequiredData> items = new LinkedList<>();
         return xmlDomParser.doAction("item", node -> {
             RequiredData requiredData = new RequiredData();
             String name = node.getAttributes().getNamedItem("name").getNodeValue();

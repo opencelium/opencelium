@@ -34,16 +34,6 @@ public class Invoker {
     public Invoker() {
     }
 
-//    public Invoker(InvokerResource invokerResource) {
-////        this.name = invokerResource.getName();
-////        this.description = invokerResource.getDescription();
-////        this.hint = invokerResource.getHint();
-////        this.icon = invokerResource.getIcon();
-////        this.authType = invokerResource.getAuthType();
-////        this.requestData = invokerResource.getRequestData().stream().map(data -> new RequestData(data)).collect(Collectors.toList());
-////        this.operations = invokerResource.getOperations().stream().map(FunctionInvoker::new).collect(Collectors.toList());
-//    }
-
     public String getName() {
         return name;
     }
