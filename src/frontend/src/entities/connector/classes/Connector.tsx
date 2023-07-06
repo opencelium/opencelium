@@ -99,6 +99,7 @@ export class Connector extends HookStateClass implements IConnector{
                 data: this.invoker.requiredData
             };
         }
+        console.log(this.invoker)
         this.shouldDeleteIcon = connector?.shouldDeleteIcon || false;
         this.requestData = connector?.requestData || null;
         // @ts-ignore
@@ -152,11 +153,12 @@ export class Connector extends HookStateClass implements IConnector{
     getCredentials({error}: InputTextProps): any[]{
         let credentials: any[] = [];
         if(this.invokerSelect) {
-            for(let i = 0; i < this.invokerSelect.data.length; i++){
-                let errorMessage = this.validations[`_${this.invokerSelect.data[i]}`] || error || '';
+            const keys = Object.keys(this.invokerSelect.data);
+            keys.forEach((key, i) => {
+                let errorMessage = this.validations[`_${keys[i]}`] || error || '';
                 let icon = 'perm_identity';
                 let type = InputTextType.Text;
-                let credentialName = this.invokerSelect.data[i];
+                let credentialName = keys[i];
                 if(credentialName.toLowerCase().includes('url')){
                     icon = 'link';
                 }
@@ -174,11 +176,11 @@ export class Connector extends HookStateClass implements IConnector{
                     type={type}
                     required
                     // @ts-ignore
-                    onChange={(e:ChangeEvent<HTMLInputElement>) => {this.validations[`_${this.invokerSelect.data[i]}`] = ''; this[`updateRequestData`](this, {...this.requestData, [credentialName]: e.target.value})}}
+                    onChange={(e:ChangeEvent<HTMLInputElement>) => {this.validations[`_${keys[i]}`] = ''; this[`updateRequestData`](this, {...this.requestData, [credentialName]: e.target.value})}}
                     // @ts-ignore
-                    value={this.requestData ? this.requestData[credentialName] : ''}
+                    value={this.requestData && this.requestData[credentialName] !== undefined ? this.requestData[credentialName] : this.invokerSelect.data[key]}
                 />);
-            }
+            })
         }
         return credentials;
     }
@@ -228,23 +230,25 @@ export class Connector extends HookStateClass implements IConnector{
     validateRequestData(){
         let isValid = true;
         let index = -1;
+        const keys = this.invokerSelect ? Object.keys(this.invokerSelect.data) : null;
         if(this.invokerSelect) {
-            for (let i = 0; i < this.invokerSelect.data.length; i++) {
-                if (!this.requestData || !this.requestData.hasOwnProperty(this.invokerSelect.data[i]) || this.requestData[this.invokerSelect.data[i]] === '') {
-                    this.validations[`_${this.invokerSelect.data[i]}`] = `${capitalize(putSpaceInCamelWords(this.invokerSelect.data[i]))} is a required field`;
+            this.requestData = this.requestData === null ? this.invokerSelect.data : this.requestData;
+            keys.forEach((key, i) => {
+                if (!this.requestData || !this.requestData.hasOwnProperty(keys[i]) || this.requestData[keys[i]] === '') {
+                    this.validations[`_${keys[i]}`] = `${capitalize(putSpaceInCamelWords(keys[i]))} is a required field`;
                     isValid = false;
                     if (index === -1) {
                         index = i;
                     }
                 }
-            }
+            })
         }
         if(!isValid){
             // @ts-ignore
             this.updateInvokerSelect(this, this.invokerSelect);
             if(index !== -1) {
                 if (!this.isFocused) {
-                    const element = document.getElementById(`input_${this.invokerSelect.data[index]}`);
+                    const element = document.getElementById(`input_${keys[index]}`);
                     if(element){
                         element.focus();
                         this.isFocused = true;
