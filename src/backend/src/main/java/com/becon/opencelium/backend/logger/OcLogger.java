@@ -54,7 +54,7 @@ public class OcLogger<T extends LogMessage> {
     }
 
     public void logAndSend(String message){
-        Consumer<String> printStrategy = logger::error;
+        Consumer<String> printStrategy = logger::info;
         logAndSend(printStrategy, message);
     }
 
