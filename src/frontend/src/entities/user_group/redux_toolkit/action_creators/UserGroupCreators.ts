@@ -50,7 +50,7 @@ export const addUserGroup = createAsyncThunk(
             const response = await addUserGroupRequest.addUserGroup(entityData);
             if(iconFile){
                 let data: FormData = new FormData();
-                data.append('userGroupId', entityData.groupId.toString());
+                data.append('userGroupId', response.data.groupId.toString());
                 data.append('file', iconFile[0]);
                 const uploadIconRequest = new UserGroupRequest({isFormData: true});
                 await uploadIconRequest.uploadUserGroupImage(data);

@@ -28,13 +28,14 @@ import {UserGroup} from "../classes/UserGroup";
 import {deleteUserGroupsById} from "../redux_toolkit/action_creators/UserGroupCreators";
 import { UserGroupPermissions } from "../constants";
 import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
+import {DeleteButtonStyled} from "@app_component/collection/collection_view/styles";
 
 class UserGroups extends ListCollection<UserGroupProps>{
     name: string = 'userGroups';
     entities: IUserGroup[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'User Groups'}];
     keyPropName: UserGroupProps ='id';
-    getListRawUrl = (entity: IUserGroup) => `${entity.id}/update`;
+    getListRawUrl = (entity: IUserGroup) => `${entity.id}/view`;
     ListRawComponent = DefaultListRaw;
     sortingProps: UserGroupProps[] = ['name'];
     listProps: ListProp<UserGroupProps>[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'components[name]', width: '30%'}];
@@ -63,6 +64,15 @@ class UserGroups extends ListCollection<UserGroupProps>{
                 <PermissionTooltipButton target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} href={`${entity.id}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
                 {/*<PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'top'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>*/}
                 {hasDeleteButton && <PermissionTooltipButton target={`delete_entity_${entity.id.toString()}`} position={'top'} tooltip={'Delete'} hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
+            </React.Fragment>
+        );
+    };
+    getGridActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
+        const hasDeleteButton = !this.isCurrentItem(entity);
+        return (
+            <React.Fragment>
+                <PermissionButton href={`${entity.id}/view`} hasBackground={false} label={'View'} color={ColorTheme.Black} size={TextSize.Size_16} permission={componentPermission.READ}/>
+                {hasDeleteButton && <DeleteButtonStyled><PermissionButton hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} label={'Delete'} color={ColorTheme.Red} size={TextSize.Size_16} permission={componentPermission.DELETE}/></DeleteButtonStyled>}
             </React.Fragment>
         );
     };
