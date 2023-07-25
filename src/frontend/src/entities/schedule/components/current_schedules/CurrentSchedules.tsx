@@ -67,8 +67,10 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
     return (
         <CurrentSchedulesStyled >
             <div>
-                <HeaderStyled>{'Current Jobs'}</HeaderStyled>
-                {getProgressBars()}
+                <HeaderStyled style={{marginBottom: '20px'}}>{'Current Jobs'}</HeaderStyled>
+                <div>
+                    {getProgressBars()}
+                </div>
             </div>
         </CurrentSchedulesStyled>
     )

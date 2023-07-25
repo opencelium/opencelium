@@ -25,6 +25,7 @@ const CurrentSchedulesStyled = styled.div`
     &> div{
         margin: 20px 0;
     }
+    margin-bottom: 20px;
 `;
 
 const HeaderStyled = styled.div`
