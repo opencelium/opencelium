@@ -64,6 +64,7 @@ export class ScheduleRequest extends Request implements IScheduleRequest{
     }
 
     async getSchedulesById(data: SchedulesIdRequestProps): Promise<AxiosResponse<ModelSchedule[]>>{
+        this.endpoint = '/list/get';
         return super.post<ModelSchedule[]>(data);
     }
 

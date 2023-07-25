@@ -24,7 +24,7 @@ export interface ScheduleStatusRequestProps{
 }
 
 export interface SchedulesIdRequestProps{
-    identifires: number[],
+    identifiers: number[],
 }
 
 export interface IScheduleRequest{

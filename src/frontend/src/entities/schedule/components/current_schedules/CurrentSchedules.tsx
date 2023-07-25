@@ -48,7 +48,7 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
             }
         }
         if(ids.length > 0) {
-            dispatch(getSchedulesById({identifires: ids}));
+            dispatch(getSchedulesById({identifiers: ids}));
         }
     }, [currentSchedules])
     const getProgressBars = () => {
