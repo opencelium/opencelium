@@ -327,6 +327,7 @@ class FormSection extends Component{
             style.height = 0;
             style.overflow = 'hidden';
             style.padding = 0;
+            style.margin = 0;
         }
         const hasHeader = content.header !== '' && !isOneFormSectionFullScreen;/*
         if(isOneFormSectionFullScreen && (!content.hasOwnProperty('hasFullScreenFunction') || !content.hasFullScreenFunction)){

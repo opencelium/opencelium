@@ -204,7 +204,7 @@ class Form extends React.Component{
                         />
                     }
                 </div>
-                <div className={styles.form_component}>
+                <div className={styles.form_component} style={{rowGap: contents.filter(c => c.visible).length > 1 ? '30px' : 0}}>
                     {
                         contents.map((form, key1) => {
                             if(isArray((form))){
