@@ -51,7 +51,7 @@ const OPERATOR_LABELS_FOR_LOOP = {
 //placeholderValue - placeholder of the selected operator (short view)
 export const FUNCTIONAL_OPERATORS_FOR_IF = [
     {value: 'IsNull', hasValue: false},
-    {value: 'AllowList',isMultiline:true,label: <span>AllowList({OPERATOR_LABELS_FOR_IF.ALLOW_LIST()})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS_FOR_IF.ALLOW_LIST(true)},
+    {value: 'AllowList', placeholder: '%[item1, item2]%', isMultiline:true,label: <span>AllowList({OPERATOR_LABELS_FOR_IF.ALLOW_LIST()})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS_FOR_IF.ALLOW_LIST(true)},
     {value: 'DenyList',isMultiline:true,label: <span>DenyList({OPERATOR_LABELS_FOR_IF.DENY_LIST()})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS_FOR_IF.DENY_LIST(true)},
     {value: 'IsTypeOf',label: <span>IsTypeOf({OPERATOR_LABELS_FOR_IF.IS_TYPE_OF()})</span>, hasValue: true, isRightStatementOption: true, options: [{value: 'NUM', label: 'Number'}, {value: 'ARR', label: 'Array'}, {value: 'OBJ', label: 'Object'}, {value: 'STR', label: 'String'}, {value: 'BOOL', label: 'Boolean'}], placeholderValue: OPERATOR_LABELS_FOR_IF.IS_TYPE_OF(true)},
     {value: 'PropertyExists',label: <span>PropertyExists({OPERATOR_LABELS_FOR_IF.PROPERTY_EXISTS()})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS_FOR_IF.PROPERTY_EXISTS(true)},
@@ -72,10 +72,10 @@ export const FUNCTIONAL_OPERATORS_FOR_IF = [
     {value: 'NotNull', hasValue: false},
     {value: 'IsEmpty', hasValue: false},
     {value: 'NotEmpty', hasValue: false}
-];
+].sort((f1, f2) => f1.value > f2.value ? 1 : f1.value === f2.value ? 0 : -1);
 export const FUNCTIONAL_OPERATORS_FOR_LOOP = [
     {value: 'SplitString', label: <span>SplitString({OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING()})</span>, hasValue: true, placeholderValue: OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING(true)}
-];
+].sort((f1, f2) => f1.value > f2.value ? 1 : f1.value === f2.value ? 0 : -1);
 
 /**
  * Condition class for Operator Item class

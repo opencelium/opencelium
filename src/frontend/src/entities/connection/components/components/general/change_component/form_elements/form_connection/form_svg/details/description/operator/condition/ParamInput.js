@@ -23,7 +23,7 @@ class ParamInput extends React.Component{
     }
 
     render(){
-        const {readOnly, param, style, id, connector, items, updateParam, isMultiline, updateConnection, selectedMethod, selectedConnector, connection} = this.props;
+        const {placeholder, readOnly, param, style, id, connector, items, updateParam, isMultiline, updateConnection, selectedMethod, selectedConnector, connection} = this.props;
         let inputTheme = {};
         inputTheme.input = styles.input_pointer_param_if;
         return (
@@ -35,7 +35,7 @@ class ParamInput extends React.Component{
                     selectedMethod={selectedMethod}
                     updateConnection={updateConnection}
                     className={styles.operator_left_field}
-                    placeholder={'param'}
+                    placeholder={placeholder || 'param'}
                     items={items}
                     readOnly={readOnly}
                     doAction={updateParam}

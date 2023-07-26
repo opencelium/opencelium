@@ -263,6 +263,10 @@ class Condition extends React.Component{
         const isLoopOperator = operator.type === LOOP_OPERATOR;
         const isLeftInputStringForLoopOperator = true;
         const isIfOperator = operator.type === IF_OPERATOR;
+        let relationalOperatorValue = condition.relationalOperator ? condition.relationalOperator.value : null;
+        const operatorOptions = isLoopOperator ? FUNCTIONAL_OPERATORS_FOR_LOOP : FUNCTIONAL_OPERATORS_FOR_IF;
+        let functionalOperator = operatorOptions.find(o => o.value === relationalOperatorValue);
+        const placeholder = functionalOperator?.placeholder || '';
         return(
             <React.Fragment>
                 <LeftStatement
@@ -291,6 +295,7 @@ class Condition extends React.Component{
                     />
                     <RightStatement
                         {...this.props}
+                        placeholder={placeholder}
                         condition={condition}
                         connector={connector}
                         operator={operator}
