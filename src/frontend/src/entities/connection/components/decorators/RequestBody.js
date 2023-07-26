@@ -110,9 +110,9 @@ export function RequestBody(CRequestType){
                  */
                 openEnhancement(e, value){
                     const {connector, connection} = this.props;
-                    if(connector.getConnectorType() === CONNECTOR_FROM){
+                    /*if(connector.getConnectorType() === CONNECTOR_FROM){
                         return;
-                    }
+                    }*/
                     let fieldName = '';
                     if(value.namespace.length > 1){
                         for(let i = 1; i < value.namespace.length; i++){

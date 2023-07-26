@@ -700,13 +700,54 @@ export default class CConnection{
 
     updateFieldBinding(connectorType, bindingItem){
         let newFieldBinding = null;
+        let hasFound = false;
         switch(connectorType){
             case CONNECTOR_FROM:
-                newFieldBinding = CFieldBinding.createFieldBinding({from: [this.convertBindingItem(bindingItem)]});
-                this._fieldBinding.push(newFieldBinding);
+                for(let i = 0; i < this._fieldBinding.length; i++){
+                    if(this._fieldBinding[i].from.length > 0){
+                        if(CFieldBinding.compareTwoBindingItems(this._fieldBinding[i].from[0], bindingItem.from[0])){
+                            if(this.checkIfExistSuchFields(bindingItem.to, CONNECTOR_FROM)) {
+                                this._fieldBinding[i].to = bindingItem.to;
+                            } else{
+                                this._fieldBinding[i].from = [];
+                            }
+                            hasFound = true;
+                            break;
+                        }
+                    }
+                }
+                for(let i = 0; i < this._fieldBinding.length; i++) {
+                    if (this._fieldBinding[i].to.length === 0 && this._fieldBinding[i].from.length === 1) {
+                        this._fieldBinding.splice(i, 1);
+                    }
+                }
+                if(!hasFound){
+                    for(let i = 0; i < this._fieldBinding.length; i++) {
+                        if(this._fieldBinding[i].to.length === 1 && this._fieldBinding[i].from.length === 0){
+                            let index = bindingItem.to.findIndex(b => CFieldBinding.compareTwoBindingItems(b, this._fieldBinding[i].to[0]));
+                            if(index !== -1){
+                                this._fieldBinding.splice(i, 1);
+                            }
+                        }
+                    }
+                    newFieldBinding = CFieldBinding.createFieldBinding({from: bindingItem.from, to: bindingItem.to});
+                    this._fieldBinding.push(newFieldBinding);
+                    for(let i = 0; i < this._fieldBinding.length; i++) {
+                        if(this._fieldBinding[i].to.length === 1 && this._fieldBinding[i].from.length === 0){
+                            let index = bindingItem.to.findIndex(b => CFieldBinding.compareTwoBindingItems(b, this._fieldBinding[i].to[0]));
+                            if(index !== -1){
+                                this._fieldBinding.splice(i, 1);
+                            }
+                        }
+                    }
+                }
+                for(let i = this._fieldBinding.length - 1; i >= 0; i--) {
+                    if (this._fieldBinding[i].from.length === 0) {
+                        this._fieldBinding.splice(i, 1);
+                    }
+                }
                 break;
             case CONNECTOR_TO:
-                let hasFound = false;
                 for(let i = 0; i < this._fieldBinding.length; i++){
                     if(this._fieldBinding[i].to.length > 0){
                         if(CFieldBinding.compareTwoBindingItems(this._fieldBinding[i].to[0], bindingItem.to[0])){
