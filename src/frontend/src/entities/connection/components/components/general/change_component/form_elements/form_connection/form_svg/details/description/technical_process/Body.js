@@ -68,9 +68,9 @@ class Body extends React.Component{
 
     setCurrentEnhancementClickingOnPointer(e, value){
         const {connection, connector} = this.props;
-        if(connector.getConnectorType() === CONNECTOR_FROM){
+        /*if(connector.getConnectorType() === CONNECTOR_FROM){
             return;
-        }
+        }*/
         let fieldName = '';
         if(value.namespace.length > 1){
             for(let i = 1; i < value.namespace.length; i++){
@@ -190,14 +190,14 @@ class Body extends React.Component{
 
     renderInfo(){
         const {bodyTitle, connector, isExtended, readOnly} = this.props;
-        const hasEnhancement = connector.getConnectorType() === CONNECTOR_TO;
+        const hasEnhancement = true;
         return(
             <React.Fragment>
                 <div className={hasEnhancement ? styles.body_data_with_enhancement : styles.body_data}>
                     <div><b>{bodyTitle}</b></div>
                     {this.renderBody()}
                 </div>
-                {hasEnhancement &&
+                {true &&
                     <div className={styles.body_enhancement}>
                         <div><b>{'Enhancement'}</b></div>
                         {this.renderEnhancement()}
@@ -218,7 +218,7 @@ class Body extends React.Component{
         const {isBodyVisible} = this.state;
         const {connector, isExtended, isCurrentInfo, method} = this.props;
         const isGraphQLData = method.isGraphQLData();
-        const hasEnhancement = connector.getConnectorType() === CONNECTOR_TO && !isGraphQLData;
+        const hasEnhancement = true && !isGraphQLData;
         return(
             <React.Fragment>
                 <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>

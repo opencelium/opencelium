@@ -178,7 +178,7 @@ class RightStatement extends React.Component{
     }
 
     render(){
-        let {condition, connection, connector, operator, readOnly, isOperatorHasValue, isOperatorHasThreeParams, hasLeftMethod, hasRightMethod, hasRightParam, updateConnection} = this.props;
+        let {placeholder, condition, connection, connector, operator, readOnly, isOperatorHasValue, isOperatorHasThreeParams, hasLeftMethod, hasRightMethod, hasRightParam, updateConnection} = this.props;
         let {hasValue, isMultiline, isRightStatementOption, options} = isOperatorHasValue();
         const propertyId = `if_operator_property_${operator.index}`;
         const propertyItems = hasLeftMethod ? connection.getConnectorMethodByColor(condition.leftMethod.color).response.success : [];
@@ -266,6 +266,7 @@ class RightStatement extends React.Component{
                         updateParam={(a) => this.updateParam(a)}
                         style={this.getParamStyles()}
                         isMultiline={isMultiline}
+                        placeholder={placeholder}
                     />
                 <LikePercentageStyled isLikeOperator={isLikeOperator} hasSign={hasRightLikeSign}>
                     <div onClick={() => this.setRightLikeSign()}>%</div>
@@ -273,6 +274,10 @@ class RightStatement extends React.Component{
             </React.Fragment>
         );
     }
+}
+
+RightStatement.defaultProps = {
+    placeholder: '',
 }
 
 export default RightStatement;

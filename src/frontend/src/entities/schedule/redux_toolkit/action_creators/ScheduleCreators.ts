@@ -132,7 +132,7 @@ export const getSchedulesById = createAsyncThunk(
     'schedule/get/selected',
     async(data: SchedulesIdRequestProps, thunkAPI) => {
         try {
-            const request = new ScheduleRequest({endpoint: `/ids`});
+            const request = new ScheduleRequest();
             const response = await request.getSchedulesById(data);
             // @ts-ignore
             return response.data || [];

@@ -63,7 +63,7 @@ export const updateNotification = createAsyncThunk(
     'schedule/notification/update',
     async(notificationTemplate: INotification, thunkAPI) => {
         try {
-            const request = new NotificationRequest({endpoint: `/${notificationTemplate.scheduleId}/notification/${notificationTemplate.id}`});
+            const request = new NotificationRequest({endpoint: `/notification/${notificationTemplate.id}`});
             const response = await request.updateNotification(notificationTemplate);
             return response.data;
         } catch(e){
@@ -89,7 +89,7 @@ export const getNotificationByScheduleIdAndId = createAsyncThunk(
     'schedule/notification/get/byScheduleIdAndId',
     async(data: {scheduleId: number, id: number}, thunkAPI) => {
         try {
-            const request = new NotificationRequest({endpoint: `/${data.scheduleId}/notification/${data.id}`});
+            const request = new NotificationRequest({endpoint: `/notification/${data.id}`});
             const response = await request.getNotificationByScheduleIdAndId();
             return response.data;
         } catch(e){

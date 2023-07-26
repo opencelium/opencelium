@@ -409,7 +409,7 @@ export function ConnectionForm(type) {
                     formClassName: styles.mode_form,
                     hint: {text: t(`${this.translationKey}.FORM.HINT_2`)},
                     header: t(`${this.translationKey}.FORM.PAGE_2`),
-                    visible: hasModeInputsSection || this.isView,
+                    visible: (hasModeInputsSection || this.isView) && !this.isUpdate,
                 };
                 if(!this.isView){
                     result.push(secondFormSection);
@@ -571,6 +571,7 @@ export function ConnectionForm(type) {
                         formClassName: this.isView ? styles.direction_form : '',
                         hint: {text: t(`${this.translationKey}.FORM.HINT_1`)},
                         header: t(`${this.translationKey}.FORM.PAGE_1`),
+                        visible: this.isAdd || this.isView,
                     },
                     ...this.getSecondThirdFormsSections(),
                 ];

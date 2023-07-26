@@ -19,7 +19,7 @@ import chroma from "chroma-js";
 import { ITheme } from '@style/Theme';
 
 const ProgressBarElementStyled = styled.div`
-    height: 15px;
+    height: 33px;
     margin-bottom: 10px;
 `;
 
@@ -37,7 +37,7 @@ const ProgressBarSectionStyled = styled.div`
 `;
 
 const ProgressBarFromStyled = styled.div`
-    line-height: 17px;
+    line-height: 33px;
     position: absolute;
     z-index: 1;
     color: #000000;
@@ -51,7 +51,7 @@ const ProgressBarFromStyled = styled.div`
 `;
 
 const ProgressBarTitleStyled = styled.div`
-    line-height: 17px;
+    line-height: 33px;
     position: absolute;
     z-index: 1;
     color: #ffffff;
@@ -61,7 +61,7 @@ const ProgressBarTitleStyled = styled.div`
 `;
 
 const ProgressBarToStyled = styled.div`
-    line-height: 17px;
+    line-height: 33px;
     position: absolute;
     z-index: 1;
     color: #000000;
@@ -77,7 +77,6 @@ const ProgressBarToStyled = styled.div`
 `;
 
 const ProgressBarStyled = styled(ProgressBar)`
-    top: -8px;
     height: 33px !important;
     margin-bottom: 10px;
     border-radius: 0.25rem;

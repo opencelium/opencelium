@@ -31,7 +31,7 @@ export class CBodyEditor{
         if(checkBodyData !== 0){
             let parents = bodyData.namespaces;
             let newValue = bodyData.newValue;
-            let currentItem = connection.toConnector.getCurrentItem();
+            let currentItem = connector.getCurrentItem();
             let item = {};
             item.color = currentItem.color;
             if(parents.length === 0){
@@ -58,7 +58,7 @@ export class CBodyEditor{
                 case 2:
                     break;
             }
-            connection.updateFieldBinding(CONNECTOR_TO, {from: fromBindingItems, to: toBindingItems});
+            connection.updateFieldBinding(connector.getConnectorType(), {from: fromBindingItems, to: toBindingItems});
         }
         CBodyEditor.cleanFieldBinding(connection, bodyData);
     }
@@ -108,7 +108,7 @@ export class CBodyEditor{
     //2 - clear; 1 - update; 0 - not update
     static shouldUpdateFieldBinding(connector, bodyData){
         let result = 0;
-        if(connector.getConnectorType() === CONNECTOR_TO && bodyData && bodyData.hasOwnProperty('namespaces')
+        if(bodyData && bodyData.hasOwnProperty('namespaces')
             && bodyData.hasOwnProperty('name')
             && bodyData.hasOwnProperty('newValue')){
             if(isString(bodyData.existingValue)) {

@@ -68,7 +68,7 @@ class RelationalOperator extends React.Component{
                     closeOnSelect={false}
                     placeholder={`...`}
                     isDisabled={readOnly || !hasMethod}
-                    isSearchable={false}
+                    isSearchable={true}
                     openMenuOnClick={true}
                     maxMenuHeight={200}
                     minMenuHeight={50}
