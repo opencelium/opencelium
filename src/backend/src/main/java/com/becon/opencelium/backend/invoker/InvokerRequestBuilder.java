@@ -46,6 +46,7 @@ import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.net.InetSocketAddress;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
