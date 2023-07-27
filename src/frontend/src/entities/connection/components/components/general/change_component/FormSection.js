@@ -76,6 +76,12 @@ class FormSection extends Component{
         }
     }
 
+    componentDidMount() {
+        if(!!this.props.shouldScroll){
+            window.scrollTo({top: findTopLeft(`form_section_label_${this.props.shouldScroll}`).top - 4, behavior: "instant"});
+        }
+    }
+
     toggle(){
         if(!this.props.content.hasFullScreenFunction) {
             this.setState({
@@ -337,7 +343,7 @@ class FormSection extends Component{
         return (
             <div className={`${!isSubFormSection ? styles.form : ''} ${content.visible ? content.formClassName : ''} ${isFormSectionMinimized ? styles.minimized_form : ''} ${isOneFormSectionFullScreen ? styles.full_screen : ''}`} style={style}>
                 {hasHeader &&
-                    <Label value={content.header} position={'absolute'}/>
+                    <Label id={`form_section_label_${content.header}`} value={content.header} position={'absolute'}/>
                 }
                 {hasIcons &&
                     <div className={styles.form_methods_icons}>

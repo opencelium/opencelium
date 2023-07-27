@@ -45,13 +45,14 @@ export const ActionButton = (props) => {
 }
 
 export const SubFormSections = (props) => {
-    const {key1, form, entity, updateEntity, clearValidationMessage} = props;
+    const {key1, form, entity, updateEntity, clearValidationMessage, shouldScroll} = props;
     return(
         <div className={styles.subform}>
             {
                 form.map((subform, key2) => {
                     return (
                         <FormSection
+                            shouldScroll={shouldScroll}
                             key={`${key1}_${key2}`}
                             isSubFormSection={true}
                             content={subform}

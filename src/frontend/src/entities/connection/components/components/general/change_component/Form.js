@@ -171,7 +171,7 @@ class Form extends React.Component{
 
     render(){
         const {entity} = this.state;
-        const {contents, translations, permissions, isActionInProcess, additionalButtons, clearValidationMessage} = this.props;
+        const {contents, translations, permissions, isActionInProcess, additionalButtons, clearValidationMessage, shouldScroll} = this.props;
         const hasActionButton = translations && translations.action_button;
         const hasListButton = translations && translations.list_button;
         const hasCancelButton = translations && translations.cancel_button;
@@ -194,7 +194,7 @@ class Form extends React.Component{
                         />
                     }
                     {
-                        additionalButtons(entity)
+                        additionalButtons(entity, (a, b) => this.updateEntity(a, b))
                     }
                     {hasCancelButton &&
                         <CancelButton
@@ -210,6 +210,7 @@ class Form extends React.Component{
                             if(isArray((form))){
                                 return (
                                     <SubFormSections
+                                        shouldScroll={shouldScroll}
                                         key={key1}
                                         key1={key1}
                                         form={form}
@@ -222,6 +223,7 @@ class Form extends React.Component{
                             } else {
                                 return (
                                     <FormSection
+                                        shouldScroll={shouldScroll}
                                         key={key1}
                                         isSubFormSection={false}
                                         content={form}
@@ -240,6 +242,7 @@ class Form extends React.Component{
 }
 
 Form.propTypes = {
+    shouldScroll: PropTypes.string,
     type: PropTypes.string,
     contents: PropTypes.array,
     translations: PropTypes.shape({
@@ -267,6 +270,7 @@ Form.propTypes = {
 }
 
 Form.defaultProps = {
+    shouldScroll: '',
     type: 'add',
     contents: [],
     isActionInProcess: false,

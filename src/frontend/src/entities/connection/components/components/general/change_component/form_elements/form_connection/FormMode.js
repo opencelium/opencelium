@@ -82,7 +82,7 @@ class FormMode extends Component{
     }
 
     componentDidMount(){
-        const {entity, updateEntity, data} = this.props;
+        const {entity, updateEntity, data, defaultMode} = this.props;
         if(data.mode === TEMPLATE_MODE && entity.allTemplates.length === 0){
             this.fetchTemplates();
         }
@@ -94,6 +94,11 @@ class FormMode extends Component{
             updateEntity(entity);
         }
         window.addEventListener('resize', this.resize, false);
+        if(defaultMode){
+            if(defaultMode === TEMPLATE_MODE){
+                this.toggleConfirm(null, TEMPLATE_MODE, false);
+            }
+        }
     }
 
     componentWillUnmount() {
@@ -115,7 +120,7 @@ class FormMode extends Component{
     resize = (e) => {
         this.setState({currentWidth: e.target.innerWidth});
     };
-    
+
     /**
      * to fetch templates
      */
@@ -160,7 +165,7 @@ class FormMode extends Component{
     /**
      * to show and hide confirmation dialog
      */
-    toggleConfirm(e, value){
+    toggleConfirm(e, value, withConfirmation = true){
         const {showConfirm} = this.state;
         const {entity, data} = this.props;
 
@@ -170,7 +175,11 @@ class FormMode extends Component{
         if(entity.fromConnector.getCurrentItem() === null && entity.toConnector.getCurrentItem() === null){
             data.setMode(value, () => this.handleChangeMode())
         } else {
-            this.setState({showConfirm: !showConfirm});
+            if(withConfirmation){
+                this.setState({showConfirm: !showConfirm});
+            } else{
+                this.handleChangeMode();
+            }
             data.setMode(value);
         }
     }
@@ -368,31 +377,34 @@ class FormMode extends Component{
     }
 
     render(){
-        const {authUser, entity, data} = this.props;
+        const {authUser, entity, data, showMode} = this.props;
         let {modeLabels, tourStep, mode} = data;
         if(!tourStep){
             tourStep = '';
         }
         return (
             <React.Fragment>
-                <div className={`${tourStep}`} style={{margin: '20px 65px 0'}}>
-                    <div style={{display: 'flex', justifyContent: 'space-around', gap: '10px', textAlign: 'center'}}>
-                        <ExpertButtonStyled
-                            size={TextSize.Size_16}
-                            isActive={mode === EXPERT_MODE}
-                            authUser={authUser}
-                            title={modeLabels.expert}
-                            onClick={(e) => this.toggleConfirm(e, EXPERT_MODE)}
-                        />
-                        <TemplateButtonStyled
-                            size={TextSize.Size_16}
-                            isActive={mode === TEMPLATE_MODE}
-                            authUser={authUser}
-                            title={modeLabels.template}
-                            onClick={(e) => this.toggleConfirm(e, TEMPLATE_MODE)}
-                        />
+                {showMode &&
+                    <div className={`${tourStep}`} style={{margin: '20px 65px 0'}}>
+                        <div
+                            style={{display: 'flex', justifyContent: 'space-around', gap: '10px', textAlign: 'center'}}>
+                            <ExpertButtonStyled
+                                size={TextSize.Size_16}
+                                isActive={mode === EXPERT_MODE}
+                                authUser={authUser}
+                                title={modeLabels.expert}
+                                onClick={(e) => this.toggleConfirm(e, EXPERT_MODE)}
+                            />
+                            <TemplateButtonStyled
+                                size={TextSize.Size_16}
+                                isActive={mode === TEMPLATE_MODE}
+                                authUser={authUser}
+                                title={modeLabels.template}
+                                onClick={(e) => this.toggleConfirm(e, TEMPLATE_MODE)}
+                            />
+                        </div>
                     </div>
-                </div>
+                }
                 {this.renderTemplateSelect()}
                 {this.renderConfirmation()}
             </React.Fragment>
@@ -404,6 +416,13 @@ FormMode.propTypes = {
     entity: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
     updateEntity: PropTypes.func.isRequired,
+    showMode: PropTypes.bool,
+    defaultMode: PropTypes.string,
 };
+
+FormMode.defaultProps = {
+    showMode: true,
+    defaultMode: '',
+}
 
 export default FormMode;
