@@ -178,8 +178,6 @@ public class ConnectorExecutor {
         executeDecisionStatement(methodNode.getNextOperator());
     }
 
-
-
     private ResponseEntity<String> sendRequest(MethodNode methodNode) throws URISyntaxException{
         String nextFunctionIndex = methodNode.getNextFunction() != null ? methodNode.getNextFunction().getIndex() : "null";
         String nextOperatorIndex = methodNode.getNextOperator() != null ? methodNode.getNextOperator().getIndex() : "null";
@@ -241,7 +239,7 @@ public class ConnectorExecutor {
 //            restTemplate = getRestTemplate();
 //        }
         ResponseEntity responseEntity;
-        if (header.getContentType() == MediaType.TEXT_HTML) {
+        if (header.getContentType() == (getResponseContentType(header, functionInvoker))) {
             responseEntity = restTemplate.exchange(uri, method ,httpEntity, String.class);
         } else {
             responseEntity = InvokerRequestBuilder
@@ -251,9 +249,12 @@ public class ConnectorExecutor {
         return responseEntity;
     }
 
-    private String getHeaderValue(HttpHeaders httpHeaders) {
-        Objects.requireNonNull(httpHeaders.getContentType());
-        return httpHeaders.getContentType().getType();
+    private MediaType getResponseContentType(HttpHeaders httpHeaders, FunctionInvoker functionInvoker) {
+        if (functionInvoker.getResponse() != null && functionInvoker.getResponse().getSuccess() != null
+            && functionInvoker.getResponse().getSuccess().getHeader() != null){
+            return MediaType.valueOf(functionInvoker.getResponse().getSuccess().getHeader().get("Content-Type"));
+        }
+        return httpHeaders.getContentType();
     }
 
     private HttpMethod getMethod(MethodNode methodNode){
