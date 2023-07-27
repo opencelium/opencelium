@@ -26,7 +26,7 @@ import {
 import AddTemplate from "@change_component/form_elements/form_connection/form_methods/AddTemplate";
 import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
 import {LocalStorage} from "@application/classes/LocalStorage";
-import {capitalize, setFocusById} from "@application/utils/utils";
+import {capitalize, findTopLeft, setFocusById} from "@application/utils/utils";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 
@@ -35,6 +35,7 @@ import "@style/css/graphiql.css";
 import ContentLoading from "@app_component/base/loading/ContentLoading";
 import {ConnectionPermissions} from "@root/constants";
 import {IF_OPERATOR} from "@classes/content/connection/operator/COperatorItem";
+import LoadTemplate from "@change_component/form_elements/form_connection/form_methods/LoadTemplate";
 
 /**
  * common component to add and update Connection
@@ -419,11 +420,11 @@ export function ConnectionForm(type) {
                         {
                             ...INPUTS.CONNECTOR_READONLY,
                             label: t(`${this.translationKey}.FORM.CONNECTORS`),
-                        placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
-                        source: connectorMenuItems,
-                        readOnly: true,
-                        hasAddMethod: true,
-                        style: {margin: '0 65px'},
+                            placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
+                            source: connectorMenuItems,
+                            readOnly: true,
+                            hasAddMethod: true,
+                            style: {margin: '0 65px'},
                         },
                         this.getMethodsFormSection(),
                     ],
@@ -575,7 +576,7 @@ export function ConnectionForm(type) {
                     },
                     ...this.getSecondThirdFormsSections(),
                 ];
-                const additionalButtons = (entity) => {
+                const additionalButtons = (entity, updateEntity) => {
                     if(this.isView || contents.length < 2){
                         return null;
                     }
@@ -603,6 +604,15 @@ export function ConnectionForm(type) {
                                     }}
                                 />
                             </div>
+                            {this.isUpdate &&
+                                <div style={{float: 'left'}}>
+                                    <LoadTemplate
+                                        data={contents[1].inputs[1]}
+                                        entity={entity}
+                                        updateEntity={updateEntity}
+                                    />
+                                </div>
+                            }
                             <Button
                                 key={'list_button'}
                                 label={'Cancel'}
@@ -615,6 +625,7 @@ export function ConnectionForm(type) {
                 }
                 return (
                     <Form
+                        shouldScroll={this.isUpdate ? 'Methods' : ''}
                         contents={contents}
                         translations={contentTranslations}
                         isActionInProcess={!this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)}

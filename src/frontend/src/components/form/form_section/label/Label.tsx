@@ -25,6 +25,7 @@ import {LabelStyled} from './styles';
 */
 const Label: FC<LabelProps> =
     ({
+        id,
         value,
         top,
         left,
@@ -33,7 +34,7 @@ const Label: FC<LabelProps> =
         background,
     }) => {
     return (
-        <LabelStyled background={background} onClick={onClick} top={top} left={left} position={position}>
+        <LabelStyled id={id} background={background} onClick={onClick} top={top} left={left} position={position}>
             <Text value={value} size={TextSize.Size_14} color={ColorTheme.White}/>
         </LabelStyled>
     )
