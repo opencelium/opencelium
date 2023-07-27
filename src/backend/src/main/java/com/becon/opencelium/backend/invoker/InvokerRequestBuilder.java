@@ -247,6 +247,7 @@ public class InvokerRequestBuilder {
         }
     }
 
+    // Need for PrettyPrinter during logging
     public static ResponseEntity<String> convertToStringResponse(ResponseEntity response) {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = "";

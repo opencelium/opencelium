@@ -49,10 +49,7 @@ import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.HttpHost;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -242,11 +239,21 @@ public class ConnectorExecutor {
 
 //        f (invoker.getName().equalsIgnoreCase("igel")){
 //            restTemplate = getRestTemplate();
-//        }i
-        ResponseEntity responseEntity = InvokerRequestBuilder
+//        }
+        ResponseEntity responseEntity;
+        if (header.getContentType() == MediaType.TEXT_HTML) {
+            responseEntity = restTemplate.exchange(uri, method ,httpEntity, String.class);
+        } else {
+            responseEntity = InvokerRequestBuilder
                 .convertToStringResponse(restTemplate.exchange(uri, method ,httpEntity, Object.class));
+        }
         logger.logAndSend("Response : " + responseEntity.getBody());
         return responseEntity;
+    }
+
+    private String getHeaderValue(HttpHeaders httpHeaders) {
+        Objects.requireNonNull(httpHeaders.getContentType());
+        return httpHeaders.getContentType().getType();
     }
 
     private HttpMethod getMethod(MethodNode methodNode){

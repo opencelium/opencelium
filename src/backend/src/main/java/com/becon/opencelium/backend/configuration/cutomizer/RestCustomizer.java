@@ -77,7 +77,7 @@ public class RestCustomizer implements RestTemplateCustomizer {
 
         // Adding text/html converter
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.TEXT_HTML));
+        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.ALL));
         restTemplate.getMessageConverters().add(converter);
     }
 
