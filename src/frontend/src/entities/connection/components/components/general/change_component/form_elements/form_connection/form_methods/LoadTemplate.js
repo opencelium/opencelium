@@ -4,6 +4,7 @@ import Dialog from "@basic_components/Dialog";
 import Button from "@basic_components/buttons/Button";
 import {TEMPLATE_MODE} from "@classes/content/connection/CTemplate";
 import Confirmation from "@components/general/app/Confirmation";
+import {TextSize} from "@app_component/base/text/interfaces";
 
 /**
  * Load Template Component
@@ -22,7 +23,7 @@ class LoadTemplate extends Component {
         const {showDialog} = this.state;
         return (
             <React.Fragment>
-                <Button hasConfirmation={true} confirmationText={'If you load a template, all your changes in methods will be lost. Are you sure?'} label={'Load Template'} onClick={() => this.setState({showDialog: true})}/>
+                <Button icon={'sim_card_download'} size={TextSize.Size_16} hasConfirmation={true} confirmationText={'If you load a template, all your changes in methods will be lost. Are you sure?'} label={'Load Template'} onClick={() => this.setState({showDialog: true})}/>
                 <Dialog
                     actions={[{label: 'Close', id: 'close_load_template', onClick: () => this.setState({showDialog: false})}]}
                     active={showDialog}
