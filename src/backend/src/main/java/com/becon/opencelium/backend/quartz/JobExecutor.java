@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.quartz;
 
 import com.becon.opencelium.backend.configuration.WebSocketConfig;
+import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.execution.ExecutionContainer;
@@ -32,6 +33,7 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
@@ -90,6 +92,9 @@ public class JobExecutor extends QuartzJobBean {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
+    @Autowired
+    private Environment environment;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         execution(context);
@@ -142,11 +147,12 @@ public class JobExecutor extends QuartzJobBean {
         }else {
             lastExecution.setScheduler(scheduler);
         }
-
+        String proxyHost = environment.getProperty(YamlPropConst.PROXY_HOST);
+        String proxyPort = environment.getProperty(YamlPropConst.PROXY_PORT);
         try {
             ConnectorExecutor connectorExecutor = new ConnectorExecutor(invokerService, executionContainer,
                     fieldNodeServiceImp, methodNodeServiceImp,
-                    connectorService, statementNodeService, logger);
+                    connectorService, statementNodeService, logger, proxyHost, proxyPort);
             ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,
                     executionContainer, connectorExecutor);
             connectionExecutor.start(scheduler);

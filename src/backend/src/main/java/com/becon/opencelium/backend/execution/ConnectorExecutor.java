@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.LogType;
 import com.becon.opencelium.backend.enums.OperatorType;
@@ -45,11 +46,10 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.*;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.HttpHost;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -88,11 +88,13 @@ public class ConnectorExecutor {
     private final ConnectorServiceImp connectorService;
     private final VariableNodeServiceImp statementNodeService;
     private final OcLogger<ExecutionLog> logger;
+    private final String proxyHost;
+    private final String proxyPort;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
                              FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeServiceImp,
                              ConnectorServiceImp connectorService, VariableNodeServiceImp statementNodeService,
-                             OcLogger<ExecutionLog> logger) {
+                             OcLogger<ExecutionLog> logger, String proxyHost, String proxyPort) {
         this.invokerService = invokerService;
         this.executionContainer = executionContainer;
         this.fieldNodeService = fieldNodeService;
@@ -100,6 +102,8 @@ public class ConnectorExecutor {
         this.connectorService = connectorService;
         this.statementNodeService = statementNodeService;
         this.logger = logger;
+        this.proxyHost = proxyHost;
+        this.proxyPort = proxyPort;
     }
 
     public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
@@ -235,11 +239,21 @@ public class ConnectorExecutor {
 
 //        f (invoker.getName().equalsIgnoreCase("igel")){
 //            restTemplate = getRestTemplate();
-//        }i
-        ResponseEntity responseEntity = InvokerRequestBuilder
+//        }
+        ResponseEntity responseEntity;
+        if (header.getContentType() == MediaType.TEXT_HTML) {
+            responseEntity = restTemplate.exchange(uri, method ,httpEntity, String.class);
+        } else {
+            responseEntity = InvokerRequestBuilder
                 .convertToStringResponse(restTemplate.exchange(uri, method ,httpEntity, Object.class));
+        }
         logger.logAndSend("Response : " + responseEntity.getBody());
         return responseEntity;
+    }
+
+    private String getHeaderValue(HttpHeaders httpHeaders) {
+        Objects.requireNonNull(httpHeaders.getContentType());
+        return httpHeaders.getContentType().getType();
     }
 
     private HttpMethod getMethod(MethodNode methodNode){
@@ -685,50 +699,15 @@ public class ConnectorExecutor {
         return  "LOOP_OPERATOR_RESULT: " + loopSize + " -- index: " + executionOrderIndex;
     }
 
-    public static CloseableHttpClient getDisabledHttpsClient() {
-
-        try {
-            TrustManager[] trustAllCerts = new TrustManager[] {
-                    new X509TrustManager() {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-                        public void checkClientTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-                        public void checkServerTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-                    }
-            };
-            SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            SSLConnectionSocketFactory ssl = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
-            PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                    .setSSLSocketFactory(ssl).build();
-
-            return HttpClients.custom().setConnectionManager(connectionManager).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static RestTemplate createRestTemplate(Connector connector) {
-        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
-        HttpComponentsClientHttpRequestFactory requestFactory;
-        if (!connector.isSslCert()){
-            requestFactory =  new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
-        } else {
-            requestFactory = new HttpComponentsClientHttpRequestFactory();
-        }
-
+    public RestTemplate createRestTemplate(Connector connector) {
         int timeout = connector.getTimeout();
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
+        restTemplateBuilder.additionalCustomizers(
+                new RestCustomizer(proxyHost, proxyPort, connector.isSslCert(), timeout)
+        );
         if (timeout > 0) {
-            requestFactory.setConnectTimeout(timeout);
             restTemplateBuilder.setReadTimeout(Duration.ofMillis(timeout));
         }
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        restTemplate.setRequestFactory(requestFactory);
-        return restTemplate;
+        return restTemplateBuilder.build();
     }
  }

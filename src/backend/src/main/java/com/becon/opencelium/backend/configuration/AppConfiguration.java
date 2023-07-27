@@ -1,14 +1,18 @@
 package com.becon.opencelium.backend.configuration;
 
+import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.constant.SecurityConstant;
+import com.becon.opencelium.backend.constant.YamlPropConst;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.HttpHost;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
@@ -16,16 +20,18 @@ import java.time.Duration;
 @Configuration
 public class AppConfiguration {
 
+    @Autowired
+    private Environment env;
+
     @Bean
     public RestTemplate restTemplate() {
+        String proxyHost = env.getProperty(YamlPropConst.PROXY_HOST);
+        String proxyPort = env.getProperty(YamlPropConst.PROXY_PORT);
         RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
-        restTemplateBuilder.setReadTimeout(Duration.ofMillis(SecurityConstant.READ_TIMEOUT));
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-        requestFactory.setConnectionRequestTimeout(SecurityConstant.CONN_REQ_TIMEOUT);
-        requestFactory.setConnectTimeout(SecurityConstant.CONN_TIMEOUT);
-        restTemplate.setRequestFactory(requestFactory);
-        return restTemplate;
+
+        return restTemplateBuilder
+                .setReadTimeout(Duration.ofMillis(SecurityConstant.READ_TIMEOUT))
+                .additionalCustomizers(new RestCustomizer(proxyHost, proxyPort)).build();
     }
 
     @Bean
@@ -33,5 +39,10 @@ public class AppConfiguration {
         YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
         yamlFactory.setResources(new ClassPathResource("application.yml"));
         return yamlFactory;
+    }
+
+    private CloseableHttpClient buildHttpClient() {
+        HttpHost proxy = new HttpHost("PROXY_SERVER_HOST", "PROXY_SERVER_PORT");
+        return HttpClientBuilder.create().setProxy(proxy).build();
     }
 }
