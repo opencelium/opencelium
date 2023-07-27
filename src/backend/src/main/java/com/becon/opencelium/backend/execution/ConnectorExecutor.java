@@ -250,7 +250,8 @@ public class ConnectorExecutor {
     }
 
     private MediaType getResponseContentType(HttpHeaders httpHeaders, FunctionInvoker functionInvoker) {
-        if (functionInvoker.getResponse() != null || functionInvoker.getResponse().getSuccess() != null){
+        if (functionInvoker.getResponse() != null && functionInvoker.getResponse().getSuccess() != null
+            && functionInvoker.getResponse().getSuccess().getHeader() != null){
             return MediaType.valueOf(functionInvoker.getResponse().getSuccess().getHeader().get("Content-Type"));
         }
         return httpHeaders.getContentType();
