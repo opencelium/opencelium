@@ -93,7 +93,7 @@ class CreateOperator extends React.Component{
 
     render(){
         const {type} = this.state;
-        const {selectedItem, isTypeCreateOperator, createElementPanelConnectorType, itemPosition, itemType} = this.props;
+        const {selectedItem, isTypeCreateOperator, createElementPanelConnectorType, itemPosition, itemType, isModal} = this.props;
         let {x, y} = CCreateElementPanel.getCoordinates(this.props);
         const isOnlyOneCreateElement = !!itemPosition && !!itemPosition;
         const {isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
@@ -108,7 +108,7 @@ class CreateOperator extends React.Component{
         const isAddDisabled = type === null;
         return(
             <React.Fragment>
-                {!itemPosition && !itemType ? <Line style={beforeItemLineStyles}/> : null}
+                {!itemPosition && !itemType && !isModal ? <Line style={beforeItemLineStyles}/> : null}
                 <div className={styles.create_element_panel_for_item} style={panelItemStyles}>
                     <Select
                         id={'new_operator_type'}

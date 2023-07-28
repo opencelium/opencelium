@@ -31,12 +31,12 @@ class ConnectorPanels extends React.Component{
         const isToConnectorEmpty = connection.toConnector.svgItems.length === 0;
         return(
             <React.Fragment>
-                <ConnectorPanel ref={this.props.innerRef} {...fromConnectorPanelParams} readOnly={readOnly} namePosition={'right'} connectorType={CONNECTOR_FROM} isEmpty={isFromConnectorEmpty} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} createElementPanelConnectorType={createElementPanelConnectorType}/>
-                <ConnectorPanel {...toConnectorPanelParams} readOnly={readOnly} namePosition={'left'} connectorType={CONNECTOR_TO} isEmpty={isToConnectorEmpty} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} createElementPanelConnectorType={createElementPanelConnectorType}/>
+                <ConnectorPanel ref={this.props.panelRef.fromConnector} {...fromConnectorPanelParams} readOnly={readOnly} namePosition={'right'} connectorType={CONNECTOR_FROM} isEmpty={isFromConnectorEmpty} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} createElementPanelConnectorType={createElementPanelConnectorType}/>
+                <ConnectorPanel ref={this.props.panelRef.toConnector} {...toConnectorPanelParams} readOnly={readOnly} namePosition={'left'} connectorType={CONNECTOR_TO} isEmpty={isToConnectorEmpty} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} createElementPanelConnectorType={createElementPanelConnectorType}/>
                 {hasLine && <line strokeDasharray="5, 5" x1={fromConnectorPanelParams.panelPosition.x + fromConnectorPanelParams.panelPosition.width} y1={ARROW_INTEND_TOP} x2={toConnectorPanelParams.panelPosition.x} y2={ARROW_INTEND_TOP} stroke="#656565"/>}
             </React.Fragment>
         );
     }
 }
 
-export default React.forwardRef((props, ref) => <ConnectorPanels innerRef={ref} {...props}/>);
+export default React.forwardRef((props, ref) => <ConnectorPanels panelRef={ref} {...props}/>);

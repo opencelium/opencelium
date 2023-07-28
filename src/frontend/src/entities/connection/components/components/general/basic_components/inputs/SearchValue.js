@@ -21,7 +21,6 @@ class SearchValue extends React.Component{
         super(props);
     }
 
-
     render(){
         const {id, name, value, type, labelText, selectedConnector, currentConnector, inputValue, updateConnection, paramCallback, onSelectItem, closeMenu, changeInputValue, connection, selectedMethod} = this.props;
         return(
@@ -30,6 +29,7 @@ class SearchValue extends React.Component{
                     {labelText}
                 </div>
                 <UpdateParam
+                    ref={this.props.updateParamRef}
                     id={`${id}_param_button`}
                     name={name}
                     selectedMethod={selectedMethod}
@@ -48,4 +48,4 @@ class SearchValue extends React.Component{
     }
 }
 
-export default SearchValue;
+export default React.forwardRef((props, ref) => <SearchValue updateParamRef={ref} {...props}/>);

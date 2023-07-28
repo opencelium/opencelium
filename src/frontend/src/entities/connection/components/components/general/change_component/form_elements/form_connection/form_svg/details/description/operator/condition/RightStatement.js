@@ -26,6 +26,7 @@ import CCondition from "@classes/content/connection/operator/CCondition";
 class RightStatement extends React.Component{
     constructor(props) {
         super(props);
+        this.paramInputRef = React.createRef();
     }
 
     updateMethod(method){
@@ -249,7 +250,8 @@ class RightStatement extends React.Component{
                         style={this.getParamSelectStyles()}
                     /> :
                     <ParamInput
-                        id={paramId}
+                        ref={this.paramInputRef}
+                        id={`${paramId}_2`}
                         selectedMethod={condition.rightMethod ? connection.getMethodByColor(condition.rightMethod.color) : null}
                         selectedConnector={condition.rightMethod ? connection.getConnectorByMethodColor(condition.rightMethod.color) : null}
                         connection={connection}

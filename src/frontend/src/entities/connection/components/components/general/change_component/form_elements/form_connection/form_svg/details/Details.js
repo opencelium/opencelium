@@ -39,11 +39,12 @@ function mapStateToProps(state, props) {
   };
 }
 @GetModalProp()
-@connect(mapStateToProps, { toggleDetails, toggleModalDetails })
+@connect(mapStateToProps, { toggleDetails, toggleModalDetails }, null, {forwardRef: true})
 class Details extends React.Component {
   constructor(props) {
     super(props);
     this.toggleDetails = props.isModal ? props.toggleModalDetails : props.toggleDetails;
+    this.descriptionRef = React.createRef()
   }
 
   render() {
@@ -85,6 +86,7 @@ class Details extends React.Component {
           {details ? (
             <div className={styles.label}>
               <Description
+                ref={this.descriptionRef}
                 readOnly={readOnly}
                 details={details}
                 updateConnection={updateConnection}

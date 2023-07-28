@@ -35,6 +35,7 @@ class JsonBody extends Component{
         const src = source === null ? method.request.getBodyFields() : source;
         return(
             <ReactJson
+                ref={this.props.reactJsonRef}
                 name={false}
                 collapsed={false}
                 src={src}
@@ -65,4 +66,6 @@ JsonBody.defaultProps = {
     noPlaceholder: false,
 };
 
-export default JsonBody;
+// export default JsonBody;
+
+export default React.forwardRef((props, ref) => <JsonBody reactJsonRef={ref} {...props}/>);

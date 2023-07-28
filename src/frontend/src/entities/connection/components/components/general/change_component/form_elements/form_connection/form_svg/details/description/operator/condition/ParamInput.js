@@ -20,6 +20,7 @@ import SelectSearch from "@entity/connection/components/components/general/basic
 class ParamInput extends React.Component{
     constructor(props) {
         super(props);
+        this.selectSearchRef = React.createRef();
     }
 
     render(){
@@ -29,6 +30,7 @@ class ParamInput extends React.Component{
         return (
             <div style={style}>
                 <SelectSearch
+                    ref={this.selectSearchRef}
                     id={id}
                     selectedConnector={selectedConnector}
                     connection={connection}

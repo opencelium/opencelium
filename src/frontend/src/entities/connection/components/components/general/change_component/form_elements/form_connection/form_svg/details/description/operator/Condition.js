@@ -42,7 +42,7 @@ import GetModalProp from '@entity/connection/components/decorators/GetModalProp'
 
 
 @GetModalProp()
-@connect(null, {setCurrentTechnicalItem, setModalCurrentTechnicalItem})
+@connect(null, {setCurrentTechnicalItem, setModalCurrentTechnicalItem}, null, {forwardRef: true})
 class Condition extends React.Component{
     constructor(props) {
         super(props);
@@ -54,6 +54,9 @@ class Condition extends React.Component{
             }
         }
         this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
+        this.leftStatementRef = React.createRef();
+        this.relationOperatorRef = React.createRef();
+        this.rightStatementRef = React.createRef();
     }
 
     hasLeftMethod(){
@@ -256,6 +259,7 @@ class Condition extends React.Component{
         return(
             <React.Fragment>
                 <LeftStatement
+                    ref={this.leftStatementRef}
                     {...this.props}
                     operator={operator}
                     condition={condition}
@@ -270,6 +274,7 @@ class Condition extends React.Component{
                 {(isIfOperator || isLeftInputStringForLoopOperator) &&
                 <React.Fragment>
                     <RelationalOperator
+                        ref={this.relationOperatorRef}
                         isLoopOperator={isLoopOperator}
                         isIfOperator={isIfOperator}
                         relationalOperator={condition.relationalOperator}
@@ -280,6 +285,7 @@ class Condition extends React.Component{
                         isOperatorHasValue={() => this.isOperatorHasValue(isLoopOperator)}
                     />
                     <RightStatement
+                        ref={this.rightStatementRef}
                         {...this.props}
                         condition={condition}
                         connector={connector}

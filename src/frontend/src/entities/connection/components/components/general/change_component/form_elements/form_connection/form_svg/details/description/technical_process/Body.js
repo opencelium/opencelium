@@ -39,6 +39,7 @@ class Body extends React.Component{
             currentFieldName: '',
             currentEnhancement: null,
         }
+        this.JsonBodyRef = React.createRef();
     }
 
     toggleBodyVisible(){
@@ -139,6 +140,7 @@ class Body extends React.Component{
             case BODY_FORMAT.JSON:
                 return (
                     <JsonBody
+                        ref={this.JsonBodyRef}
                         id={'description_body'}
                         isDraft={isDraft}
                         readOnly={readOnly}
@@ -220,8 +222,8 @@ class Body extends React.Component{
         const hasEnhancement = connector.getConnectorType() === CONNECTOR_TO && !isGraphQLData;
         return(
             <React.Fragment>
-                <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
-                <Col xs={8} className={`${styles.col}`}>
+                <Col id='body_label' xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
+                <Col id='body_option' xs={8} className={`${styles.col}`}>
                     <TooltipFontIcon onClick={(a) => this.toggleBodyVisible(a)} size={14} value={<span className={styles.more_details}>{`...`}</span>} tooltip={'Body'}/>
                 </Col>
                 {isExtended && isCurrentInfo &&

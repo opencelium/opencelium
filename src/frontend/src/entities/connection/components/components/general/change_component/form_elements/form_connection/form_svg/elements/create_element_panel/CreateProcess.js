@@ -116,7 +116,7 @@ class CreateProcess extends React.Component{
 
     render(){
         const {name, label} = this.state;
-        const {connection, selectedItem, isTypeCreateOperator, createElementPanelConnectorType, hasBeforeLine, itemPosition, itemType} = this.props;
+        const {connection, selectedItem, isTypeCreateOperator, createElementPanelConnectorType, hasBeforeLine, itemPosition, itemType, isModal} = this.props;
         let connectorType = CCreateElementPanel.getConnectorType(this.props);
         const {isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
         let {x, y} = CCreateElementPanel.getCoordinates(this.props);
@@ -136,7 +136,7 @@ class CreateProcess extends React.Component{
         const isAddDisabled = name === '' || name === null;
         return(
             <React.Fragment>
-                {hasBeforeLine && <Line style={beforeItemLineStyles}/>}
+                {hasBeforeLine && !isModal ? <Line style={beforeItemLineStyles}/> : null}
                 <div className={styles.create_element_panel_for_item} style={panelItemStyles}>
                     <Select
                         id={'new_request_name'}

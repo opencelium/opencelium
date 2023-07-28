@@ -50,7 +50,7 @@ class Panel extends React.Component{
         const hasAction = !readOnly && !isTestingConnection;
         return(
             <React.Fragment>
-                <svg id={`${connectorType}_panel`} x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
+                <svg id={`${connectorType}_panel${this.props.isModal ? '_modal' : ''}`} x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
                     <rect onClick={hasAction ? () => this.onClick() : () => {}} x={rectPosition.x} y={rectPosition.y} width={rectPosition.width} height={rectPosition.height} className={styles.connector_item_panel} style={{cursor: isEmpty && hasAction ? 'pointer' : 'move'}}/>
                     <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={rectPosition.y - 6} className={styles.connector_item_text}>
                         {invokerName}

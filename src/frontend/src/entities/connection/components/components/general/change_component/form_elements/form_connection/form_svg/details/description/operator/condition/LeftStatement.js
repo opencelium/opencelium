@@ -20,6 +20,8 @@ import ParamInput from "./ParamInput";
 class LeftStatement extends React.Component{
     constructor(props) {
         super(props);
+        this.methodSelectRef = React.createRef();
+        this.paramInputRef = React.createRef();
     }
 
     updateMethod(method){
@@ -74,6 +76,7 @@ class LeftStatement extends React.Component{
         return(
             <React.Fragment>
                 <MethodSelect
+                    ref={this.methodSelectRef}
                     readOnly={readOnly}
                     hasValue={hasValue}
                     method={condition.leftMethod}
@@ -85,6 +88,7 @@ class LeftStatement extends React.Component{
                     isSearchable={isMethodSearchable}
                 />
                 <ParamInput
+                    ref={this.paramInputRef}
                     id={paramId}
                     updateConnection={updateConnection}
                     selectedMethod={condition.leftMethod ? connection.getMethodByColor(condition.leftMethod.color) : null}

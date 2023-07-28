@@ -17,7 +17,6 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withTranslation } from 'react-i18next';
 import TechnicalLayout from './layouts/TechnicalLayout';
-
 import Details from './details/Details';
 import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2.scss';
 import { mapItemsToClasses } from '@change_component/form_elements/form_connection/form_svg/utils';
@@ -50,20 +49,35 @@ function mapStateToProps(state, props) {
  * Form for ConnectionSvg
  */
 @GetModalProp()
-@withTranslation('basic_components', {withRef: true})
-@connect(mapStateToProps, { setCurrentTechnicalItem, setConnectionData, setModalConnectionData, setModalCurrentTechnicalItem }, null, {forwardRef: true})
+@withTranslation("basic_components", { withRef: true })
+@connect(
+  mapStateToProps,
+  {
+    setCurrentTechnicalItem,
+    setConnectionData,
+    setModalConnectionData,
+    setModalCurrentTechnicalItem,
+  },
+  null,
+  { forwardRef: true }
+)
 class FormConnectionSvg extends Component {
   constructor(props) {
     super(props);
     this.state = {
       isCreateElementPanelOpened: false,
-      createElementPanelConnectorType: '',
+      createElementPanelConnectorType: "",
       createElementPanelPosition: { x: 0, y: 0 },
     };
-    this.setData = props.isModal ? props.setModalConnectionData : props.setConnectionData;
-    this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
+    this.setData = props.isModal
+      ? props.setModalConnectionData
+      : props.setConnectionData;
+    this.setCurrentTechnicalItem = props.isModal
+      ? props.setModalCurrentTechnicalItem
+      : props.setCurrentTechnicalItem;
     this.technicalLayoutRef = React.createRef();
     this.createElementPalenRef = React.createRef();
+    this.detailsRef = React.createRef();
   }
 
   setCreateElementPanelPosition(position) {
@@ -74,7 +88,7 @@ class FormConnectionSvg extends Component {
 
   setIsCreateElementPanelOpened(
     isCreateElementPanelOpened,
-    createElementPanelConnectorType = ''
+    createElementPanelConnectorType = ""
   ) {
     this.setState({
       isCreateElementPanelOpened,
@@ -108,11 +122,7 @@ class FormConnectionSvg extends Component {
   }
 
   updateEntity(entity = null, settings = { hasPostMessage: true }) {
-    const {
-      authUser,
-      connection,
-      updateEntity,
-    } = this.props;
+    const { authUser, connection, updateEntity } = this.props;
     if (connection) {
       const storage = LocalStorage.getStorage();
       storage.set(
@@ -128,10 +138,16 @@ class FormConnectionSvg extends Component {
         this.setData({ connection: connectionData });
       }
     }
-  }
+  } 
 
   render() {
-    const { data, connection, currentTechnicalItem, isFullScreen, setRef } = this.props;
+    const {
+      data,
+      connection,
+      currentTechnicalItem,
+      isFullScreen,
+      setRef,
+    } = this.props;
     const {
       isCreateElementPanelOpened,
       createElementPanelConnectorType,
@@ -140,9 +156,10 @@ class FormConnectionSvg extends Component {
     return (
       <div
         className={`${styles.connection_editor}`}
-        style={{ padding: isFullScreen ? '0 0 0 15px' : '0' }}
+        style={{ padding: isFullScreen ? "0 0 0 15px" : "0" }}
       >
         <Details
+          ref={this.detailsRef}
           readOnly={data.readOnly}
           updateConnection={(a, b) => this.updateEntity(a, b)}
         />
@@ -168,7 +185,7 @@ class FormConnectionSvg extends Component {
             type={createElementPanelPosition.type}
             itemPosition={createElementPanelPosition.itemPosition}
             connectorType={
-              currentTechnicalItem ? currentTechnicalItem.connectorType : ''
+              currentTechnicalItem ? currentTechnicalItem.connectorType : ""
             }
             connection={connection}
             isCreateElementPanelOpened={isCreateElementPanelOpened}

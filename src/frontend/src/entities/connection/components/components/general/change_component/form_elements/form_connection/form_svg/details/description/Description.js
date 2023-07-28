@@ -38,10 +38,12 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {}, null, {forwardRef: true})
 class Description extends React.Component{
     constructor(props) {
         super(props);
+        this.conditionRef = React.createRef();
+        this.technicalProcessDescriptionRef = React.createRef();
     }
 
     renderForOperator(){
@@ -60,7 +62,7 @@ class Description extends React.Component{
                         <Col xs={8} className={`${styles.col} ${styles.value}`}>{operatorItem.iterator}</Col>
                     </React.Fragment>
                 }
-                <Condition readOnly={readOnly} nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details}/>
+                <Condition ref={this.conditionRef} readOnly={readOnly} nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details}/>
                 {
                     errorMessages.map(error => {
                         return <div style={{color: errorColor}}>{error}</div>
@@ -74,7 +76,7 @@ class Description extends React.Component{
         const {details} = this.props;
         return(
             <div className={styles.description}>
-                {details instanceof CTechnicalProcess && <TechnicalProcessDescription {...this.props}/>}
+                {details instanceof CTechnicalProcess && <TechnicalProcessDescription {...this.props} ref={this.technicalProcessDescriptionRef}/>}
                 {details instanceof COperator && this.renderForOperator()}
             </div>
         );

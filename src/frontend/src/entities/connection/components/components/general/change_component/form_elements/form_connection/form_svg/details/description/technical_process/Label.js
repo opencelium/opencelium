@@ -27,7 +27,7 @@ import {
 } from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
 
 
-@connect(null, {})
+@connect(null, {}, null, {forwardRef: true})
 class Label extends React.Component{
     constructor(props) {
         super(props);
@@ -102,8 +102,8 @@ class Label extends React.Component{
         const {label, readOnly, text} = this.props;
         return(
             <React.Fragment>
-                <Col xs={4} className={styles.col}>{text}</Col>
-                <Col xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
+                <Col id={text} xs={4} className={styles.col}>{text}</Col>
+                <Col id={`${text}_option`} xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
                     {isEditOn
                     ?
                         <Input id={'details_label'} placeholder={label} value={labelValue} onChange={(a) => this.setLabelValue(a)} theme={{input: styles.label_input, inputElement: styles.label_input_element}}/>

@@ -23,11 +23,12 @@ import {CONNECTOR_FROM} from "@entity/connection/components/classes/components/c
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 @GetModalProp()
-@connect(null, {setCurrentTechnicalItem, setModalCurrentTechnicalItem})
+@connect(null, {setCurrentTechnicalItem, setModalCurrentTechnicalItem}, null, {forwardRef: true})
 class Name extends React.Component{
     constructor(props) {
         super(props);
         this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
+        this.selectableInputRef = React.createRef();
     }
 
     changeName(optionValue){
@@ -67,6 +68,7 @@ class Name extends React.Component{
         const name = this.getName();
         return(
             <SelectableInput
+                ref={this.selectableInputRef}
                 id={`name_options`}
                 readOnly={readOnly}
                 options={invoker.getAllOperationsForSelect()}

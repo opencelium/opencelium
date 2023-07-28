@@ -159,8 +159,8 @@ class SelectableInput extends React.Component{
         const {label, value, readOnly} = this.props;
         return(
             <React.Fragment>
-                <Col xs={4} className={styles.col}>{label}</Col>
-                <Col xs={8} className={isEditOn ? styles.col_select : styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
+                <Col id={label} xs={4} className={styles.col}>{label}</Col>
+                <Col id={`${label}_option`} xs={8} className={isEditOn ? styles.col_select : styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
                     {isEditOn ? this.renderOptions() : <span className={styles.value}>{value}</span>}
                     {isMouseOver && !isEditOn && !readOnly && <EditIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isEditOn && <ApplyIcon onClick={(a) => this.toggleConfirmation(a)}/>}

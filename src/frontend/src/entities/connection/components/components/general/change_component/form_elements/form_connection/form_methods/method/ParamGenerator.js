@@ -45,6 +45,8 @@ class ParamGenerator extends Component {
         const {top, left} = findTopLeft(props.parent);
         this.top = top;
         this.left = left;
+
+        this.selectRef = React.createRef();
     }
 
     componentDidMount(){
@@ -175,6 +177,7 @@ class ParamGenerator extends Component {
         return (
             <div style={selectThemeInputStyle} className={themeGeneratorFormMethod}>
                 <Select
+                    ref={this.selectRef}
                     id={`param_generator_select_${this.props.connector.getConnectorType()}_${this.props.method.index}`}
                     name={'...'}
                     value={value}

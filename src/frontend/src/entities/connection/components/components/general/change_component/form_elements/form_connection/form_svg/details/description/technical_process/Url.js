@@ -85,8 +85,8 @@ class Url extends React.Component{
         const label = readOnly ? 'Ok' : 'Apply';
         return(
             <React.Fragment>
-                <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Endpoint`}</Col>
-                <Col xs={8} className={`${styles.col}`}>
+                <Col id="url_label" xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Endpoint`}</Col>
+                <Col id="url_option" xs={8} className={`${styles.col}`}>
                     <TooltipFontIcon onClick={() => this.toggleUrlVisibleIcon()} size={14} value={<span className={styles.more_details}>{`URL`}</span>} tooltip={'URL'}/>
                 </Col>
                 {isExtended && isCurrentInfo &&
