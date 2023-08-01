@@ -173,7 +173,7 @@ const HelpBlock = () => {
     const ifDetails = () => {
       const refs: any = {};
       refs.detailsRef = ref.current.detailsRef.current;
-      
+
       if(refs.detailsRef){
         delay(duration)
         .then(() => {
@@ -255,7 +255,7 @@ const HelpBlock = () => {
     const loopDetails = () =>{
       const refs: any = {};
       refs.detailsRef = ref.current.detailsRef.current;
-
+      
       if(refs.detailsRef){
         delay(duration)
         .then(() => {
@@ -347,6 +347,49 @@ const HelpBlock = () => {
         return delay(duration)
       })
       .then(() => {
+        if(connectorType === 'toConnector'){
+          positionElementOver([`param_generator_select_${connectorType}_${index}`], 10);
+          return delay(duration)
+        }
+      })
+      .then(() => {
+        if(connectorType === 'toConnector'){
+          if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current.endpointRef.current){
+            const method = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current.endpointRef.current.paramGeneratorRef.current.getOptionsForMethods()
+            ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current.endpointRef.current.paramGeneratorRef.current.updateColor(method[0].options[0])
+          }
+          return delay(duration)
+        }
+
+      })
+      .then(() => {
+        if(connectorType === 'toConnector'){
+          positionElementOver([`input_no_id`], 10)
+          return delay(duration)
+        }
+      })
+      .then(() => {
+        if(connectorType === 'toConnector'){
+          ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current.endpointRef.current.paramGeneratorRef.current.onChangeField('[0]')
+          return delay(duration)
+        }
+      })
+      .then(() => {
+        if(connectorType === 'toConnector'){
+          positionElementOver([`param_generator_add_${connectorType}_${index}`], 10)
+          return delay(duration);
+        }
+      })
+      .then(() => {
+        if(connectorType === 'toConnector'){
+          if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current.endpointRef.current){
+           ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current.endpointRef.current.paramGeneratorRef.current.addParam()
+           positionElementOver([`param_generator_add_${connectorType}_${index}`], 10, true)
+           return delay(duration);
+          }
+        }
+      })
+      .then(() => {
         refs.url.toggleUrlVisibleIcon();
 
         return delay(duration)
@@ -371,6 +414,7 @@ const HelpBlock = () => {
         return delay(duration)
       })
       .then(() => {
+        positionElementOver(["body_label", "body_option"], 10, true);
         positionElementOverByClassName(['.react-json-view .icon-container'], 10)
 
         return delay(duration)
@@ -450,7 +494,7 @@ const HelpBlock = () => {
         positionElementOverByClassName(['.react-json-view .variable-editor'], 10, true)
         refs.textarea = document.querySelector('.react-json-view .variable-editor');
         refs.nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-        refs.nativeTextAreaValueSetter.call(refs.textarea, `${index >= 1 && showLinkInBody && connectorType === 'fromConnector' ? '#' : 'key value'}`);
+        refs.nativeTextAreaValueSetter.call(refs.textarea, `${index >= 1 && showLinkInBody && connectorType === 'fromConnector' || index === 0 && showLinkInBody && connectorType === 'toConnector' ? '#' : 'key value'}`);
 
         return delay(duration)
       })
@@ -460,7 +504,7 @@ const HelpBlock = () => {
         return delay(duration)
       })
       .then(() =>{
-        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector'){
+        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' || index === 0 && showLinkInBody && connectorType === 'toConnector'){
           if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current !== null){
             positionElementOver([`param_generator_select_${connectorType}_${index}`], 10);
             return delay(duration)
@@ -468,16 +512,17 @@ const HelpBlock = () => {
         }
       })
       .then(() =>{
-        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector'){
+        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' || index === 0 && showLinkInBody && connectorType === 'toConnector'){
           if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current !== null){
             const method = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current.getOptionsForMethods();
-            ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current.updateColor(method[0])
+            console.log(method)
+            ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current.updateColor(connectorType === 'toConnector' ? method[0].options[0] : method[0])
             return delay(duration)
           }
         }
       })
       .then(() =>{
-        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector'){
+        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' || index === 0 && showLinkInBody && connectorType === 'toConnector'){
           if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current !== null){
             positionElementOver([`input_no_id`], 10)
             return delay(duration)
@@ -485,7 +530,7 @@ const HelpBlock = () => {
         }
       })
       .then(() =>{
-        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector'){
+        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' || index === 0 && showLinkInBody && connectorType === 'toConnector'){
           if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current !== null){
             ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current.onChangeField('[0]')
             return delay(duration)
@@ -493,7 +538,7 @@ const HelpBlock = () => {
         }
       })
       .then(() =>{
-        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector'){
+        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' || index === 0 && showLinkInBody && connectorType === 'toConnector'){
           if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current !== null){
             positionElementOver([`param_generator_add_${connectorType}_${index}`], 10)
             return delay(duration)
@@ -501,7 +546,7 @@ const HelpBlock = () => {
         }
       })
       .then(() =>{
-        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector'){
+        if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' || index === 0 && showLinkInBody && connectorType === 'toConnector'){
           if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current !== null){
             positionElementOver([`param_generator_add_${connectorType}_${index}`], 10, true)
             ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current.submitEdit()
@@ -511,14 +556,40 @@ const HelpBlock = () => {
         }
       })
       .then(() => {
-        if(index === 0){
+        if(index === 0 && showLinkInBody && connectorType === 'toConnector'){
+          positionElementOverByClassName(['.reference_element'], 10)
+          
+          return delay(duration);
+        } 
+      })
+      .then(() => {
+        if(index === 0 && showLinkInBody && connectorType === 'toConnector'){
+          positionElementOverByClassName(['.reference_element'], 10, true)
+          const referenceElement = document.querySelector('.reference_element');
+          // @ts-ignore
+          referenceElement.click();
+          return delay(duration);
+        } 
+      })
+      .then(() => {
+        if(index === 0 && showLinkInBody && connectorType === 'toConnector'){
+          positionElementOver(['enhancement_description'], 10)
+          refs.textarea = document.querySelector('#enhancement_description');
+          refs.nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+          refs.nativeTextAreaValueSetter.call(refs.textarea, 'Enhancement description');
+          refs.textarea.dispatchEvent(refs.inputEvent);
+          return delay(duration)
+        }
+      })
+      .then(() => {
+        if(index === 0 && connectorType === 'fromConnector'){
           positionElementOverByClassName(['.react-json-view .edit-check'], 10)
 
           return delay(duration)
         }
       })
       .then(() => {
-        if(index === 0){
+        if(index === 0 && connectorType === 'fromConnector'){
           positionElementOverByClassName(['.react-json-view .edit-check'], 10, true)
           refs.editSubmit = document.querySelector('.react-json-view .edit-check');
   
@@ -528,6 +599,9 @@ const HelpBlock = () => {
         }
       })
       .then(() => {
+        if(index === 0 && showLinkInBody && connectorType === 'toConnector'){
+          positionElementOver(['enhancement_description'], 10, true)
+        }
         refs.body.toggleBodyVisible();
         
         return delay(duration)
@@ -637,7 +711,7 @@ const HelpBlock = () => {
         if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' && name !=='if' && name !== 'loop'){
           methodDetails()
         }
-        if(index <= 0 && connectorType === 'fromConnector'){
+        if(index <= 0){
           methodDetails()
         }
         if(name === 'if'){
@@ -649,9 +723,9 @@ const HelpBlock = () => {
         if(index >= 1 && name !== 'if' && name !== 'loop' && !showLinkInBody){
           setIndex(index + 1);
         }
-        if(index <= 0 && connectorType === 'toConnector'){
-          setIndex(index + 1);
-        }
+        // if(index <= 0 && connectorType === 'toConnector'){
+        //   setIndex(index + 1);
+        // }
         return delay(duration);
       })
       .then(() => {
@@ -687,6 +761,7 @@ const HelpBlock = () => {
             }
             else if(index === animationData[videoAnimationName].fromConnector.length && connectorType === 'fromConnector'){
               setConnectorType('toConnector')
+              setShowLinkInBody(true)
               setIndex(0)
             }
             else if(index < animationData[videoAnimationName].toConnector.length && connectorType === 'toConnector'){

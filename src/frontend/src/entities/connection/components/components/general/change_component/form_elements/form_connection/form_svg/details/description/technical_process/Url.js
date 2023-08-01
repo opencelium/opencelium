@@ -29,6 +29,7 @@ class Url extends React.Component{
         this.state = {
             isUrlVisible: false,
         }
+        this.endpointRef = React.createRef();
     }
 
     toggleUrlVisibleIcon(){
@@ -67,6 +68,7 @@ class Url extends React.Component{
                     }}
                     isParamGeneratorArrowVisible={false}
                     isParamGeneratorAlwaysVisible={!readOnly}
+                    ref={this.endpointRef}
                 />
                 {isExtended &&
                     <Button
