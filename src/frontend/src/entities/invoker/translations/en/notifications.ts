@@ -32,7 +32,7 @@ export default {
     },
     rejected: {
         [updateOperation.rejected.type]: {
-            "__DEFAULT__": "The invoker operation was not updated"
+            "__DEFAULT__": "The invoker operation was not updated."
         },
         [getInvokerByName.rejected.type]: {
             "__DEFAULT__": "There is an error fetching invoker."
@@ -41,19 +41,20 @@ export default {
             "__DEFAULT__": "There is an error fetching invokers."
         },
         [addInvoker.rejected.type]: {
-            "__DEFAULT__": "The invoker was not added."
+            "__DEFAULT__": "The invoker was not added.",
+            "EXISTS": "Invoker with such name is already in use.",
         },
         [importInvoker.rejected.type]: {
             "__DEFAULT__": "The invoker was not imported."
         },
         [deleteInvokerByName.rejected.type]: {
-            "__DEFAULT__": "The invoker was not removed"
+            "__DEFAULT__": "The invoker was not removed."
         },
         [deleteInvokersByName.rejected.type]: {
-            "__DEFAULT__": "The selected invokers were not removed"
+            "__DEFAULT__": "The selected invokers were not removed."
         },
         [updateInvoker.rejected.type]: {
-            "__DEFAULT__": "The invoker was not updated"
+            "__DEFAULT__": "The invoker was not updated."
         },
         [uploadInvokerImage.rejected.type]: {
             "__DEFAULT__": "The image of the invoker was not uploaded."

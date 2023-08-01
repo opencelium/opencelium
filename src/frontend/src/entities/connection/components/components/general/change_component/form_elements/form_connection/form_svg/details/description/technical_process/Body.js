@@ -29,6 +29,8 @@ import CEnhancement from "@entity/connection/components/classes/components/conte
 import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
 import {markFieldNameAsArray} from "@change_component//form_elements/form_connection/form_methods/help";
 import GraphQLBody from "@change_component/form_elements/form_connection/form_methods/method/GraphQLBody";
+import ReferenceInformation
+    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/reference_information/ReferenceInformation";
 
 class Body extends React.Component{
     constructor(props) {
@@ -38,7 +40,13 @@ class Body extends React.Component{
             isBodyVisible: false,
             currentFieldName: '',
             currentEnhancement: null,
+            isToggledIcon: true,
+            isToggledReferenceIcon: false,
         }
+    }
+
+    toggleReferenceIcon(isToggledReferenceIcon){
+        this.setState({isToggledReferenceIcon});
     }
 
     toggleBodyVisible(){
@@ -52,6 +60,8 @@ class Body extends React.Component{
             isBodyVisible: !this.state.isBodyVisible,
             currentEnhancement: null,
             currentFieldName: '',
+            isToggledIcon: true,
+            isToggledReferenceIcon: false,
         });
     }
 
@@ -66,24 +76,25 @@ class Body extends React.Component{
         });
     }
 
-    setCurrentEnhancementClickingOnPointer(e, value){
+    setCurrentEnhancementClickingOnPointer(e, value, fieldName = ''){
         const {connection, connector} = this.props;
         /*if(connector.getConnectorType() === CONNECTOR_FROM){
             return;
         }*/
-        let fieldName = '';
-        if(value.namespace.length > 1){
-            for(let i = 1; i < value.namespace.length; i++){
-                if((i + 1) < value.namespace.length && isNumber(value.namespace[i + 1])){
-                    fieldName += markFieldNameAsArray(value.namespace[i], value.namespace[i + 1]);
-                    i++;
-                } else{
-                    fieldName += value.namespace[i];
+        if(fieldName === '') {
+            if (value.namespace.length > 1) {
+                for (let i = 1; i < value.namespace.length; i++) {
+                    if ((i + 1) < value.namespace.length && isNumber(value.namespace[i + 1])) {
+                        fieldName += markFieldNameAsArray(value.namespace[i], value.namespace[i + 1]);
+                        i++;
+                    } else {
+                        fieldName += value.namespace[i];
+                    }
+                    fieldName += '.';
                 }
-                fieldName += '.';
             }
+            fieldName += value.variable.name;
         }
-        fieldName += value.variable.name;
         let bindingItem = this.getCurrentBindingItem(fieldName);
         if(bindingItem){
             bindingItem = bindingItem.to[0];
@@ -119,6 +130,7 @@ class Body extends React.Component{
     }
 
     renderBody(){
+        const {isToggledReferenceIcon} = this.state;
         const {readOnly, method, connection, isDraft, source, connector} = this.props;
         if(method.isGraphQLData()){
             return (
@@ -142,6 +154,7 @@ class Body extends React.Component{
                     <JsonBody
                         id={'description_body'}
                         isDraft={isDraft}
+                        isFullHeight={!isToggledReferenceIcon}
                         readOnly={readOnly}
                         method={connector.getMethodByIndex(method.index)}
                         connection={connection}
@@ -189,20 +202,50 @@ class Body extends React.Component{
     }
 
     renderInfo(){
-        const {bodyTitle, connector, isExtended, readOnly} = this.props;
-        const hasEnhancement = true;
+        const {isToggledIcon, isToggledReferenceIcon} = this.state;
+        const {bodyTitle, isExtended, readOnly, source, method, connector, connection} = this.props;
+        let gridStyles = {};
+        if(isToggledReferenceIcon && !isToggledIcon){
+            gridStyles.gridTemplateRows = 'minmax(auto, max-content) 40px';
+        }
+        if(!isToggledReferenceIcon && isToggledIcon){
+            gridStyles.gridTemplateRows = '40px minmax(auto, max-content)';
+        }
+        if(!isToggledReferenceIcon && !isToggledIcon){
+            gridStyles.gridTemplateRows = '40px 40px';
+        }
+        if(isToggledReferenceIcon && isToggledIcon){
+            gridStyles.gridTemplateRows = '25% auto';
+        }
         return(
             <React.Fragment>
-                <div className={hasEnhancement ? styles.body_data_with_enhancement : styles.body_data}>
-                    <div><b>{bodyTitle}</b></div>
-                    {this.renderBody()}
-                </div>
-                {true &&
-                    <div className={styles.body_enhancement}>
-                        <div><b>{'Enhancement'}</b></div>
-                        {this.renderEnhancement()}
+                <div className={styles.body_data_with_enhancement} style={gridStyles}>
+                    <ReferenceInformation
+                        body={source}
+                        method={method}
+                        connection={connection}
+                        toggleIcon={(a) => this.toggleReferenceIcon(a)}
+                        isToggledIcon={isToggledReferenceIcon}
+                        onReferenceClick={(fieldName) => this.setCurrentEnhancementClickingOnPointer(null, null, fieldName)}
+                    />
+                    <div>
+                        <div>
+                            <b>{bodyTitle}</b>
+                            <TooltipFontIcon
+                                tooltipPosition={'right'}
+                                style={{verticalAlign: 'middle',cursor: 'pointer'}}
+                                onClick={() => this.setState({isToggledIcon: !isToggledIcon})}
+                                tooltip={isToggledIcon ? 'Hide' : 'Show'}
+                                value={isToggledIcon ? 'expand_less' : 'chevron_right'}
+                            />
+                        </div>
+                        {isToggledIcon && this.renderBody()}
                     </div>
-                }
+                </div>
+                <div className={styles.body_enhancement}>
+                    <div><b>{'Enhancement'}</b></div>
+                    {this.renderEnhancement()}
+                </div>
                 {isExtended && !readOnly &&
                     <Button
                         className={styles.extended_details_button_save_body}
@@ -235,7 +278,11 @@ class Body extends React.Component{
                     active={isBodyVisible && !isExtended}
                     toggle={(a) => this.toggleBodyVisible(a)}
                     title={'Body'}
-                    theme={{dialog: isGraphQLData ? styles.body_dialog_graphql : hasEnhancement ? styles.body_dialog_with_enhancement : styles.body_dialog, content: styles.body_content}}
+                    theme={{
+                        dialog: isGraphQLData ? styles.body_dialog_graphql : hasEnhancement ? styles.body_dialog_with_enhancement : styles.body_dialog,
+                        content: styles.body_content,
+                        body: styles.enhancement_dialog_body,
+                    }}
                 >
                     {this.renderInfo()}
                 </Dialog>

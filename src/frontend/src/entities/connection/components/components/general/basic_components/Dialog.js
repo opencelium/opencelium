@@ -106,7 +106,7 @@ class Dialog extends Component{
         return(
             <Modal id={`modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} className={dialogClassname} modalClassName={theme.modal} contentClassName={theme.content} wrapClassName={theme.wrapper}>
                 <ModalHeader toggle={toggle} className={theme.title}>{title}</ModalHeader>
-                <ModalBody>
+                <ModalBody className={theme.body}>
                     {children}
                 </ModalBody>
                 <ModalFooter style={{borderTop: 'none'}} className={styles.buttons}>
@@ -129,12 +129,13 @@ Dialog.propTypes = {
         content: PropTypes.string,
         modal: PropTypes.string,
         dialog: PropTypes.string,
+        body: PropTypes.string,
     }),
     hasAutoFocus: PropTypes.bool,
 };
 
 Dialog.defaultProps = {
-    theme: {wrapper: '', title: '', content: '', modal: '', dialog: ''},
+    theme: {wrapper: '', title: '', content: '', modal: '', dialog: '', body: ''},
     active: false,
     isConfirmation: false,
     hasAutoFocus: true,
