@@ -159,6 +159,7 @@ class Body extends React.Component{
                 />
             );
         }
+        console.log('isFullHeight', !isToggledReferenceIcon);
         switch(method.bodyFormat){
             case BODY_FORMAT.JSON:
                 return (
@@ -217,10 +218,10 @@ class Body extends React.Component{
         const {bodyTitle, isExtended, readOnly, source, method, connector, connection} = this.props;
         let gridStyles = {};
         if(isToggledReferenceIcon && !isToggledIcon){
-            gridStyles.gridTemplateRows = 'minmax(auto, max-content) 40px';
+            gridStyles.gridTemplateRows = 'auto 40px';
         }
         if(!isToggledReferenceIcon && isToggledIcon){
-            gridStyles.gridTemplateRows = '40px minmax(auto, max-content)';
+            gridStyles.gridTemplateRows = '40px auto';
         }
         if(!isToggledReferenceIcon && !isToggledIcon){
             gridStyles.gridTemplateRows = '40px 40px';
