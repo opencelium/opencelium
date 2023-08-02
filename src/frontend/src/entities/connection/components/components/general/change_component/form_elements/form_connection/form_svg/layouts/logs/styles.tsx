@@ -43,6 +43,7 @@ export const LogPanelStyled = styled.div<{isFullScreen: boolean, noLogs: boolean
 `;
 
 export const HeaderStyled = styled(Text)`
+    user-select: none;
     text-align: center;
     color: #555;
 `;
@@ -73,6 +74,7 @@ export const TopStyled = styled.div<{logPanelHeight: number}>`
 `;
 
 export const NoLogsStyled = styled(Text)`
+    user-select: none;
     width: 100%;
     height: 100%;
     text-align: center;

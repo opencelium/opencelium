@@ -31,13 +31,21 @@ import {markFieldNameAsArray} from "@change_component//form_elements/form_connec
 import GraphQLBody from "@change_component/form_elements/form_connection/form_methods/method/GraphQLBody";
 import ReferenceInformation
     from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/reference_information/ReferenceInformation";
+import {connect} from "react-redux";
+import {toggleBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
 
+function mapStateToProps(state){
+    const editor = state.connectionEditorReducer;
+    return{
+        isBodyDialogOpened: editor.isBodyDialogOpened,
+    };
+}
+@connect(mapStateToProps, {toggleBodyDialog})
 class Body extends React.Component{
     constructor(props) {
         super(props);
 
         this.state = {
-            isBodyVisible: false,
             currentFieldName: '',
             currentEnhancement: null,
             isToggledIcon: true,
@@ -50,14 +58,17 @@ class Body extends React.Component{
     }
 
     toggleBodyVisible(){
-        const {connection, updateConnection, setCurrentInfo, nameOfCurrentInfo} = this.props;
-        if(!this.state.isBodyVisible) {
+        const {
+            connection, updateConnection, setCurrentInfo, nameOfCurrentInfo,
+            isBodyDialogOpened, toggleBodyDialog,
+        } = this.props;
+        if(!isBodyDialogOpened) {
             connection.currentEnhancemnet = null;
         }
         if(setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
         updateConnection(connection);
+        toggleBodyDialog();
         this.setState({
-            isBodyVisible: !this.state.isBodyVisible,
             currentEnhancement: null,
             currentFieldName: '',
             isToggledIcon: true,
@@ -258,8 +269,7 @@ class Body extends React.Component{
     }
 
     render(){
-        const {isBodyVisible} = this.state;
-        const {connector, isExtended, isCurrentInfo, method} = this.props;
+        const {connector, isExtended, isCurrentInfo, method, isBodyDialogOpened} = this.props;
         const isGraphQLData = method.isGraphQLData();
         const hasEnhancement = true && !isGraphQLData;
         return(
@@ -275,7 +285,7 @@ class Body extends React.Component{
                 }
                 <Dialog
                     actions={[{label: 'Ok', onClick: (a) => this.toggleBodyVisible(a), id: 'header_ok'}]}
-                    active={isBodyVisible && !isExtended}
+                    active={isBodyDialogOpened && !isExtended}
                     toggle={(a) => this.toggleBodyVisible(a)}
                     title={'Body'}
                     theme={{

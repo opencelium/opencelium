@@ -31,6 +31,7 @@ import DashedElement from "./DashedElement";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
 import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {toggleBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
@@ -47,7 +48,7 @@ function mapStateToProps(state){
     }
 }
 
-@connect(mapStateToProps, {setJustDeletedItem})
+@connect(mapStateToProps, {setJustDeletedItem, toggleBodyDialog})
 class Process extends React.Component{
     constructor(props) {
         super(props)
@@ -190,6 +191,11 @@ class Process extends React.Component{
         }
     }
 
+    onDoubleClick(){
+        this.onClick();
+        this.props.toggleBodyDialog();
+    }
+
     deleteProcess(e){
         const {deleteProcess, process, setJustDeletedItem} = this.props;
         setJustDeletedItem({index: process.entity.index, connectorType: process.connectorType});
@@ -283,7 +289,8 @@ class Process extends React.Component{
                                     {...props}
                                     id={`${process.getHtmlIdName()}_rect`}
                                     fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color}
-                                    onClick={(a) => {this.onClick(a)}}
+                                    onClick={() => this.onClick()}
+                                    onDoubleClick={() => this.onDoubleClick()}
                                     onMouseDown={(a) => {this.onMouseDown(a)}}
                                     x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
                                     className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${technicalRectClassName} ${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}

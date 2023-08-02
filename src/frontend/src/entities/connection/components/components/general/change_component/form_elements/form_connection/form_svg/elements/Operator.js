@@ -32,6 +32,7 @@ import DashedElement from "@change_component/form_elements/form_connection/form_
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
 import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {toggleConditionDialog} from "@root/redux_toolkit/slices/EditorSlice";
 
 
 function mapStateToProps(state){
@@ -47,7 +48,7 @@ function mapStateToProps(state){
     }
 }
 
-@connect(mapStateToProps, {setJustDeletedItem})
+@connect(mapStateToProps, {setJustDeletedItem, toggleConditionDialog})
 class Operator extends React.Component{
     constructor(props) {
         super(props)
@@ -228,6 +229,11 @@ class Operator extends React.Component{
         }
     }
 
+    onDoubleClick(){
+        this.onClick();
+        this.props.toggleConditionDialog();
+    }
+
     deleteOperator(e){
         const {connection, operator, updateConnection, setCurrentItem, setJustDeletedItem} = this.props;
         const connector = connection.getConnectorByType(operator.connectorType);
@@ -343,7 +349,8 @@ class Operator extends React.Component{
                                 return <polygon
                                     onMouseDown={(a) => this.onMouseDown(a)}
                                     onMouseUp={(a) => this.onMouseUp(a)}
-                                    onClick={(a) => this.onClick(a)}
+                                    onClick={() => this.onClick()}
+                                    onDoubleClick={() => this.onDoubleClick()}
                                     points={points}
                                     style={{...polygonStyle, ...errorStyles}}
                                     className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
@@ -367,7 +374,8 @@ class Operator extends React.Component{
                                 return <polygon
                                     onMouseDown={(a) => this.onMouseDown(a)}
                                     onMouseUp={(a) => this.onMouseUp(a)}
-                                    onClick={(a) => this.onClick(a)}
+                                    onClick={() => this.onClick()}
+                                    onDoubleClick={() => this.onDoubleClick()}
                                     points={points}
                                     style={{...polygonStyle, ...errorStyles}}
                                     className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
