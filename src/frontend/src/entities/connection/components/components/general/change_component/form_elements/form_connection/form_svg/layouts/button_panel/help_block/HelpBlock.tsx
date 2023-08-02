@@ -90,25 +90,57 @@ const HelpBlock = () => {
           {
             "type": "process",
             "name": "GetBoards",
-            "label": "test"
+            "label": "test",
+            "id": "0"
           },
           {
             "type": "operator",
             "name": "if",
+            "id": "1",
           },
           {
             "type": "process",
             "name": "GetBoardList",
-            "label": "test3"
+            "label": "test3",
+            "direction": 'in',
+            "id": "1_0",
           },
           {
             "type": "operator",
             "name": "loop",
+            "id": "1_1",
           },
           {
             "type": "process",
             "name": "GetBoardList",
-            "label": "test2"
+            "label": "test2",
+            "id": "1_2",
+          },
+          {
+            "type": "process",
+            "name": "GetBoardList",
+            "label": "test123",
+            "id": "2",
+            "after": "1"
+          },
+          {
+            "type": "operator",
+            "name": "if",
+            "id": "3",
+          },
+          {
+            "type": "process",
+            "name": "GetBoardList",
+            "label": "test3",
+            "direction": 'in',
+            "id": "3_0",
+          },
+          {
+            "type": "process",
+            "name": "GetBoardList",
+            "label": "test3",
+            "id": "4",
+            "after": "3"
           },
         ],
         "toConnector": [
@@ -356,6 +388,7 @@ const HelpBlock = () => {
         if(connectorType === 'toConnector'){
           if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current.endpointRef.current){
             const method = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current.endpointRef.current.paramGeneratorRef.current.getOptionsForMethods()
+            
             ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current.endpointRef.current.paramGeneratorRef.current.updateColor(method[0].options[0])
           }
           return delay(duration)
@@ -506,7 +539,8 @@ const HelpBlock = () => {
       .then(() =>{
         if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' || index === 0 && showLinkInBody && connectorType === 'toConnector'){
           if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current !== null){
-            positionElementOver([`param_generator_select_${connectorType}_${index}`], 10);
+            refs.currentItemId = ref.current.props.currentTechnicalItem.id;
+            positionElementOver([`param_generator_select_${refs.currentItemId}`], 10);
             return delay(duration)
           }
         }
@@ -515,7 +549,7 @@ const HelpBlock = () => {
         if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' || index === 0 && showLinkInBody && connectorType === 'toConnector'){
           if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current !== null){
             const method = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current.getOptionsForMethods();
-            console.log(method)
+            
             ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current.updateColor(connectorType === 'toConnector' ? method[0].options[0] : method[0])
             return delay(duration)
           }
@@ -540,7 +574,7 @@ const HelpBlock = () => {
       .then(() =>{
         if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' || index === 0 && showLinkInBody && connectorType === 'toConnector'){
           if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current !== null){
-            positionElementOver([`param_generator_add_${connectorType}_${index}`], 10)
+            positionElementOver([`param_generator_add_${refs.currentItemId}`], 10)
             return delay(duration)
           }
         }
@@ -548,7 +582,7 @@ const HelpBlock = () => {
       .then(() =>{
         if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' || index === 0 && showLinkInBody && connectorType === 'toConnector'){
           if(ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current !== null){
-            positionElementOver([`param_generator_add_${connectorType}_${index}`], 10, true)
+            positionElementOver([`param_generator_add_${refs.currentItemId}`], 10, true)
             ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current.JsonBodyRef.current.props.ReferenceComponent.self.current.submitEdit()
             setShowLinkInBody(false);
             return delay(duration)
@@ -607,6 +641,10 @@ const HelpBlock = () => {
         return delay(duration)
       })
       .then(() => {
+        positionElementOver(["response_label"], 10);
+        return delay(duration)
+      })
+      .then(() => {
         ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.toggleResponseVisibleIcon();
         positionElementOver(["response_label"], 10, true);
         setIndex(index + 1)
@@ -619,8 +657,11 @@ const HelpBlock = () => {
       const type = animationData[videoAnimationName][panel][index].type;
       const name = animationData[videoAnimationName][panel][index].name;
       const label = animationData[videoAnimationName][panel][index].label;
+      const direction = animationData[videoAnimationName][panel][index].direction;
+      const after = animationData[videoAnimationName][panel][index].after;
       const prevElementType = animationData[videoAnimationName][panel][index > 0 ? index - 1 : index].type;
       const svgRef = ref.current.technicalLayoutRef.current.svgRef.current;
+      
 
       const connectorPanel = panel === 'fromConnector' ? svgRef.fromConnectorPanelRef.current : svgRef.toConnectorPanelRef.current;
       
@@ -630,10 +671,10 @@ const HelpBlock = () => {
         if(index <= 0){
           connectorPanel.onClick()
         }
-        else{
+        else{      
           const operatorRef = svgRef.operatorRef.current;
           const processRef = svgRef.processRef.current;
-          
+
             if(prevElementType === "operator"){
               operatorRef.onMouseOverSvg()
             }
@@ -647,31 +688,42 @@ const HelpBlock = () => {
       .then(() => {
         if(index >= 1){
           const createPanelElement = document.querySelector(`#create_panel_right`).nextElementSibling;
+          let currentItem = null;
+          if(after){
+            const svgItems = ref.current.technicalLayoutRef.current.props.connectionOverviewState.connection[connectorType].svgItems
+            for(let i = 0; i < svgItems.length; i++){
+              if(svgItems[i].id === `${connectorType}_${after}`){
+  
+                currentItem = animationProps.connection.fromConnector.getSvgElementByIndex(after)
+                
+                break;
+              }
+            }
+          }
           
           if(type === "process" && prevElementType === "operator"){
             const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
 
-            operatorCreatePanel.createProcess(createPanelElement);
+            operatorCreatePanel.createProcess(createPanelElement, direction ? direction : 'out', currentItem);
           }
            
           else if(type === "process" && prevElementType === "process"){
             const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
 
-            processCreatePanel.createProcess(createPanelElement);
+            processCreatePanel.createProcess(createPanelElement, direction ? direction : 'out', currentItem);
           }
             
           else if(type === "operator" && prevElementType === "process"){
             const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
 
-            processCreatePanel.createOperator(createPanelElement);
+            processCreatePanel.createOperator(createPanelElement, direction ? direction : 'out', currentItem);
           }
 
           else if(type === "operator" && prevElementType === "operator"){
             const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
 
-            operatorCreatePanel.createOperator(createPanelElement);
+            operatorCreatePanel.createOperator(createPanelElement, direction ? direction : 'out', currentItem);
           }
-
           return delay(duration);
         }
       })
@@ -707,7 +759,10 @@ const HelpBlock = () => {
         
         type === "process" ? createProcessRef.create() : createOperatorRef.create()
         const processRef = svgRef.processRef.current;
+       
         processRef.onClick()
+        
+        
         if(index >= 1 && showLinkInBody && connectorType === 'fromConnector' && name !=='if' && name !== 'loop'){
           methodDetails()
         }
@@ -723,9 +778,7 @@ const HelpBlock = () => {
         if(index >= 1 && name !== 'if' && name !== 'loop' && !showLinkInBody){
           setIndex(index + 1);
         }
-        // if(index <= 0 && connectorType === 'toConnector'){
-        //   setIndex(index + 1);
-        // }
+
         return delay(duration);
       })
       .then(() => {
@@ -807,9 +860,7 @@ const HelpBlock = () => {
   }
 
   const updateEntity = (updatedEntity: any) => {
-      setAnimationProps({...animationProps, connection: updatedEntity});
-      let connection = updatedEntity instanceof CConnection ? updatedEntity.getObjectForConnectionOverview() : updatedEntity;
-      dispatch(setModalConnectionData({connection}));
+    setAnimationProps({...animationProps, connection: updatedEntity});
   }
 
   return (

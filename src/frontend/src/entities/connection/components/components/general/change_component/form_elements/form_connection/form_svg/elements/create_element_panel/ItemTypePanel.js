@@ -32,7 +32,7 @@ class ItemTypePanel extends React.Component{
         const {isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
         let {x, y} = CCreateElementPanel.getCoordinates(this.props);
         let ItemClass = selectedItem;
-        console.log(this.props.isModal)
+        
         if(selectedItem === null){
             if(isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout){
                 ItemClass = CTechnicalProcess;

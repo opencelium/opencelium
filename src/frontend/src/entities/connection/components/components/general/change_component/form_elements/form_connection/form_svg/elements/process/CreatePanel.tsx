@@ -45,14 +45,14 @@ const CreatePanel: FC<{
     const points = `${operatorPlaceholderSize / 2},1 ${operatorPlaceholderSize - 1},${operatorPlaceholderSize / 2} ${operatorPlaceholderSize / 2},${operatorPlaceholderSize - 1} 1,${operatorPlaceholderSize / 2}`;
 
     useImperativeHandle(ref, () => ({
-        createProcess(e: any, itemPosition: string){
-            setCurrentItem(element);
+        createProcess(e: any, itemPosition: string, currentElement: any = null){
+            setCurrentItem(currentElement || element);
             setCoordinatesForCreateElementPanel(e, CREATE_PROCESS, itemPosition);
             setIsCreateElementPanelOpened(true);
             onMouseLeave();
         },
-        createOperator(e: any, itemPosition: string){
-            setCurrentItem(element);
+        createOperator(e: any, itemPosition: string, currentElement: any = null){
+            setCurrentItem(currentElement || element);
             setIsCreateElementPanelOpened(true);
             setCoordinatesForCreateElementPanel(e, CREATE_OPERATOR, itemPosition);
             onMouseLeave();
@@ -120,7 +120,7 @@ const CreatePanel: FC<{
                 <svg {...containerCoordinatesBottom} onMouseOver={onMouseOverSvgBottom} onMouseLeave={onMouseLeaveSvgBottom}>
                     <CreatePanelStyled id={'create_panel_bottom'} style={{opacity: isMouseOverBottom ? 0.5 : 0.2}} isBottom={true}/>
                     <CreateProcessContainerStyled isBottom={true}>
-                        <CreateProcessStyled x={37.5} onClick={(e) => (createProcess(e, INSIDE_ITEM), console.log(e))} style={{opacity: isMouseOverBottom ? 1 : 0.2}} isBottom={true}>
+                        <CreateProcessStyled x={37.5} onClick={(e) => (createProcess(e, INSIDE_ITEM))} style={{opacity: isMouseOverBottom ? 1 : 0.2}} isBottom={true}>
                             <title>{"Process"}</title>
                         </CreateProcessStyled>
                     </CreateProcessContainerStyled>
