@@ -169,7 +169,7 @@ export const deleteInvokersByName = createAsyncThunk(
     async(invokerNames: string[], thunkAPI) => {
         try {
             const request = new InvokerRequest();
-            await request.deleteInvokersByName(invokerNames);
+            await request.deleteInvokersByName({identifiers: invokerNames});
             return invokerNames;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

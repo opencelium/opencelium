@@ -31,6 +31,10 @@ export interface UpdateMethodProps{
     fields: FieldProps[]
 }
 
+export interface DeleteInvokerByNameRequestProps{
+    identifiers: string[],
+}
+
 export interface IInvokerRequest{
 
     //to import invoker as an xml file
@@ -61,7 +65,7 @@ export interface IInvokerRequest{
     deleteInvokerByName(): Promise<AxiosResponse<IInvoker>>,
 
     //to delete invokers by id
-    deleteInvokersByName(invoker: string[]): Promise<AxiosResponse<IResponse>>,
+    deleteInvokersByName(args: DeleteInvokerByNameRequestProps): Promise<AxiosResponse<IResponse>>,
 
     //to upload image of invoker
     uploadInvokerImage(data: FormData): Promise<AxiosResponse<IInvoker>>,

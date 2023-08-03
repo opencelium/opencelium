@@ -18,7 +18,10 @@ import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IContent, INotificationTemplate} from "../../interfaces/INotificationTemplate";
-import {INotificationTemplateRequest} from "../interfaces/INotificationTemplate";
+import {
+    DeleteNotificationTemplatesByIdRequestProps,
+    INotificationTemplateRequest
+} from "../interfaces/INotificationTemplate";
 
 
 export class NotificationTemplateRequest extends Request implements INotificationTemplateRequest{
@@ -55,8 +58,9 @@ export class NotificationTemplateRequest extends Request implements INotificatio
         return super.delete<INotificationTemplate>();
     }
 
-    async deleteNotificationTemplatesById(notificationTemplateIds: number[]): Promise<AxiosResponse<number[]>>{
-        return super.delete<number[]>({data: notificationTemplateIds});
+    async deleteNotificationTemplatesById(data: DeleteNotificationTemplatesByIdRequestProps): Promise<AxiosResponse<IResponse>>{
+        this.endpoint = '/list/delete';
+        return super.put<IResponse>(data);
     }
 
     backendMap(notificationTemplate: INotificationTemplate){

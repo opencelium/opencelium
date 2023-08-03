@@ -18,6 +18,10 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 import { ITemplate } from "../../interfaces/ITemplate";
 import ModelTemplate from "../models/Template";
 
+export interface DeleteTemplatesByIdRequestProps{
+    identifiers: number[],
+}
+
 export interface ITemplateRequest{
 
     //to check if template with such name already exists
@@ -48,5 +52,5 @@ export interface ITemplateRequest{
     deleteTemplateById(): Promise<AxiosResponse<ITemplate>>,
 
     //to delete templates by id
-    deleteTemplatesById(template: number[]): Promise<AxiosResponse<number[]>>,
+    deleteTemplatesById(args: DeleteTemplatesByIdRequestProps): Promise<AxiosResponse<IResponse>>,
 }

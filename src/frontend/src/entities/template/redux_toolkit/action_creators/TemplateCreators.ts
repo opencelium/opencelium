@@ -156,11 +156,11 @@ export const deleteTemplateById = createAsyncThunk(
 
 export const deleteTemplatesById = createAsyncThunk(
     'template/delete/selected/byId',
-    async(templateIds: number[], thunkAPI) => {
+    async(identifiers: number[], thunkAPI) => {
         try {
             const request = new TemplateRequest();
-            await request.deleteTemplatesById(templateIds);
-            return templateIds;
+            await request.deleteTemplatesById({identifiers});
+            return identifiers;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
