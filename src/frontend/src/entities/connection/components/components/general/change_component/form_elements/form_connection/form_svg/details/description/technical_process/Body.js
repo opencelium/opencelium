@@ -159,7 +159,6 @@ class Body extends React.Component{
                 />
             );
         }
-        console.log('isFullHeight', !isToggledReferenceIcon);
         switch(method.bodyFormat){
             case BODY_FORMAT.JSON:
                 return (
