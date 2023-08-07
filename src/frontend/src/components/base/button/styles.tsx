@@ -20,6 +20,7 @@ import {isNumber} from "@application/utils/utils";
 import { ButtonStyledProps, LabelStyledProps, SpinnerStyledProps } from "./interfaces";
 
 const ButtonStyled = styled.button<ButtonStyledProps>`
+    user-select: none;
     opacity: ${({isDisabled}) => isDisabled ? 0.5 : 'unset'};
     width: ${({size, iconSize, hasLabel, width}) => width ? width : !hasLabel ? iconSize : 'auto'};
     height: ${({size, iconSize, hasLabel}) => !hasLabel ? iconSize : 'auto'};

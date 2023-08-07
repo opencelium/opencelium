@@ -672,6 +672,10 @@ $DASHED_COLOR: #58854d;
   max-height: 90vh;
   height: 90vh;
 }
+.enhancement_dialog_body{
+  max-height: 100%;
+  overflow: hidden;
+}
 
 .body_data{
   width: 100%;
@@ -686,6 +690,7 @@ $DASHED_COLOR: #58854d;
   width: 50%;
   border-right: 1px solid #eee;
   padding-right: 10px;
+  display: grid;
 }
 .body_mapping{
   width: 33%;

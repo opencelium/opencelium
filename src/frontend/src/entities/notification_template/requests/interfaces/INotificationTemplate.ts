@@ -17,6 +17,10 @@ import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import { INotificationTemplate } from "../../interfaces/INotificationTemplate";
 
+export interface DeleteNotificationTemplatesByIdRequestProps{
+    identifiers: number[],
+}
+
 export interface INotificationTemplateRequest{
 
     /*
@@ -44,5 +48,5 @@ export interface INotificationTemplateRequest{
     deleteNotificationTemplateById(): Promise<AxiosResponse<INotificationTemplate>>,
 
     //to delete notification templates by id
-    deleteNotificationTemplatesById(notificationTemplate: number[]): Promise<AxiosResponse<number[]>>,
+    deleteNotificationTemplatesById(args: DeleteNotificationTemplatesByIdRequestProps): Promise<AxiosResponse<IResponse>>,
 }

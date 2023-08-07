@@ -136,11 +136,11 @@ export const deleteNotificationTemplateById = createAsyncThunk(
 
 export const deleteNotificationTemplatesById = createAsyncThunk(
     'schedule/notification_template/delete/selected/byId',
-    async(notificationTemplateIds: number[], thunkAPI) => {
+    async(identifiers: number[], thunkAPI) => {
         try {
             const request = new NotificationTemplateRequest();
-            await request.deleteNotificationTemplatesById(notificationTemplateIds);
-            return notificationTemplateIds;
+            await request.deleteNotificationTemplatesById({identifiers});
+            return identifiers;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

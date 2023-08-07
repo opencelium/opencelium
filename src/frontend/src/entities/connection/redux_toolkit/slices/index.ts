@@ -14,9 +14,11 @@
  */
 
 import connectionReducer from "./ConnectionSlice";
+import connectionEditorReducer from "./EditorSlice";
 import graphQLReducer from './GraphQLSlice';
 
 export default {
     connectionReducer,
+    connectionEditorReducer,
     graphQLReducer,
 }

@@ -18,6 +18,10 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 import ModelUser from "../models/User";
 import ModelUserPoust from "../models/UserPoust";
 
+export interface DeleteUsersByIdRequestProps{
+    identifiers: number[],
+}
+
 export default interface IUserRequest{
 
     //to check if user with such email already exists
@@ -39,7 +43,7 @@ export default interface IUserRequest{
     deleteUserById(): Promise<AxiosResponse<IResponse>>,
 
     //to delete users by id
-    deleteUsersById(user: number[]): Promise<AxiosResponse<number[]>>,
+    deleteUsersById(args: DeleteUsersByIdRequestProps): Promise<AxiosResponse<IResponse>>,
 
     //to upload image of user
     uploadUserImage(data: FormData): Promise<AxiosResponse<ModelUser>>,

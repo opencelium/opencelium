@@ -850,6 +850,16 @@ export default class CConnection{
         }
     }
 
+    getFieldBindingsByMethod(method){
+        const result = [];
+        for(let i = 0; i < this.fieldBinding.length; i++){
+            if(this.fieldBinding[i].to[0].color === method.color){
+                result.push(this.fieldBinding[i]);
+            }
+        }
+        return result;
+    }
+
     getObjectForConnectionOverview(){
         return{
             ...this.getObject(),

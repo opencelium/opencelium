@@ -19,7 +19,7 @@ import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IInvoker} from "../../interfaces/IInvoker";
 import {IOperation} from "../../interfaces/IOperation";
-import {IInvokerRequest, UpdateMethodProps} from "../interfaces/IInvoker";
+import {DeleteInvokerByNameRequestProps, IInvokerRequest, UpdateMethodProps} from "../interfaces/IInvoker";
 import ModelInvoker from "../models/Invoker";
 
 
@@ -62,8 +62,9 @@ export class InvokerRequest extends Request implements IInvokerRequest{
         return super.delete<IInvoker>();
     }
 
-    async deleteInvokersByName(invokerNames: string[]): Promise<AxiosResponse<IResponse>>{
-        return super.delete<IResponse>({data: invokerNames});
+    async deleteInvokersByName(data: DeleteInvokerByNameRequestProps): Promise<AxiosResponse<IResponse>>{
+        this.endpoint = '/list/delete';
+        return super.put<IResponse>(data);
     }
 
     async uploadInvokerImage(data: FormData): Promise<AxiosResponse<IInvoker>>{

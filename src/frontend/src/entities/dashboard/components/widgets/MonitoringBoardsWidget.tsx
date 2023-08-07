@@ -55,7 +55,6 @@ const MonitoringBoardsWidget: FC =
                 :
                 <Iframe
                     onLoad={() => {
-                        console.log('loaded')
                     }}
                     url={defaultUrl}
                     width="100%"
