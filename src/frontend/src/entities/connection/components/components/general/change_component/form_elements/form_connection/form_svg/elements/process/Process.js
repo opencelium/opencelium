@@ -273,9 +273,9 @@ class Process extends React.Component{
         const prevLog = currentLogs.length > 1 ? currentLogs[currentLogs.length - 2] : null;
         // || (currentLog.message === ConnectionLogs.BreakMessage && prevLog && !prevLog.hasNextItem)
         const hasDashAnimation = logPanelHeight !== 0 && currentLog
-            && ((currentLog.message !== ConnectionLogs.BreakMessage && currentLog.message !== ConnectionLogs.EndOfExecutionMessage))
+            && currentLog.shouldDraw && ((currentLog.message !== ConnectionLogs.BreakMessage && currentLog.message !== ConnectionLogs.EndOfExecutionMessage))
             && currentLog.index === process.entity.index && currentLog.connectorType === process.connectorType && currentLog.message !== '';
-        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === process.entity.index) !== -1 ? '#58854d' : '';
+        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.shouldDraw && l.index === process.entity.index && l.connectorType === process.connectorType) !== -1 ? '#58854d' : '';
         const isJustCreatedItem = this.isJustCreatedItem();
         const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;
         return(

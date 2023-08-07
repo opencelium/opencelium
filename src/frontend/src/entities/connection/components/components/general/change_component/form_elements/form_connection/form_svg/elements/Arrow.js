@@ -133,7 +133,7 @@ class Arrow extends React.Component{
         const isArrowVertical = arrow.x1 === arrow.x2;
         const isArrowHorizontal = arrow.y1 === arrow.y2;
         let hasArrowAlert = false;
-        if(from && from.entity instanceof COperatorItem){
+        if (from && from.entity instanceof COperatorItem) {
             if(hasDashAnimation){
                 if(currentLog?.operatorData?.isNextMethodOutside){
                     hasDashAnimationHorizontal = true;
