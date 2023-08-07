@@ -65,6 +65,8 @@ public class ComparisonOperatorFactory implements OperatorFactory {
             case "DenyList":
             case "AllowList":
                 return new MatchesInList();
+            case "RegEx":
+                return new RegEx();
             default:
                 throw new RuntimeException("Operator '" + type + "' not supported");
         }
