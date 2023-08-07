@@ -120,7 +120,7 @@ class Enhancement extends Component{
                     showGutter={true}
                     highlightActiveLine={true}
                     value={`${expertCode}`}
-                    height={'260px'}
+                    height={'330px'}
                     width={'100%'}
                     readOnly={readOnly}
                     setOptions={{

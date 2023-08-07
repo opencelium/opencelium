@@ -88,10 +88,11 @@ class Body extends React.Component{
     }
 
     setCurrentEnhancementClickingOnPointer(e, value, fieldName = ''){
-        const {connection, connector} = this.props;
+        const {connection, connector, method} = this.props;
         /*if(connector.getConnectorType() === CONNECTOR_FROM){
             return;
         }*/
+        let bindingItem = null;
         if(fieldName === '') {
             if (value.namespace.length > 1) {
                 for (let i = 1; i < value.namespace.length; i++) {
@@ -105,8 +106,14 @@ class Body extends React.Component{
                 }
             }
             fieldName += value.variable.name;
+            bindingItem = this.getCurrentBindingItem(fieldName);
+        } else{
+            bindingItem = connection.fieldBinding.find(item => {
+                return item.to.findIndex(elem => {
+                    return elem.color === method.color && elem.field === fieldName;
+                }) !== -1;
+            });
         }
-        let bindingItem = this.getCurrentBindingItem(fieldName);
         if(bindingItem){
             bindingItem = bindingItem.to[0];
             connection.setCurrentFieldBindingTo(bindingItem);
