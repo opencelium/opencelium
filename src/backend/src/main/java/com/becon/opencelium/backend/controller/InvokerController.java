@@ -130,6 +130,25 @@ public class InvokerController {
         return ResponseEntity.ok(invokerResources);
     }
 
+    @Operation(summary = "Checks by name whether an invoker exist or not")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Property 'result' contains a boolean value true(exists) or false(not exists)",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/exists/{invokerName}")
+    public ResponseEntity<ResultDTO<Boolean>> existsByName(@PathVariable String invokerName) throws Exception {
+        Boolean result = invokerService.existsByName(invokerName);
+        ResultDTO<Boolean> resultDTO = new ResultDTO<>(result);
+        return ResponseEntity.ok(resultDTO);
+    }
+
     @Operation(summary = "Creates new invoker")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
@@ -194,9 +213,9 @@ public class InvokerController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/{name}/dependency")
-    public ResponseEntity<?> hasDependency(@PathVariable String name){
-        ResultDTO<String> resultDTO = connectorService.existByInvoker(name)
-                ? new ResultDTO<>("true") : new ResultDTO<>("false");
+    public ResponseEntity<ResultDTO<Boolean>> hasDependency(@PathVariable String name){
+        Boolean result = connectorService.existByInvoker(name);
+        ResultDTO<Boolean> resultDTO = new ResultDTO<>(result);
         return ResponseEntity.ok(resultDTO);
     }
 
