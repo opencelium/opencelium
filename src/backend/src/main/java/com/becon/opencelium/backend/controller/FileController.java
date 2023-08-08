@@ -31,6 +31,7 @@ import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.resource.FileDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -46,20 +47,29 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
+import java.net.InetAddress;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -210,7 +220,7 @@ public class FileController {
 
     @Operation(summary = "Uploads template json file")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
+        @ApiResponse( responseCode = "201",
                 description = "Template has been successfully uploaded",
                 content = @Content),
         @ApiResponse( responseCode = "401",
@@ -227,42 +237,76 @@ public class FileController {
         if (extension == null) {
             throw new RuntimeException("Extension not found");
         }
-
-        List<byte[]> files = new ArrayList<>();
         try {
-            if (extension.equals("zip")) {
-                InputStream inputStream = file.getInputStream();
-                ZipInputStream zis = new ZipInputStream(inputStream);
-                ZipEntry zipEntry = zis.getNextEntry();
-                while (zipEntry != null) {
-                    System.out.println(zipEntry.getName());
-                    zipEntry = zis.getNextEntry();
-                    byte[] bytes = zis.readAllBytes(); //IOUtils.toByteArray(zis);
-                    files.add(bytes);
-                }
-            } else {
-                files.add(file.getBytes());
+            if (!checkJsonExtension(extension)){
+                throw new StorageException("File should be JSON");
             }
+            //Generate new file name
+            String id = UUID.randomUUID().toString();
+            ObjectMapper objectMapper = new ObjectMapper();
+            Template template = objectMapper.readValue(file.getBytes(), Template.class);
+            template.setTemplateId(id);
+            // Save file in storage
+            templateService.save(template);
 
-            for (byte[] tmpBytes : files) {
-                if (!checkJsonExtension(extension)){
-                    throw new StorageException("File should be JSON");
-                }
-                //Generate new file name
-                String id = UUID.randomUUID().toString();
-                // Save file in storage
-                ObjectMapper objectMapper = new ObjectMapper();
-                Template template = objectMapper.readValue(tmpBytes, Template.class);
-                template.setTemplateId(id);
-                templateService.save(template);
-            }
-
-//            final org.springframework.hateoas.Resource<TemplateResource> resource
-//                    = new org.springframework.hateoas.Resource<>(templateService.toResource(template));
-            return ResponseEntity.ok().build();
+            URI uri = getUri(id + ".json");
+            FileDTO fileDTO = new FileDTO(id, uri.toString());
+            return ResponseEntity.ok().body(fileDTO);
         } catch (Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    @Operation(summary = "Uploads templates in zip file")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Template has been successfully uploaded",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(value = "/template/zip", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadZip(@RequestParam("file") MultipartFile zip) {
+        // Get extension
+        String extension = FileNameUtils.getExtension(zip.getOriginalFilename());
+        if (extension == null) {
+            throw new RuntimeException("Extension not found");
+        }
+
+        List<FileDTO> files = new ArrayList<>();
+        try {
+            if (extension.equals("zip")) {
+                InputStream inputStream = zip.getInputStream();
+                ZipInputStream zis = new ZipInputStream(inputStream);
+                ObjectMapper objectMapper = new ObjectMapper();
+                ZipEntry zipEntry;
+                while ((zipEntry = zis.getNextEntry()) != null) {
+                    if(zipEntry.isDirectory() || !zipEntry.getName().endsWith(".json")) {
+                        continue;
+                    }
+                    //Generate new file name
+                    String id = UUID.randomUUID().toString();
+                    String jsonContent = new String(zis.readAllBytes(), StandardCharsets.UTF_8);
+                    Template template = objectMapper.readValue(jsonContent, Template.class);
+                    template.setTemplateId(id);
+                    // Save file in storage
+                    templateService.save(template);
+                    URI uri = getUri(id + ".json");
+                    FileDTO fileDTO = new FileDTO(id, uri.toString());
+                    files.add(fileDTO);
+                }
+            } else {
+                throw new RuntimeException("Zip file is required");
+            }
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.ok().body(files);
     }
 
     @Operation(summary = "Uploads invoker xml file")
@@ -325,7 +369,6 @@ public class FileController {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-
     }
 
     @Operation(summary = "Uploads connector json file")
@@ -394,6 +437,32 @@ public class FileController {
             return false;
         }
         return true;
+    }
+
+    private static String readJsonContent(InputStream inputStream) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            StringBuilder content = new StringBuilder();
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line);
+            }
+
+            return content.toString();
+        }
+    }
+
+    private URI getUri(String name) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                .scheme(request.getScheme())
+                .host(request.getServerName())
+                .port(request.getServerPort())
+                .path("/api/template/file/" + name)
+                .build();
+
+        return uriComponents.toUri();
     }
 
     private List<Document> getAllInvokers(){
