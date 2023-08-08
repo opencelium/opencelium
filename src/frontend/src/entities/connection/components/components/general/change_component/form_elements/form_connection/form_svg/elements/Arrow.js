@@ -50,15 +50,16 @@ class Arrow extends React.Component{
         }
     }
 
-    onMouseOver(){
+    onMouseOver(e){
         const {from, to, currentTechnicalItem, connection, isItemDraggable} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
+        const shouldCheckOutReferences = currentTechnicalItem ? !e.altKey : true;
         if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseOver && currentTechnicalItem.entity.index !== from.entity.index && currentTechnicalItem.entity.index !== to.entity.index){
             let {line1, line2, arrow} = CCoordinates.getLinkCoordinates(from, to);
             const isInsideDirection = line1 !== null && line2 !== null;
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            let isAvailableForDragging = connector.areIndexesUnderScope(from.entity, currentTechnicalItem.entity, isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM, currentTechnicalItem.isSelectedAll);
+            let isAvailableForDragging = connector.areIndexesUnderScope(from.entity, currentTechnicalItem.entity, isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM, currentTechnicalItem.isSelectedAll, shouldCheckOutReferences);
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(from.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
@@ -271,7 +272,7 @@ class Arrow extends React.Component{
                         </text>
                     </React.Fragment>
                 }
-                <rect id={`arrow_from__${from.id}__${isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM}`} data-movable={isAvailableForDragging} onMouseOver={() => this.onMouseOver()} onMouseLeave={() => this.onMouseLeave()} className={styles.process_placeholder_background} {...processPlaceholderBackgroundCoord}/>
+                <rect id={`arrow_from__${from.id}__${isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM}`} data-movable={isAvailableForDragging} onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={() => this.onMouseLeave()} className={styles.process_placeholder_background} {...processPlaceholderBackgroundCoord}/>
             </React.Fragment>
         );
     }

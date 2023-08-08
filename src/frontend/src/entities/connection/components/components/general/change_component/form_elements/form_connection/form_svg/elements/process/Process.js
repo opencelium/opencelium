@@ -108,7 +108,7 @@ class Process extends React.Component{
         }
     }
 
-    onMouseOverSvg(){
+    onMouseOverSvg(e){
         const {currentTechnicalItem, connection, process, isItemDraggable, isCreateElementPanelOpened} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
         const isItemOver = isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== process.entity.index;
