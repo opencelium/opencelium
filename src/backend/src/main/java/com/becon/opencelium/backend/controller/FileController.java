@@ -35,6 +35,7 @@ import com.becon.opencelium.backend.resource.FileDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
@@ -42,12 +43,14 @@ import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -109,11 +112,11 @@ public class FileController {
     @Autowired
     private UpdatePackageServiceImp updatePackageServiceImp;
 
-//    @Autowired
-//    private InvokerContainer invokerContainer;
-
     @Autowired
     private InvokerServiceImp invokerServiceImp;
+
+//    @Autowired
+//    private InvokerContainer invokerContainer;
 
     private final UserStorageService storageService;
 
@@ -220,9 +223,9 @@ public class FileController {
 
     @Operation(summary = "Uploads template json file")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "201",
+        @ApiResponse( responseCode = "200",
                 description = "Template has been successfully uploaded",
-                content = @Content),
+                content = @Content(schema = @Schema(implementation = FileDTO.class))),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -261,7 +264,7 @@ public class FileController {
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Template has been successfully uploaded",
-                    content = @Content),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = FileDTO.class)))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -299,6 +302,7 @@ public class FileController {
                     FileDTO fileDTO = new FileDTO(id, uri.toString());
                     files.add(fileDTO);
                 }
+                zis.close();
             } else {
                 throw new RuntimeException("Zip file is required");
             }
@@ -313,7 +317,7 @@ public class FileController {
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
                 description = "Invoker has been successfully uploaded",
-                content = @Content),
+                content = @Content(schema = @Schema(implementation = FileDTO.class))),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -331,6 +335,45 @@ public class FileController {
             }
             Objects.requireNonNull(filename);
             if (filename.contains("..")) {
+                throw new StorageException(
+                        "Cannot store file with relative path outside current directory "
+                                + filename);
+            }
+            Objects.requireNonNull(extension);
+            Xml xml = saveXmlFile(file.getInputStream(), filename);
+            String name = xml.getValueByXPath("//invoker/name");
+            FileDTO fileDTO = new FileDTO(name);
+            return ResponseEntity.ok(fileDTO);
+        }
+        catch (Exception e) {
+            invokerServiceImp.delete(FileNameUtils.removeExtension(filename));
+            throw new StorageException("Failed to store file " + filename, e);
+        }
+    }
+
+    @Operation(summary = "Uploads zip file that contains invoker files")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Invoker has been successfully uploaded",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = FileDTO.class)))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/invoker/zip", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadInvokerZip(@RequestParam("file") MultipartFile file) {
+        String filename = file.getOriginalFilename();
+        String extension = FileNameUtils.getExtension(file.getOriginalFilename());
+        List<FileDTO> fileDTOList = new ArrayList<>();
+        try {
+            if (file.isEmpty()) {
+                throw new StorageException("Failed to store empty file " + filename);
+            }
+            Objects.requireNonNull(filename);
+            if (filename.contains("..")) {
                 // This is a security check
                 throw new StorageException(
                         "Cannot store file with relative path outside current directory "
@@ -340,36 +383,62 @@ public class FileController {
             if (extension.equals("zip")) {
                 InputStream inputStream = file.getInputStream();
                 ZipInputStream zis = new ZipInputStream(inputStream);
-                ZipEntry zipEntry = zis.getNextEntry();
-                while (zipEntry != null) {
-                    System.out.println(zipEntry.getName());
-                    zipEntry = zis.getNextEntry();
-                    saveXmlFile(zis, filename);
+                ZipEntry zipEntry;
+                while ((zipEntry = zis.getNextEntry()) != null) {
+                    if(zipEntry.isDirectory() || !zipEntry.getName().endsWith(".xml")) {
+                        continue;
+                    }
+                    Xml xml = saveXmlFile(zis, filename);
+                    String name = xml.getValueByXPath("//invoker/name");
+                    FileDTO fileDTO = new FileDTO(name);
+                    fileDTOList.add(fileDTO);
                 }
+                zis.close();
             } else {
-                saveXmlFile(file.getInputStream(), filename);
+                throw new RuntimeException("ZIP_FILE_REQUIRED");
             }
-        }
-        catch (Exception e) {
-            invokerServiceImp.delete(FileNameUtils.removeExtension(filename));
+        } catch (Exception e) {
+            fileDTOList.forEach(f -> {
+                invokerServiceImp.delete(f.getId());
+            });
             throw new StorageException("Failed to store file " + filename, e);
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(fileDTOList);
     }
 
-    private void saveXmlFile(InputStream inputStream, String filename) {
+    private Xml saveXmlFile(InputStream inputStream, String filename) {
         try {
             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = dBuilder.parse(inputStream);
+            InputStream copyIS = getInputStreamCopy(inputStream);
+            Document doc = dBuilder.parse(copyIS);
             doc.setDocumentURI(PathConstant.INVOKER + filename);
             Xml xml = new Xml(doc, filename);
             xml.save(); // TODO: add to invokerServiceImpl
             invokerServiceImp.save(doc);
+            copyIS.close();
+            return xml;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
+
+    private InputStream getInputStreamCopy(InputStream originInputStream) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        try {
+            while ((bytesRead = originInputStream.read(buffer)) > -1 ) {
+                baos.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return new ByteArrayInputStream(baos.toByteArray());
+    }
+
 
     @Operation(summary = "Uploads connector json file")
     @ApiResponses(value = {

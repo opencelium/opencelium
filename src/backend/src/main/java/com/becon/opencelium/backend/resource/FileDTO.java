@@ -11,6 +11,10 @@ public class FileDTO {
     public FileDTO() {
     }
 
+    public FileDTO(String id) {
+        this.id = id;
+    }
+
     public FileDTO(String id, String path) {
         this.id = id;
         this.path = path;

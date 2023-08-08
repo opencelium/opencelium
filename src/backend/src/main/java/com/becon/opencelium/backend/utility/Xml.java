@@ -4,7 +4,10 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.invoker.resource.FieldResource;
 import com.becon.opencelium.backend.invoker.resource.OperationResource;
 import org.w3c.dom.*;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -17,6 +20,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,6 +35,10 @@ public class Xml {
 
     public Xml(Document document) {
         this.document = document;
+    }
+
+    public Xml(String document) {
+        this.document = convertStringToDocument(document);
     }
 
     public Xml(Document document, String fileName) {
@@ -152,6 +160,10 @@ public class Xml {
 
         }
         return node;
+    }
+
+    public String getValueByXPath(String xPath) throws XPathExpressionException {
+        return xpath.compile(xPath).evaluate(document, XPathConstants.STRING).toString();
     }
 
     private FieldResource createFieldResource(String field) {
@@ -316,5 +328,19 @@ public class Xml {
             System.out.println("nodeToString Transformer Exception");
         }
         return sw.toString();
+    }
+
+    private static Document convertStringToDocument(String xmlStr) {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder;
+        try
+        {
+            builder = factory.newDocumentBuilder();
+            Document doc = builder.parse( new InputSource( new StringReader( xmlStr ) ) );
+            return doc;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
