@@ -15,14 +15,15 @@
 
 import {FC, useEffect, useState} from "react";
 import Socket, {Message} from "@application/classes/socket/Socket";
-import {addCurrentLog, clearCurrentLogs} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {
+    addCurrentLog,
+    clearCurrentLogs,
+} from "@root/redux_toolkit/slices/ConnectionSlice";
 import { Auth } from "@application/classes/Auth";
 import {useAppDispatch} from "@application/utils/store";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
-import { Connection } from "@entity/connection/classes/Connection";
 import { Schedule } from "@entity/schedule/classes/Schedule";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/content/connection/CConnectorItem";
 
 const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
     ({

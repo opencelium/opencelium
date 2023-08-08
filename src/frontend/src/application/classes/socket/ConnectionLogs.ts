@@ -88,6 +88,8 @@ export default class ConnectionLogs {
                 message = operator.condition.generateStatementText(true)
             }
         }
+        const isMethod = connection.isItemMethodByIndex(connector.getConnectorType(), index);
+        const isOperator = connection.isItemOperatorByIndex(connector.getConnectorType(), index);
         return {
             index,
             message,
@@ -95,6 +97,8 @@ export default class ConnectionLogs {
             hasNextItem: !(isNextFunctionNull && isNextOperatorNull),
             methodData,
             operatorData,
+            isMethod,
+            isOperator,
         }
     }
 

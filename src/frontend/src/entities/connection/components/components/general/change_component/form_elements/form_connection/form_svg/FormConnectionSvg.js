@@ -23,7 +23,7 @@ import styles from "@entity/connection/components/themes/default/content/connect
 import {PANEL_LOCATION} from "@entity/connection/components/utils/constants/app";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import CreateElementPanel from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel";
-import {setCurrentTechnicalItem, setConnectionData} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {setCurrentTechnicalItem, setConnectionData, clearCurrentLogs} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import LogPanel from "@change_component/form_elements/form_connection/form_svg/layouts/logs/LogPanel";
@@ -52,7 +52,7 @@ function mapStateToProps(state){
  * Form for ConnectionSvg
  */
 @withTranslation('basic_components')
-@connect(mapStateToProps, {setCurrentTechnicalItem, setConnectionData})
+@connect(mapStateToProps, {setCurrentTechnicalItem, setConnectionData, clearCurrentLogs})
 class FormConnectionSvg extends Component{
 
     constructor(props){
@@ -92,8 +92,9 @@ class FormConnectionSvg extends Component{
     }
 
     componentWillUnmount() {
-        const {setCurrentTechnicalItem, currentTechnicalItem} = this.props;
+        const {setCurrentTechnicalItem, currentTechnicalItem, clearCurrentLogs} = this.props;
         if(currentTechnicalItem !== null) setCurrentTechnicalItem(null);
+        clearCurrentLogs();
     }
 
     updateEntity(entity = null, settings = {hasPostMessage: true}){

@@ -224,16 +224,16 @@ class Body extends React.Component{
         const {bodyTitle, isExtended, readOnly, source, method, connector, connection} = this.props;
         let gridStyles = {};
         if(isToggledReferenceIcon && !isToggledIcon){
-            gridStyles.gridTemplateRows = 'auto 40px';
+            gridStyles.gridTemplateRows = 'calc(100%) 40px';
         }
         if(!isToggledReferenceIcon && isToggledIcon){
-            gridStyles.gridTemplateRows = '40px auto';
+            gridStyles.gridTemplateRows = '40px calc(100%)';
         }
         if(!isToggledReferenceIcon && !isToggledIcon){
             gridStyles.gridTemplateRows = '40px 40px';
         }
         if(isToggledReferenceIcon && isToggledIcon){
-            gridStyles.gridTemplateRows = '25% auto';
+            gridStyles.gridTemplateRows = '25% calc(100%)';
         }
         return(
             <React.Fragment>

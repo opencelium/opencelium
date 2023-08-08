@@ -335,7 +335,7 @@ class Operator extends React.Component{
             && (currentLog.message !== ConnectionLogs.BreakMessage || (currentLog.message === ConnectionLogs.BreakMessage && currentLog.operatorData && !currentLog.operatorData.conditionResult) && currentLog.message !== ConnectionLogs.EndOfExecutionMessage)
             && currentLog.index === operator.entity.index && currentLog.connectorType === operator.connectorType && currentLog.message !== '';
         const hasDeleteIcon = isCurrent && !readOnly && !isTestingConnection;
-        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index) !== -1 ? '#58854d' : '';
+        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index && l.connectorType === operator.connectorType) !== -1 ? '#58854d' : '';
         const isJustCreatedItem = this.isJustCreatedItem();
         const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;
         return(

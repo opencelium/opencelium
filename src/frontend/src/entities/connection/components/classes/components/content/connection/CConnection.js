@@ -817,6 +817,16 @@ export default class CConnection{
         }
     }
 
+    isItemMethodByIndex(connectorType, index){
+        const connector = connectorType === CONNECTOR_FROM ? this._fromConnector : this._toConnector;
+        return connector.methods.findIndex(m => m.index === index) !== -1;
+    }
+
+    isItemOperatorByIndex (connectorType, index){
+        const connector = connectorType === CONNECTOR_FROM ? this._fromConnector : this._toConnector;
+        return connector.operators.findIndex(o => o.index === index) !== -1;
+    }
+
     isEmpty(){
         return this.fromConnector.isEmpty() && this.toConnector.isEmpty();
     }

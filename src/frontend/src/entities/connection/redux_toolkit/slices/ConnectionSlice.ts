@@ -39,7 +39,6 @@ export const LogPanelHeight = {
     Medium: 270,
     High: 350,
 }
-
 export interface ConnectionState extends ICommonState{
     connections: IConnection[],
     metaConnections: IConnection[],
@@ -73,6 +72,7 @@ export interface ConnectionState extends ICommonState{
     isCreateElementPanelOpened: boolean,
     isDraftOpenedOnce: boolean,
     currentLogs: ConnectionLogProps[],
+    logMessages: any[],
     isTestingConnection: boolean,
     logPanelHeight: number,
     isDetailsOpened: boolean,
@@ -111,6 +111,7 @@ let initialState: ConnectionState = {
     isCreateElementPanelOpened: false,
     isDraftOpenedOnce: false,
     currentLogs: [],
+    logMessages: [],
     isTestingConnection: false,
     logPanelHeight: 0,
     isDetailsOpened: true,
@@ -148,6 +149,23 @@ export const connectionSlice = createSlice({
         addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
             if(action.payload){
                 const currentState = current(state);
+                let newCurrentLogs = currentState.currentLogs;
+                if(action.payload.isMethod){
+                    newCurrentLogs = currentState.currentLogs.map(log => {
+                        if(log.index === action.payload.index && log.connectorType === action.payload.connectorType){
+                            return {...log, shouldDraw: false};
+                        }
+                        return log;
+                    })
+                }
+                if(action.payload.isOperator){
+                    newCurrentLogs = currentState.currentLogs.map(log => {
+                        if(log.index.indexOf(action.payload.index) === 0 && log.connectorType === action.payload.connectorType){
+                            return {...log, shouldDraw: false};
+                        }
+                        return log;
+                    })
+                }
                 let lastLog = state.currentLogs.length > 0 ? state.currentLogs[state.currentLogs.length - 1] : null;
                 let lastLogKey = lastLog ? state.currentLogs.length - 1 : -1;
                 if(lastLog && lastLog.message === ConnectionLogs.BreakMessage && state.currentLogs.length > 1 && lastLog.message !== action.payload.message){
@@ -162,10 +180,10 @@ export const connectionSlice = createSlice({
                 }
                 let methodData = action.payload.methodData ? action.payload.methodData : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].methodData : null;
                 let hasNextItem = action.payload.index ? action.payload.hasNextItem : state.currentLogs.length > 0 ? currentState.currentLogs[currentState.currentLogs.length - 1].hasNextItem : false;
-
                 if(!lastLog || lastLog.message !== action.payload.message) {
-                    state.currentLogs = [...state.currentLogs, {
+                    newCurrentLogs = [...newCurrentLogs, {
                         ...action.payload,
+                        shouldDraw: true,
                         index,
                         connectorType,
                         operatorData,
@@ -174,8 +192,9 @@ export const connectionSlice = createSlice({
                     }];
                 }
                 if(lastLog && lastLog.message === action.payload.message){
-                    state.currentLogs = state.currentLogs.map((currentLog, key) => key === lastLogKey ? {
+                    newCurrentLogs = newCurrentLogs.map((currentLog, key) => key === lastLogKey ? {
                         ...action.payload,
+                        shouldDraw: true,
                         index,
                         connectorType,
                         operatorData,
@@ -183,7 +202,20 @@ export const connectionSlice = createSlice({
                         hasNextItem
                     } : currentLog);
                 }
+                state.currentLogs = newCurrentLogs;
+                state.logMessages = [...state.logMessages, action.payload];
             }
+        },
+        shouldNotDrawLogMessage: (state, action: PayloadAction<{index: string, connectorType: string}>) => {
+            state.currentLogs = state.currentLogs.map(log => {
+                if(log.index === action.payload.index && log.connectorType === action.payload.connectorType){
+                    return {...log, shouldDraw: false};
+                }
+                return log;
+            })
+        },
+        addLogMessage: (state, action: PayloadAction<any>) => {
+            state.logMessages = [...state.logMessages, action.payload];
         },
         clearCurrentLogs: (state) => {
             state.currentLogs = [];
@@ -403,7 +435,7 @@ export const {
     setDetailsLocation, setTechnicalLayoutLocation,
     setConnectionDraftWasOpened, setInitialTestConnectionState,
     setLogPanelHeight, toggleDetails, setJustCreatedItem,
-    setJustDeletedItem,
+    setJustDeletedItem, addLogMessage, shouldNotDrawLogMessage,
 } = connectionSlice.actions;
 
 export const actions = {

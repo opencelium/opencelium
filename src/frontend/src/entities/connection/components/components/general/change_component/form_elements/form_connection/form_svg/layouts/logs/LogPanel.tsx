@@ -124,6 +124,7 @@ const LogPanel: FC = ({}) => {
                             return (
                                 <LogMessage
                                     key={key}
+                                    index={key}
                                     {...messageProps}
                                     style={{background: log?.methodData?.color || '#fff'}}
                                     message={log.message}

@@ -20,7 +20,7 @@ import { MessageStyled, ResponseMessage, } from './styles';
 import ReactJson from "react-json-view";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 
-const LogMessage: FC<React.HTMLAttributes<HTMLDivElement> & {message: string}> = ({ message, ...props}) => {
+const LogMessage: FC<React.HTMLAttributes<HTMLDivElement> & {message: string, index: number}> = ({ index, message, ...props}) => {
     let jsonLabel = '';
     let isJson = false;
     let json = null;

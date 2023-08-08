@@ -47,6 +47,8 @@ export interface IConnection extends IConnectionForm{
 }
 
 export interface ConnectionLogProps{
+    isOperator: boolean,
+    isMethod: boolean,
     message: string,
     index?: string,
     connectorType?: string,
@@ -58,7 +60,8 @@ export interface ConnectionLogProps{
     operatorData?: {
         isNextMethodOutside?: boolean,
         conditionResult?: boolean,
-    }
+    },
+    shouldDraw?: boolean,
 }
 
 export type ConnectionProps = keyof IConnection | string;
