@@ -56,8 +56,7 @@ public class BodyExtractor implements Extractor{
         if (expr == null) {
             return Optional.empty();
         }
-        RestTemplate restTemplate = new RestTemplate();
-        InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder(restTemplate);
+        InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder();
         String val;
         for (String ref : extractRefs(expr)) {
             FunctionInvoker functionInvoker = getFunctionInvoker(ref);

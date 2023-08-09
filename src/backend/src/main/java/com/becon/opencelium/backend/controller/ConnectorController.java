@@ -70,9 +70,6 @@ public class ConnectorController {
     @Autowired
     private ConnectionNodeServiceImp connectionNodeService;
 
-    @Autowired
-    private RestTemplate restTemplate;
-
     @Operation(summary = "Retrieves a connector from database by provided connector ID")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",

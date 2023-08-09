@@ -32,12 +32,6 @@ public class SystemOverviewRepository {
     @Autowired
     private DataSource dataSource;
 
-//    @Autowired
-//    private SessionFactory sessionFactory;
-
-    @Autowired
-    private RestTemplate restTemplate;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
