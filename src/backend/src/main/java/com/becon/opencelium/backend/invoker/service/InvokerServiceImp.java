@@ -32,9 +32,11 @@ import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.becon.opencelium.backend.utility.FileNameUtils;
+import com.becon.opencelium.backend.utility.PathUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.w3c.dom.Document;
@@ -107,6 +109,16 @@ public class InvokerServiceImp implements InvokerService {
     @Override
     public boolean existsByName(String name) {
         return invokerContainer.existsByName(name);
+    }
+
+    @Override
+    public boolean existsByFileName(String fileName) {
+        String ext = FileNameUtils.getExtension(fileName);
+        if (ext == null || ext.isEmpty()) {
+            fileName += ".xml";
+        }
+        Path path = Path.of(PathConstant.INVOKER + fileName);
+        return exists(path);
     }
 
     @Override
