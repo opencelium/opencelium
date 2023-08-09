@@ -65,5 +65,7 @@ public interface InvokerService {
 
     List<FunctionInvoker> getAuthFunctions(String invoker);
 
+    boolean existsByFileName(String fileName);
+
 //    Object findField(String field, Map<String, Object> body);
 }

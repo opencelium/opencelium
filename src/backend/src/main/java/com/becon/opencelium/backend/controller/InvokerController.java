@@ -149,6 +149,25 @@ public class InvokerController {
         return ResponseEntity.ok(resultDTO);
     }
 
+    @Operation(summary = "Checks by filename whether an invoker exist or not")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Property 'result' contains a boolean value true(exists) or false(not exists)",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/file/exists/{fileName}")
+    public ResponseEntity<ResultDTO<Boolean>> existsByFileName(@PathVariable String fileName) throws Exception {
+        Boolean result = invokerService.existsByFileName(fileName);
+        ResultDTO<Boolean> resultDTO = new ResultDTO<>(result);
+        return ResponseEntity.ok(resultDTO);
+    }
+
     @Operation(summary = "Creates new invoker")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
