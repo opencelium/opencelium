@@ -19,7 +19,12 @@ import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IInvoker} from "../../interfaces/IInvoker";
 import {IOperation} from "../../interfaces/IOperation";
-import {DeleteInvokerByNameRequestProps, IInvokerRequest, UpdateMethodProps} from "../interfaces/IInvoker";
+import {
+    DeleteInvokerByNameRequestProps,
+    ImportInvokerResponse,
+    IInvokerRequest,
+    UpdateMethodProps
+} from "../interfaces/IInvoker";
 import ModelInvoker from "../models/Invoker";
 
 
@@ -29,9 +34,9 @@ export class InvokerRequest extends Request implements IInvokerRequest{
         super({url: 'invoker', ...settings});
     }
 
-    async importInvoker(invoker: FormData): Promise<AxiosResponse<IInvoker>>{
+    async importInvoker(data: FormData): Promise<AxiosResponse<ImportInvokerResponse>>{
         this.url = 'storage/invoker';
-        return super.post<IInvoker>(invoker);
+        return super.post<ImportInvokerResponse>(data);
     }
 
     async updateOperation(data: UpdateMethodProps): Promise<AxiosResponse<IOperation>>{

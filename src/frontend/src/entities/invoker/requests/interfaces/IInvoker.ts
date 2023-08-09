@@ -31,6 +31,10 @@ export interface UpdateMethodProps{
     fields: FieldProps[]
 }
 
+export interface ImportInvokerResponse {
+    id: string,
+}
+
 export interface DeleteInvokerByNameRequestProps{
     identifiers: string[],
 }
@@ -38,7 +42,7 @@ export interface DeleteInvokerByNameRequestProps{
 export interface IInvokerRequest{
 
     //to import invoker as an xml file
-    importInvoker(invoker: FormData): Promise<AxiosResponse<IInvoker>>,
+    importInvoker(invoker: FormData): Promise<AxiosResponse<ImportInvokerResponse>>,
 
     //to update a single operation
     updateOperation(data: UpdateMethodProps): Promise<AxiosResponse<IOperation>>,

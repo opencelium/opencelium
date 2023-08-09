@@ -22,13 +22,18 @@ export interface DeleteTemplatesByIdRequestProps{
     identifiers: number[],
 }
 
+export interface ImportTemplateResponse {
+    id: string,
+    path: string,
+}
+
 export interface ITemplateRequest{
 
     //to check if template with such name already exists
     checkTemplateName(): Promise<AxiosResponse<IResponse>>,
 
     //to import template as a json file
-    importTemplate(template: FormData): Promise<AxiosResponse<IResponse>>,
+    importTemplate(data: FormData): Promise<AxiosResponse<ImportTemplateResponse>>,
 
     //to export template
     exportTemplate(): Promise<AxiosResponse<ITemplate>>,
