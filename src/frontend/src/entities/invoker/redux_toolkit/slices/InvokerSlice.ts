@@ -18,26 +18,31 @@ import {IResponse, ResponseMessages} from "@application/requests/interfaces/IRes
 import {CommonState} from "@application/utils/store";
 import {ICommonState} from "@application/interfaces/core";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
-import {ITemplate} from "@entity/connection/interfaces/ITemplate";
 import {IInvoker} from "../../interfaces/IInvoker";
 import {
     addInvoker,
+    checkInvokerFileName,
     checkInvokerName,
     deleteInvokerByName,
     deleteInvokerImage,
     deleteInvokersByName,
     getAllInvokers,
-    getInvokerByName, importInvoker,
-    updateInvoker, updateOperation,
+    getInvokerByName,
+    importInvoker,
+    updateInvoker,
+    updateOperation,
     uploadInvokerImage
 } from "../action_creators/InvokerCreators";
 import {IOperation} from "../../interfaces/IOperation";
+import {CheckInvokerUniquenessResponse} from "@entity/invoker/requests/interfaces/IInvoker";
 
 export interface InvokerState extends ICommonState{
     invokers: IInvoker[],
     importingInvoker: API_REQUEST_STATE,
     isCurrentInvokerHasUniqueTitle: TRIPLET_STATE,
+    isCurrentInvokerHasUniqueFilename: TRIPLET_STATE,
     checkingInvokerTitle: API_REQUEST_STATE,
+    checkingInvokerFilename: API_REQUEST_STATE,
     updatingOperation: API_REQUEST_STATE,
     addingInvoker: API_REQUEST_STATE,
     updatingInvoker: API_REQUEST_STATE,
@@ -55,7 +60,9 @@ const initialState: InvokerState = {
     invokers: [],
     importingInvoker: API_REQUEST_STATE.INITIAL,
     isCurrentInvokerHasUniqueTitle: TRIPLET_STATE.INITIAL,
+    isCurrentInvokerHasUniqueFilename: TRIPLET_STATE.INITIAL,
     checkingInvokerTitle: API_REQUEST_STATE.INITIAL,
+    checkingInvokerFilename: API_REQUEST_STATE.INITIAL,
     updatingOperation: API_REQUEST_STATE.INITIAL,
     addingInvoker: API_REQUEST_STATE.INITIAL,
     updatingInvoker: API_REQUEST_STATE.INITIAL,
@@ -94,6 +101,9 @@ export const invokerSlice = createSlice({
         },
         [importInvoker.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.importingInvoker = API_REQUEST_STATE.ERROR;
+            if(action.payload?.message === ResponseMessages.EXISTS){
+                state.isCurrentInvokerHasUniqueFilename = TRIPLET_STATE.FALSE;
+            }
             state.error = action.payload;
         },
         [updateOperation.pending.type]: (state, action: PayloadAction<IInvoker>) => {
@@ -116,6 +126,18 @@ export const invokerSlice = createSlice({
         },
         [checkInvokerName.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.checkingInvokerTitle = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [checkInvokerFileName.pending.type]: (state) => {
+            state.checkingInvokerFilename = API_REQUEST_STATE.START;
+        },
+        [checkInvokerFileName.fulfilled.type]: (state, action: PayloadAction<CheckInvokerUniquenessResponse>) => {
+            state.checkingInvokerFilename = API_REQUEST_STATE.FINISH;
+            state.isCurrentInvokerHasUniqueFilename = action.payload.result ? TRIPLET_STATE.FALSE : TRIPLET_STATE.TRUE;
+            state.error = null;
+        },
+        [checkInvokerFileName.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.checkingInvokerFilename = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [addInvoker.pending.type]: (state, action: PayloadAction<IInvoker>) => {
