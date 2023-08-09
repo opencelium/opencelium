@@ -14,7 +14,6 @@
  */
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
-import XmlConverter from 'xml-js';
 import {errorHandler} from "@application/utils/utils";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {InvokerRequest} from "../../requests/classes/Invoker";
@@ -26,13 +25,13 @@ export const importInvoker = createAsyncThunk(
     'invoker/import',
     async(invokerFile: Blob, thunkAPI) => {
         try {
-            const xmlInvoker = await invokerFile.text();
-            const invoker = XmlConverter.xml2js(xmlInvoker);
             let data = new FormData();
             data.append('file', invokerFile);
-            const request = new InvokerRequest({isFormData: true});
-            const response = await request.importInvoker(data);
-            return response.data;
+            const importRequest = new InvokerRequest({isFormData: true});
+            const importResponse = await importRequest.importInvoker(data);
+            const getRequest = new InvokerRequest({endpoint: `/${importResponse.data.id}`});
+            const getResponse = await getRequest.getInvokerByName();
+            return getResponse.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

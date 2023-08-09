@@ -79,7 +79,7 @@ export const invokerSlice = createSlice({
             }
     },
     extraReducers: {
-        [importInvoker.pending.type]: (state, action: PayloadAction<ITemplate>) => {
+        [importInvoker.pending.type]: (state) => {
             state.importingInvoker = API_REQUEST_STATE.START;
         },
         [importInvoker.fulfilled.type]: (state, action: PayloadAction<IInvoker>) => {
