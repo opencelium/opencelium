@@ -21,6 +21,20 @@ import { IInvoker } from "../../interfaces/IInvoker";
 import {UpdateMethodProps} from "../../requests/interfaces/IInvoker";
 
 
+export const checkInvokerFileName = createAsyncThunk(
+    'invoker/exist/filename',
+    async(filename: string, thunkAPI) => {
+        try {
+            const checkFilenameRequest = new InvokerRequest({endpoint: `/file/exists/${filename}`})
+            const checkFilenameResponse = await checkFilenameRequest.checkInvokerFilename();
+            if (checkFilenameResponse.data.result === true) {
+                return thunkAPI.rejectWithValue({message: ResponseMessages.EXISTS});
+            }
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 export const importInvoker = createAsyncThunk(
     'invoker/import',
     async(invokerFile: Blob, thunkAPI) => {
@@ -56,7 +70,7 @@ export const checkInvokerName = createAsyncThunk(
     async(name: string, thunkAPI) => {
         try {
             const request = new InvokerRequest({endpoint: `/exists/${name}`});
-            const response = await request.checkInvokerTitle();
+            const response = await request.checkInvokerName();
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -69,7 +83,7 @@ export const addInvoker = createAsyncThunk(
     async(invoker: IInvoker, thunkAPI) => {
         try {
             const checkNameRequest = new InvokerRequest({endpoint: `/exists/${invoker.name}`});
-            const responseNameRequest = await checkNameRequest.checkInvokerTitle();
+            const responseNameRequest = await checkNameRequest.checkInvokerName();
             if (responseNameRequest.data.result === true) {
                 return thunkAPI.rejectWithValue({message: ResponseMessages.EXISTS});
             }
@@ -100,7 +114,7 @@ export const updateInvoker = createAsyncThunk(
             const invokerState = thunkAPI.getState().invokerReducer;
             if(invokerState.currentInvoker.name !== invoker.name ){
                 const checkNameRequest = new InvokerRequest({endpoint: `/exists/${invoker.name}`});
-                const responseNameRequest = await checkNameRequest.checkInvokerTitle();
+                const responseNameRequest = await checkNameRequest.checkInvokerName();
                 if (responseNameRequest.data.result === true) {
                     return thunkAPI.rejectWithValue({message: ResponseMessages.EXISTS});
                 }
@@ -209,6 +223,7 @@ export default {
     importInvoker,
     updateOperation,
     checkInvokerName,
+    checkInvokerFileName,
     addInvoker,
     updateInvoker,
     getInvokerByName,

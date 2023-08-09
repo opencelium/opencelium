@@ -20,10 +20,8 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IInvoker} from "../../interfaces/IInvoker";
 import {IOperation} from "../../interfaces/IOperation";
 import {
-    DeleteInvokerByNameRequestProps,
-    ImportInvokerResponse,
-    IInvokerRequest,
-    UpdateMethodProps, CheckInvokerTitleResponse
+    DeleteInvokerByNameRequestProps, ImportInvokerResponse,
+    IInvokerRequest, UpdateMethodProps, CheckInvokerUniquenessResponse,
 } from "../interfaces/IInvoker";
 import ModelInvoker from "../models/Invoker";
 
@@ -43,8 +41,12 @@ export class InvokerRequest extends Request implements IInvokerRequest{
         return super.post<IOperation>(data);
     }
 
-    async checkInvokerTitle(): Promise<AxiosResponse<CheckInvokerTitleResponse>>{
-        return super.get<CheckInvokerTitleResponse>();
+    async checkInvokerName(): Promise<AxiosResponse<CheckInvokerUniquenessResponse>>{
+        return super.get<CheckInvokerUniquenessResponse>();
+    }
+
+    async checkInvokerFilename(): Promise<AxiosResponse<CheckInvokerUniquenessResponse>>{
+        return super.get<CheckInvokerUniquenessResponse>();
     }
 
     async getInvokerByName(): Promise<AxiosResponse<IInvoker>>{

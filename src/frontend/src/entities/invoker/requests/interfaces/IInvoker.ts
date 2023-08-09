@@ -39,7 +39,7 @@ export interface DeleteInvokerByNameRequestProps{
     identifiers: string[],
 }
 
-export interface CheckInvokerTitleResponse {
+export interface CheckInvokerUniquenessResponse {
     result: boolean,
 }
 
@@ -51,8 +51,11 @@ export interface IInvokerRequest{
     //to update a single operation
     updateOperation(data: UpdateMethodProps): Promise<AxiosResponse<IOperation>>,
 
-    //to check if invoker with such title already exists
-    checkInvokerTitle(): Promise<AxiosResponse<CheckInvokerTitleResponse>>,
+    //to check if invoker with such name already exists
+    checkInvokerName(): Promise<AxiosResponse<CheckInvokerUniquenessResponse>>,
+
+    //to check if invoker with such filename already exists
+    checkInvokerFilename(): Promise<AxiosResponse<CheckInvokerUniquenessResponse>>,
 
     //to get invoker by name
     getInvokerByName(): Promise<AxiosResponse<IInvoker>>,
