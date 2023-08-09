@@ -68,11 +68,11 @@ export const addInvoker = createAsyncThunk(
     'invoker/add',
     async(invoker: IInvoker, thunkAPI) => {
         try {
-            /*const checkNameRequest = new InvokerRequest({endpoint: `/check/${invoker.name}`});
+            const checkNameRequest = new InvokerRequest({endpoint: `/exists/${invoker.name}`});
             const responseNameRequest = await checkNameRequest.checkInvokerTitle();
-            if (responseNameRequest.data.message === ResponseMessages.EXISTS) {
-                return thunkAPI.rejectWithValue(responseNameRequest.data);
-            }*/
+            if (responseNameRequest.data.result === true) {
+                return thunkAPI.rejectWithValue({message: ResponseMessages.EXISTS});
+            }
             const request = new InvokerRequest();
             const response = await request.addInvoker(invoker);
             if (invoker.icon) {
@@ -99,10 +99,10 @@ export const updateInvoker = createAsyncThunk(
             // @ts-ignore
             const invokerState = thunkAPI.getState().invokerReducer;
             if(invokerState.currentInvoker.name !== invoker.name ){
-                const checkNameRequest = new InvokerRequest({endpoint: `/check/${invoker.name}`});
+                const checkNameRequest = new InvokerRequest({endpoint: `/exists/${invoker.name}`});
                 const responseNameRequest = await checkNameRequest.checkInvokerTitle();
-                if (responseNameRequest.data.message === ResponseMessages.EXISTS) {
-                    return thunkAPI.rejectWithValue(responseNameRequest.data);
+                if (responseNameRequest.data.result === true) {
+                    return thunkAPI.rejectWithValue({message: ResponseMessages.EXISTS});
                 }
             }
             const request = new InvokerRequest();

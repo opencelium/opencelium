@@ -39,6 +39,10 @@ export interface DeleteInvokerByNameRequestProps{
     identifiers: string[],
 }
 
+export interface CheckInvokerTitleResponse {
+    result: boolean,
+}
+
 export interface IInvokerRequest{
 
     //to import invoker as an xml file
@@ -48,7 +52,7 @@ export interface IInvokerRequest{
     updateOperation(data: UpdateMethodProps): Promise<AxiosResponse<IOperation>>,
 
     //to check if invoker with such title already exists
-    checkInvokerTitle(): Promise<AxiosResponse<IResponse>>,
+    checkInvokerTitle(): Promise<AxiosResponse<CheckInvokerTitleResponse>>,
 
     //to get invoker by name
     getInvokerByName(): Promise<AxiosResponse<IInvoker>>,

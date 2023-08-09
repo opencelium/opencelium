@@ -23,7 +23,7 @@ import {
     DeleteInvokerByNameRequestProps,
     ImportInvokerResponse,
     IInvokerRequest,
-    UpdateMethodProps
+    UpdateMethodProps, CheckInvokerTitleResponse
 } from "../interfaces/IInvoker";
 import ModelInvoker from "../models/Invoker";
 
@@ -43,8 +43,8 @@ export class InvokerRequest extends Request implements IInvokerRequest{
         return super.post<IOperation>(data);
     }
 
-    async checkInvokerTitle(): Promise<AxiosResponse<IResponse>>{
-        return super.get<IResponse>();
+    async checkInvokerTitle(): Promise<AxiosResponse<CheckInvokerTitleResponse>>{
+        return super.get<CheckInvokerTitleResponse>();
     }
 
     async getInvokerByName(): Promise<AxiosResponse<IInvoker>>{
