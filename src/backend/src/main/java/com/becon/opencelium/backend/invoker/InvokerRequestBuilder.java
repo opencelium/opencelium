@@ -16,8 +16,10 @@
 
 package com.becon.opencelium.backend.invoker;
 
+import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
+import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,6 +31,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,6 +51,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.InetSocketAddress;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,13 +59,13 @@ import java.util.Map;
 // TODO: need to add interface for supporting multiple function conversion to response entity
 public class InvokerRequestBuilder {
 
-    private RestTemplate restTemplate;
     private FunctionInvoker functionInvoker;
     private List<RequestData> requestData;
     private boolean sslCert;
+    private String proxyPort;
+    private String proxyHost;
 
-    public InvokerRequestBuilder(RestTemplate restTemplate){
-        this.restTemplate = restTemplate;
+    public InvokerRequestBuilder() {
     }
 
     public InvokerRequestBuilder setRequestData(List<RequestData> requestData){
@@ -76,6 +80,16 @@ public class InvokerRequestBuilder {
 
     public InvokerRequestBuilder setSslCert(boolean sslCert) {
         this.sslCert = sslCert;
+        return this;
+    }
+
+    public InvokerRequestBuilder setProxyPort(String proxyPort) {
+        this.proxyPort = proxyPort;
+        return this;
+    }
+
+    public InvokerRequestBuilder setProxyHost(String proxyHost) {
+        this.proxyHost = proxyHost;
         return this;
     }
 
@@ -109,41 +123,15 @@ public class InvokerRequestBuilder {
         if (body == null || body.equals("null")){
             httpEntity = new HttpEntity <Object> (header);
         }
-
-        if (!sslCert){
-            ClientHttpRequestFactory requestFactory =
-                    new HttpComponentsClientHttpRequestFactory(getHttpClient());
-            restTemplate.setRequestFactory(requestFactory);
-        }
+        RestTemplate restTemplate = createRestTemplate();
         ResponseEntity<Object> response = restTemplate.exchange(url, method ,httpEntity, Object.class);
         return convertToStringResponse(response);
     }
 
-    private CloseableHttpClient getHttpClient() {
-
-        try {
-            TrustManager[] trustAllCerts = new TrustManager[] {
-                    new X509TrustManager() {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-                        public void checkClientTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-                        public void checkServerTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-                    }
-            };
-            SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            SSLConnectionSocketFactory ssl = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
-            PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                    .setSSLSocketFactory(ssl).build();
-            return HttpClients.custom().setConnectionManager(connectionManager).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    private RestTemplate createRestTemplate() {
+        RestTemplateBuilder restTemplateBuilder =
+                new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, sslCert));
+        return restTemplateBuilder.build();
     }
 
     private HttpMethod getMethod(){

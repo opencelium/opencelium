@@ -240,10 +240,10 @@ public class ConnectorExecutor {
 //        }
         ResponseEntity responseEntity;
         if (header.getContentType() == (getResponseContentType(header, functionInvoker))) {
-            responseEntity = restTemplate.exchange(uri, method ,httpEntity, String.class);
+            responseEntity = this.restTemplate.exchange(uri, method ,httpEntity, String.class);
         } else {
             responseEntity = InvokerRequestBuilder
-                .convertToStringResponse(restTemplate.exchange(uri, method ,httpEntity, Object.class));
+                .convertToStringResponse(this.restTemplate.exchange(uri, method ,httpEntity, Object.class));
         }
         logger.logAndSend("Response : " + responseEntity.getBody());
         return responseEntity;
@@ -702,10 +702,7 @@ public class ConnectorExecutor {
 
     public RestTemplate createRestTemplate(Connector connector) {
         int timeout = connector.getTimeout();
-        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
-        restTemplateBuilder.additionalCustomizers(
-                new RestCustomizer(proxyHost, proxyPort, connector.isSslCert(), timeout)
-        );
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, connector.isSslCert(), timeout));
         if (timeout > 0) {
             restTemplateBuilder.setReadTimeout(Duration.ofMillis(timeout));
         }

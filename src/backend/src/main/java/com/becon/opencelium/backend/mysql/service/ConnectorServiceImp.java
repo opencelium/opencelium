@@ -64,9 +64,6 @@ public class ConnectorServiceImp implements ConnectorService{
     private OperatorNodeServiceImp operatorNodeService;
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
     private InvokerServiceImp invokerService;
 
     @Override
@@ -229,7 +226,7 @@ public class ConnectorServiceImp implements ConnectorService{
 
     @Override
     public ResponseEntity<?> checkCommunication(Connector connector) {
-        InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder(restTemplate);
+        InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder();
         FunctionInvoker function = invokerService.getTestFunction(connector.getInvoker());
         List<RequestData> requestData = buildRequestData(connector);
 
@@ -242,7 +239,7 @@ public class ConnectorServiceImp implements ConnectorService{
 
     @Override
     public ResponseEntity<?> getAuthorization(Connector connector) {
-        InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder(restTemplate);
+        InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder();
         FunctionInvoker function = invokerService.getAuthFunction(connector.getInvoker());
         return invokerRequestBuilder.setFunction(function).setRequestData(connector.getRequestData()).sendRequest();
     }
