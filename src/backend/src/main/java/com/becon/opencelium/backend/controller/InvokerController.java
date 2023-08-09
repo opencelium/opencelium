@@ -285,7 +285,7 @@ public class InvokerController {
             throw new RuntimeException("Couldn't delete because invoker '" + name + "' has references to connector and connection. ");
         }
         invokerService.delete(name);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Deletes a collection of invokers based on the provided list of their corresponding 'names'.")

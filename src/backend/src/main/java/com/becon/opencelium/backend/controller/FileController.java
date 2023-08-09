@@ -388,7 +388,7 @@ public class FileController {
                     if(zipEntry.isDirectory() || !zipEntry.getName().endsWith(".xml")) {
                         continue;
                     }
-                    Xml xml = saveXmlFile(zis, filename);
+                    Xml xml = saveXmlFile(zis, zipEntry.getName());
                     String name = xml.getValueByXPath("//invoker/name");
                     FileDTO fileDTO = new FileDTO(name);
                     fileDTOList.add(fileDTO);

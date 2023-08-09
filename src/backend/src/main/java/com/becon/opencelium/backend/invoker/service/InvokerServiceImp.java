@@ -158,7 +158,7 @@ public class InvokerServiceImp implements InvokerService {
             Path file = findFileByInvokerName(name).toPath();
             if(exists(file)){
                 invokerContainer.remove(name);
-                Files.delete(file);
+                Files.delete(file.toAbsolutePath());
             }
         }
         catch (IOException e){
