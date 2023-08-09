@@ -26,14 +26,14 @@ import { ImportInvokerButtonProps } from './interfaces';
 import { ImportInvokerButtonStyled } from './styles';
 import { Invoker } from '@entity/invoker/classes/Invoker';
 import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 
 const ImportInvokerButton: FC<ImportInvokerButtonProps> =
     ({
 
     }) => {
     const dispatch = useAppDispatch();
-    const {checkingInvokerFilename} = Invoker.getReduxState();
+    const {checkingInvokerFilename, isCurrentInvokerHasUniqueFilename} = Invoker.getReduxState();
     const [showDialog, setShowDialog] = useState<boolean>(false);
     const [showConfirm, setShowConfirm] = useState<boolean>(false);
     const toggleDialog = () => {setShowDialog(!showDialog)};
@@ -51,15 +51,19 @@ const ImportInvokerButton: FC<ImportInvokerButtonProps> =
     useEffect(() => {
         if(startCheckingFilename) {
             if (checkingInvokerFilename === API_REQUEST_STATE.FINISH) {
-                importFile();
+                if(isCurrentInvokerHasUniqueFilename === TRIPLET_STATE.TRUE){
+                    importFile();
+                } else{
+                    setShowConfirm(true);
+                }
+                setStartCheckingFilename(false);
             }
-            if (checkingInvokerFilename === API_REQUEST_STATE.ERROR) {
-                setShowConfirm(true);
-            }
-            setStartCheckingFilename(false);
         }
     }, [checkingInvokerFilename])
     const importFile = () => {
+        if(showConfirm){
+            setShowConfirm(false);
+        }
         if(invokerFile) {
             dispatch(importInvoker(invokerFile))
         }

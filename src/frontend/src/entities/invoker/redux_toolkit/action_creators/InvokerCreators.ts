@@ -27,9 +27,7 @@ export const checkInvokerFileName = createAsyncThunk(
         try {
             const checkFilenameRequest = new InvokerRequest({endpoint: `/file/exists/${filename}`})
             const checkFilenameResponse = await checkFilenameRequest.checkInvokerFilename();
-            if (checkFilenameResponse.data.result === true) {
-                return thunkAPI.rejectWithValue({message: ResponseMessages.EXISTS});
-            }
+            return checkFilenameResponse.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
