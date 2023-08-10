@@ -56,7 +56,7 @@ const ReferenceInformation: FC<ReferenceInformationProps> =
                                         return (
                                             <ReferenceBlockStyled>
                                                 <SourceMethodNameStyled
-                                                    style={{background: method.color}}>{method.name}</SourceMethodNameStyled>
+                                                    style={{background: method.color}}>{method.label || method.name}</SourceMethodNameStyled>
                                                 <span>{" bindet with "}</span>
                                                 <SourceFieldStyled>{item.field}</SourceFieldStyled>
                                                 <span>{` field${key !== fieldBinding.from.length - 1 ? ";" : "."}`}</span>
