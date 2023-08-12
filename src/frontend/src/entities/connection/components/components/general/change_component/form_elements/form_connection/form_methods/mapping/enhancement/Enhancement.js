@@ -111,6 +111,7 @@ class Enhancement extends Component{
                     }}
                 />
                 <AceEditor
+                    ref={this.props.enhancementRef}
                     mode="javascript"
                     theme="tomorrow"
                     onChange={(a) => this.updateExpertCode(a)}
@@ -172,4 +173,5 @@ Enhancement.propTypes = {
 Enhancement.defaultProps = {
 };
 
-export default Enhancement;
+
+export default React.forwardRef((props, ref) => <Enhancement enhancementRef={ref} {...props}/>);

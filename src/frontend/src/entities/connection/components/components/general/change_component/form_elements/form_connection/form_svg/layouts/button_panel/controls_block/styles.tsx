@@ -20,19 +20,62 @@ const ControlsBlockStyled = styled.div<ControlsBlockStyledProps>`
   display: flex;
   gap: 10px;
   position: relative;
+  height: ${(props) => (props.isButtonPanelOpened ? '150px' : '0')};
+    width: ${(props) => (props.isButtonPanelOpened ? '150px' : '0')}; 
 
   button:not(#show_button_panel){
-    display: ${(props) => (!props.isButtonPanelOpened && 'none')}
+    display: ${(props) => (!props.isButtonPanelOpened && 'none')};
   }
 
   &::after{
     content: "Controls";
     position: absolute;
     left: 0;
-    bottom: -150%;
+    bottom: -15%;
     font-size: 14px;
-    display: ${(props) => (!props.isButtonPanelOpened && 'none')}
+    display: ${(props) => (!props.isButtonPanelOpened && 'none')};
   }
+
+  
+  
+  .center_item{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 222;
+  }
+  
+  .wrapper {
+    display: ${(props) => (!props.isButtonPanelOpened && 'none')};
+    position: absolute;
+    left: calc(50% - 14px);
+    top: 13px;
+    height: 50%;
+    transform-origin: 50% 100%;
+  }
+  .wrapper:nth-child(2) { transform: rotate(60deg); }
+  .wrapper:nth-child(3) { transform: rotate(120deg); }
+  .wrapper:nth-child(4) { transform: rotate(180deg); }
+  .wrapper:nth-child(5) { transform: rotate(240deg); }
+  .wrapper:nth-child(6) { transform: rotate(300deg); }
+  
+  .button_wrap {
+    position: relative;
+    display: inline-flex;
+    flex-flow: column nowrap;
+    justify-content: start;
+    align-items: center;
+    text-align: center;
+    height: 28px; 
+    width: 28px;
+    transform-origin: 50% 30px;
+  }
+  .wrapper:nth-child(2) .button_wrap { transform: rotate(-60deg); }
+  .wrapper:nth-child(3) .button_wrap { transform: rotate(-120deg); }
+  .wrapper:nth-child(4) .button_wrap { transform: rotate(-180deg); }
+  .wrapper:nth-child(5) .button_wrap { transform: rotate(-240deg); }
+  .wrapper:nth-child(6) .button_wrap { transform: rotate(-300deg); }
 `;
 
 export { ControlsBlockStyled };

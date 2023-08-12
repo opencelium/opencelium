@@ -57,79 +57,121 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
 
   return (
     <ControlsBlockStyled isButtonPanelOpened={isButtonPanelOpened}>
-      {!readOnly && (
-        <TooltipButton
-          position={"bottom"}
-          icon={"save"}
-          tooltip={"Save"}
-          target={`save_connection_button`}
-          hasBackground={true}
-          background={
-            addingConnection === API_REQUEST_STATE.START ||
-            updatingConnection === API_REQUEST_STATE.START
-              ? ColorTheme.Blue
-              : ColorTheme.White
-          }
-          color={
-            addingConnection === API_REQUEST_STATE.START ||
-            updatingConnection === API_REQUEST_STATE.START
-              ? ColorTheme.White
-              : ColorTheme.Gray
-          }
-          padding="2px"
-          isLoading={
-            addingConnection === API_REQUEST_STATE.START ||
-            updatingConnection === API_REQUEST_STATE.START
-          }
-          isDisabled={
-            isTestingConnection ||
-            addingConnection === API_REQUEST_STATE.START ||
-            updatingConnection === API_REQUEST_STATE.START
-          }
-          handleClick={() => data.justUpdate(connection)}
-        />
-      )}
 
-      <TooltipButton
-        position={"bottom"}
-        icon={isFullScreen ? "close_fullscreen" : "open_in_full"}
-        tooltip={isFullScreen ? "Minimize" : "Maximize"}
-        target={`fullscreen_connection_button`}
-        hasBackground={true}
-        background={isFullScreen ? ColorTheme.Blue : ColorTheme.White}
-        color={isFullScreen ? ColorTheme.White : ColorTheme.Gray}
-        padding="2px"
-        handleClick={() => dispatch(setFullScreenFormSection(!isFullScreen))}
-      />
-      <TooltipButton
-        position={"bottom"}
-        icon={"menu"}
-        tooltip={
-          !isButtonPanelOpened ? "Show Button Panel" : "Hide Button Panel"
-        }
-        target={`show_button_panel`}
-        hasBackground={true}
-        background={isButtonPanelOpened ? ColorTheme.Blue : ColorTheme.White}
-        color={isButtonPanelOpened ? ColorTheme.White : ColorTheme.Gray}
-        padding="2px"
-        handleClick={() =>
-          dispatch(setButtonPanelVisibility(!isButtonPanelOpened))
-        }
-      />
-      <TooltipButton
-        position={"bottom"}
-        icon={"sort"}
-        tooltip={!logPanelHeight ? "Show Logs" : "Hide Logs"}
-        target={`show_log_panel`}
-        hasBackground={true}
-        background={!logPanelHeight ? ColorTheme.White : ColorTheme.Blue}
-        color={!logPanelHeight ? ColorTheme.Gray : ColorTheme.White}
-        padding="2px"
-        handleClick={() =>
-          dispatch(setLogPanelHeight(!logPanelHeight ? LogPanelHeight.High : 0))
-        }
-      />
-      <ConfigurationsIcon />
+    
+      <div className="center_item">
+        <div className="button_wrap">
+          <TooltipButton
+            position={"bottom"}
+            icon={"menu"}
+            tooltip={
+              !isButtonPanelOpened ? "Show Button Panel" : "Hide Button Panel"
+            }
+            target={`show_button_panel`}
+            hasBackground={true}
+            background={isButtonPanelOpened ? ColorTheme.Blue : ColorTheme.White}
+            color={isButtonPanelOpened ? ColorTheme.White : ColorTheme.Gray}
+            padding="2px"
+            handleClick={() =>
+              dispatch(setButtonPanelVisibility(!isButtonPanelOpened))
+            }
+          />
+        </div>
+      </div>
+
+      <div className="wrapper">
+        <div className="button_wrap">
+          <TooltipButton
+            position={"bottom"}
+            icon={isFullScreen ? "close_fullscreen" : "open_in_full"}
+            tooltip={isFullScreen ? "Minimize" : "Maximize"}
+            target={`fullscreen_connection_button`}
+            hasBackground={true}
+            background={isFullScreen ? ColorTheme.Blue : ColorTheme.White}
+            color={isFullScreen ? ColorTheme.White : ColorTheme.Gray}
+            padding="2px"
+            handleClick={() => dispatch(setFullScreenFormSection(!isFullScreen))}
+          />
+        </div>
+      </div>
+
+      <div className="wrapper">
+        <div className="button_wrap">
+          <ConfigurationsIcon />
+        </div>
+      </div>
+
+      <div className="wrapper">
+        <div className="button_wrap">
+        <ConfigurationsIcon />
+        </div>
+      </div>
+
+      <div className="wrapper">
+        <div className="button_wrap">
+        <ConfigurationsIcon />
+        </div>
+      </div>
+      <div className="wrapper">
+        <div className="button_wrap">
+          <TooltipButton
+            position={"bottom"}
+            icon={"sort"}
+            tooltip={!logPanelHeight ? "Show Logs" : "Hide Logs"}
+            target={`show_log_panel`}
+            hasBackground={true}
+            background={!logPanelHeight ? ColorTheme.White : ColorTheme.Blue}
+            color={!logPanelHeight ? ColorTheme.Gray : ColorTheme.White}
+            padding="2px"
+            handleClick={() =>
+              dispatch(setLogPanelHeight(!logPanelHeight ? LogPanelHeight.High : 0))
+            }
+          />
+        </div>
+      </div>
+
+      <div className="wrapper">
+        <div className="button_wrap">
+          {!readOnly && (
+            <TooltipButton
+              position={"bottom"}
+              icon={"save"}
+              tooltip={"Save"}
+              target={`save_connection_button`}
+              hasBackground={true}
+              background={
+                addingConnection === API_REQUEST_STATE.START ||
+                updatingConnection === API_REQUEST_STATE.START
+                  ? ColorTheme.Blue
+                  : ColorTheme.White
+              }
+              color={
+                addingConnection === API_REQUEST_STATE.START ||
+                updatingConnection === API_REQUEST_STATE.START
+                  ? ColorTheme.White
+                  : ColorTheme.Gray
+              }
+              padding="2px"
+              isLoading={
+                addingConnection === API_REQUEST_STATE.START ||
+                updatingConnection === API_REQUEST_STATE.START
+              }
+              isDisabled={
+                isTestingConnection ||
+                addingConnection === API_REQUEST_STATE.START ||
+                updatingConnection === API_REQUEST_STATE.START
+              }
+              handleClick={() => data.justUpdate(connection)}
+            />
+          )}
+        </div>
+      </div>
+    
+
+      
+      
+      
+      
     </ControlsBlockStyled>
   );
 };

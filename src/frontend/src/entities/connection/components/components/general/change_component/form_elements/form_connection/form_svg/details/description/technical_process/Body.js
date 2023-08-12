@@ -40,6 +40,7 @@ class Body extends React.Component{
             currentEnhancement: null,
         }
         this.JsonBodyRef = React.createRef();
+        this.enhancementRef = React.createRef();
     }
 
     toggleBodyVisible(){
@@ -184,7 +185,7 @@ class Body extends React.Component{
         }
         return(
             <div className={styles.data}>
-                <Enhancement readOnly={readOnly} enhancement={{...currentEnhancement}} setEnhancement={(a) => this.setCurrentEnhancement(a)}/>
+                <Enhancement ref={this.enhancementRef} readOnly={readOnly} enhancement={{...currentEnhancement}} setEnhancement={(a) => this.setCurrentEnhancement(a)}/>
             </div>
         );
     }

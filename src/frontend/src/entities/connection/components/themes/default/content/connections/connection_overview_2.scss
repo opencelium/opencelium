@@ -137,6 +137,7 @@ $DASHED_COLOR: #58854d;
   position: relative;
   background: #fafafa;
   border: 1px solid #eee;
+  overflow: hidden;
 }
 .technical_layout_extended {
   @extend .technical_layout;
@@ -867,7 +868,7 @@ $DASHED_COLOR: #58854d;
   transform: translateX(-50%);
   bottom: 34px;
   z-index: 999;
-  padding: 40px 40px 60px;
+  padding: 20px 40px 40px;
   border-radius: 4px;
   display: flex;
   align-items: center;

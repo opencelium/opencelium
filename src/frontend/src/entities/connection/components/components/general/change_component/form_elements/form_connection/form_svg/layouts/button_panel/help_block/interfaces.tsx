@@ -24,4 +24,97 @@ interface HelpBlockStyledProps {
   readonly isButtonPanelOpened: boolean;
 }
 
-export { HelpBlockProps, HelpBlockStyledProps };
+type ConnectorPanelType = "fromConnector" | "toConnector";
+
+
+type RelationalOperatorForIf = "IsNull" | "AllowList" | "DenyList" | "IsTypeOf" | "PropertyExists" | "PropertyNotExists" | "Contains" | "NotContains" | "ContainsSubStr" | "NotContainsSubStr" | "RegExp" | "Like" | "NotLike" | ">=" | ">" | "<=" | "<" | "=" | "!=" | "NotNull" | "IsEmpty" | "NotEmpty";
+
+type RelationalOperatorForLoop = "SplitString";
+
+interface IBaseAnimationData {
+  index: string;
+  type: "process" | "operator";
+  name: string;
+  toDown?: true | false;
+  after?: string;
+}
+
+interface IAnimationDataForProcess extends IBaseAnimationData {
+  label?: string;
+  endpoint?: IEndpointData;
+  body?: IBodyData[];
+}
+
+interface IAnimationDataForIf extends IBaseAnimationData {
+  conditionForIf?: IConditionDataForIf;
+}
+
+interface IAnimationDataForLoop extends IBaseAnimationData {
+  conditionForLoop?: IConditionDataForLoop;
+}
+
+interface IEndpointData {
+  index: string;
+  param: string;
+  connectorType: ConnectorPanelType;
+}
+
+interface IConditionDataForIf {
+  leftStatement: {
+    fromConnector: ConnectorPanelType, 
+    leftMethodIndex: string, 
+    leftParam: string
+  }
+  relationalOperator: RelationalOperatorForIf;
+  rightStatement?: {
+    fromConnector?: ConnectorPanelType, 
+    property?: string, 
+    rightMethodIndex?: string, 
+    rightParam?: string
+  }
+}
+
+interface IConditionDataForLoop {
+  leftStatement: {
+    fromConnector: ConnectorPanelType, 
+    leftMethodIndex: string, 
+    leftParam: string
+  }
+  relationalOperator: RelationalOperatorForLoop;
+  rightStatement: {
+    fromConnector: ConnectorPanelType, 
+    rightMethodIndex: string, 
+    rightParam: string
+  }
+}
+
+interface IBodyData{
+  keyName: string;
+  keyValue: string;
+  reference?: IBodyReferenceData[];
+}
+
+interface IBodyReferenceData{
+  enhancementDescription?: string;
+  enhancementContent?: string;
+  method?: IBodyReferenceMethodData[];
+}
+
+interface IBodyReferenceMethodData{
+  fromConnector: ConnectorPanelType;
+  index: string;
+  param: string;
+}
+
+type IConnectorData = IAnimationDataForProcess | IAnimationDataForIf | IAnimationDataForLoop;
+
+interface IConnectorType {
+  fromConnector: IConnectorData[];
+  toConnector: IConnectorData[];
+}
+
+interface IAnimationData {
+  [key: string]: IConnectorType;
+}
+
+export { HelpBlockProps, HelpBlockStyledProps, ConnectorPanelType, IAnimationData };

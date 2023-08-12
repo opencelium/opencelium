@@ -957,7 +957,13 @@ export const positionElementOverByClassName = (targetElementsClasses, offset, hi
 
     let element = document.getElementById('wrapActiveElement');
     let targetElements = targetElementsClasses.map(function(className) {
-        return document.querySelector(className);
+        const el = document.querySelectorAll(className);
+        for(let i = 0; i < el.length; i++) {
+            let computedStyle = window.getComputedStyle(el[i]);
+            if(computedStyle.display !== 'none') {
+                return el[i];
+            }
+        }
     });
 
     let targetRects = targetElements.map(function(targetElement) {

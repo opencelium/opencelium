@@ -25,7 +25,7 @@ const HelpBlockStyled = styled.div<HelpBlockStyledProps>`
     content: "Help";
     position: absolute;
     left: 0;
-    bottom: -150%;
+    bottom: -295%;
     font-size: 14px;
   }
 
