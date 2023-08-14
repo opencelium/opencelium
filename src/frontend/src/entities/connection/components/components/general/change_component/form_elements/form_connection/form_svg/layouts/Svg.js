@@ -360,6 +360,7 @@ class Svg extends React.Component {
             }
             connection.addFieldBinding(CFieldBinding.createFieldBinding(newFieldBinding));
         })
+        connection.removeDuplicatesFromFieldBinding();
         updateConnection(connection);
         if(result.currentItem){
             connector.setCurrentItem(result.currentItem);
