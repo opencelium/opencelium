@@ -24,6 +24,7 @@ import {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorI
 import DashedElement from "@change_component/form_elements/form_connection/form_svg/elements/process/DashedElement";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
+import {ConnectionLogType} from "@root/interfaces/IConnection";
 
 export const ARROW_WIDTH = 2;
 
@@ -149,38 +150,20 @@ class Arrow extends React.Component{
         if(hasArrowDashAnimation){
             markerStyle = '_dashed';
         }
-        if(logPanelHeight !== 0 && from && from.entity instanceof COperatorItem){
-            if(currentLog && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`){
-                if(isArrowVertical && currentLog.operatorData && currentLog.operatorData.conditionResult === false){
-                    stroke = '#d24545';
-                    hasArrowAlert = true;
-                    markerStyle = '_rejected_placeholder';
-                }
-            }
-        }
         let logStroke = '';
-        if(logPanelHeight !== 0) {
-            const logsWithoutLastItem = currentLogs.filter(l => l.index !== currentLog.index);
-            for (let i = 0; i < logsWithoutLastItem.length; i++) {
-                if (from.id === `${logsWithoutLastItem[i].connectorType}_${logsWithoutLastItem[i].index}`) {
-                    if (isArrowVertical && logsWithoutLastItem[i].operatorData && logsWithoutLastItem[i].operatorData.conditionResult === false) {
-                        logStroke = '#d24545';
-                        hasArrowAlert = true;
-                        markerStyle = '_rejected_placeholder';
-                    } else {
-                        logStroke = '#58854d';
-                        markerStyle = '_dashed';
-                    }
-                    break;
-                }
-            }
-            if(isArrowVertical) {
-                const logsWithFalseConditionResult = currentLogs.filter(l => l.operatorData && l.operatorData.conditionResult === false);
-                for (let i = 0; i < logsWithFalseConditionResult.length; i++) {
-                    if (from.id === `${logsWithFalseConditionResult[i].connectorType}_${logsWithFalseConditionResult[i].index}`) {
-                        logStroke = '#d24545';
-                        hasArrowAlert = true;
-                        markerStyle = '_rejected_placeholder';
+        if(logPanelHeight !== 0){
+            if(currentLog && currentLog.type === ConnectionLogType.ERROR){
+                stroke = '#d24545';
+                hasArrowAlert = true;
+                markerStyle = '_rejected_placeholder';
+            } else {
+                const logsWithoutLastItem = currentLogs.filter(l => l.index !== currentLog.index);
+                for (let i = 0; i < logsWithoutLastItem.length; i++) {
+                    if (from.id === `${logsWithoutLastItem[i].connectorType}_${logsWithoutLastItem[i].index}`) {
+                        if (!(isArrowVertical && logsWithoutLastItem[i].operatorData && logsWithoutLastItem[i].operatorData.conditionResult === false)) {
+                            logStroke = '#58854d';
+                            markerStyle = '_dashed';
+                        }
                         break;
                     }
                 }

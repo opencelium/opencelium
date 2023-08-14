@@ -46,6 +46,12 @@ export interface IConnection extends IConnectionForm{
     getObjectForBackend?(): any;
 }
 
+export enum ConnectionLogType{
+    ERROR = 'ERROR',
+    INFO = 'INFO',
+    WARNING = 'WARNING',
+}
+
 export interface ConnectionLogProps{
     isOperator: boolean,
     isMethod: boolean,
@@ -62,6 +68,7 @@ export interface ConnectionLogProps{
         conditionResult?: boolean,
     },
     shouldDraw?: boolean,
+    type: ConnectionLogType,
 }
 
 export type ConnectionProps = keyof IConnection | string;
