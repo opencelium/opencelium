@@ -35,6 +35,8 @@ import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import CFieldBinding from "@classes/content/connection/field_binding/CFieldBinding";
 import {Dialog} from "@app_component/base/dialog/Dialog";
+import {TooltipIcon} from "@app_component/base/tooltip_icon/TooltipIcon";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
@@ -406,6 +408,13 @@ class Svg extends React.Component {
         }
     }
 
+    zoomIn(){
+        this.onWheel({shiftKey: true, wheelDelta: 300, deltaY: -250, detail: 0, clientX: 0, clientY: 0, preventDefault: () => {}})
+    }
+    zoomOut(){
+        this.onWheel({shiftKey: true, wheelDelta: -300, deltaY: 250, detail: 0, clientX: 0, clientY: 0, preventDefault: () => {}})
+    }
+
     renderItems(){
         const {
             isItemDraggable, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened,
@@ -521,6 +530,35 @@ class Svg extends React.Component {
         let svgStyle = this.props.style ? {...this.props.style} : {};
         return(
             <React.Fragment>
+                <div style={{
+                    position: "absolute",
+                    top: '30px',
+                    left: '5px',
+                    display: 'grid',
+                    background: '#fff',
+                    padding: '5px',
+                    borderRadius: '3px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                }}>
+                    <TooltipFontIcon
+                        wrapStyles={{borderBottom: '1px solid #eee', lineHeight: 0, paddingBottom: '5px'}}
+                        size={20}
+                        onClick={() => this.zoomIn()}
+                        tooltip={<span>Zoom in<br/>(Shift + Forward Scroll)</span>}
+                        value={'add'}
+                        tooltipPosition={'right'}
+                        isButton={true}
+                    />
+                    <TooltipFontIcon
+                        wrapStyles={{lineHeight: 0, paddingTop: '5px'}}
+                        size={20}
+                        onClick={() => this.zoomOut()}
+                        tooltip={<span>Zoom out<br/>(Shift + Backward Scroll)</span>}
+                        value={'remove'}
+                        tooltipPosition={'right'}
+                        isButton={true}
+                    />
+                </div>
                 <svg
                     id={svgId}
                     style={svgStyle}
