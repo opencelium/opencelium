@@ -1570,7 +1570,7 @@ export default class CConnectorItem{
                         });
                     }
                     if(decreasedIndex === '0'){
-                        return methods.reverse()
+                        return methods
                     }
                     decreasedIndex = this.decreaseIndex(decreasedIndex);
                 }
