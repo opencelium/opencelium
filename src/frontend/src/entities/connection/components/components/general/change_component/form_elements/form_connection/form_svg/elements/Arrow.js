@@ -152,7 +152,7 @@ class Arrow extends React.Component{
         }
         let logStroke = '';
         if(logPanelHeight !== 0){
-            if(currentLog && currentLog.type === ConnectionLogType.ERROR){
+            if(currentLog && currentLog.type === ConnectionLogType.ERROR && `${from.id}_${to.id}` === `${from.id}_${currentLog.connectorType}_${currentLog.index}`){
                 stroke = '#d24545';
                 hasArrowAlert = true;
                 markerStyle = '_rejected_placeholder';
