@@ -16,7 +16,7 @@
 import { Middleware } from 'redux'
 import {AppDispatch, RootState} from "@application/utils/store";
 import {LocalStorage} from "@application/classes/LocalStorage";
-import {getLogoName, getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
+import {checkConnection, getLogoName, getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {ApplicationVersionResponseProps} from "@application/requests/interfaces/IApplication";
 import {
     setCurrentPages,
@@ -28,6 +28,7 @@ import {
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
 import {getThemesFromServicePortal, saveThemesInServicePortal} from "@entity/application/utils/utils";
+import {checkAccess} from "@application/utils/middlewares/auth";
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (getLogoName.fulfilled.type === action.type) {

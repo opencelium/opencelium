@@ -23,16 +23,22 @@ import {LogoutProps} from "@application/interfaces/IAuth";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {clearCurrentPages, clearSearchFields } from '@application/redux_toolkit/slices/ApplicationSlice';
 import {clearWidgetSettings} from "@entity/dashboard/redux_toolkit/slices/WidgetSettingSlice";
+import {checkConnection} from "@application/redux_toolkit/action_creators/ApplicationCreators";
+
+export const checkAccess = (storeApi: any, action: any) => {
+    const response: IResponse = action.payload;
+    const applicationState = storeApi.getState().applicationReducer;
+    return applicationState.openingExternalUrl !== API_REQUEST_STATE.START && (response?.status === 403 || response?.message === ResponseMessages.ACCESS_DENIED || response?.message === ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE || response?.message === ResponseMessages.TOKEN_IS_NOT_VALID || (response?.message === ResponseMessages.NETWORK_ERROR && login.rejected.type === action.type) || false);
+}
 
 export const authMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     const dispatch: AppDispatch = storeApi.dispatch;
     const actionTypeSplit = action.type.split('/');
-    const isRequestRejected = actionTypeSplit[actionTypeSplit.length - 1] === 'rejected';
+    const isRequestRejected = actionTypeSplit[actionTypeSplit.length - 1] === 'rejected' && checkConnection.rejected.type !== action.type;
     let isAccessDenied = false;
     const response: IResponse = action.payload;
     if(isRequestRejected){
-        const applicationState = storeApi.getState().applicationReducer;
-        isAccessDenied = applicationState.openingExternalUrl !== API_REQUEST_STATE.START && (response?.status === 403 || response?.message === ResponseMessages.ACCESS_DENIED || response?.message === ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE || response?.message === ResponseMessages.TOKEN_IS_NOT_VALID || (response?.message === ResponseMessages.NETWORK_ERROR && login.rejected.type === action.type) || false);
+        isAccessDenied = checkAccess(storeApi, action);
     }
     if(isAccessDenied){
         const authState = storeApi.getState().authReducer;
@@ -44,12 +50,12 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
     if (login.fulfilled.type === action.type) {
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);
+        dispatch(checkConnection());
     } else if (logout.match(action)) {
         const SecuredStorage = LocalStorage.getStorage(true);
         SecuredStorage.remove('authUser');
         const OpenedStorage = LocalStorage.getStorage();
         OpenedStorage.remove('appVersion');
-        const dispatch: AppDispatch = storeApi.dispatch;
         dispatch(clearSearchFields({}));
         dispatch(clearCurrentPages({}));
         dispatch(clearWidgetSettings());

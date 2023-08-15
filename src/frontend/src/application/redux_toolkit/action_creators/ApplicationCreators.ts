@@ -75,6 +75,18 @@ export const getVersion = createAsyncThunk(
     }
 )
 
+export const checkConnection = createAsyncThunk(
+    'application/check/connection',
+    async(data: never, thunkAPI) => {
+        try{
+            const request = new ApplicationRequest();
+            await request.getVersion();
+        }catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const getResources = createAsyncThunk(
     'application/get/resources',
     async(settings: SettingsProps | void, thunkAPI) => {
@@ -169,4 +181,5 @@ export default {
     updateResources,
     openExternalUrl,
     requestRemoteApi,
+    checkConnection,
 }

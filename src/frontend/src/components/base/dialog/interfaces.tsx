@@ -47,6 +47,8 @@ interface DialogProps{
     dialogClassname?: string,
     dialogTheme?: DialogThemeProps,
     styles?: DialogStylesProps,
+    hasNoBody?: boolean,
+    hasNoActions?: boolean,
 }
 
 export {
