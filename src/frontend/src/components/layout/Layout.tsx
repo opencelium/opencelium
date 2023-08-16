@@ -29,6 +29,7 @@ import {logout} from "@application/redux_toolkit/slices/AuthSlice";
 import Dialog from "@app_component/base/dialog/Dialog";
 import LoginFormInputs from "@app_component/default_pages/login/LoginFormInputs";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
+import { Auth } from '@application/classes/Auth';
 
 const OnlyOutletPages = ["/connection_overview_details", "/connection_overview_technical_layout", "/connection_overview_business_layout"]
 
@@ -38,6 +39,7 @@ const Layout: FC =
     }) => {
     const dispatch = useAppDispatch();
     const {pathname} = useLocation();
+    const {isAuth} = Auth.getReduxState();
     const {checkingConnection} = Application.getReduxState();
     const isOnlyOutletPage = OnlyOutletPages.indexOf(pathname) !== -1;
     const [timerId, setTimerId] = useState(null);
@@ -56,15 +58,21 @@ const Layout: FC =
         return () => {
             clear();
         }
-    }, [])
+    }, [timerId])
+    useEffect(() => {
+        if(!isAuth){
+            clear();
+        }
+    }, [isAuth])
     useEffect(() => {
         if(checkingConnection === API_REQUEST_STATE.ERROR && timerId){
             clear();
         }
         if(checkingConnection !== API_REQUEST_STATE.ERROR && !timerId){
-            setTimerId(setInterval(() => {
+            const id = setInterval(() => {
                 dispatch(checkConnection());
-            }, 5000));
+            }, 5000);
+            setTimerId(id);
         }
     }, [checkingConnection])
     return (
