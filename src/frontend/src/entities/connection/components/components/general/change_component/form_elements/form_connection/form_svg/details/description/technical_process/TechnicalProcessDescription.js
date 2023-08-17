@@ -27,8 +27,17 @@ import Header
 import Body from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Body";
 import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
 
-@connect(null, {setCurrentTechnicalItem})
+function mapStateToProps(state){
+    const editor = state.connectionEditorReducer;
+    return{
+        isRequestBodyDialogOpened: editor.isRequestBodyDialogOpened,
+        isResponseSuccessDialogOpened: editor.isResponseSuccessDialogOpened,
+        isResponseFailDialogOpened: editor.isResponseFailDialogOpened,
+    };
+}
+@connect(mapStateToProps, {setCurrentTechnicalItem, toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog})
 class TechnicalProcessDescription extends React.Component{
     constructor(props) {
         super(props);
@@ -65,7 +74,10 @@ class TechnicalProcessDescription extends React.Component{
 
     render(){
         const {isResponseVisible} = this.state;
-        const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo, readOnly} = this.props;
+        const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo, readOnly,
+            isResponseFailDialogOpened, isResponseSuccessDialogOpened, isRequestBodyDialogOpened,
+            toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog
+        } = this.props;
         const methodItem = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
         const request = methodItem.request;
@@ -101,7 +113,7 @@ class TechnicalProcessDescription extends React.Component{
                         <Col xs={8} className={`${styles.col}`}><span className={styles.value}>{request.method}</span></Col>
                         <Url readOnly={readOnly} nameOfCurrentInfo={'request_url'} isCurrentInfo={currentInfo === 'request_url'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} request={request} connection={connection} updateConnection={updateConnection} method={methodItem} connector={connector}/>
                         <Header nameOfCurrentInfo={'request_header'} isCurrentInfo={currentInfo === 'request_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={request.header}/>
-                        <Body readOnly={readOnly} nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem} bodyTitle={'Request data'}/>
+                        <Body toggleBodyDialog={toggleRequestBodyDialog} isBodyDialogOpened={isRequestBodyDialogOpened} readOnly={readOnly} nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem} bodyTitle={'Request data'}/>
                     </Row>
                 </Col>
                 <Col xs={12} className={styles.col}>
@@ -115,14 +127,14 @@ class TechnicalProcessDescription extends React.Component{
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                         <Col xs={8} className={`${styles.col}`}>{successResponse.status}</Col>
                         <Header nameOfCurrentInfo={'success_header'} isCurrentInfo={currentInfo === 'success_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={successResponse.header}/>
-                        <Body nameOfCurrentInfo={'success_body'} isCurrentInfo={currentInfo === 'success_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={successResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem} bodyTitle={'Response. Success data'}/>
+                        <Body hasEnhancement={false} toggleBodyDialog={toggleResponseSuccessBodyDialog} isBodyDialogOpened={isResponseSuccessDialogOpened} nameOfCurrentInfo={'success_body'} isCurrentInfo={currentInfo === 'success_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={successResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem} bodyTitle={'Response. Success data'}/>
                         <br/>
                         <br/>
                         <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Fail`}</b></Col>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                         <Col xs={8} className={`${styles.col}`}>{failResponse.status}</Col>
                         <Header nameOfCurrentInfo={'fail_header'} isCurrentInfo={currentInfo === 'fail_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={failResponse.header}/>
-                        <Body nameOfCurrentInfo={'fail_body'} isCurrentInfo={currentInfo === 'fail_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={failResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem} bodyTitle={'Response. Fail data'}/>
+                        <Body hasEnhancement={false} toggleBodyDialog={toggleResponseFailBodyDialog} isBodyDialogOpened={isResponseFailDialogOpened} nameOfCurrentInfo={'fail_body'} isCurrentInfo={currentInfo === 'fail_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={failResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem} bodyTitle={'Response. Fail data'}/>
                     </Row>
                 </Col>
                 }

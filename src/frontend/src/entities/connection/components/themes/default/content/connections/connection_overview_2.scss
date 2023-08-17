@@ -692,6 +692,10 @@ $DASHED_COLOR: #58854d;
   padding-right: 10px;
   display: grid;
 }
+.body_data_without_enhancement{
+  @extend .body_data;
+  display: grid;
+}
 .body_mapping{
   width: 33%;
   float: left;

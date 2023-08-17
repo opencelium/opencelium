@@ -31,7 +31,7 @@ import DashedElement from "./DashedElement";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
 import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
-import {toggleBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
+import {toggleRequestBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
@@ -48,7 +48,7 @@ function mapStateToProps(state){
     }
 }
 
-@connect(mapStateToProps, {setJustDeletedItem, toggleBodyDialog})
+@connect(mapStateToProps, {setJustDeletedItem, toggleRequestBodyDialog})
 class Process extends React.Component{
     constructor(props) {
         super(props)
@@ -193,7 +193,7 @@ class Process extends React.Component{
 
     onDoubleClick(){
         this.onClick();
-        this.props.toggleBodyDialog();
+        this.props.toggleRequestBodyDialog();
     }
 
     deleteProcess(e){

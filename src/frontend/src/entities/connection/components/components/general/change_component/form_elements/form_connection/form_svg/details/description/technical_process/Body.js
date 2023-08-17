@@ -23,7 +23,6 @@ import {BODY_FORMAT} from "@entity/connection/components/classes/components/cont
 import JsonBody from "@change_component/form_elements/form_connection/form_methods/method/JsonBody";
 import XmlBody from "@change_component/form_elements/form_connection/form_methods/method/XmlBody";
 import Enhancement from "@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Enhancement";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 import {isNumber, subArrayToString} from "@application/utils/utils";
 import CEnhancement from "@entity/connection/components/classes/components/content/connection/field_binding/CEnhancement";
 import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
@@ -31,16 +30,8 @@ import {markFieldNameAsArray} from "@change_component//form_elements/form_connec
 import GraphQLBody from "@change_component/form_elements/form_connection/form_methods/method/GraphQLBody";
 import ReferenceInformation
     from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/reference_information/ReferenceInformation";
-import {connect} from "react-redux";
-import {toggleBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
 
-function mapStateToProps(state){
-    const editor = state.connectionEditorReducer;
-    return{
-        isBodyDialogOpened: editor.isBodyDialogOpened,
-    };
-}
-@connect(mapStateToProps, {toggleBodyDialog})
+
 class Body extends React.Component{
     constructor(props) {
         super(props);
@@ -51,6 +42,10 @@ class Body extends React.Component{
             isToggledIcon: true,
             isToggledReferenceIcon: false,
         }
+    }
+
+    getBodyDialogState(){
+
     }
 
     toggleReferenceIcon(isToggledReferenceIcon){
@@ -221,13 +216,13 @@ class Body extends React.Component{
 
     renderInfo(){
         const {isToggledIcon, isToggledReferenceIcon} = this.state;
-        const {bodyTitle, isExtended, readOnly, source, method, connector, connection} = this.props;
+        const {bodyTitle, isExtended, readOnly, source, method, connector, connection, hasEnhancement} = this.props;
         let gridStyles = {};
         if(isToggledReferenceIcon && !isToggledIcon){
-            gridStyles.gridTemplateRows = 'calc(100%) 40px';
+            gridStyles.gridTemplateRows = 'calc(100% - 40px) 40px';
         }
         if(!isToggledReferenceIcon && isToggledIcon){
-            gridStyles.gridTemplateRows = '40px calc(100%)';
+            gridStyles.gridTemplateRows = '40px calc(100% - 40px)';
         }
         if(!isToggledReferenceIcon && !isToggledIcon){
             gridStyles.gridTemplateRows = '40px 40px';
@@ -235,17 +230,20 @@ class Body extends React.Component{
         if(isToggledReferenceIcon && isToggledIcon){
             gridStyles.gridTemplateRows = '25% calc(100%)';
         }
+        if(!hasEnhancement){
+            gridStyles.gridTemplateRows = 'unset';
+        }
         return(
             <React.Fragment>
-                <div className={styles.body_data_with_enhancement} style={gridStyles}>
-                    <ReferenceInformation
+                <div className={hasEnhancement ? styles.body_data_with_enhancement : styles.body_data_without_enhancement} style={gridStyles}>
+                    {hasEnhancement && <ReferenceInformation
                         body={source}
                         method={method}
                         connection={connection}
                         toggleIcon={(a) => this.toggleReferenceIcon(a)}
                         isToggledIcon={isToggledReferenceIcon}
                         onReferenceClick={(fieldName) => this.setCurrentEnhancementClickingOnPointer(null, null, fieldName)}
-                    />
+                    />}
                     <div>
                         <div>
                             <b>{bodyTitle}</b>
@@ -260,10 +258,11 @@ class Body extends React.Component{
                         {isToggledIcon && this.renderBody()}
                     </div>
                 </div>
-                <div className={styles.body_enhancement}>
+                {hasEnhancement && <div className={styles.body_enhancement}>
                     <div><b>{'Enhancement'}</b></div>
                     {this.renderEnhancement()}
                 </div>
+                }
                 {isExtended && !readOnly &&
                     <Button
                         className={styles.extended_details_button_save_body}
@@ -278,7 +277,7 @@ class Body extends React.Component{
     render(){
         const {connector, isExtended, isCurrentInfo, method, isBodyDialogOpened} = this.props;
         const isGraphQLData = method.isGraphQLData();
-        const hasEnhancement = true && !isGraphQLData;
+        const hasEnhancement = this.props.hasEnhancement && !isGraphQLData;
         return(
             <React.Fragment>
                 <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
@@ -310,6 +309,7 @@ class Body extends React.Component{
 
 Body.defaultProps = {
     isDraft: false,
+    hasEnhancement: true,
 };
 
 export default Body;

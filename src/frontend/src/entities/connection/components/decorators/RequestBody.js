@@ -14,7 +14,6 @@
  */
 
 import React from 'react';
-import {withTranslation} from 'react-i18next';
 import {isJsonString, subArrayToString, isString, isNumber} from "@application/utils/utils";
 import {CONNECTOR_FROM} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
@@ -27,6 +26,7 @@ import Input from "@entity/connection/components/components/general/basic_compon
 import CRequest from "@entity/connection/components/classes/components/content/invoker/request/CRequest";
 import ToolboxThemeInput from "../hocs/ToolboxThemeInput";
 import {markFieldNameAsArray} from "@change_component//form_elements/form_connection/form_methods/help";
+import Pointer from "@change_component/form_elements/form_connection/form_methods/method/Pointer";
 
 
 export function RequestBody(CRequestType){
@@ -295,6 +295,18 @@ export function RequestBody(CRequestType){
                                 {...componentProps}
                                 openEnhancement={(a, b) => this.openEnhancement(a, b)}
                                 updateBody={(a) => this.updateBody(a)}
+                                PointerComponent={{
+                                    getComponent: (params) => {
+                                        const {submitEdit, pointer, pointers} = params;
+                                        return (
+                                            <Pointer
+                                                pointer={pointer}
+                                                pointers={pointers}
+                                                submitEdit={submitEdit}
+                                            />
+                                        );},
+                                    id: `${id}_pointer_component`,
+                                }}
                                 ReferenceComponent={hasReferenceComponent ? {
                                     getComponent: (params) => {
                                         const {submitEdit, textarea, selectId} = params;

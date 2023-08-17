@@ -16,11 +16,15 @@
 import {createSlice} from "@reduxjs/toolkit";
 
 export interface ConnectionEditorState{
-    isBodyDialogOpened: boolean,
+    isRequestBodyDialogOpened: boolean,
+    isResponseSuccessDialogOpened: boolean,
+    isResponseFailDialogOpened: boolean,
     isConditionDialogOpened: boolean,
 }
 const initialState: ConnectionEditorState = {
-    isBodyDialogOpened: false,
+    isRequestBodyDialogOpened: false,
+    isResponseSuccessDialogOpened: false,
+    isResponseFailDialogOpened: false,
     isConditionDialogOpened: false,
 }
 
@@ -28,8 +32,14 @@ export const connectionEditorSlice = createSlice({
     name: 'connection_editor',
     initialState,
     reducers: {
-        toggleBodyDialog: (state) => {
-            state.isBodyDialogOpened = !state.isBodyDialogOpened;
+        toggleRequestBodyDialog: (state) => {
+            state.isRequestBodyDialogOpened = !state.isRequestBodyDialogOpened;
+        },
+        toggleResponseSuccessBodyDialog: (state) => {
+            state.isResponseSuccessDialogOpened = !state.isResponseSuccessDialogOpened;
+        },
+        toggleResponseFailBodyDialog: (state) => {
+            state.isResponseFailDialogOpened = !state.isResponseFailDialogOpened;
         },
         toggleConditionDialog: (state) => {
             state.isConditionDialogOpened = !state.isConditionDialogOpened;
@@ -38,7 +48,8 @@ export const connectionEditorSlice = createSlice({
 })
 
 export const {
-    toggleBodyDialog, toggleConditionDialog,
+    toggleRequestBodyDialog, toggleResponseSuccessBodyDialog,
+    toggleResponseFailBodyDialog, toggleConditionDialog,
 } = connectionEditorSlice.actions;
 
 export default connectionEditorSlice.reducer;
