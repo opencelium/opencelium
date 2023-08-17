@@ -51,6 +51,8 @@ export const LogPanelHeight = {
 };
 
 export interface ConnectionState extends ICommonState {
+  animationSpeed: number;
+  isSavePanelVisible: boolean;
   videoAnimationName: string;
   isAnimationPreviewPanelOpened: boolean;
   isButtonPanelOpened: boolean;
@@ -92,9 +94,11 @@ export interface ConnectionState extends ICommonState {
 }
 
 let initialState: ConnectionState = {
+  animationSpeed: 1000,
+  isSavePanelVisible: false,
   videoAnimationName: '',
   isAnimationPreviewPanelOpened: true,
-  isButtonPanelOpened: false,
+  isButtonPanelOpened: true,
   moveTestButton: 0,
   connections: [],
   metaConnections: [],
@@ -150,11 +154,17 @@ const connectionReducers = (isModal: boolean = false) => {
     setButtonPanelVisibility: (state, action: PayloadAction<boolean>) => {
       state.isButtonPanelOpened = action.payload;
     },
+    setSavePanelVisibility: (state, action: PayloadAction<boolean>) => {
+      state.isSavePanelVisible = action.payload;
+    },
     setAnimationPreviewPanelVisibility: (state, action: PayloadAction<boolean>) => {
       state.isAnimationPreviewPanelOpened = action.payload;
     },
     setVideoAnimationName: (state, action: PayloadAction<string>) => {
       state.videoAnimationName = action.payload;
+    },
+    setAnimationSpeed: (state, action: PayloadAction<number>) => {
+      state.animationSpeed = action.payload;
     },
     setTestingConnection: (state, action: PayloadAction<boolean>) => {
       if (action.payload) {
@@ -607,7 +617,9 @@ export const {
   setJustDeletedItem,
   setButtonPanelVisibility,
   setAnimationPreviewPanelVisibility,
-  setVideoAnimationName
+  setVideoAnimationName,
+  setSavePanelVisibility,
+  setAnimationSpeed
 } = connectionSlice.actions;
 
 

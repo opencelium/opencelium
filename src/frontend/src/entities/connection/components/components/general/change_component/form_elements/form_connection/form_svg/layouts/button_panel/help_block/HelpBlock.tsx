@@ -13,42 +13,36 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { withTheme } from "styled-components";
 import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
 import { TextSize } from "@app_component/base/text/interfaces";
 import { HelpBlockStyled } from "./styles";
 import { ConnectorPanelType } from "./interfaces";
-
 import { ColorTheme } from "@style/Theme";
 import { useAppDispatch } from "@application/utils/store";
 import Dialog from "@app_component/base/dialog/Dialog";
-
 // @ts-ignore
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
-
 import Content from "./content/Content";
 import FormConnectionSvg from "../../../FormConnectionSvg";
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
 import animationData from "./AnimationData";
 import CConnection from "@classes/content/connection/CConnection";
-import {setAnimationPaused } from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import {setAnimationPaused, toggleModalDetails } from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/content/connection/CConnectorItem";
 import { Connector } from "@entity/connector/classes/Connector";
 import {ModalConnection} from "@root/classes/ModalConnection";
 import { Connection } from "@entity/connection/classes/Connection";
-
 import { setVideoAnimationName, setAnimationPreviewPanelVisibility } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
-
 import { setFocusById, positionElementOver, positionElementOverByClassName } from '@application/utils/utils';
-
 import CSvg from "@entity/connection/components/classes/components/content/connection_overview_2/CSvg";
+import AnimationSpeedSlider from "./AnimationSpeedSlider/AnimationSpeedSlider";
 
-import { toggleModalDetails } from '@root/redux_toolkit/slices/ModalConnectionSlice';
+import DetailsForOperators from "./AnimationFunctions/DetailsForOperators";
 
 //@ts-ignore
-const connectionData = {"nodeId":null,"connectionId":null,"title":"test","description":"test","fromConnector":{"nodeId":null,"connectorId":3,"title":null,"invoker":{"name":"trello"},"methods":[{"name":"GetBoards","request":{"endpoint":"{url}/1/members/{username}/boards?key={key}&token={token}","body":null,"method":"GET"},"response":{"success":{"status":"200","body":{"type":"array","format":"json","data":"raw","fields":{"name":"","id":""}}},"fail":{"status":"401","body":null}},"index":"0","label":null,"color":"#FFCFB5"}],"operators":[]},"toConnector":{"nodeId":null,"connectorId":3,"title":null,"invoker":{"name":"trello"},"methods":[],"operators":[]},"fieldBinding":[]}
-
+const connectionData = {"nodeId":null,"connectionId":null,"title":"trello connection","description":"desc","fromConnector":{"nodeId":null,"connectorId":1,"title":null,"invoker":{"name":"trello"},"methods":[{"name":"GetBoards","request":{"endpoint":"{url}/1/members/{username}/boards?key={key}&token={token}","body":null,"method":"GET"},"response":{"success":{"status":"200","body":{"type":"array","format":"json","data":"raw","fields":{"name":"","id":""}}},"fail":{"status":"401","body":null}},"index":"0","label":null,"color":"#FFCFB5"}],"operators":[]},"toConnector":{"nodeId":null,"connectorId":1,"title":null,"invoker":{"name":"trello"},"methods":[],"operators":[]},"fieldBinding":[]}
 
 const prepareConnection = (connection: any, connectors: any,) => {
     if(connection && connection.fromConnector && connection.toConnector) {
@@ -70,833 +64,990 @@ const prepareConnection = (connection: any, connectors: any,) => {
     return connection;
 }
 
-
 const HelpBlock = () => {
-    const dispatch = useAppDispatch();
-    const [animationProps, setAnimationProps] = useState<any>({connection: CConnection.createConnection()})
-    const {connectors, gettingConnectors} = Connector.getReduxState();
-    const [isVisible, setIsVisible] = useState(false);
-    const { isButtonPanelOpened, videoAnimationName } = Connection.getReduxState();
-    const { isAnimationPaused } = ModalConnection.getReduxState();
-    const [index, setIndex] = useState(0);
-    const [stopTimer, setStopTimer] = useState(false);
+  const dispatch = useAppDispatch();
+  const [animationProps, setAnimationProps] = useState<any>({connection: CConnection.createConnection()})
+  const {connectors, gettingConnectors} = Connector.getReduxState();
+  const [isVisible, setIsVisible] = useState(false);
+  const { isButtonPanelOpened, videoAnimationName, animationSpeed } = Connection.getReduxState();
+  const { isAnimationPaused } = ModalConnection.getReduxState();
+  const [index, setIndex] = useState(0);
+  const [stopTimer, setStopTimer] = useState(false);
 
-    const [connectorType, setConnectorType] = useState<ConnectorPanelType>("fromConnector");
-    const [showLinkInBody, setShowLinkInBody] = useState(true);
+  const [connectorType, setConnectorType] = useState<ConnectorPanelType>("fromConnector");
+  const [showLinkInBody, setShowLinkInBody] = useState(true);
 
-    const ref = React.useRef(null);
-    const duration = 1000;
+  const ref = React.useRef(null);
 
+  const reference: any = React.useRef();
+  reference.current = animationSpeed;
+
+  function delay(ms: number) {
+    return new Promise((resolve, reject) => {
+      if (!stopTimer) {
+        setTimeout(resolve, ms);
+      } else {
+        reject();
+      }
+    });
+  }
+
+  const setSvgViewBox = (elementId: string, currentSvgElementId: string) => {
+    const svgElement = document.getElementById(elementId);
+    const viewBoxValue = svgElement.getAttribute('viewBox');
+    const fromConnectorPanel = svgElement.querySelector('#fromConnector_panel_modal');
+    const toConnectorPanel = svgElement.querySelector('#toConnector_panel_modal');
+
+    const currentElement = svgElement.querySelector(`#${currentSvgElementId}`);
+
+
+    // const fromConnectorHeight = fromConnectorPanel.getBoundingClientRect().height;
+    // const toConnectorHeight = toConnectorPanel.getBoundingClientRect().height;
+
+    const fromConnectorWidth = fromConnectorPanel.getBoundingClientRect().width;
+    const toConnectorWidth = toConnectorPanel.getBoundingClientRect().width;
+
+    const [x, y, width, height] = viewBoxValue.split(' ').map(parseFloat);
+
+    let offsetX; 
+    // let offsetY = fromConnectorHeight > height / 2 || toConnectorHeight > height / 2 ? y + 80 : y
+    // @ts-ignore
+    let offsetY = currentElement.y.animVal.value / 2 - 50
+
+    if(connectorType === 'fromConnector'){
+      offsetX = fromConnectorWidth > 350 ? fromConnectorWidth / 4 : x
+    }
+    if(connectorType === 'toConnector'){
+      offsetX = toConnectorWidth > 350 ? toConnectorWidth / 2 + fromConnectorWidth : fromConnectorWidth;
+    }
+
+    const viewBox = {x: offsetX, y: offsetY, width: width, height: height};
+
+    CSvg.setViewBox(elementId, viewBox)
+  }
+
+  const addOutlineById = async (idsArray: any, withDelay = false) => {
+    positionElementOver(idsArray, 10);
     
-
-    function delay(ms: number) {
-      return new Promise((resolve, reject) => {
-        if (!stopTimer) {
-          setTimeout(resolve, ms);
-        } else {
-          reject();
-        }
-      });
+    if(withDelay){
+      return delay(reference.current)
     }
+  }
 
-    const setSvgViewBox = (elementId: string, currentSvgElementId: string) => {
-      const svgElement = document.getElementById(elementId);
-      const viewBoxValue = svgElement.getAttribute('viewBox');
-      const fromConnectorPanel = svgElement.querySelector('#fromConnector_panel_modal');
-      const toConnectorPanel = svgElement.querySelector('#toConnector_panel_modal');
-
-      const currentElement = svgElement.querySelector(`#${currentSvgElementId}`);
-
-
-      // const fromConnectorHeight = fromConnectorPanel.getBoundingClientRect().height;
-      // const toConnectorHeight = toConnectorPanel.getBoundingClientRect().height;
-
-      const fromConnectorWidth = fromConnectorPanel.getBoundingClientRect().width;
-      const toConnectorWidth = toConnectorPanel.getBoundingClientRect().width;
-
-      const [x, y, width, height] = viewBoxValue.split(' ').map(parseFloat);
-
-      let offsetX; 
-      // let offsetY = fromConnectorHeight > height / 2 || toConnectorHeight > height / 2 ? y + 80 : y
-      // @ts-ignore
-      let offsetY = currentElement.y.animVal.value / 2 - 50
-
-      if(connectorType === 'fromConnector'){
-        offsetX = fromConnectorWidth > 350 ? fromConnectorWidth / 4 : x
-      }
-      if(connectorType === 'toConnector'){
-        offsetX = toConnectorWidth > 350 ? toConnectorWidth / 2 + fromConnectorWidth : fromConnectorWidth;
-      }
-
-      const viewBox = {x: offsetX, y: offsetY, width: width, height: height};
-
-      CSvg.setViewBox(elementId, viewBox)
+  const removeOutlineById = async (idsArray: any, withDelay = false) => {
+    positionElementOver(idsArray, 10, true);
+    if(withDelay){
+      return delay(reference.current)
     }
+  }
 
-    const ifDetails = () => {
-      // setIndex(index + 1); return;
-      const refs: any = {};
-      refs.detailsRef = ref.current.detailsRef.current;
+  const addOutlineByClassName = async (classNamesArray: any, withDelay = false) => {
+    positionElementOverByClassName(classNamesArray, 10);
+    if(withDelay){
+      return delay(reference.current)
+    }
+  }
 
-      // @ts-ignore
-      const condition = animationData[videoAnimationName][connectorType][index].conditionForIf;
+  const removeOutlineByClassName = async (classNamesArray: any, withDelay = false) => {
+    positionElementOverByClassName(classNamesArray, 10, true);
+    if(withDelay){
+      return delay(reference.current)
+    }
+  }
 
-      if(condition){
-        delay(duration)
-        .then(() => {
-          refs.conditionRef = refs.detailsRef.descriptionRef.current.conditionRef.current;
-          refs.conditionRef.toggleEdit();
+  // for show if operator details
+  const openIfConditionDialog = async (ref: any) => {
+    const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
+    conditionRef.toggleEdit();
 
-          return delay(duration)
-        })
-        .then(() => {
-          refs.leftStatementRef = refs.conditionRef.leftStatementRef.current;
-          refs.rightStatementRef = refs.conditionRef.rightStatementRef.current;
-          
-          const connectionMethods = ref.current.props.connection[condition.leftStatement.fromConnector].methods;
+    return delay(reference.current);
+  }
 
-          let method;
-          for(let i = 0; i < connectionMethods.length; i++) {
-            if(connectionMethods[i].index === condition.leftStatement.leftMethodIndex){
-              method = connectionMethods[i];
-              break;
-            }
-          }
+  const changeLeftMethodForIf = async (ref: any, condition: any) => {
+    const leftStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current;
+    const connectionMethods = ref.current.props.connection[condition.leftStatement.fromConnector].methods;
 
-          refs.leftStatementRef.updateMethod(method);
-
-          return delay(duration)
-        })
-        .then(() => {
-          setFocusById(refs.leftStatementRef.paramInputRef.current.props.id);
-
-          return delay(duration)
-        })
-        .then(() => {
-          refs.leftStatementRef.updateParam(condition.leftStatement.leftParam);
-          refs.leftParamInput = document.getElementById(refs.leftStatementRef.paramInputRef.current.props.id);
-
-          return delay(duration)
-        })
-        .then(() => {
-          refs.leftParamInput.blur();
-          refs.conditionRef.updateRelationalOperator({ value: condition.relationalOperator});
-          return delay(duration)
-        })
-        .then(() => {
-          if(condition.rightStatement.property){
-            setFocusById(`if_operator_property_${refs.rightStatementRef.props.operator.index}`);
-
-            return delay(duration)
-          }
-        })
-        .then(() => {
-          if(condition.rightStatement.property){
-            refs.rightStatementRef.updateProperty(condition.rightStatement.property);
-            refs.propertyInput = document.getElementById(`if_operator_property_${refs.rightStatementRef.props.operator.index}`);
-
-            return delay(duration)
-          }
-        })
-        .then(() => {
-          if(condition.rightStatement.property){
-            refs.propertyInput.blur();
-
-            return delay(duration)
-          }
-        })
-        .then(() => {
-          if(condition.rightStatement.rightMethodIndex){
-            const connectionMethods = ref.current.props.connection[condition.rightStatement.fromConnector].methods;
-
-            let method;
-            for(let i = 0; i < connectionMethods.length; i++) {
-              if(connectionMethods[i].index === condition.rightStatement.rightMethodIndex){
-                method = connectionMethods[i];
-                break;
-              }
-            }
-            refs.rightStatementRef.updateMethod(method);
-
-            return delay(duration)
-          }
-        })
-        .then(() => {
-          if(condition.rightStatement.rightParam){
-            setFocusById(refs.rightStatementRef.paramInputRef.current.props.id);
-
-            return delay(duration)
-          }
-        })
-        .then(() => {
-          if(condition.rightStatement.rightParam){
-            refs.rightStatementRef.updateParam(condition.rightStatement.rightParam);
-            refs.rightParamInput = document.getElementById(refs.rightStatementRef.paramInputRef.current.props.id)
-
-            return delay(duration)
-          }
-        })
-        .then(() => {
-          if(condition.rightStatement.rightParam){
-            refs.rightParamInput.blur();
-
-            return delay(duration)
-          }
-        })
-        .then(() => {
-          refs.conditionRef.updateConnection();
-          // refs.conditionRef.toggleEdit();
-          setIndex(index + 1);
-        })
-        .catch(() => {})
-      }
-      else{
-        setIndex(index + 1);
+    let leftMethod;
+    for(let i = 0; i < connectionMethods.length; i++) {
+      if(connectionMethods[i].index === condition.leftStatement.leftMethodIndex){
+        leftMethod = connectionMethods[i];
+        break;
       }
     }
+    leftStatementRef.updateMethod(leftMethod);
 
-    const loopDetails = () =>{
-      const refs: any = {};
-      refs.detailsRef = ref.current.detailsRef.current;
+    return delay(reference.current);
+  }
 
-      // @ts-ignore
-      const condition = animationData[videoAnimationName][connectorType][index].conditionForLoop;
-      
-      if(condition){
-        delay(duration)
-        .then(() => {
-          refs.conditionRef = refs.detailsRef.descriptionRef.current.conditionRef.current;
-          refs.conditionRef.toggleEdit();
-
-          return delay(duration)
-        })
-        .then(() => {
-          refs.leftStatementRef = refs.conditionRef.leftStatementRef.current;
-          refs.rightStatementRef = refs.conditionRef.rightStatementRef.current;
-
-          const connectionMethods = ref.current.props.connection[condition.leftStatement.fromConnector].methods;
-
-          let method;
-          for(let i = 0; i < connectionMethods.length; i++) {
-            if(connectionMethods[i].index === condition.leftStatement.leftMethodIndex){
-              method = connectionMethods[i];
-              break;
-            }
-          }
-
-          refs.leftStatementRef.updateMethod(method);
-
-          return delay(duration)
-        })
-        .then(() => {
-          setFocusById(refs.leftStatementRef.paramInputRef.current.props.id);
-
-          return delay(duration)
-        })
-        .then(() => {
-          refs.leftStatementRef.updateParam(condition.leftStatement.leftParam);
-          refs.leftParamInput = document.getElementById(refs.leftStatementRef.paramInputRef.current.props.id);
-
-          return delay(duration)
-        })
-        .then(() => {
-          refs.leftParamInput.blur();
-          refs.conditionRef.updateRelationalOperator({ value: condition.relationalOperator});
-
-          return delay(duration)
-        })
-        .then(() => {
-
-          const connectionMethods = ref.current.props.connection[condition.rightStatement.fromConnector].methods;
-
-          let method;
-          for(let i = 0; i < connectionMethods.length; i++) {
-            if(connectionMethods[i].index === condition.rightStatement.rightMethodIndex){
-              method = connectionMethods[i];
-              break;
-            }
-          }
-
-          refs.rightStatementRef.updateMethod(method);
-
-          return delay(duration)
-        })
-        .then(() => {
-          refs.rightStatementRef.updateParam(condition.rightStatement.rightParam);
-
-          return delay(duration)
-        })
-        .then(() => {
-          refs.conditionRef.updateConnection();
-          setIndex(index + 1);
-        })
-        .catch(() => {})
-      }
-      else{
-        setIndex(index + 1);
-      }
-    }
-
-    const methodDetails = () => {
-
-      // setIndex(index + 1); return;
-
-      const refs: any = {};
-
-      refs.animationData = animationData[videoAnimationName][connectorType][index];
-      refs.endpointData = refs.animationData.endpoint;
-      refs.currentElementId = refs.animationData.index;
-
-      delay(duration)
-      .then(() => {
-        if(refs.animationData.label){
-          refs.labelRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.labelRef.current;
-          refs.labelRef.toggleEdit();
-          positionElementOver(["Label", "Label_option"], 10);
-  
-          return delay(duration)
-        }
-      })
-      .then(() => {
-        if(refs.animationData.label){
-          positionElementOver(["Label", "Label_option"], 10, true);
-          refs.labelRef.cancelEdit();
-
-          return delay(duration)
-        }
-      })
-      .then(() => {
-        if(refs.endpointData){
-          refs.urlRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current;
-          refs.urlRef.toggleUrlVisibleIcon();
-          positionElementOver(["url_label", "url_option"], 10);
-          
-          return delay(duration)
-        }
-      })
-      .then(() => {
-        if(refs.endpointData){
-          positionElementOver([`param_generator_select_${connectorType}_${refs.currentElementId}`], 10);
-          return delay(duration)
-        }
-      })
-      .then(() => {
-        if(refs.endpointData){
-          refs.endpointRef = refs.urlRef.endpointRef.current;
-          refs.paramGeneratorRef = refs.endpointRef.paramGeneratorRef.current;
-
-          const connectionMethods = ref.current.props.connection[refs.endpointData.connectorType].methods;
-
-          let method;
-          for(let i = 0; i < connectionMethods.length; i++) {
-            if(connectionMethods[i].index === refs.endpointData.index){
-              method = connectionMethods[i];
-              break;
-            }
-          }
-
-          refs.paramGeneratorRef.updateColor(method)
-
-          positionElementOver([`param_generator_select_${connectorType}_${refs.currentElementId}`], 10);
-          
-          return delay(duration)
-        }
-
-      })
-      .then(() => {
-        if(refs.endpointData){
-          positionElementOver([`input_no_id`], 10)
-          return delay(duration)
-        }
-      })
-      .then(() => {
-        if(refs.endpointData){
-          refs.paramGeneratorRef.onChangeField(refs.endpointData.param)
-          return delay(duration)
-        }
-      })
-      .then(() => {
-        if(refs.endpointData){
-          positionElementOver([`param_generator_add_${connectorType}_${refs.currentElementId}`], 10)
-          return delay(duration);
-        }
-      })
-      .then(() => {
-        if(refs.endpointData){
-          refs.paramGeneratorRef.addParam()
-          positionElementOver([`param_generator_add_${connectorType}_${refs.currentElementId}`], 10, true)
-          return delay(duration);
-        }
-      })
-      .then(() => {
-        if(refs.endpointData){
-          refs.urlRef.toggleUrlVisibleIcon();
-  
-          return delay(duration)
-        }
-      })
-      .then(() => {
-        if(connectorType === 'fromConnector' && index === 0){
-          positionElementOver(["header_label", "header_option"], 10);
-          refs.headerRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.headerRef.current;
-          refs.headerRef.toggleHeaderVisible();
-          return delay(duration)
-        }
-      })
-      .then(() => {
-        if(connectorType === 'fromConnector' && index === 0){
-          positionElementOver(["header_label", "header_option"], 10, true);
-          refs.headerRef.toggleHeaderVisible();
-
-          return delay(duration)
-        }
-      })
-      .then(async () => {
-        const bodyData = refs.animationData.body;
-
-        if(bodyData){
-          refs.bodyRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current;
-          positionElementOver(["body_label", "body_option"], 10);
-          
-          await delay(duration)
-          positionElementOver(["body_label", "body_option"], 10, true);
-          refs.bodyRef.toggleBodyVisible();
-      
-          await delay(duration);
-          positionElementOverByClassName(['.react-json-view .icon-container'], 10)
-      
-          await delay(duration);
-          refs.collapse = document.querySelector('.react-json-view .collapsed-icon');
-          refs.collapse.click()
-      
-          for(let i = 0; i < bodyData.length; i++){
-            await delay(duration)
-            let addButton = document.querySelector('.react-json-view .click-to-add');
-            // @ts-ignore
-            addButton.style.display = 'inline-block';
-            positionElementOverByClassName(['.react-json-view .click-to-add'], 10)
-        
-            await delay(duration)
-            refs.add = document.querySelector('.react-json-view .click-to-add-icon');
-            refs.add.click()
-          
-            await delay(duration)
-            positionElementOverByClassName(['.react-json-view .key-modal-input'], 10)
-          
-            await delay(duration)
-            refs.input = document.querySelector('.react-json-view .key-modal-input')
-            refs.nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-            refs.nativeInputValueSetter.call(refs.input, bodyData[i].keyName);
-            refs.inputEvent = new Event('input', { bubbles: true});
-            refs.input.dispatchEvent(refs.inputEvent);
-            
-            await delay(duration)
-            let submitButton = document.querySelector('.react-json-view .key-modal-submit');
-            // @ts-ignore
-            submitButton.style = 'position: absolute; width: 1em; height: 1em; right: 0;';
-            positionElementOverByClassName(['.react-json-view .key-modal-submit'], 10)
-        
-            await delay(duration)
-            positionElementOverByClassName(['.react-json-view .key-modal-submit'], 10, true)
-            refs.submit = document.querySelector('.react-json-view .key-modal-submit');
-            refs.submit.click()
-        
-            await delay(duration)
-            refs.editButton = document.querySelectorAll('.react-json-view .click-to-edit');
-            // @ts-ignore
-            refs.editButton[i].style.display = 'inline-block';
-            positionElementOverByClassName(['.react-json-view .click-to-edit'], 10)
-        
-            await delay(duration)
-            positionElementOverByClassName(['.react-json-view .click-to-edit'], 10, true)
-            refs.edit = document.querySelectorAll('.react-json-view .click-to-edit-icon');
-            refs.edit[i].click()
-        
-            await delay(duration)
-            positionElementOverByClassName(['.react-json-view .variable-editor'], 10)
-          
-            await delay(duration)
-            positionElementOverByClassName(['.react-json-view .variable-editor'], 10, true)
-            refs.textarea = document.querySelector('.react-json-view .variable-editor');
-            refs.nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-            refs.nativeTextAreaValueSetter.call(refs.textarea, bodyData[i].keyValue);
-            refs.textarea.dispatchEvent(refs.inputEvent);
-            
-            if(bodyData[i].keyValue === '#'){
-              
-              for(let referenceCount = 0; referenceCount < bodyData[i].reference.length; referenceCount++) {
-                for(let methodCount = 0; methodCount < bodyData[i].reference[referenceCount].method.length; methodCount++){
-                  if(methodCount > 0){
-                    await delay(duration)
-                    refs.editButton = document.querySelectorAll('.react-json-view .click-to-edit');
-                    // @ts-ignore
-                    refs.editButton[i].style.display = 'inline-block';
-                    positionElementOverByClassName(['.react-json-view .click-to-edit'], 10)
-                
-                    await delay(duration)
-                    positionElementOverByClassName(['.react-json-view .click-to-edit'], 10, true)
-                    refs.edit = document.querySelectorAll('.react-json-view .click-to-edit-icon');
-                    refs.edit[i].click()
-                  }
-                  
-                  
-                  await delay(duration)
-                  refs.currentItemId = ref.current.props.currentTechnicalItem.id;
-                  positionElementOver([`param_generator_select_${refs.currentItemId}`], 10);
-  
-                  await delay(duration)
-                  const connectionMethods = ref.current.props.connection[bodyData[i].reference[referenceCount].method[methodCount].fromConnector].methods;
-                  
-                  let method;
-  
-                  connectionMethods.forEach((element: any) => {
-                    if(element.index === bodyData[i].reference[referenceCount].method[methodCount].index){
-                      method = element;
-                      return;
-                    }
-                  });
-                  
-                  refs.bodyRef.JsonBodyRef.current.props.ReferenceComponent.self.current.updateColor(method)
-                  
-                  await delay(duration)
-                  positionElementOver([`input_no_id`], 10)
-                  
-                  await delay(duration)
-                  refs.bodyRef.JsonBodyRef.current.props.ReferenceComponent.self.current.onChangeField(bodyData[i].reference[referenceCount].method[methodCount].param)
-                  
-                  await delay(duration)
-                  positionElementOver([`param_generator_add_${refs.currentItemId}`], 10)
-                  
-                  await delay(duration)
-                  positionElementOver([`param_generator_add_${refs.currentItemId}`], 10, true)
-                  refs.bodyRef.JsonBodyRef.current.props.ReferenceComponent.self.current.submitEdit()
-                }
-  
-                if(connectorType === 'toConnector' && bodyData[i].reference[referenceCount].enhancementDescription){
-                  await delay(duration);
-                  const referenceElement = document.querySelectorAll('.reference_element');
-                  referenceElement[i].classList.add(`reference_element_${i}`);
-                  positionElementOverByClassName([`.reference_element_${i}`], 10);
-                  
-                  
-                  await delay(duration);
-                  positionElementOverByClassName([`.reference_element_${i}`], 10, true);
-                  // @ts-ignore
-                  referenceElement[i].click();
+  const setFocusOnLeftParamForIf = async (ref: any) => {
+    const leftParamInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current.paramInputRef.current.props.id;
+    setFocusById(leftParamInputId);
     
-                  await delay(duration)
-                  positionElementOver(['enhancement_description'], 10);
+    return delay(reference.current)
+  }
 
-                  await delay(duration)
-                  refs.textarea = document.querySelector('#enhancement_description');
-                  refs.nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-                  refs.nativeTextAreaValueSetter.call(refs.textarea, bodyData[i].reference[referenceCount].enhancementDescription);
-                  refs.textarea.dispatchEvent(refs.inputEvent);
-                  
-                  await delay(duration);
-                  positionElementOver(['enhancement_description'], 10, true);
-                  positionElementOverByClassName(['.ace_content'], 10);
+  const changeLeftParamForIf = async (ref: any, condition: any) => {
+    const leftStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current;
 
-                  await delay(duration);
-                  refs.bodyRef.enhancementRef.current.props.onChange(bodyData[i].reference[referenceCount].enhancementContent);
+    const leftParamInputId = leftStatementRef.paramInputRef.current.props.id
+    
+    leftStatementRef.updateParam(condition.leftStatement.leftParam);
 
-                  await delay(duration);
-                  positionElementOverByClassName(['.ace_content'], 10, true);
-                }
-              }
-            }
-            else{
-              await delay(duration);
-              positionElementOverByClassName(['.react-json-view .edit-check'], 10);
+    const leftParamInput = document.getElementById(leftParamInputId);
+    leftParamInput.blur();
+    return delay(reference.current);
+  }
 
-              await delay(duration);
-              positionElementOverByClassName(['.react-json-view .edit-check'], 10, true);
-              refs.editSubmit = document.querySelector('.react-json-view .edit-check');
+  const changeRelationalOperaotorForIf = async (ref: any, condition: any) => {
+    const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
+    conditionRef.updateRelationalOperator({ value: condition.relationalOperator});
+
+    return delay(reference.current)
+  }
+
+  const setFocusOnRightPropertyForIf = async (ref: any) => {
+    const rightProperyInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.props.operator.index;
+    setFocusById(`if_operator_property_${rightProperyInputId}`);
+    return delay(reference.current)
+  }
+
+  const changeRightPropertyForIf = async (ref: any, condition: any) => {
+    const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
+    rightStatementRef.updateProperty(condition.rightStatement.property);
+    return delay(reference.current)
+  }
+
+  const removeFocusFromRightPropertyForIf = async (ref: any) => {
+    const rightProperyInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.props.operator.index;
+    const propertyInput = document.getElementById(`if_operator_property_${rightProperyInputId}`);
+    propertyInput.blur();
+
+    return delay(reference.current)
+  }
+
+  const changeRightMethodForIf = async (ref: any, condition: any) => {
+    const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
+    const connectionMethods = ref.current.props.connection[condition.rightStatement.fromConnector].methods;
+
+    let rightMethod;
+    connectionMethods.forEach((element: any) => {
+      if(element.index === condition.rightStatement.rightMethodIndex){
+        rightMethod = element;
+        return;
+      }
+    })
+
+    rightStatementRef.updateMethod(rightMethod);
+
+    return delay(reference.current)
+  }
+
+  const setFocusOnRightParamForIf = async (ref: any) => {
+    const rightParamInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.paramInputRef.current.props.id;
+    setFocusById(rightParamInputId);
+    return delay(reference.current)
+  }
+
+  const changeRightParamForIf = async (ref: any, condition: any) => {
+    const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
+    rightStatementRef.updateParam(condition.rightStatement.rightParam);
+    return delay(reference.current);
+  }
+
+  const removeFocusFromRightParamForIf = async (ref: any) => {
+    const rightParamInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.paramInputRef.current.props.id;
+    const rightParamInput = document.getElementById(rightParamInputId);
+    rightParamInput.blur();
+    return delay(reference.current)
+  }
+
+  const showDetailsForOperatorIf = async () => {
+    // @ts-ignore
+    const condition = animationData[videoAnimationName][connectorType][index].conditionForIf;
+
+    if(condition){
+      const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
+
+      await openIfConditionDialog(ref);
       
-              refs.editSubmit.click();
-            }
+      await changeLeftMethodForIf(ref, condition);
+      
+      await setFocusOnLeftParamForIf(ref);
+
+      await changeLeftParamForIf(ref, condition);
+      
+      await changeRelationalOperaotorForIf(ref, condition);
+
+      if(condition.rightStatement.property){
+        await setFocusOnRightPropertyForIf(ref);
+        
+        await changeRightPropertyForIf(ref, condition);
+
+        await removeFocusFromRightPropertyForIf(ref); 
+      }
+      
+      if(condition.rightStatement.rightMethodIndex){
+        await changeRightMethodForIf(ref, condition)
+      }
+      
+      if(condition.rightStatement.rightParam){
+        await setFocusOnRightParamForIf(ref);
+        
+        await changeRightParamForIf(ref, condition);
+
+        await removeFocusFromRightParamForIf(ref);
+      }
+      
+      conditionRef.updateConnection();
+      setIndex(index + 1);
+    }
+    else{
+      setIndex(index + 1);
+    }
+  }
+
+  // for show loop operator details
+  const openLoopConditionDialog = async (ref: any) => {
+    const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
+    conditionRef.toggleEdit();
+
+    return delay(reference.current);
+  }
+
+  const changeLeftMethodForLoop = async (ref: any, condition: any) => {
+    const leftStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current;
+    const connectionMethods = ref.current.props.connection[condition.leftStatement.fromConnector].methods;
+
+    let leftMethod;
+    connectionMethods.forEach((element: any) => {
+      if(element.index === condition.leftStatement.leftMethodIndex){
+        leftMethod = element;
+        return;
+      }
+    });
+
+    leftStatementRef.updateMethod(leftMethod);
+
+    return delay(reference.current);
+  }
+
+  const setFocusOnLeftParamForLoop = async (ref: any) => {
+    const leftParamInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current.paramInputRef.current.props.id;
+    setFocusById(leftParamInputId);
+    
+    return delay(reference.current)
+  }
+
+  const changeLeftParamForLoop = async (ref: any, condition: any) => {
+    const leftStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current;
+
+    const leftParamInputId = leftStatementRef.paramInputRef.current.props.id
+    
+    leftStatementRef.updateParam(condition.leftStatement.leftParam);
+
+    const leftParamInput = document.getElementById(leftParamInputId);
+    leftParamInput.blur();
+    return delay(reference.current);
+  }
+
+  const changeRelationalOperaotorForLoop = async (ref: any, condition: any) => {
+    const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
+    conditionRef.updateRelationalOperator({ value: condition.relationalOperator});
+
+    return delay(reference.current)
+  }
+
+  const changeRightMethodForLoop = async (ref: any, condition: any) => {
+    const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
+    const connectionMethods = ref.current.props.connection[condition.rightStatement.fromConnector].methods;
+
+    let rightMethod;
+    connectionMethods.forEach((element: any) => {
+      if(element.index === condition.rightStatement.rightMethodIndex){
+        rightMethod = element;
+        return;
+      }
+    })
+
+    rightStatementRef.updateMethod(rightMethod);
+
+    return delay(reference.current)
+  }
+
+  const changeRightParamForLoop = async (ref: any, condition: any) => {
+    const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
+    rightStatementRef.updateParam(condition.rightStatement.rightParam);
+    return delay(reference.current);
+  }
+
+  const showDetailsForOperatorLoop = async () => {
+    // @ts-ignore
+    const condition = animationData[videoAnimationName][connectorType][index].conditionForLoop;
+    
+    if(condition){
+      const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
+      // await openLoopConditionDialog(ref);
+      await DetailsForOperators.openConditionDialog(ref, reference.current);
+
+      // await changeLeftMethodForLoop(ref, condition);
+      await DetailsForOperators.changeLeftMethod(ref, condition, reference.current);
+    
+      // await setFocusOnLeftParamForLoop(ref);
+      await DetailsForOperators.setFocusOnLeftParam(ref, reference.current);
+
+      // await changeLeftParamForLoop(ref, condition);
+      await DetailsForOperators.changeLeftParam(ref, condition, reference.current);
+
+      // await changeRelationalOperaotorForLoop(ref, condition);
+      await DetailsForOperators.changeRelationalOperator(ref, condition, reference.current);
+
+      // await changeRightMethodForLoop(ref, condition);
+      await DetailsForOperators.changeRightMethodForLoop(ref, condition, reference.current);
+      
+      // await changeRightParamForLoop(ref, condition);
+      await DetailsForOperators.changeRightParamForLoop(ref, condition, reference.current);
+    
+      conditionRef.updateConnection();
+      setIndex(index + 1);
+    }
+    else{
+      setIndex(index + 1);
+    }
+  }
+
+  // for show process details
+  const startEditLabel = async (label: any) => {
+    addOutlineById(["Label", "Label_option"]);
+    label.toggleEdit();
+
+    return delay(reference.current)
+  }
+
+  const endEditLabel = async (label: any) => {
+    removeOutlineById(["Label", "Label_option"]);
+    label.cancelEdit();
+
+    return delay(reference.current)
+  }
+
+  const openUrlDialog = async (url: any) => {
+    url.toggleUrlVisibleIcon();
+    addOutlineById(["url_label", "url_option"]);
+      
+    return delay(reference.current)
+  }
+
+  const changeUrlMethod = async (refs: any) => {
+    await addOutlineById([`param_generator_select_${connectorType}_${refs.currentElementId}`], true);
+
+    const connectionMethods = ref.current.props.connection[refs.endpointData.connectorType].methods;
+
+    let method;
+
+    connectionMethods.forEach((element: any) => {
+      if(element.index === refs.endpointData.index){
+        method = element;
+        return;
+      }
+    })
+
+    refs.paramGeneratorRef.updateColor(method)
+
+    addOutlineById([`param_generator_select_${connectorType}_${refs.currentElementId}`]);
+
+    return delay(reference.current)
+  }
+
+  const changeUrlParam = async (refs: any) => {
+    await addOutlineById([`input_no_id`]);
+    refs.paramGeneratorRef.onChangeField(refs.endpointData.param);
+    return delay(reference.current)
+  }
+
+  const addUrlParam = async (refs: any) => {
+    await addOutlineById([`param_generator_add_${connectorType}_${refs.currentElementId}`])
+
+    refs.paramGeneratorRef.addParam()
+    removeOutlineById([`param_generator_add_${connectorType}_${refs.currentElementId}`]);
+    return delay(reference.current)
+  }
+
+  const closeUrlDialog = async (refs: any) => {
+    refs.urlRef.toggleUrlVisibleIcon();
+    return delay(reference.current)
+  }
+
+  const openHeaderDialog = async (refs: any) => {
+    addOutlineById(["header_label", "header_option"]);
+    refs.headerRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.headerRef.current;
+    refs.headerRef.toggleHeaderVisible();
+    return delay(reference.current);
+  }
+
+  const closeHeaderDialog = async (refs: any) => {
+      removeOutlineById(["header_label", "header_option"]);
+      refs.headerRef.toggleHeaderVisible();
+
+      return delay(reference.current)
+  }
+
+  const openBodyDialog = async (refs: any) => {
+    await addOutlineById(["body_label", "body_option"], true);
+
+    removeOutlineById(["body_label", "body_option"]);
+    refs.bodyRef.toggleBodyVisible();
+  
+    return delay(reference.current);
+  }
+
+  const openBodyObject = async (refs: any) => {
+    await addOutlineByClassName(['.react-json-view .icon-container'], true);
+
+    refs.collapse = document.querySelector('.react-json-view .collapsed-icon');
+    refs.collapse.click()
+
+    return delay(reference.current);
+  }
+
+  const displayBodyAddKeysButton = async () => {
+    let addButton = document.querySelector('.react-json-view .click-to-add');
+    // @ts-ignore
+    addButton.style.display = 'inline-block';
+    addOutlineByClassName(['.react-json-view .click-to-add'])
+    return delay(reference.current);
+  }
+
+  const clickAddKeysButton = async () => {
+    const addButton = document.querySelector('.react-json-view .click-to-add-icon');
+    // @ts-ignore
+    addButton.click()
+      
+    return delay(reference.current)
+  }
+
+  const addBodyKeyName = async (keyName: any) => {
+    await addOutlineByClassName(['.react-json-view .key-modal-input'], true);
+
+    const input = document.querySelector('.react-json-view .key-modal-input')
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    nativeInputValueSetter.call(input, keyName);
+    const inputEvent = new Event('input', { bubbles: true});
+    input.dispatchEvent(inputEvent);
+        
+    return delay(reference.current)
+  }
+
+  const displaySubmitButtonToAddKey = async () => {
+    const submitButton = document.querySelector('.react-json-view .key-modal-submit');
+    // @ts-ignore
+    submitButton.style = 'position: absolute; width: 1em; height: 1em; right: 0;';
+    addOutlineByClassName(['.react-json-view .key-modal-submit']);
+    
+    return delay(reference.current)
+  }
+
+  const clickSubmitButtonToAddKey = async () => {
+    removeOutlineByClassName(['.react-json-view .key-modal-submit']);
+    const submitButton = document.querySelector('.react-json-view .key-modal-submit');
+    // @ts-ignore
+    submitButton.click()
+    
+    return delay(reference.current)
+  }
+
+  const displayEditKeyValueButton = async (index: any) => {
+    const editButton = document.querySelectorAll('.react-json-view .click-to-edit');
+    // @ts-ignore
+    editButton[index].style.display = 'inline-block';
+    addOutlineByClassName(['.react-json-view .click-to-edit'])
+
+    return delay(reference.current)
+  }
+
+  const clickEditKeyValueButton = async (index: any) => {
+    removeOutlineByClassName(['.react-json-view .click-to-edit']);
+    const edit = document.querySelectorAll('.react-json-view .click-to-edit-icon');
+    // @ts-ignore
+    edit[index].click();
+
+    return delay(reference.current);
+  }
+
+  const addBodyKeyValue = async (keyValue: any) => {
+    await addOutlineByClassName(['.react-json-view .variable-editor'], true);
+        
+    removeOutlineByClassName(['.react-json-view .variable-editor'])
+    const textarea = document.querySelector('.react-json-view .variable-editor');
+    const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+    nativeTextAreaValueSetter.call(textarea, keyValue);
+    const inputEvent = new Event('input', { bubbles: true});
+    textarea.dispatchEvent(inputEvent);
+
+    return delay(reference.current);
+  }
+
+  const changeBodyMethod = async (refs: any, bodyData: any, bodyDataIndex: any, referenceIndex: any, methodIndex: any) => {
+
+    const currentItemId = ref.current.props.currentTechnicalItem.id;
+    await addOutlineById([`param_generator_select_${currentItemId}`], true);
+
+    const connectionMethods = ref.current.props.connection[bodyData[bodyDataIndex].reference[referenceIndex].method[methodIndex].fromConnector].methods;
+    
+    let method;
+
+    connectionMethods.forEach((element: any) => {
+      if(element.index === bodyData[bodyDataIndex].reference[referenceIndex].method[methodIndex].index){
+        method = element;
+        return;
+      }
+    });
+    
+    refs.bodyRef.JsonBodyRef.current.props.ReferenceComponent.self.current.updateColor(method);
+
+    return delay(reference.current)
+  }
+
+  const changeBodyParam = async (refs: any, bodyData: any, bodyIndex: number, referenceIndex: number, methodIndex: number) => {
+    await addOutlineById([`input_no_id`], true)
+
+    refs.bodyRef.JsonBodyRef.current.props.ReferenceComponent.self.current.onChangeField(bodyData[bodyIndex].reference[referenceIndex].method[methodIndex].param)
+
+    return delay(reference.current)
+  }
+
+  const addBodyMethodAndParam = async (refs: any) => {
+    const currentItemId = ref.current.props.currentTechnicalItem.id;
+    await addOutlineById([`param_generator_add_${currentItemId}`])
+
+    removeOutlineById([`param_generator_add_${currentItemId}`])
+    refs.bodyRef.JsonBodyRef.current.props.ReferenceComponent.self.current.submitEdit()
+    return delay(reference.current)
+  }
+
+  const clickOnReferenceElements = async (bodyIndex: number) => {
+    const referenceElement = document.querySelectorAll('.reference_element');
+    referenceElement[bodyIndex].classList.add(`reference_element_${bodyIndex}`);
+    await addOutlineByClassName([`.reference_element_${bodyIndex}`], true);
+
+    removeOutlineByClassName([`.reference_element_${bodyIndex}`]);
+
+    // @ts-ignore
+    referenceElement[bodyIndex].click();
+
+    return delay(reference.current);
+  }
+
+  const changeReferenceDescription = async (bodyData: any, bodyIndex: number, referenceIndex: number) => {
+    await addOutlineById(['enhancement_description'], true);
+
+    const textarea = document.querySelector('#enhancement_description');
+    const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+    nativeTextAreaValueSetter.call(textarea, bodyData[bodyIndex].reference[referenceIndex].enhancementDescription);
+    const inputEvent = new Event('input', { bubbles: true});
+    textarea.dispatchEvent(inputEvent);
+
+    return delay(reference.current)
+  }
+
+  const changeReferenceContent = async (refs: any, bodyData: any, bodyDataIndex: number, referenceIndex: number) => {
+    await removeOutlineById(['enhancement_description']);
+    await addOutlineByClassName(['.ace_content'], true);
+
+    refs.bodyRef.enhancementRef.current.props.onChange(bodyData[bodyDataIndex].reference[referenceIndex].enhancementContent);
+
+    await removeOutlineByClassName(['.ace_content']);
+
+    return delay(reference.current);
+  }
+
+  const clickSubmitButtonToAddValue = async () => {
+    await addOutlineByClassName(['.react-json-view .edit-check']);
+
+    await removeOutlineByClassName(['.react-json-view .edit-check'], true);
+    const editSubmitButton = document.querySelector('.react-json-view .edit-check');
+    // @ts-ignore
+    editSubmitButton.click();
+
+    return delay(reference.current);
+  }
+
+  const closeBodyDialog = async (refs: any) => {
+    refs.bodyRef.toggleBodyVisible();
+
+    return delay(reference.current);
+  }
+
+  const showResponse = async () => {
+    await addOutlineById(["response_label"], true);
+    
+    ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.toggleResponseVisibleIcon();
+    await removeOutlineById(["response_label"], true);
+
+    return delay(reference.current);
+  }
+
+  const deleteLastProcess = async () => {
+    const processRef = ref.current.technicalLayoutRef.current.svgRef.current.processRef.current;
+    await addOutlineById(['delete_icon'], true);
+
+    await removeOutlineById(['delete_icon'])
+    processRef.deleteProcess();
+
+    return delay(reference.current);
+  }
+
+  const showResult = async () => {
+    const technicalLayout = document.getElementById('modal_technical_layout_svg');
+      // @ts-ignore
+      technicalLayout.style = `
+        height: auto;
+        width: 1000px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        overflow: visible;
+      `;
+
+      const setSvgViewBox = (elementId: string) => {
+        const svgElement = document.getElementById(elementId);
+        const viewBoxValue = svgElement.getAttribute('viewBox');
+        const fromConnectorPanel = svgElement.querySelector('#fromConnector_panel_modal');
+        const toConnectorPanel = svgElement.querySelector('#toConnector_panel_modal');
+
+        const fromConnectorHeight = fromConnectorPanel.getBoundingClientRect().height;
+        const toConnectorHeight = toConnectorPanel.getBoundingClientRect().height;
+
+        const svgElementHeight = svgElement.getBoundingClientRect().height;
+        const svgElementWidth = svgElement.getBoundingClientRect().width;
+  
+        const fromConnectorWidth = fromConnectorPanel.getBoundingClientRect().width;
+        const toConnectorWidth = toConnectorPanel.getBoundingClientRect().width;
+  
+        const [x, y, width, height] = viewBoxValue.split(' ').map(parseFloat);
+  
+        let offsetX = ((fromConnectorWidth + toConnectorWidth + 50) - svgElementWidth) / 2;
+        let offsetY;
+
+        if(fromConnectorHeight > toConnectorHeight){
+          if(fromConnectorHeight > svgElementHeight){
+            offsetY = Math.abs(svgElementHeight - fromConnectorHeight);
           }
-          await delay(duration);
-          refs.bodyRef.toggleBodyVisible();
-          return delay(duration);
-        }
-      })          
-      .then(() => {
-        if(connectorType === 'fromConnector' && index === 0){
-          positionElementOver(["response_label"], 10);
-          return delay(duration);
-        }
-      })
-      .then(() => {
-        if(connectorType === 'fromConnector' && index === 0){
-          ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.toggleResponseVisibleIcon();
-          positionElementOver(["response_label"], 10, true);
-          return delay(duration);
-        }
-      })
-      .then(() => {
-        if(index === animationData[videoAnimationName].toConnector.length - 1 && connectorType === 'toConnector'){
-          positionElementOver(['delete_icon'], 10);
-
-          return delay(duration);
-        }
-      })
-      .then(() => {
-        if(index === animationData[videoAnimationName].toConnector.length - 1 && connectorType === 'toConnector'){
-          positionElementOver(['delete_icon'], 10, true)
-          const processRef = ref.current.technicalLayoutRef.current.svgRef.current.processRef.current;
-
-          processRef.deleteProcess();
-          return delay(duration);
-        }
-      })
-      .then(() => {
-        if(index === animationData[videoAnimationName].toConnector.length - 1 && connectorType === 'toConnector'){
-          const technicalLayout = document.getElementById('modal_technical_layout_svg');
-          // @ts-ignore
-          technicalLayout.style = `
-            height: auto;
-            width: 1000px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            overflow: visible;
-          `;
-
-          const setSvgViewBox = (elementId: string) => {
-            const svgElement = document.getElementById(elementId);
-            const viewBoxValue = svgElement.getAttribute('viewBox');
-            const fromConnectorPanel = svgElement.querySelector('#fromConnector_panel_modal');
-            const toConnectorPanel = svgElement.querySelector('#toConnector_panel_modal');
-
-            const fromConnectorHeight = fromConnectorPanel.getBoundingClientRect().height;
-            const toConnectorHeight = toConnectorPanel.getBoundingClientRect().height;
-
-            const svgElementHeight = svgElement.getBoundingClientRect().height;
-            const svgElementWidth = svgElement.getBoundingClientRect().width;
-      
-            const fromConnectorWidth = fromConnectorPanel.getBoundingClientRect().width;
-            const toConnectorWidth = toConnectorPanel.getBoundingClientRect().width;
-      
-            const [x, y, width, height] = viewBoxValue.split(' ').map(parseFloat);
-      
-            let offsetX = ((fromConnectorWidth + toConnectorWidth + 50) - svgElementWidth) / 2;
-            let offsetY;
-
-            if(fromConnectorHeight > toConnectorHeight){
-              if(fromConnectorHeight > svgElementHeight){
-                offsetY = Math.abs(svgElementHeight - fromConnectorHeight);
-              }
-              else{
-                offsetY = fromConnectorHeight - svgElementHeight 
-              }
-            }
-            else{
-              if(toConnectorHeight > svgElementHeight){
-                offsetY = Math.abs(svgElementHeight - toConnectorHeight);
-              }
-              else{
-                offsetY = toConnectorHeight - svgElementHeight
-              }
-            }
-
-            const viewBox = {x: offsetX, y: offsetY, width: width, height: height};
-      
-            CSvg.setViewBox(elementId, viewBox)
+          else{
+            offsetY = fromConnectorHeight - svgElementHeight 
           }
-          dispatch(toggleModalDetails())
-          setSvgViewBox('modal_technical_layout_svg');
-          setIndex(index + 1);
         }
         else{
-          setIndex(index + 1);
-        }
-      })
-      .catch(() => {})
-    }
-
-    const animationFunction = (connectorPanelType: ConnectorPanelType) => {
-      const currentElementId = animationData[videoAnimationName][connectorPanelType][index].index;
-      const type = animationData[videoAnimationName][connectorPanelType][index].type;
-      const name = animationData[videoAnimationName][connectorPanelType][index].name;
-      // @ts-ignore
-      const label = animationData[videoAnimationName][connectorPanelType][index].label;
-      const direction = animationData[videoAnimationName][connectorPanelType][index].toDown;
-      const after = animationData[videoAnimationName][connectorPanelType][index].after;
-      const prevElementType = animationData[videoAnimationName][connectorPanelType][index > 0 ? index - 1 : index].type;
-      const svgRef = ref.current.technicalLayoutRef.current.svgRef.current;
-
-      const connectorPanel = connectorPanelType === 'fromConnector' ? svgRef.fromConnectorPanelRef.current : svgRef.toConnectorPanelRef.current;
-      
-      
-      delay(duration)
-      .then(() => {
-        if(index <= 0){
-          connectorPanel.onClick()
-        }
-        else{      
-          const operatorRef = svgRef.operatorRef.current;
-          const processRef = svgRef.processRef.current;
-
-            if(prevElementType === "operator"){
-              operatorRef.onMouseOverSvg()
-            }
-            else{
-              processRef.onMouseOverSvg()
-            }
-
+          if(toConnectorHeight > svgElementHeight){
+            offsetY = Math.abs(svgElementHeight - toConnectorHeight);
           }
-          return delay(duration);
-      })
-      .then(() => {
-        if(index >= 1){
-          const createPanelElement = document.querySelector(`#create_panel_right`).nextElementSibling;
-          let currentItem = null;
-          if(after){
-            const svgItems = ref.current.technicalLayoutRef.current.props.connectionOverviewState.connection[connectorType].svgItems
-            for(let i = 0; i < svgItems.length; i++){
-              if(svgItems[i].id === `${connectorType}_${after}`){
+          else{
+            offsetY = toConnectorHeight - svgElementHeight
+          }
+        }
+
+        const viewBox = {x: offsetX, y: offsetY, width: width, height: height};
   
-                currentItem = animationProps.connection.fromConnector.getSvgElementByIndex(after)
-                
-                break;
+        CSvg.setViewBox(elementId, viewBox)
+      }
+      dispatch(toggleModalDetails())
+      setSvgViewBox('modal_technical_layout_svg');
+  }
+
+  const showDetailsForProcess = async () => {
+    const refs: any = {};
+
+    refs.animationData = animationData[videoAnimationName][connectorType][index];
+    refs.endpointData = refs.animationData.endpoint;
+    refs.currentElementId = refs.animationData.index;
+
+    await delay(reference.current)
+    
+    if(refs.animationData.label){
+      refs.labelRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.labelRef.current;
+      await startEditLabel(refs.labelRef)
+    
+      await endEditLabel(refs.labelRef)
+    }
+    
+    if(refs.endpointData){
+      refs.urlRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current;
+      
+      await openUrlDialog(refs.urlRef)
+      
+      refs.paramGeneratorRef = refs.urlRef.endpointRef.current.paramGeneratorRef.current;
+
+      await changeUrlMethod(refs)
+    
+      await changeUrlParam(refs);
+    
+      await addUrlParam(refs);
+
+      await closeUrlDialog(refs);
+    }
+    
+    if(connectorType === 'fromConnector' && index === 0){
+      await openHeaderDialog(refs);
+    
+      await closeHeaderDialog(refs);
+    }
+    
+    const bodyData = refs.animationData.body;
+
+    if(bodyData){
+      refs.bodyRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current;
+
+      await openBodyDialog(refs);
+  
+      await openBodyObject(refs);
+      
+      for(let i = 0; i < bodyData.length; i++){
+        await displayBodyAddKeysButton();
+
+        await clickAddKeysButton();
+
+        await addBodyKeyName(bodyData[i].keyName);
+
+        await displaySubmitButtonToAddKey()
+
+        await clickSubmitButtonToAddKey()
+        
+        await displayEditKeyValueButton(i);
+
+        await clickEditKeyValueButton(i);
+
+        await addBodyKeyValue(bodyData[i].keyValue)
+        
+        if(bodyData[i].keyValue === '#'){
+          
+          for(let referenceCount = 0; referenceCount < bodyData[i].reference.length; referenceCount++) {
+            for(let methodCount = 0; methodCount < bodyData[i].reference[referenceCount].method.length; methodCount++){
+              if(methodCount > 0){
+                await displayEditKeyValueButton(i);
+            
+                await clickEditKeyValueButton(i);
               }
+
+              await changeBodyMethod(refs, bodyData, i, referenceCount, methodCount);
+
+              await changeBodyParam(refs, bodyData, i, referenceCount, methodCount)
+
+              await addBodyMethodAndParam(refs);
+            }
+
+            if(connectorType === 'toConnector' && bodyData[i].reference[referenceCount].enhancementDescription){
+
+              await clickOnReferenceElements(i);
+
+              await changeReferenceDescription(bodyData, i, referenceCount);
+
+              await changeReferenceContent(refs, bodyData, i, referenceCount);
             }
           }
-          
-          if(type === "process" && prevElementType === "operator"){
-            const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
-
-            operatorCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
-          }
-           
-          else if(type === "process" && prevElementType === "process"){
-            const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
-
-            processCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
-          }
-            
-          else if(type === "operator" && prevElementType === "process"){
-            const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
-
-            processCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
-          }
-
-          else if(type === "operator" && prevElementType === "operator"){
-            const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
-
-            operatorCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
-          }
-          return delay(duration);
-        }
-      })
-      .then(() => {
-        const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
-        const createOperatorRef = ref.current.createElementPalenRef.current.createOperatorRef.current;
-
-        if(type === "process"){
-          createProcessRef.changeName({label: name, value: name})
         }
         else{
-          createOperatorRef.changeType({label: name, value: name})
+          await clickSubmitButtonToAddValue();
         }
-        return delay(duration);
-      })
-      .then(() => {
-        if(type === "process" && label){
-          setFocusById('new_request_label');
-          return delay(duration);
-        }
-      })
-      .then(() => {
-        if(type === "process" && label){
-          const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
-          createProcessRef.changeLabel(label)
-          return delay(duration);
-        }
-      })
-      .then(() => {
-        const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
-        const createOperatorRef = ref.current.createElementPalenRef.current.createOperatorRef.current;
-        
-        type === "process" ? createProcessRef.create() : createOperatorRef.create()
+      }
+      await closeBodyDialog(refs);
+    }
+            
+    if(connectorType === 'fromConnector' && index === 0){
+      await showResponse();
+    }
+  
+    if(index === animationData[videoAnimationName].toConnector.length - 1 && connectorType === 'toConnector'){
+
+      await deleteLastProcess();
+      
+      await showResult();
+      
+      setIndex(index + 1);
+    }
+    else{
+      setIndex(index + 1);
+    }
+  }
+
+  const animationFunction = (connectorPanelType: ConnectorPanelType) => {
+    const currentElementId = animationData[videoAnimationName][connectorPanelType][index].index;
+    const type = animationData[videoAnimationName][connectorPanelType][index].type;
+    const name = animationData[videoAnimationName][connectorPanelType][index].name;
+    // @ts-ignore
+    const label = animationData[videoAnimationName][connectorPanelType][index].label;
+    const direction = animationData[videoAnimationName][connectorPanelType][index].toDown;
+    const after = animationData[videoAnimationName][connectorPanelType][index].after;
+    const prevElementType = animationData[videoAnimationName][connectorPanelType][index > 0 ? index - 1 : index].type;
+    const svgRef = ref.current.technicalLayoutRef.current.svgRef.current;
+
+    const connectorPanel = connectorPanelType === 'fromConnector' ? svgRef.fromConnectorPanelRef.current : svgRef.toConnectorPanelRef.current;
+    
+    
+    delay(reference.current)
+    .then(() => {
+      if(index <= 0){
+        connectorPanel.onClick()
+      }
+      else{      
+        const operatorRef = svgRef.operatorRef.current;
         const processRef = svgRef.processRef.current;
-       
-        processRef.onClick()
-        
-        const currentSvgElementId = `${connectorType}__${connectorType}_${currentElementId}${type === "process" ? "__" + name : ''}`
 
-        setSvgViewBox('modal_technical_layout_svg', currentSvgElementId);
-        
-        if(index >= 0 && name !=='if' && name !== 'loop'){
-          methodDetails();
-        }
-        if(name === 'if'){
-          ifDetails();
-        }
-        if(name === 'loop'){
-          loopDetails();
-        }
-      })
-      .catch(() => {})
-    }
+          if(prevElementType === "operator"){
+            operatorRef.onMouseOverSvg()
+          }
+          else{
+            processRef.onMouseOverSvg()
+          }
 
-    useEffect(() => {
-      if(ref.current){
-        if(videoAnimationName && index <= 0 && connectorType === 'fromConnector'){
-          let connection = CConnection.createConnection(connectionData);
-          setAnimationProps({
-              connection: prepareConnection(connection, connectors)
-          })
         }
-        if(isButtonPanelOpened && videoAnimationName && !isAnimationPaused) {
-          if(index < animationData[videoAnimationName].fromConnector.length + animationData[videoAnimationName].toConnector.length) {
-            if(index < animationData[videoAnimationName].fromConnector.length && connectorType === 'fromConnector'){
-              animationFunction('fromConnector');
-            }
-            else if(index === animationData[videoAnimationName].fromConnector.length && connectorType === 'fromConnector'){
-              setConnectorType('toConnector')
-              setShowLinkInBody(true)
-              setIndex(0)
-            }
-            else if(index < animationData[videoAnimationName].toConnector.length && connectorType === 'toConnector'){
-              animationFunction('toConnector');
-            }
-            else if(index === animationData[videoAnimationName].toConnector.length && connectorType === 'toConnector'){
-              setConnectorType('fromConnector')
-              dispatch(setVideoAnimationName(''));
-              setIndex(0)
+        return delay(reference.current);
+    })
+    .then(() => {
+      if(index >= 1){
+        const createPanelElement = document.querySelector(`#create_panel_right`).nextElementSibling;
+        let currentItem = null;
+        if(after){
+          const svgItems = ref.current.technicalLayoutRef.current.props.connectionOverviewState.connection[connectorType].svgItems
+          for(let i = 0; i < svgItems.length; i++){
+            if(svgItems[i].id === `${connectorType}_${after}`){
+
+              currentItem = animationProps.connection.fromConnector.getSvgElementByIndex(after)
+              
+              break;
             }
           }
         }
+        
+        if(type === "process" && prevElementType === "operator"){
+          const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
+
+          operatorCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
+        }
+         
+        else if(type === "process" && prevElementType === "process"){
+          const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
+
+          processCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
+        }
+          
+        else if(type === "operator" && prevElementType === "process"){
+          const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
+
+          processCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
+        }
+
+        else if(type === "operator" && prevElementType === "operator"){
+          const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
+
+          operatorCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
+        }
+        return delay(reference.current);
       }
-      
-    }, [videoAnimationName, isAnimationPaused, index])
+    })
+    .then(() => {
+      const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
+      const createOperatorRef = ref.current.createElementPalenRef.current.createOperatorRef.current;
 
-    useEffect(() => {
-      setIndex(0);
-      if(isAnimationPaused) dispatch(setAnimationPaused(!isAnimationPaused))
-    }, [videoAnimationName])
-
-    useEffect(() => {
-      if(!isVisible){
-        setStopTimer(true);
+      if(type === "process"){
+        createProcessRef.changeName({label: name, value: name})
       }
       else{
-        setStopTimer(false);
-        dispatch(setVideoAnimationName(''));
-        dispatch(setAnimationPreviewPanelVisibility(true))
+        createOperatorRef.changeType({label: name, value: name})
       }
-    }, [isVisible])
-
-    useEffect(() => {
-      if(connectorType === 'toConnector'){
-        animationFunction('toConnector');
+      return delay(reference.current);
+    })
+    .then(() => {
+      if(type === "process" && label){
+        setFocusById('new_request_label');
+        return delay(reference.current);
       }
-    }, [connectorType])
+    })
+    .then(() => {
+      if(type === "process" && label){
+        const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
+        createProcessRef.changeLabel(label)
+        return delay(reference.current);
+      }
+    })
+    .then(() => {
+      const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
+      const createOperatorRef = ref.current.createElementPalenRef.current.createOperatorRef.current;
+      
+      type === "process" ? createProcessRef.create() : createOperatorRef.create()
+      const processRef = svgRef.processRef.current;
+     
+      processRef.onClick()
+      
+      const currentSvgElementId = `${connectorType}__${connectorType}_${currentElementId}${type === "process" ? "__" + name : ''}`
 
+      setSvgViewBox('modal_technical_layout_svg', currentSvgElementId);
+      
+      if(index >= 0 && name !=='if' && name !== 'loop'){
+        showDetailsForProcess();
+      }
+      if(name === 'if'){
+        showDetailsForOperatorIf();
+      }
+      if(name === 'loop'){
+        showDetailsForOperatorLoop();
+      }
+    })
+    .catch(() => {})
+  }
 
+  useEffect(() => {
+    if(ref.current){
+      if(videoAnimationName && index <= 0 && connectorType === 'fromConnector'){
+        let connection = CConnection.createConnection(connectionData);
+        setAnimationProps({
+            connection: prepareConnection(connection, connectors)
+        })
+      }
+      if(isButtonPanelOpened && videoAnimationName && !isAnimationPaused) {
+        if(index < animationData[videoAnimationName].fromConnector.length + animationData[videoAnimationName].toConnector.length) {
+          if(index < animationData[videoAnimationName].fromConnector.length && connectorType === 'fromConnector'){
+            animationFunction('fromConnector');
+          }
+          else if(index === animationData[videoAnimationName].fromConnector.length && connectorType === 'fromConnector'){
+            setConnectorType('toConnector')
+            setShowLinkInBody(true)
+            setIndex(0)
+          }
+          else if(index < animationData[videoAnimationName].toConnector.length && connectorType === 'toConnector'){
+            animationFunction('toConnector');
+          }
+          else if(index === animationData[videoAnimationName].toConnector.length && connectorType === 'toConnector'){
+            setConnectorType('fromConnector')
+            dispatch(setVideoAnimationName(''));
+            setIndex(0)
+          }
+        }
+      }
+    }
+    
+  }, [videoAnimationName, isAnimationPaused, index])
+
+  useEffect(() => {
+    setIndex(0);
+    if(isAnimationPaused) dispatch(setAnimationPaused(!isAnimationPaused))
+  }, [videoAnimationName])
+
+  useEffect(() => {
+    if(!isVisible){
+      setStopTimer(true);
+    }
+    else{
+      setStopTimer(false);
+      dispatch(setVideoAnimationName(''));
+      dispatch(setAnimationPreviewPanelVisibility(true))
+    }
+  }, [isVisible])
+
+  useEffect(() => {
+    if(connectorType === 'toConnector'){
+      animationFunction('toConnector');
+    }
+  }, [connectorType])
 
   function toggleVisible() {
     setIsVisible(!isVisible);
@@ -934,19 +1085,20 @@ const HelpBlock = () => {
           }}
           dialogClassname={`${styles.help_dialog}`}
         >
-            <TooltipButton
-                style={{position: "absolute", top:0, left:0, right: 'auto', zIndex: 100000}}
-                size={TextSize.Size_40}
-                position={"bottom"}
-                icon={isAnimationPaused ? "play_arrow" : "pause"}
-                tooltip={isAnimationPaused ? "play animation" : 'pause animation'}
-                target={`animation_play_button`}
-                hasBackground={true}
-                background={ColorTheme.White}
-                color={ColorTheme.Gray}
-                padding="2px"
-                handleClick={() => dispatch(setAnimationPaused(!isAnimationPaused))}
-            />
+          <TooltipButton
+            style={{position: "absolute", top:0, left:0, right: 'auto', zIndex: 100000}}
+            size={TextSize.Size_40}
+            position={"bottom"}
+            icon={isAnimationPaused ? "play_arrow" : "pause"}
+            tooltip={isAnimationPaused ? "play animation" : 'pause animation'}
+            target={`animation_play_button`}
+            hasBackground={true}
+            background={ColorTheme.White}
+            color={ColorTheme.Gray}
+            padding="2px"
+            handleClick={() => dispatch(setAnimationPaused(!isAnimationPaused))}
+          />
+          <AnimationSpeedSlider step={500} min={500} max={2500}/>
           <ModalContext.Provider value={{ isModal: true }}>
             {
               <FormConnectionSvg
@@ -959,7 +1111,6 @@ const HelpBlock = () => {
           </ModalContext.Provider>
           <Content />
         </Dialog>
-
         <TooltipButton
           position={"bottom"}
           icon={"menu_book"}
@@ -969,6 +1120,7 @@ const HelpBlock = () => {
           background={ColorTheme.White}
           color={ColorTheme.Gray}
           padding="2px"
+          handleClick={() => {console.log('documentation')}}
         />
         <TooltipButton
           position={"bottom"}
@@ -979,6 +1131,7 @@ const HelpBlock = () => {
           background={ColorTheme.White}
           color={ColorTheme.Gray}
           padding="2px"
+          handleClick={() => {console.log('shortcuts')}}
         />
       </div>
     </HelpBlockStyled>

@@ -14,39 +14,12 @@
  */
 
 import styled from "styled-components";
-import { ContentStyledProps } from "./interfaces";
+import { AnimationSpeedSliderStyledProps } from "./interfaces";
 
-const ContentStyled = styled.div<ContentStyledProps>`
-  background: #f2f2f2;
-  border-radius: 10px;
-  padding: 40px;
-  width: 100%;
+const AnimationSpeedSliderStyled = styled.div<AnimationSpeedSliderStyledProps>`
   position: absolute;
-  z-index: 2;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-
-  ${props => !props.isPreviewPanelOpened && `
-    padding: 0;
-
-    & > div{
-      display: none;
-    }
-  `}
-
-  .toggle_preview_button{
-    position: absolute;
-    top: ${props => !props.isPreviewPanelOpened ? '-35px' : 0};
-    right: auto;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 333;
-    width: 30px;
-  }
+  z-index: 10000;
+  left: 100px;
 `;
 
-export { ContentStyled };
+export { AnimationSpeedSliderStyled };

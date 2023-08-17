@@ -9,51 +9,51 @@ const animationData: IAnimationData = {
         type: "process",
         name: "GetBoards",
         label: "first process",
-        body: [
-          {
-            keyName: "firstKeyName",
-            keyValue: "firstKeyValue",
-          },
-          {
-            keyName: "secondKeyName",
-            keyValue: "secondKeyValue",
-          },
-        ]
+        // body: [
+        //   {
+        //     keyName: "firstKeyName",
+        //     keyValue: "firstKeyValue",
+        //   },
+        //   {
+        //     keyName: "secondKeyName",
+        //     keyValue: "secondKeyValue",
+        //   },
+        // ]
       },
+      // {
+      //   index: "1",
+      //   type: "operator",
+      //   name: "if",
+      //   conditionForIf: {
+      //     leftStatement: {
+      //       fromConnector: "fromConnector",
+      //       leftMethodIndex: "0",
+      //       leftParam: '[0].ifLeftParam',
+      //     },
+      //     relationalOperator: "Contains",
+      //     rightStatement: {
+      //       fromConnector: "fromConnector",
+      //       property: 'id',
+      //       rightMethodIndex: '0',
+      //       rightParam: '[0].ifRightParam',
+      //     }
+      //   }
+      // },
+      // {
+      //   index: "1",
+      //   type: "process",
+      //   name: "GetBoardList",
+      //   label: "down",
+      //   endpoint: {index: "0", param: "[0]", connectorType: "fromConnector"}
+      // },
       {
         index: "1",
-        type: "operator",
-        name: "if",
-        conditionForIf: {
-          leftStatement: {
-            fromConnector: "fromConnector",
-            leftMethodIndex: "0",
-            leftParam: '[0].ifLeftParam',
-          },
-          relationalOperator: "Contains",
-          rightStatement: {
-            fromConnector: "fromConnector",
-            property: 'id',
-            rightMethodIndex: '0',
-            rightParam: '[0].ifRightParam',
-          }
-        }
-      },
-      {
-        index: "1_0",
-        type: "process",
-        name: "GetBoardList",
-        label: "down",
-        toDown: true,
-      },
-      {
-        index: "1_1",
         type: "operator",
         name: "loop",
         conditionForLoop: {
           leftStatement: {
             fromConnector: "fromConnector",
-            leftMethodIndex: "1_0",
+            leftMethodIndex: "0",
             leftParam: '[0].loopLeftParam',
           },
           relationalOperator: "SplitString",
@@ -64,17 +64,17 @@ const animationData: IAnimationData = {
           }
         }
       },
-      {
-        index: "1_2",
-        type: "process",
-        name: "GetBoardList",
-      },
-      {
-        index: "2",
-        type: "process",
-        name: "GetBoardList",
-        after: "1",
-      },
+      // {
+      //   index: "1_2",
+      //   type: "process",
+      //   name: "GetBoardList",
+      // },
+      // {
+      //   index: "2",
+      //   type: "process",
+      //   name: "GetBoardList",
+      //   after: "1",
+      // },
     ],
     toConnector: [
       {
@@ -91,7 +91,7 @@ const animationData: IAnimationData = {
                 method: [
                   {
                     fromConnector: "fromConnector",
-                    index: "1_0",
+                    index: "0",
                     param: "[0].firstParam",
                   },
                   {
@@ -105,28 +105,6 @@ const animationData: IAnimationData = {
               },
             ]
           },
-          {
-            keyName: "secondKeyName",
-            keyValue: "#",
-            reference: [
-              {
-                method: [
-                  {
-                    fromConnector: "fromConnector",
-                    index: "1_0",
-                    param: "[0].firstParam",
-                  },
-                  {
-                    fromConnector: "fromConnector",
-                    index: "0",
-                    param: "[0].secondParam",
-                  },
-                ],
-                enhancementDescription: "second reference description",
-                enhancementContent: "RESULT_VAR = VAR_0; var TEST_VAR = RESULT_VAR;\nvar SECOND_LINE = 'some text';"
-              },
-            ]
-          },
         ]
       },
       {
@@ -136,11 +114,11 @@ const animationData: IAnimationData = {
         label: "with endpoint",
         endpoint: {index: "0", param: "[0]", connectorType: "toConnector"}
       },
-      {
-        index: "2",
-        type: "process",
-        name: "GetBoards",
-      },
+      // {
+      //   index: "2",
+      //   type: "process",
+      //   name: "GetBoards",
+      // },
     ],
   }
 };

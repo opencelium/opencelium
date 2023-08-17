@@ -146,7 +146,8 @@ class FormConnectionSvg extends Component {
       connection,
       currentTechnicalItem,
       isFullScreen,
-      setRef,
+      entity,
+      updateEntity
     } = this.props;
     const {
       isCreateElementPanelOpened,
@@ -198,7 +199,7 @@ class FormConnectionSvg extends Component {
             updateConnection={(a, b) => this.updateEntity(a, b)}
           />
         )}
-        <ButtonPanel data={data} />
+        <ButtonPanel data={data} entity={entity} updateEntity={updateEntity} />
         <LogPanel />
       </div>
     );

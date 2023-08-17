@@ -35,8 +35,6 @@ const ControlsBlockStyled = styled.div<ControlsBlockStyledProps>`
     font-size: 14px;
     display: ${(props) => (!props.isButtonPanelOpened && 'none')};
   }
-
-  
   
   .center_item{
     position: absolute;
@@ -76,6 +74,27 @@ const ControlsBlockStyled = styled.div<ControlsBlockStyledProps>`
   .wrapper:nth-child(4) .button_wrap { transform: rotate(-180deg); }
   .wrapper:nth-child(5) .button_wrap { transform: rotate(-240deg); }
   .wrapper:nth-child(6) .button_wrap { transform: rotate(-300deg); }
+
+  .save_panel{
+    position: absolute;
+    background: #ffffffee;
+    transform: translateY(-120%);
+    display: flex;
+    padding: 10px;
+    gap: 10px;
+    border-radius: 4px;
+    &::after{
+      content: '';
+      position: absolute;
+      z-index: -1;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      box-shadow: inset 0 0 0 3000px rgba(204, 203, 203, 0.3);
+      filter: blur(10px);
+    }
+  }
 `;
 
 export { ControlsBlockStyled };

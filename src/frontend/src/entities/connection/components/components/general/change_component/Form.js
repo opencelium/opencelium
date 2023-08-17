@@ -175,7 +175,7 @@ class Form extends React.Component{
 
     render(){
         const {entity} = this.state;
-        const {contents, translations, permissions, isActionInProcess, additionalButtons, clearValidationMessage} = this.props;
+        const {contents, translations, permissions, isActionInProcess, additionalButtons, clearValidationMessage, type} = this.props;
         const hasActionButton = translations && translations.action_button;
         const hasListButton = translations && translations.list_button;
         const hasCancelButton = translations && translations.cancel_button;
@@ -183,29 +183,33 @@ class Form extends React.Component{
             <div style={{margin: '20px 0', padding: 0, paddingBottom: '30px'}}>
                 <Title title={translations.header}/>
                 <div className={styles.buttons_panel}>
-                    {hasActionButton &&
-                        <ActionButton
-                            {...this.props}
-                            doAction={(a) => this.doAction(a)}
-                            isActionInProcess={isActionInProcess}
-                        />
-                    }
-                    {hasListButton &&
-                        <ListButton
-                            title={translations.list_button.title}
-                            link={translations.list_button.link}
-                            permission={permissions.READ}
-                        />
-                    }
-                    {
-                        additionalButtons(entity)
-                    }
-                    {hasCancelButton &&
-                        <CancelButton
-                            title={translations.cancel_button.title}
-                            link={translations.cancel_button.link}
-                            permission={permissions.READ}
-                        />
+                    {type !== 'update' && 
+                        <React.Fragment>
+                            {hasActionButton &&
+                                <ActionButton
+                                    {...this.props}
+                                    doAction={(a) => this.doAction(a)}
+                                    isActionInProcess={isActionInProcess}
+                                />
+                            }
+                            {hasListButton &&
+                                <ListButton
+                                    title={translations.list_button.title}
+                                    link={translations.list_button.link}
+                                    permission={permissions.READ}
+                                />
+                            }
+                            {
+                                additionalButtons(entity, (a, b) => this.updateEntity(a, b))
+                            }
+                            {hasCancelButton &&
+                                <CancelButton
+                                    title={translations.cancel_button.title}
+                                    link={translations.cancel_button.link}
+                                    permission={permissions.READ}
+                                />
+                            }
+                        </React.Fragment>
                     }
                 </div>
                 <div className={styles.form_component}>
