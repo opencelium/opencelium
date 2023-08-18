@@ -20,50 +20,50 @@ const animationData: IAnimationData = {
         //   },
         // ]
       },
-      // {
-      //   index: "1",
-      //   type: "operator",
-      //   name: "if",
-      //   conditionForIf: {
-      //     leftStatement: {
-      //       fromConnector: "fromConnector",
-      //       leftMethodIndex: "0",
-      //       leftParam: '[0].ifLeftParam',
-      //     },
-      //     relationalOperator: "Contains",
-      //     rightStatement: {
-      //       fromConnector: "fromConnector",
-      //       property: 'id',
-      //       rightMethodIndex: '0',
-      //       rightParam: '[0].ifRightParam',
-      //     }
-      //   }
-      // },
-      // {
-      //   index: "1",
-      //   type: "process",
-      //   name: "GetBoardList",
-      //   label: "down",
-      //   endpoint: {index: "0", param: "[0]", connectorType: "fromConnector"}
-      // },
       {
         index: "1",
         type: "operator",
-        name: "loop",
-        conditionForLoop: {
+        name: "if",
+        conditionForIf: {
           leftStatement: {
             fromConnector: "fromConnector",
             leftMethodIndex: "0",
-            leftParam: '[0].loopLeftParam',
+            leftParam: '[0].ifLeftParam',
           },
-          relationalOperator: "SplitString",
+          relationalOperator: "Contains",
           rightStatement: {
             fromConnector: "fromConnector",
-            rightMethodIndex: "0",
-            rightParam: "[0].loopRightParam"
+            property: 'id',
+            rightMethodIndex: '0',
+            rightParam: '[0].ifRightParam',
           }
         }
       },
+      {
+        index: "2",
+        type: "process",
+        name: "GetBoardList",
+        label: "down",
+        endpoint: {index: "0", param: "[0]", connectorType: "fromConnector"}
+      },
+      // {
+      //   index: "1",
+      //   type: "operator",
+      //   name: "loop",
+      //   conditionForLoop: {
+      //     leftStatement: {
+      //       fromConnector: "fromConnector",
+      //       leftMethodIndex: "0",
+      //       leftParam: '[0].loopLeftParam',
+      //     },
+      //     relationalOperator: "SplitString",
+      //     rightStatement: {
+      //       fromConnector: "fromConnector",
+      //       rightMethodIndex: "0",
+      //       rightParam: "[0].loopRightParam"
+      //     }
+      //   }
+      // },
       // {
       //   index: "1_2",
       //   type: "process",

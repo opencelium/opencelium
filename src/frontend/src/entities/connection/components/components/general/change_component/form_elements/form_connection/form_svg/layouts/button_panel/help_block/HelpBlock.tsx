@@ -80,7 +80,7 @@ const HelpBlock = () => {
   const ref = React.useRef(null);
 
   const reference: any = React.useRef();
-  reference.current = animationSpeed;
+  const currentAnimationSpeed = reference.current = animationSpeed;
 
   function delay(ms: number) {
     return new Promise((resolve, reject) => {
@@ -100,17 +100,12 @@ const HelpBlock = () => {
 
     const currentElement = svgElement.querySelector(`#${currentSvgElementId}`);
 
-
-    // const fromConnectorHeight = fromConnectorPanel.getBoundingClientRect().height;
-    // const toConnectorHeight = toConnectorPanel.getBoundingClientRect().height;
-
     const fromConnectorWidth = fromConnectorPanel.getBoundingClientRect().width;
     const toConnectorWidth = toConnectorPanel.getBoundingClientRect().width;
 
     const [x, y, width, height] = viewBoxValue.split(' ').map(parseFloat);
 
-    let offsetX; 
-    // let offsetY = fromConnectorHeight > height / 2 || toConnectorHeight > height / 2 ? y + 80 : y
+    let offsetX;
     // @ts-ignore
     let offsetY = currentElement.y.animVal.value / 2 - 50
 
@@ -130,172 +125,65 @@ const HelpBlock = () => {
     positionElementOver(idsArray, 10);
     
     if(withDelay){
-      return delay(reference.current)
+      return delay(currentAnimationSpeed)
     }
   }
 
   const removeOutlineById = async (idsArray: any, withDelay = false) => {
     positionElementOver(idsArray, 10, true);
     if(withDelay){
-      return delay(reference.current)
+      return delay(currentAnimationSpeed)
     }
   }
 
   const addOutlineByClassName = async (classNamesArray: any, withDelay = false) => {
     positionElementOverByClassName(classNamesArray, 10);
     if(withDelay){
-      return delay(reference.current)
+      return delay(currentAnimationSpeed)
     }
   }
 
   const removeOutlineByClassName = async (classNamesArray: any, withDelay = false) => {
     positionElementOverByClassName(classNamesArray, 10, true);
     if(withDelay){
-      return delay(reference.current)
+      return delay(currentAnimationSpeed)
     }
   }
 
   // for show if operator details
-  const openIfConditionDialog = async (ref: any) => {
-    const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
-    conditionRef.toggleEdit();
 
-    return delay(reference.current);
-  }
-
-  const changeLeftMethodForIf = async (ref: any, condition: any) => {
-    const leftStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current;
-    const connectionMethods = ref.current.props.connection[condition.leftStatement.fromConnector].methods;
-
-    let leftMethod;
-    for(let i = 0; i < connectionMethods.length; i++) {
-      if(connectionMethods[i].index === condition.leftStatement.leftMethodIndex){
-        leftMethod = connectionMethods[i];
-        break;
-      }
-    }
-    leftStatementRef.updateMethod(leftMethod);
-
-    return delay(reference.current);
-  }
-
-  const setFocusOnLeftParamForIf = async (ref: any) => {
-    const leftParamInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current.paramInputRef.current.props.id;
-    setFocusById(leftParamInputId);
-    
-    return delay(reference.current)
-  }
-
-  const changeLeftParamForIf = async (ref: any, condition: any) => {
-    const leftStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current;
-
-    const leftParamInputId = leftStatementRef.paramInputRef.current.props.id
-    
-    leftStatementRef.updateParam(condition.leftStatement.leftParam);
-
-    const leftParamInput = document.getElementById(leftParamInputId);
-    leftParamInput.blur();
-    return delay(reference.current);
-  }
-
-  const changeRelationalOperaotorForIf = async (ref: any, condition: any) => {
-    const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
-    conditionRef.updateRelationalOperator({ value: condition.relationalOperator});
-
-    return delay(reference.current)
-  }
-
-  const setFocusOnRightPropertyForIf = async (ref: any) => {
-    const rightProperyInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.props.operator.index;
-    setFocusById(`if_operator_property_${rightProperyInputId}`);
-    return delay(reference.current)
-  }
-
-  const changeRightPropertyForIf = async (ref: any, condition: any) => {
-    const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
-    rightStatementRef.updateProperty(condition.rightStatement.property);
-    return delay(reference.current)
-  }
-
-  const removeFocusFromRightPropertyForIf = async (ref: any) => {
-    const rightProperyInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.props.operator.index;
-    const propertyInput = document.getElementById(`if_operator_property_${rightProperyInputId}`);
-    propertyInput.blur();
-
-    return delay(reference.current)
-  }
-
-  const changeRightMethodForIf = async (ref: any, condition: any) => {
-    const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
-    const connectionMethods = ref.current.props.connection[condition.rightStatement.fromConnector].methods;
-
-    let rightMethod;
-    connectionMethods.forEach((element: any) => {
-      if(element.index === condition.rightStatement.rightMethodIndex){
-        rightMethod = element;
-        return;
-      }
-    })
-
-    rightStatementRef.updateMethod(rightMethod);
-
-    return delay(reference.current)
-  }
-
-  const setFocusOnRightParamForIf = async (ref: any) => {
-    const rightParamInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.paramInputRef.current.props.id;
-    setFocusById(rightParamInputId);
-    return delay(reference.current)
-  }
-
-  const changeRightParamForIf = async (ref: any, condition: any) => {
-    const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
-    rightStatementRef.updateParam(condition.rightStatement.rightParam);
-    return delay(reference.current);
-  }
-
-  const removeFocusFromRightParamForIf = async (ref: any) => {
-    const rightParamInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.paramInputRef.current.props.id;
-    const rightParamInput = document.getElementById(rightParamInputId);
-    rightParamInput.blur();
-    return delay(reference.current)
-  }
-
-  const showDetailsForOperatorIf = async () => {
-    // @ts-ignore
-    const condition = animationData[videoAnimationName][connectorType][index].conditionForIf;
-
+  const showDetailsForOperatorIf = async (condition: any) => {
     if(condition){
       const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
 
-      await openIfConditionDialog(ref);
-      
-      await changeLeftMethodForIf(ref, condition);
-      
-      await setFocusOnLeftParamForIf(ref);
+      await DetailsForOperators.openConditionDialog(ref, currentAnimationSpeed);
 
-      await changeLeftParamForIf(ref, condition);
-      
-      await changeRelationalOperaotorForIf(ref, condition);
+      await DetailsForOperators.changeLeftMethod(ref, condition, currentAnimationSpeed);
+
+      await DetailsForOperators.setFocusOnLeftParam(ref, currentAnimationSpeed);
+
+      await DetailsForOperators.changeLeftParam(ref, condition, currentAnimationSpeed);
+
+      await DetailsForOperators.changeRelationalOperator(ref, condition, currentAnimationSpeed);
 
       if(condition.rightStatement.property){
-        await setFocusOnRightPropertyForIf(ref);
-        
-        await changeRightPropertyForIf(ref, condition);
+        await DetailsForOperators.setFocusOnRightProperty(ref, currentAnimationSpeed);
 
-        await removeFocusFromRightPropertyForIf(ref); 
+        await DetailsForOperators.changeRightProperty(ref, condition, currentAnimationSpeed);
+
+        await DetailsForOperators.removeFocusFromRightProperty(ref, currentAnimationSpeed);
       }
       
       if(condition.rightStatement.rightMethodIndex){
-        await changeRightMethodForIf(ref, condition)
+        await DetailsForOperators.changeRightMethod(ref, condition, currentAnimationSpeed);
       }
       
       if(condition.rightStatement.rightParam){
-        await setFocusOnRightParamForIf(ref);
-        
-        await changeRightParamForIf(ref, condition);
+        await DetailsForOperators.setFocusOnRightParam(ref, currentAnimationSpeed);
 
-        await removeFocusFromRightParamForIf(ref);
+        await DetailsForOperators.changeRightParam(ref, condition, currentAnimationSpeed);
+
+        await DetailsForOperators.removeFocusFromRightParam(ref, currentAnimationSpeed);
       }
       
       conditionRef.updateConnection();
@@ -306,106 +194,24 @@ const HelpBlock = () => {
     }
   }
 
-  // for show loop operator details
-  const openLoopConditionDialog = async (ref: any) => {
-    const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
-    conditionRef.toggleEdit();
-
-    return delay(reference.current);
-  }
-
-  const changeLeftMethodForLoop = async (ref: any, condition: any) => {
-    const leftStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current;
-    const connectionMethods = ref.current.props.connection[condition.leftStatement.fromConnector].methods;
-
-    let leftMethod;
-    connectionMethods.forEach((element: any) => {
-      if(element.index === condition.leftStatement.leftMethodIndex){
-        leftMethod = element;
-        return;
-      }
-    });
-
-    leftStatementRef.updateMethod(leftMethod);
-
-    return delay(reference.current);
-  }
-
-  const setFocusOnLeftParamForLoop = async (ref: any) => {
-    const leftParamInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current.paramInputRef.current.props.id;
-    setFocusById(leftParamInputId);
-    
-    return delay(reference.current)
-  }
-
-  const changeLeftParamForLoop = async (ref: any, condition: any) => {
-    const leftStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current;
-
-    const leftParamInputId = leftStatementRef.paramInputRef.current.props.id
-    
-    leftStatementRef.updateParam(condition.leftStatement.leftParam);
-
-    const leftParamInput = document.getElementById(leftParamInputId);
-    leftParamInput.blur();
-    return delay(reference.current);
-  }
-
-  const changeRelationalOperaotorForLoop = async (ref: any, condition: any) => {
-    const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
-    conditionRef.updateRelationalOperator({ value: condition.relationalOperator});
-
-    return delay(reference.current)
-  }
-
-  const changeRightMethodForLoop = async (ref: any, condition: any) => {
-    const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
-    const connectionMethods = ref.current.props.connection[condition.rightStatement.fromConnector].methods;
-
-    let rightMethod;
-    connectionMethods.forEach((element: any) => {
-      if(element.index === condition.rightStatement.rightMethodIndex){
-        rightMethod = element;
-        return;
-      }
-    })
-
-    rightStatementRef.updateMethod(rightMethod);
-
-    return delay(reference.current)
-  }
-
-  const changeRightParamForLoop = async (ref: any, condition: any) => {
-    const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
-    rightStatementRef.updateParam(condition.rightStatement.rightParam);
-    return delay(reference.current);
-  }
-
-  const showDetailsForOperatorLoop = async () => {
-    // @ts-ignore
-    const condition = animationData[videoAnimationName][connectorType][index].conditionForLoop;
-    
+  
+  const showDetailsForOperatorLoop = async (condition: any) => {
     if(condition){
       const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
-      // await openLoopConditionDialog(ref);
-      await DetailsForOperators.openConditionDialog(ref, reference.current);
 
-      // await changeLeftMethodForLoop(ref, condition);
-      await DetailsForOperators.changeLeftMethod(ref, condition, reference.current);
-    
-      // await setFocusOnLeftParamForLoop(ref);
-      await DetailsForOperators.setFocusOnLeftParam(ref, reference.current);
+      await DetailsForOperators.openConditionDialog(ref, currentAnimationSpeed);
 
-      // await changeLeftParamForLoop(ref, condition);
-      await DetailsForOperators.changeLeftParam(ref, condition, reference.current);
+      await DetailsForOperators.changeLeftMethod(ref, condition, currentAnimationSpeed);
 
-      // await changeRelationalOperaotorForLoop(ref, condition);
-      await DetailsForOperators.changeRelationalOperator(ref, condition, reference.current);
+      await DetailsForOperators.setFocusOnLeftParam(ref, currentAnimationSpeed);
 
-      // await changeRightMethodForLoop(ref, condition);
-      await DetailsForOperators.changeRightMethodForLoop(ref, condition, reference.current);
-      
-      // await changeRightParamForLoop(ref, condition);
-      await DetailsForOperators.changeRightParamForLoop(ref, condition, reference.current);
+      await DetailsForOperators.changeLeftParam(ref, condition, currentAnimationSpeed);
+
+      await DetailsForOperators.changeRelationalOperator(ref, condition, currentAnimationSpeed);
+
+      await DetailsForOperators.changeRightMethod(ref, condition, currentAnimationSpeed);
+
+      await DetailsForOperators.changeRightParam(ref, condition, currentAnimationSpeed);
     
       conditionRef.updateConnection();
       setIndex(index + 1);
@@ -986,10 +792,14 @@ const HelpBlock = () => {
         showDetailsForProcess();
       }
       if(name === 'if'){
-        showDetailsForOperatorIf();
+        // @ts-ignore
+        const condition = animationData[videoAnimationName][connectorType][index].conditionForIf;
+        showDetailsForOperatorIf(condition);
       }
       if(name === 'loop'){
-        showDetailsForOperatorLoop();
+        // @ts-ignore
+        const condition = animationData[videoAnimationName][connectorType][index].conditionForLoop;
+        showDetailsForOperatorLoop(condition);
       }
     })
     .catch(() => {})

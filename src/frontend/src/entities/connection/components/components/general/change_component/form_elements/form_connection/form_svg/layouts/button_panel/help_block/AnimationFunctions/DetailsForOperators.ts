@@ -56,7 +56,27 @@ export default class DetailsForOperators {
     return DetailsForOperators.delay(animationSpeed);
   }
 
-  static async changeRightMethodForLoop (ref: any, condition: any, animationSpeed: number) {
+  static async setFocusOnRightProperty (ref: any, animationSpeed: number) {
+    const rightProperyInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.props.operator.index;
+    setFocusById(`if_operator_property_${rightProperyInputId}`);
+    return DetailsForOperators.delay(animationSpeed);
+  }
+
+  static async changeRightProperty (ref: any, condition: any, animationSpeed: number) {
+    const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
+    rightStatementRef.updateProperty(condition.rightStatement.property);
+    return DetailsForOperators.delay(animationSpeed);
+  }
+
+  static async removeFocusFromRightProperty (ref: any, animationSpeed: number) {
+    const rightProperyInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.props.operator.index;
+    const propertyInput = document.getElementById(`if_operator_property_${rightProperyInputId}`);
+    propertyInput.blur();
+
+    return DetailsForOperators.delay(animationSpeed);
+  }
+
+  static async changeRightMethod (ref: any, condition: any, animationSpeed: number) {
     const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
     const connectionMethods = ref.current.props.connection[condition.rightStatement.fromConnector].methods;
 
@@ -73,10 +93,23 @@ export default class DetailsForOperators {
     return DetailsForOperators.delay(animationSpeed);
   }
 
-  static async changeRightParamForLoop (ref: any, condition: any, animationSpeed: number) {
+  static async setFocusOnRightParam (ref: any, animationSpeed: number) {
+    const rightParamInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.paramInputRef.current.props.id;
+    setFocusById(rightParamInputId);
+    return DetailsForOperators.delay(animationSpeed);
+  }
+
+  static async changeRightParam (ref: any, condition: any, animationSpeed: number) {
     const rightStatementRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
     rightStatementRef.updateParam(condition.rightStatement.rightParam);
     
+    return DetailsForOperators.delay(animationSpeed);
+  }
+
+  static async removeFocusFromRightParam (ref: any, animationSpeed: number) {
+    const rightParamInputId = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.paramInputRef.current.props.id;
+    const rightParamInput = document.getElementById(rightParamInputId);
+    rightParamInput.blur();
     return DetailsForOperators.delay(animationSpeed);
   }
 }
