@@ -40,6 +40,8 @@ import CSvg from "@entity/connection/components/classes/components/content/conne
 import AnimationSpeedSlider from "./AnimationSpeedSlider/AnimationSpeedSlider";
 
 import DetailsForOperators from "./AnimationFunctions/DetailsForOperators";
+import DetailsForProcess from "./AnimationFunctions/DetailsForProcess";
+import { current } from "@reduxjs/toolkit";
 
 //@ts-ignore
 const connectionData = {"nodeId":null,"connectionId":null,"title":"trello connection","description":"desc","fromConnector":{"nodeId":null,"connectorId":1,"title":null,"invoker":{"name":"trello"},"methods":[{"name":"GetBoards","request":{"endpoint":"{url}/1/members/{username}/boards?key={key}&token={token}","body":null,"method":"GET"},"response":{"success":{"status":"200","body":{"type":"array","format":"json","data":"raw","fields":{"name":"","id":""}}},"fail":{"status":"401","body":null}},"index":"0","label":null,"color":"#FFCFB5"}],"operators":[]},"toConnector":{"nodeId":null,"connectorId":1,"title":null,"invoker":{"name":"trello"},"methods":[],"operators":[]},"fieldBinding":[]}
@@ -121,37 +123,6 @@ const HelpBlock = () => {
     CSvg.setViewBox(elementId, viewBox)
   }
 
-  const addOutlineById = async (idsArray: any, withDelay = false) => {
-    positionElementOver(idsArray, 10);
-    
-    if(withDelay){
-      return delay(currentAnimationSpeed)
-    }
-  }
-
-  const removeOutlineById = async (idsArray: any, withDelay = false) => {
-    positionElementOver(idsArray, 10, true);
-    if(withDelay){
-      return delay(currentAnimationSpeed)
-    }
-  }
-
-  const addOutlineByClassName = async (classNamesArray: any, withDelay = false) => {
-    positionElementOverByClassName(classNamesArray, 10);
-    if(withDelay){
-      return delay(currentAnimationSpeed)
-    }
-  }
-
-  const removeOutlineByClassName = async (classNamesArray: any, withDelay = false) => {
-    positionElementOverByClassName(classNamesArray, 10, true);
-    if(withDelay){
-      return delay(currentAnimationSpeed)
-    }
-  }
-
-  // for show if operator details
-
   const showDetailsForOperatorIf = async (condition: any) => {
     if(condition){
       const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
@@ -193,7 +164,6 @@ const HelpBlock = () => {
       setIndex(index + 1);
     }
   }
-
   
   const showDetailsForOperatorLoop = async (condition: any) => {
     if(condition){
@@ -222,343 +192,6 @@ const HelpBlock = () => {
   }
 
   // for show process details
-  const startEditLabel = async (label: any) => {
-    addOutlineById(["Label", "Label_option"]);
-    label.toggleEdit();
-
-    return delay(reference.current)
-  }
-
-  const endEditLabel = async (label: any) => {
-    removeOutlineById(["Label", "Label_option"]);
-    label.cancelEdit();
-
-    return delay(reference.current)
-  }
-
-  const openUrlDialog = async (url: any) => {
-    url.toggleUrlVisibleIcon();
-    addOutlineById(["url_label", "url_option"]);
-      
-    return delay(reference.current)
-  }
-
-  const changeUrlMethod = async (refs: any) => {
-    await addOutlineById([`param_generator_select_${connectorType}_${refs.currentElementId}`], true);
-
-    const connectionMethods = ref.current.props.connection[refs.endpointData.connectorType].methods;
-
-    let method;
-
-    connectionMethods.forEach((element: any) => {
-      if(element.index === refs.endpointData.index){
-        method = element;
-        return;
-      }
-    })
-
-    refs.paramGeneratorRef.updateColor(method)
-
-    addOutlineById([`param_generator_select_${connectorType}_${refs.currentElementId}`]);
-
-    return delay(reference.current)
-  }
-
-  const changeUrlParam = async (refs: any) => {
-    await addOutlineById([`input_no_id`]);
-    refs.paramGeneratorRef.onChangeField(refs.endpointData.param);
-    return delay(reference.current)
-  }
-
-  const addUrlParam = async (refs: any) => {
-    await addOutlineById([`param_generator_add_${connectorType}_${refs.currentElementId}`])
-
-    refs.paramGeneratorRef.addParam()
-    removeOutlineById([`param_generator_add_${connectorType}_${refs.currentElementId}`]);
-    return delay(reference.current)
-  }
-
-  const closeUrlDialog = async (refs: any) => {
-    refs.urlRef.toggleUrlVisibleIcon();
-    return delay(reference.current)
-  }
-
-  const openHeaderDialog = async (refs: any) => {
-    addOutlineById(["header_label", "header_option"]);
-    refs.headerRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.headerRef.current;
-    refs.headerRef.toggleHeaderVisible();
-    return delay(reference.current);
-  }
-
-  const closeHeaderDialog = async (refs: any) => {
-      removeOutlineById(["header_label", "header_option"]);
-      refs.headerRef.toggleHeaderVisible();
-
-      return delay(reference.current)
-  }
-
-  const openBodyDialog = async (refs: any) => {
-    await addOutlineById(["body_label", "body_option"], true);
-
-    removeOutlineById(["body_label", "body_option"]);
-    refs.bodyRef.toggleBodyVisible();
-  
-    return delay(reference.current);
-  }
-
-  const openBodyObject = async (refs: any) => {
-    await addOutlineByClassName(['.react-json-view .icon-container'], true);
-
-    refs.collapse = document.querySelector('.react-json-view .collapsed-icon');
-    refs.collapse.click()
-
-    return delay(reference.current);
-  }
-
-  const displayBodyAddKeysButton = async () => {
-    let addButton = document.querySelector('.react-json-view .click-to-add');
-    // @ts-ignore
-    addButton.style.display = 'inline-block';
-    addOutlineByClassName(['.react-json-view .click-to-add'])
-    return delay(reference.current);
-  }
-
-  const clickAddKeysButton = async () => {
-    const addButton = document.querySelector('.react-json-view .click-to-add-icon');
-    // @ts-ignore
-    addButton.click()
-      
-    return delay(reference.current)
-  }
-
-  const addBodyKeyName = async (keyName: any) => {
-    await addOutlineByClassName(['.react-json-view .key-modal-input'], true);
-
-    const input = document.querySelector('.react-json-view .key-modal-input')
-    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-    nativeInputValueSetter.call(input, keyName);
-    const inputEvent = new Event('input', { bubbles: true});
-    input.dispatchEvent(inputEvent);
-        
-    return delay(reference.current)
-  }
-
-  const displaySubmitButtonToAddKey = async () => {
-    const submitButton = document.querySelector('.react-json-view .key-modal-submit');
-    // @ts-ignore
-    submitButton.style = 'position: absolute; width: 1em; height: 1em; right: 0;';
-    addOutlineByClassName(['.react-json-view .key-modal-submit']);
-    
-    return delay(reference.current)
-  }
-
-  const clickSubmitButtonToAddKey = async () => {
-    removeOutlineByClassName(['.react-json-view .key-modal-submit']);
-    const submitButton = document.querySelector('.react-json-view .key-modal-submit');
-    // @ts-ignore
-    submitButton.click()
-    
-    return delay(reference.current)
-  }
-
-  const displayEditKeyValueButton = async (index: any) => {
-    const editButton = document.querySelectorAll('.react-json-view .click-to-edit');
-    // @ts-ignore
-    editButton[index].style.display = 'inline-block';
-    addOutlineByClassName(['.react-json-view .click-to-edit'])
-
-    return delay(reference.current)
-  }
-
-  const clickEditKeyValueButton = async (index: any) => {
-    removeOutlineByClassName(['.react-json-view .click-to-edit']);
-    const edit = document.querySelectorAll('.react-json-view .click-to-edit-icon');
-    // @ts-ignore
-    edit[index].click();
-
-    return delay(reference.current);
-  }
-
-  const addBodyKeyValue = async (keyValue: any) => {
-    await addOutlineByClassName(['.react-json-view .variable-editor'], true);
-        
-    removeOutlineByClassName(['.react-json-view .variable-editor'])
-    const textarea = document.querySelector('.react-json-view .variable-editor');
-    const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-    nativeTextAreaValueSetter.call(textarea, keyValue);
-    const inputEvent = new Event('input', { bubbles: true});
-    textarea.dispatchEvent(inputEvent);
-
-    return delay(reference.current);
-  }
-
-  const changeBodyMethod = async (refs: any, bodyData: any, bodyDataIndex: any, referenceIndex: any, methodIndex: any) => {
-
-    const currentItemId = ref.current.props.currentTechnicalItem.id;
-    await addOutlineById([`param_generator_select_${currentItemId}`], true);
-
-    const connectionMethods = ref.current.props.connection[bodyData[bodyDataIndex].reference[referenceIndex].method[methodIndex].fromConnector].methods;
-    
-    let method;
-
-    connectionMethods.forEach((element: any) => {
-      if(element.index === bodyData[bodyDataIndex].reference[referenceIndex].method[methodIndex].index){
-        method = element;
-        return;
-      }
-    });
-    
-    refs.bodyRef.JsonBodyRef.current.props.ReferenceComponent.self.current.updateColor(method);
-
-    return delay(reference.current)
-  }
-
-  const changeBodyParam = async (refs: any, bodyData: any, bodyIndex: number, referenceIndex: number, methodIndex: number) => {
-    await addOutlineById([`input_no_id`], true)
-
-    refs.bodyRef.JsonBodyRef.current.props.ReferenceComponent.self.current.onChangeField(bodyData[bodyIndex].reference[referenceIndex].method[methodIndex].param)
-
-    return delay(reference.current)
-  }
-
-  const addBodyMethodAndParam = async (refs: any) => {
-    const currentItemId = ref.current.props.currentTechnicalItem.id;
-    await addOutlineById([`param_generator_add_${currentItemId}`])
-
-    removeOutlineById([`param_generator_add_${currentItemId}`])
-    refs.bodyRef.JsonBodyRef.current.props.ReferenceComponent.self.current.submitEdit()
-    return delay(reference.current)
-  }
-
-  const clickOnReferenceElements = async (bodyIndex: number) => {
-    const referenceElement = document.querySelectorAll('.reference_element');
-    referenceElement[bodyIndex].classList.add(`reference_element_${bodyIndex}`);
-    await addOutlineByClassName([`.reference_element_${bodyIndex}`], true);
-
-    removeOutlineByClassName([`.reference_element_${bodyIndex}`]);
-
-    // @ts-ignore
-    referenceElement[bodyIndex].click();
-
-    return delay(reference.current);
-  }
-
-  const changeReferenceDescription = async (bodyData: any, bodyIndex: number, referenceIndex: number) => {
-    await addOutlineById(['enhancement_description'], true);
-
-    const textarea = document.querySelector('#enhancement_description');
-    const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-    nativeTextAreaValueSetter.call(textarea, bodyData[bodyIndex].reference[referenceIndex].enhancementDescription);
-    const inputEvent = new Event('input', { bubbles: true});
-    textarea.dispatchEvent(inputEvent);
-
-    return delay(reference.current)
-  }
-
-  const changeReferenceContent = async (refs: any, bodyData: any, bodyDataIndex: number, referenceIndex: number) => {
-    await removeOutlineById(['enhancement_description']);
-    await addOutlineByClassName(['.ace_content'], true);
-
-    refs.bodyRef.enhancementRef.current.props.onChange(bodyData[bodyDataIndex].reference[referenceIndex].enhancementContent);
-
-    await removeOutlineByClassName(['.ace_content']);
-
-    return delay(reference.current);
-  }
-
-  const clickSubmitButtonToAddValue = async () => {
-    await addOutlineByClassName(['.react-json-view .edit-check']);
-
-    await removeOutlineByClassName(['.react-json-view .edit-check'], true);
-    const editSubmitButton = document.querySelector('.react-json-view .edit-check');
-    // @ts-ignore
-    editSubmitButton.click();
-
-    return delay(reference.current);
-  }
-
-  const closeBodyDialog = async (refs: any) => {
-    refs.bodyRef.toggleBodyVisible();
-
-    return delay(reference.current);
-  }
-
-  const showResponse = async () => {
-    await addOutlineById(["response_label"], true);
-    
-    ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.toggleResponseVisibleIcon();
-    await removeOutlineById(["response_label"], true);
-
-    return delay(reference.current);
-  }
-
-  const deleteLastProcess = async () => {
-    const processRef = ref.current.technicalLayoutRef.current.svgRef.current.processRef.current;
-    await addOutlineById(['delete_icon'], true);
-
-    await removeOutlineById(['delete_icon'])
-    processRef.deleteProcess();
-
-    return delay(reference.current);
-  }
-
-  const showResult = async () => {
-    const technicalLayout = document.getElementById('modal_technical_layout_svg');
-      // @ts-ignore
-      technicalLayout.style = `
-        height: auto;
-        width: 1000px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        overflow: visible;
-      `;
-
-      const setSvgViewBox = (elementId: string) => {
-        const svgElement = document.getElementById(elementId);
-        const viewBoxValue = svgElement.getAttribute('viewBox');
-        const fromConnectorPanel = svgElement.querySelector('#fromConnector_panel_modal');
-        const toConnectorPanel = svgElement.querySelector('#toConnector_panel_modal');
-
-        const fromConnectorHeight = fromConnectorPanel.getBoundingClientRect().height;
-        const toConnectorHeight = toConnectorPanel.getBoundingClientRect().height;
-
-        const svgElementHeight = svgElement.getBoundingClientRect().height;
-        const svgElementWidth = svgElement.getBoundingClientRect().width;
-  
-        const fromConnectorWidth = fromConnectorPanel.getBoundingClientRect().width;
-        const toConnectorWidth = toConnectorPanel.getBoundingClientRect().width;
-  
-        const [x, y, width, height] = viewBoxValue.split(' ').map(parseFloat);
-  
-        let offsetX = ((fromConnectorWidth + toConnectorWidth + 50) - svgElementWidth) / 2;
-        let offsetY;
-
-        if(fromConnectorHeight > toConnectorHeight){
-          if(fromConnectorHeight > svgElementHeight){
-            offsetY = Math.abs(svgElementHeight - fromConnectorHeight);
-          }
-          else{
-            offsetY = fromConnectorHeight - svgElementHeight 
-          }
-        }
-        else{
-          if(toConnectorHeight > svgElementHeight){
-            offsetY = Math.abs(svgElementHeight - toConnectorHeight);
-          }
-          else{
-            offsetY = toConnectorHeight - svgElementHeight
-          }
-        }
-
-        const viewBox = {x: offsetX, y: offsetY, width: width, height: height};
-  
-        CSvg.setViewBox(elementId, viewBox)
-      }
-      dispatch(toggleModalDetails())
-      setSvgViewBox('modal_technical_layout_svg');
-  }
 
   const showDetailsForProcess = async () => {
     const refs: any = {};
@@ -566,107 +199,95 @@ const HelpBlock = () => {
     refs.animationData = animationData[videoAnimationName][connectorType][index];
     refs.endpointData = refs.animationData.endpoint;
     refs.currentElementId = refs.animationData.index;
-
-    await delay(reference.current)
     
     if(refs.animationData.label){
-      refs.labelRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.labelRef.current;
-      await startEditLabel(refs.labelRef)
-    
-      await endEditLabel(refs.labelRef)
+      await DetailsForProcess.startEditLabel(ref, currentAnimationSpeed);
+
+      await DetailsForProcess.endEditLabel(ref, currentAnimationSpeed);
     }
     
     if(refs.endpointData){
-      refs.urlRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current;
-      
-      await openUrlDialog(refs.urlRef)
-      
-      refs.paramGeneratorRef = refs.urlRef.endpointRef.current.paramGeneratorRef.current;
+      await DetailsForProcess.openUrlDialog(ref, currentAnimationSpeed);
 
-      await changeUrlMethod(refs)
-    
-      await changeUrlParam(refs);
-    
-      await addUrlParam(refs);
+      await DetailsForProcess.changeUrlMethod(ref, refs.animationData, connectorType, currentAnimationSpeed);
 
-      await closeUrlDialog(refs);
+      await DetailsForProcess.changeUrlParam(ref, refs.animationData, currentAnimationSpeed);
+
+      await DetailsForProcess.addUrlParam(ref, refs.animationData, connectorType, currentAnimationSpeed);
+
+      await DetailsForProcess.closeUrlDialog(ref, currentAnimationSpeed);
     }
     
     if(connectorType === 'fromConnector' && index === 0){
-      await openHeaderDialog(refs);
-    
-      await closeHeaderDialog(refs);
+      await DetailsForProcess.openHeaderDialog(ref, currentAnimationSpeed);
+
+      await DetailsForProcess.closeHeaderDialog(ref, currentAnimationSpeed);
     }
     
     const bodyData = refs.animationData.body;
 
     if(bodyData){
-      refs.bodyRef = ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current;
+      await DetailsForProcess.openBodyDialog(ref, currentAnimationSpeed);
 
-      await openBodyDialog(refs);
-  
-      await openBodyObject(refs);
+      await DetailsForProcess.openBodyObject(currentAnimationSpeed);
       
-      for(let i = 0; i < bodyData.length; i++){
-        await displayBodyAddKeysButton();
+      for(let bodyIndex = 0; bodyIndex < bodyData.length; bodyIndex++){
+        await DetailsForProcess.displayBodyAddKeysButton(currentAnimationSpeed);
 
-        await clickAddKeysButton();
+        await DetailsForProcess.clickAddKeysButton(currentAnimationSpeed);
 
-        await addBodyKeyName(bodyData[i].keyName);
+        await DetailsForProcess.addBodyKeyName(bodyData[bodyIndex].keyName, currentAnimationSpeed);
 
-        await displaySubmitButtonToAddKey()
+        await DetailsForProcess.displaySubmitButtonToAddKey(currentAnimationSpeed);
 
-        await clickSubmitButtonToAddKey()
+        await DetailsForProcess.clickSubmitButtonToAddKey(currentAnimationSpeed);
+
+        await DetailsForProcess.displayEditKeyValueButton(bodyIndex, currentAnimationSpeed);
+
+        await DetailsForProcess.clickEditKeyValueButton(bodyIndex, currentAnimationSpeed);
+
+        await DetailsForProcess.addBodyKeyValue(bodyData[bodyIndex].keyValue, currentAnimationSpeed);
         
-        await displayEditKeyValueButton(i);
+        if(bodyData[bodyIndex].keyValue === '#'){
+          for(let referenceIndex = 0; referenceIndex < bodyData[bodyIndex].reference.length; referenceIndex++) {
+            for(let methodIndex = 0; methodIndex < bodyData[bodyIndex].reference[referenceIndex].method.length; methodIndex++){
+              if(methodIndex > 0){
+                await DetailsForProcess.displayEditKeyValueButton(bodyIndex, currentAnimationSpeed);
 
-        await clickEditKeyValueButton(i);
-
-        await addBodyKeyValue(bodyData[i].keyValue)
-        
-        if(bodyData[i].keyValue === '#'){
-          
-          for(let referenceCount = 0; referenceCount < bodyData[i].reference.length; referenceCount++) {
-            for(let methodCount = 0; methodCount < bodyData[i].reference[referenceCount].method.length; methodCount++){
-              if(methodCount > 0){
-                await displayEditKeyValueButton(i);
-            
-                await clickEditKeyValueButton(i);
+                await DetailsForProcess.clickEditKeyValueButton(bodyIndex, currentAnimationSpeed);
               }
 
-              await changeBodyMethod(refs, bodyData, i, referenceCount, methodCount);
+              await DetailsForProcess.changeBodyMethod(ref, bodyData, bodyIndex, referenceIndex, methodIndex, currentAnimationSpeed);
 
-              await changeBodyParam(refs, bodyData, i, referenceCount, methodCount)
+              await DetailsForProcess.changeBodyParam(ref, bodyData, bodyIndex, referenceIndex, methodIndex, currentAnimationSpeed);
 
-              await addBodyMethodAndParam(refs);
+              await DetailsForProcess.addBodyMethodAndParam(ref, currentAnimationSpeed);
             }
 
-            if(connectorType === 'toConnector' && bodyData[i].reference[referenceCount].enhancementDescription){
+            if(connectorType === 'toConnector' && bodyData[bodyIndex].reference[referenceIndex].enhancementDescription){
+              await DetailsForProcess.clickOnReferenceElements(bodyIndex, currentAnimationSpeed);
 
-              await clickOnReferenceElements(i);
+              await DetailsForProcess.changeReferenceDescription(bodyData, bodyIndex, referenceIndex, currentAnimationSpeed);
 
-              await changeReferenceDescription(bodyData, i, referenceCount);
-
-              await changeReferenceContent(refs, bodyData, i, referenceCount);
+              await DetailsForProcess.changeReferenceContent(ref, bodyData, bodyIndex, referenceIndex, currentAnimationSpeed);
             }
           }
         }
         else{
-          await clickSubmitButtonToAddValue();
+          await DetailsForProcess.clickSubmitButtonToAddValue(currentAnimationSpeed);
         }
       }
-      await closeBodyDialog(refs);
+      await DetailsForProcess.closeBodyDialog(ref, currentAnimationSpeed);
     }
             
     if(connectorType === 'fromConnector' && index === 0){
-      await showResponse();
+      await DetailsForProcess.showResponse(ref, currentAnimationSpeed);
     }
   
     if(index === animationData[videoAnimationName].toConnector.length - 1 && connectorType === 'toConnector'){
+      await DetailsForProcess.deleteLastProcess(ref, currentAnimationSpeed);
 
-      await deleteLastProcess();
-      
-      await showResult();
+      await DetailsForProcess.showResult(dispatch, currentAnimationSpeed);
       
       setIndex(index + 1);
     }
@@ -687,7 +308,6 @@ const HelpBlock = () => {
     const svgRef = ref.current.technicalLayoutRef.current.svgRef.current;
 
     const connectorPanel = connectorPanelType === 'fromConnector' ? svgRef.fromConnectorPanelRef.current : svgRef.toConnectorPanelRef.current;
-    
     
     delay(reference.current)
     .then(() => {

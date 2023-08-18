@@ -9,38 +9,38 @@ const animationData: IAnimationData = {
         type: "process",
         name: "GetBoards",
         label: "first process",
-        // body: [
-        //   {
-        //     keyName: "firstKeyName",
-        //     keyValue: "firstKeyValue",
-        //   },
-        //   {
-        //     keyName: "secondKeyName",
-        //     keyValue: "secondKeyValue",
-        //   },
-        // ]
+        body: [
+          {
+            keyName: "firstKeyName",
+            keyValue: "firstKeyValue",
+          },
+          {
+            keyName: "secondKeyName",
+            keyValue: "secondKeyValue",
+          },
+        ]
       },
+      // {
+      //   index: "1",
+      //   type: "operator",
+      //   name: "if",
+      //   conditionForIf: {
+      //     leftStatement: {
+      //       fromConnector: "fromConnector",
+      //       leftMethodIndex: "0",
+      //       leftParam: '[0].ifLeftParam',
+      //     },
+      //     relationalOperator: "Contains",
+      //     rightStatement: {
+      //       fromConnector: "fromConnector",
+      //       property: 'id',
+      //       rightMethodIndex: '0',
+      //       rightParam: '[0].ifRightParam',
+      //     }
+      //   }
+      // },
       {
         index: "1",
-        type: "operator",
-        name: "if",
-        conditionForIf: {
-          leftStatement: {
-            fromConnector: "fromConnector",
-            leftMethodIndex: "0",
-            leftParam: '[0].ifLeftParam',
-          },
-          relationalOperator: "Contains",
-          rightStatement: {
-            fromConnector: "fromConnector",
-            property: 'id',
-            rightMethodIndex: '0',
-            rightParam: '[0].ifRightParam',
-          }
-        }
-      },
-      {
-        index: "2",
         type: "process",
         name: "GetBoardList",
         label: "down",
