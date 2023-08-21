@@ -91,13 +91,15 @@ class Form extends React.Component{
         if(JSON.stringify(prevErrors) !== JSON.stringify(curErrors)){
             const {entity} = this.state;
             const {setCurrentTechnicalItem, currentTechnicalItem} = this.props;
-            const fromConnectorErrors = curErrors.operators.fromConnector;
-            const toConnectorErrors = curErrors.operators.toConnector;
+            const fromConnectorOperatorErrors = curErrors.operators.fromConnector;
+            const toConnectorOperatorErrors = curErrors.operators.toConnector;
+            const fromConnectorMethodErrors = curErrors.methods.fromConnector;
+            const toConnectorMethodErrors = curErrors.methods.toConnector;
             let hasErrors = false;
             let currentItem = null;
-            if(fromConnectorErrors.length > 0){
-                hasErrors = entity.fromConnector.setErrorsForOperators(fromConnectorErrors);
-                currentItem = entity.fromConnector.getSvgElementByIndex(fromConnectorErrors[0].index);
+            if(fromConnectorOperatorErrors.length > 0){
+                hasErrors = entity.fromConnector.setErrorsForOperators(fromConnectorOperatorErrors);
+                currentItem = entity.fromConnector.getSvgElementByIndex(fromConnectorOperatorErrors[0].index);
                 const currentItemInConnector = entity.fromConnector.getCurrentItem();
                 if (currentItemInConnector) {
                     if (currentItemInConnector.index !== currentItem.entity.index || (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)) {
@@ -107,11 +109,35 @@ class Form extends React.Component{
                     }
                 }
             }
-            if(toConnectorErrors.length > 0){
-                hasErrors = entity.toConnector.setErrorsForOperators(toConnectorErrors);
-                currentItem = entity.toConnector.getSvgElementByIndex(toConnectorErrors[0].index);
+            if(toConnectorOperatorErrors.length > 0){
+                hasErrors = entity.toConnector.setErrorsForOperators(toConnectorOperatorErrors);
+                currentItem = entity.toConnector.getSvgElementByIndex(toConnectorOperatorErrors[0].index);
                 const currentItemInConnector = entity.toConnector.getCurrentItem();
                 if (!currentItem && currentItemInConnector) {
+                    if (currentItemInConnector.index !== currentItem.entity.index || (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)) {
+                        entity.toConnector.setCurrentItem(currentItem.entity);
+                    } else{
+                        currentItem = null;
+                    }
+                }
+            }
+            if(fromConnectorMethodErrors.length > 0){
+                hasErrors = entity.fromConnector.setErrorsForMethods(fromConnectorMethodErrors);
+                currentItem = entity.fromConnector.getSvgElementByIndex(fromConnectorMethodErrors[0].index);
+                const currentItemInConnector = entity.fromConnector.getCurrentItem();
+                if (currentItemInConnector) {
+                    if (currentItemInConnector.index !== currentItem.entity.index || (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)) {
+                        entity.fromConnector.setCurrentItem(currentItem.entity);
+                    } else{
+                        currentItem = null;
+                    }
+                }
+            }
+            if(toConnectorMethodErrors.length > 0){
+                hasErrors = entity.toConnector.setErrorsForMethods(toConnectorMethodErrors);
+                currentItem = entity.toConnector.getSvgElementByIndex(toConnectorMethodErrors[0].index);
+                const currentItemInConnector = entity.toConnector.getCurrentItem();
+                if (currentItemInConnector) {
                     if (currentItemInConnector.index !== currentItem.entity.index || (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)) {
                         entity.toConnector.setCurrentItem(currentItem.entity);
                     } else{

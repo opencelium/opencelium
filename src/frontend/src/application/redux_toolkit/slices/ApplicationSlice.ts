@@ -26,7 +26,7 @@ import {
     ResourcesProps
 } from "../../requests/interfaces/IApplication";
 import {
-    addTicket, checkConnection, getAllComponents, getGlobalSearchData,
+    addTicket, getAllComponents, getGlobalSearchData,
     getLogoName, getResources, getVersion,
     openExternalUrl, requestRemoteApi, updateResources,
     updateThemes,
@@ -39,7 +39,6 @@ import {isJsonString} from "@application/utils/utils";
 
 
 export interface AuthState extends ICommonState{
-    checkingConnection: API_REQUEST_STATE,
     gettingLogoName: API_REQUEST_STATE,
     addingTicket: API_REQUEST_STATE,
     gettingVersion: API_REQUEST_STATE,
@@ -88,7 +87,6 @@ const gridViewType: GridViewType = storage.get('gridViewType');
 const searchFields = storage.get('searchFields') || {};
 const currentPages = storage.get('currentPages') || {};
 const initialState: AuthState = {
-    checkingConnection: API_REQUEST_STATE.INITIAL,
     gettingLogoName: API_REQUEST_STATE.INITIAL,
     addingTicket: API_REQUEST_STATE.INITIAL,
     gettingVersion: API_REQUEST_STATE.INITIAL,
@@ -218,17 +216,6 @@ export const applicationSlice = createSlice({
         },
         [getVersion.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingVersion = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
-        },
-        [checkConnection.pending.type]: (state) => {
-            state.checkingConnection = API_REQUEST_STATE.START;
-        },
-        [checkConnection.fulfilled.type]: (state) => {
-            state.checkingConnection = API_REQUEST_STATE.FINISH;
-            state.error = null;
-        },
-        [checkConnection.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.checkingConnection = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [getResources.pending.type]: (state) => {

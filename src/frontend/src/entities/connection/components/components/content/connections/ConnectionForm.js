@@ -36,6 +36,7 @@ import ContentLoading from "@app_component/base/loading/ContentLoading";
 import {ConnectionPermissions} from "@root/constants";
 import {IF_OPERATOR} from "@classes/content/connection/operator/COperatorItem";
 import LoadTemplate from "@change_component/form_elements/form_connection/form_methods/LoadTemplate";
+import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
 
 /**
  * common component to add and update Connection
@@ -63,7 +64,7 @@ export function ConnectionForm(type) {
                         toConnector: '',
                         template: '',
                     },
-                    validateLogicResult: {toggleFlag: false, operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}},
+                    validateLogicResult: {toggleFlag: false, operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}, methods: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}},
                     connection: CConnection.createConnection(),
                     entity: null,
                     mode: EXPERT_MODE,
@@ -345,7 +346,7 @@ export function ConnectionForm(type) {
             validateLogic(entity) {
                 const fromConnectorOperators = entity.fromConnector.operators;
                 const toConnectorOperators = entity.toConnector.operators;
-                const errors = {operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}};
+                const errors = {operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}, methods: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}};
                 const checkOperator = (connector, connectorType) => {
                     connector.forEach((operator) => {
                         const condition = operator.condition;
@@ -364,9 +365,37 @@ export function ConnectionForm(type) {
                         }
                     })
                 }
+                const checkFieldBinding = () => {
+                    entity.fieldBinding.forEach((binding) => {
+                        let newError = '';
+                        if(binding.to){
+                            if(binding.to.length === 1){
+                                if(binding.enhancement.expertCode.split(CEnhancement.generateNotExistVar()).length > 1){
+                                    newError = `Such variable does not exist in the enhancement for the field: ${binding.to[0].field}.`;
+                                }
+                            }
+                        }
+                        if(newError){
+                            const color = binding.to[0].color;
+                            const index = entity.getMethodByColor(color).index;
+                            const connectorType = entity.getConnectorByMethodColor(color).getConnectorType();
+                            let findIndex = errors.methods[connectorType].findIndex(e => e.index === index);
+                            if(findIndex === -1){
+                                errors.methods[connectorType].push({
+                                    index: entity.getMethodByColor(color).index,
+                                    location: 'request.body.fields',
+                                    errors: [newError],
+                                })
+                            } else{
+                                errors.methods[connectorType][findIndex].errors.push(newError);
+                            }
+                        }
+                    })
+                }
                 checkOperator(fromConnectorOperators, CONNECTOR_FROM);
                 checkOperator(toConnectorOperators, CONNECTOR_TO);
-                const hasErrors = errors.operators[CONNECTOR_FROM].length > 0 || errors.operators[CONNECTOR_TO].length > 0;
+                checkFieldBinding();
+                const hasErrors = errors.operators[CONNECTOR_FROM].length > 0 || errors.operators[CONNECTOR_TO].length > 0 || errors.methods[CONNECTOR_FROM].length > 0 || errors.methods[CONNECTOR_TO].length > 0;
                 return {passed: !hasErrors, result: errors};
             }
 

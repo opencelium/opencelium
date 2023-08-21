@@ -30,6 +30,7 @@ import {markFieldNameAsArray} from "@change_component//form_elements/form_connec
 import GraphQLBody from "@change_component/form_elements/form_connection/form_methods/method/GraphQLBody";
 import ReferenceInformation
     from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/reference_information/ReferenceInformation";
+import {withTheme} from "styled-components";
 
 
 class Body extends React.Component{
@@ -275,14 +276,15 @@ class Body extends React.Component{
     }
 
     render(){
-        const {connector, isExtended, isCurrentInfo, method, isBodyDialogOpened} = this.props;
+        const {connector, isExtended, isCurrentInfo, method, isBodyDialogOpened, hasError, theme} = this.props;
+        const errorColor = hasError ? theme?.input?.error?.color || '#9b2e2e' : 'unset';
         const isGraphQLData = method.isGraphQLData();
         const hasEnhancement = this.props.hasEnhancement && !isGraphQLData;
         return(
             <React.Fragment>
-                <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
+                <Col xs={4} className={`${styles.col} ${styles.entry_padding}`} style={{color: errorColor}}>{`Body`}</Col>
                 <Col xs={8} className={`${styles.col}`}>
-                    <TooltipFontIcon onClick={(a) => this.toggleBodyVisible(a)} size={14} value={<span className={styles.more_details}>{`...`}</span>} tooltip={'Body'}/>
+                    <TooltipFontIcon onClick={(a) => this.toggleBodyVisible(a)} size={14} value={<span className={styles.more_details} style={{color: errorColor}}>{`...`}</span>} tooltip={'Body'}/>
                 </Col>
                 {isExtended && isCurrentInfo &&
                     ReactDOM.createPortal(
@@ -310,6 +312,7 @@ class Body extends React.Component{
 Body.defaultProps = {
     isDraft: false,
     hasEnhancement: true,
+    hasError: false,
 };
 
-export default Body;
+export default withTheme(Body);

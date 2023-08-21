@@ -28,6 +28,7 @@ import Body from "@change_component/form_elements/form_connection/form_svg/detai
 import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
+import {withTheme} from "styled-components";
 
 function mapStateToProps(state){
     const editor = state.connectionEditorReducer;
@@ -76,7 +77,8 @@ class TechnicalProcessDescription extends React.Component{
         const {isResponseVisible} = this.state;
         const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo, readOnly,
             isResponseFailDialogOpened, isResponseSuccessDialogOpened, isRequestBodyDialogOpened,
-            toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog
+            toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog,
+            theme,
         } = this.props;
         const methodItem = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
@@ -92,6 +94,11 @@ class TechnicalProcessDescription extends React.Component{
             {name: 'Format', value: requestFormat},
         ];
         const label = details && details.entity ? details.entity.label || '' : '';
+        const errors = connector ? connector.getMethodByIndex(methodItem.index)?.error || null : null;
+        const hasErrors = !!errors.hasError;
+        const isErrorLocationRequest = hasErrors ? errors?.location.indexOf('request') !== -1 : false;
+        const isErrorLocationBody = hasErrors ? errors?.location.indexOf('body') !== -1 : false;
+        const errorColor = theme?.input?.error?.color || '#9b2e2e';
         return(
             <Row className={styles.row}>
                 <Name {...this.props}/>
@@ -113,9 +120,17 @@ class TechnicalProcessDescription extends React.Component{
                         <Col xs={8} className={`${styles.col}`}><span className={styles.value}>{request.method}</span></Col>
                         <Url readOnly={readOnly} nameOfCurrentInfo={'request_url'} isCurrentInfo={currentInfo === 'request_url'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} request={request} connection={connection} updateConnection={updateConnection} method={methodItem} connector={connector}/>
                         <Header nameOfCurrentInfo={'request_header'} isCurrentInfo={currentInfo === 'request_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={request.header}/>
-                        <Body toggleBodyDialog={toggleRequestBodyDialog} isBodyDialogOpened={isRequestBodyDialogOpened} readOnly={readOnly} nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem} bodyTitle={'Request data'}/>
+                        <Body toggleBodyDialog={toggleRequestBodyDialog} isBodyDialogOpened={isRequestBodyDialogOpened} readOnly={readOnly} nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem}
+                              bodyTitle={"Request data"}
+                              hasError={isErrorLocationRequest && isErrorLocationBody}
+                        />
                     </Row>
                 </Col>
+                {
+                    isErrorLocationRequest ? errors.messages.map(error => {
+                        return <div style={{color: errorColor}}>{error}</div>
+                    }) : null
+                }
                 <Col xs={12} className={styles.col}>
                     <b>{`Response`}</b>
                     <TooltipFontIcon className={styles.response_toggle_icon} onClick={(a) => this.toggleResponseVisibleIcon(a)} tooltip={isResponseVisible ? 'Hide' : 'Show'} value={isResponseVisible ? 'arrow_drop_up' : 'arrow_drop_down'}/>
@@ -143,4 +158,4 @@ class TechnicalProcessDescription extends React.Component{
     }
 }
 
-export default TechnicalProcessDescription;
+export default withTheme(TechnicalProcessDescription);

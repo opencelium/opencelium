@@ -4,6 +4,7 @@ import {ColorTheme} from "@style/Theme";
 import {TextSize} from "@app_component/base/text/interfaces";
 import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
 import CConnection from "@classes/content/connection/CConnection";
+import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
 
 interface PointerProps{
     pointer: string,
@@ -30,7 +31,7 @@ const Pointer: FC<PointerProps> = ({connection, pointer, pointers, submitEdit, o
         if(filteredIndex !== -1 && updatedEnhancement){
             for(let i = filteredIndex; i < pointers.length; i++){
                 if(i === filteredIndex){
-                    updatedEnhancement.expertCode = updatedEnhancement.expertCode.split(`VAR_${i}`).join(`NOT_EXIST`)
+                    updatedEnhancement.expertCode = updatedEnhancement.expertCode.split(`VAR_${i}`).join(CEnhancement.generateNotExistVar())
                 } else{
                     updatedEnhancement.expertCode = updatedEnhancement.expertCode.split(`VAR_${i}`).join(`VAR_${i - 1}`)
                 }
