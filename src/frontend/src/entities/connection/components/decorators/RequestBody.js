@@ -297,12 +297,10 @@ export function RequestBody(CRequestType){
                                 updateBody={(a) => this.updateBody(a)}
                                 PointerComponent={{
                                     getComponent: (params) => {
-                                        const {submitEdit, pointer, pointers} = params;
                                         return (
                                             <Pointer
-                                                pointer={pointer}
-                                                pointers={pointers}
-                                                submitEdit={submitEdit}
+                                                {...params}
+                                                connection={connection}
                                             />
                                         );},
                                     id: `${id}_pointer_component`,
