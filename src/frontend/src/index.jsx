@@ -12,7 +12,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+import './scripts/config';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {Provider} from "react-redux";
