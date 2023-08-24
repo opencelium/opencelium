@@ -13,9 +13,6 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-//TODO separate this file into application url and entity application url
-import SETTINGS from '../../../../../settings.json'
-
 const isBuild = false;
 
 let {protocol, hostname, port, pathname} = window.location;
@@ -23,13 +20,13 @@ if(isBuild){
     protocol = 'https:';
     hostname = 'opencelium-demo.becon.de';
 }
-const apiPort = SETTINGS.PORT.API;
-const socketPort = SETTINGS.PORT.SOCKET;
-const kibanaPort = SETTINGS.PORT.KIBANA;
-const neo4jPort = SETTINGS.PORT.NEO4J;
-if(SETTINGS.hasOwnProperty('PROTOCOL') && SETTINGS.PROTOCOL !== '') protocol = SETTINGS.PROTOCOL;
-if(SETTINGS.hasOwnProperty('HOSTNAME') && SETTINGS.HOSTNAME !== '') hostname = SETTINGS.HOSTNAME;
-if(SETTINGS.PORT.hasOwnProperty('APPLICATION') && SETTINGS.PORT.APPLICATION !== '0') port = SETTINGS.PORT.APPLICATION;
+const apiPort = window.config.env.urlInfo.port.api;
+const socketPort = window.config.env.urlInfo.port.socket;
+const kibanaPort = window.config.env.urlInfo.port.kibana;
+const neo4jPort = window.config.env.urlInfo.port.neo4j;
+if(window.config.env.urlInfo.hasOwnProperty('protocol') && window.config.env.urlInfo.protocol !== '') protocol = window.config.env.urlInfo.protocol;
+if(window.config.env.urlInfo.hasOwnProperty('hostname') && window.config.env.urlInfo.hostname !== '') hostname = window.config.env.urlInfo.hostname;
+if(window.config.env.urlInfo.port.hasOwnProperty('application')) port = window.config.env.urlInfo.port.application;
 
 export {protocol, hostname, port};
 

@@ -23,4 +23,5 @@ export interface LoginIconStyledProps{
 export interface LoginIconProps{
     login: () => void;
     logining?: API_REQUEST_STATE,
+    hasAnimation?: boolean,
 }

@@ -68,6 +68,10 @@ const getConfig = ({isBuild, envVar}) => {
             to: path.resolve(__dirname, 'dist/locales')
         },
         {
+            from: path.resolve(__dirname, 'src/scripts'),
+            to: path.resolve(__dirname, 'dist/scripts')
+        },
+        {
             from: path.resolve(__dirname, 'src/img'),
             to: path.resolve(__dirname, isBuild ? 'dist/img' : 'dist')
         },

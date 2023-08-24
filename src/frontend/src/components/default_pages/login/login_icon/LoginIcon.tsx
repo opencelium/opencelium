@@ -24,6 +24,7 @@ import {LoginIconStyled} from './styles';
 const LoginIcon: FC<LoginIconProps> =
     ({
         login,
+        hasAnimation,
      }) => {
         const {
             isAuth,
@@ -31,11 +32,15 @@ const LoginIcon: FC<LoginIconProps> =
         } = Auth.getReduxState();
         const [hasRotation, toggleRotation] = useState(false);
         const onClick = () => {
-            toggleRotation(true);
-            setTimeout(() => {
-                toggleRotation(false);
+            if(hasAnimation){
+                toggleRotation(true);
+                setTimeout(() => {
+                    toggleRotation(false);
+                    login();
+                }, 800);
+            } else{
                 login();
-            }, 800);
+            }
         }
         return (
             <LoginIconStyled hasRotation={hasRotation} isAuth={false}>
@@ -45,6 +50,7 @@ const LoginIcon: FC<LoginIconProps> =
     }
 
 LoginIcon.defaultProps = {
+    hasAnimation: true,
 }
 
 

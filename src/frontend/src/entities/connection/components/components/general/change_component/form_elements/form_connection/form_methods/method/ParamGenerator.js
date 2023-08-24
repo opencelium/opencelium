@@ -95,7 +95,7 @@ class ParamGenerator extends Component {
      * to change field value
      */
     onChangeField(field){
-        this.setState({field}, this.setIdValue());
+        this.setState({field}, () => this.setIdValue());
     }
 
     /**

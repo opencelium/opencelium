@@ -48,5 +48,8 @@ export const Global = createGlobalStyle`
     .fade{
         transition: none !important;
     }
+    .hide_dialog_content{
+        border: none;
+    }
     ${SlickCarousel}
 `;

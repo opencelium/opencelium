@@ -15,8 +15,10 @@
 
 import ApplicationCreators from "./ApplicationCreators";
 import AuthCreators from "./AuthCreators";
+import CheckConnectionCreators from "./CheckConnectionCreators";
 
 export default {
     ...ApplicationCreators,
     ...AuthCreators,
+    ...CheckConnectionCreators,
 }

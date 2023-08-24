@@ -698,6 +698,33 @@ export default class CConnection{
         }
     }
 
+    removeDuplicatesFromFieldBinding(){
+        this.fieldBinding = this.fieldBinding.filter((binding1, index, self) => {
+            return self.findIndex(binding2 => {
+                let checkFrom = binding1.from.length === binding2.from.length;
+                if(checkFrom) {
+                    for (let i = 0; i < binding1.from.length; i++) {
+                        checkFrom = CFieldBinding.compareTwoBindingItems(binding1.from[i], binding2.from[i]);
+                        if(!checkFrom){
+                            break;
+                        }
+                    }
+                }
+                let checkTo = false;
+                if(checkFrom){
+                    checkTo = binding1.to.length === binding2.to.length;
+                    for (let i = 0; i < binding1.to.length; i++) {
+                        checkTo = CFieldBinding.compareTwoBindingItems(binding1.to[i], binding2.to[i]);
+                        if(!checkTo){
+                            break;
+                        }
+                    }
+                }
+                return checkFrom && checkTo;
+            }) === index;
+        })
+    }
+
     updateFieldBinding(connectorType, bindingItem){
         let newFieldBinding = null;
         let hasFound = false;

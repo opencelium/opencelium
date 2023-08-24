@@ -1,7 +1,6 @@
 import React, {FC, useEffect, useState} from "react";
 import {ReferenceInformationProps, Reference} from './interfaces';
 import CFieldBinding from "@classes/content/connection/field_binding/CFieldBinding";
-import CConnection from "@classes/content/connection/CConnection";
 import {
     FieldBindingBlockStyled, FieldBindingsBlockStyled,
     ReferenceBlockStyled, ReferenceInformationStyled,
@@ -26,6 +25,11 @@ const ReferenceInformation: FC<ReferenceInformationProps> =
     useEffect(() => {
         extractReferences();
     }, [body, method])
+    useEffect(() => {
+        if(fieldBindings.length === 0 && isToggledIcon === true){
+            toggleIcon(!isToggledIcon);
+        }
+    }, [fieldBindings])
     const hasFieldBindings = fieldBindings.length > 0;
     return (
         <ReferenceInformationStyled>
@@ -44,6 +48,9 @@ const ReferenceInformation: FC<ReferenceInformationProps> =
             {isToggledIcon && hasFieldBindings && <FieldBindingsBlockStyled>
                 {
                     fieldBindings.map((fieldBinding) => {
+                        if(fieldBinding.to.length === 0){
+                            return null;
+                        }
                         return (
                             <FieldBindingBlockStyled onClick={() => onReferenceClick(fieldBinding.to[0].field)}>
                                 <span>
@@ -56,7 +63,7 @@ const ReferenceInformation: FC<ReferenceInformationProps> =
                                         return (
                                             <ReferenceBlockStyled>
                                                 <SourceMethodNameStyled
-                                                    style={{background: method.color}}>{method.name}</SourceMethodNameStyled>
+                                                    style={{background: method.color}}>{method.label || method.name}</SourceMethodNameStyled>
                                                 <span>{" bindet with "}</span>
                                                 <SourceFieldStyled>{item.field}</SourceFieldStyled>
                                                 <span>{` field${key !== fieldBinding.from.length - 1 ? ";" : "."}`}</span>

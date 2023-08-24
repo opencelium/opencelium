@@ -31,7 +31,7 @@ class JsonBody extends Component{
     }
 
     render(){
-        const {readOnly, method, updateBody, ReferenceComponent, onReferenceClick, source} = this.props;
+        const {readOnly, method, updateBody, ReferenceComponent, PointerComponent, onReferenceClick, source} = this.props;
         const src = source === null ? method.request.getBodyFields() : source;
         return(
             <ReactJson
@@ -43,6 +43,7 @@ class JsonBody extends Component{
                 onAdd={readOnly ? false : updateBody}
                 style={{wordBreak: 'break-word', padding: '8px 0', width: '80%', display: 'inline-block', position: 'relative'}}
                 ReferenceComponent={ReferenceComponent}
+                PointerComponent={PointerComponent}
                 onReferenceClick={onReferenceClick}
             />
         );

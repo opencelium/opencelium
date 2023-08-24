@@ -47,6 +47,10 @@ export default class CEnhancement{
         return new CEnhancement(enhancementId, name, description, language, simpleCode, expertVar, expertCode, fieldBinding);
     }
 
+    static generateNotExistVar(){
+        return `OC_VAR_NOT_EXIST`;
+    }
+
     setExpertVar(expertVar){
         let result = expertVar !== '' ? expertVar : '';
         if(result === ''){

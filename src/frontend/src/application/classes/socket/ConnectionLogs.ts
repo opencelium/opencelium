@@ -99,6 +99,7 @@ export default class ConnectionLogs {
             operatorData,
             isMethod,
             isOperator,
+            type: log.type,
         }
     }
 

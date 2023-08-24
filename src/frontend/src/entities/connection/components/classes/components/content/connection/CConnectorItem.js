@@ -184,7 +184,19 @@ export default class CConnectorItem{
         errors.forEach(errorData => {
             const index = this._operators.findIndex(operator => operator.index === errorData.index);
             if(index !== -1){
-                this._operators[index].error = {hasError: true, location: '', messages: errorData.errors};
+                this._operators[index].error = {hasError: true, location: errorData.location || '', messages: errorData.errors};
+                hasNewErrors = true;
+            }
+        })
+        return hasNewErrors;
+    }
+
+    setErrorsForMethods(errors){
+        let hasNewErrors = false;
+        errors.forEach(errorData => {
+            const index = this._methods.findIndex(method => method.index === errorData.index);
+            if(index !== -1){
+                this._methods[index].error = {hasError: true, location: errorData.location || '', messages: errorData.errors};
                 hasNewErrors = true;
             }
         })
@@ -1570,7 +1582,7 @@ export default class CConnectorItem{
                         });
                     }
                     if(decreasedIndex === '0'){
-                        return methods.reverse()
+                        return methods
                     }
                     decreasedIndex = this.decreaseIndex(decreasedIndex);
                 }
@@ -1629,9 +1641,14 @@ export default class CConnectorItem{
         for (let i = 0; i < this._operators.length; i++){
             operators.push(this._operators[i].getObjectForConnectionOverview());
         }
+        let methods = [];
+        for (let i = 0; i < this._methods.length; i++){
+            methods.push(this._methods[i].getObjectForConnectionOverview());
+        }
         return {
             ...this.getObject(),
             operators,
+            methods,
             title: this._title,
             invoker: this._invoker.getObject(),
             currentItemIndex: this._currentItem ? this._currentItem.index : '',

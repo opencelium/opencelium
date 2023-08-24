@@ -20,6 +20,7 @@ import ContentLoading from "@app_component/base/loading/ContentLoading";
 import Menu from "./menu/Menu";
 import NotificationPanel from "./notification_panel/NotificationPanel";
 import TopBar from "./top_bar/TopBar";
+import { CheckConnectionComponent } from './check_connection/CheckConnection';
 
 const OnlyOutletPages = ["/connection_overview_details", "/connection_overview_technical_layout", "/connection_overview_business_layout"]
 
@@ -30,19 +31,22 @@ const Layout: FC =
     const {pathname} = useLocation();
     const isOnlyOutletPage = OnlyOutletPages.indexOf(pathname) !== -1;
     return (
-        <Suspense fallback={(<LayoutLoading/>)}>
-            {
-                !isOnlyOutletPage &&
-                    <React.Fragment>
-                        <TopBar/>
-                        <Menu/>
-                        <NotificationPanel/>
-                    </React.Fragment>
-            }
-            <Suspense fallback={(<ContentLoading/>)}>
-                <Outlet/>
+        <React.Fragment>
+            <Suspense fallback={(<LayoutLoading/>)}>
+                {
+                    !isOnlyOutletPage &&
+                        <React.Fragment>
+                            <TopBar/>
+                            <Menu/>
+                            <NotificationPanel/>
+                        </React.Fragment>
+                }
+                <Suspense fallback={(<ContentLoading/>)}>
+                    <Outlet/>
+                </Suspense>
             </Suspense>
-        </Suspense>
+            <CheckConnectionComponent/>
+        </React.Fragment>
     )
 }
 
