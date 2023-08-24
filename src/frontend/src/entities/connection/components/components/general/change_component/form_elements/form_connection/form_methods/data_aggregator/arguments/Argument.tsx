@@ -1,54 +1,100 @@
 import React, {FC, useState} from 'react';
-import {
-    ArgumentProps,
-} from "./interfaces";
+import {ArgumentProps,} from "./interfaces";
 import InputText from "@app_component/base/input/text/InputText";
-import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
 import Button from "@app_component/base/button/Button";
+import {ArgumentContainer, ButtonContainer, FormContainer,} from './styles';
+import {TextSize} from "@app_component/base/text/interfaces";
 
 
 const Argument:FC<ArgumentProps> =
     ({
         argument,
         id,
-        readOnly,
         isAdd,
+        isUpdate,
+        isView,
+        add,
+        update,
+        deleteArg,
+        args,
+        argIndex,
      }) => {
     const [name, setName] = useState<string>(argument.name || '');
     const [nameError, setNameError] = useState<string>('');
     const [description, setDescription] = useState<string>(argument.description || '');
-    const add = () => {
+    const setArg = () => {
         if(name === ''){
-            setNameError('The name is a required field');
+            setNameError('The name is a required field.');
             return;
         }
+        let index = args.findIndex(a => a.name === name);
+        if(index !== -1){
+            if(isAdd || isUpdate && index !== argIndex){
+                setNameError('Argument already exists.');
+                return;
+            }
+        }
+        if(isAdd){
+            setName('');
+            setDescription('');
+            add({name, description});
+        }
+        if(isUpdate){
+            update({name, description});
+        }
+        setNameError('');
+    }
+    const deleteArgument = () => {
+        deleteArg();
     }
     return (
-        <div>
-            <InputText
-                id={`input_argument_name_${id}`}
-                readOnly={readOnly}
-                onChange={(e) => setName(e.target.value)}
-                value={name}
-                icon={'person'}
-                label={'Name'}
-                error={nameError}
-            />
-            <InputTextarea
-                id={`input_argument_description_${id}`}
-                readOnly={readOnly}
-                icon={'notes'}
-                onChange={(e) => setDescription(e.target.value)}
-                value={description}
-                label={"Description"}
-            />
-            {isAdd && <Button
-                label={'Add'}
-                icon={'add'}
-                handleClick={add}
-            />}
-        </div>
+        <React.Fragment>
+            <ArgumentContainer>
+                <FormContainer isView={isView}>
+                    <InputText
+                        id={`input_argument_name_${id}`}
+                        readOnly={isView}
+                        onChange={(e) => setName(e.target.value)}
+                        value={name}
+                        minHeight={30}
+                        label={'Name'}
+                        error={nameError}
+                        errorBottom={'-15px'}
+                    />
+                </FormContainer>
+                <FormContainer isView={isView}>
+                    <InputText
+                        id={`input_argument_description_${id}`}
+                        readOnly={isView}
+                        minHeight={30}
+                        onChange={(e) => setDescription(e.target.value)}
+                        value={description}
+                        label={"Description"}
+                    />
+                </FormContainer>
+                {!isView &&
+                    <ButtonContainer>
+                        <Button
+                            icon={isAdd ? 'add' : 'autorenew'}
+                            iconSize={isAdd ? TextSize.Size_12 : TextSize.Size_10}
+                            handleClick={setArg}
+                        />
+                        {isUpdate && <Button
+                            icon={'delete'}
+                            iconSize={TextSize.Size_10}
+                            handleClick={deleteArgument}
+                        />}
+                    </ButtonContainer>
+                }
+            </ArgumentContainer>
+        </React.Fragment>
     )
+}
+
+Argument.defaultProps = {
+    isAdd: false,
+    isUpdate: false,
+    isView: false,
 }
 
 export default Argument;

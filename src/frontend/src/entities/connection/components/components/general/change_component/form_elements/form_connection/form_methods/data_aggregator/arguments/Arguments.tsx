@@ -5,11 +5,11 @@ import {
 import Argument from './Argument';
 
 
-const Arguments:FC<ArgumentsProps> = ({args, readOnly}) => {
+const Arguments:FC<ArgumentsProps> = ({add, update, deleteArg, args, readOnly}) => {
     return (
         <React.Fragment>
             {args.map((argument, key) => {
-                return <Argument argument={argument} id={key} readOnly={readOnly}/>
+                return <Argument key={argument.name} argIndex={key} args={args} add={add} deleteArg={() => deleteArg(key)} isView={readOnly} isUpdate={true} update={(a) => update(key, a)} argument={argument} id={argument.name}/>
             })}
         </React.Fragment>
     )

@@ -61,6 +61,7 @@ interface InputProps extends InputElementProps{
     afterInputComponent?: any,
     height?: string | number,
     className?: string,
+    errorBottom?: string | number,
 }
 
 /*
@@ -118,6 +119,7 @@ interface ErrorStyledProps{
     isIconInside?: boolean,
     hasIcon?: boolean,
     paddingLeft?: string | number;
+    errorBottom?: string | number,
 }
 
 interface LabelStyledProps{

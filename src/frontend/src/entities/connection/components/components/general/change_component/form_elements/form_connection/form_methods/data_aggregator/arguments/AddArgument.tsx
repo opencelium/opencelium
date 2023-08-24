@@ -5,9 +5,13 @@ import {
 import Argument from './Argument';
 
 
-const AddArgument:FC<AddArgumentProps> = ({}) => {
+const AddArgument:FC<AddArgumentProps> =
+    ({
+        add,
+        args,
+    }) => {
     return (
-        <Argument argument={{name: '', description: ''}} id={'add'} isAdd={true}/>
+        <Argument args={args} argument={{name: '', description: ''}} id={'add'} isAdd={true} add={add}/>
     )
 }
 

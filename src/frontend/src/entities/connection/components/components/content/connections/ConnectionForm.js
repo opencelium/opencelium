@@ -37,6 +37,8 @@ import {ConnectionPermissions} from "@root/constants";
 import {IF_OPERATOR} from "@classes/content/connection/operator/COperatorItem";
 import LoadTemplate from "@change_component/form_elements/form_connection/form_methods/LoadTemplate";
 import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
+import DataAggregator
+    from "@change_component/form_elements/form_connection/form_methods/data_aggregator/DataAggregator";
 
 /**
  * common component to add and update Connection
@@ -632,6 +634,9 @@ export function ConnectionForm(type) {
                                         title: t(`${this.translationKey}.FORM.ADD_TEMPLATE`)
                                     }}
                                 />
+                            </div>
+                            <div style={{float: 'left'}}>
+                                <DataAggregator readOnly={this.isView} connection={entity} updateConnection={updateEntity}/>
                             </div>
                             {this.isUpdate &&
                                 <div style={{float: 'left'}}>

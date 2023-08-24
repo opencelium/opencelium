@@ -1,6 +1,7 @@
 //api description of data aggregator
 export default interface ModelDataAggregator{
     id?: string,
+    name: string,
     assignedItems: ModelAssignedItem[],
     args: ModelArgument[],
     script: string,

@@ -47,7 +47,7 @@ const ErrorStyled = styled.span<ErrorStyledProps>`
     opacity: 1 !important;
     position: absolute;
     left: ${({hasIcon, isIconInside, theme}) => !hasIcon || isIconInside ? 0 : theme.input.iconInputDistance};
-    bottom: ${({theme}) => `-calc(${theme.input.inputElement.paddingTop} / 2)` || 0};
+    bottom: ${({theme, errorBottom}) => typeof errorBottom !== 'undefined' ? errorBottom : `calc(-${theme.input.inputElement.paddingTop} / 2)` || 0};
     font-size: 12px;
     color: ${({color, theme}: {color?: string, theme: ITheme}) => color || theme.input.error.color};
     transition: color 0.5s;

@@ -22,6 +22,7 @@ import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../invoker/response/CResponse";
 import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
  import CMethodItem from "@classes/content/connection/method/CMethodItem";
  import COperatorItem from "@classes/content/connection/operator/COperatorItem";
+ import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
 
 const DEFAULT_COLOR = '#ffffff';
 
@@ -49,7 +50,7 @@ export const ALL_COLORS = [
  */
 export default class CConnection{
 
-    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false){
+    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false, dataAggregator = []){
         if(connectionId !== 0){
             this._id = isId(connectionId) ? connectionId : 0;
         }
@@ -111,6 +112,7 @@ export default class CConnection{
         this._currentFieldBindingTo = -1;
         this.setError(error);
         this._readOnly = readOnly;
+        this._dataAggregator = dataAggregator;
     }
 
     static createConnection(connection){
@@ -126,7 +128,8 @@ export default class CConnection{
         const template = connection && connection.hasOwnProperty('template') ? connection.template : null;
         const error = connection && connection.hasOwnProperty('error') ? connection.error : null;
         const readOnly = connection && connection.hasOwnProperty('readOnly') ? connection.readOnly : false;
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly);
+        const dataAggregator = connection && connection.hasOwnProperty('dataAggregator') ? connection.dataAggregator : [];
+        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly, dataAggregator);
     }
 
     static duplicateConnection(connection){
@@ -136,13 +139,6 @@ export default class CConnection{
             duplicate.connectionId = duplicate.id;
         }
         return new CConnection(duplicate);
-    }
-
-    convertBindingItem(bindingItem){
-        if(!(bindingItem instanceof CBindingItem)) {
-            return CBindingItem.createBindingItem(bindingItem);
-        }
-        return bindingItem;
     }
 
     convertFieldBindingItem(fieldBindingItem){
@@ -165,6 +161,15 @@ export default class CConnection{
             return CTemplate.createTemplate(template);
         }
         return template;
+    }
+
+
+    getAllMethods(){
+        return [...this.fromConnector.methods, ...this.toConnector.methods];
+    }
+
+    getAllOperators(){
+        return [...this.fromConnector.operators, ...this.toConnector.operators];
     }
 
     moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete = true){
@@ -462,6 +467,18 @@ export default class CConnection{
 
     set readOnly(readOnly){
         this._readOnly = readOnly;
+    }
+
+    get dataAggregator(){
+        return this._dataAggregator;
+    }
+
+    set dataAggregator(dataAggregator){
+        this._dataAggregator = dataAggregator;
+    }
+
+    addDataAggregator(aggregator){
+        this._dataAggregator = [...this._dataAggregator, aggregator];
     }
 
     getCurrentFieldBindingTo(){
@@ -870,9 +887,10 @@ export default class CConnection{
         let obj = {
             title: this._title,
             description: this._description,
-            fromConnector: fromConnector,
-            toConnector: toConnector,
-            fieldBinding: fieldBinding,
+            fromConnector,
+            toConnector,
+            fieldBinding,
+            dataAggregator: this._dataAggregator,
         };
         if(this.hasOwnProperty('_id')){
             obj.id = this._id;
