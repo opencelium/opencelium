@@ -6,6 +6,8 @@ public class ExtractorFactory {
 
     public static Extractor getInstance(DataRef type) {
         switch (type) {
+//            case HEADER:
+//                return new HeaderExtractor();
             case BODY:
                 return new BodyExtractor();
             case BASIC:
