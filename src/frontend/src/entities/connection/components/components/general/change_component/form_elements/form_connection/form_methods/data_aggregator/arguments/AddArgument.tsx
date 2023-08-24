@@ -9,9 +9,10 @@ const AddArgument:FC<AddArgumentProps> =
     ({
         add,
         args,
+        clearArgsError,
     }) => {
     return (
-        <Argument args={args} argument={{name: '', description: ''}} id={'add'} isAdd={true} add={add}/>
+        <Argument clearArgsError={clearArgsError} args={args} argument={{name: '', description: ''}} id={'add'} isAdd={true} add={add}/>
     )
 }
 

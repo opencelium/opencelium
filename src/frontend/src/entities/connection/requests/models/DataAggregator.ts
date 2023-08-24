@@ -1,4 +1,5 @@
 //api description of data aggregator
+
 export default interface ModelDataAggregator{
     id?: string,
     name: string,
@@ -6,6 +7,8 @@ export default interface ModelDataAggregator{
     args: ModelArgument[],
     script: string,
 }
+
+export type ModelDataAggregatorProps = keyof ModelDataAggregator;
 
 export interface ModelAssignedItem{
     name: string,

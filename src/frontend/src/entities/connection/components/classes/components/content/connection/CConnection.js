@@ -481,6 +481,10 @@ export default class CConnection{
         this._dataAggregator = [...this._dataAggregator, aggregator];
     }
 
+    updateDataAggregator(aggregator){
+        this._dataAggregator = this._dataAggregator.map(a => a.id === aggregator.id ? aggregator : a);
+    }
+
     getCurrentFieldBindingTo(){
         return this._currentFieldBindingTo;
     }

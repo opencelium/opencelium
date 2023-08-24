@@ -1,4 +1,4 @@
-import React, {FC, useRef, useState, useEffect} from 'react';
+import React, {FC, useRef, useState, useEffect, useMemo} from 'react';
 import AceEditor from "react-ace";
 import {
     AggregatorFormProps,
@@ -18,7 +18,22 @@ import {ModelArgument} from "@root/requests/models/DataAggregator";
 import {TextSize} from "@app_component/base/text/interfaces";
 import Button from "@app_component/base/button/Button";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
+import { OptionProps } from '@app_component/base/input/select/interfaces';
+import {setFocusById} from "@application/utils/utils";
 
+const getStaticWordCompleter = (variables: string[]) => {
+    return {
+        getCompletions: function (editor: any, session: any, pos: any, prefix: any, callback: any) {
+            callback(null, variables.map(function (word) {
+                return {
+                    caption: word,
+                    value: word,
+                    meta: "static"
+                };
+            }));
+        }
+    }
+}
 
 const AggregatorForm:FC<AggregatorFormProps> =
     ({
@@ -26,24 +41,34 @@ const AggregatorForm:FC<AggregatorFormProps> =
         allMethods,
         allOperators,
         aggregator,
-        isAdd,
+        formType,
         theme,
         add,
+        closeForm,
     }) => {
+    if(formType === 'view'){
+        readOnly = true;
+    }
     const variablesRef = useRef(null);
     const scriptSegmentRef = useRef(null);
     const [name, setName] = useState<string>(aggregator?.name || '');
     const [nameError, setNameError] = useState<string>('');
-    const [items, setItems] = useState(aggregator?.assignedItems || []);
+    const initialItems = useMemo(() => {
+        if(!aggregator){
+            return [];
+        }
+        return allMethods.filter(m => {return aggregator.assignedItems.findIndex(i => i.name === m.value) !== -1;});
+    }, [aggregator]);
+    const [items, setItems] = useState<OptionProps[]>(initialItems || []);
     const [args, setArgs] = useState(aggregator?.args || []);
     const [argsError, setArgsError] = useState<string>('');
     const initialScript = CAggregator.splitVariablesFromScript(aggregator?.script || '');
+    const [variables, setVariables] = useState<string>(initialScript.variables || '');
     const [scriptSegment, setScriptSegment] = useState<string>(initialScript.scriptSegment || '');
     const [scriptSegmentError, setScriptSegmentError] = useState<string>('');
-    const [variables, setVariables] = useState<string>(initialScript.variables || '');
     const [hideComments, toggleComments] = useState<boolean>(false);
     const changeScriptSegment = (segment: string) => {
-        setScriptSegment(segment.replace(/\s*\/\/.*\n/g, '\n').replace(/\s*\/\*[\s\S]*?\*\//g, '').trim());
+        setScriptSegment(CAggregator.cleanCodeFromComments(segment));
         setScriptSegmentError('');
     }
     const changeName = (newName: string) => {
@@ -71,21 +96,30 @@ const AggregatorForm:FC<AggregatorFormProps> =
             toggleComments(false);
         }
     }, [hideComments])
+    useEffect(() => {
+        scriptSegmentRef.current.editor.completers.push(getStaticWordCompleter(args.map(a => a.name)))
+    }, [args])
     const change = () => {
         if(name === ''){
             setNameError('Name is a required field');
+            setFocusById('input_aggregator_name');
             return;
         }
         if(args.length === 0){
             setArgsError('Arguments are required fields');
+            setFocusById(`input_argument_name_add`);
             return;
         }
         if(scriptSegment === ''){
             setScriptSegmentError('Script is a required field');
+            scriptSegmentRef.current.focus();
             return;
         }
-        if(isAdd){
-            add({name, args, assignedItems: items, script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
+        if(formType === 'add'){
+            add({name, args, assignedItems: items.map(i => {return {name: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
+        }
+        if(formType === 'update'){
+            add({name, args, assignedItems: items.map(i => {return {name: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
         }
     }
     const addArgument = (arg: ModelArgument) => {
@@ -101,6 +135,7 @@ const AggregatorForm:FC<AggregatorFormProps> =
         setVariables(newVariables);
         let newScriptSegment = scriptSegment;
         newScriptSegment = newScriptSegment.split(` ${args[index].name}`).join(` ${arg.name}`);
+        newScriptSegment = newScriptSegment.split(`${args[index].name} `).join(`${arg.name} `);
         newScriptSegment = newScriptSegment.split(`\n${args[index].name}`).join(`\n${arg.name}`);
         setScriptSegment(newScriptSegment);
         const newArgs = [...args];
@@ -133,6 +168,7 @@ const AggregatorForm:FC<AggregatorFormProps> =
                 <FormContainer>
                     <InputText
                         id={`input_aggregator_name`}
+                        autoFocus={true}
                         required={true}
                         readOnly={readOnly}
                         onChange={(e) => changeName(e.target.value)}
@@ -151,9 +187,9 @@ const AggregatorForm:FC<AggregatorFormProps> =
                         options={allMethods}
                         isMultiple={true}
                     />
-                    <Input error={argsError} readOnly={readOnly} required={true} value={'arguments'} label={'Arguments'} icon={'abc'} marginBottom={'20px'}>
+                    <Input errorBottom={'-20px'} error={argsError} readOnly={readOnly} required={true} value={'arguments'} label={'Arguments'} icon={'abc'} marginBottom={'20px'}>
                         <ArgumentFormContainer>
-                            <AddArgument args={args} add={addArgument}/>
+                            {!readOnly && <AddArgument clearArgsError={() => setArgsError('')} args={args} add={addArgument}/>}
                             <Arguments add={addArgument} update={updateArgument} deleteArg={deleteArgument} args={args} readOnly={readOnly}/>
                         </ArgumentFormContainer>
                     </Input>
@@ -219,11 +255,20 @@ const AggregatorForm:FC<AggregatorFormProps> =
                 </FormContainer>
             </AggregatorFormContainer>
             <ActionButtonContainer>
-                <Button
-                    label={isAdd ? 'Add' : 'Update'}
-                    size={TextSize.Size_16}
-                    handleClick={change}
-                />
+                {formType !== 'view' &&
+                    <Button
+                        label={formType === 'add' ? 'Add' : 'Update'}
+                        size={TextSize.Size_14}
+                        handleClick={change}
+                    />
+                }
+                {(closeForm || formType === 'view') &&
+                    <Button
+                        label={'Cancel'}
+                        size={TextSize.Size_14}
+                        handleClick={closeForm}
+                    />
+                }
             </ActionButtonContainer>
         </React.Fragment>
     )

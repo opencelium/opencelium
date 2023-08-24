@@ -4,10 +4,12 @@ import InputText from "@app_component/base/input/text/InputText";
 import Button from "@app_component/base/button/Button";
 import {ArgumentContainer, ButtonContainer, FormContainer,} from './styles';
 import {TextSize} from "@app_component/base/text/interfaces";
+import {setFocusById} from "@application/utils/utils";
 
 
 const Argument:FC<ArgumentProps> =
     ({
+        clearArgsError,
         argument,
         id,
         isAdd,
@@ -22,15 +24,24 @@ const Argument:FC<ArgumentProps> =
     const [name, setName] = useState<string>(argument.name || '');
     const [nameError, setNameError] = useState<string>('');
     const [description, setDescription] = useState<string>(argument.description || '');
+    const changeName = (newName: string) => {
+        setName(newName);
+        setNameError('');
+        if(clearArgsError){
+            clearArgsError();
+        }
+    }
     const setArg = () => {
         if(name === ''){
             setNameError('The name is a required field.');
+            setFocusById(`input_argument_name_${id}`);
             return;
         }
         let index = args.findIndex(a => a.name === name);
         if(index !== -1){
             if(isAdd || isUpdate && index !== argIndex){
                 setNameError('Argument already exists.');
+                setFocusById(`input_argument_name_${id}`);
                 return;
             }
         }
@@ -38,6 +49,7 @@ const Argument:FC<ArgumentProps> =
             setName('');
             setDescription('');
             add({name, description});
+            setFocusById(`input_argument_name_${id}`);
         }
         if(isUpdate){
             update({name, description});
@@ -54,7 +66,7 @@ const Argument:FC<ArgumentProps> =
                     <InputText
                         id={`input_argument_name_${id}`}
                         readOnly={isView}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e) => changeName(e.target.value)}
                         value={name}
                         minHeight={30}
                         label={'Name'}

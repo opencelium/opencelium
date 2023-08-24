@@ -11,6 +11,7 @@ export interface ArgumentProps {
     argument: ModelArgument,
     id: string | number,
     isAdd?: boolean,
+    clearArgsError?: () => void,
     isUpdate?: boolean,
     isView?: boolean,
     add: (arg: ModelArgument) => void,
@@ -22,4 +23,5 @@ export interface ArgumentProps {
 export interface AddArgumentProps{
     add: (arg: ModelArgument) => void,
     args: ModelArgument[],
+    clearArgsError?: () => void,
 }

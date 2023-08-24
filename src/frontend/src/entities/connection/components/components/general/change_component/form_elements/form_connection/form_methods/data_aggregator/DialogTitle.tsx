@@ -9,10 +9,10 @@ import {
 } from "@change_component/form_elements/form_connection/form_methods/data_aggregator/styles";
 
 
-const DialogTitle:FC<DialogTitleProps> = ({isForm, setIsForm}) => {
+const DialogTitle:FC<DialogTitleProps> = ({isForm, setIsForm, hasList}) => {
     return (
         <DialogTitleContainerStyled>
-            <DialogTitleLinkStyled isLink={isForm} onClick={() => setIsForm(false)}>{"Data Aggregator"}</DialogTitleLinkStyled>
+            <DialogTitleLinkStyled isLink={isForm && hasList} onClick={hasList ? () => setIsForm(false) : null}>{"Data Aggregator"}</DialogTitleLinkStyled>
             {isForm &&
                 <React.Fragment>
                     <Icon name={'chevron_right'}/>

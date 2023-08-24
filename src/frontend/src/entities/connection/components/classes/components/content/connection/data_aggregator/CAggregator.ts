@@ -93,7 +93,11 @@ export default class CAggregator implements ModelDataAggregator{
     }
 
     static joinVariablesWithScriptSegment(variables: string, scriptSegment: string): string {
-        return `${variables}\n\n${scriptSegment}`
+        return this.cleanCodeFromComments(`${variables}\n\n${scriptSegment}`);
+    }
+
+    static cleanCodeFromComments(code: string): string{
+        return code.replace(/\s*\/\/.*\n/g, '\n').replace(/\s*\/\*[\s\S]*?\*\//g, '').trim();
     }
 
 }

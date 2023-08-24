@@ -1,7 +1,7 @@
 import React, {FC, useState, useMemo} from 'react';
 import _ from 'lodash';
 import {
-    DataAggregatorProps
+    DataAggregatorProps, FormType,
 } from "./interfaces";
 import Dialog from "@basic_components/Dialog";
 import Button from "@app_component/base/button/Button";
@@ -12,12 +12,14 @@ import DialogTitle from "./DialogTitle";
 //@ts-ignore
 import styles from './styles.scss';
 import ModelDataAggregator from "@root/requests/models/DataAggregator";
+import AggregatorList from './AggregatorList';
 
 
 const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, readOnly}) => {
     const [showDialog, setShowDialog] = useState<boolean>(false);
-    const [isForm, setIsForm] = useState<boolean>(true);
-    const [isAdd, setIsAdd] = useState<boolean>(true);
+    const [isForm, setIsForm] = useState<boolean>(false);
+    const [formType, setFormType] = useState<FormType>('add');
+    const [currentAggregator, setCurrentAggregator] = useState<ModelDataAggregator>(null);
     const allMethods = connection.getAllMethods();
     const allOperators = connection.getAllOperators();
     const allMethodOptions = useMemo(() => {
@@ -28,14 +30,26 @@ const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, r
     }, [allOperators]);
     const actions = isForm ? [] : [
         {
+            icon: 'add',
+            label: 'Add Aggregator',
+            onClick: () => setIsForm(true),
+        },
+        {
             id: 'action_data_aggregator',
             label: 'Close',
             onClick: () => setShowDialog(!showDialog)
         }
     ];
     const add = (aggregator: ModelDataAggregator) => {
+        aggregator.id = '1';
         connection.addDataAggregator(aggregator);
         updateConnection(connection);
+        setIsForm(false);
+    }
+    const update = (aggregator: ModelDataAggregator) => {
+        connection.updateDataAggregator(aggregator);
+        updateConnection(connection);
+        setIsForm(false);
     }
     return (
         <React.Fragment>
@@ -43,23 +57,31 @@ const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, r
                 isDisabled={allMethodOptions.length === 0}
                 label={'Aggregator'}
                 icon={'subtitles'}
-                handleClick={() => {setShowDialog(true); setIsForm(true);}}
+                handleClick={() => {setShowDialog(true); if(connection.dataAggregator.length === 0){ setIsForm(true); }}}
             />
             <Dialog
                 actions={actions}
                 active={showDialog}
                 toggle={() => setShowDialog(!showDialog)}
-                title={<DialogTitle setIsForm={setIsForm} isForm={isForm}/>}
+                title={<DialogTitle setIsForm={setIsForm} isForm={isForm} hasList={connection.dataAggregator.length > 0}/>}
                 theme={{dialog: styles.aggregator_dialog}}
             >
-                {isForm &&
+                {isForm ?
                     <AggregatorForm
-                        aggregator={null}
+                        aggregator={currentAggregator}
                         readOnly={readOnly}
                         allMethods={allMethodOptions}
                         allOperators={allOperatorOptions}
                         add={add}
-                        isAdd={isAdd}
+                        update={update}
+                        formType={formType}
+                        closeForm={connection.dataAggregator.length > 0 ? () => setIsForm(false) : null}
+                    />
+                    :
+                    <AggregatorList
+                        setFormType={(type: FormType, aggregator: ModelDataAggregator) => {setFormType(type); setCurrentAggregator(aggregator); setIsForm(true)}}
+                        dataAggregator={connection.dataAggregator}
+                        updateConnection={updateConnection}
                     />
                 }
             </Dialog>

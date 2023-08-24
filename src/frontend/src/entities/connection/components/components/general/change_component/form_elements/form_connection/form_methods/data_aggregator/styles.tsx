@@ -14,6 +14,7 @@ export const ArgumentFormContainer = styled.div`
     margin-left: 60px;
     padding-top: 35px;
     max-height: 220px;
+    min-height: 120px;
     overflow-y: auto;
     &>div:not(:last-child){
         margin-bottom: 20px;
@@ -22,8 +23,10 @@ export const ArgumentFormContainer = styled.div`
 
 export const ActionButtonContainer = styled.div`
     position: absolute;
-    bottom: 0px;
+    bottom: -10px;
     right: 10px;
+    display: flex;
+    gap: 10px;
 `;
 
 export const DialogTitleContainerStyled = styled.span`
