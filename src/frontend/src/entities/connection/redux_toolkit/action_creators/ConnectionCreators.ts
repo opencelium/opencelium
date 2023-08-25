@@ -21,6 +21,32 @@ import {ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {ScheduleRequest} from "@entity/schedule/requests/classes/Schedule";
 import ModelWebhook from "@entity/schedule/requests/models/Webhook";
 
+const dataAggregator = [[{
+    id: '1',
+    name: 'collect_removed',
+    script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
+    assignedItems: [{name: 'ConfigItemCreate'}],
+    args: [{name: 'arg1', description: 'desc1'},{name: 'arg2', description: 'desc2'}]
+},{
+    id: '2',
+    name: 'collect_updated',
+    script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
+    assignedItems: [{name: 'ConfigItemUpdate'}],
+    args: [{name: 'arg1', description: 'desc1'}, {name: 'arg2', description: 'desc2'}]
+}], [{
+    id: '3',
+    name: 'Create',
+    script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
+    assignedItems: [{name: 'TicketSearch'}],
+    args: [{name: 'arg1', description: 'desc1'},{name: 'arg2', description: 'desc2'}]
+},{
+    id: '4',
+    name: 'Deleted',
+    script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
+    assignedItems: [{name: 'TicketGet'}],
+    args: [{name: 'arg1', description: 'desc1'}, {name: 'arg2', description: 'desc2'}]
+}], ];
+
 
 export const testConnection = createAsyncThunk(
     'connection/test',
@@ -157,19 +183,7 @@ export const getConnectionById = createAsyncThunk(
         try {
             const request = new ConnectionRequest({endpoint: `/${connectionId}`});
             const response = await request.getConnectionById();
-            response.data.dataAggregator = [{
-                id: '1',
-                name: 'collect created items',
-                script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
-                assignedItems: [{name: 'ConfigItemCreate'}],
-                args: [{name: 'arg1', description: 'desc1'},{name: 'arg2', description: 'desc2'}]
-            },{
-                id: '2',
-                name: 'collect updated items',
-                script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
-                assignedItems: [{name: 'ConfigItemUpdate'}],
-                args: [{name: 'arg1', description: 'desc1'}, {name: 'arg2', description: 'desc2'}]
-            }]
+            response.data.dataAggregator = dataAggregator[0];
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -203,9 +217,10 @@ export const getAllMetaConnections = createAsyncThunk(
     async(data: never, thunkAPI) => {
         try {
             const request = new ConnectionRequest();
-            const response = await request.getAllMetaConnections();
+            let response = await request.getAllMetaConnections();
+            let result = response.data;
             // @ts-ignore
-            return response.data.filter((connection) => {
+            result = result.filter((connection) => {
                 if(connection.title.indexOf('!*test_connection_') === 0){
                     if(connection.title.split('_').length >= 3){
                         return false;
@@ -213,6 +228,11 @@ export const getAllMetaConnections = createAsyncThunk(
                 }
                 return true;
             }) || [];
+            result = result.map((item, key) => {
+                item.dataAggregator = dataAggregator[key];
+                return item;
+            });
+            return result;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
