@@ -20,15 +20,12 @@ import TechnicalLayout from "./layouts/TechnicalLayout";
 
 import Details from "./details/Details";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2.scss";
-import {PANEL_LOCATION} from "@entity/connection/components/utils/constants/app";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import CreateElementPanel from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel";
 import {setCurrentTechnicalItem, setConnectionData, clearCurrentLogs} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import LogPanel from "@change_component/form_elements/form_connection/form_svg/layouts/logs/LogPanel";
-import {OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
-import {CREATE_PROCESS} from "@classes/content/connection_overview_2/CCreateElementPanel";
 
 
 export const HAS_LAYOUTS_SCALING = true;

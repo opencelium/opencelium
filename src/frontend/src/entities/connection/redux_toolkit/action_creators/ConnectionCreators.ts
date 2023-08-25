@@ -157,6 +157,19 @@ export const getConnectionById = createAsyncThunk(
         try {
             const request = new ConnectionRequest({endpoint: `/${connectionId}`});
             const response = await request.getConnectionById();
+            response.data.dataAggregator = [{
+                id: '1',
+                name: 'collect created items',
+                script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
+                assignedItems: [{name: 'ConfigItemCreate'}],
+                args: [{name: 'arg1', description: 'desc1'},{name: 'arg2', description: 'desc2'}]
+            },{
+                id: '2',
+                name: 'collect updated items',
+                script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
+                assignedItems: [{name: 'ConfigItemUpdate'}],
+                args: [{name: 'arg1', description: 'desc1'}, {name: 'arg2', description: 'desc2'}]
+            }]
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

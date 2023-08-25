@@ -570,7 +570,7 @@ export function ConnectionForm(type) {
 
             render(){
                 const {validationMessages, connection} = this.state;
-                const {t, error, checkingConnectionTitle, fetchingConnectors} = this.props;
+                const {t, error, checkingConnectionTitle, fetchingConnectors, setCurrentTechnicalItem, currentTechnicalItem} = this.props;
                 if((!this.isView && fetchingConnectors !== API_REQUEST_STATE.FINISH) || (!this.isAdd && !this.isFetchedConnection)){
                     return <ContentLoading/>;
                 }
@@ -636,7 +636,18 @@ export function ConnectionForm(type) {
                                 />
                             </div>
                             <div style={{float: 'left'}}>
-                                <DataAggregator readOnly={this.isView} connection={entity} updateConnection={updateEntity}/>
+                                <DataAggregator
+                                    readOnly={this.isView}
+                                    connection={entity}
+                                    updateConnection={(e) => {
+                                        updateEntity(e);
+                                        if(currentTechnicalItem){
+                                            const connector = currentTechnicalItem.connectorType === CONNECTOR_FROM ? e.fromConnector : e.toConnector;
+                                            const currentItem = connector.getSvgElementByIndex(currentTechnicalItem.entity.index);
+                                            setCurrentTechnicalItem(currentItem.getObject());
+                                        }
+                                    }}
+                                />
                             </div>
                             {this.isUpdate &&
                                 <div style={{float: 'left'}}>

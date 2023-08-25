@@ -44,7 +44,9 @@ const AggregatorForm:FC<AggregatorFormProps> =
         formType,
         theme,
         add,
+        update,
         closeForm,
+        dataAggregator,
     }) => {
     if(formType === 'view'){
         readOnly = true;
@@ -105,6 +107,15 @@ const AggregatorForm:FC<AggregatorFormProps> =
             setFocusById('input_aggregator_name');
             return;
         }
+        let dataAggregatorItem = dataAggregator.find(a => a.name === name);
+        if(dataAggregatorItem){
+            if((formType === 'update' && dataAggregatorItem.id !== aggregator.id)
+            || formType === 'add'){
+                setNameError('Such name already exists');
+                setFocusById('input_aggregator_name');
+                return;
+            }
+        }
         if(args.length === 0){
             setArgsError('Arguments are required fields');
             setFocusById(`input_argument_name_add`);
@@ -119,7 +130,7 @@ const AggregatorForm:FC<AggregatorFormProps> =
             add({name, args, assignedItems: items.map(i => {return {name: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
         }
         if(formType === 'update'){
-            add({name, args, assignedItems: items.map(i => {return {name: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
+            update({id: aggregator.id, name, args, assignedItems: items.map(i => {return {name: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
         }
     }
     const addArgument = (arg: ModelArgument) => {
@@ -134,6 +145,9 @@ const AggregatorForm:FC<AggregatorFormProps> =
         newVariables = newVariables.split(`var ${args[index].name}`).join(`var ${arg.name}`);
         setVariables(newVariables);
         let newScriptSegment = scriptSegment;
+        if(scriptSegment === args[index].name){
+            newScriptSegment = arg.name;
+        }
         newScriptSegment = newScriptSegment.split(` ${args[index].name}`).join(` ${arg.name}`);
         newScriptSegment = newScriptSegment.split(`${args[index].name} `).join(`${arg.name} `);
         newScriptSegment = newScriptSegment.split(`\n${args[index].name}`).join(`\n${arg.name}`);

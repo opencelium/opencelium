@@ -23,6 +23,7 @@ export interface AggregatorFormProps {
     add: (aggregator: ModelDataAggregator) => void,
     update: (aggregator: ModelDataAggregator) => void,
     closeForm: () => void,
+    dataAggregator: ModelDataAggregator[],
 }
 
 export interface DialogTitleProps {

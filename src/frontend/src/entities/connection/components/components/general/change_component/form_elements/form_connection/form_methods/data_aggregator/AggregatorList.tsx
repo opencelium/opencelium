@@ -19,6 +19,7 @@ const AggregatorList:FC<AggregatorListProps> =
             <React.Fragment>
                 <TooltipButton handleClick={() => setFormType('update', entity)} target={`update_entity_${entity.id.toString()}`} position={'top'} tooltip={'Update'} hasBackground={false} icon={'edit'} size={TextSize.Size_20}/>
                 <TooltipButton handleClick={() => setFormType('view', entity)} target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} hasBackground={false} icon={'visibility'} size={TextSize.Size_20}/>
+                <TooltipButton handleClick={() => {const aggregator = {...entity}; delete aggregator.id; setFormType('add', {...aggregator, name: `${entity.name} [copy]`})}} target={`copy_entity_${entity.id.toString()}`} position={'top'} tooltip={'Copy'} hasBackground={false} icon={'content_copy'} size={TextSize.Size_20}/>
             </React.Fragment>
         );
     };

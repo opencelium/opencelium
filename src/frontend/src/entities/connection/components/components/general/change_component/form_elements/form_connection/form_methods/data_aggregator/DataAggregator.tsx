@@ -32,7 +32,7 @@ const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, r
         {
             icon: 'add',
             label: 'Add Aggregator',
-            onClick: () => setIsForm(true),
+            onClick: () => {setCurrentAggregator(null); setIsForm(true); setFormType('add')},
         },
         {
             id: 'action_data_aggregator',
@@ -41,10 +41,10 @@ const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, r
         }
     ];
     const add = (aggregator: ModelDataAggregator) => {
-        aggregator.id = '1';
+        aggregator.id = '5';
         connection.addDataAggregator(aggregator);
-        updateConnection(connection);
         setIsForm(false);
+        updateConnection(connection);
     }
     const update = (aggregator: ModelDataAggregator) => {
         connection.updateDataAggregator(aggregator);
@@ -69,13 +69,14 @@ const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, r
                 {isForm ?
                     <AggregatorForm
                         aggregator={currentAggregator}
+                        dataAggregator={connection.dataAggregator}
                         readOnly={readOnly}
                         allMethods={allMethodOptions}
                         allOperators={allOperatorOptions}
                         add={add}
                         update={update}
                         formType={formType}
-                        closeForm={connection.dataAggregator.length > 0 ? () => setIsForm(false) : null}
+                        closeForm={connection.dataAggregator.length > 0 ? () => {setIsForm(false); setCurrentAggregator(null);} : null}
                     />
                     :
                     <AggregatorList

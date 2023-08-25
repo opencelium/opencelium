@@ -79,7 +79,7 @@ class Details extends React.Component{
                 <SettingsPanel {...this.props}/>
                 <div className={styles.details_data}>
                     <div className={styles.title}>
-                        Details
+                        {"Details"}
                     </div>
                     {details ?
                         <div className={styles.label}>

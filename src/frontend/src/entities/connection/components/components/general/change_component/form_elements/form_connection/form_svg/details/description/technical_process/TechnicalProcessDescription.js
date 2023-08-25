@@ -29,6 +29,8 @@ import TooltipFontIcon from "@entity/connection/components/components/general/ba
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
 import {withTheme} from "styled-components";
+import DataAggregation
+    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregation";
 
 function mapStateToProps(state){
     const editor = state.connectionEditorReducer;
@@ -78,7 +80,7 @@ class TechnicalProcessDescription extends React.Component{
         const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo, readOnly,
             isResponseFailDialogOpened, isResponseSuccessDialogOpened, isRequestBodyDialogOpened,
             toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog,
-            theme,
+            theme, setCurrentTechnicalItem,
         } = this.props;
         const methodItem = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
@@ -111,6 +113,13 @@ class TechnicalProcessDescription extends React.Component{
                         </React.Fragment>
                     )
                 })}
+                <DataAggregation
+                    details={details}
+                    connection={connection}
+                    currentItem={details.entity}
+                    updateConnection={updateConnection}
+                    setCurrentTechnicalItem={setCurrentTechnicalItem}
+                />
                 <br/>
                 <br/>
                 <Col xs={12} className={styles.col}><b>{`Request`}</b></Col>

@@ -112,7 +112,7 @@ export default class CConnection{
         this._currentFieldBindingTo = -1;
         this.setError(error);
         this._readOnly = readOnly;
-        this._dataAggregator = dataAggregator;
+        this.setDataAggregator(dataAggregator);
     }
 
     static createConnection(connection){
@@ -139,6 +139,20 @@ export default class CConnection{
             duplicate.connectionId = duplicate.id;
         }
         return new CConnection(duplicate);
+    }
+
+    setDataAggregator(aggregator){
+        this._dataAggregator = aggregator;
+        const allMethods = this.getAllMethods();
+        for(let i = 0; i < allMethods.length; i++){
+            for(let j = 0; j < aggregator.length; j++){
+                for(let k = 0; k < aggregator[j].assignedItems.length; k++){
+                    if(allMethods[i].name === aggregator[j].assignedItems[k].name){
+                        allMethods[i].dataAggregator = {...aggregator[j]};
+                    }
+                }
+            }
+        }
     }
 
     convertFieldBindingItem(fieldBindingItem){
@@ -477,12 +491,45 @@ export default class CConnection{
         this._dataAggregator = dataAggregator;
     }
 
+    refreshDataAggregator(aggregator){
+        const assignedItems = aggregator.assignedItems;
+        const allMethods = this.getAllMethods();
+        for(let i = 0; i < allMethods.length; i++){
+            for(let j = 0; j < assignedItems.length; j++){
+                if(allMethods[i].name === assignedItems[j].name){
+                    allMethods[i].dataAggregator = {...aggregator};
+                }
+            }
+        }
+    }
+
     addDataAggregator(aggregator){
+        this.refreshDataAggregator(aggregator);
         this._dataAggregator = [...this._dataAggregator, aggregator];
     }
 
+    updateAssignItemsInDataAggregator(methodName, newAggregatorId){
+        let newDataAggregator = [...this.dataAggregator];
+        for(let i = 0; i < newDataAggregator.length; i++){
+            if(newDataAggregator[i].id === newAggregatorId){
+                newDataAggregator[i] = {...newDataAggregator[i], assignedItems: [...newDataAggregator[i].assignedItems, {name: methodName}]};
+            } else{
+                let index = newDataAggregator[i].assignedItems.findIndex(item => item.name === methodName);
+                if(index !== -1){
+                    newDataAggregator[i] = {...newDataAggregator[i], assignedItems: newDataAggregator[i].assignedItems.filter(item => item.name !== methodName)};
+                }
+            }
+        }
+        this.dataAggregator = newDataAggregator;
+    }
+
     updateDataAggregator(aggregator){
-        this._dataAggregator = this._dataAggregator.map(a => a.id === aggregator.id ? aggregator : a);
+        this.refreshDataAggregator(aggregator);
+        this._dataAggregator = [...this._dataAggregator.map(a => a.id === aggregator.id ? aggregator : a)];
+    }
+
+    getAllAggregationsForSelect(){
+        return this.dataAggregator.map(o => {return {label: o.name, value: o.id};});
     }
 
     getCurrentFieldBindingTo(){

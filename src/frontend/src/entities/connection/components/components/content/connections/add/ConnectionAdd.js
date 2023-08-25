@@ -23,22 +23,26 @@ import {
     updateConnection,
     testConnection,
 } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
+import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {addTemplate, getTemplatesByConnectors as fetchTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {permission} from "@entity/application/utils/permission";
 import {ConnectionForm} from "@entity/connection/components/components/content/connections/ConnectionForm";
 import {useNavigate} from "react-router";
 import {ConnectionPermissions} from "@entity/connection/constants";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 
 
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
-    const connection = state.connectionReducer;
     const template = state.templateReducer
     const connector = state.connectorReducer;
+    const connection = state.connectionReducer;
+    const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
         authUser,
         connection: connection.currentConnection,
+        currentTechnicalItem,
         addingConnection: connection.addingConnection,
         testingConnection: connection.testingConnection,
         updatingConnection: connection.updatingConnection,
@@ -57,7 +61,7 @@ function mapStateToProps(state){
 /**
  * Component to Add Connection
  */
-@connect(mapStateToProps, {updateConnection, addConnection, addTemplate, fetchConnectors, checkConnectionTitle, fetchTemplates, testConnection})
+@connect(mapStateToProps, {updateConnection, addConnection, addTemplate, fetchConnectors, checkConnectionTitle, fetchTemplates, testConnection, setCurrentTechnicalItem})
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @ConnectionForm('add')
