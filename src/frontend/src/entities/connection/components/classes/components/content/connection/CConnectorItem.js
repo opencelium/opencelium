@@ -812,9 +812,9 @@ export default class CConnectorItem{
         }
     }
 
-    updateInvokerForMethods(){
+    updateInvokerForMethods(invoker = null){
         for(let i = 0; i < this._methods.length; i++){
-            this._methods[i].invoker = this._invoker;
+            this._methods[i].invoker = invoker || this._invoker;
         }
     }
 
