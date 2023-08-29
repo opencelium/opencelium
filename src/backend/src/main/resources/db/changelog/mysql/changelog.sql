@@ -317,3 +317,20 @@ SELECT VERSION();
 --changeset 3.1.2:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 SELECT VERSION();
 
+--changeset 3.2:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE data_aggregator (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    assigned_methods JSON,
+    script JSON
+);
+
+--changeset 3.2:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE argument (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    data_aggregator_id INT,
+    name VARCHAR(255),
+    description TEXT,
+    FOREIGN KEY (data_aggregator_id) REFERENCES data_aggregator(id)
+);
+
