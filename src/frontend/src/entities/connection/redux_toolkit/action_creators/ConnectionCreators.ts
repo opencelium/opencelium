@@ -19,31 +19,26 @@ import {ConnectionRequest} from "../../requests/classes/Connection";
 import { IConnection } from "../../interfaces/IConnection";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {ScheduleRequest} from "@entity/schedule/requests/classes/Schedule";
-import ModelWebhook from "@entity/schedule/requests/models/Webhook";
 
 const dataAggregator = [[{
     id: '1',
     name: 'collect_removed',
     script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
-    assignedItems: [{name: 'ConfigItemCreate'}],
     args: [{name: 'arg1', description: 'desc1'},{name: 'arg2', description: 'desc2'}]
 },{
     id: '2',
     name: 'collect_updated',
     script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
-    assignedItems: [{name: 'ConfigItemUpdate'}],
     args: [{name: 'arg1', description: 'desc1'}, {name: 'arg2', description: 'desc2'}]
 }], [{
     id: '3',
     name: 'Create',
     script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
-    assignedItems: [{name: 'TicketSearch'}],
     args: [{name: 'arg1', description: 'desc1'},{name: 'arg2', description: 'desc2'}]
 },{
     id: '4',
     name: 'Deleted',
     script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
-    assignedItems: [{name: 'TicketGet'}],
     args: [{name: 'arg1', description: 'desc1'}, {name: 'arg2', description: 'desc2'}]
 }], ];
 

@@ -3,7 +3,7 @@
 export default interface ModelDataAggregator{
     id?: string,
     name: string,
-    assignedItems: ModelAssignedItem[],
+    assignedItems?: ModelAssignedItem[],
     args: ModelArgument[],
     script: string,
 }

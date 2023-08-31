@@ -45,6 +45,7 @@ interface InputElementProps{
     display?: string,
     minHeight?: string | number,
     background?: string,
+    checkboxProps?: any,
 }
 
 interface InputProps extends InputElementProps{

@@ -35,12 +35,6 @@ class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
             return <td key={aggregator.id}>{aggregator.name}</td>
         }
     },{
-        propertyKey: 'assignedItems',
-        replace: true,
-        getValue: (aggregator: ModelDataAggregator) => {
-            return <td key={aggregator.id}>{aggregator.assignedItems.map(i => i.name).join(', ')}</td>
-        }
-    }, {
         propertyKey: 'args',
         replace: true,
         getValue: (aggregator: ModelDataAggregator) => {
@@ -50,7 +44,6 @@ class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
     gridProps = {title: 'name'};
     translations = {
         name: 'Name',
-        assignedItems: 'Assigned Items',
         args: 'Arguments',
     };
     hasCheckboxes = false;

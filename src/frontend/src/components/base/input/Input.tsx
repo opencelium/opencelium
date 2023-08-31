@@ -20,6 +20,7 @@ import {ErrorStyled, IconStyled, InputElementStyled, LabelStyled, NumberCounterS
 import Icon from '../icon/Icon';
 import {Text} from "../text/Text";
 import {TextSize} from "../text/interfaces";
+import {CheckboxStyled} from "@app_component/base/input/file/styles";
 
 
 const Input: FC<InputProps> =
@@ -55,6 +56,7 @@ const Input: FC<InputProps> =
         labelMargin,
         paddingRight,
         marginBottom,
+        checkboxProps
     }) => {
         const hasMaxLength = maxLength !== Infinity && !readOnly;
         const hasLabel = label !== '';
@@ -91,8 +93,29 @@ const Input: FC<InputProps> =
         }
         const showIcon = (hasIcon || isLoadingWithoutIcon) && !noIcon;
         return (
-            <InputElementStyled marginBottom={marginBottom} paddingLeft={paddingLeft} paddingRight={paddingRight} className={className} overflow={overflow} height={height} marginTop={marginTop} background={background} ref={componentRef} display={display} minHeight={`${minHeight}px`} paddingTop={paddingTop} paddingBottom={paddingBottom} width={width}>
-                {childrenWithProps}
+            <InputElementStyled
+                marginBottom={marginBottom}
+                paddingLeft={paddingLeft}
+                paddingRight={paddingRight}
+                className={className}
+                overflow={overflow}
+                height={height}
+                marginTop={marginTop}
+                background={background}
+                ref={componentRef}
+                display={display}
+                minHeight={`${minHeight}px`}
+                paddingTop={paddingTop}
+                paddingBottom={paddingBottom}
+                width={width}
+            >
+                {checkboxProps &&
+                    <CheckboxStyled
+                        type={'checkbox'}
+                        {...checkboxProps}
+                    />
+                }
+                {!!checkboxProps ? <span style={{paddingLeft: '20px'}}>{childrenWithProps}</span> : childrenWithProps}
                 {hasUnderline && <div/>}
                 {showIcon && <IconStyled paddingTop={paddingTop ? paddingTop : '0'} top={hasLabel ? '24px' : '2px'} left={!isLoadingWithoutIcon && isIconInside ? '3px' : '10px'} right={isLoadingWithoutIcon ? isTextarea ? '15px' : '3px' : 'unset'}><Icon color={ColorTheme.LightGray} isLoading={isLoading} name={icon} size={TextSize.Size_24}/></IconStyled>}
                 {hasLabel && <LabelStyled labelMargin={labelMargin} paddingTop={paddingTop ? paddingTop : '0'} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={label} size={TextSize.Size_12}/></LabelStyled>}

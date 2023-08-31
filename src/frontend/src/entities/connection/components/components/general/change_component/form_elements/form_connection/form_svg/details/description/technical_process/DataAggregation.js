@@ -30,9 +30,8 @@ class DataAggregation extends React.Component{
             const {currentItem, connection, updateConnection, setCurrentTechnicalItem, details} = this.props;
             const connector = connection.getConnectorByType(details.connectorType);
             let dataAggregator = connection.dataAggregator.find(a => a.id === optionValue.value);
-            connection.updateAssignItemsInDataAggregator(details.entity.name, optionValue.value);
             let method = connection.getMethodByColor(details.entity.color);
-            method.dataAggregator = dataAggregator;
+            method.dataAggregator = dataAggregator.id;
             const currentTechnicalItem = connector.getSvgElementByIndex(method.index);
             updateConnection(connection);
             setCurrentTechnicalItem(currentTechnicalItem.getObject());
@@ -43,11 +42,7 @@ class DataAggregation extends React.Component{
         const {connection, currentItem} = this.props;
         let aggregator = null;
         if(currentItem && currentItem.dataAggregator){
-            if(!currentItem.dataAggregator.id){
-                aggregator = connection.dataAggregator.find(a => a.id === currentItem.dataAggregator)
-            } else{
-                aggregator = currentItem.dataAggregator;
-            }
+            aggregator = connection.dataAggregator.find(a => a.id === currentItem.dataAggregator)
         }
         if(aggregator) {
             aggregator = aggregator.name;

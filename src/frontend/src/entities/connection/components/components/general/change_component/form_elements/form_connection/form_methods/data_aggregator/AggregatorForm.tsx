@@ -20,6 +20,9 @@ import Button from "@app_component/base/button/Button";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
 import { OptionProps } from '@app_component/base/input/select/interfaces';
 import {setFocusById} from "@application/utils/utils";
+import {ButtonStyled, CheckboxStyled, FileStyled, TextStyled} from "@app_component/base/input/file/styles";
+import ReactCrop from "@app_component/base/crop/ReactCrop";
+import {ColorTheme} from "@style/Theme";
 
 const getStaticWordCompleter = (variables: string[]) => {
     return {
@@ -54,14 +57,9 @@ const AggregatorForm:FC<AggregatorFormProps> =
     const variablesRef = useRef(null);
     const scriptSegmentRef = useRef(null);
     const [name, setName] = useState<string>(aggregator?.name || '');
+    const [showAssignedItemsSelect, toggleAssignedItemsSelect] = useState<boolean>(false);
     const [nameError, setNameError] = useState<string>('');
-    const initialItems = useMemo(() => {
-        if(!aggregator){
-            return [];
-        }
-        return allMethods.filter(m => {return aggregator.assignedItems.findIndex(i => i.name === m.value) !== -1;});
-    }, [aggregator]);
-    const [items, setItems] = useState<OptionProps[]>(initialItems || []);
+    const [items, setItems] = useState<OptionProps[]>([]);
     const [args, setArgs] = useState(aggregator?.args || []);
     const [argsError, setArgsError] = useState<string>('');
     const initialScript = CAggregator.splitVariablesFromScript(aggregator?.script || '');
@@ -126,11 +124,12 @@ const AggregatorForm:FC<AggregatorFormProps> =
             scriptSegmentRef.current.focus();
             return;
         }
+        let assignedItems = showAssignedItemsSelect ? items : [];
         if(formType === 'add'){
-            add({name, args, assignedItems: items.map(i => {return {name: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
+            add({name, args, assignedItems: assignedItems.map(i => {return {name: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
         }
         if(formType === 'update'){
-            update({id: aggregator.id, name, args, assignedItems: items.map(i => {return {name: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
+            update({id: aggregator.id, name, args, assignedItems: assignedItems.map(i => {return {name: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
         }
     }
     const addArgument = (arg: ModelArgument) => {
@@ -191,16 +190,40 @@ const AggregatorForm:FC<AggregatorFormProps> =
                         label={'Name'}
                         error={nameError}
                     />
-                    <InputSelect
-                        id={`input_aggregator_items`}
-                        readOnly={readOnly}
-                        onChange={(option: any) => setItems(option)}
-                        value={items}
-                        icon={'commit'}
-                        label={'Item'}
-                        options={allMethods}
-                        isMultiple={true}
-                    />
+                    {!showAssignedItemsSelect &&
+                        <Input readOnly={readOnly} value={'checkbox'} label={'Method'} icon={'commit'}>
+                            <CheckboxStyled
+                                theme={theme}
+                                type={'checkbox'}
+                                checked={showAssignedItemsSelect}
+                                onChange={() => toggleAssignedItemsSelect(!showAssignedItemsSelect)}
+                            />
+                            <TextStyled
+                                hasCheckbox={true}
+                                hasBorder={false}
+                                paddingLeft={'30px'}
+                                value={'Do you want to assign for all selected methods?'}
+                                display={'inline-block'}
+                            />
+                        </Input>
+                    }
+                    {showAssignedItemsSelect &&
+                        <InputSelect
+                            id={`input_aggregator_items`}
+                            readOnly={readOnly}
+                            onChange={(option: any) => setItems(option)}
+                            value={items}
+                            icon={'commit'}
+                            label={'Method'}
+                            options={allMethods}
+                            isMultiple={true}
+                            checkboxProps={{
+                                theme: theme,
+                                checked: showAssignedItemsSelect,
+                                onChange: () => toggleAssignedItemsSelect(!showAssignedItemsSelect),
+                            }}
+                        />
+                    }
                     <Input errorBottom={'-20px'} error={argsError} readOnly={readOnly} required={true} value={'arguments'} label={'Arguments'} icon={'abc'} marginBottom={'20px'}>
                         <ArgumentFormContainer>
                             {!readOnly && <AddArgument clearArgsError={() => setArgsError('')} args={args} add={addArgument}/>}

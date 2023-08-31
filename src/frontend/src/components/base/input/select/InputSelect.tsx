@@ -32,6 +32,7 @@ import {Option} from "./Option";
 import Button from "../../button/Button";
 import { capitalize } from '@application/utils/utils';
 import { sortAlphabeticallyByKey } from '@application/utils/utils';
+import {CheckboxStyled} from "@app_component/base/input/file/styles";
 
 const InputSelect: FC<InputSelectProps> = ({
     id,
@@ -54,6 +55,7 @@ const InputSelect: FC<InputSelectProps> = ({
     getOptionRightComponent,
     maxMultiValues,
     autoFocus,
+    checkboxProps,
     ...props
 }) => {
     let source: OptionProps[];
@@ -221,7 +223,7 @@ const InputSelect: FC<InputSelectProps> = ({
     const searchPlaceholder = !!placeholder ? placeholder : "Please type to search...";
     const hasSearchInput = isSearchable && (!readOnly || !isMultiple);
     return(
-        <Input className={className} paddingLeft={hasIcon && isIconInside ? '30px' : '0'} componentRef={inputRef} noIcon={!hasIcon} hasUnderline={false} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
+        <Input checkboxProps={checkboxProps} className={className} paddingLeft={hasIcon && isIconInside ? '30px' : '0'} componentRef={inputRef} noIcon={!hasIcon} hasUnderline={false} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputContainerStyled hasBorder={!hasValue && !isToggled} ref={containerRef} color={currentOption ? ColorTheme.Black : ColorTheme.Gray}>
                 <MultipleValuesStyled ref={multipleRef}>
                     {
