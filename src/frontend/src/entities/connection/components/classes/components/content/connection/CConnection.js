@@ -731,12 +731,12 @@ export default class CConnection{
         switch(connectorType){
             case CONNECTOR_FROM:
                 for(let i = 0; i < this._fieldBinding.length; i++){
-                    if(this._fieldBinding[i].from.length > 0){
-                        if(CFieldBinding.compareTwoBindingItems(this._fieldBinding[i].from[0], bindingItem.from[0])){
-                            if(this.checkIfExistSuchFields(bindingItem.to, CONNECTOR_FROM)) {
-                                this._fieldBinding[i].to = bindingItem.to;
+                    if(this._fieldBinding[i].to.length > 0){
+                        if(CFieldBinding.compareTwoBindingItems(this._fieldBinding[i].to[0], bindingItem.to[0])){
+                            if(this.checkIfExistSuchFields(bindingItem.from, CONNECTOR_FROM)) {
+                                this._fieldBinding[i].from = bindingItem.from;
                             } else{
-                                this._fieldBinding[i].from = [];
+                                this._fieldBinding[i].to = [];
                             }
                             hasFound = true;
                             break;

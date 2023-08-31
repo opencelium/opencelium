@@ -44,12 +44,16 @@ export const connectionEditorSlice = createSlice({
         toggleConditionDialog: (state) => {
             state.isConditionDialogOpened = !state.isConditionDialogOpened;
         },
+        syncInvokers: (state) => {
+
+        }
     },
 })
 
 export const {
     toggleRequestBodyDialog, toggleResponseSuccessBodyDialog,
     toggleResponseFailBodyDialog, toggleConditionDialog,
+    syncInvokers,
 } = connectionEditorSlice.actions;
 
 export default connectionEditorSlice.reducer;
