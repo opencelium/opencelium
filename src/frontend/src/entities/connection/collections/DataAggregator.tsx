@@ -32,13 +32,13 @@ class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
         propertyKey: 'name',
         replace: true,
         getValue: (aggregator: ModelDataAggregator) => {
-            return <td key={aggregator.id}>{aggregator.name}</td>
+            return <td key={`name_${aggregator.id}`}>{aggregator.name}</td>
         }
     },{
         propertyKey: 'args',
         replace: true,
         getValue: (aggregator: ModelDataAggregator) => {
-            return <td key={aggregator.id}>{aggregator.args.map(a => a.name).join(', ')}</td>
+            return <td key={`args_${aggregator.id}`}>{aggregator.args.map(a => a.name).join(', ')}</td>
         }
     }];
     gridProps = {title: 'name'};
