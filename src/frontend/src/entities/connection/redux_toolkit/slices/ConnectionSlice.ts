@@ -57,8 +57,6 @@ export interface ConnectionState extends ICommonState{
     deletingConnectionById: API_REQUEST_STATE,
     deletingTestConnectionById: API_REQUEST_STATE,
     deletingConnectionsById: API_REQUEST_STATE,
-    addingDataAggregator: API_REQUEST_STATE,
-    updatingDataAggregator: API_REQUEST_STATE,
     currentConnection: IConnection,
     /*
     * TODO: rework during the the connection cleaning
@@ -101,8 +99,6 @@ let initialState: ConnectionState = {
     deletingConnectionById: API_REQUEST_STATE.INITIAL,
     deletingTestConnectionById: API_REQUEST_STATE.INITIAL,
     deletingConnectionsById: API_REQUEST_STATE.INITIAL,
-    addingDataAggregator: API_REQUEST_STATE.INITIAL,
-    updatingDataAggregator: API_REQUEST_STATE.INITIAL,
     currentConnection: null,
     currentTechnicalItem: null,
     connection: null,
@@ -349,39 +345,6 @@ export const connectionSlice = createSlice({
             state.updatingConnection = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
-        [addAggregator.pending.type]: (state) => {
-            state.addingDataAggregator = API_REQUEST_STATE.START;
-        },
-        [addAggregator.fulfilled.type]: (state, action: PayloadAction<AggregatorRequest>) => {
-            state.addingDataAggregator = API_REQUEST_STATE.FINISH;
-            state.connections = state.connections.map(connection => connection.connectionId === action.payload.connectionId ? {...connection, dataAggregator: [...state.currentConnection.dataAggregator, action.payload.aggregator]} : connection);
-            state.metaConnections = state.metaConnections.map(connection => connection.connectionId === action.payload.connectionId ? {...connection, dataAggregator: [...state.currentConnection.dataAggregator, action.payload.aggregator]} : connection);
-            if(state.currentConnection && state.currentConnection.connectionId === action.payload.connectionId){
-                state.currentConnection = {...state.currentConnection, dataAggregator: [...state.currentConnection.dataAggregator, action.payload.aggregator]};
-            }
-            state.error = null;
-        },
-        [addAggregator.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.addingDataAggregator = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
-        },
-        [updateAggregator.pending.type]: (state) => {
-            state.updatingDataAggregator = API_REQUEST_STATE.START;
-        },
-        [updateAggregator.fulfilled.type]: (state, action: PayloadAction<AggregatorRequest>) => {
-            const getUpdatedDataAggregator = (connection: IConnection) => connection.dataAggregator.map((agg: ModelDataAggregator) => agg.id === action.payload.aggregator.id ? action.payload.aggregator : agg);
-            state.updatingDataAggregator = API_REQUEST_STATE.FINISH;
-            state.connections = state.connections.map(connection => connection.connectionId === action.payload.connectionId ? {...connection, dataAggregator: getUpdatedDataAggregator(connection)} : connection);
-            state.metaConnections = state.metaConnections.map(connection => connection.connectionId === action.payload.connectionId ? {...connection, dataAggregator: getUpdatedDataAggregator(connection)} : connection);
-            if(state.currentConnection && state.currentConnection.connectionId === action.payload.connectionId){
-                state.currentConnection = {...state.currentConnection, dataAggregator: getUpdatedDataAggregator(state.currentConnection)};
-            }
-            state.error = null;
-        },
-        [updateAggregator.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.updatingDataAggregator = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
-        },
         [getConnectionById.pending.type]: (state) => {
             state.currentConnection = null;
             state.gettingConnection = API_REQUEST_STATE.START;
@@ -475,7 +438,7 @@ export const {
     setDetailsLocation, setTechnicalLayoutLocation,
     setConnectionDraftWasOpened, setInitialTestConnectionState,
     setLogPanelHeight, toggleDetails, setJustCreatedItem,
-    setJustDeletedItem, addLogMessage, shouldNotDrawLogMessage,
+    setJustDeletedItem, shouldNotDrawLogMessage,
 } = connectionSlice.actions;
 
 export const actions = {

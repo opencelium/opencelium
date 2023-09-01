@@ -1,10 +1,8 @@
-import Request from "@entity/application/requests/classes/Request";
-import {IConnectionRequest} from "@root/requests/interfaces/IConnection";
-import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {AxiosResponse} from "axios";
-import {IResponse} from "@application/requests/interfaces/IResponse";
+import Request from "@entity/application/requests/classes/Request";
+import {IRequestSettings} from "@application/requests/interfaces/IRequest";
+import ModelDataAggregator from "../models/DataAggregator";
 import {IDataAggregator} from "../interfaces/IDataAggregator";
-import ModelDataAggregator from "@root/requests/models/DataAggregator";
 
 export class DataAggregatorRequest extends Request implements IDataAggregator {
 

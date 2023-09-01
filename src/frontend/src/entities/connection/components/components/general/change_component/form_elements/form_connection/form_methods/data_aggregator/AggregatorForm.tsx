@@ -20,9 +20,9 @@ import Button from "@app_component/base/button/Button";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
 import { OptionProps } from '@app_component/base/input/select/interfaces';
 import {setFocusById} from "@application/utils/utils";
-import {ButtonStyled, CheckboxStyled, FileStyled, TextStyled} from "@app_component/base/input/file/styles";
-import ReactCrop from "@app_component/base/crop/ReactCrop";
-import {ColorTheme} from "@style/Theme";
+import {CheckboxStyled, TextStyled} from "@app_component/base/input/file/styles";
+import {CDataAggregator} from "@root/classes/CDataAggregator";
+import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 
 const getStaticWordCompleter = (variables: string[]) => {
     return {
@@ -54,6 +54,7 @@ const AggregatorForm:FC<AggregatorFormProps> =
     if(formType === 'view'){
         readOnly = true;
     }
+    const {addingDataAggregator, updatingDataAggregator} = CDataAggregator.getReduxState();
     const variablesRef = useRef(null);
     const scriptSegmentRef = useRef(null);
     const [name, setName] = useState<string>(aggregator?.name || '');
@@ -297,6 +298,7 @@ const AggregatorForm:FC<AggregatorFormProps> =
                         label={formType === 'add' ? 'Add' : 'Update'}
                         size={TextSize.Size_14}
                         handleClick={change}
+                        isLoading={addingDataAggregator === API_REQUEST_STATE.START || updatingDataAggregator === API_REQUEST_STATE.START}
                     />
                 }
                 {(closeForm || formType === 'view') &&

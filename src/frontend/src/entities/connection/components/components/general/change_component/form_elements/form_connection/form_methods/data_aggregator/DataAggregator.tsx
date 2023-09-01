@@ -1,4 +1,4 @@
-import React, {FC, useState, useMemo} from 'react';
+import React, {FC, useState, useMemo, useEffect} from 'react';
 import _ from 'lodash';
 import {
     DataAggregatorProps, FormType,
@@ -13,9 +13,15 @@ import DialogTitle from "./DialogTitle";
 import styles from './styles.scss';
 import ModelDataAggregator from "@root/requests/models/DataAggregator";
 import AggregatorList from './AggregatorList';
+import {CDataAggregator} from "@root/classes/CDataAggregator";
+import {useAppDispatch} from "@application/utils/store";
+import {setCurrentAggregator as setCurrentStateAggregator} from '@entity/connection/redux_toolkit/slices/DataAggregatorSlice';
+import {addAggregator, updateAggregator} from '@entity/connection/redux_toolkit/action_creators/DataAggregatorCreators';
 
 
 const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, readOnly}) => {
+    const dispatch = useAppDispatch();
+    const {currentAggregator: currentStateAggregator} = CDataAggregator.getReduxState();
     const [showDialog, setShowDialog] = useState<boolean>(false);
     const [isForm, setIsForm] = useState<boolean>(false);
     const [formType, setFormType] = useState<FormType>('add');
@@ -28,6 +34,25 @@ const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, r
     const allOperatorOptions = useMemo(() => {
         return _.uniqWith(allOperators.map(o => {return {label: o.index, value: o.index }}), _.isEqual);
     }, [allOperators]);
+    useEffect(() => {
+        if(currentStateAggregator){
+            if(formType === 'add'){
+                connection.addDataAggregator(currentStateAggregator);
+            }
+            if(formType === 'update'){
+                connection.updateDataAggregator(currentStateAggregator);
+            }
+            updateConnection(connection);
+            setIsForm(false);
+            dispatch(setCurrentStateAggregator(null));
+        }
+    }, [currentStateAggregator]);
+    const add = (aggregator: ModelDataAggregator) => {
+        dispatch(addAggregator({aggregator, connectionId: connection.id}));
+    }
+    const update = (aggregator: ModelDataAggregator) => {
+        dispatch(updateAggregator({aggregator, connectionId: connection.id}));
+    }
     const actions = isForm ? [] : [
         {
             icon: 'add',
@@ -40,17 +65,6 @@ const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, r
             onClick: () => setShowDialog(!showDialog)
         }
     ];
-    const add = (aggregator: ModelDataAggregator) => {
-        aggregator.id = '5';
-        connection.addDataAggregator(aggregator);
-        setIsForm(false);
-        updateConnection(connection);
-    }
-    const update = (aggregator: ModelDataAggregator) => {
-        connection.updateDataAggregator(aggregator);
-        updateConnection(connection);
-        setIsForm(false);
-    }
     return (
         <React.Fragment>
             <Button

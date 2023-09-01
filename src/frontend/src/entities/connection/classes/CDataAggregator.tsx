@@ -13,14 +13,11 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import connectionReducer from "./ConnectionSlice";
-import connectionEditorReducer from "./EditorSlice";
-import graphQLReducer from './GraphQLSlice';
-import dataAggregatorReducer from './DataAggregatorSlice';
+import {useAppSelector} from "@application/utils/store";
+import {RootState} from "@application/utils/store";
 
-export default {
-    connectionReducer,
-    connectionEditorReducer,
-    graphQLReducer,
-    dataAggregatorReducer,
+export class CDataAggregator{
+    static getReduxState() {
+        return useAppSelector((state: RootState) => state.dataAggregatorReducer);
+    }
 }

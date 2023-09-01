@@ -18,10 +18,8 @@ import {getActionWithoutType} from "@application/utils/utils";
 import LinkMessage from "@app_component/base/link_message/LinkMessage";
 import {InterpolateTranslation} from "@app_component/base/interpolate_translation/InterpolateTranslation";
 import {
-    addConnection,
-    deleteConnectionById,
-    getAndUpdateConnection, testConnection,
-    updateConnection
+    addConnection, deleteConnectionById,
+    getAndUpdateConnection, updateConnection,
 } from "../../redux_toolkit/action_creators/ConnectionCreators";
 import Connections from "@root/collections/Connections";
 
