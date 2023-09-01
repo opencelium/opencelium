@@ -69,9 +69,11 @@ public class UserDetail {
     @Column(name = "lang")
     private String lang;
 
+    // Deprecated
     @Column(name = "repo_user")
     private String repoUser;
 
+    // Deprecated
     @Column(name = "repo_password")
     private String repoPassword;
 

@@ -11,12 +11,10 @@ import java.io.Serializable;
 public class BLarrow implements Serializable {
 
     @Id
-//    @GeneratedValue(strategy=GenerationType.SEQUENCE)
     @Column(name = "arr_from")
     private int from;
 
     @Id
-//    @GeneratedValue(strategy=GenerationType.SEQUENCE)
     @Column(name = "arr_to")
     private int to;
 
