@@ -321,16 +321,16 @@ SELECT VERSION();
 CREATE TABLE data_aggregator (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
-    assigned_methods JSON,
-    script JSON
+    script LONGTEXT
 );
 
 --changeset 3.2:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-CREATE TABLE argument (
+CREATE TABLE aggregator_argument (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    data_aggregator_id INT,
-    name VARCHAR(255),
+    data_aggregator_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
     description TEXT,
+    UNIQUE KEY unique_aggregator_argument_per_aggregator (data_aggregator_id, name),
     FOREIGN KEY (data_aggregator_id) REFERENCES data_aggregator(id)
 );
 

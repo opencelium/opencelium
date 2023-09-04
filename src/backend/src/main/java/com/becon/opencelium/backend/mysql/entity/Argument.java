@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.mysql.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "argument")
+@Table(name = "aggregator_argument")
 public class Argument {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

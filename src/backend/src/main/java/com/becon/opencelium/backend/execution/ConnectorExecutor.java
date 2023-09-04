@@ -304,7 +304,6 @@ public class ConnectorExecutor {
             return "null";
         }
         Map<String, Object> fields = replaceValues(bodyNode.getFields());
-//        body = fieldNodeService.deleteEmptyFields(body); // user should determine which fields should be in body.
         Object content = null;
         if (bodyNode.getType() != null && bodyNode.getType().equals("array")){
             List<Object> c = new ArrayList<>();
