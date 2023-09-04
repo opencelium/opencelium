@@ -16,6 +16,7 @@ export interface ModelAssignedItem{
 }
 
 export interface ModelArgument{
+    id?: string,
     name: string,
     description?: string,
 }

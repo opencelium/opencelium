@@ -105,7 +105,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             isLoading={gettingMetaConnections === API_REQUEST_STATE.START}
         />;
     const DataAggregatorItems = selectedConnection ? (
-        <Input value={selectedConnection.option} label={'Data Aggregation Names'} icon={'subtitles'} marginBottom={'20px'} display={'grid'}>
+        <Input value={selectedConnection.option} label={'Aggregation Argument Names'} icon={'subtitles'} marginBottom={'20px'} display={'grid'}>
             <DataAggregatorItemsStyled>{
                 dataAggregator.length > 0 ? dataAggregator.map((aggregator: ModelDataAggregator) => {
                     return (
