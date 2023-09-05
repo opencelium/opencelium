@@ -237,6 +237,7 @@ class RightStatement extends React.Component{
                     placeholder={methodPlaceholder}
                     isDisabled={isMethodDisabled}
                     isSearchable={isMethodSearchable}
+                    fromStatement="right"
                 />
                 {isRightStatementOption ?
                     <ParamSelect
@@ -264,6 +265,7 @@ class RightStatement extends React.Component{
                         updateParam={(a) => this.updateParam(a)}
                         style={this.getParamStyles()}
                         isMultiline={isMultiline}
+                        fromStatement="right"
                     />
                 }
                 <LikePercentageStyled isLikeOperator={isLikeOperator} hasSign={hasRightLikeSign}>

@@ -86,6 +86,7 @@ class LeftStatement extends React.Component{
                     placeholder={methodPlaceholder}
                     isDisabled={isMethodDisabled}
                     isSearchable={isMethodSearchable}
+                    fromStatement="left"
                 />
                 <ParamInput
                     ref={this.paramInputRef}
@@ -101,6 +102,7 @@ class LeftStatement extends React.Component{
                     items={paramItems}
                     updateParam={(a) => this.updateParam(a)}
                     style={this.getParamStyles()}
+                    fromStatement="left"
                 />
             </React.Fragment>
         );

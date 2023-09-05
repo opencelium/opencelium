@@ -946,7 +946,6 @@ export const positionElementOver = (targetElementIds, offset, hide) => {
 }
 
 export const positionElementOverByClassName = (targetElementsClasses, offset, hide) => {
-
     if(!document.getElementById('wrapActiveElement')){
         let div = document.createElement('div');
         div.setAttribute('id', 'wrapActiveElement');

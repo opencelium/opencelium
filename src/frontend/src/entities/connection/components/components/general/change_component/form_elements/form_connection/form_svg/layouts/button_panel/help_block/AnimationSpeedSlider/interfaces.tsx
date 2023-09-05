@@ -13,8 +13,6 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITheme } from "@style/Theme";
-
 interface AnimationSpeedSliderProps {
   step: number;
   max:  number;

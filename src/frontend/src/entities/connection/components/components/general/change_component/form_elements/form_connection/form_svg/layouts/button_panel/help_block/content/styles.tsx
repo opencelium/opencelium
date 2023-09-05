@@ -22,7 +22,7 @@ const ContentStyled = styled.div<ContentStyledProps>`
   padding: 40px;
   width: 100%;
   position: absolute;
-  z-index: 2;
+  z-index: 100001;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);

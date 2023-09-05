@@ -13,36 +13,11 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSlice, PayloadAction, current, SliceCaseReducers, CaseReducers } from "@reduxjs/toolkit";
-import {
-  API_REQUEST_STATE,
-  TRIPLET_STATE,
-} from "@application/interfaces/IApplication";
-import {
-  IResponse,
-  ResponseMessages,
-} from "@application/requests/interfaces/IResponse";
+import { createSlice, PayloadAction, current } from "@reduxjs/toolkit";
 import { CommonState } from "@application/utils/store";
 import { ICommonState } from "@application/interfaces/core";
-import { LocalStorage } from "@application/classes/LocalStorage";
-import {
-  addConnection,
-  addTestConnection,
-  checkConnectionTitle,
-  deleteConnectionById,
-  deleteConnectionsById,
-  deleteTestConnectionById,
-  getAllConnections,
-  getAllMetaConnections,
-  getAndUpdateConnection,
-  getConnectionById,
-  testConnection,
-  updateConnection,
-} from "../action_creators/ConnectionCreators";
-import { ConnectionLogProps, IConnection } from "../../interfaces/IConnection";
-import { PANEL_LOCATION } from "../../components/utils/constants/app";
+import { ConnectionLogProps } from "../../interfaces/IConnection";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
-import { NoInfer } from "@reduxjs/toolkit/dist/tsHelpers";
 import {COLOR_MODE} from "@classes/content/connection_overview_2/CSvg";
 import { LogPanelHeight } from "./ConnectionSlice";
 

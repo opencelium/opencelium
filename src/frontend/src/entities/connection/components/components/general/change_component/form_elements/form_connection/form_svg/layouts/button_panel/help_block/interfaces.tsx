@@ -37,10 +37,17 @@ interface IBaseAnimationData {
   name: string;
   toDown?: true | false;
   after?: string;
+  scripts?: IScriptsData[];
+  label?: string;
+}
+
+interface IScriptsData {
+  functionId: string;
+  text: string;
 }
 
 interface IAnimationDataForProcess extends IBaseAnimationData {
-  label?: string;
+  
   endpoint?: IEndpointData;
   body?: IBodyData[];
 }

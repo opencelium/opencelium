@@ -102,11 +102,11 @@ const CreatePanel: FC<{
             <svg {...containerCoordinatesRight} onMouseOver={onMouseOverSvgRight} onMouseLeave={onMouseLeaveSvgRight}>
                 <CreatePanelStyled id={'create_panel_right'} y={0} style={{opacity: isMouseOverRight ? 0.5 : 0.2}} isRight={true}/>
                 <CreateProcessContainerStyled isRight={true}>
-                    <CreateProcessStyled y={16.5} onClick={(e) => createProcess(e, OUTSIDE_ITEM)} style={{opacity: isMouseOverRight ? 1 : 0.2}} isRight={true}>
+                    <CreateProcessStyled id='create_process_right' y={16.5} onClick={(e) => createProcess(e, OUTSIDE_ITEM)} style={{opacity: isMouseOverRight ? 1 : 0.2}} isRight={true}>
                         <title>{"Process"}</title>
                     </CreateProcessStyled>
                 </CreateProcessContainerStyled>
-                <CreateOperatorContainerStyled y={35} isRight={true}>
+                <CreateOperatorContainerStyled id='create_operator_right' y={35} isRight={true}>
                     <CreateOperatorStyled
                         points={points}
                         onClick={(e) => createOperator(e, OUTSIDE_ITEM)}
@@ -120,11 +120,11 @@ const CreatePanel: FC<{
                 <svg {...containerCoordinatesBottom} onMouseOver={onMouseOverSvgBottom} onMouseLeave={onMouseLeaveSvgBottom}>
                     <CreatePanelStyled id={'create_panel_bottom'} style={{opacity: isMouseOverBottom ? 0.5 : 0.2}} isBottom={true}/>
                     <CreateProcessContainerStyled isBottom={true}>
-                        <CreateProcessStyled x={37.5} onClick={(e) => (createProcess(e, INSIDE_ITEM))} style={{opacity: isMouseOverBottom ? 1 : 0.2}} isBottom={true}>
+                        <CreateProcessStyled id='create_process_bottom' x={37.5} onClick={(e) => (createProcess(e, INSIDE_ITEM))} style={{opacity: isMouseOverBottom ? 1 : 0.2}} isBottom={true}>
                             <title>{"Process"}</title>
                         </CreateProcessStyled>
                     </CreateProcessContainerStyled>
-                    <CreateOperatorContainerStyled x={14} isBottom={true}>
+                    <CreateOperatorContainerStyled id='create_operator_bottom' x={14} isBottom={true}>
                         <CreateOperatorStyled
                             points={points}
                             onClick={(e) => createOperator(e, INSIDE_ITEM)}

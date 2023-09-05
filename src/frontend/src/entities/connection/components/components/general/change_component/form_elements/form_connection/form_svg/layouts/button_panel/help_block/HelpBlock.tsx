@@ -29,22 +29,21 @@ import FormConnectionSvg from "../../../FormConnectionSvg";
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
 import animationData from "./AnimationData";
 import CConnection from "@classes/content/connection/CConnection";
-import {setAnimationPaused, toggleModalDetails } from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import {setAnimationPaused } from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/content/connection/CConnectorItem";
 import { Connector } from "@entity/connector/classes/Connector";
 import {ModalConnection} from "@root/classes/ModalConnection";
 import { Connection } from "@entity/connection/classes/Connection";
 import { setVideoAnimationName, setAnimationPreviewPanelVisibility } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
-import { setFocusById, positionElementOver, positionElementOverByClassName } from '@application/utils/utils';
-import CSvg from "@entity/connection/components/classes/components/content/connection_overview_2/CSvg";
 import AnimationSpeedSlider from "./AnimationSpeedSlider/AnimationSpeedSlider";
 
-import DetailsForOperators from "./AnimationFunctions/DetailsForOperators";
-import DetailsForProcess from "./AnimationFunctions/DetailsForProcess";
-import { current } from "@reduxjs/toolkit";
+import DetailsForOperators from "./classes/DetailsForOperators";
+import DetailsForProcess from "./classes/DetailsForProcess";
+import AdditionalFunctions from "./classes/AdditionalFunctions";
+import { AnimationPopoverProps } from "./AnimationPopover/interfaces";
+import AnimationPopover from "./AnimationPopover/AnimationPopover";
+import AnimationFunctionSteps from "./classes/AnimationFunctionSteps";
 
-//@ts-ignore
-const connectionData = {"nodeId":null,"connectionId":null,"title":"trello connection","description":"desc","fromConnector":{"nodeId":null,"connectorId":1,"title":null,"invoker":{"name":"trello"},"methods":[{"name":"GetBoards","request":{"endpoint":"{url}/1/members/{username}/boards?key={key}&token={token}","body":null,"method":"GET"},"response":{"success":{"status":"200","body":{"type":"array","format":"json","data":"raw","fields":{"name":"","id":""}}},"fail":{"status":"401","body":null}},"index":"0","label":null,"color":"#FFCFB5"}],"operators":[]},"toConnector":{"nodeId":null,"connectorId":1,"title":null,"invoker":{"name":"trello"},"methods":[],"operators":[]},"fieldBinding":[]}
 
 const prepareConnection = (connection: any, connectors: any,) => {
     if(connection && connection.fromConnector && connection.toConnector) {
@@ -68,361 +67,251 @@ const prepareConnection = (connection: any, connectors: any,) => {
 
 const HelpBlock = () => {
   const dispatch = useAppDispatch();
-  const [animationProps, setAnimationProps] = useState<any>({connection: CConnection.createConnection()})
-  const {connectors, gettingConnectors} = Connector.getReduxState();
-  const [isVisible, setIsVisible] = useState(false);
-  const { isButtonPanelOpened, videoAnimationName, animationSpeed } = Connection.getReduxState();
+  const [ animationProps, setAnimationProps ] = useState<any>({connection: CConnection.createConnection()})
+  const { connectors } = Connector.getReduxState();
+  const [ isVisible, setIsVisible ] = useState(false);
+  const { isButtonPanelOpened, videoAnimationName, animationSpeed, connection: connectionData } = Connection.getReduxState();
   const { isAnimationPaused } = ModalConnection.getReduxState();
-  const [index, setIndex] = useState(0);
-  const [stopTimer, setStopTimer] = useState(false);
+  const [ index, setIndex ] = useState(0);
+  const [ stopTimer, setStopTimer ] = useState(false);
 
   const [connectorType, setConnectorType] = useState<ConnectorPanelType>("fromConnector");
-  const [showLinkInBody, setShowLinkInBody] = useState(true);
+
+  const [popoverProps, setPopoverProps] = useState<AnimationPopoverProps>(null);
 
   const ref = React.useRef(null);
 
   const reference: any = React.useRef();
-  const currentAnimationSpeed = reference.current = animationSpeed;
-
-  function delay(ms: number) {
-    return new Promise((resolve, reject) => {
-      if (!stopTimer) {
-        setTimeout(resolve, ms);
-      } else {
-        reject();
-      }
-    });
-  }
-
-  const setSvgViewBox = (elementId: string, currentSvgElementId: string) => {
-    const svgElement = document.getElementById(elementId);
-    const viewBoxValue = svgElement.getAttribute('viewBox');
-    const fromConnectorPanel = svgElement.querySelector('#fromConnector_panel_modal');
-    const toConnectorPanel = svgElement.querySelector('#toConnector_panel_modal');
-
-    const currentElement = svgElement.querySelector(`#${currentSvgElementId}`);
-
-    const fromConnectorWidth = fromConnectorPanel.getBoundingClientRect().width;
-    const toConnectorWidth = toConnectorPanel.getBoundingClientRect().width;
-
-    const [x, y, width, height] = viewBoxValue.split(' ').map(parseFloat);
-
-    let offsetX;
-    // @ts-ignore
-    let offsetY = currentElement.y.animVal.value / 2 - 50
-
-    if(connectorType === 'fromConnector'){
-      offsetX = fromConnectorWidth > 350 ? fromConnectorWidth / 4 : x
-    }
-    if(connectorType === 'toConnector'){
-      offsetX = toConnectorWidth > 350 ? toConnectorWidth / 2 + fromConnectorWidth : fromConnectorWidth;
-    }
-
-    const viewBox = {x: offsetX, y: offsetY, width: width, height: height};
-
-    CSvg.setViewBox(elementId, viewBox)
-  }
+  reference.current = animationSpeed;
 
   const showDetailsForOperatorIf = async (condition: any) => {
+    const refs: any = {};
+    refs.animationData = animationData[videoAnimationName][connectorType][index];
+    const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
+    
     if(condition){
       const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
 
-      await DetailsForOperators.openConditionDialog(ref, currentAnimationSpeed);
+      // add delay for first step
+      await details.openConditionDialog(reference.current);
 
-      await DetailsForOperators.changeLeftMethod(ref, condition, currentAnimationSpeed);
+      await details.changeLeftMethod(reference.current);
 
-      await DetailsForOperators.setFocusOnLeftParam(ref, currentAnimationSpeed);
+      await details.setFocusOnLeftParam(reference.current);
 
-      await DetailsForOperators.changeLeftParam(ref, condition, currentAnimationSpeed);
+      await details.changeLeftParam(reference.current);
 
-      await DetailsForOperators.changeRelationalOperator(ref, condition, currentAnimationSpeed);
+      await details.changeRelationalOperator(reference.current);
 
       if(condition.rightStatement.property){
-        await DetailsForOperators.setFocusOnRightProperty(ref, currentAnimationSpeed);
+        await details.setFocusOnRightProperty(reference.current);
 
-        await DetailsForOperators.changeRightProperty(ref, condition, currentAnimationSpeed);
+        await details.changeRightProperty(reference.current);
 
-        await DetailsForOperators.removeFocusFromRightProperty(ref, currentAnimationSpeed);
+        await details.removeFocusFromRightProperty(reference.current);
       }
       
       if(condition.rightStatement.rightMethodIndex){
-        await DetailsForOperators.changeRightMethod(ref, condition, currentAnimationSpeed);
+        await details.changeRightMethod(reference.current);
       }
       
       if(condition.rightStatement.rightParam){
-        await DetailsForOperators.setFocusOnRightParam(ref, currentAnimationSpeed);
+        await details.setFocusOnRightParam(reference.current);
 
-        await DetailsForOperators.changeRightParam(ref, condition, currentAnimationSpeed);
+        await details.changeRightParam(reference.current);
 
-        await DetailsForOperators.removeFocusFromRightParam(ref, currentAnimationSpeed);
+        await details.removeFocusFromRightParam(reference.current);
       }
       
       conditionRef.updateConnection();
-      setIndex(index + 1);
-    }
-    else{
-      setIndex(index + 1);
     }
   }
   
   const showDetailsForOperatorLoop = async (condition: any) => {
+    const refs: any = {};
+    
+    refs.animationData = animationData[videoAnimationName][connectorType][index];
+    const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
     if(condition){
       const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
 
-      await DetailsForOperators.openConditionDialog(ref, currentAnimationSpeed);
+      // add delay for first step
+      await details.openConditionDialog(reference.current);
 
-      await DetailsForOperators.changeLeftMethod(ref, condition, currentAnimationSpeed);
+      await details.changeLeftMethod(reference.current);
 
-      await DetailsForOperators.setFocusOnLeftParam(ref, currentAnimationSpeed);
+      await details.setFocusOnLeftParam(reference.current);
 
-      await DetailsForOperators.changeLeftParam(ref, condition, currentAnimationSpeed);
+      await details.changeLeftParam(reference.current);
 
-      await DetailsForOperators.changeRelationalOperator(ref, condition, currentAnimationSpeed);
+      await details.changeRelationalOperator(reference.current);
 
-      await DetailsForOperators.changeRightMethod(ref, condition, currentAnimationSpeed);
+      await details.changeRightMethod(reference.current);
 
-      await DetailsForOperators.changeRightParam(ref, condition, currentAnimationSpeed);
+      await details.changeRightParam(reference.current);
     
       conditionRef.updateConnection();
-      setIndex(index + 1);
-    }
-    else{
-      setIndex(index + 1);
     }
   }
 
-  // for show process details
-
   const showDetailsForProcess = async () => {
     const refs: any = {};
-
+    
     refs.animationData = animationData[videoAnimationName][connectorType][index];
     refs.endpointData = refs.animationData.endpoint;
     refs.currentElementId = refs.animationData.index;
+    const details = new DetailsForProcess(ref, setPopoverProps, refs.animationData);
     
     if(refs.animationData.label){
-      await DetailsForProcess.startEditLabel(ref, currentAnimationSpeed);
+      // add delay for first step
+      await details.startEditLabel(reference.current);
 
-      await DetailsForProcess.endEditLabel(ref, currentAnimationSpeed);
+      await details.endEditLabel(reference.current);
     }
     
     if(refs.endpointData){
-      await DetailsForProcess.openUrlDialog(ref, currentAnimationSpeed);
+      await details.openUrlDialog(reference.current);
 
-      await DetailsForProcess.changeUrlMethod(ref, refs.animationData, connectorType, currentAnimationSpeed);
+      await details.changeUrlMethod(refs.animationData, refs.endpointData.connectorType, reference.current);
 
-      await DetailsForProcess.changeUrlParam(ref, refs.animationData, currentAnimationSpeed);
+      await details.changeUrlParam(refs.animationData, reference.current);
 
-      await DetailsForProcess.addUrlParam(ref, refs.animationData, connectorType, currentAnimationSpeed);
+      await details.addUrlParam(refs.animationData, connectorType, reference.current);
 
-      await DetailsForProcess.closeUrlDialog(ref, currentAnimationSpeed);
+      await details.closeUrlDialog(reference.current);
     }
     
     if(connectorType === 'fromConnector' && index === 0){
-      await DetailsForProcess.openHeaderDialog(ref, currentAnimationSpeed);
+      await details.openHeaderDialog(reference.current);
 
-      await DetailsForProcess.closeHeaderDialog(ref, currentAnimationSpeed);
+      await details.closeHeaderDialog(reference.current);
     }
     
     const bodyData = refs.animationData.body;
 
     if(bodyData){
-      await DetailsForProcess.openBodyDialog(ref, currentAnimationSpeed);
+      await details.openBodyDialog(reference.current);
 
-      await DetailsForProcess.openBodyObject(currentAnimationSpeed);
+      await details.openBodyObject(reference.current);
       
       for(let bodyIndex = 0; bodyIndex < bodyData.length; bodyIndex++){
-        await DetailsForProcess.displayBodyAddKeysButton(currentAnimationSpeed);
+        await details.displayBodyAddKeysButton(reference.current);
 
-        await DetailsForProcess.clickAddKeysButton(currentAnimationSpeed);
+        await details.clickAddKeysButton(reference.current);
 
-        await DetailsForProcess.addBodyKeyName(bodyData[bodyIndex].keyName, currentAnimationSpeed);
+        await details.addBodyKeyName(bodyData[bodyIndex].keyName, reference.current);
 
-        await DetailsForProcess.displaySubmitButtonToAddKey(currentAnimationSpeed);
+        await details.displaySubmitButtonToAddKey(reference.current);
 
-        await DetailsForProcess.clickSubmitButtonToAddKey(currentAnimationSpeed);
+        await details.clickSubmitButtonToAddKey(reference.current);
 
-        await DetailsForProcess.displayEditKeyValueButton(bodyIndex, currentAnimationSpeed);
+        await details.displayEditKeyValueButton(bodyIndex, reference.current);
 
-        await DetailsForProcess.clickEditKeyValueButton(bodyIndex, currentAnimationSpeed);
+        await details.clickEditKeyValueButton(bodyIndex, reference.current);
 
-        await DetailsForProcess.addBodyKeyValue(bodyData[bodyIndex].keyValue, currentAnimationSpeed);
+        await details.addBodyKeyValue(bodyData[bodyIndex].keyValue, reference.current);
         
         if(bodyData[bodyIndex].keyValue === '#'){
           for(let referenceIndex = 0; referenceIndex < bodyData[bodyIndex].reference.length; referenceIndex++) {
             for(let methodIndex = 0; methodIndex < bodyData[bodyIndex].reference[referenceIndex].method.length; methodIndex++){
               if(methodIndex > 0){
-                await DetailsForProcess.displayEditKeyValueButton(bodyIndex, currentAnimationSpeed);
+                await details.displayEditKeyValueButton(bodyIndex, reference.current);
 
-                await DetailsForProcess.clickEditKeyValueButton(bodyIndex, currentAnimationSpeed);
+                await details.clickEditKeyValueButton(bodyIndex, reference.current);
               }
 
-              await DetailsForProcess.changeBodyMethod(ref, bodyData, bodyIndex, referenceIndex, methodIndex, currentAnimationSpeed);
+              const currentItemId = ref.current.props.currentTechnicalItem.id;
+              await details.changeBodyMethod(bodyData, bodyIndex, referenceIndex, methodIndex, currentItemId, reference.current);
 
-              await DetailsForProcess.changeBodyParam(ref, bodyData, bodyIndex, referenceIndex, methodIndex, currentAnimationSpeed);
+              await details.changeBodyParam(bodyData, bodyIndex, referenceIndex, methodIndex, reference.current);
 
-              await DetailsForProcess.addBodyMethodAndParam(ref, currentAnimationSpeed);
+              await details.addBodyMethodAndParam(currentItemId, reference.current);
             }
 
             if(connectorType === 'toConnector' && bodyData[bodyIndex].reference[referenceIndex].enhancementDescription){
-              await DetailsForProcess.clickOnReferenceElements(bodyIndex, currentAnimationSpeed);
+              await details.clickOnReferenceElements(bodyIndex, reference.current);
 
-              await DetailsForProcess.changeReferenceDescription(bodyData, bodyIndex, referenceIndex, currentAnimationSpeed);
+              await details.changeReferenceDescription(bodyData, bodyIndex, referenceIndex, reference.current);
 
-              await DetailsForProcess.changeReferenceContent(ref, bodyData, bodyIndex, referenceIndex, currentAnimationSpeed);
+              await details.changeReferenceContent(bodyData, bodyIndex, referenceIndex, reference.current);
             }
           }
         }
         else{
-          await DetailsForProcess.clickSubmitButtonToAddValue(currentAnimationSpeed);
+          await details.clickSubmitButtonToAddValue(reference.current);
         }
       }
-      await DetailsForProcess.closeBodyDialog(ref, currentAnimationSpeed);
+      await details.closeBodyDialog(reference.current);
     }
             
     if(connectorType === 'fromConnector' && index === 0){
-      await DetailsForProcess.showResponse(ref, currentAnimationSpeed);
+      await details.showResponse(reference.current);
     }
   
     if(index === animationData[videoAnimationName].toConnector.length - 1 && connectorType === 'toConnector'){
-      await DetailsForProcess.deleteLastProcess(ref, currentAnimationSpeed);
+      await details.deleteLastProcess(reference.current);
 
-      await DetailsForProcess.showResult(dispatch, currentAnimationSpeed);
-      
-      setIndex(index + 1);
-    }
-    else{
-      setIndex(index + 1);
+      await details.showResult(dispatch, reference.current);
     }
   }
 
-  const animationFunction = (connectorPanelType: ConnectorPanelType) => {
+  const animationFunction = async (connectorPanelType: ConnectorPanelType) => {
+
+    const refs: any = {};
+    refs.animationData = animationData[videoAnimationName][connectorPanelType][index];
+
+    const animationSteps = new AnimationFunctionSteps(ref, refs.animationData, setPopoverProps);
+
     const currentElementId = animationData[videoAnimationName][connectorPanelType][index].index;
     const type = animationData[videoAnimationName][connectorPanelType][index].type;
     const name = animationData[videoAnimationName][connectorPanelType][index].name;
-    // @ts-ignore
     const label = animationData[videoAnimationName][connectorPanelType][index].label;
-    const direction = animationData[videoAnimationName][connectorPanelType][index].toDown;
-    const after = animationData[videoAnimationName][connectorPanelType][index].after;
     const prevElementType = animationData[videoAnimationName][connectorPanelType][index > 0 ? index - 1 : index].type;
     const svgRef = ref.current.technicalLayoutRef.current.svgRef.current;
 
     const connectorPanel = connectorPanelType === 'fromConnector' ? svgRef.fromConnectorPanelRef.current : svgRef.toConnectorPanelRef.current;
     
-    delay(reference.current)
-    .then(() => {
-      if(index <= 0){
-        connectorPanel.onClick()
-      }
-      else{      
-        const operatorRef = svgRef.operatorRef.current;
-        const processRef = svgRef.processRef.current;
+    if(index <= 0){
+      // add delay for first step
+      await animationSteps.clickOnPanel(connectorPanel, reference.current);
+    }
+    else{      
+     await animationSteps.onMouseOver(prevElementType, reference.current);
 
-          if(prevElementType === "operator"){
-            operatorRef.onMouseOverSvg()
-          }
-          else{
-            processRef.onMouseOverSvg()
-          }
+    }
+  
+    if(index >= 1){
+      await animationSteps.showPopoverForCreateElement(type, reference.current);
 
-        }
-        return delay(reference.current);
-    })
-    .then(() => {
-      if(index >= 1){
-        const createPanelElement = document.querySelector(`#create_panel_right`).nextElementSibling;
-        let currentItem = null;
-        if(after){
-          const svgItems = ref.current.technicalLayoutRef.current.props.connectionOverviewState.connection[connectorType].svgItems
-          for(let i = 0; i < svgItems.length; i++){
-            if(svgItems[i].id === `${connectorType}_${after}`){
+      await animationSteps.createProcessOrOperator(type, animationProps, refs.animationData, connectorType, prevElementType, reference.current);
+    }
 
-              currentItem = animationProps.connection.fromConnector.getSvgElementByIndex(after)
-              
-              break;
-            }
-          }
-        }
-        
-        if(type === "process" && prevElementType === "operator"){
-          const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
-
-          operatorCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
-        }
-         
-        else if(type === "process" && prevElementType === "process"){
-          const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
-
-          processCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
-        }
-          
-        else if(type === "operator" && prevElementType === "process"){
-          const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
-
-          processCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
-        }
-
-        else if(type === "operator" && prevElementType === "operator"){
-          const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
-
-          operatorCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
-        }
-        return delay(reference.current);
-      }
-    })
-    .then(() => {
-      const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
-      const createOperatorRef = ref.current.createElementPalenRef.current.createOperatorRef.current;
-
-      if(type === "process"){
-        createProcessRef.changeName({label: name, value: name})
-      }
-      else{
-        createOperatorRef.changeType({label: name, value: name})
-      }
-      return delay(reference.current);
-    })
-    .then(() => {
-      if(type === "process" && label){
-        setFocusById('new_request_label');
-        return delay(reference.current);
-      }
-    })
-    .then(() => {
-      if(type === "process" && label){
-        const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
-        createProcessRef.changeLabel(label)
-        return delay(reference.current);
-      }
-    })
-    .then(() => {
-      const createProcessRef = ref.current.createElementPalenRef.current.createProcessRef.current;
-      const createOperatorRef = ref.current.createElementPalenRef.current.createOperatorRef.current;
+    await animationSteps.changeElementNameOrType(type, name, reference.current);
+ 
+    await animationSteps.changeProcessLabel(type, label, reference.current);
       
-      type === "process" ? createProcessRef.create() : createOperatorRef.create()
-      const processRef = svgRef.processRef.current;
-     
-      processRef.onClick()
+    animationSteps.create(type);
       
-      const currentSvgElementId = `${connectorType}__${connectorType}_${currentElementId}${type === "process" ? "__" + name : ''}`
+    animationSteps.setFocusOnCurrentElement();
+    
+    const currentSvgElementId = `${connectorType}__${connectorType}_${currentElementId}${type === "process" ? "__" + name : ''}`
 
-      setSvgViewBox('modal_technical_layout_svg', currentSvgElementId);
-      
-      if(index >= 0 && name !=='if' && name !== 'loop'){
-        showDetailsForProcess();
-      }
-      if(name === 'if'){
-        // @ts-ignore
-        const condition = animationData[videoAnimationName][connectorType][index].conditionForIf;
-        showDetailsForOperatorIf(condition);
-      }
-      if(name === 'loop'){
-        // @ts-ignore
-        const condition = animationData[videoAnimationName][connectorType][index].conditionForLoop;
-        showDetailsForOperatorLoop(condition);
-      }
-    })
-    .catch(() => {})
+    AdditionalFunctions.setSvgViewBox({elementId: 'modal_technical_layout_svg', currentSvgElementId, connectorType});
+    
+    if(index >= 0 && name !=='if' && name !== 'loop'){
+      await showDetailsForProcess();
+    }
+    if(name === 'if'){
+      // @ts-ignore
+      const condition = animationData[videoAnimationName][connectorType][index].conditionForIf;
+      await showDetailsForOperatorIf(condition);
+    }
+    if(name === 'loop'){
+      // @ts-ignore
+      const condition = animationData[videoAnimationName][connectorType][index].conditionForLoop;
+      await showDetailsForOperatorLoop(condition);
+    }
+    setIndex(index + 1)
   }
 
   useEffect(() => {
@@ -439,11 +328,10 @@ const HelpBlock = () => {
             animationFunction('fromConnector');
           }
           else if(index === animationData[videoAnimationName].fromConnector.length && connectorType === 'fromConnector'){
-            setConnectorType('toConnector')
-            setShowLinkInBody(true)
+            setConnectorType('toConnector');
             setIndex(0)
           }
-          else if(index < animationData[videoAnimationName].toConnector.length && connectorType === 'toConnector'){
+          else if(index > 0 && index < animationData[videoAnimationName].toConnector.length && connectorType === 'toConnector'){
             animationFunction('toConnector');
           }
           else if(index === animationData[videoAnimationName].toConnector.length && connectorType === 'toConnector'){
@@ -459,7 +347,9 @@ const HelpBlock = () => {
 
   useEffect(() => {
     setIndex(0);
-    if(isAnimationPaused) dispatch(setAnimationPaused(!isAnimationPaused))
+    if(isAnimationPaused){
+      dispatch(setAnimationPaused(!isAnimationPaused))
+    }
   }, [videoAnimationName])
 
   useEffect(() => {
@@ -502,6 +392,7 @@ const HelpBlock = () => {
           padding="2px"
           handleClick={() => toggleVisible()}
         />
+        <AnimationPopover {...popoverProps}/>
         <Dialog
           actions={[]}
           title="Videoanimations"
@@ -515,20 +406,32 @@ const HelpBlock = () => {
           }}
           dialogClassname={`${styles.help_dialog}`}
         >
-          <TooltipButton
-            style={{position: "absolute", top:0, left:0, right: 'auto', zIndex: 100000}}
-            size={TextSize.Size_40}
-            position={"bottom"}
-            icon={isAnimationPaused ? "play_arrow" : "pause"}
-            tooltip={isAnimationPaused ? "play animation" : 'pause animation'}
-            target={`animation_play_button`}
-            hasBackground={true}
-            background={ColorTheme.White}
-            color={ColorTheme.Gray}
-            padding="2px"
-            handleClick={() => dispatch(setAnimationPaused(!isAnimationPaused))}
-          />
-          <AnimationSpeedSlider step={500} min={500} max={2500}/>
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            left: '100px',
+            zIndex: 100000,
+            padding: '15px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            background: '#FFF',
+            boxShadow: '0px 0px 5px 0px rgba(0,0,0,0.75)',
+          }}>
+            <TooltipButton
+              size={TextSize.Size_40}
+              position={"bottom"}
+              icon={isAnimationPaused ? "play_arrow" : "pause"}
+              tooltip={isAnimationPaused ? "play animation" : 'pause animation'}
+              target={`animation_play_button`}
+              hasBackground={true}
+              background={ColorTheme.White}
+              color={ColorTheme.Blue}
+              padding="2px"
+              handleClick={() => dispatch(setAnimationPaused(!isAnimationPaused))}
+            />
+            <AnimationSpeedSlider step={1000} min={1000} max={6000}/>
+          </div>
           <ModalContext.Provider value={{ isModal: true }}>
             {
               <FormConnectionSvg

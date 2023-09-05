@@ -61,6 +61,7 @@ class RelationalOperator extends React.Component{
             <div style={this.getStyles()}>
                 <span className={styles.if_relational_operator_separator}/>
                 <Select
+                    className="condition_relational_operator"
                     name={'relational_operators'}
                     value={relationalOperator ? {value: relationalOperator.value, label: this.getLabel()} : null}
                     onChange={updateRelationalOperator}

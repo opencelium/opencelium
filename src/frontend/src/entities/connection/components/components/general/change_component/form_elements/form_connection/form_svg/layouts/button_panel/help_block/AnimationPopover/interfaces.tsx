@@ -13,21 +13,17 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from "styled-components";
-import { AnimationSpeedSliderStyledProps } from "./interfaces";
+import { Placement } from "react-bootstrap/esm/types";
 
-const AnimationSpeedSliderStyled = styled.div<AnimationSpeedSliderStyledProps>`
-  position: relative;
-  margin-top: 3px;
+interface AnimationPopoverProps {
+  target?: string;
+  text?: string;
+  isOpen: boolean;
+  position?: Placement;
+}
 
-  &::after{
-    content: "1x 2x 3x 4x 5x 6x";
-    position: absolute;
-    top: 15px;
-    left: 0;
-    font-size: 11px;
-    word-spacing: 7.6px;
-  }
-`;
+interface AnimationPopoverStyledProps {
 
-export { AnimationSpeedSliderStyled };
+}
+
+export { AnimationPopoverProps, AnimationPopoverStyledProps };
