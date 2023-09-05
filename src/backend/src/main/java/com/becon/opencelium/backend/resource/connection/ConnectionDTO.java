@@ -32,8 +32,8 @@ public class ConnectionDTO {
     private Long connectionId;
     private String title;
     private String description;
-    private ConnectorNodeResource fromConnector;
-    private ConnectorNodeResource toConnector;
+    private ConnectorNodeDTO fromConnector;
+    private ConnectorNodeDTO toConnector;
     private List<FieldBindingDTO> fieldBinding;
     private BusinessLayoutResource businessLayout;
     private DataAggregatorDTO dataAggregator;
@@ -70,19 +70,19 @@ public class ConnectionDTO {
         this.description = description;
     }
 
-    public ConnectorNodeResource getFromConnector() {
+    public ConnectorNodeDTO getFromConnector() {
         return fromConnector;
     }
 
-    public void setFromConnector(ConnectorNodeResource fromConnector) {
+    public void setFromConnector(ConnectorNodeDTO fromConnector) {
         this.fromConnector = fromConnector;
     }
 
-    public ConnectorNodeResource getToConnector() {
+    public ConnectorNodeDTO getToConnector() {
         return toConnector;
     }
 
-    public void setToConnector(ConnectorNodeResource toConnector) {
+    public void setToConnector(ConnectorNodeDTO toConnector) {
         this.toConnector = toConnector;
     }
 

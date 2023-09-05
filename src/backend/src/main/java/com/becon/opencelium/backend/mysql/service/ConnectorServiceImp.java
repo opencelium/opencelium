@@ -25,7 +25,7 @@ import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.mysql.repository.ConnectorRepository;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
-import com.becon.opencelium.backend.resource.connection.ConnectorNodeResource;
+import com.becon.opencelium.backend.resource.connection.ConnectorNodeDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.utility.StringUtility;
@@ -36,7 +36,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository
 public class ConnectorServiceImp implements ConnectorService{
@@ -168,10 +167,10 @@ public class ConnectorServiceImp implements ConnectorService{
         return connectorResource;
     }
 
-    public ConnectorNodeResource toMetaResource(Connector entity) {
+    public ConnectorNodeDTO toMetaResource(Connector entity) {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
-        ConnectorNodeResource connectorNodeResource = new ConnectorNodeResource();
+        ConnectorNodeDTO connectorNodeResource = new ConnectorNodeDTO();
         connectorNodeResource.setConnectorId(entity.getId());
         InvokerResource invokerResource = invokerService.toMetaResource(invokerService.findByName(entity.getInvoker()));
         connectorNodeResource.setInvoker(invokerResource);

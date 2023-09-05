@@ -19,13 +19,13 @@ package com.becon.opencelium.backend.resource.connection;
 import jakarta.annotation.Resource;
 
 @Resource
-public class ConditionResource {
+public class ConditionDTO {
 
     private String relationalOperator;
     private StatementDTO leftStatement;
     private StatementDTO rightStatement;
 
-    public ConditionResource() {
+    public ConditionDTO() {
     }
 
     public String getRelationalOperator() {

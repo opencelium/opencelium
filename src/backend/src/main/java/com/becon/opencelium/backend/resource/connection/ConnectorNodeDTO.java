@@ -25,7 +25,7 @@ import java.util.List;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ConnectorNodeResource {
+public class ConnectorNodeDTO {
 
     private Long nodeId;
     private Integer connectorId;

@@ -25,7 +25,7 @@ public class OperatorDTO {
     private String type;
     private String index;
     private String iterator;
-    private ConditionResource condition;
+    private ConditionDTO condition;
 
     public Long getNodeId() {
         return nodeId;
@@ -43,11 +43,11 @@ public class OperatorDTO {
         this.type = type;
     }
 
-    public ConditionResource getCondition() {
+    public ConditionDTO getCondition() {
         return condition;
     }
 
-    public void setCondition(ConditionResource condition) {
+    public void setCondition(ConditionDTO condition) {
         this.condition = condition;
     }
 
