@@ -19,7 +19,7 @@ package com.becon.opencelium.backend.mysql.service;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.repository.ConnectionRepository;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -105,7 +105,7 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
-    public Connection toEntity(ConnectionResource resource) {
+    public Connection toEntity(ConnectionDTO resource) {
         Connection connection = new Connection();
 
         connection.setId(resource.getConnectionId());
@@ -121,8 +121,8 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
-    public ConnectionResource toResource(Connection connection) {
-        ConnectionResource connectionResource = new ConnectionResource();
+    public ConnectionDTO toResource(Connection connection) {
+        ConnectionDTO connectionResource = new ConnectionDTO();
         connectionResource.setConnectionId(connection.getId());
         connectionResource.setTitle(connection.getName());
         connectionResource.setDescription(connection.getDescription());

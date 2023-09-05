@@ -25,7 +25,7 @@ import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.resource.application.*;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.resource.update_assistant.VersionDTO;
@@ -348,7 +348,7 @@ public class UpdateAssistantController {
             ObjectMapper objectMapper = new ObjectMapper();
             for (HashMap<String, Object> connection : cns) {
                 String str = objectMapper.writeValueAsString(connection);
-                ConnectionResource connectionResource = objectMapper.readValue(str, ConnectionResource.class);
+                ConnectionDTO connectionResource = objectMapper.readValue(str, ConnectionDTO.class);
                 assistantServiceImp.updateConnection(connectionResource);
             }
 

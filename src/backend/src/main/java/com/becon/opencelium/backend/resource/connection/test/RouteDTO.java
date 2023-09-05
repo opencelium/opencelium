@@ -1,9 +1,7 @@
 package com.becon.opencelium.backend.resource.connection.test;
 
 
-import java.util.List;
-
-public class RouteResource {
+public class RouteDTO {
 
     private String color;
     private String method;

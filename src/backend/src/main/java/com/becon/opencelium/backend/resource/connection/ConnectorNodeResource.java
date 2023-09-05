@@ -20,7 +20,6 @@ import com.becon.opencelium.backend.mysql.entity.BusinessLayout;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.util.List;
 
@@ -36,8 +35,8 @@ public class ConnectorNodeResource {
     private int timeout;
     private InvokerResource invoker; // due to front end asked sending object, normally should be name of invoker
     private BusinessLayout businessLayout;
-    private List<MethodResource> methods;
-    private List<OperatorResource> operators;
+    private List<MethodDTO> methods;
+    private List<OperatorDTO> operators;
 
     public Long getNodeId() {
         return nodeId;
@@ -103,19 +102,19 @@ public class ConnectorNodeResource {
         this.businessLayout = businessLayout;
     }
 
-    public List<MethodResource> getMethods() {
+    public List<MethodDTO> getMethods() {
         return methods;
     }
 
-    public void setMethods(List<MethodResource> methods) {
+    public void setMethods(List<MethodDTO> methods) {
         this.methods = methods;
     }
 
-    public List<OperatorResource> getOperators() {
+    public List<OperatorDTO> getOperators() {
         return operators;
     }
 
-    public void setOperators(List<OperatorResource> operators) {
+    public void setOperators(List<OperatorDTO> operators) {
         this.operators = operators;
     }
 }

@@ -29,7 +29,6 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
@@ -39,13 +38,10 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
 
-import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.resource.ApiDataResource;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import com.becon.opencelium.backend.resource.error.validation.ErrorMessageDataResource;
-import com.becon.opencelium.backend.resource.error.validation.ValidationResource;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,9 +50,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/connection", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -79,7 +73,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Connections have been successfully retrieved",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionDTO.class)))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -96,7 +90,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Metadata of connections have been successfully retrieved",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionDTO.class)))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -113,7 +107,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Connection has been successfully retrieved",
-                    content = @Content(schema = @Schema(implementation = ConnectionResource.class))),
+                    content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -130,7 +124,7 @@ public class ConnectionController {
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
                 description = "Connection has been successfully created",
-                content = @Content(schema = @Schema(implementation = ConnectionResource.class))),
+                content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -139,7 +133,7 @@ public class ConnectionController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> add(@RequestBody ConnectionResource connectionResource) throws Exception{
+    public ResponseEntity<?> add(@RequestBody ConnectionDTO connectionResource) throws Exception{
         return ResponseEntity.ok().build();
     }
 
@@ -155,7 +149,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/validate", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> validate(@RequestBody ConnectionResource connectionResource) throws Exception{
+    public ResponseEntity<?> validate(@RequestBody ConnectionDTO connectionResource) throws Exception{
         return ResponseEntity.badRequest().build();
     }
 
@@ -163,7 +157,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Connection has been successfully modified",
-                    content = @Content(schema = @Schema(implementation = ConnectionResource.class))),
+                    content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -173,7 +167,7 @@ public class ConnectionController {
     })
     @PutMapping(path = "/{connectionId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable Long connectionId,
-                                    @RequestBody ConnectionResource connectionResource) throws Exception{
+                                    @RequestBody ConnectionDTO connectionResource) throws Exception{
 
         return ResponseEntity.badRequest().build();
     }

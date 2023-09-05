@@ -14,19 +14,16 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.resource.connection.binding;
+package com.becon.opencelium.backend.resource.connection;
 
-import jakarta.annotation.Resource;
-
-
-@Resource
-public class LinkedFieldResource {
+public class StatementDTO {
 
     private String color;
-    private String type;
     private String field;
+    private String type;
+    private String rightPropertyValue;
 
-    public LinkedFieldResource() {
+    public StatementDTO() {
     }
 
     public String getColor() {
@@ -37,6 +34,14 @@ public class LinkedFieldResource {
         this.color = color;
     }
 
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
+    }
+
     public String getType() {
         return type;
     }
@@ -45,11 +50,11 @@ public class LinkedFieldResource {
         this.type = type;
     }
 
-    public String getField() {
-        return field;
+    public String getRightPropertyValue() {
+        return rightPropertyValue;
     }
 
-    public void setField(String field) {
-        this.field = field;
+    public void setRightPropertyValue(String rightPropertyValue) {
+        this.rightPropertyValue = rightPropertyValue;
     }
 }

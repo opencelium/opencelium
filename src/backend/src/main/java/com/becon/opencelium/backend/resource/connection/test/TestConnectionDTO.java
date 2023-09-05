@@ -2,11 +2,11 @@ package com.becon.opencelium.backend.resource.connection.test;
 
 import java.util.List;
 
-public class TestConnectionResource {
+public class TestConnectionDTO {
     private Long connectionId;
     private String fromConnector;
     private String toConnector;
-    private List<EntryResource> entries;
+    private List<EntryDTO> entries;
 
     public Long getConnectionId() {
         return connectionId;
@@ -32,11 +32,11 @@ public class TestConnectionResource {
         this.toConnector = toConnector;
     }
 
-    public List<EntryResource> getEntries() {
+    public List<EntryDTO> getEntries() {
         return entries;
     }
 
-    public void setEntries(List<EntryResource> entries) {
+    public void setEntries(List<EntryDTO> entries) {
         this.entries = entries;
     }
 }

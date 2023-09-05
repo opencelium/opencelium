@@ -17,10 +17,9 @@
 package com.becon.opencelium.backend.resource.connection;
 
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class OperatorResource {
+public class OperatorDTO {
 
     private Long nodeId;
     private String type;

@@ -18,16 +18,13 @@ package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.mysql.repository.EnhancementRepository;
-import com.becon.opencelium.backend.resource.connection.binding.EnhancementResource;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
-import com.becon.opencelium.backend.resource.connection.binding.LinkedFieldResource;
+import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
+import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class EnhancementServiceImp implements EnhancementService{
@@ -73,7 +70,7 @@ public class EnhancementServiceImp implements EnhancementService{
     }
 
     @Override
-    public Enhancement toEntity(EnhancementResource resource) {
+    public Enhancement toEntity(EnhancementDTO resource) {
         Enhancement enhancement = new Enhancement();
         enhancement.setId(resource.getEnhanceId());
         enhancement.setDescription(resource.getDescription());
@@ -86,12 +83,12 @@ public class EnhancementServiceImp implements EnhancementService{
     }
 
     @Override
-    public EnhancementResource toResource(Enhancement entity) {
-        return new EnhancementResource(entity);
+    public EnhancementDTO toResource(Enhancement entity) {
+        return new EnhancementDTO(entity);
     }
 
     @Override
-    public FieldBindingResource toFieldBindingResource(Enhancement enhancement) {
+    public FieldBindingDTO toFieldBindingResource(Enhancement enhancement) {
         return null;
     }
 

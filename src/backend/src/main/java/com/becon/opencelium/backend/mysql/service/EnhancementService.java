@@ -17,8 +17,8 @@
 package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
-import com.becon.opencelium.backend.resource.connection.binding.EnhancementResource;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
+import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
+import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +31,7 @@ public interface EnhancementService {
     Enhancement findByFieldId(Long fieldId);
     Optional<Enhancement> findById(Integer enhId);
     void deleteAll(List<Enhancement> enhancements);
-    Enhancement toEntity(EnhancementResource resource);
-    EnhancementResource toResource(Enhancement entity);
-    FieldBindingResource toFieldBindingResource(Enhancement enhancement);
+    Enhancement toEntity(EnhancementDTO resource);
+    EnhancementDTO toResource(Enhancement entity);
+    FieldBindingDTO toFieldBindingResource(Enhancement enhancement);
 }

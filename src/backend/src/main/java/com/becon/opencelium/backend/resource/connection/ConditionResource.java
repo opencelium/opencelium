@@ -16,15 +16,14 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
-import com.becon.opencelium.backend.utility.ConditionUtility;
 import jakarta.annotation.Resource;
 
 @Resource
 public class ConditionResource {
 
     private String relationalOperator;
-    private StatementResource leftStatement;
-    private StatementResource rightStatement;
+    private StatementDTO leftStatement;
+    private StatementDTO rightStatement;
 
     public ConditionResource() {
     }
@@ -37,19 +36,19 @@ public class ConditionResource {
         this.relationalOperator = relationalOperator;
     }
 
-    public StatementResource getLeftStatement() {
+    public StatementDTO getLeftStatement() {
         return leftStatement;
     }
 
-    public void setLeftStatement(StatementResource leftStatement) {
+    public void setLeftStatement(StatementDTO leftStatement) {
         this.leftStatement = leftStatement;
     }
 
-    public StatementResource getRightStatement() {
+    public StatementDTO getRightStatement() {
         return rightStatement;
     }
 
-    public void setRightStatement(StatementResource rightStatement) {
+    public void setRightStatement(StatementDTO rightStatement) {
         this.rightStatement = rightStatement;
     }
 }

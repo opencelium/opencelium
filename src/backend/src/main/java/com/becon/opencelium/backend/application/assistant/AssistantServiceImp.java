@@ -4,11 +4,10 @@ import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.repository.SystemOverviewRepository;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
-import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -42,7 +41,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 
@@ -432,7 +430,7 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     @Override
-    public void updateConnection(ConnectionResource connectionResource) {
+    public void updateConnection(ConnectionDTO connectionDTO) {
 
     }
 

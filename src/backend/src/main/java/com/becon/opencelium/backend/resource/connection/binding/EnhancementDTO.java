@@ -18,24 +18,23 @@ package com.becon.opencelium.backend.resource.connection.binding;
 
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 
 @Resource
-public class EnhancementResource {
+public class EnhancementDTO {
 
     private Integer enhanceId;
     private String name;
     private String description;
     private String expertCode;
     private String expertVar;
-    private SimpleCodeResource simpleCode;
+    private SimpleCodeDTO simpleCode;
     private String language;
 
-    public EnhancementResource() {
+    public EnhancementDTO() {
     }
 
-    public EnhancementResource(Enhancement enhancement) {
+    public EnhancementDTO(Enhancement enhancement) {
         this.enhanceId = enhancement.getId();
         this.name = enhancement.getName();
         this.description = enhancement.getDescription();
@@ -85,11 +84,11 @@ public class EnhancementResource {
         this.expertVar = expertVar;
     }
 
-    public SimpleCodeResource getSimpleCode() {
+    public SimpleCodeDTO getSimpleCode() {
         return simpleCode;
     }
 
-    public void setSimpleCode(SimpleCodeResource simpleCode) {
+    public void setSimpleCode(SimpleCodeDTO simpleCode) {
         this.simpleCode = simpleCode;
     }
 

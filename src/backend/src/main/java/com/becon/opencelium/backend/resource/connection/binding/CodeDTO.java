@@ -14,34 +14,32 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.resource.connection;
+package com.becon.opencelium.backend.resource.connection.binding;
 
-import org.springframework.hateoas.RepresentationModel;
 
-public class StatementResource {
+import jakarta.annotation.Resource;
 
-    private String color;
-    private String field;
+@Resource
+public class CodeDTO {
+
+    private String name;
+    private String value;
     private String type;
-    private String rightPropertyValue;
 
-    public StatementResource() {
+    public String getName() {
+        return name;
     }
 
-    public String getColor() {
-        return color;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setColor(String color) {
-        this.color = color;
+    public String getValue() {
+        return value;
     }
 
-    public String getField() {
-        return field;
-    }
-
-    public void setField(String field) {
-        this.field = field;
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public String getType() {
@@ -52,11 +50,12 @@ public class StatementResource {
         this.type = type;
     }
 
-    public String getRightPropertyValue() {
-        return rightPropertyValue;
-    }
-
-    public void setRightPropertyValue(String rightPropertyValue) {
-        this.rightPropertyValue = rightPropertyValue;
+    @Override
+    public String toString() {
+        return "{" +
+                "\"name\":\"" + this.name + "\"," +
+                "\"value\":\"" + this.value + "\"," +
+                "\"type\":\"" + this.type + "\"" +
+                "}";
     }
 }

@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.resource.connection;
 
 import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
 import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
+import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
 
@@ -26,7 +26,7 @@ import java.util.List;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ConnectionResource {
+public class ConnectionDTO {
 
     private Long nodeId;
     private Long connectionId;
@@ -34,7 +34,7 @@ public class ConnectionResource {
     private String description;
     private ConnectorNodeResource fromConnector;
     private ConnectorNodeResource toConnector;
-    private List<FieldBindingResource> fieldBinding;
+    private List<FieldBindingDTO> fieldBinding;
     private BusinessLayoutResource businessLayout;
     private DataAggregatorDTO dataAggregator;
 
@@ -86,11 +86,11 @@ public class ConnectionResource {
         this.toConnector = toConnector;
     }
 
-    public List<FieldBindingResource> getFieldBinding() {
+    public List<FieldBindingDTO> getFieldBinding() {
         return fieldBinding;
     }
 
-    public void setFieldBinding(List<FieldBindingResource> fieldBinding) {
+    public void setFieldBinding(List<FieldBindingDTO> fieldBinding) {
         this.fieldBinding = fieldBinding;
     }
 

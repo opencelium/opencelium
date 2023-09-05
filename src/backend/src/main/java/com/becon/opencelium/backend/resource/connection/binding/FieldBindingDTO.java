@@ -18,38 +18,37 @@ package com.becon.opencelium.backend.resource.connection.binding;
 
 
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Resource
-public class FieldBindingResource {
-    private List<LinkedFieldResource> from = new ArrayList<>();
-    private EnhancementResource enhancement;
-    private List<LinkedFieldResource> to = new ArrayList<>();
+public class FieldBindingDTO {
+    private List<LinkedFieldDTO> from = new ArrayList<>();
+    private EnhancementDTO enhancement;
+    private List<LinkedFieldDTO> to = new ArrayList<>();
 
-    public List<LinkedFieldResource> getFrom() {
+    public List<LinkedFieldDTO> getFrom() {
         return from;
     }
 
-    public void setFrom(List<LinkedFieldResource> from) {
+    public void setFrom(List<LinkedFieldDTO> from) {
         this.from = from;
     }
 
-    public EnhancementResource getEnhancement() {
+    public EnhancementDTO getEnhancement() {
         return enhancement;
     }
 
-    public void setEnhancement(EnhancementResource enhancement) {
+    public void setEnhancement(EnhancementDTO enhancement) {
         this.enhancement = enhancement;
     }
 
-    public List<LinkedFieldResource> getTo() {
+    public List<LinkedFieldDTO> getTo() {
         return to;
     }
 
-    public void setTo(List<LinkedFieldResource> to) {
+    public void setTo(List<LinkedFieldDTO> to) {
         this.to = to;
     }
 }

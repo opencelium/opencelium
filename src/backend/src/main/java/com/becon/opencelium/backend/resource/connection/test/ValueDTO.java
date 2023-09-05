@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.resource.connection.test;
 
-public class ValueResource {
+public class ValueDTO {
 
     private int loopIndex;
     private String field;

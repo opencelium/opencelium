@@ -17,7 +17,7 @@
 package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +41,7 @@ public interface ConnectionService {
 
     List<Connection> findAllByNameContains(String name);
 
-    Connection toEntity(ConnectionResource resource);
+    Connection toEntity(ConnectionDTO resource);
 
-    ConnectionResource toResource(Connection connection);
+    ConnectionDTO toResource(Connection connection);
 }

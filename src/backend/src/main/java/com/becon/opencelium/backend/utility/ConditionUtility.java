@@ -17,7 +17,6 @@
 package com.becon.opencelium.backend.utility;
 
 import com.becon.opencelium.backend.constant.RegExpression;
-import com.becon.opencelium.backend.resource.connection.StatementResource;
 
 import java.util.Arrays;
 import java.util.List;

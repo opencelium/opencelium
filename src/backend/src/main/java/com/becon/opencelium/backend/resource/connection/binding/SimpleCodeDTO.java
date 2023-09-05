@@ -17,15 +17,14 @@
 package com.becon.opencelium.backend.resource.connection.binding;
 
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.util.List;
 
 @Resource
-public class SimpleCodeResource {
+public class SimpleCodeDTO {
 
     private int pointer;
-    private List<CodeResource> code;
+    private List<CodeDTO> code;
 
     public int getPointer() {
         return pointer;
@@ -35,11 +34,11 @@ public class SimpleCodeResource {
         this.pointer = pointer;
     }
 
-    public List<CodeResource> getCode() {
+    public List<CodeDTO> getCode() {
         return code;
     }
 
-    public void setCode(List<CodeResource> code) {
+    public void setCode(List<CodeDTO> code) {
         this.code = code;
     }
 

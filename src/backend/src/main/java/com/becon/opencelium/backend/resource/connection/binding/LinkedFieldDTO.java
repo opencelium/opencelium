@@ -16,31 +16,25 @@
 
 package com.becon.opencelium.backend.resource.connection.binding;
 
-
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
+
 
 @Resource
-public class CodeResource {
+public class LinkedFieldDTO {
 
-    private String name;
-    private String value;
+    private String color;
     private String type;
+    private String field;
 
-    public String getName() {
-        return name;
+    public LinkedFieldDTO() {
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getColor() {
+        return color;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
+    public void setColor(String color) {
+        this.color = color;
     }
 
     public String getType() {
@@ -51,12 +45,11 @@ public class CodeResource {
         this.type = type;
     }
 
-    @Override
-    public String toString() {
-        return "{" +
-                "\"name\":\"" + this.name + "\"," +
-                "\"value\":\"" + this.value + "\"," +
-                "\"type\":\"" + this.type + "\"" +
-                "}";
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
     }
 }

@@ -19,10 +19,9 @@ package com.becon.opencelium.backend.resource.connection;
 import com.becon.opencelium.backend.resource.connector.RequestResource;
 import com.becon.opencelium.backend.resource.connector.ResponseResource;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class MethodResource {
+public class MethodDTO {
 
     private Long nodeId;
     private String index;
