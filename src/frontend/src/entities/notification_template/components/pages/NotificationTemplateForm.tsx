@@ -28,7 +28,7 @@ import InputSelect from "@app_component/base/input/select/InputSelect";
 import { Connection } from "@entity/connection/classes/Connection";
 import {getAllMetaConnections} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import {useAppDispatch} from "@application/utils/store";
-import ModelDataAggregator from "@root/requests/models/DataAggregator";
+import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
 import Input from "@app_component/base/input/Input";
 import {AggregatorNameStyled, DataAggregatorItemsStyled } from "./styles";
 

@@ -6,22 +6,22 @@ import {
 import Dialog from "@basic_components/Dialog";
 import Button from "@app_component/base/button/Button";
 import AggregatorForm
-    from "./AggregatorForm";
-import DialogTitle from "./DialogTitle";
+    from "./DataAggregatorDialogForm";
+import DialogTitle from "./title/DialogTitle";
 
 //@ts-ignore
 import styles from './styles.scss';
-import ModelDataAggregator from "@root/requests/models/DataAggregator";
-import AggregatorList from './AggregatorList';
-import {CDataAggregator} from "@root/classes/CDataAggregator";
+import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
+import DataAggregatorList from './DataAggregatorList';
+import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import {useAppDispatch} from "@application/utils/store";
-import {setCurrentAggregator as setCurrentStateAggregator} from '@entity/connection/redux_toolkit/slices/DataAggregatorSlice';
-import {addAggregator, updateAggregator} from '@entity/connection/redux_toolkit/action_creators/DataAggregatorCreators';
+import {setCurrentAggregator as setCurrentStateAggregator} from '@entity/data_aggregator/redux_toolkit/slices/DataAggregatorSlice';
+import {addAggregator, updateAggregator} from '@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators';
 
 
-const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, readOnly}) => {
+const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnection, readOnly}) => {
     const dispatch = useAppDispatch();
-    const {currentAggregator: currentStateAggregator} = CDataAggregator.getReduxState();
+    const {currentAggregator: currentStateAggregator, aggregators} = CDataAggregator.getReduxState();
     const [showDialog, setShowDialog] = useState<boolean>(false);
     const [isForm, setIsForm] = useState<boolean>(false);
     const [formType, setFormType] = useState<FormType>('add');
@@ -48,10 +48,10 @@ const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, r
         }
     }, [currentStateAggregator]);
     const add = (aggregator: ModelDataAggregator) => {
-        dispatch(addAggregator({aggregator, connectionId: connection.id}));
+        dispatch(addAggregator(aggregator));
     }
     const update = (aggregator: ModelDataAggregator) => {
-        dispatch(updateAggregator({aggregator, connectionId: connection.id}));
+        dispatch(updateAggregator(aggregator));
     }
     const actions = isForm ? [] : [
         {
@@ -71,32 +71,30 @@ const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, r
                 isDisabled={allMethodOptions.length === 0}
                 label={'Aggregator'}
                 icon={'subtitles'}
-                handleClick={() => {setShowDialog(true); if(connection.dataAggregator.length === 0){ setIsForm(true); }}}
+                handleClick={() => {setShowDialog(true); if(aggregators.length === 0){ setIsForm(true); }}}
             />
             <Dialog
                 actions={actions}
                 active={showDialog}
                 toggle={() => setShowDialog(!showDialog)}
-                title={<DialogTitle setIsForm={setIsForm} isForm={isForm} hasList={connection.dataAggregator.length > 0}/>}
+                title={<DialogTitle setIsForm={setIsForm} isForm={isForm} hasList={aggregators.length > 0}/>}
                 theme={{dialog: styles.aggregator_dialog}}
             >
                 {isForm ?
                     <AggregatorForm
                         aggregator={currentAggregator}
-                        dataAggregator={connection.dataAggregator}
+                        dataAggregator={aggregators}
                         readOnly={readOnly}
                         allMethods={allMethodOptions}
                         allOperators={allOperatorOptions}
                         add={add}
                         update={update}
                         formType={formType}
-                        closeForm={connection.dataAggregator.length > 0 ? () => {setIsForm(false); setCurrentAggregator(null);} : null}
+                        closeForm={aggregators.length > 0 ? () => {setIsForm(false); setCurrentAggregator(null);} : null}
                     />
                     :
-                    <AggregatorList
+                    <DataAggregatorList
                         setFormType={(type: FormType, aggregator: ModelDataAggregator) => {setFormType(type); setCurrentAggregator(aggregator); setIsForm(true)}}
-                        dataAggregator={connection.dataAggregator}
-                        updateConnection={updateConnection}
                     />
                 }
             </Dialog>
@@ -104,4 +102,4 @@ const DataAggregator:FC<DataAggregatorProps> = ({connection, updateConnection, r
     )
 }
 
-export default DataAggregator;
+export default DataAggregatorButton;

@@ -6,7 +6,7 @@ import Icon from "@app_component/base/icon/Icon";
 import {
     DialogTitleLinkStyled,
     DialogTitleContainerStyled,
-} from "@change_component/form_elements/form_connection/form_methods/data_aggregator/styles";
+} from "./styles";
 
 
 const DialogTitle:FC<DialogTitleProps> = ({isForm, setIsForm, hasList}) => {

@@ -24,7 +24,7 @@ export const LOOP_OPERATOR = 'loop';
  */
 export default class COperatorItem{
 
-    constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false, iterator = ''){
+    constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false, iterator = '', dataAggregator = null){
         this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._type = this.checkType(type) ? type : '';
@@ -35,6 +35,7 @@ export default class COperatorItem{
         this._intend = 0;
         this._isDisabled = false;
         this._iterator = iterator;
+        this._dataAggregator = dataAggregator;
     }
 
     static createOperatorItem(operatorItem){
@@ -45,7 +46,8 @@ export default class COperatorItem{
         let isMinimized = operatorItem && operatorItem.hasOwnProperty('isMinimized') ? operatorItem.isMinimized : false;
         let isToggled = operatorItem && operatorItem.hasOwnProperty('isToggled') ? operatorItem.isToggled : false;
         let iterator = operatorItem && operatorItem.hasOwnProperty('iterator') ? operatorItem.iterator : '';
-        return new COperatorItem(index, type, condition, error, isMinimized, isToggled, iterator);
+        let dataAggregator = operatorItem && operatorItem.hasOwnProperty('dataAggregator') ? operatorItem.dataAggregator : null;
+        return new COperatorItem(index, type, condition, error, isMinimized, isToggled, iterator, dataAggregator);
     }
 
     static getOperatorTypesForSelect(){
@@ -108,6 +110,14 @@ export default class COperatorItem{
 
     set condition(condition){
         this._condition = condition;
+    }
+
+    get dataAggregator(){
+        return this._dataAggregator;
+    }
+
+    set dataAggregator(dataAggregator){
+        this._dataAggregator = dataAggregator;
     }
 
     setStatementColorByType(type, color){
@@ -260,6 +270,7 @@ export default class COperatorItem{
             index: this._index,
             type: this._type,
             condition: this._condition.getObject(),
+            dataAggregator: this._dataAggregator?.id || this._dataAggregator,
         };
         if(this._iterator !== ''){
             obj.iterator = this._iterator;

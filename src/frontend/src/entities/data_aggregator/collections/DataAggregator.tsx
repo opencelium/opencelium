@@ -19,11 +19,14 @@ import {ListProp} from "@application/interfaces/IListCollection";
 import { ComponentPermissionProps } from "@application/interfaces/IApplication";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {SortType} from "@app_component/collection/collection_view/interfaces";
-import ModelDataAggregator, {ModelDataAggregatorProps} from "@root/requests/models/DataAggregator";
+import ModelDataAggregator, {ModelDataAggregatorProps} from "@entity/data_aggregator/requests/models/DataAggregator";
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
+import {ViewType} from "@app_component/collection/collection_view/CollectionView";
+import Button from "@app_component/base/button/Button";
 
 class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
     name: string = 'dataAggregator';
+    title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Data Aggregator'}];
     entities: ModelDataAggregator[];
     keyPropName: ModelDataAggregatorProps ='id';
     hasSearch = false;
@@ -47,25 +50,36 @@ class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
         args: 'Arguments',
     };
     hasCheckboxes = false;
+    getTopActions = (viewType: ViewType, checkedIds: number[] = []) => {
+        const hasSearch = this.hasSearch && this.entities.length > 0;
+        return(
+            <React.Fragment>
+                <Button autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Aggregator'}/>
+            </React.Fragment>
+        );
+    };
     getGridActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
         return null;
     };
     getListActions: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
         return (
             <React.Fragment>
-                <TooltipButton target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} hasBackground={false} icon={'visibility'} size={TextSize.Size_20}/>
+                <TooltipButton href={`${entity.id}/update`} target={`update_entity_${entity.id.toString()}`} position={'top'} tooltip={'Update'} hasBackground={false} icon={'edit'} size={TextSize.Size_20}/>
+                <TooltipButton href={`${entity.id}/view`} target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} hasBackground={false} icon={'visibility'} size={TextSize.Size_20}/>
             </React.Fragment>
         );
     };
     hasCardLink = true;
 
-    constructor(aggregators: any[], getListActions: any) {
+    constructor(aggregators: any[], getListActions?: any) {
         super();
         let aggregatorInstances = [];
         for(let i = 0; i < aggregators.length; i++){
             aggregatorInstances.push(aggregators[i]);
         }
-        this.getListActions = getListActions;
+        if(getListActions){
+            this.getListActions = getListActions;
+        }
         this.entities = [...aggregatorInstances];
     }
 

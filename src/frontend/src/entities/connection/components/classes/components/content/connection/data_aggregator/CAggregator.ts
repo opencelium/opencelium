@@ -1,4 +1,4 @@
-import ModelDataAggregator, {ModelArgument, ModelAssignedItem} from "@root/requests/models/DataAggregator";
+import ModelDataAggregator, {ModelArgument, ModelAssignedItem} from "@entity/data_aggregator/requests/models/DataAggregator";
 import {subArrayToString} from "@application/utils/utils";
 
 export default class CAggregator implements ModelDataAggregator{

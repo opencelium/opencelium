@@ -13,12 +13,10 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import connectionReducer from "./ConnectionSlice";
-import connectionEditorReducer from "./EditorSlice";
-import graphQLReducer from './GraphQLSlice';
+import actionCreators from "./action_creators";
+import reducers from "./slices";
 
 export default {
-    connectionReducer,
-    connectionEditorReducer,
-    graphQLReducer,
+    actionCreators,
+    reducers,
 }

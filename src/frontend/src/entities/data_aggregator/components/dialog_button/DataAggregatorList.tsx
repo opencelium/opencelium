@@ -1,19 +1,26 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {
     AggregatorListProps,
-} from "./interfaces";
+} from "../pages/interfaces";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
-import DataAggregatorCollection from "@root/collections/DataAggregator";
+import DataAggregatorCollection from "@entity/data_aggregator/collections/DataAggregator";
 import {TextSize} from "@app_component/base/text/interfaces";
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
-import ModelDataAggregator from "@root/requests/models/DataAggregator";
+import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
+import {useAppDispatch} from "@application/utils/store";
+import {getAllAggregators} from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
+import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 
-const AggregatorList:FC<AggregatorListProps> =
+const DataAggregatorList:FC<AggregatorListProps> =
     ({
-        dataAggregator,
         setFormType,
     }) => {
+    const dispatch = useAppDispatch();
+    const {
+        error, aggregators, gettingAllAggregators,
+    } = CDataAggregator.getReduxState();
     const getListActions = (entity: ModelDataAggregator) => {
         return (
             <React.Fragment>
@@ -23,10 +30,13 @@ const AggregatorList:FC<AggregatorListProps> =
             </React.Fragment>
         );
     };
-    const CDataAggregator = new DataAggregatorCollection(dataAggregator, getListActions);
+    useEffect(() => {
+        dispatch(getAllAggregators());
+    }, [])
+    const CollectionAggregator = new DataAggregatorCollection(aggregators, getListActions);
     return (
-        <CollectionView collection={CDataAggregator} hasViewSection={false} hasTitle={false} isListViewCard={false}/>
+        <CollectionView hasError={!!error} isLoading={gettingAllAggregators === API_REQUEST_STATE.START} collection={CollectionAggregator} hasViewSection={false} hasTitle={false} isListViewCard={false}/>
     )
 }
 
-export default AggregatorList;
+export default DataAggregatorList;

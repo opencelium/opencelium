@@ -13,11 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {useAppSelector} from "@application/utils/store";
-import {RootState} from "@application/utils/store";
+import DataAggregatorCreators from "./DataAggregatorCreators";
 
-export class CDataAggregator{
-    static getReduxState() {
-        return useAppSelector((state: RootState) => state.dataAggregatorReducer);
-    }
+export default {
+    ...DataAggregatorCreators,
 }

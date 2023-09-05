@@ -13,7 +13,7 @@ export const FormContainer = styled.div`
 export const ArgumentFormContainer = styled.div`
     margin-left: 60px;
     padding-top: 35px;
-    max-height: 220px;
+    max-height: 280px;
     min-height: 120px;
     overflow-y: auto;
     &>div:not(:last-child){
@@ -29,18 +29,4 @@ export const ActionButtonContainer = styled.div`
     gap: 10px;
 `;
 
-export const DialogTitleContainerStyled = styled.span`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`;
-
-export const DialogTitleLinkStyled = styled.span`
-    ${({isLink}: {isLink: boolean}) => isLink ? `
-    &:hover{
-        text-decoration: underline;
-        cursor: pointer;
-    }
-    ` : ''}
-`;
 

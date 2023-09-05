@@ -13,12 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import connectionReducer from "./ConnectionSlice";
-import connectionEditorReducer from "./EditorSlice";
-import graphQLReducer from './GraphQLSlice';
+import dataAggregatorReducer from "./DataAggregatorSlice";
 
 export default {
-    connectionReducer,
-    connectionEditorReducer,
-    graphQLReducer,
+    dataAggregatorReducer,
 }

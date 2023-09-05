@@ -28,6 +28,8 @@ import {withTheme} from "styled-components";
 import {ITheme} from "@style/Theme";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {connect} from "react-redux";
+import DataAggregation
+    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregation";
 
 function mapStateToProps(state){
     const {connection} = mapItemsToClasses(state);
@@ -64,6 +66,12 @@ class Description extends React.Component{
                         return <div style={{color: errorColor}}>{error}</div>
                     })
                 }
+                <DataAggregation
+                    details={details}
+                    connection={connection}
+                    currentItem={details.entity}
+                    updateConnection={updateConnection}
+                />
             </Row>
         );
     }

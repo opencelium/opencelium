@@ -4,8 +4,8 @@ import {
     AggregatorFormProps,
 } from "./interfaces";
 import InputSelect from "@app_component/base/input/select/InputSelect";
-import Arguments from "./arguments/Arguments";
-import AddArgument from "./arguments/AddArgument";
+import Arguments from "../arguments/Arguments";
+import AddArgument from "../arguments/AddArgument";
 import Input from "@app_component/base/input/Input";
 import {
     AggregatorFormContainer, FormContainer,
@@ -14,14 +14,14 @@ import {
 import {getReactXmlStyles} from "@app_component/base/input/xml_view/styles";
 import { withTheme } from 'styled-components';
 import InputText from "@app_component/base/input/text/InputText";
-import {ModelArgument} from "@root/requests/models/DataAggregator";
+import {ModelArgument} from "@entity/data_aggregator/requests/models/DataAggregator";
 import {TextSize} from "@app_component/base/text/interfaces";
 import Button from "@app_component/base/button/Button";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
 import { OptionProps } from '@app_component/base/input/select/interfaces';
 import {setFocusById} from "@application/utils/utils";
 import {CheckboxStyled, TextStyled} from "@app_component/base/input/file/styles";
-import {CDataAggregator} from "@root/classes/CDataAggregator";
+import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 
 const getStaticWordCompleter = (variables: string[]) => {
@@ -38,7 +38,7 @@ const getStaticWordCompleter = (variables: string[]) => {
     }
 }
 
-const AggregatorForm:FC<AggregatorFormProps> =
+const DataAggregatorDialogForm:FC<AggregatorFormProps> =
     ({
         readOnly,
         allMethods,
@@ -54,7 +54,7 @@ const AggregatorForm:FC<AggregatorFormProps> =
     if(formType === 'view'){
         readOnly = true;
     }
-    const {addingDataAggregator, updatingDataAggregator} = CDataAggregator.getReduxState();
+    const {addingAggregator, updatingAggregator} = CDataAggregator.getReduxState();
     const variablesRef = useRef(null);
     const scriptSegmentRef = useRef(null);
     const [name, setName] = useState<string>(aggregator?.name || '');
@@ -122,7 +122,9 @@ const AggregatorForm:FC<AggregatorFormProps> =
         }
         if(scriptSegment === ''){
             setScriptSegmentError('Script is a required field');
-            scriptSegmentRef.current.focus();
+            if(scriptSegmentRef.current){
+                scriptSegmentRef.current.editor.focus();
+            }
             return;
         }
         let assignedItems = showAssignedItemsSelect ? items : [];
@@ -298,7 +300,7 @@ const AggregatorForm:FC<AggregatorFormProps> =
                         label={formType === 'add' ? 'Add' : 'Update'}
                         size={TextSize.Size_14}
                         handleClick={change}
-                        isLoading={addingDataAggregator === API_REQUEST_STATE.START || updatingDataAggregator === API_REQUEST_STATE.START}
+                        isLoading={addingAggregator === API_REQUEST_STATE.START || updatingAggregator === API_REQUEST_STATE.START}
                     />
                 }
                 {(closeForm || formType === 'view') &&
@@ -313,4 +315,4 @@ const AggregatorForm:FC<AggregatorFormProps> =
     )
 }
 
-export default withTheme(AggregatorForm);
+export default withTheme(DataAggregatorDialogForm);

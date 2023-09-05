@@ -37,8 +37,8 @@ import {ConnectionPermissions} from "@root/constants";
 import {IF_OPERATOR} from "@classes/content/connection/operator/COperatorItem";
 import LoadTemplate from "@change_component/form_elements/form_connection/form_methods/LoadTemplate";
 import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
-import DataAggregator
-    from "@change_component/form_elements/form_connection/form_methods/data_aggregator/DataAggregator";
+import DataAggregatorButton
+    from "@entity/data_aggregator/components/dialog_button/DataAggregatorButton";
 
 /**
  * common component to add and update Connection
@@ -406,7 +406,7 @@ export function ConnectionForm(type) {
              */
             addTemplate(template){
                 const {addTemplate} = this.props;
-                addTemplate({version: template.version, name: template.name, description: template.description, connection: template.entity.getObject()});
+                addTemplate({version: template.version, name: template.name, description: template.description, connection: template.entity.getObjectWithoutDataAggregator()});
             }
 
             getSecondThirdFormsSections(){
@@ -636,7 +636,7 @@ export function ConnectionForm(type) {
                                 />
                             </div>
                             <div style={{float: 'left'}}>
-                                <DataAggregator
+                                <DataAggregatorButton
                                     readOnly={this.isView}
                                     connection={entity}
                                     updateConnection={(e) => {

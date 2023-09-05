@@ -118,7 +118,6 @@ class TechnicalProcessDescription extends React.Component{
                     connection={connection}
                     currentItem={details.entity}
                     updateConnection={updateConnection}
-                    setCurrentTechnicalItem={setCurrentTechnicalItem}
                 />
                 <br/>
                 <br/>

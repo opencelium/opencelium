@@ -4,7 +4,6 @@ import {
 } from "./interfaces";
 import Argument from './Argument';
 
-
 const AddArgument:FC<AddArgumentProps> =
     ({
         add,

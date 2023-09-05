@@ -28,9 +28,6 @@ import {
 import {ConnectionLogProps, IConnection} from "../../interfaces/IConnection";
 import {PANEL_LOCATION} from "../../components/utils/constants/app";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
-import {addAggregator, updateAggregator} from "@root/redux_toolkit/action_creators/DataAggregatorCreators";
-import ModelDataAggregator from "@root/requests/models/DataAggregator";
-import {AggregatorRequest} from "@root/requests/interfaces/IDataAggregator";
 
 const COLOR_MODE = {
     RECTANGLE_TOP: 'RECTANGLE_TOP',

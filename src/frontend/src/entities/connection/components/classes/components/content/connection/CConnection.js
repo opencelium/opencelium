@@ -66,7 +66,7 @@ export const ALL_COLORS = [
  */
 export default class CConnection{
 
-    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false, dataAggregator = []){
+    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false){
         if(connectionId !== 0){
             this._id = isId(connectionId) ? connectionId : 0;
         }
@@ -128,7 +128,6 @@ export default class CConnection{
         this._currentFieldBindingTo = -1;
         this.setError(error);
         this._readOnly = readOnly;
-        this._dataAggregator = dataAggregator;
     }
 
     static createConnection(connection){
@@ -144,8 +143,7 @@ export default class CConnection{
         const template = connection && connection.hasOwnProperty('template') ? connection.template : null;
         const error = connection && connection.hasOwnProperty('error') ? connection.error : null;
         const readOnly = connection && connection.hasOwnProperty('readOnly') ? connection.readOnly : false;
-        const dataAggregator = connection && connection.hasOwnProperty('dataAggregator') ? connection.dataAggregator : [];
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly, dataAggregator);
+        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly);
     }
 
     static duplicateConnection(connection){
@@ -501,14 +499,6 @@ export default class CConnection{
         this._readOnly = readOnly;
     }
 
-    get dataAggregator(){
-        return this._dataAggregator;
-    }
-
-    set dataAggregator(dataAggregator){
-        this._dataAggregator = dataAggregator;
-    }
-
     refreshDataAggregator(aggregator){
         const assignedItems = aggregator.assignedItems;
         const allMethods = this.getAllMethods();
@@ -524,18 +514,10 @@ export default class CConnection{
 
     addDataAggregator(aggregator){
         this.refreshDataAggregator(aggregator);
-        const {assignedItems, ...props} = aggregator;
-        this._dataAggregator = [...this._dataAggregator, props];
     }
 
     updateDataAggregator(aggregator){
         this.refreshDataAggregator(aggregator);
-        const {assignedItems, ...props} = aggregator;
-        this._dataAggregator = [...this._dataAggregator.map(a => a.id === props.id ? props : a)];
-    }
-
-    getAllAggregationsForSelect(){
-        return this.dataAggregator.map(o => {return {label: o.name, value: o.id};});
     }
 
     getCurrentFieldBindingTo(){
@@ -932,6 +914,18 @@ export default class CConnection{
         return this.fromConnector.isEmpty() && this.toConnector.isEmpty();
     }
 
+    removeDataAggregatorEntries(){
+        this.removeDataAggregator(this.fromConnector.methods);
+        this.removeDataAggregator(this.fromConnector.operators);
+        this.removeDataAggregator(this.toConnector.methods);
+        this.removeDataAggregator(this.toConnector.operators);
+    }
+    removeDataAggregator(entries){
+        for(let i = 0; i < entries.length; i++){
+            delete entries.dataAggregator;
+        }
+    }
+
     getObject(){
         let fromConnector = this._fromConnector.getObject();
         let toConnector = this._toConnector.getObject();
@@ -947,12 +941,16 @@ export default class CConnection{
             fromConnector,
             toConnector,
             fieldBinding,
-            dataAggregator: this._dataAggregator,
         };
         if(this.hasOwnProperty('_id')){
             obj.id = this._id;
         }
         return obj;
+    }
+
+    getObjectWithoutDataAggregator(){
+        this.removeDataAggregatorEntries();
+        return this.getObject();
     }
 
     getObjectForBackend(){

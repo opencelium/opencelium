@@ -32,6 +32,7 @@ const IconStyled = styled.div<IconStyledProps>`
 `;
 
 const LabelStyled = styled.span<LabelStyledProps>`
+    background: white;
     opacity: 1 !important;
     text-transform: capitalize;
     position: absolute;

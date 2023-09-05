@@ -1,5 +1,5 @@
 import CConnection from "@classes/content/connection/CConnection";
-import ModelDataAggregator from "@root/requests/models/DataAggregator";
+import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
 
 export type FormType = 'add' | 'update' | 'view';
 
@@ -7,11 +7,6 @@ export interface DataAggregatorProps {
     connection: CConnection,
     updateConnection: any,
     readOnly?: boolean,
-}
-export interface AggregatorListProps {
-    dataAggregator: ModelDataAggregator[],
-    updateConnection: any,
-    setFormType: (type: FormType, aggregator: ModelDataAggregator) => void,
 }
 export interface AggregatorFormProps {
     readOnly?: boolean,
@@ -26,8 +21,8 @@ export interface AggregatorFormProps {
     dataAggregator: ModelDataAggregator[],
 }
 
-export interface DialogTitleProps {
-    hasList: boolean,
-    isForm: boolean,
-    setIsForm: (isForm: boolean) => void,
+export interface DataAggregatorProps {
+    connection: CConnection,
+    updateConnection: any,
+    readOnly?: boolean,
 }

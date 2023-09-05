@@ -1,4 +1,4 @@
-import {ModelArgument} from "@root/requests/models/DataAggregator";
+import {ModelArgument} from "@entity/data_aggregator/requests/models/DataAggregator";
 
 export interface ArgumentsProps {
     add: (arg: ModelArgument) => void,
