@@ -17,8 +17,6 @@
 package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
-import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
@@ -26,26 +24,18 @@ import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.mysql.repository.ConnectorRepository;
-import com.becon.opencelium.backend.neo4j.entity.MethodNode;
-import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
-import com.becon.opencelium.backend.neo4j.service.OperatorNodeServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
 import com.becon.opencelium.backend.resource.connection.ConnectorNodeResource;
-import com.becon.opencelium.backend.resource.connection.MethodResource;
-import com.becon.opencelium.backend.resource.connection.OperatorResource;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.utility.StringUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Repository
@@ -56,12 +46,6 @@ public class ConnectorServiceImp implements ConnectorService{
 
     @Autowired
     private RequestDataServiceImp requestDataService;
-
-    @Autowired
-    private MethodNodeServiceImp methodNodeService;
-
-    @Autowired
-    private OperatorNodeServiceImp operatorNodeService;
 
     @Autowired
     private InvokerServiceImp invokerService;
@@ -184,32 +168,6 @@ public class ConnectorServiceImp implements ConnectorService{
         return connectorResource;
     }
 
-    @Override
-    public ConnectorNodeResource toNodeResource(Connector entity, Long connectionId, String direction) {
-         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-         String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
-         ConnectorNodeResource connectorNodeResource = new ConnectorNodeResource();
-         connectorNodeResource.setConnectorId(entity.getId());
-         InvokerResource invokerResource = invokerService.toResource(invokerService.findByName(entity.getInvoker()));
-         connectorNodeResource.setInvoker(invokerResource);
-         connectorNodeResource.setTitle(entity.getTitle());
-         connectorNodeResource.setIcon(imagePath + entity.getIcon());
-         connectorNodeResource.setSslCert(entity.isSslCert());
-         List<MethodResource> methodResources = methodNodeService
-                .findMethodsByConnectionIdAndConnectorId(connectionId, direction, entity.getId()).stream()
-                .map(m -> {
-                    MethodNode methodNode = methodNodeService.findById(m.getId()).get();
-                    return MethodNodeServiceImp.toResource(methodNode);
-                }).collect(Collectors.toList());
-
-         List<OperatorResource> operatorResources = operatorNodeService
-                .findOperatorsByConnectionIdAndConnectorId(connectionId, direction, entity.getId()).stream()
-                .map(OperatorNodeServiceImp::toResource).collect(Collectors.toList());
-         connectorNodeResource.setMethods(methodResources);
-         connectorNodeResource.setOperators(operatorResources);
-         return connectorNodeResource;
-    }
-
     public ConnectorNodeResource toMetaResource(Connector entity) {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
@@ -248,19 +206,8 @@ public class ConnectorServiceImp implements ConnectorService{
     // RequestData = from db; RequiredData = from invoker
     @Override
     public List<RequestData> buildRequestData(Connector connector) {
-        Invoker invoker = invokerService.findByName(connector.getInvoker());
-        List<RequiredData> requiredData = invoker.getRequiredData();
-        List<RequestData> requestData = connector.getRequestData();
-        requiredData.forEach(rqd -> addFieldIfNotExists(requestData, rqd));
 
-        // looping through request data nad looking for values that contains references
-        // rqsd - requestData object
-        RequiredDataService requiredDataService = new RequiredDataServiceImp(requestData, invoker.getOperations());
-        requestData.forEach(rqsd -> {
-            String value = requiredDataService.getValue(rqsd).orElse(null);
-            rqsd.setValue(value);
-        });
-        return requestData;
+        return null;
     }
 
     private void addFieldIfNotExists(List<RequestData> requestData, RequiredData rqd) {

@@ -56,8 +56,6 @@ public interface ConnectorService {
 
     ConnectorResource toResource(Connector entity);
 
-    ConnectorNodeResource toNodeResource(Connector entity, Long connectionId, String direction);
-
     ResponseEntity<?> checkCommunication(Connector connector) throws JsonProcessingException;
 
     ResponseEntity<?> getAuthorization(Connector connector);

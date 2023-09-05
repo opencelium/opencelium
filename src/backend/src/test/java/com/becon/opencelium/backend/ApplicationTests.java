@@ -16,19 +16,11 @@
 
 package com.becon.opencelium.backend;
 
-import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
 public class ApplicationTests {
-
-	@Autowired
-	private ConnectionNodeServiceImp connectionNodeServiceImp;
 
 	@Test
 	public void contextLoads() {

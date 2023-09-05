@@ -16,15 +16,12 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
-import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.mysql.entity.Webhook;
 import com.becon.opencelium.backend.mysql.repository.WebhookRepository;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
-import com.becon.opencelium.backend.utility.TokenUtility;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -40,9 +37,6 @@ public class WebhookServiceImp implements WebhookService {
 
     @Autowired
     private WebhookRepository webhookRepository;
-
-    @Autowired
-    private ConnectionNodeServiceImp connectionNodeService;
 
     @Autowired
     private UserServiceImpl userService;

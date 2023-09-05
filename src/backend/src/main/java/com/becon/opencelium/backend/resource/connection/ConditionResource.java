@@ -16,10 +16,8 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
-import com.becon.opencelium.backend.neo4j.entity.StatementNode;
 import com.becon.opencelium.backend.utility.ConditionUtility;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 @Resource
 public class ConditionResource {
@@ -29,22 +27,6 @@ public class ConditionResource {
     private StatementResource rightStatement;
 
     public ConditionResource() {
-    }
-
-    public ConditionResource(StatementNode statementNode, String type) {
-        if (type.equals("if")){
-            this.relationalOperator = ConditionUtility.findOperator(statementNode.getOperand());
-            this.rightStatement = ConditionUtility.buildStatement(statementNode.getRightStatementVariable());
-        }
-        this.leftStatement = ConditionUtility.buildStatement(statementNode.getLeftStatementVariable());
-    }
-
-    public ConditionResource(StatementNode entity) {
-        if (entity.getType().equals("if")){
-            this.relationalOperator = entity.getOperand();
-            this.rightStatement = ConditionUtility.buildStatement(entity.getRightStatementVariable());
-        }
-        this.leftStatement = ConditionUtility.buildStatement(entity.getLeftStatementVariable());
     }
 
     public String getRelationalOperator() {

@@ -24,13 +24,11 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.resource.application.*;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.resource.update_assistant.VersionDTO;
-import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,9 +56,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -93,9 +89,6 @@ public class UpdateAssistantController {
 
     @Autowired
     private ConnectionServiceImp connectionServiceImp;
-
-    @Autowired
-    private ConnectionNodeServiceImp connectionNodeServiceImp;
 
     @Autowired
     private UpdatePackageServiceImp updatePackageServiceImp;

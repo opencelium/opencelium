@@ -51,37 +51,6 @@ public class DatabaseConfiguration {
     @Autowired
     private Environment env;
 
-    // ----------------------------------------- Neo4j -----------------------------------------------------------------
-    @Bean
-    public Driver neo4jDriver() {
-        // with domain entity base package(s)
-//        return new SessionFactory(configuration(), RepositoryEnum.NEO4J.getPath());
-        String url = env.getProperty("spring.neo4j.url");
-        String username = env.getProperty("spring.neo4j.authentication.username");
-        String password = env.getProperty("spring.neo4j.authentication.password");
-        if (username == null || password == null ) {
-            throw new RuntimeException("Neo4j Username or Password is NOT set in application.yml(path: spring.neo4j.authentication)");
-        }
-        return GraphDatabase.driver(url, AuthTokens.basic(username,password));
-    }
-//
-//    @Bean
-//    public org.neo4j.ogm.config.Configuration configuration() {
-//        String url = env.getProperty("spring.data.neo4j.url");
-//        String username = env.getProperty("spring.data.neo4j.username");
-//        String password = env.getProperty("spring.data.neo4j.password");
-//
-//        return new org.neo4j.ogm.config.Configuration.Builder()
-//                .uri(url)
-//                .credentials(username, password)
-//                .build();
-//    }
-//
-    @Bean(name = "neo4jTransactionManager")
-    public Neo4jTransactionManager neo4jTransactionManager() {
-        return new Neo4jTransactionManager(neo4jDriver());
-    }
-
 // ----------------------------------------- MariaDB -----------------------------------------------------------------
 
     @Bean
@@ -123,11 +92,9 @@ public class DatabaseConfiguration {
     // -----------------------------------------------------------------------------------------------------------------
     @Autowired
     @Bean(name = "transactionManager")
-    public PlatformTransactionManager transactionManager(Neo4jTransactionManager neo4jTransactionManager,
-                                                         JpaTransactionManager mysqlTransactionManager) {
+    public PlatformTransactionManager transactionManager(JpaTransactionManager mysqlTransactionManager) {
         return new ChainedTransactionManager(
-                mysqlTransactionManager,
-                neo4jTransactionManager
+                mysqlTransactionManager
         );
     }
 }

@@ -28,33 +28,28 @@ spring:
     password: root
     initialization-mode: always
     driver-class-name: org.mariadb.jdbc.Driver
-  neo4j:
-    url: bolt://localhost:7687
-    authentication:
-      username: neo4j
-      password: secret1234
 ###########################################################################
 #                                                                         #
 #   Mail configuration section                                            #
 #                                                                         #
 ###########################################################################
-  mail:
-    opencelium:
-      from: noreply@opencelium.io
-  #    enabled: false
-    host: smtp.gmail.com
-    port: 587
-    username:
-    password:
-    properties:
-      mail:
-        smtp:
-          auth: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-          starttls:
-            enable: true
+#  mail:
+#    opencelium:
+#      from: noreply@opencelium.io
+#  #    enabled: false
+#    host: smtp.gmail.com
+#    port: 587
+#    username:
+#    password:
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          connectiontimeout: 5000
+#          timeout: 5000
+#          writetimeout: 5000
+#          starttls:
+#            enable: true
   #        ssl:
   #          trust: example.host.de
 ###########################################################################

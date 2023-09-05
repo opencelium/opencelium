@@ -43,7 +43,5 @@ public interface ConnectionService {
 
     Connection toEntity(ConnectionResource resource);
 
-    ConnectionResource toNodeResource(Connection connection);
-
     ConnectionResource toResource(Connection connection);
 }

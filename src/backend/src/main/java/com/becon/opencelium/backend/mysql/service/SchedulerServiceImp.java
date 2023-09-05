@@ -21,7 +21,6 @@ import com.becon.opencelium.backend.exception.WrongSchedulerStatus;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.mysql.repository.SchedulerRepository;
-import com.becon.opencelium.backend.quartz.QuartzUtility;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
@@ -42,8 +41,6 @@ public class SchedulerServiceImp implements SchedulerService {
     @Autowired
     private SchedulerRepository schedulerRepository;
 
-    @Autowired
-    private QuartzUtility quartzUtility;
 
     @Autowired
     private WebhookServiceImp webhookService;
@@ -68,32 +65,7 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void save(Scheduler scheduler) {
-        boolean update = scheduler.getId() != 0;
-        if(scheduler.getCronExp() == null || scheduler.getCronExp().isEmpty()) {
-            // TODO: should be refactored
-            if (scheduler.getStatus()) {
-                throw new WrongSchedulerStatus(scheduler.getId());
-            }
-            scheduler.setCronExp(Constant.NEVER_TRIGGERED_CRON); // never triggered job
-        }
-        if (quartzUtility.validateCronExpression(scheduler.getCronExp())) {
-            schedulerRepository.save(scheduler);
-        } else{
-            throw new RuntimeException("BAD_CRON_EXPRESSION");
-        }
 
-
-        if (scheduler.getCronExp() == null || scheduler.getCronExp().isEmpty()) {
-        }
-        try {
-            if (update) {
-                quartzUtility.rescheduleJob(scheduler);
-            } else {
-                quartzUtility.addJob(scheduler);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -103,28 +75,12 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void deleteById(int id) {
-        Scheduler scheduler = schedulerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Scheduler not found"));
-        try {
-            quartzUtility.deleteJob(scheduler);
-        } catch (Exception e){
-            throw new RuntimeException(e);
-        }
-        schedulerRepository.deleteById(id);
+
     }
 
     @Override
     public void deleteAllById(List<Integer> schedulerIds) {
-        List<Scheduler> schedulerList = schedulerRepository.findAllById(schedulerIds);
 
-        schedulerList.forEach(scheduler -> {
-            try{
-                quartzUtility.deleteJob(scheduler);
-            }catch (Exception e){
-                throw new RuntimeException(e);
-            }
-            schedulerRepository.deleteById(scheduler.getId());
-        });
     }
 
     @Override
@@ -210,12 +166,12 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void startNow(Scheduler scheduler) throws Exception{
-        quartzUtility.runJob(scheduler);
+//        quartzUtility.runJob(scheduler);
     }
 
     @Override
     public void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception{
-        quartzUtility.runJob(scheduler, queryMap);
+//        quartzUtility.runJob(scheduler, queryMap);
     }
 
     @Override
@@ -225,44 +181,17 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void disable(Scheduler scheduler) throws SchedulerException{
-        quartzUtility.pauseTrigger(scheduler);
+//        quartzUtility.pauseTrigger(scheduler);
     }
 
     @Override
     public void enable(Scheduler scheduler) throws SchedulerException {
-        quartzUtility.resumeTrigger(scheduler);
+//        quartzUtility.resumeTrigger(scheduler);
     }
 
     @Override
     public List<RunningJobsResource> getAllRunningJobs() throws Exception{
-        RunningJobsResource runningJobResource = new RunningJobsResource();
-        List<RunningJobsResource> runningJobResources = new ArrayList<>();
-        // <schedulerId, connectionId>
-        Map<Integer, Long> mappedData = quartzUtility.getRunningJobsData();
-
-        if (mappedData == null){
-            return null;
-        }
-        mappedData.forEach((schedulerId, connectionId) -> {
-            Connection connection = connectionService.findById(connectionId)
-                    .orElseThrow(() -> new RuntimeException("Connection not found"));
-            Scheduler scheduler = schedulerRepository.findById(schedulerId)
-                    .orElseThrow(() -> new RuntimeException("Scheduler not found"));
-
-            String from = connectorService.findById( connection.getFromConnector()).get().getInvoker();
-            String to = connectorService.findById( connection.getToConnector()).get().getInvoker();
-
-            // TODO: need to rework calculation of avg time
-            double avg = executionServiceImp.getAvgDurationOfExecution(schedulerId);
-
-            runningJobResource.setSchedulerId(scheduler.getId());
-            runningJobResource.setTitle(scheduler.getTitle());
-            runningJobResource.setFromConnector(from);
-            runningJobResource.setToConnector(to);
-            runningJobResource.setAvgDuration(avg);
-            runningJobResources.add(runningJobResource);
-        });
-        return runningJobResources;
+        return null;
     }
 
     @Override

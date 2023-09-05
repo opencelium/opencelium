@@ -20,13 +20,11 @@ import com.becon.opencelium.backend.exception.CommunicationFailedException;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
-import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -66,9 +64,6 @@ public class ConnectorController {
 
     @Autowired
     private ConnectionServiceImp connectionService;
-
-    @Autowired
-    private ConnectionNodeServiceImp connectionNodeService;
 
     @Operation(summary = "Retrieves a connector from database by provided connector ID")
     @ApiResponses(value = {
@@ -180,7 +175,7 @@ public class ConnectorController {
         List<Connection> connections = connectionService.findAllByConnectorId(id);
         connections.forEach(c -> {
             connectionService.deleteById(c.getId());
-            connectionNodeService.deleteById(c.getId());
+//            connectionNodeService.deleteById(c.getId());
         });
         connectorService.deleteById(id);
         return ResponseEntity.noContent().build();

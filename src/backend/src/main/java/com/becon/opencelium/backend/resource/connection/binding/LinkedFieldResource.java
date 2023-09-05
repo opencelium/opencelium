@@ -16,9 +16,7 @@
 
 package com.becon.opencelium.backend.resource.connection.binding;
 
-import com.becon.opencelium.backend.neo4j.entity.FieldNode;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 
 @Resource
@@ -29,9 +27,6 @@ public class LinkedFieldResource {
     private String field;
 
     public LinkedFieldResource() {
-    }
-
-    public LinkedFieldResource(FieldNode fieldNode) {
     }
 
     public String getColor() {

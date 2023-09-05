@@ -16,9 +16,7 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
-import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
-import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementResource;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 

@@ -16,24 +16,16 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
-import com.becon.opencelium.backend.enums.ExecutionType;
-import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.repository.ConnectionRepository;
-import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
-import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
-import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ConnectionServiceImp implements ConnectionService {
@@ -46,12 +38,6 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Autowired
     private EnhancementServiceImp enhancementService;
-
-    @Autowired
-    private EnhancementNodeServiceImp enhancementNodeServiceImp;
-
-    @Autowired
-    private ConnectionNodeServiceImp connectionNodeService;
 
     @Lazy
     @Autowired
@@ -79,7 +65,7 @@ public class ConnectionServiceImp implements ConnectionService {
             });
         }
         connectionRepository.deleteById(id);
-        connectionNodeService.deleteById(id);
+//        connectionNodeService.deleteById(id);
     }
 
     @Override
@@ -108,19 +94,6 @@ public class ConnectionServiceImp implements ConnectionService {
         return connectionRepository.existsByName(name);
     }
 
-    private Map<Integer, List<RequestData>> getCtorsRequestData(ConnectionNode ctionNode) {
-        Map<Integer, List<RequestData>> requestDataMap = new HashMap<>();
-        int ctorId = ctionNode.getFromConnector().getConnectorId();
-        List<RequestData> fromCtorReqData = connectorService.getRequestData(ctorId);
-        requestDataMap.put(ctorId, fromCtorReqData);
-
-        ctorId = ctionNode.getToConnector().getConnectorId();
-        List<RequestData> toCtorReqData = connectorService.getRequestData(ctorId);
-        requestDataMap.put(ctorId, toCtorReqData);
-
-        return requestDataMap;
-    }
-
     @Override
     public boolean existsById(Long id) {
         return connectionRepository.existsById(id);
@@ -145,33 +118,6 @@ public class ConnectionServiceImp implements ConnectionService {
             connection.setBusinessLayout(businessLayout);
         }
         return connection;
-    }
-
-    @Override
-    public ConnectionResource toNodeResource(Connection connection) {
-        ConnectionResource connectionResource = new ConnectionResource();
-        List<FieldBindingResource> fieldBindingResources = new ArrayList<>();
-        if (connection.getEnhancements() != null) {
-            fieldBindingResources = connection.getEnhancements().stream()
-                    .map(e -> enhancementService.toFieldBindingResource(e)).collect(Collectors.toList());
-        }
-
-        connectionResource.setConnectionId(connection.getId());
-        connectionResource.setTitle(connection.getName());
-        connectionResource.setDescription(connection.getDescription());
-        connectionResource.setFieldBinding(fieldBindingResources);
-        if(connection.getBusinessLayout() != null) {
-            connectionResource.setBusinessLayout(new BusinessLayoutResource(connection.getBusinessLayout()));
-        }
-
-        Connector from = connectorService.findById(connection.getFromConnector())
-                .orElseThrow(() -> new RuntimeException("Connector - " + connection.getFromConnector() + " not found"));
-        Connector to = connectorService.findById(connection.getToConnector())
-                .orElseThrow(() -> new RuntimeException("Connector - " + connection.getToConnector() + " not found"));
-
-        connectionResource.setFromConnector(connectorService.toNodeResource(from, connection.getId(), "from_connector"));
-        connectionResource.setToConnector(connectorService.toNodeResource(to, connection.getId(), "to_connector"));
-        return connectionResource;
     }
 
     @Override

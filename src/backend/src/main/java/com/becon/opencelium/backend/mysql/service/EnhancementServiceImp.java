@@ -18,15 +18,11 @@ package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.mysql.repository.EnhancementRepository;
-import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
-import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
-import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementResource;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import com.becon.opencelium.backend.resource.connection.binding.LinkedFieldResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,12 +34,6 @@ public class EnhancementServiceImp implements EnhancementService{
 
     @Autowired
     private EnhancementRepository enhancementRepository;
-
-    @Autowired
-    private EnhancementNodeServiceImp enhancementNodeService;
-
-    @Autowired
-    private FieldNodeServiceImp fieldNodeService;
 
     @Override
     public void save(Enhancement enhancement) {
@@ -67,11 +57,9 @@ public class EnhancementServiceImp implements EnhancementService{
 
     @Override
     public Enhancement findByFieldId(Long fieldId) {
-        EnhancementNode enhancementNode = enhancementNodeService.findByFieldId(fieldId)
-                .orElseThrow(() -> new RuntimeException("Field(" + fieldId + ") not found"));
-        return enhancementRepository.findById(enhancementNode.getEnhanceId())
-                .orElseThrow(() -> new RuntimeException("Enhancement " + enhancementNode.getEnhanceId() + " not found in MariaDB"));
+        return null;
     }
+
 
     @Override
     public Optional<Enhancement> findById(Integer enhId) {
@@ -104,24 +92,7 @@ public class EnhancementServiceImp implements EnhancementService{
 
     @Override
     public FieldBindingResource toFieldBindingResource(Enhancement enhancement) {
-        FieldBindingResource fieldBindingResource = new FieldBindingResource();
-        EnhancementResource enhancementResource = new EnhancementResource(enhancement);
-//        EnhancementNode enhancementNode = enhancementNodeService.findByEnhanceId(enhancement.getId())
-//                .orElseThrow(()-> new RuntimeException("Enhancement: " + enhancement.getId() +" not found"));
-//        List<LinkedFieldResource> toField = enhancementNode.getOutgoingField().stream()
-//                .map(fieldNode -> fieldNodeService.toLinkedFieldResource(fieldNode)).collect(Collectors.toList());
-//        List<LinkedFieldResource> fromField = enhancementNode.getIncomeField().stream()
-//                .map(fieldNode -> fieldNodeService.toLinkedFieldResource(fieldNode)).collect(Collectors.toList());
-        List<LinkedFieldResource> toField = Arrays.stream(enhancement.getExpertVar().split(";"))
-                .filter(f -> f.contains("RESULT_VAR")).map(f -> (f.split("="))[1].trim())
-                .map(f -> fieldNodeService.toLinkedFieldResource(f)).collect(Collectors.toList());
-        List<LinkedFieldResource> fromField = Arrays.stream(enhancement.getExpertVar().split(";"))
-                .filter(f -> !f.contains("RESULT_VAR")).map(f -> (f.split("="))[1].trim())
-                .map(f -> fieldNodeService.toLinkedFieldResource(f)).collect(Collectors.toList());
-        fieldBindingResource.setEnhancement(enhancementResource);
-        fieldBindingResource.setFrom(fromField);
-        fieldBindingResource.setTo(toField);
-        return fieldBindingResource;
+        return null;
     }
 
 }

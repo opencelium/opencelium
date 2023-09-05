@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
-import com.becon.opencelium.backend.neo4j.entity.StatementVariable;
 import org.springframework.hateoas.RepresentationModel;
 
 public class StatementResource {
@@ -27,13 +26,6 @@ public class StatementResource {
     private String rightPropertyValue;
 
     public StatementResource() {
-    }
-
-    public StatementResource(StatementVariable statementVariable) {
-        this.color = statementVariable.getColor();
-        this.field = statementVariable.getFiled();
-        this.type = statementVariable.getType();
-        this.rightPropertyValue = statementVariable.getRightPropertyValue();
     }
 
     public String getColor() {
