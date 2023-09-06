@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
-import com.becon.opencelium.backend.mysql.entity.BusinessLayout;
+import com.becon.opencelium.backend.database.mysql.entity.BusinessLayout;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;

@@ -16,8 +16,8 @@
 
 package com.becon.opencelium.backend.authentication;
 
-import com.becon.opencelium.backend.mysql.entity.Connector;
-import com.becon.opencelium.backend.mysql.entity.RequestData;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

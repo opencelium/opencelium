@@ -23,7 +23,7 @@ import com.becon.opencelium.backend.application.assistant.UpdatePackageServiceIm
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
-import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.resource.application.*;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;

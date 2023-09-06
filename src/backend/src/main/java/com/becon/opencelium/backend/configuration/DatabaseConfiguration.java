@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.data.neo4j.core.transaction.Neo4jTransactionManager;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.data.transaction.ChainedTransactionManager;
@@ -43,7 +44,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 
 @Configuration
-@EnableNeo4jRepositories(basePackages = PathConstant.NEO4J, transactionManagerRef = "neo4jTransactionManager")
+@EnableMongoRepositories(basePackages = PathConstant.MONGODB)
 @EnableJpaRepositories(basePackages = PathConstant.MYSQl, transactionManagerRef = "mysqlTransactionManager")
 @EnableTransactionManagement
 public class DatabaseConfiguration {

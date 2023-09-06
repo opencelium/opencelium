@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.security;
 
-import com.becon.opencelium.backend.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

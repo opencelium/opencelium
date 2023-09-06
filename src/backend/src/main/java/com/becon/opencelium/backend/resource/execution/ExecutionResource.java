@@ -16,9 +16,8 @@
 
 package com.becon.opencelium.backend.resource.execution;
 
-import com.becon.opencelium.backend.mysql.entity.LastExecution;
+import com.becon.opencelium.backend.database.mysql.entity.LastExecution;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 @Resource
 public class ExecutionResource {

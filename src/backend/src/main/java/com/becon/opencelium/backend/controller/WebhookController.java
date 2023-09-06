@@ -16,10 +16,10 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.mysql.entity.Scheduler;
-import com.becon.opencelium.backend.mysql.entity.Webhook;
-import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
-import com.becon.opencelium.backend.mysql.service.WebhookServiceImp;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.database.mysql.entity.Webhook;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.WebhookServiceImp;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
@@ -29,10 +29,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 

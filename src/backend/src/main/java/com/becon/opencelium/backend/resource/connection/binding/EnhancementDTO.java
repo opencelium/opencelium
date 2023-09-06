@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.resource.connection.binding;
 
-import com.becon.opencelium.backend.mysql.entity.Enhancement;
+import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import jakarta.annotation.Resource;
 
 

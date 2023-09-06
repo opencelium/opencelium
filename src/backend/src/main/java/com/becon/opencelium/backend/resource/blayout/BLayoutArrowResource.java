@@ -1,8 +1,6 @@
 package com.becon.opencelium.backend.resource.blayout;
 
-import com.becon.opencelium.backend.mysql.entity.BLarrow;
-
-import java.util.List;
+import com.becon.opencelium.backend.database.mysql.entity.BLarrow;
 
 public class BLayoutArrowResource {
     private int from;

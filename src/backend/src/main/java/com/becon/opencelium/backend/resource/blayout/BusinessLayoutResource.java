@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.resource.blayout;
 
-import com.becon.opencelium.backend.mysql.entity.BusinessLayout;
+import com.becon.opencelium.backend.database.mysql.entity.BusinessLayout;
 
 import java.util.List;
 import java.util.stream.Collectors;

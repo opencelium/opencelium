@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.constant.PathConstant;
 public enum RepositoryEnum {
     MYSQL(PathConstant.MYSQl),
     NEO4J(PathConstant.NEO4J),
+    MONGODB(PathConstant.MONGODB),
     ELASTICSEARCH(PathConstant.ELASTICSEARCH);
 
     private final String path;
