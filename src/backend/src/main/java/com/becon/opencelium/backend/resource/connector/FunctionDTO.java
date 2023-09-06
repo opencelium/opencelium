@@ -18,20 +18,19 @@ package com.becon.opencelium.backend.resource.connector;
 
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class FunctionResource {
+public class FunctionDTO {
 
     private String name;
     private String type;
     private RequestResource request;
     private ResponseResource response;
 
-    public FunctionResource() {
+    public FunctionDTO() {
     }
 
-    public FunctionResource(FunctionInvoker functionInvoker) {
+    public FunctionDTO(FunctionInvoker functionInvoker) {
         this.name = functionInvoker.getName();
         this.type = functionInvoker.getType();
         this.request =  new RequestResource(functionInvoker.getRequest());

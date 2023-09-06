@@ -21,12 +21,14 @@ import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
+@Qualifier("adasdasdsad")
 @Service
 public class ConnectionServiceImp implements ConnectionService {
 

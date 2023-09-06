@@ -19,21 +19,19 @@ package com.becon.opencelium.backend.invoker.service;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
-import com.becon.opencelium.backend.resource.connector.InvokerResource;
+import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import org.w3c.dom.Document;
 
-import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 
 public interface InvokerService {
 
-    Invoker toEntity(InvokerResource resource);
+    Invoker toEntity(InvokerDTO resource);
 
-    InvokerResource toResource(Invoker entity);
+    InvokerDTO toResource(Invoker entity);
 
     FunctionInvoker getTestFunction(String invokerName);
 

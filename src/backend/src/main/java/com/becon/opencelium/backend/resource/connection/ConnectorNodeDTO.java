@@ -17,7 +17,7 @@
 package com.becon.opencelium.backend.resource.connection;
 
 import com.becon.opencelium.backend.mysql.entity.BusinessLayout;
-import com.becon.opencelium.backend.resource.connector.InvokerResource;
+import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
 
@@ -33,7 +33,7 @@ public class ConnectorNodeDTO {
     private String icon;
     private boolean sslCert;
     private int timeout;
-    private InvokerResource invoker; // due to front end asked sending object, normally should be name of invoker
+    private InvokerDTO invoker; // due to front end asked sending object, normally should be name of invoker
     private BusinessLayout businessLayout;
     private List<MethodDTO> methods;
     private List<OperatorDTO> operators;
@@ -70,11 +70,11 @@ public class ConnectorNodeDTO {
         this.icon = icon;
     }
 
-    public InvokerResource getInvoker() {
+    public InvokerDTO getInvoker() {
         return invoker;
     }
 
-    public void setInvoker(InvokerResource invoker) {
+    public void setInvoker(InvokerDTO invoker) {
         this.invoker = invoker;
     }
 

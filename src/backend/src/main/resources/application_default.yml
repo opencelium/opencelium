@@ -77,8 +77,16 @@ spring:
   main:
     banner-mode: "off"
   data:
-    rest:
-      basePath: /api
+    mongodb:
+  #  Uncomment if authentication is located in another database and don't forget to comment "uri"
+  #      authentication-database: admin
+  #      host: localhost
+  #      port: 27017
+  #      database: opencelium
+  #      username: admin
+  #      password: secretsecret
+  #     Example - mongodb://<username>:<password>@<host>:<port>/<database>
+  #      uri: mongodb://oc_admin:secretsecret@localhost:27017/opencelium
   jpa:
     properties:
       hibernate:

@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InvokerResource {
+public class InvokerDTO {
 
     private String name;
     private String description;
@@ -39,12 +39,12 @@ public class InvokerResource {
     private String icon;
     private String authType;
     private LinkedHashMap<String, String> requiredData;
-    private List<FunctionResource> operations;
+    private List<FunctionDTO> operations;
 
-    public InvokerResource() {
+    public InvokerDTO() {
     }
 
-    public InvokerResource(Invoker invoker) {
+    public InvokerDTO(Invoker invoker) {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
 
@@ -56,7 +56,7 @@ public class InvokerResource {
         this.requiredData = invoker.getRequiredData().stream().filter(d->!d.getVisibility().equals("private"))
                 .collect(Collectors.toMap(RequiredData::getName, RequiredData::getValue,
                         (existingValue, newValue) -> existingValue, LinkedHashMap::new));
-        this.operations = invoker.getOperations().stream().map(FunctionResource::new).collect(Collectors.toList());
+        this.operations = invoker.getOperations().stream().map(FunctionDTO::new).collect(Collectors.toList());
     }
 
     public String getName() {
@@ -107,11 +107,11 @@ public class InvokerResource {
         this.authType = authType;
     }
 
-    public List<FunctionResource> getOperations() {
+    public List<FunctionDTO> getOperations() {
         return operations;
     }
 
-    public void setOperations(List<FunctionResource> operations) {
+    public void setOperations(List<FunctionDTO> operations) {
         this.operations = operations;
     }
 }

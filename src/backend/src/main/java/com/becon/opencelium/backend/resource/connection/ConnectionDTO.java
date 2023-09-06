@@ -28,8 +28,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConnectionDTO {
 
-    private Long nodeId;
-    private Long connectionId;
+    private Long nodeId; // id generated in neo4j
+    private Long connectionId; // id generated in mariadb.
     private String title;
     private String description;
     private ConnectorNodeDTO fromConnector;
