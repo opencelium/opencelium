@@ -28,6 +28,7 @@ const FormSection: FC<FormSectionProps> =
         dependencies,
         children,
         padding,
+        inputsStyle,
     }) => {
     let isVisible = true;
     for(let i = 0; i < dependencies.length; i++){
@@ -39,7 +40,7 @@ const FormSection: FC<FormSectionProps> =
     return (
         <FormSectionStyled position={position} overflow={overflow} isVisible={isVisible} padding={padding ? padding : `${hasLabel ? '50px' : '20px'} 30px 20px 10px`} margin={`${hasLabel ? '31px' : '0'} 0 0`}>
             {hasLabel && <Label {...label} position={'absolute'}/>}
-            <Inputs>{children}</Inputs>
+            <Inputs style={inputsStyle}>{children}</Inputs>
         </FormSectionStyled>
     )
 }
@@ -52,6 +53,7 @@ FormSection.defaultProps = {
     overflow: '',
     position: '',
     styles: {},
+    inputsStyle: {},
 }
 
 

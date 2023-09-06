@@ -25,12 +25,13 @@ import {NotificationTemplate} from "../../classes/NotificationTemplate";
 import {IContent, INotificationTemplate} from "../../interfaces/INotificationTemplate";
 import {Content} from "../../classes/Content";
 import InputSelect from "@app_component/base/input/select/InputSelect";
-import { Connection } from "@entity/connection/classes/Connection";
-import {getAllMetaConnections} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import {useAppDispatch} from "@application/utils/store";
-import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
+import {ModelArgument} from "@entity/data_aggregator/requests/models/DataAggregator";
 import Input from "@app_component/base/input/Input";
 import {AggregatorNameStyled, DataAggregatorItemsStyled } from "./styles";
+import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
+import { getAllAggregators } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
+import HelpDivider from '../help_divider/HelpDivider';
 
 
 const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
@@ -39,12 +40,11 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         checkingNotificationTemplateName, isCurrentNotificationTemplateHasUniqueName, error,
         gettingNotificationTemplate,
     } = NotificationTemplate.getReduxState();
-    const {metaConnections, gettingMetaConnections} = Connection.getReduxState();
-    const [selectedConnection, setSelectedConnection] = useState(null);
-    const connectionOptions = useMemo(() => {
-        return metaConnections.map(c => {return {label: c.title, value: c.connectionId};});
-    }, [metaConnections]);
-    const dataAggregator = selectedConnection ? metaConnections.find(c => c.connectionId === selectedConnection.value)?.dataAggregator || [] : [];
+    const {aggregators, gettingAllAggregators} = CDataAggregator.getReduxState();
+    const [selectedAggregator, setSelectedAggregator] = useState(null);
+    const aggregatorOptions = useMemo(() => {
+        return aggregators.map(a => {return {label: a.name, value: a.id, args: a.args};});
+    }, [aggregators]);
     const dispatch = useAppDispatch();
     const didMount = useRef(false);
     let navigate = useNavigate();
@@ -65,7 +65,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             notificationTemplate.getById()
         }
         if(shouldFetchConnections){
-            dispatch(getAllMetaConnections());
+            dispatch(getAllAggregators());
         }
     },[]);
     useEffect(() => {
@@ -92,34 +92,34 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         propertyName: "subject", props: {icon: 'subject', label: 'Subject', required: true}
     })
     const BodyInput = notificationTemplate.content.getTextarea({
-        propertyName: "body", props: {icon: 'feed', label: 'Body', required: true}
+        propertyName: "body", props: {icon: 'feed', label: 'Body', required: true, height: `calc(100% - 67px)`, style: {height: 'calc(100% - 37px)'}}
     })
     const ConnectionForm =
         <InputSelect
             id={`input_connections`}
-            onChange={(option: any) => setSelectedConnection(option)}
-            value={selectedConnection}
-            icon={'sync_alt'}
-            label={'Connections'}
-            options={connectionOptions}
-            isLoading={gettingMetaConnections === API_REQUEST_STATE.START}
+            onChange={(option: any) => setSelectedAggregator(option)}
+            value={selectedAggregator}
+            icon={'subtitles'}
+            label={'Data Aggregator'}
+            options={aggregatorOptions}
+            isLoading={gettingAllAggregators === API_REQUEST_STATE.START}
         />;
-    const DataAggregatorItems = selectedConnection ? (
-        <Input value={selectedConnection.option} label={'Aggregation Argument Names'} icon={'subtitles'} marginBottom={'20px'} display={'grid'}>
+    const DataAggregatorItems = selectedAggregator ? (
+        <Input value={selectedAggregator.value} label={'Arguments'} icon={'abc'} marginBottom={'20px'} display={'grid'}>
             <DataAggregatorItemsStyled>{
-                dataAggregator.length > 0 ? dataAggregator.map((aggregator: ModelDataAggregator) => {
+                selectedAggregator.args.length > 0 ? selectedAggregator.args.map((argument: ModelArgument) => {
                     return (
                         <AggregatorNameStyled
-                            key={aggregator.name}
+                            key={argument.name}
                             onClick={() => {
                                 //@ts-ignore
-                                content.updateBody(content, `${content.body} {{${aggregator.name}}`)}
+                                content.updateBody(content, `${content.body} {{${selectedAggregator.label}.${argument.name}}}`)}
                             }
                         >
-                            {aggregator.name}
+                            {argument.name}
                         </AggregatorNameStyled>
                     );
-                }) : <span>{"There are no names."}</span>
+                }) : <span>{"There are no arguments."}</span>
             }</DataAggregatorItemsStyled>
         </Input>
     ) : null;
@@ -147,12 +147,13 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             <FormSection label={{value: 'General Data'}}>
                 {NameInput}
                 {Type}
-            </FormSection>,
-            <FormSection label={{value: 'Template Content'}}>
-                {SubjectInput}
-                {BodyInput}
+                <HelpDivider/>
                 {ConnectionForm}
                 {DataAggregatorItems}
+            </FormSection>,
+            <FormSection label={{value: 'Template Content'}} inputsStyle={{height: '100%'}}>
+                {SubjectInput}
+                {BodyInput}
             </FormSection>
         ]
     }

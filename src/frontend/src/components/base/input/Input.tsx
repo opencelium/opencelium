@@ -21,6 +21,7 @@ import Icon from '../icon/Icon';
 import {Text} from "../text/Text";
 import {TextSize} from "../text/interfaces";
 import {CheckboxStyled} from "@app_component/base/input/file/styles";
+import {isNumber} from "@application/utils/utils";
 
 
 const Input: FC<InputProps> =
@@ -104,7 +105,7 @@ const Input: FC<InputProps> =
                 background={background}
                 ref={componentRef}
                 display={display}
-                minHeight={`${minHeight}px`}
+                minHeight={isNumber(minHeight) ? `${minHeight}px` : minHeight}
                 paddingTop={paddingTop}
                 paddingBottom={paddingBottom}
                 width={width}
