@@ -35,7 +35,7 @@ const DataAggregatorList:FC<AggregatorListProps> =
     }, [])
     const CollectionAggregator = new DataAggregatorCollection(aggregators, getListActions);
     return (
-        <CollectionView hasError={!!error} isLoading={gettingAllAggregators === API_REQUEST_STATE.START} collection={CollectionAggregator} hasViewSection={false} hasTitle={false} isListViewCard={false}/>
+        <CollectionView hasTopBar={false} hasError={!!error} isLoading={gettingAllAggregators === API_REQUEST_STATE.START} collection={CollectionAggregator} hasViewSection={false} hasTitle={false} isListViewCard={false}/>
     )
 }
 

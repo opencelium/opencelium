@@ -14,17 +14,18 @@
  */
 
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {ICommonState} from "@application/interfaces/core";
 import {CommonState} from "@application/utils/store";
 import {
     addAggregator, deleteAggregatorById, getAllAggregators, getAggregatorById,
     updateAggregator
 } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
-import {IResponse} from "@application/requests/interfaces/IResponse";
+import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
 
 export interface DataAggregatorState extends ICommonState{
+    isCurrentAggregatorHasUniqueName: TRIPLET_STATE,
     addingAggregator: API_REQUEST_STATE,
     updatingAggregator: API_REQUEST_STATE,
     gettingAggregator: API_REQUEST_STATE,
@@ -34,6 +35,7 @@ export interface DataAggregatorState extends ICommonState{
     aggregators: ModelDataAggregator[],
 }
 const initialState: DataAggregatorState = {
+    isCurrentAggregatorHasUniqueName: TRIPLET_STATE.INITIAL,
     addingAggregator: API_REQUEST_STATE.INITIAL,
     updatingAggregator: API_REQUEST_STATE.INITIAL,
     gettingAggregator: API_REQUEST_STATE.INITIAL,
@@ -54,6 +56,7 @@ export const dataAggregatorSlice = createSlice({
     },
     extraReducers: {
         [addAggregator.pending.type]: (state) => {
+            state.isCurrentAggregatorHasUniqueName = TRIPLET_STATE.INITIAL;
             state.addingAggregator = API_REQUEST_STATE.START;
         },
         [addAggregator.fulfilled.type]: (state, action: PayloadAction<ModelDataAggregator>) => {
@@ -64,9 +67,13 @@ export const dataAggregatorSlice = createSlice({
         },
         [addAggregator.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.addingAggregator = API_REQUEST_STATE.ERROR;
+            if(action.payload?.message === ResponseMessages.EXISTS){
+                state.isCurrentAggregatorHasUniqueName = TRIPLET_STATE.FALSE;
+            }
             state.error = action.payload;
         },
         [updateAggregator.pending.type]: (state) => {
+            state.isCurrentAggregatorHasUniqueName = TRIPLET_STATE.INITIAL;
             state.updatingAggregator = API_REQUEST_STATE.START;
         },
         [updateAggregator.fulfilled.type]: (state, action: PayloadAction<ModelDataAggregator>) => {
@@ -77,10 +84,14 @@ export const dataAggregatorSlice = createSlice({
         },
         [updateAggregator.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.updatingAggregator = API_REQUEST_STATE.ERROR;
+            if(action.payload?.message === ResponseMessages.EXISTS){
+                state.isCurrentAggregatorHasUniqueName = TRIPLET_STATE.FALSE;
+            }
             state.error = action.payload;
         },
         [getAggregatorById.pending.type]: (state) => {
             state.gettingAggregator = API_REQUEST_STATE.START;
+            state.isCurrentAggregatorHasUniqueName = TRIPLET_STATE.INITIAL;
             state.currentAggregator = null;
         },
         [getAggregatorById.fulfilled.type]: (state, action: PayloadAction<ModelDataAggregator>) => {
@@ -97,6 +108,7 @@ export const dataAggregatorSlice = createSlice({
         },
         [getAllAggregators.fulfilled.type]: (state, action: PayloadAction<ModelDataAggregator[]>) => {
             state.gettingAllAggregators = API_REQUEST_STATE.FINISH;
+            state.isCurrentAggregatorHasUniqueName = TRIPLET_STATE.INITIAL;
             state.aggregators = action.payload;
             state.currentAggregator = null;
             state.error = null;

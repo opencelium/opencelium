@@ -16,12 +16,17 @@ import DataAggregatorList from './DataAggregatorList';
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import {useAppDispatch} from "@application/utils/store";
 import {setCurrentAggregator as setCurrentStateAggregator} from '@entity/data_aggregator/redux_toolkit/slices/DataAggregatorSlice';
-import {addAggregator, updateAggregator} from '@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators';
+import {
+    addAggregator,
+    getAllAggregators,
+    updateAggregator
+} from '@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators';
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 
 const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnection, readOnly}) => {
     const dispatch = useAppDispatch();
-    const {currentAggregator: currentStateAggregator, aggregators} = CDataAggregator.getReduxState();
+    const {currentAggregator: currentStateAggregator, aggregators, gettingAllAggregators} = CDataAggregator.getReduxState();
     const [showDialog, setShowDialog] = useState<boolean>(false);
     const [isForm, setIsForm] = useState<boolean>(false);
     const [formType, setFormType] = useState<FormType>('add');
@@ -34,6 +39,9 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
     const allOperatorOptions = useMemo(() => {
         return _.uniqWith(allOperators.map(o => {return {label: o.index, value: o.index }}), _.isEqual);
     }, [allOperators]);
+    useEffect(() => {
+        dispatch(getAllAggregators());
+    }, [])
     useEffect(() => {
         if(currentStateAggregator){
             if(formType === 'add'){
@@ -71,6 +79,7 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
                 isDisabled={allMethodOptions.length === 0}
                 label={'Aggregator'}
                 icon={'subtitles'}
+                isLoading={gettingAllAggregators === API_REQUEST_STATE.START}
                 handleClick={() => {setShowDialog(true); if(aggregators.length === 0){ setIsForm(true); }}}
             />
             <Dialog

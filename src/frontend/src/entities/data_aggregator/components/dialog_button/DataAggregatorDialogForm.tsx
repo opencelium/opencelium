@@ -22,7 +22,7 @@ import { OptionProps } from '@app_component/base/input/select/interfaces';
 import {setFocusById} from "@application/utils/utils";
 import {CheckboxStyled, TextStyled} from "@app_component/base/input/file/styles";
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
-import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
+import {API_REQUEST_STATE, TRIPLET_STATE} from '@application/interfaces/IApplication';
 
 const getStaticWordCompleter = (variables: string[]) => {
     return {
@@ -54,7 +54,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
     if(formType === 'view'){
         readOnly = true;
     }
-    const {addingAggregator, updatingAggregator} = CDataAggregator.getReduxState();
+    const {addingAggregator, updatingAggregator, isCurrentAggregatorHasUniqueName} = CDataAggregator.getReduxState();
     const variablesRef = useRef(null);
     const scriptSegmentRef = useRef(null);
     const [name, setName] = useState<string>(aggregator?.name || '');
@@ -87,6 +87,13 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
         }
     }, [])
     useEffect(() => {
+        if(isCurrentAggregatorHasUniqueName === TRIPLET_STATE.FALSE){
+            setNameError('Such name already exists');
+            setFocusById('input_aggregator_name');
+            return;
+        }
+    }, [isCurrentAggregatorHasUniqueName])
+    useEffect(() => {
         if(hideComments){
             if(variablesRef.current){
                 variablesRef.current.editor.session.foldAllComments();
@@ -105,15 +112,6 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
             setNameError('Name is a required field');
             setFocusById('input_aggregator_name');
             return;
-        }
-        let dataAggregatorItem = dataAggregator.find(a => a.name === name);
-        if(dataAggregatorItem){
-            if((formType === 'update' && dataAggregatorItem.id !== aggregator.id)
-            || formType === 'add'){
-                setNameError('Such name already exists');
-                setFocusById('input_aggregator_name');
-                return;
-            }
         }
         if(args.length === 0){
             setArgsError('Arguments are required fields');

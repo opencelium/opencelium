@@ -2,8 +2,10 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
 import {DataAggregatorRequest} from "@entity/data_aggregator/requests/classes/DataAggregator";
+import {ResponseMessages} from "@application/requests/interfaces/IResponse";
+import {ConnectorRequest} from "@entity/connector/requests/classes/Connector";
 
-const dataAggregator = [{
+let dataAggregator: any = [{
     id: '1',
     name: 'collect_removed',
     script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
@@ -28,9 +30,18 @@ export const addAggregator = createAsyncThunk(
     'data_aggregator/add',
     async(aggregator: ModelDataAggregator, thunkAPI) => {
         try {
-/*            const request = new DataAggregatorRequest();
+            /*const checkNameRequest = new DataAggregatorRequest({endpoint: `/exists/${aggregator.name}`});
+            const responseNameRequest = await checkNameRequest.checkAggregatorName();
+            if(responseNameRequest.data.message === ResponseMessages.EXISTS){
+                return thunkAPI.rejectWithValue(responseNameRequest.data);
+            }
+            const request = new DataAggregatorRequest();
             const response = await request.addAggregator(aggregator);
             return response.data;*/
+            if(dataAggregator.findIndex((a: any) => a.name === aggregator.name) !== -1){
+                return thunkAPI.rejectWithValue({message: ResponseMessages.EXISTS});
+            }
+            dataAggregator = [...dataAggregator, {...aggregator, id: '5'}];
             return {...aggregator, id: '5'}
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -41,9 +52,22 @@ export const updateAggregator = createAsyncThunk(
     'data_aggregator/update',
     async(aggregator: ModelDataAggregator, thunkAPI) => {
         try {
-/*            const request = new DataAggregatorRequest({endpoint: `/${aggregator.id}`});
+            // @ts-ignore
+            /*const dataAggregatorState = thunkAPI.getState().dataAggregatorReducer;
+            if(dataAggregatorState.currentAggregator && dataAggregatorState.currentAggregator.title !== aggregator.name){
+                const checkNameRequest = new DataAggregatorRequest({endpoint: `/exists/${aggregator.name}`});
+                const responseNameRequest = await checkNameRequest.checkAggregatorName();
+                if(responseNameRequest.data.message === ResponseMessages.EXISTS){
+                    return thunkAPI.rejectWithValue(responseNameRequest.data);
+                }
+            }
+            const request = new DataAggregatorRequest({endpoint: `/${aggregator.id}`});
             const response = await request.updateAggregator(aggregator);
             return aggregator;*/
+            if(dataAggregator.findIndex((a: any) => a.name === aggregator.name && a.id !== aggregator.id) !== -1){
+                return thunkAPI.rejectWithValue({message: ResponseMessages.EXISTS});
+            }
+            dataAggregator = dataAggregator.map((a: any) => a.id === aggregator.id ? aggregator : a);
             return aggregator;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -57,7 +81,7 @@ export const getAggregatorById = createAsyncThunk(
             /*const request = new DataAggregatorRequest({endpoint: `/${aggregatorId}`});
             const response = await request.getAggregator();
             return response.data;*/
-            return dataAggregator.find(a => a.id === aggregatorId);
+            return dataAggregator.find((a: any) => a.id === aggregatorId);
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -86,7 +110,7 @@ export const deleteAggregatorById = createAsyncThunk(
             /*const request = new DataAggregatorRequest({endpoint: `/${id}`});
             await request.deleteAggregator();
             return id;*/
-            dataAggregator.filter(a => a.id !== id)
+            dataAggregator.filter((a: any) => a.id !== id)
             return id;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

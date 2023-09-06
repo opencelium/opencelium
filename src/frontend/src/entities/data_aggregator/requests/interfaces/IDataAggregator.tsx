@@ -5,6 +5,9 @@ import ModelDataAggregator from "../models/DataAggregator";
 
 export interface IDataAggregator {
 
+    //to check if aggregator with such name already exists
+    checkAggregatorName(): Promise<AxiosResponse<IResponse>>,
+
     //to add aggregator
     addAggregator(data: ModelDataAggregator): Promise<AxiosResponse<ModelDataAggregator>>,
 

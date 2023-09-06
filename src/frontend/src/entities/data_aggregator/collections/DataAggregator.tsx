@@ -23,6 +23,8 @@ import ModelDataAggregator, {ModelDataAggregatorProps} from "@entity/data_aggreg
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import Button from "@app_component/base/button/Button";
+import {PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
+import {ColorTheme} from "@style/Theme";
 
 class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
     name: string = 'dataAggregator';
@@ -60,14 +62,6 @@ class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
     };
     getGridActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
         return null;
-    };
-    getListActions: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
-        return (
-            <React.Fragment>
-                <TooltipButton href={`${entity.id}/update`} target={`update_entity_${entity.id.toString()}`} position={'top'} tooltip={'Update'} hasBackground={false} icon={'edit'} size={TextSize.Size_20}/>
-                <TooltipButton href={`${entity.id}/view`} target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} hasBackground={false} icon={'visibility'} size={TextSize.Size_20}/>
-            </React.Fragment>
-        );
     };
     hasCardLink = true;
 

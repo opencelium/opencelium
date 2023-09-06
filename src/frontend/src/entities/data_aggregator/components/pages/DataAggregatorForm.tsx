@@ -14,7 +14,7 @@ import Button from "@app_component/base/button/Button";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
 import {setFocusById} from "@application/utils/utils";
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
-import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
+import {API_REQUEST_STATE, TRIPLET_STATE} from '@application/interfaces/IApplication';
 import FormComponent from "@app_component/form/form/Form";
 import {Form} from "@application/classes/Form";
 import {IForm} from "@application/interfaces/IForm";
@@ -26,7 +26,6 @@ import {
 } from "../../redux_toolkit/action_creators/DataAggregatorCreators";
 import {useAppDispatch} from "@application/utils/store";
 import {useNavigate, useParams} from "react-router";
-import {setCurrentAggregator} from "@entity/data_aggregator/redux_toolkit/slices/DataAggregatorSlice";
 
 const getStaticWordCompleter = (variables: string[]) => {
     return {
@@ -53,7 +52,7 @@ const DataAggregatorDialogForm:FC<IForm> =
         const {
             addingAggregator, updatingAggregator, error,
             currentAggregator, aggregators, gettingAggregator,
-            gettingAllAggregators,
+            gettingAllAggregators, isCurrentAggregatorHasUniqueName,
         } = CDataAggregator.getReduxState();
         const dispatch = useAppDispatch();
         const variablesRef = useRef(null);
@@ -111,9 +110,15 @@ const DataAggregatorDialogForm:FC<IForm> =
             }
         }, [])
         useEffect(() => {
+            if(isCurrentAggregatorHasUniqueName === TRIPLET_STATE.FALSE){
+                setNameError('Such name already exists');
+                setFocusById('input_aggregator_name');
+                return;
+            }
+        }, [isCurrentAggregatorHasUniqueName])
+        useEffect(() => {
             if(shouldFetchDataAggregator){
-                dispatch(getAggregatorById(`${aggregatorId}`))
-                dispatch(getAllAggregators());
+                dispatch(getAggregatorById(`${aggregatorId}`));
             }
         }, [])
         useEffect(() => {
@@ -145,15 +150,6 @@ const DataAggregatorDialogForm:FC<IForm> =
                 setFocusById('input_aggregator_name');
                 return;
             }
-            let dataAggregatorItem = aggregators.find(a => a.name === name);
-            if(dataAggregatorItem){
-                if((isUpdate && dataAggregatorItem.id !== currentAggregator.id)
-                    || isAdd){
-                    setNameError('Such name already exists');
-                    setFocusById('input_aggregator_name');
-                    return;
-                }
-            }
             if(args.length === 0){
                 setArgsError('Arguments are required fields');
                 setFocusById(`input_argument_name_add`);
@@ -161,14 +157,14 @@ const DataAggregatorDialogForm:FC<IForm> =
             }
             if(scriptSegment === ''){
                 setScriptSegmentError('Script is a required field');
-                scriptSegmentRef.current.focus();
+                scriptSegmentRef.current.editor.focus();
                 return;
             }
             if(isAdd){
-                addAggregator({name, args, script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
+                dispatch(addAggregator({name, args, script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)}));
             }
             if(isUpdate){
-                updateAggregator({id: currentAggregator.id, name, args, script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
+                dispatch(updateAggregator({id: currentAggregator.id, name, args, script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)}));
             }
         }
         const addArgument = (arg: ModelArgument) => {
