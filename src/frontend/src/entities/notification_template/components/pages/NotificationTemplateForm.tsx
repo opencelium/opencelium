@@ -57,9 +57,30 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     if(shouldFetchNotificationTemplate){
         notificationTemplateId = parseInt(urlParams.id);
     }
+
+    const initialNotificationTemplate = useMemo(() => {
+        if(!currentNotificationTemplate){
+            return null;
+        }
+        if(isUpdate && gettingAllAggregators !== API_REQUEST_STATE.FINISH){
+            return null;
+        }
+        return {
+            ...currentNotificationTemplate,
+            content: [{
+                // @ts-ignore
+                ...currentNotificationTemplate.content[0],
+                // @ts-ignore
+                subject: CDataAggregator.replaceIdsOnNames(aggregators, currentNotificationTemplate.content[0].subject),
+                // @ts-ignore
+                body: CDataAggregator.replaceIdsOnNames(aggregators, currentNotificationTemplate.content[0].body),
+            }]
+        };
+    }, [currentNotificationTemplate, gettingAllAggregators]);
     // @ts-ignore
-    const content = Content.createState<IContent>({_readOnly: isView}, isAdd ? null : currentNotificationTemplate?.content[0]);
-    const notificationTemplate = NotificationTemplate.createState<INotificationTemplate>({id: notificationTemplateId, _readOnly: isView, content}, isAdd ? null : currentNotificationTemplate);
+    const content = Content.createState<IContent>({_readOnly: isView}, isAdd ? null : initialNotificationTemplate?.content[0]);
+
+    const notificationTemplate = NotificationTemplate.createState<INotificationTemplate>({id: notificationTemplateId, _readOnly: isView, content}, isAdd ? null : initialNotificationTemplate);
     useEffect(() => {
         if(shouldFetchNotificationTemplate){
             notificationTemplate.getById()
@@ -113,8 +134,8 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
                             key={argument.name}
                             onClick={() => {
                                 //@ts-ignore
-                                content.updateBody(content, `${content.body} {{${selectedAggregator.label}.${argument.name}}}`)}
-                            }
+                                content.updateBody(content, `${content.body} ${CDataAggregator.embraceArgument(`${selectedAggregator.label}.${argument.name}`)}`)
+                            }}
                         >
                             {argument.name}
                         </AggregatorNameStyled>
@@ -131,7 +152,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         autoFocus={isView}
     />];
     if(isAdd || isUpdate){
-        let handleClick = isAdd ? () => notificationTemplate.add() : () => notificationTemplate.update();
+        let handleClick = isAdd ? () => notificationTemplate.add(aggregators) : () => notificationTemplate.update(aggregators);
         actions.unshift(<Button
             key={'action_button'}
             label={formData.actionButton.label}

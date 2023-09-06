@@ -37,6 +37,8 @@ import {
     updateNotificationTemplate
 } from "../redux_toolkit/action_creators/NotificationTemplateCreators";
 import {Content} from "./Content";
+import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
+import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 
 
 export class NotificationTemplate extends HookStateClass implements INotificationTemplate{
@@ -54,6 +56,8 @@ export class NotificationTemplate extends HookStateClass implements INotificatio
     content: Partial<Content> = null;
 
     type: string;
+
+    aggregators: ModelDataAggregator[];
 
     constructor(notificationTemplate?: Partial<INotificationTemplate> | null) {
         // @ts-ignore
@@ -196,13 +200,33 @@ export class NotificationTemplate extends HookStateClass implements INotificatio
         return this.validateId(this.id);
     }
 
-    @App.dispatch(addNotificationTemplate)
-    add(): boolean{
+    @App.dispatch(addNotificationTemplate, {
+        mapping: (notificationTemplate: INotificationTemplate) => {
+            return {
+                ...notificationTemplate,
+                content: {
+                    ...notificationTemplate.content,
+                    subject: CDataAggregator.replaceNamesOnIds(notificationTemplate.aggregators, notificationTemplate.content.subject),
+                    body: CDataAggregator.replaceNamesOnIds(notificationTemplate.aggregators, notificationTemplate.content.body)
+                }
+            }}, hasNoValidation: false})
+    add(aggregators: ModelDataAggregator[]): boolean{
+        this.aggregators = aggregators;
         return this.validateAdd();
     }
 
-    @App.dispatch(updateNotificationTemplate)
-    update(): boolean{
+    @App.dispatch(updateNotificationTemplate, {
+        mapping: (notificationTemplate: INotificationTemplate) => {
+            return {
+                ...notificationTemplate,
+                content: {
+                    ...notificationTemplate.content,
+                    subject: CDataAggregator.replaceNamesOnIds(notificationTemplate.aggregators, notificationTemplate.content.subject),
+                    body: CDataAggregator.replaceNamesOnIds(notificationTemplate.aggregators, notificationTemplate.content.body)
+                }
+            }}, hasNoValidation: false})
+    update(aggregators: ModelDataAggregator[]): boolean{
+        this.aggregators = aggregators;
         return this.validateId(this.id) && this.validateAdd();
     }
 

@@ -25,4 +25,28 @@ export class CDataAggregator{
     static getOptionsForSelect(dataAggregator: ModelDataAggregator[]){
         return dataAggregator.map(o => {return {label: o.name, value: o.id};});
     }
+
+    static replaceIdsOnNames(dataAggregator: ModelDataAggregator[], string: string){
+        for(let i = 0; i < dataAggregator.length; i++){
+            for(let j = 0; j < dataAggregator[i].args.length; j++){
+                let splitStr = string.split(this.embraceArgument(dataAggregator[i].args[j].id));
+                string = splitStr.join(this.embraceArgument(`${dataAggregator[i].name}.${dataAggregator[i].args[j].name}`));
+            }
+        }
+        return string;
+    }
+
+    static replaceNamesOnIds(dataAggregator: ModelDataAggregator[], string: string){
+        for(let i = 0; i < dataAggregator.length; i++){
+            for(let j = 0; j < dataAggregator[i].args.length; j++){
+                let splitStr = string.split(this.embraceArgument(`${dataAggregator[i].name}.${dataAggregator[i].args[j].name}`));
+                string = splitStr.join(this.embraceArgument(dataAggregator[i].args[j].id));
+            }
+        }
+        return string;
+    }
+
+    static embraceArgument(argument: string){
+        return `{{${argument}}}`;
+    }
 }

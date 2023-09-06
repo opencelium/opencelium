@@ -9,22 +9,22 @@ let dataAggregator: any = [{
     id: '1',
     name: 'collect_removed',
     script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
-    args: [{name: 'arg1', description: 'desc1'},{name: 'arg2', description: 'desc2'}]
+    args: [{id: 1, name: 'arg1', description: 'desc1'},{id: 2, name: 'arg2', description: 'desc2'}]
 },{
     id: '2',
     name: 'collect_updated',
     script: 'var arg3;\nvar arg4;\n\narg3 + arg4',
-    args: [{name: 'arg3', description: 'desc3'}, {name: 'arg4', description: 'desc4'}]
+    args: [{id: 3, name: 'arg3', description: 'desc3'}, {id: 4, name: 'arg4', description: 'desc4'}]
 },{
     id: '3',
     name: 'Create',
     script: 'var arg5;\nvar arg6;\n\narg5 + arg6',
-    args: [{name: 'arg5', description: 'desc5'},{name: 'arg6', description: 'desc6'}]
+    args: [{id: 5, name: 'arg5', description: 'desc5'},{id: 6, name: 'arg6', description: 'desc6'}]
 }, {
     id: '4',
     name: 'Deleted',
     script: 'var arg7;\nvar arg8;\n\narg7 + arg8',
-    args: [{name: 'arg7', description: 'desc7'}, {name: 'arg8', description: 'desc8'}]
+    args: [{id: 7, name: 'arg7', description: 'desc7'}, {id: 8, name: 'arg8', description: 'desc8'}]
 }];
 export const addAggregator = createAsyncThunk(
     'data_aggregator/add',

@@ -6,7 +6,7 @@ const HelpDivider = ({}) => {
         <HelpDividerStyled>
             <DividerStyled/>
             <TextStyled>
-                {"This search only helps you too find the right argument."}
+                {"This search only helps you to find the right argument."}
             </TextStyled>
         </HelpDividerStyled>
     )
