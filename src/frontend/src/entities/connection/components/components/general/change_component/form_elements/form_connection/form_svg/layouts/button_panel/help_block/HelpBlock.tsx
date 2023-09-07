@@ -319,12 +319,12 @@ const HelpBlock = () => {
     }
     if(name === 'if'){
       // @ts-ignore
-      const condition = animationData[videoAnimationName][connectorType][index].conditionForIf;
+      const condition = animationData[videoAnimationName][connectorType].items[index].conditionForIf;
       await showDetailsForOperatorIf(condition);
     }
     if(name === 'loop'){
       // @ts-ignore
-      const condition = animationData[videoAnimationName][connectorType][index].conditionForLoop;
+      const condition = animationData[videoAnimationName][connectorType].items[index].conditionForLoop;
       await showDetailsForOperatorLoop(condition);
     }
     if(index === animationData[videoAnimationName].fromConnector.items.length - 1 && animationData[videoAnimationName].toConnector.items.length === 0 || index === animationData[videoAnimationName].toConnector.items.length - 1 && connectorType === 'toConnector'){
