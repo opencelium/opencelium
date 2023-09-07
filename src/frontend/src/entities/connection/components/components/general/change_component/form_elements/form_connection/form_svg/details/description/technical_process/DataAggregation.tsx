@@ -27,7 +27,7 @@ export default
             item.dataAggregator = dataAggregator.id;
             const currentTechnicalItem = connector.getSvgElementByIndex(item.index);
             updateConnection(connection);
-            setCurrentTechnicalItem(currentTechnicalItem.getObject());
+            dispatch(setCurrentTechnicalItem(currentTechnicalItem.getObject()));
         }
     }
 
