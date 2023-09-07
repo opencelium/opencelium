@@ -86,6 +86,7 @@ public class ConnectionController {
         return ResponseEntity.ok().build();
     }
 
+
     @Operation(summary = "Retrieves all Metadata of connections from database")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
