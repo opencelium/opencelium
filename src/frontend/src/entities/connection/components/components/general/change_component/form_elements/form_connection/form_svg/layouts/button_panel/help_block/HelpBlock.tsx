@@ -191,19 +191,34 @@ const HelpBlock = () => {
 
     if(bodyData){
       await details.openBodyDialog(reference.current);
+      let availableBodyContent: any;
+      
+      for(var i = 0; i < bodyData.length; i++){
+        if(bodyData[i].available){
+          availableBodyContent = true;
+          break;
+        }
+      }
+      
+      if(!availableBodyContent){
+        await details.openBodyObject(reference.current);
+      }
 
-      await details.openBodyObject(reference.current);
       
       for(let bodyIndex = 0; bodyIndex < bodyData.length; bodyIndex++){
-        await details.displayBodyAddKeysButton(reference.current);
+        
+        if(!bodyData[bodyIndex].available){
+          await details.displayBodyAddKeysButton(reference.current);
 
-        await details.clickAddKeysButton(reference.current);
+          await details.clickAddKeysButton(reference.current);
 
-        await details.addBodyKeyName(bodyData[bodyIndex].keyName, reference.current);
+          await details.addBodyKeyName(bodyData[bodyIndex].keyName, reference.current);
 
-        await details.displaySubmitButtonToAddKey(reference.current);
+          await details.displaySubmitButtonToAddKey(reference.current);
 
-        await details.clickSubmitButtonToAddKey(reference.current);
+          await details.clickSubmitButtonToAddKey(reference.current);
+        }
+
 
         await details.displayEditKeyValueButton(bodyIndex, reference.current);
 
@@ -238,7 +253,7 @@ const HelpBlock = () => {
           }
         }
         else{
-          await details.clickSubmitButtonToAddValue(reference.current);
+          await details.clickSubmitButtonToAddValue(bodyIndex, reference.current);
         }
       }
       await details.closeBodyDialog(reference.current);
@@ -248,10 +263,8 @@ const HelpBlock = () => {
       await details.showResponse(reference.current);
     }
   
-    if(index === animationData[videoAnimationName].toConnector.length - 1 && connectorType === 'toConnector'){
+    if(refs.animationData.delete){
       await details.deleteLastProcess(reference.current);
-
-      await details.showResult(dispatch, reference.current);
     }
   }
 
@@ -311,13 +324,20 @@ const HelpBlock = () => {
       const condition = animationData[videoAnimationName][connectorType][index].conditionForLoop;
       await showDetailsForOperatorLoop(condition);
     }
+    if(index === animationData[videoAnimationName].fromConnector.length - 1 && animationData[videoAnimationName].toConnector.length === 0 || index === animationData[videoAnimationName].toConnector.length - 1 && connectorType === 'toConnector'){
+      const details = new DetailsForProcess(ref, setPopoverProps, refs.animationData);
+      await details.showResult(dispatch, reference.current);
+    }
     setIndex(index + 1)
   }
 
   useEffect(() => {
     if(ref.current){
       if(videoAnimationName && index <= 0 && connectorType === 'fromConnector'){
-        let connection = CConnection.createConnection(connectionData);
+        
+        // @ts-ignore
+        const cData = {nodeId:null,connectionId:null,title:"",description:"",fromConnector:{nodeId:null,connectorId:connectionData.fromConnector.connectorId,title:null,invoker:{name:connectionData.fromConnector.invoker.name},methods:[],operators:[]},toConnector:{nodeId:null,connectorId:connectionData.toConnector.connectorId,title:null,invoker:{name:connectionData.toConnector.invoker.name},methods:[],operators:[]},fieldBinding:[]};
+        let connection = CConnection.createConnection(cData);
         setAnimationProps({
             connection: prepareConnection(connection, connectors)
         })
@@ -408,8 +428,8 @@ const HelpBlock = () => {
         >
           <div style={{
             position: 'absolute',
-            top: '20px',
-            left: '100px',
+            top: '0',
+            left: '0',
             zIndex: 100000,
             padding: '15px',
             display: 'flex',

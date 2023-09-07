@@ -15,6 +15,20 @@ export default class DetailsForProcess{
     this.setPopoverProps = setPopoverProps;
   }
 
+  static searchParentElementForBodyElement(keyName: string){
+    const jsonView = document.querySelector('.react-json-view');
+    const allElementsInJsonView = jsonView.querySelectorAll('*');
+    let found;
+    
+    for (var i = 0; i < allElementsInJsonView.length; i++) {
+      if (allElementsInJsonView[i].textContent == keyName) {
+        found = allElementsInJsonView[i];
+        break;
+      }
+    }
+
+    return found.closest('.variable-row') === null ? found.closest('.object-key-val') : found.closest('.variable-row')
+  }
 
 
   @AdditionalFunctions.setPopover('Label_option')
@@ -186,9 +200,12 @@ export default class DetailsForProcess{
 
   @AdditionalFunctions.setPopover('.react-json-view .click-to-edit')
   async displayEditKeyValueButton (index: any, animationSpeed: number) {
-    const editButton = document.querySelectorAll('.react-json-view .click-to-edit');
     // @ts-ignore
-    editButton[index].style.display = 'inline-block';
+    const parent = DetailsForProcess.searchParentElementForBodyElement(this.animationData.body[index].keyName);
+
+    const editButton = parent.querySelector('.click-to-edit');
+    // @ts-ignore
+    editButton.style.display = 'inline-block';
     AdditionalFunctions.addOutlineByClassName(['.react-json-view .click-to-edit']);
 
     return AdditionalFunctions.delay(animationSpeed);
@@ -196,9 +213,11 @@ export default class DetailsForProcess{
 
   async clickEditKeyValueButton (index: any, animationSpeed: number) {
     AdditionalFunctions.removeOutlineByClassName(['.react-json-view .click-to-edit']);
-    const edit = document.querySelectorAll('.react-json-view .click-to-edit-icon');
     // @ts-ignore
-    edit[index].click();
+    const parent = DetailsForProcess.searchParentElementForBodyElement(this.animationData.body[index].keyName);
+    const edit = parent.querySelector('.click-to-edit-icon');
+    // @ts-ignore
+    edit.click();
 
     return AdditionalFunctions.delay(animationSpeed);
   }
@@ -316,12 +335,15 @@ export default class DetailsForProcess{
   }
 
   @AdditionalFunctions.setPopover('.react-json-view .edit-check')
-  async clickSubmitButtonToAddValue (animationSpeed: number) {
+  async clickSubmitButtonToAddValue (index: number, animationSpeed: number) {
+    
     const editSubmitButtonClassName = '.react-json-view .edit-check';
     AdditionalFunctions.addOutlineByClassName([editSubmitButtonClassName]);
-
+    
     await AdditionalFunctions.removeOutlineByClassName([editSubmitButtonClassName], true, animationSpeed);
-    const editSubmitButton = document.querySelector(editSubmitButtonClassName);
+    // @ts-ignore
+    const parent = DetailsForProcess.searchParentElementForBodyElement(this.animationData.body[index].keyName);
+    const editSubmitButton = parent.querySelector('.edit-check');
     // @ts-ignore
     editSubmitButton.click();
 

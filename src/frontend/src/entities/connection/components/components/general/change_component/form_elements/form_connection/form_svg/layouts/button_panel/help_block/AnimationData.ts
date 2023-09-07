@@ -30,18 +30,6 @@ const animationData: IAnimationData = {
             functionId: "displayBodyAddKeysButton",
             text: "click add keys button",
           },
-          // {
-          //   functionId: "addBodyKeyName",
-          //   text: "add body key name",
-          // },
-          // {
-          //   functionId: "displaySubmitButtonToAddKey",
-          //   text: "click submit button to add key",
-          // },
-          // {
-          //   functionId: "displayEditKeyValueButton",
-          //   text: "click edit key value button",
-          // },
           {
             functionId: "addBodyKeyValue",
             text: "add body key value",
@@ -254,6 +242,42 @@ const animationData: IAnimationData = {
       //   name: "GetBoards",
       // },
     ],
+  },
+  configureAPI: {
+    fromConnector: [
+      {
+        index: "0",
+        type: "process",
+        name: "TicketSearch",
+        label: "Ticket Search label",
+        delete: false,
+        body: [
+          {
+            keyName: "StateType",
+            keyValue: "state type value",
+            available: true
+          },
+          {
+            keyName: "StateType2",
+            keyValue: "state type value",
+          },
+        ]
+      },
+      {
+        index: "1",
+        type: "operator",
+        name: "if",
+      },
+
+    ],
+    toConnector: [
+      {
+        index: "0",
+        name: "TicketSearch",
+        type: "process",
+        delete: true
+      }
+    ]
   }
 };
 

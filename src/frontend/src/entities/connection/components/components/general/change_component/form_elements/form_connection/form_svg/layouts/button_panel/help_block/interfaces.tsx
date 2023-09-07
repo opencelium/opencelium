@@ -35,6 +35,7 @@ interface IBaseAnimationData {
   index: string;
   type: "process" | "operator";
   name: string;
+  delete?: boolean;
   toDown?: true | false;
   after?: string;
   scripts?: IScriptsData[];
@@ -98,6 +99,7 @@ interface IConditionDataForLoop {
 interface IBodyData{
   keyName: string;
   keyValue: string;
+  available?: boolean;
   reference?: IBodyReferenceData[];
 }
 
