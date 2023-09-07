@@ -1,5 +1,5 @@
 import React, {FC, useRef, useState, useEffect, useMemo} from 'react';
-import AceEditor from "react-ace";
+import AceEditor, { IMarker } from "react-ace";
 import Arguments from "../arguments/Arguments";
 import AddArgument from "../arguments/AddArgument";
 import Input from "@app_component/base/input/Input";
@@ -12,7 +12,7 @@ import InputText from "@app_component/base/input/text/InputText";
 import {ModelArgument} from "@entity/data_aggregator/requests/models/DataAggregator";
 import Button from "@app_component/base/button/Button";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
-import {setFocusById} from "@application/utils/utils";
+import {getMarker, setFocusById} from "@application/utils/utils";
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import {API_REQUEST_STATE, TRIPLET_STATE} from '@application/interfaces/IApplication';
 import FormComponent from "@app_component/form/form/Form";
@@ -54,6 +54,7 @@ const DataAggregatorDialogForm:FC<IForm> =
             currentAggregator, aggregators, gettingAggregator,
             gettingAllAggregators, isCurrentAggregatorHasUniqueName,
         } = CDataAggregator.getReduxState();
+        const [markers, setMarkers] = useState<any[]>([]);
         const dispatch = useAppDispatch();
         const variablesRef = useRef(null);
         const scriptSegmentRef = useRef(null);
@@ -63,7 +64,7 @@ const DataAggregatorDialogForm:FC<IForm> =
         const [argsError, setArgsError] = useState<string>('');
         const initialScript = CAggregator.splitVariablesFromScript(currentAggregator?.script || '');
         const [variables, setVariables] = useState<string>(initialScript.variables || '');
-        const [scriptSegment, setScriptSegment] = useState<string>(initialScript.scriptSegment || '');
+        const [scriptSegment, updateScriptSegment] = useState<string>(initialScript.scriptSegment || '');
         const [scriptSegmentError, setScriptSegmentError] = useState<string>('');
         const [hideComments, toggleComments] = useState<boolean>(false);
         const shouldFetchDataAggregator = isUpdate || isView;
@@ -74,6 +75,9 @@ const DataAggregatorDialogForm:FC<IForm> =
         if(shouldFetchDataAggregator){
             aggregatorId = parseInt(urlParams.id);
         }
+        const setScriptSegment = (segment: string) => {
+            updateScriptSegment(segment);
+        }
         const changeScriptSegment = (segment: string) => {
             setScriptSegment(CAggregator.cleanCodeFromComments(segment));
             setScriptSegmentError('');
@@ -82,6 +86,10 @@ const DataAggregatorDialogForm:FC<IForm> =
             setName(newName);
             setNameError('');
         }
+        useEffect(() => {
+            const newMarkers = getMarker(scriptSegmentRef.current.editor, CAggregator.getScriptSegmentComment()+scriptSegment, CAggregator.generateNotExistVar());
+            setMarkers(newMarkers)
+        }, [scriptSegment])
         useEffect(() => {
             if(currentAggregator) {
                 if (name !== currentAggregator.name) {
@@ -198,6 +206,9 @@ const DataAggregatorDialogForm:FC<IForm> =
             let newScriptSegment = scriptSegment;
             newScriptSegment = newScriptSegment.split(` ${args[index].name}`).join(` ${CAggregator.generateNotExistVar()}`);
             newScriptSegment = newScriptSegment.split(`\n${args[index].name}`).join(`\n${CAggregator.generateNotExistVar()}`);
+            if(newScriptSegment.indexOf(args[index].name) === 0){
+                newScriptSegment = CAggregator.generateNotExistVar() + newScriptSegment.substring(args[index].name.length);
+            }
             setScriptSegment(newScriptSegment);
             const newArgs = [...args];
             newArgs.splice(index, 1);
@@ -285,6 +296,7 @@ const DataAggregatorDialogForm:FC<IForm> =
                             }}
                         />
                         <AceEditor
+                            markers={markers}
                             ref={scriptSegmentRef}
                             style={{...getReactXmlStyles(styleProps), marginLeft: '50px', marginBottom: 20, marginTop: 0}}
                             mode="javascript"

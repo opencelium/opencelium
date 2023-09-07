@@ -8,8 +8,8 @@ import {ConnectorRequest} from "@entity/connector/requests/classes/Connector";
 let dataAggregator: any = [{
     id: '1',
     name: 'collect_removed',
-    script: 'var arg1;\nvar arg2;\n\narg1 + arg2',
-    args: [{id: 1, name: 'arg1', description: 'desc1'},{id: 2, name: 'arg2', description: 'desc2'}]
+    script: 'var created;\nvar deleted;\n\ncreated + deleted + deleted + created',
+    args: [{id: 1, name: 'created', description: 'desc1'},{id: 2, name: 'deleted', description: 'desc2'}]
 },{
     id: '2',
     name: 'collect_updated',

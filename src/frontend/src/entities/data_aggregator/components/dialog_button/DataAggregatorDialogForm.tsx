@@ -19,7 +19,7 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import Button from "@app_component/base/button/Button";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
 import { OptionProps } from '@app_component/base/input/select/interfaces';
-import {setFocusById} from "@application/utils/utils";
+import {getMarker, setFocusById} from "@application/utils/utils";
 import {CheckboxStyled, TextStyled} from "@app_component/base/input/file/styles";
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import {API_REQUEST_STATE, TRIPLET_STATE} from '@application/interfaces/IApplication';
@@ -55,6 +55,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
         readOnly = true;
     }
     const {addingAggregator, updatingAggregator, isCurrentAggregatorHasUniqueName} = CDataAggregator.getReduxState();
+    const [markers, setMarkers] = useState<any[]>([]);
     const variablesRef = useRef(null);
     const scriptSegmentRef = useRef(null);
     const [name, setName] = useState<string>(aggregator?.name || '');
@@ -76,6 +77,10 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
         setName(newName);
         setNameError('');
     }
+    useEffect(() => {
+        const newMarkers = getMarker(scriptSegmentRef.current.editor, CAggregator.getScriptSegmentComment()+scriptSegment, CAggregator.generateNotExistVar());
+        setMarkers(newMarkers)
+    }, [scriptSegment])
     useEffect(() => {
         if(variablesRef.current){
             variablesRef.current.editor.renderer.$cursorLayer.element.style.opacity = 0;
@@ -164,6 +169,9 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
         let newScriptSegment = scriptSegment;
         newScriptSegment = newScriptSegment.split(` ${args[index].name}`).join(` ${CAggregator.generateNotExistVar()}`);
         newScriptSegment = newScriptSegment.split(`\n${args[index].name}`).join(`\n${CAggregator.generateNotExistVar()}`);
+        if(newScriptSegment.indexOf(args[index].name) === 0){
+            newScriptSegment = CAggregator.generateNotExistVar() + newScriptSegment.substring(args[index].name.length);
+        }
         setScriptSegment(newScriptSegment);
         const newArgs = [...args];
         newArgs.splice(index, 1);
@@ -266,6 +274,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
                             }}
                         />
                         <AceEditor
+                            markers={markers}
                             ref={scriptSegmentRef}
                             style={{...getReactXmlStyles(styleProps), marginLeft: '50px', marginBottom: 20, marginTop: 0}}
                             mode="javascript"

@@ -50,7 +50,7 @@ export default
         <SelectableInput
             id={`data_aggregation_options`}
             readOnly={readOnly}
-            options={connection.getAllAggregationsForSelect()}
+            options={CDataAggregator.getOptionsForSelect(aggregators)}
             changeValue={changeAggregator}
             label={'Aggregation'}
             value={aggregator}

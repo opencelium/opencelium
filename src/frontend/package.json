@@ -28,6 +28,7 @@
     "@types/sockjs-client": "^1.5.1",
     "@types/stompjs": "^2.3.5",
     "@types/styled-components": "^5.1.14",
+    "ace-builds": "^1.24.1",
     "axios": "^0.21.3",
     "chroma-js": "^2.1.2",
     "cron-parser": "^4.7.1",
