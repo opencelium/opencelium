@@ -118,8 +118,18 @@ interface IBodyReferenceMethodData{
 type IConnectorData = IAnimationDataForProcess | IAnimationDataForIf | IAnimationDataForLoop;
 
 interface IConnectorType {
-  fromConnector: IConnectorData[];
-  toConnector: IConnectorData[];
+  fromConnector: {
+    invoker: {
+      name: string;
+    },
+    items: IConnectorData[]
+  };
+  toConnector: {
+    invoker: {
+      name: string;
+    },
+    items: IConnectorData[]
+  };
 }
 
 interface IAnimationData {

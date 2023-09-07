@@ -337,10 +337,10 @@ export default class DetailsForProcess{
   @AdditionalFunctions.setPopover('.react-json-view .edit-check')
   async clickSubmitButtonToAddValue (index: number, animationSpeed: number) {
     
-    const editSubmitButtonClassName = '.react-json-view .edit-check';
-    AdditionalFunctions.addOutlineByClassName([editSubmitButtonClassName]);
+    // const editSubmitButtonClassName = '.react-json-view .edit-check';
+    // AdditionalFunctions.addOutlineByClassName([editSubmitButtonClassName]);
     
-    await AdditionalFunctions.removeOutlineByClassName([editSubmitButtonClassName], true, animationSpeed);
+    // await AdditionalFunctions.removeOutlineByClassName([editSubmitButtonClassName], true, animationSpeed);
     // @ts-ignore
     const parent = DetailsForProcess.searchParentElementForBodyElement(this.animationData.body[index].keyName);
     const editSubmitButton = parent.querySelector('.edit-check');

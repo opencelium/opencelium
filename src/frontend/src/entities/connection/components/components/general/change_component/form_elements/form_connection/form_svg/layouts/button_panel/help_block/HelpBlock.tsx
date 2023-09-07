@@ -43,22 +43,24 @@ import AdditionalFunctions from "./classes/AdditionalFunctions";
 import { AnimationPopoverProps } from "./AnimationPopover/interfaces";
 import AnimationPopover from "./AnimationPopover/AnimationPopover";
 import AnimationFunctionSteps from "./classes/AnimationFunctionSteps";
+import { getAllInvokers } from "@entity/invoker/redux_toolkit/action_creators/InvokerCreators";
+import { Invoker } from "@entity/invoker/classes/Invoker";
 
 
-const prepareConnection = (connection: any, connectors: any,) => {
+const prepareConnection = (connection: any, connectors: any, invokers: any) => {
     if(connection && connection.fromConnector && connection.toConnector) {
-        let fromConnector = connectors.find((c: any) => c.connectorId === connection.fromConnector.id);
-        let toConnector = connectors.find((c: any) => c.connectorId === connection.toConnector.id);
-        if(fromConnector && toConnector) {
+        let fromInvoker = invokers.find((i: any) => i.name === connection.fromConnector.invoker.name);
+        let toInvoker = invokers.find((i: any) => i.name === connection.toConnector.invoker.name);
+        if(fromInvoker && toInvoker) {
             connection.fromConnector.methods = [];
             connection.fromConnector.operators = [];
             //@ts-ignore
-            connection.fromConnector.invoker = fromConnector.invoker;
+            connection.fromConnector.invoker = fromInvoker;
             connection.fromConnector.setConnectorType(CONNECTOR_FROM);
             connection.toConnector.methods = [];
             connection.toConnector.operators = [];
             //@ts-ignore
-            connection.toConnector.invoker = toConnector.invoker;
+            connection.toConnector.invoker = toInvoker;
             connection.toConnector.setConnectorType(CONNECTOR_TO);
         }
     }
@@ -69,6 +71,7 @@ const HelpBlock = () => {
   const dispatch = useAppDispatch();
   const [ animationProps, setAnimationProps ] = useState<any>({connection: CConnection.createConnection()})
   const { connectors } = Connector.getReduxState();
+  const { invokers } = Invoker.getReduxState();
   const [ isVisible, setIsVisible ] = useState(false);
   const { isButtonPanelOpened, videoAnimationName, animationSpeed, connection: connectionData } = Connection.getReduxState();
   const { isAnimationPaused } = ModalConnection.getReduxState();
@@ -86,7 +89,7 @@ const HelpBlock = () => {
 
   const showDetailsForOperatorIf = async (condition: any) => {
     const refs: any = {};
-    refs.animationData = animationData[videoAnimationName][connectorType][index];
+    refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
     
     if(condition){
@@ -130,7 +133,7 @@ const HelpBlock = () => {
   const showDetailsForOperatorLoop = async (condition: any) => {
     const refs: any = {};
     
-    refs.animationData = animationData[videoAnimationName][connectorType][index];
+    refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
     if(condition){
       const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
@@ -157,7 +160,7 @@ const HelpBlock = () => {
   const showDetailsForProcess = async () => {
     const refs: any = {};
     
-    refs.animationData = animationData[videoAnimationName][connectorType][index];
+    refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     refs.endpointData = refs.animationData.endpoint;
     refs.currentElementId = refs.animationData.index;
     const details = new DetailsForProcess(ref, setPopoverProps, refs.animationData);
@@ -271,15 +274,15 @@ const HelpBlock = () => {
   const animationFunction = async (connectorPanelType: ConnectorPanelType) => {
 
     const refs: any = {};
-    refs.animationData = animationData[videoAnimationName][connectorPanelType][index];
+    refs.animationData = animationData[videoAnimationName][connectorPanelType].items[index];
 
     const animationSteps = new AnimationFunctionSteps(ref, refs.animationData, setPopoverProps);
 
-    const currentElementId = animationData[videoAnimationName][connectorPanelType][index].index;
-    const type = animationData[videoAnimationName][connectorPanelType][index].type;
-    const name = animationData[videoAnimationName][connectorPanelType][index].name;
-    const label = animationData[videoAnimationName][connectorPanelType][index].label;
-    const prevElementType = animationData[videoAnimationName][connectorPanelType][index > 0 ? index - 1 : index].type;
+    const currentElementId = animationData[videoAnimationName][connectorPanelType].items[index].index;
+    const type = animationData[videoAnimationName][connectorPanelType].items[index].type;
+    const name = animationData[videoAnimationName][connectorPanelType].items[index].name;
+    const label = animationData[videoAnimationName][connectorPanelType].items[index].label;
+    const prevElementType = animationData[videoAnimationName][connectorPanelType].items[index > 0 ? index - 1 : index].type;
     const svgRef = ref.current.technicalLayoutRef.current.svgRef.current;
 
     const connectorPanel = connectorPanelType === 'fromConnector' ? svgRef.fromConnectorPanelRef.current : svgRef.toConnectorPanelRef.current;
@@ -324,7 +327,7 @@ const HelpBlock = () => {
       const condition = animationData[videoAnimationName][connectorType][index].conditionForLoop;
       await showDetailsForOperatorLoop(condition);
     }
-    if(index === animationData[videoAnimationName].fromConnector.length - 1 && animationData[videoAnimationName].toConnector.length === 0 || index === animationData[videoAnimationName].toConnector.length - 1 && connectorType === 'toConnector'){
+    if(index === animationData[videoAnimationName].fromConnector.items.length - 1 && animationData[videoAnimationName].toConnector.items.length === 0 || index === animationData[videoAnimationName].toConnector.items.length - 1 && connectorType === 'toConnector'){
       const details = new DetailsForProcess(ref, setPopoverProps, refs.animationData);
       await details.showResult(dispatch, reference.current);
     }
@@ -332,29 +335,34 @@ const HelpBlock = () => {
   }
 
   useEffect(() => {
+    dispatch(getAllInvokers())
+  }, [])
+
+  useEffect(() => {
     if(ref.current){
       if(videoAnimationName && index <= 0 && connectorType === 'fromConnector'){
-        
+        const fromInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
+        const toInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
         // @ts-ignore
-        const cData = {nodeId:null,connectionId:null,title:"",description:"",fromConnector:{nodeId:null,connectorId:connectionData.fromConnector.connectorId,title:null,invoker:{name:connectionData.fromConnector.invoker.name},methods:[],operators:[]},toConnector:{nodeId:null,connectorId:connectionData.toConnector.connectorId,title:null,invoker:{name:connectionData.toConnector.invoker.name},methods:[],operators:[]},fieldBinding:[]};
+        const cData = {nodeId:null,connectionId:null,title:"",description:"",fromConnector:{nodeId:null,title:null,invoker:{name:fromInvoker},methods:[],operators:[]},toConnector:{nodeId:null,title:null,invoker:{name:toInvoker},methods:[],operators:[]},fieldBinding:[]};
         let connection = CConnection.createConnection(cData);
         setAnimationProps({
-            connection: prepareConnection(connection, connectors)
+            connection: prepareConnection(connection, connectors, invokers)
         })
       }
       if(isButtonPanelOpened && videoAnimationName && !isAnimationPaused) {
-        if(index < animationData[videoAnimationName].fromConnector.length + animationData[videoAnimationName].toConnector.length) {
-          if(index < animationData[videoAnimationName].fromConnector.length && connectorType === 'fromConnector'){
+        if(index < animationData[videoAnimationName].fromConnector.items.length + animationData[videoAnimationName].toConnector.items.length) {
+          if(index < animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
             animationFunction('fromConnector');
           }
-          else if(index === animationData[videoAnimationName].fromConnector.length && connectorType === 'fromConnector'){
+          else if(index === animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
             setConnectorType('toConnector');
             setIndex(0)
           }
-          else if(index > 0 && index < animationData[videoAnimationName].toConnector.length && connectorType === 'toConnector'){
+          else if(index > 0 && index < animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector'){
             animationFunction('toConnector');
           }
-          else if(index === animationData[videoAnimationName].toConnector.length && connectorType === 'toConnector'){
+          else if(index === animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector'){
             setConnectorType('fromConnector')
             dispatch(setVideoAnimationName(''));
             setIndex(0)
