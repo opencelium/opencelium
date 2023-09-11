@@ -45,6 +45,8 @@ import AnimationPopover from "./AnimationPopover/AnimationPopover";
 import AnimationFunctionSteps from "./classes/AnimationFunctionSteps";
 import { getAllInvokers } from "@entity/invoker/redux_toolkit/action_creators/InvokerCreators";
 import { Invoker } from "@entity/invoker/classes/Invoker";
+import Loading from "@app_component/base/loading/Loading";
+import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
 
 
 const prepareConnection = (connection: any, connectors: any, invokers: any) => {
@@ -71,7 +73,7 @@ const HelpBlock = () => {
   const dispatch = useAppDispatch();
   const [ animationProps, setAnimationProps ] = useState<any>({connection: CConnection.createConnection()})
   const { connectors } = Connector.getReduxState();
-  const { invokers } = Invoker.getReduxState();
+  const { invokers, gettingInvokers } = Invoker.getReduxState();
   const [ isVisible, setIsVisible ] = useState(false);
   const { isButtonPanelOpened, videoAnimationName, animationSpeed, connection: connectionData } = Connection.getReduxState();
   const { isAnimationPaused } = ModalConnection.getReduxState();
@@ -335,7 +337,9 @@ const HelpBlock = () => {
   }
 
   useEffect(() => {
-    dispatch(getAllInvokers())
+    if(gettingInvokers !== API_REQUEST_STATE.FINISH) {
+      dispatch(getAllInvokers())
+    }
   }, [])
 
   useEffect(() => {
@@ -460,17 +464,20 @@ const HelpBlock = () => {
             />
             <AnimationSpeedSlider step={1000} min={1000} max={6000}/>
           </div>
-          <ModalContext.Provider value={{ isModal: true }}>
-            {
-              <FormConnectionSvg
-                ref={ref}
-                data={{ readOnly: false }}
-                entity={animationProps.connection}
-                updateEntity={updateEntity}
-              />
-            }
-          </ModalContext.Provider>
-          <Content />
+          {gettingInvokers === API_REQUEST_STATE.START && <Loading className="animationDataLoading"/>}
+          {gettingInvokers === API_REQUEST_STATE.FINISH && 
+            <React.Fragment>
+              <ModalContext.Provider value={{ isModal: true }}>
+                  <FormConnectionSvg
+                  ref={ref}
+                  data={{ readOnly: false }}
+                  entity={animationProps.connection}
+                  updateEntity={updateEntity}
+                  />
+              </ModalContext.Provider>    
+              <Content />
+            </React.Fragment>
+          }
         </Dialog>
         <TooltipButton
           position={"bottom"}
