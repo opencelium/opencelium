@@ -244,6 +244,6 @@ public class InvokerRequestBuilder {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return new ResponseEntity<>(json, response.getStatusCode());
+        return new ResponseEntity<>(json, response.getHeaders(), response.getStatusCode());
     }
 }

@@ -32,6 +32,7 @@ public class MethodNode {
     private String color;
     private String name;
     private String label;
+    private int aggregatorId;
 
     @Relationship(type = "has_request", direction = Relationship.Direction.OUTGOING)
     private RequestNode requestNode;
@@ -115,5 +116,13 @@ public class MethodNode {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public int getAggregatorId() {
+        return aggregatorId;
+    }
+
+    public void setAggregatorId(int aggregatorId) {
+        this.aggregatorId = aggregatorId;
     }
 }

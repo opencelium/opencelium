@@ -29,6 +29,7 @@ public class MethodResource {
     private String name;
     private String color;
     private String label;
+    private Integer dataAggregator;
     private RequestResource request;
     private ResponseResource response;
 
@@ -86,6 +87,14 @@ public class MethodResource {
 
     public void setResponse(ResponseResource response) {
         this.response = response;
+    }
+
+    public Integer getDataAggregator() {
+        return dataAggregator;
+    }
+
+    public void setDataAggregator(Integer dataAggregator) {
+        this.dataAggregator = dataAggregator;
     }
 
     @Override

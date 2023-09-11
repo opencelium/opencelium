@@ -132,13 +132,15 @@ class ParamGenerator extends Component {
         const {connection} = this.props;
         let method = connection.getConnectorMethodByColor(color);
         let paramSource = null;
+        const operation = method.invoker.operations.find(o => o.name === method.name);
+        const source = operation ? operation : method;
         if(method) {
             switch (responseType) {
                 case RESPONSE_SUCCESS:
-                    paramSource = method.response.success;
+                    paramSource = source.response.success;
                     break;
                 case RESPONSE_FAIL:
-                    paramSource = method.response.fail;
+                    paramSource = source.response.fail;
                     break;
             }
         }

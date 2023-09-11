@@ -152,7 +152,7 @@ management:
       show-details: always
 
 opencelium:
-  version: 3.1.2
+  version: 3.2
   debug_mode: true
   reboot:
     path: src/backend/src/main/resources/bashfile/restart.sh

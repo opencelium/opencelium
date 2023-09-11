@@ -50,6 +50,7 @@ public class MethodNodeServiceImp implements MethodNodeService {
         methodResource.setIndex(methodNode.getIndex());
         methodResource.setColor(methodNode.getColor());
         methodResource.setName(methodNode.getName());
+        methodResource.setDataAggregator(methodNode.getAggregatorId());
 //        methodResource.setNodeId(methodNode.getId());
         methodResource.setLabel(methodNode.getLabel());
 

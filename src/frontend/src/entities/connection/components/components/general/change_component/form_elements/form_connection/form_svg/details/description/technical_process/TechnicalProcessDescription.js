@@ -97,7 +97,7 @@ class TechnicalProcessDescription extends React.Component{
         ];
         const label = details && details.entity ? details.entity.label || '' : '';
         const errors = connector ? connector.getMethodByIndex(methodItem.index)?.error || null : null;
-        const hasErrors = !!errors.hasError;
+        const hasErrors = errors ? !!errors.hasError : false;
         const isErrorLocationRequest = hasErrors ? errors?.location.indexOf('request') !== -1 : false;
         const isErrorLocationBody = hasErrors ? errors?.location.indexOf('body') !== -1 : false;
         const errorColor = theme?.input?.error?.color || '#9b2e2e';

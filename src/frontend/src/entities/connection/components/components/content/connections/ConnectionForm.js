@@ -39,6 +39,7 @@ import LoadTemplate from "@change_component/form_elements/form_connection/form_m
 import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
 import DataAggregatorButton
     from "@entity/data_aggregator/components/dialog_button/DataAggregatorButton";
+import SyncInvokers from "@change_component/form_elements/form_connection/form_methods/SyncInvokers";
 
 /**
  * common component to add and update Connection
@@ -608,6 +609,7 @@ export function ConnectionForm(type) {
                     ...this.getSecondThirdFormsSections(),
                 ];
                 const additionalButtons = (entity, updateEntity) => {
+                    const {connectors} = this.props;
                     if(this.isView || contents.length < 2){
                         return null;
                     }
@@ -650,13 +652,18 @@ export function ConnectionForm(type) {
                                 />
                             </div>
                             {this.isUpdate &&
-                                <div style={{float: 'left'}}>
-                                    <LoadTemplate
-                                        data={contents[1].inputs[1]}
-                                        entity={entity}
-                                        updateEntity={updateEntity}
-                                    />
-                                </div>
+                                <React.Fragment>
+                                    <div style={{float: 'left'}}>
+                                        <LoadTemplate
+                                            data={contents[1].inputs[1]}
+                                            entity={entity}
+                                            updateEntity={updateEntity}
+                                        />
+                                    </div>
+                                    <div style={{float: 'left'}}>
+                                        <SyncInvokers connection={entity} updateConnection={updateEntity} connectors={connectors}/>
+                                    </div>
+                                </React.Fragment>
                             }
                             <Button
                                 key={'list_button'}

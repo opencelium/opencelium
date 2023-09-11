@@ -15,6 +15,7 @@
 
 import ActionCreators from "../../redux_toolkit/action_creators";
 import {getAndUpdateConnection} from "@root/redux_toolkit/action_creators/ConnectionCreators";
+import { syncInvokers } from "@entity/connection/redux_toolkit/slices/EditorSlice";
 
 const {testConnection, addConnection, updateConnection, deleteConnectionById, deleteConnectionsById, getConnectionById, getAllMetaConnections, getAllConnections, checkConnectionTitle, graphQLLogin} = ActionCreators;
 
@@ -26,6 +27,7 @@ export default {
         [getAndUpdateConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully updated",
         [deleteConnectionById.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully removed",
         [deleteConnectionsById.fulfilled.type]: "The selected connections were successfully removed",
+        [syncInvokers.type]: "Synchronized successfully",
     },
     rejected: {
         [testConnection.rejected.type]: {

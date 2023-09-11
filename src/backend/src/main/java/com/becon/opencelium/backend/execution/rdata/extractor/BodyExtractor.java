@@ -65,6 +65,9 @@ public class BodyExtractor implements Extractor{
                                         .setFunction(functionInvoker).sendRequest();
             String path = getPathFromRef(expr);
             String value = getValueFromResponse(path, response);
+            if (value == null) {
+                value = "";
+            }
             expr = expr.replace(ref, value);
         }
         return Optional.of(expr);
@@ -102,7 +105,10 @@ public class BodyExtractor implements Extractor{
 
         if (isHeader) {
             HttpHeaders httpHeaders = response.getHeaders();
-            return Objects.requireNonNull(httpHeaders.get(pathParts.get(0))).get(0);
+            if (httpHeaders.get(pathParts.get(0)) == null) {
+                return null;
+            }
+            return httpHeaders.get(pathParts.get(0)).get(0);
         }
 
         if(path.equals("body")){
