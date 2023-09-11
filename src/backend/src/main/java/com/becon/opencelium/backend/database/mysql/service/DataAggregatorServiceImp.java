@@ -1,15 +1,14 @@
-package com.becon.opencelium.backend.mysql.service;
+package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.mysql.entity.Argument;
-import com.becon.opencelium.backend.mysql.entity.DataAggregator;
-import com.becon.opencelium.backend.mysql.repository.DataAggregatorRepository;
+import com.becon.opencelium.backend.database.mysql.entity.Argument;
+import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
+import com.becon.opencelium.backend.database.mysql.repository.DataAggregatorRepository;
 import com.becon.opencelium.backend.resource.connection.aggregator.ArgumentDTO;
 import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 

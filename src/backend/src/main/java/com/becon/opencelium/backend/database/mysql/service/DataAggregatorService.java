@@ -1,6 +1,6 @@
-package com.becon.opencelium.backend.mysql.service;
+package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.mysql.entity.DataAggregator;
+import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
 import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
 
 public interface DataAggregatorService {

@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.mysql.entity;
+package com.becon.opencelium.backend.database.mysql.entity;
 
 import jakarta.persistence.*;
 
