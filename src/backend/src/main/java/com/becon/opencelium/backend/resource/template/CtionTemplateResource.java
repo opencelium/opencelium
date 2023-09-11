@@ -1,10 +1,6 @@
 package com.becon.opencelium.backend.resource.template;
 
-import com.becon.opencelium.backend.resource.connection.ConnectorNodeResource;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CtionTemplateResource {

@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.resource.user;
 
-import com.becon.opencelium.backend.mysql.entity.Widget;
+import com.becon.opencelium.backend.database.mysql.entity.Widget;
 import jakarta.annotation.Resource;
 
 

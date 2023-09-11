@@ -15,13 +15,8 @@
  */
 
 package com.becon.opencelium.backend.controller;
-import com.becon.opencelium.backend.neo4j.entity.FieldNode;
-import com.becon.opencelium.backend.neo4j.entity.MethodNode;
-import com.becon.opencelium.backend.neo4j.repository.FieldNodeRepository;
-import com.becon.opencelium.backend.neo4j.service.*;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,8 +29,6 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.core5.ssl.TrustStrategy;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
@@ -45,15 +38,10 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
 
-import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
-import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
-import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.resource.ApiDataResource;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import com.becon.opencelium.backend.resource.error.validation.ErrorMessageDataResource;
-import com.becon.opencelium.backend.resource.error.validation.ValidationResource;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,9 +50,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/connection", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -75,22 +61,10 @@ public class ConnectionController {
     private ConnectionServiceImp connectionService;
 
     @Autowired
-    private ConnectionNodeServiceImp connectionNodeService;
-
-    @Autowired
     private EnhancementServiceImp enhancementService;
 
     @Autowired
-    private EnhancementNodeServiceImp enhancementNodeService;
-
-    @Autowired
-    private LinkRelationServiceImp linkRelationService;
-
-    @Autowired
     private ValidationContext validationContext;
-
-    @Autowired
-    private MethodNodeServiceImp methodNodeServiceImp;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -99,7 +73,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Connections have been successfully retrieved",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionDTO.class)))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -109,17 +83,15 @@ public class ConnectionController {
     })
     @GetMapping(path = "/all")
     public ResponseEntity<?> getAll(){
-        List<Connection> connections = connectionService.findAll();
-        List<ConnectionResource> connectionResources = connections.stream()
-                .map(c -> connectionService.toNodeResource(c)).collect(Collectors.toList());
-        return ResponseEntity.ok().body(connectionResources);
+        return ResponseEntity.ok().build();
     }
+
 
     @Operation(summary = "Retrieves all Metadata of connections from database")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Metadata of connections have been successfully retrieved",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionDTO.class)))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -129,17 +101,14 @@ public class ConnectionController {
     })
     @GetMapping(path = "/all/meta")
     public ResponseEntity<?> getAllMeta(){
-        List<Connection> connections = connectionService.findAll();
-        List<ConnectionResource> connectionResources = connections.stream()
-                .map(c -> connectionService.toResource(c)).collect(Collectors.toList());
-        return ResponseEntity.ok().body(connectionResources);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Retrieves a connection from database by provided connection ID")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Connection has been successfully retrieved",
-                    content = @Content(schema = @Schema(implementation = ConnectionResource.class))),
+                    content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -149,17 +118,14 @@ public class ConnectionController {
     })
     @GetMapping(path = "/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId) {
-        Connection connection = connectionService.findById(connectionId).orElse(null);
-        ConnectionResource connectionResource = connectionService.toNodeResource(connection);
-        final EntityModel<ConnectionResource> resource = EntityModel.of(connectionResource);
-        return ResponseEntity.ok().body(resource);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
                 description = "Connection has been successfully created",
-                content = @Content(schema = @Schema(implementation = ConnectionResource.class))),
+                content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -168,55 +134,8 @@ public class ConnectionController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> add(@RequestBody ConnectionResource connectionResource) throws Exception{
-        Connection connection = connectionService.toEntity(connectionResource);
-        if (connectionService.existsByName(connection.getName())){
-            throw new RuntimeException("CONNECTION_NAME_ALREADY_EXISTS");
-        }
-        Long connectionId = 0L;
-        try {
-            connectionService.save(connection);
-            connectionId = connection.getId();
-
-            connectionResource.setConnectionId(connection.getId());
-            ConnectionNode connectionNode = connectionNodeService.toEntity(connectionResource);
-            connectionNodeService.save(connectionNode);
-
-            if (connectionResource.getFieldBinding() != null){
-                if (connectionResource.getFieldBinding().isEmpty()){
-                    final EntityModel<ConnectionResource> resource = EntityModel.of(connectionService.toNodeResource(connection));
-                    return ResponseEntity.ok().body(resource);
-                }
-
-                List<EnhancementNode> enhancementNodes =  connectionNodeService
-                        .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
-                enhancementNodeService.saveAll(enhancementNodes);
-
-                // Uncomment if fields are linked DIRECTLY, without enhancement;
-//                List<Linked> linkRelations = linkRelationService
-//                        .toEntity(connectionResource.getFieldBinding(), connection);
-//                if (linkRelations != null && !linkRelations.isEmpty()){
-//                    linkRelationService.saveAll(linkRelations);
-//                }
-            }
-
-            final EntityModel<ConnectionResource> resource = EntityModel.of(connectionService.toNodeResource(connection));
-            validationContext.remove(connection.getName());
-            return ResponseEntity.ok().body(resource);
-        } catch (Exception e) {
-            e.printStackTrace();
-//            enhancementService.deleteAllByConnectionId(connectionId);
-            connectionService.deleteById(connectionId);
-            connectionNodeService.deleteById(connectionId);
-
-            ErrorMessageDataResource errorMessageDataResource =
-                    new ErrorMessageDataResource(validationContext.get(connection.getName()));
-            ValidationResource validationResource =
-                    new ValidationResource(e, HttpStatus.BAD_REQUEST, "/connection", errorMessageDataResource);
-            validationContext.remove(connection.getName());
-
-            return ResponseEntity.badRequest().body(validationResource);
-        }
+    public ResponseEntity<?> add(@RequestBody ConnectionDTO connectionResource) throws Exception{
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Validates a connection for correctly constructed structure")
@@ -231,31 +150,15 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/validate", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> validate(@RequestBody ConnectionResource connectionResource) throws Exception{
-        Connection connection = connectionService.toEntity(connectionResource);
-        if (connectionService.existsByName(connection.getName())){
-            throw new RuntimeException("CONNECTION_NAME_ALREADY_EXISTS");
-        }
-        Long connectionId = 0L;
-        try {
-            connectionNodeService.toEntity(connectionResource);
-            return ResponseEntity.ok().build();
-        } catch (Exception e){
-            ErrorMessageDataResource errorMessageDataResource =
-                    new ErrorMessageDataResource(validationContext.get(connection.getName()));
-            ValidationResource validationResource =
-                    new ValidationResource(e, HttpStatus.BAD_REQUEST, "/connection", errorMessageDataResource);
-            validationContext.remove(connection.getName());
-
-            return ResponseEntity.badRequest().body(validationResource);
-        }
+    public ResponseEntity<?> validate(@RequestBody ConnectionDTO connectionResource) throws Exception{
+        return ResponseEntity.badRequest().build();
     }
 
     @Operation(summary = "Modifies a connection by provided connection ID and accepting connection data in request body.")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Connection has been successfully modified",
-                    content = @Content(schema = @Schema(implementation = ConnectionResource.class))),
+                    content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -265,48 +168,9 @@ public class ConnectionController {
     })
     @PutMapping(path = "/{connectionId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable Long connectionId,
-                                    @RequestBody ConnectionResource connectionResource) throws Exception{
-        connectionResource.setConnectionId(connectionId);
-        Connection connection = connectionService.toEntity(connectionResource);
-        Connection connectionClone = connectionService.findById(connectionId)
-                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
-        ConnectionResource connectionRClone =  connectionService.toNodeResource(connectionClone);
+                                    @RequestBody ConnectionDTO connectionResource) throws Exception{
 
-        List<EnhancementNode> enhancementNodeClone = enhancementNodeService.findAllByConnectionId(connectionId);
-        try {
-//            List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
-            enhancementService.deleteAllByConnectionId(connectionId);
-            connectionService.save(connection);
-
-            ConnectionNode connectionNode = connectionNodeService.toEntity(connectionResource);
-            connectionNodeService.deleteById(connectionId);
-            connectionNodeService.save(connectionNode);
-
-            if (connectionResource.getFieldBinding() != null || !connectionResource.getFieldBinding().isEmpty()){
-                List<EnhancementNode> enhancementNodes = connectionNodeService
-                        .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
-                enhancementNodeService.saveAll(enhancementNodes);
-            }
-            final EntityModel<ConnectionResource> resource = EntityModel.of(connectionService.toNodeResource(connection));
-            return ResponseEntity.ok().body(resource);
-        } catch (Exception e){
-            e.printStackTrace();
-            enhancementService.deleteAllByConnectionId(connectionId);
-            connectionNodeService.deleteById(connectionId);
-
-            connectionService.save(connectionClone);
-            ConnectionNode connNClone = connectionNodeService.toEntity(connectionRClone);
-            connectionNodeService.save(connNClone);
-            enhancementNodeClone = connectionNodeService.buildEnhancementNodes(connectionRClone.getFieldBinding(), connectionClone);
-            enhancementNodeService.saveAll(enhancementNodeClone);
-            ErrorMessageDataResource errorMessageDataResource =
-                    new ErrorMessageDataResource(validationContext.get(connection.getName()));
-            ValidationResource validationResource =
-                    new ValidationResource(e, HttpStatus.BAD_REQUEST, "/connection", errorMessageDataResource);
-            validationContext.remove(connection.getName());
-
-            return ResponseEntity.badRequest().body(validationResource);
-        }
+        return ResponseEntity.badRequest().build();
     }
 
     @Operation(summary = "Deletes a connection by provided connection ID")
@@ -324,7 +188,7 @@ public class ConnectionController {
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id){
         connectionService.deleteById(id);
-        connectionNodeService.deleteById(id);
+//        connectionNodeService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -434,7 +298,7 @@ public class ConnectionController {
 
         ids.getIdentifiers().forEach(id -> {
             connectionService.deleteById(id);
-            connectionNodeService.deleteById(id);
+//            connectionNodeService.deleteById(id);
         });
         return ResponseEntity.noContent().build();
     }

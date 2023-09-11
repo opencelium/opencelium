@@ -1,8 +1,7 @@
 package com.becon.opencelium.backend.resource.user;
 
-import com.becon.opencelium.backend.mysql.entity.WidgetSetting;
+import com.becon.opencelium.backend.database.mysql.entity.WidgetSetting;
 import jakarta.annotation.Resource;
-import org.hibernate.Hibernate;
 
 @Resource
 public class WidgetSettingResource {

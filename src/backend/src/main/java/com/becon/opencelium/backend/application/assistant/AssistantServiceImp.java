@@ -4,18 +4,11 @@ import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.repository.SystemOverviewRepository;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
-import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
-import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
-import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
-import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
-import com.becon.opencelium.backend.neo4j.service.LinkRelationServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +41,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 
@@ -68,16 +60,7 @@ public class AssistantServiceImp implements ApplicationService {
     private ConnectionServiceImp connectionService;
 
     @Autowired
-    private ConnectionNodeServiceImp connectionNodeService;
-
-    @Autowired
     private EnhancementServiceImp enhancementService;
-
-    @Autowired
-    private EnhancementNodeServiceImp enhancementNodeService;
-
-    @Autowired
-    private LinkRelationServiceImp linkRelationService;
 
     @Autowired
     private ValidationContext validationContext;
@@ -447,33 +430,8 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     @Override
-    public void updateConnection(ConnectionResource connectionResource) {
-        Long connectionId = connectionResource.getConnectionId();
-        connectionResource.setConnectionId(connectionId);
-        Connection connection = connectionService.toEntity(connectionResource);
-        Connection connectionClone = connectionService.findById(connectionId)
-                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
-        ConnectionNode connectionNodeClone = connectionNodeService.findByConnectionId(connectionId)
-                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
-        try {
-//            List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
-            enhancementService.deleteAllByConnectionId(connectionId);
-            connectionService.save(connection);
+    public void updateConnection(ConnectionDTO connectionDTO) {
 
-            ConnectionNode connectionNode = connectionNodeService.toEntity(connectionResource);
-            connectionNodeService.deleteById(connectionId);
-            connectionNodeService.save(connectionNode);
-
-            if (connectionResource.getFieldBinding() != null || !connectionResource.getFieldBinding().isEmpty()){
-                List<EnhancementNode> enhancementNodes = connectionNodeService
-                        .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
-                enhancementNodeService.saveAll(enhancementNodes);
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-            connectionService.save(connectionClone);
-            connectionNodeService.save(connectionNodeClone);
-        }
     }
 
     public void runScript(){
