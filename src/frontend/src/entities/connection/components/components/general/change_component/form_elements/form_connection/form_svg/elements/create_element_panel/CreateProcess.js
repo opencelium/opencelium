@@ -27,17 +27,20 @@ import {CTechnicalProcess} from "@entity/connection/components/classes/component
 import CCreateElementPanel from "@entity/connection/components/classes/components/content/connection_overview_2/CCreateElementPanel";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {connect} from "react-redux";
-import {setArrows, setJustCreatedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {setJustCreatedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {setModalJustCreatedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-function mapStateToProps(state){
-    const connectionOverview = state.connectionReducer;
+function mapStateToProps(state, props){
+    const { connectionOverview } = mapItemsToClasses(state, props.isModal);
     return{
         justCreatedItem: connectionOverview.justCreatedItem,
     };
 }
 
-@connect(mapStateToProps, {setJustCreatedItem})
+@GetModalProp()
+@connect(mapStateToProps, {setJustCreatedItem, setModalJustCreatedItem}, null, {forwardRef: true})
 class CreateProcess extends React.Component{
     constructor(props) {
         super(props);
@@ -46,6 +49,7 @@ class CreateProcess extends React.Component{
             name: '',
             label: '',
         }
+        this.setJustCreatedItem = props.isModal ? props.setModalJustCreatedItem : props.setJustCreatedItem;
     }
 
     componentDidMount() {
@@ -85,7 +89,6 @@ class CreateProcess extends React.Component{
 
     create(){
         let {name, label} = this.state;
-        const {setJustCreatedItem} = this.props;
         if(name) {
             name = name.value;
             const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
@@ -101,11 +104,11 @@ class CreateProcess extends React.Component{
             } else {
                 newMethod = connection.addToConnectorMethod(method, itemPosition);
             }
-            setJustCreatedItem({index: newMethod.index, connectorType})
+            this.setJustCreatedItem({index: newMethod.index, connectorType})
             updateConnection(connection);
             if (setCreateElementPanelPosition) setCreateElementPanelPosition({x: 0, y: 0});
             if (setIsCreateElementPanelOpened) setIsCreateElementPanelOpened(false);
-            setTimeout(() => {setJustCreatedItem(null)}, 800)
+            setTimeout(() => {this.setJustCreatedItem(null)}, 800)
         } else{
             setFocusById('new_request_name')
         }
@@ -113,7 +116,7 @@ class CreateProcess extends React.Component{
 
     render(){
         const {name, label} = this.state;
-        const {connection, selectedItem, isTypeCreateOperator, createElementPanelConnectorType, hasBeforeLine, itemPosition, itemType} = this.props;
+        const {connection, selectedItem, isTypeCreateOperator, createElementPanelConnectorType, hasBeforeLine, itemPosition, itemType, isModal} = this.props;
         let connectorType = CCreateElementPanel.getConnectorType(this.props);
         const {isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
         let {x, y} = CCreateElementPanel.getCoordinates(this.props);
@@ -133,7 +136,7 @@ class CreateProcess extends React.Component{
         const isAddDisabled = name === '' || name === null;
         return(
             <React.Fragment>
-                {hasBeforeLine && <Line style={beforeItemLineStyles}/>}
+                {hasBeforeLine && !isModal ? <Line style={beforeItemLineStyles}/> : null}
                 <div className={styles.create_element_panel_for_item} style={panelItemStyles}>
                     <Select
                         id={'new_request_name'}

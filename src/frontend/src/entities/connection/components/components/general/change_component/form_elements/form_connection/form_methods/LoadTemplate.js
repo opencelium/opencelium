@@ -5,6 +5,8 @@ import Button from "@basic_components/buttons/Button";
 import {TEMPLATE_MODE} from "@classes/content/connection/CTemplate";
 import Confirmation from "@components/general/app/Confirmation";
 import {TextSize} from "@app_component/base/text/interfaces";
+import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
+import { ColorTheme } from "@style/Theme";
 
 /**
  * Load Template Component
@@ -21,9 +23,25 @@ class LoadTemplate extends Component {
 
     render(){
         const {showDialog} = this.state;
+        const {data, entity, updateEntity, tooltipButtonProps} = this.props;
         return (
             <React.Fragment>
-                <Button icon={'sim_card_download'} size={TextSize.Size_16} hasConfirmation={true} confirmationText={'If you load a template, all your changes in methods will be lost. Are you sure?'} label={'Load Template'} onClick={() => this.setState({showDialog: true})}/>
+                {tooltipButtonProps ?
+                <TooltipButton
+                    position={tooltipButtonProps.position}
+                    icon={tooltipButtonProps.icon}
+                    tooltip={tooltipButtonProps.tooltip}
+                    target={tooltipButtonProps.target}
+                    hasBackground={tooltipButtonProps.hasBackground}
+                    background={!showDialog ? ColorTheme.White : ColorTheme.Blue}
+                    color={!showDialog ? ColorTheme.Gray : ColorTheme.White}
+                    padding={tooltipButtonProps.padding}
+                    handleClick={() => this.setState({showDialog: !showDialog})}
+                    hasConfirmation={true}
+                    confirmationText={'If you load a template, all your changes in methods will be lost. Are you sure?'}
+                    />
+                :
+                <Button icon={'sim_card_download'} size={TextSize.Size_16} hasConfirmation={true} confirmationText={'If you load a template, all your changes in methods will be lost. Are you sure?'} label={'Load Template'} onClick={() => this.setState({showDialog: true})}/>}
                 <Dialog
                     actions={[{label: 'Close', id: 'close_load_template', onClick: () => this.setState({showDialog: false})}]}
                     active={showDialog}

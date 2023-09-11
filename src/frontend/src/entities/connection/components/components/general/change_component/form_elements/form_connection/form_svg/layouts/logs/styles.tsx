@@ -61,8 +61,8 @@ export const TopStyled = styled.div<{logPanelHeight: number}>`
     display: flex;
     ${({logPanelHeight}) => !logPanelHeight ? `
     bottom: 0;
-    width: 28px;
-    height: 28px;
+    width: 0;
+    height: 0;
     display: flex;
     justify-content: center;
     align-items: center;

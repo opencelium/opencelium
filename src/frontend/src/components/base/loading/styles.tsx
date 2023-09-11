@@ -20,6 +20,11 @@ import Loading from "./Loading";
 const LoadingStyled = styled(Icon)`
     margin: 0 auto;
     margin-top: ${({top}) => top || 0};
+    ${({className}) => className === 'animationDataLoading' && `
+        position: relative;
+        top: 46%;
+        transform: translateX(-50%);
+    `}
 `;
 
 const GridImageLoadingStyled = styled(Loading)`

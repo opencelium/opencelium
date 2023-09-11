@@ -41,7 +41,7 @@ function mapStateToProps(state){
     };
 }
 
-@connect(mapStateToProps, {updateOperation, cleanMethod})
+@connect(mapStateToProps, {updateOperation, cleanMethod}, null, {forwardRef: true})
 class UpdateParam extends React.Component{
     constructor(props) {
         super(props);

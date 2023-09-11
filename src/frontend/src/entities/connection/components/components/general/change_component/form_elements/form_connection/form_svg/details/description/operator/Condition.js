@@ -23,6 +23,7 @@ import styles from "@entity/connection/components/themes/default/content/connect
 import {setFocusById} from "@application/utils/utils";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {toggleConditionDialog} from "@entity/connection/redux_toolkit/slices/EditorSlice";
+import {setModalCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ModalConnectionSlice";
 import Dialog from "@entity/connection/components/components/general/basic_components/Dialog";
 import {EditIcon, ViewIcon} from "../Icons";
 import LeftStatement
@@ -38,7 +39,7 @@ import RightStatement
 import CProcess from "@entity/connection/components/classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@entity/connection/components/classes/components/content/connection_overview_2/operator/COperator";
 import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
-
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 function mapStateToProps(state){
     const editor = state.connectionEditorReducer;
@@ -46,7 +47,9 @@ function mapStateToProps(state){
         isConditionDialogOpened: editor.isConditionDialogOpened,
     };
 }
-@connect(mapStateToProps, {setCurrentTechnicalItem, toggleConditionDialog})
+
+@GetModalProp()
+@connect(mapStateToProps, {setCurrentTechnicalItem, toggleConditionDialog, setModalCurrentTechnicalItem}, null, {forwardRef: true})
 class Condition extends React.Component{
     constructor(props) {
         super(props);
@@ -56,6 +59,10 @@ class Condition extends React.Component{
                 ...this.getConditionFromProps(props),
             }
         }
+        this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
+        this.leftStatementRef = React.createRef();
+        this.relationOperatorRef = React.createRef();
+        this.rightStatementRef = React.createRef();
     }
 
     hasLeftMethod(){
@@ -207,7 +214,7 @@ class Condition extends React.Component{
         operatorItem.error = null;
         updateConnection(connection);
         let currentTechnicalItem = connector.getSvgElementByIndex(operator.index);
-        setCurrentTechnicalItem(currentTechnicalItem.getObject());
+        this.setCurrentTechnicalItem(currentTechnicalItem.getObject());
         this.setState({
             isMouseOver: false,
         })
@@ -276,6 +283,7 @@ class Condition extends React.Component{
         return(
             <React.Fragment>
                 <LeftStatement
+                    ref={this.leftStatementRef}
                     {...this.props}
                     operator={operator}
                     condition={condition}
@@ -290,6 +298,7 @@ class Condition extends React.Component{
                 {(isIfOperator || isLeftInputStringForLoopOperator) &&
                 <React.Fragment>
                     <RelationalOperator
+                        ref={this.relationOperatorRef}
                         isLoopOperator={isLoopOperator}
                         isIfOperator={isIfOperator}
                         relationalOperator={condition.relationalOperator}
@@ -300,6 +309,7 @@ class Condition extends React.Component{
                         isOperatorHasValue={() => this.isOperatorHasValue(isLoopOperator)}
                     />
                     <RightStatement
+                        ref={this.rightStatementRef}
                         {...this.props}
                         placeholder={placeholder}
                         condition={condition}
@@ -339,7 +349,7 @@ class Condition extends React.Component{
         return(
             <React.Fragment>
                 <Col xs={4} className={styles.col} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{`Condition`}</Col>
-                <Col xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
+                <Col id="condition_label" xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
                     <span className={styles.value} title={conditionTextTitle} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{conditionText}</span>
                     {isMouseOver && !isConditionDialogOpened && !readOnly && <EditIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isMouseOver && !isConditionDialogOpened && readOnly && <ViewIcon onClick={(a) => this.toggleEdit(a)}/>}

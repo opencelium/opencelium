@@ -29,6 +29,9 @@ interface DialogThemeProps{
     wrapper?: string,
     title?: string,
     dialog?: string,
+    body?: string,
+    footer?: string,
+    backdrop?: string,
 }
 
 interface DialogStylesProps{

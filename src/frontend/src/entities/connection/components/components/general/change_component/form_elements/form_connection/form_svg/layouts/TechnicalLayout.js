@@ -19,19 +19,17 @@ import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/C
 import {mapItemsToClasses} from "../utils";
 import Svg from "./Svg";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
-import {setTechnicalLayoutLocation} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
-import {
-    HAS_LAYOUTS_SCALING,
-} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import { setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 import {
     addSelectAllAfterItemsKeyNavigation,
     removeSelectAllAfterItemsKeyNavigation
 } from "@root/components/utils/key_navigation";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-function mapStateToProps(state){
-    const {connectionOverview, currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {connectionOverview, currentTechnicalItem, connection} = mapItemsToClasses(state, props.isModal);
     return{
         connectionOverviewState: connectionOverview,
         currentTechnicalItem,
@@ -40,12 +38,15 @@ function mapStateToProps(state){
     };
 }
 
-@connect(mapStateToProps, {setCurrentTechnicalItem, setTechnicalLayoutLocation})
+@GetModalProp()
+@connect(mapStateToProps, {setCurrentTechnicalItem, setModalCurrentTechnicalItem}, null, {forwardRef: true})
 class TechnicalLayout extends React.Component{
 
     constructor(props) {
         super(props);
-        this.layoutId = 'technical_layout';
+        this.layoutId = `${props.isModal ? 'modal_' : ''}technical_layout`;
+        this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
+        this.svgRef = React.createRef();
     }
 
     componentDidMount() {
@@ -57,7 +58,7 @@ class TechnicalLayout extends React.Component{
     }
 
     deleteProcess(process){
-        const {connection, updateConnection, setCurrentTechnicalItem} = this.props;
+        const {connection, updateConnection} = this.props;
         const method = process.entity;
         const connector = connection.getConnectorByType(process.connectorType);
         if(connector){
@@ -70,15 +71,15 @@ class TechnicalLayout extends React.Component{
             const currentItem = connector.getCurrentItem();
             if(currentItem){
                 const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
-                setCurrentTechnicalItem(currentSvgElement.getObject());
+                this.setCurrentTechnicalItem(currentSvgElement.getObject());
             }
         }
     }
 
     setCurrentItem(currentItem){
         if(currentItem) {
-            const {setCurrentTechnicalItem, connection, updateConnection, currentTechnicalItem} = this.props;
-            setCurrentTechnicalItem(currentItem.getObject());
+            const {connection, updateConnection} = this.props;
+            this.setCurrentTechnicalItem(currentItem.getObject());
             if (connection) {
                 const connector = connection.getConnectorByType(currentItem.connectorType);
                 const currentItemInConnector = connector.getCurrentItem();
@@ -111,8 +112,7 @@ class TechnicalLayout extends React.Component{
     render(){
         const {setCreateElementPanelPosition} = this.props;
         const {
-            connection, setCurrentTechnicalItem,
-            currentTechnicalItem, ...svgProps
+            setRef, connection, currentTechnicalItem, ...svgProps
         } = this.props;
         const items = connection ? [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems] : [];
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams(items);
@@ -122,6 +122,7 @@ class TechnicalLayout extends React.Component{
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <Svg
                     {...svgProps}
+                    ref={this.svgRef}
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
                     isDraggable={true}

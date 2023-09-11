@@ -24,6 +24,9 @@ class ItemPositionPanel extends React.Component{
     }
 
     render(){
+        if(this.props.isModal){
+            return false;
+        }
         let {itemPosition, onChangeItemPosition} = this.props;
         let {x, y} = CCreateElementPanel.getCoordinates(this.props);
         const panelItemPositionStyles = {top: `${y - 5}px`, left: `${x + 12}px`};

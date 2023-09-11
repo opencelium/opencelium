@@ -14,14 +14,12 @@
  */
 
 import {
-    setArrows, setConnectionData,
+    setConnectionData,
     setCurrentTechnicalItem, setDetailsLocation,
-    setItems, addCurrentLog, clearCurrentLogs,
+    addCurrentLog, clearCurrentLogs,
 } from "../redux_toolkit/slices/ConnectionSlice";
 
 const whiteList = [
-    setItems.type,
-    setArrows.type,
     setCurrentTechnicalItem.type,
     setDetailsLocation.type,
     setConnectionData.type,

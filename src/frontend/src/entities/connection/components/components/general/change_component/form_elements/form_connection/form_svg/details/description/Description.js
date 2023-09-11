@@ -18,30 +18,32 @@ import PropTypes from 'prop-types';
 import {Row, Col} from "react-grid-system";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import COperator from "@entity/connection/components/classes/components/content/connection_overview_2/operator/COperator";
-import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import Condition from "@change_component/form_elements/form_connection/form_svg/details/description/operator/Condition";
 import OperatorType from "@change_component/form_elements/form_connection/form_svg/details/description/operator/OperatorType";
 import TechnicalProcessDescription
     from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/TechnicalProcessDescription";
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {withTheme} from "styled-components";
-import {ITheme} from "@style/Theme";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {connect} from "react-redux";
 import DataAggregation
     from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregation";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-function mapStateToProps(state){
-    const {connection} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {connection} = mapItemsToClasses(state, props.isModal);
     return{
         connection,
     };
 }
 
-@connect(mapStateToProps, {})
+@GetModalProp()
+@connect(mapStateToProps, {}, null, {forwardRef: true})
 class Description extends React.Component{
     constructor(props) {
         super(props);
+        this.conditionRef = React.createRef();
+        this.technicalProcessDescriptionRef = React.createRef();
     }
 
     renderForOperator(){
@@ -60,7 +62,7 @@ class Description extends React.Component{
                         <Col xs={8} className={`${styles.col} ${styles.value}`}>{operatorItem.iterator}</Col>
                     </React.Fragment>
                 }
-                <Condition readOnly={readOnly} nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details}/>
+                <Condition ref={this.conditionRef} readOnly={readOnly} nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details}/>
                 {
                     errorMessages.map(error => {
                         return <div style={{color: errorColor}}>{error}</div>
@@ -80,7 +82,7 @@ class Description extends React.Component{
         const {details} = this.props;
         return(
             <div className={styles.description}>
-                {details instanceof CTechnicalProcess && <TechnicalProcessDescription {...this.props}/>}
+                {details instanceof CTechnicalProcess && <TechnicalProcessDescription {...this.props} ref={this.technicalProcessDescriptionRef}/>}
                 {details instanceof COperator && this.renderForOperator()}
             </div>
         );

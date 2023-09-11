@@ -43,6 +43,8 @@ class Body extends React.Component{
             isToggledIcon: true,
             isToggledReferenceIcon: false,
         }
+        this.JsonBodyRef = React.createRef();
+        this.enhancementRef = React.createRef();
     }
 
     getBodyDialogState(){
@@ -166,6 +168,7 @@ class Body extends React.Component{
             case BODY_FORMAT.JSON:
                 return (
                     <JsonBody
+                        ref={this.JsonBodyRef}
                         id={'description_body'}
                         isDraft={isDraft}
                         isFullHeight={!isToggledReferenceIcon}
@@ -210,7 +213,7 @@ class Body extends React.Component{
         }
         return(
             <div className={styles.data}>
-                <Enhancement readOnly={readOnly} enhancement={{...currentEnhancement}} setEnhancement={(a) => this.setCurrentEnhancement(a)}/>
+                <Enhancement ref={this.enhancementRef} readOnly={readOnly} enhancement={{...currentEnhancement}} setEnhancement={(a) => this.setCurrentEnhancement(a)}/>
             </div>
         );
     }
@@ -282,9 +285,9 @@ class Body extends React.Component{
         const hasEnhancement = this.props.hasEnhancement && !isGraphQLData;
         return(
             <React.Fragment>
-                <Col xs={4} className={`${styles.col} ${styles.entry_padding}`} style={{color: errorColor}}>{`Body`}</Col>
-                <Col xs={8} className={`${styles.col}`}>
-                    <TooltipFontIcon onClick={(a) => this.toggleBodyVisible(a)} size={14} value={<span className={styles.more_details} style={{color: errorColor}}>{`...`}</span>} tooltip={'Body'}/>
+                <Col id='body_label' xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
+                <Col id='body_option' xs={8} className={`${styles.col}`}>
+                    <TooltipFontIcon onClick={(a) => this.toggleBodyVisible(a)} size={14} value={<span className={styles.more_details}>{`...`}</span>} tooltip={'Body'}/>
                 </Col>
                 {isExtended && isCurrentInfo &&
                     ReactDOM.createPortal(
