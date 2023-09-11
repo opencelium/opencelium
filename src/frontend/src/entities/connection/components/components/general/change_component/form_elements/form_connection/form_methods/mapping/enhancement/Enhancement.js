@@ -24,7 +24,8 @@ import 'ace-builds/src-noconflict/theme-tomorrow';
 import {Row, Col} from "react-grid-system";
 
 import Input from '@entity/connection/components/components/general/basic_components/inputs/Input';
-import {setFocusById} from "@application/utils/utils";
+import {getMarker, setFocusById} from "@application/utils/utils";
+import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
 
 
 /**
@@ -42,7 +43,9 @@ class Enhancement extends Component{
             expertCode,
             name: enhancement ? enhancement.name : '',
             description: enhancement ? enhancement.description : '',
+            markers: [],
         };
+        this.expertCodeRef = React.createRef();
     }
 
     componentDidMount(){
@@ -58,6 +61,10 @@ class Enhancement extends Component{
                 name: this.props.enhancement.name,
                 description: this.props.enhancement.description,
             })
+        }
+        if(this.state.expertCode !== prevState.expertCode){
+            const newMarkers = getMarker(this.expertCodeRef.current.editor, this.state.expertCode, CEnhancement.generateNotExistVar());
+            this.setState({markers: newMarkers});
         }
     }
 
@@ -83,7 +90,7 @@ class Enhancement extends Component{
     }
 
     renderEnhancement(){
-        const {expertVar} = this.state;
+        const {expertVar, markers} = this.state;
         let {readOnly} = this.props;
         let {expertCode} = this.state;
         return(
@@ -111,6 +118,8 @@ class Enhancement extends Component{
                     }}
                 />
                 <AceEditor
+                    ref={this.expertCodeRef}
+                    markers={markers}
                     mode="javascript"
                     theme="tomorrow"
                     onChange={(a) => this.updateExpertCode(a)}

@@ -51,5 +51,9 @@ export const Global = createGlobalStyle`
     .hide_dialog_content{
         border: none;
     }
+    .error-ace-marker{
+        position: absolute; 
+        background: red;
+    }
     ${SlickCarousel}
 `;
