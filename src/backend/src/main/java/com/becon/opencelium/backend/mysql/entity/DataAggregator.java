@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import jakarta.persistence.*;
 
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "data_aggregator")
@@ -10,21 +10,21 @@ public class DataAggregator {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String name;
 
     @Column(columnDefinition = "json")
     private String script;
 
-    @OneToMany(mappedBy = "dataAggregator", cascade = CascadeType.ALL)
-    private List<Argument> args;
+    @OneToMany(mappedBy = "dataAggregator", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<Argument> args;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -44,11 +44,11 @@ public class DataAggregator {
         this.script = script;
     }
 
-    public List<Argument> getArgs() {
+    public Set<Argument> getArgs() {
         return args;
     }
 
-    public void setArgs(List<Argument> args) {
+    public void setArgs(Set<Argument> args) {
         this.args = args;
     }
 }

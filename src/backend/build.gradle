@@ -21,7 +21,7 @@ plugins {
 }
 
 group = 'com.becon'
-version = '3.1.2'
+version = '3.2'
 sourceCompatibility = '17'
 
 repositories {

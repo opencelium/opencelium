@@ -2,6 +2,8 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import jakarta.persistence.*;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "aggregator_argument")
 public class Argument {
@@ -15,6 +17,9 @@ public class Argument {
     @ManyToOne
     @JoinColumn(name = "data_aggregator_id")
     private DataAggregator dataAggregator;
+
+    @OneToMany(mappedBy = "argument")
+    private Set<ExecutionArgument> executionArguments;
 
     public Long getId() {
         return id;

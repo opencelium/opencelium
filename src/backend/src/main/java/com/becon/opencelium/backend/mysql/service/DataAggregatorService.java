@@ -1,0 +1,16 @@
+package com.becon.opencelium.backend.mysql.service;
+
+import com.becon.opencelium.backend.mysql.entity.DataAggregator;
+import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
+
+public interface DataAggregatorService {
+    DataAggregatorDTO convertToDto(DataAggregator dataAggregator);
+
+    DataAggregator convertToEntity(DataAggregatorDTO dataAggregatorDTO);
+
+    void save(DataAggregator dataAggregator);
+
+    DataAggregator getById(Integer id);
+
+    void deleteById(Integer id);
+}

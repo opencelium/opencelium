@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Table(name = "execution")
@@ -48,6 +49,9 @@ public class Execution {
 
     @Column(name = "status")
     private String status;
+
+    @OneToMany(mappedBy = "execution")
+    private Set<ExecutionArgument> executionArguments;
 
     public long getId() {
         return id;
@@ -95,5 +99,13 @@ public class Execution {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Set<ExecutionArgument> getExecutionArguments() {
+        return executionArguments;
+    }
+
+    public void setExecutionArguments(Set<ExecutionArgument> executionArguments) {
+        this.executionArguments = executionArguments;
     }
 }
