@@ -31,18 +31,21 @@ public class ConnectionMng {
     private Long connectionId; // id generated in mariadb.
     private String title;
     private String description;
-    @DBRef
     @Field(name = "from_connector")
+    @DBRef
     private ConnectorNodeMng fromConnector;
-    @DBRef
     @Field(name = "to_connector")
+    @DBRef
     private ConnectorNodeMng toConnector;
-    @DBRef
     @Field(name = "field_binding")
-    private List<FieldBindingMng> fieldBinding;
     @DBRef
+    private List<FieldBindingMng> fieldBinding;
     @Field(name = "data_aggregator")
+    @DBRef
     private DataAggregatorMng dataAggregator;
+
+    public ConnectionMng() {
+    }
 
     public String getId() {
         return id;

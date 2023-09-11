@@ -15,6 +15,9 @@ public class DataAggregatorMng {
     private List<ArgumentMng> args;
     private String script;
 
+    public DataAggregatorMng() {
+    }
+
     public String getId() {
         return id;
     }

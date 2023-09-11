@@ -26,7 +26,6 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class ConditionMng {
     @Id
     private String id;
-
     @Field(name = "relational_statement")
     private String relationalOperator;
     @Field(name = "left_statement")

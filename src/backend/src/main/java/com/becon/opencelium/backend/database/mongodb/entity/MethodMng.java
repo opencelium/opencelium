@@ -36,6 +36,9 @@ public class MethodMng {
     @DBRef
     private ResponseMng response;
 
+    public MethodMng() {
+    }
+
     public String getId() {
         return id;
     }

@@ -35,6 +35,9 @@ public class FieldBindingMng {
     @DBRef
     private List<LinkedFieldMng> to = new ArrayList<>();
 
+    public FieldBindingMng() {
+    }
+
     public String getId() {
         return id;
     }

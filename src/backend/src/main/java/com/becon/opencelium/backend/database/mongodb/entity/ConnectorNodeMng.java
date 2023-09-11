@@ -32,15 +32,16 @@ public class ConnectorNodeMng {
     private String icon;
     @Field(name = "ssl_cert")
     private boolean sslCert;
-
-    //millisecond
-    private int timeout;
+    private int timeout;  //millisecond
     @DBRef
     private InvokerMng invoker;
     @DBRef
     private List<MethodMng> methods;
     @DBRef
     private List<OperatorMng> operators;
+
+    public ConnectorNodeMng() {
+    }
 
     public String getId() {
         return id;

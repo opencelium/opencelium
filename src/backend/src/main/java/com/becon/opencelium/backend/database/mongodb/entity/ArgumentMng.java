@@ -10,6 +10,9 @@ public class ArgumentMng {
     private String name;
     private String description;
 
+    public ArgumentMng() {
+    }
+
     public String getName() {
         return name;
     }

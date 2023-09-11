@@ -31,6 +31,9 @@ public class OperatorMng {
     @DBRef
     private ConditionMng condition;
 
+    public OperatorMng() {
+    }
+
     public String getId() {
         return id;
     }
