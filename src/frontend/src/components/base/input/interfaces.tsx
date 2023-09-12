@@ -45,6 +45,7 @@ interface InputElementProps{
     display?: string,
     minHeight?: string | number,
     background?: string,
+    checkboxProps?: any,
 }
 
 interface InputProps extends InputElementProps{
@@ -61,6 +62,7 @@ interface InputProps extends InputElementProps{
     afterInputComponent?: any,
     height?: string | number,
     className?: string,
+    errorBottom?: string | number,
 }
 
 /*
@@ -118,6 +120,7 @@ interface ErrorStyledProps{
     isIconInside?: boolean,
     hasIcon?: boolean,
     paddingLeft?: string | number;
+    errorBottom?: string | number,
 }
 
 interface LabelStyledProps{

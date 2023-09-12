@@ -21,6 +21,7 @@ interface InputsStyledProps{
 
 interface InputsProps extends InputsStyledProps{
     theme?: ITheme,
+    style?: any,
 }
 
 

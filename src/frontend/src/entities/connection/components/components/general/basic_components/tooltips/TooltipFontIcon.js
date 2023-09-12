@@ -1,4 +1,4 @@
- 
+
 /*
  *  Copyright (C) <2023>  <becon GmbH>
  *
@@ -45,7 +45,7 @@ class TooltipFontIcon extends Component{
 }
 
 TooltipFontIcon.propTypes = {
-    tooltip: PropTypes.string.isRequired,
+    tooltip: PropTypes.any.isRequired,
     value: PropTypes.any.isRequired,
     isButton: PropTypes.bool,
     blueTheme: PropTypes.bool,

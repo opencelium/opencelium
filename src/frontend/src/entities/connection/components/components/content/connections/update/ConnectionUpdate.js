@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
+import React, {Component, useEffect} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
@@ -25,6 +25,8 @@ import {ConnectionForm} from "@entity/connection/components/components/content/c
 import {useNavigate} from "react-router";
 import {useParams} from "react-router";
  import {ConnectionPermissions} from "@entity/connection/constants";
+ import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+ import {setCurrentTechnicalItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 /*
 * TODO: implement connection update
@@ -32,11 +34,13 @@ import {useParams} from "react-router";
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
     const connection = state.connectionReducer;
+    const {currentTechnicalItem} = mapItemsToClasses(state);
     const template = state.templateReducer;
     const connector = state.connectorReducer;
     return{
         authUser,
         connection: connection.currentConnection,
+        currentTechnicalItem,
         fetchingConnection: connection.gettingConnection,
         updatingConnection: connection.updatingConnection,
         testingConnection: connection.testingConnection,
@@ -55,7 +59,7 @@ function mapStateToProps(state){
 /**
  * Component to Update Connection
  */
-@connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle, fetchTemplates, testConnection})
+@connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle, fetchTemplates, testConnection, setCurrentTechnicalItem})
 @permission(ConnectionPermissions.UPDATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @ConnectionForm('update')

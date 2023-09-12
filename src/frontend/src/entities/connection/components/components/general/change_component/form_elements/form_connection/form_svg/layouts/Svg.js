@@ -30,24 +30,21 @@ import CSvg from "@entity/connection/components/classes/components/content/conne
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {CTechnicalOperator} from "@entity/connection/components/classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CONNECTOR_FROM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
-import CMethodItem from "@classes/content/connection/method/CMethodItem";
-import COperatorItem from "@classes/content/connection/operator/COperatorItem";
-import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import CFieldBinding from "@classes/content/connection/field_binding/CFieldBinding";
 import {Dialog} from "@app_component/base/dialog/Dialog";
-import {TooltipIcon} from "@app_component/base/tooltip_icon/TooltipIcon";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import GetModalProp from "@entity/connection/components/decorators/GetModalProp";
 
-function mapStateToProps(state){
-    const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
         isTestingConnection: connectionOverview.isTestingConnection,
     };
 }
 
-@connect(mapStateToProps, {setCurrentTechnicalItem})
+@GetModalProp()
+@connect(mapStateToProps, {}, null, {forwardRef: true})
 class Svg extends React.Component {
     constructor(props) {
         super(props);
@@ -68,6 +65,10 @@ class Svg extends React.Component {
         }
         this.svgRef = React.createRef();
         this.resetRatio = false;
+        this.processRef = React.createRef();
+        this.operatorRef = React.createRef();
+        this.fromConnectorPanelRef = React.createRef();
+        this.toConnectorPanelRef = React.createRef();
     }
 
 
@@ -163,7 +164,7 @@ class Svg extends React.Component {
     setCoordinatesForCreateElementPanel(e, type, itemPosition){
         const {setCreateElementPanelPosition, layoutPosition} = this.props;
         if(typeof setCreateElementPanelPosition === 'function'){
-            const clientRect = e.target.getBoundingClientRect();
+            const clientRect = e instanceof SVGGElement ? e.getBoundingClientRect() : e.target.getBoundingClientRect();
             let x = clientRect.x;
             let y = clientRect.y;
             x += clientRect.width + 8;
@@ -418,7 +419,7 @@ class Svg extends React.Component {
     renderItems(){
         const {
             isItemDraggable, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened,
-            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll, isTestingConnection, isCreateElementPanelOpened,
+            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll, isTestingConnection, isCreateElementPanelOpened, setRef
         } = this.props;
         return items.map((item,key) => {
             let currentItem = null;
@@ -431,6 +432,7 @@ class Svg extends React.Component {
                 case 'if':
                     return(
                         <Operator
+                            ref={this.operatorRef}
                             key={key}
                             isItemDraggable={isItemDraggable && !isTestingConnection}
                             type={'if'}
@@ -449,6 +451,7 @@ class Svg extends React.Component {
                 case 'loop':
                     return(
                         <Operator
+                            ref={this.operatorRef}
                             key={key}
                             isItemDraggable={isItemDraggable && !isTestingConnection}
                             type={'loop'}
@@ -467,6 +470,7 @@ class Svg extends React.Component {
                 default:
                     return(
                         <Process
+                            ref={this.processRef}
                             key={key}
                             isItemDraggable={isItemDraggable && !isTestingConnection}
                             process={item}
@@ -579,6 +583,7 @@ class Svg extends React.Component {
                     </defs>
                     {fromConnectorPanelParams && toConnectorPanelParams &&
                         <ConnectorPanels
+                            ref={{fromConnector: this.fromConnectorPanelRef, toConnector: this.toConnectorPanelRef}}
                             fromConnectorPanelParams={fromConnectorPanelParams}
                             toConnectorPanelParams={toConnectorPanelParams}
                             connection={connection}

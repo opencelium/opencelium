@@ -32,10 +32,11 @@ import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
 import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {toggleRequestBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
+import {setModalJustDeletedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-function mapStateToProps(state){
-    const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         isTestingConnection: connectionOverview.isTestingConnection,
         colorMode: connectionOverview.colorMode,
@@ -48,11 +49,11 @@ function mapStateToProps(state){
     }
 }
 
-@connect(mapStateToProps, {setJustDeletedItem, toggleRequestBodyDialog})
+@GetModalProp()
+@connect(mapStateToProps, {setJustDeletedItem, setModalJustDeletedItem, toggleRequestBodyDialog}, null, {forwardRef: true})
 class Process extends React.Component{
     constructor(props) {
         super(props)
-
         this.state = {
             technicalRectClassName: '',
             isMouseOverPlaceholder: false,
@@ -61,6 +62,8 @@ class Process extends React.Component{
             isMouseOver: false,
             showCreatePanel: false,
         }
+        this.createPanelRef = React.createRef();
+        this.setJustDeletedItem = props.isModal ? props.setModalJustDeletedItem : props.setJustDeletedItem;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -197,13 +200,13 @@ class Process extends React.Component{
     }
 
     deleteProcess(e){
-        const {deleteProcess, process, setJustDeletedItem} = this.props;
-        setJustDeletedItem({index: process.entity.index, connectorType: process.connectorType});
+        const {deleteProcess, process} = this.props;
+        this.setJustDeletedItem({index: process.entity.index, connectorType: process.connectorType});
         this.setState({
             showCreatePanel: false,
         })
         setTimeout(() => {
-            setJustDeletedItem(null);
+            this.setJustDeletedItem(null);
             deleteProcess(process);
         }, 450)
         if(e){
@@ -367,6 +370,7 @@ class Process extends React.Component{
                 }
                 {showCreatePanel &&
                     <CreatePanel
+                        ref={this.createPanelRef}
                         element={process}
                         onMouseLeave={(a) => this.onMouseLeaveSvg(a)}
                         setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}

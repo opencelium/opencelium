@@ -27,7 +27,7 @@ export const FIELD_TYPE_OBJECT = 'object';
  */
 export default class CMethodItem{
 
-    constructor(index = '', name = '', color = '', request = null, response = null, invoker = null, error = null, isToggled = false, label = ''){
+    constructor(index = '', name = '', color = '', request = null, response = null, invoker = null, error = null, isToggled = false, label = '', dataAggregator = null){
         this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._invoker = this.convertInvoker(invoker);
@@ -41,6 +41,7 @@ export default class CMethodItem{
         this._intend = 0;
         this._isDisabled = false;
         this._bodyFormat = this._request.body.format;
+        this._dataAggregator = dataAggregator;
     }
 
     static createMethodItem(methodItem){
@@ -53,7 +54,8 @@ export default class CMethodItem{
         let error = methodItem && methodItem.hasOwnProperty('error') ? methodItem.error : null;
         let isToggled = methodItem && methodItem.hasOwnProperty('isToggled') ? methodItem.isToggled : false;
         let label = methodItem && methodItem.hasOwnProperty('label') ? methodItem.label : '';
-        return new CMethodItem(index, name, color, request, response, invoker, error, isToggled, label);
+        let dataAggregator = methodItem && methodItem.hasOwnProperty('dataAggregator') ? methodItem.dataAggregator : null;
+        return new CMethodItem(index, name, color, request, response, invoker, error, isToggled, label, dataAggregator);
     }
 
     deleteError(){
@@ -234,6 +236,14 @@ export default class CMethodItem{
         this._isDisabled = isDisabled;
     }
 
+    get dataAggregator(){
+        return this._dataAggregator;
+    }
+
+    set dataAggregator(dataAggregator){
+        this._dataAggregator = dataAggregator;
+    }
+
     get bodyFormat(){
         return this._bodyFormat;
     }
@@ -255,6 +265,7 @@ export default class CMethodItem{
             name: this._name,
             request: this._request.getObject(),
             response: this._response.getObject(),
+            dataAggregator: this._dataAggregator?.id || this._dataAggregator,
         };
         if(this._index !== ''){
             obj.index = this._index;

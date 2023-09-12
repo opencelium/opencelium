@@ -29,7 +29,11 @@ import TooltipFontIcon from "@entity/connection/components/components/general/ba
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
 import {withTheme} from "styled-components";
+import DataAggregation
+    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregation";
 
+import { setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 function mapStateToProps(state){
     const editor = state.connectionEditorReducer;
     return{
@@ -38,47 +42,58 @@ function mapStateToProps(state){
         isResponseFailDialogOpened: editor.isResponseFailDialogOpened,
     };
 }
-@connect(mapStateToProps, {setCurrentTechnicalItem, toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog})
-class TechnicalProcessDescription extends React.Component{
-    constructor(props) {
-        super(props);
 
-        this.state = {
-            isResponseVisible: false,
-        };
-    }
+@GetModalProp()
+@connect(mapStateToProps, { setCurrentTechnicalItem, setModalCurrentTechnicalItem, toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog }, null, {forwardRef: true})
+class TechnicalProcessDescription extends React.Component {
+  constructor(props) {
+    super(props);
 
-    toggleResponseVisibleIcon(){
-        this.setState({
-            isResponseVisible: !this.state.isResponseVisible,
-        })
-    }
+    this.state = {
+      isResponseVisible: false,
+    };
+    this.setCurrentTechnicalItem = props.isModal
+      ? props.setModalCurrentTechnicalItem
+      : props.setCurrentTechnicalItem;
+    this.urlRef = React.createRef();
+    this.nameRef = React.createRef();
+    this.headerRef = React.createRef();
+    this.labelRef = React.createRef();
+    this.bodyRef = React.createRef();
+  }
 
-    changeLabel(label){
-        const {connection, details, updateConnection, setCurrentTechnicalItem} = this.props;
+
+
+  toggleResponseVisibleIcon() {
+    this.setState({
+      isResponseVisible: !this.state.isResponseVisible,
+    });
+  }
+
+  changeLabel(label) {
+    const { connection, details, updateConnection } = this.props;
+    const connector = connection.getConnectorByType(details.connectorType);
+    const method = connector.getMethodByColor(details.entity.color);
+    method.label = label;
+    const currentTechnicalItem = connector.getSvgElementByIndex(method.index);
+    updateConnection(connection);
+    this.setCurrentTechnicalItem(currentTechnicalItem.getObject());
+  }
+
+    updateBody(connection) {
+        const { details, updateConnection } = this.props;
         const connector = connection.getConnectorByType(details.connectorType);
         const method = connector.getMethodByColor(details.entity.color);
-        method.label = label;
         const currentTechnicalItem = connector.getSvgElementByIndex(method.index);
         updateConnection(connection);
-        setCurrentTechnicalItem(currentTechnicalItem.getObject());
+        this.setCurrentTechnicalItem(currentTechnicalItem.getObject());
     }
-
-    updateBody(connection){
-        const {details, updateConnection, setCurrentTechnicalItem} = this.props;
-        const connector = connection.getConnectorByType(details.connectorType);
-        const method = connector.getMethodByColor(details.entity.color);
-        const currentTechnicalItem = connector.getSvgElementByIndex(method.index);
-        updateConnection(connection);
-        setCurrentTechnicalItem(currentTechnicalItem.getObject());
-    }
-
     render(){
         const {isResponseVisible} = this.state;
         const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo, readOnly,
             isResponseFailDialogOpened, isResponseSuccessDialogOpened, isRequestBodyDialogOpened,
             toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog,
-            theme,
+            theme, setCurrentTechnicalItem,
         } = this.props;
         const methodItem = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
@@ -101,16 +116,31 @@ class TechnicalProcessDescription extends React.Component{
         const errorColor = theme?.input?.error?.color || '#9b2e2e';
         return(
             <Row className={styles.row}>
-                <Name {...this.props}/>
-                <Label {...this.props} label={label} changeLabel={(a) => this.changeLabel(a)} text={'Label'}/>
+                <Name {...this.props} ref={this.nameRef}/>
+                <Label
+                    {...this.props}
+                    ref={this.labelRef}
+                    label={label}
+                    changeLabel={(a) => this.changeLabel(a)}
+                    text={'Label'}
+                />
                 {generalDataEntries.map(entry => {
                     return(
                         <React.Fragment key={entry.name}>
                             <Col xs={4} className={styles.col}>{`${entry.name}:`}</Col>
-                            <Col xs={8} className={`${styles.col}`}><span className={styles.value}>{entry.value}</span></Col>
+                            <Col xs={8} className={`${styles.col}`}>
+                                <span className={styles.value}>{entry.value}
+                                </span>
+                            </Col>
                         </React.Fragment>
                     )
                 })}
+                <DataAggregation
+                    details={details}
+                    connection={connection}
+                    currentItem={details.entity}
+                    updateConnection={updateConnection}
+                />
                 <br/>
                 <br/>
                 <Col xs={12} className={styles.col}><b>{`Request`}</b></Col>
@@ -118,11 +148,31 @@ class TechnicalProcessDescription extends React.Component{
                     <Row className={styles.row}>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Method:`}</Col>
                         <Col xs={8} className={`${styles.col}`}><span className={styles.value}>{request.method}</span></Col>
-                        <Url readOnly={readOnly} nameOfCurrentInfo={'request_url'} isCurrentInfo={currentInfo === 'request_url'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} request={request} connection={connection} updateConnection={updateConnection} method={methodItem} connector={connector}/>
-                        <Header nameOfCurrentInfo={'request_header'} isCurrentInfo={currentInfo === 'request_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={request.header}/>
+                        <Url
+                            readOnly={readOnly}
+                            nameOfCurrentInfo={'request_url'}
+                            isCurrentInfo={currentInfo === 'request_url'}
+                            setCurrentInfo={setCurrentInfo}
+                            isExtended={isExtended}
+                            request={request}
+                            connection={connection}
+                            updateConnection={updateConnection}
+                            method={methodItem}
+                            connector={connector}
+                            ref={this.urlRef}
+                        />
+                        <Header
+                            nameOfCurrentInfo={'request_header'}
+                            isCurrentInfo={currentInfo === 'request_header'}
+                            setCurrentInfo={setCurrentInfo}
+                            isExtended={isExtended}
+                            items={request.header}
+                            ref={this.headerRef}
+                        />
                         <Body toggleBodyDialog={toggleRequestBodyDialog} isBodyDialogOpened={isRequestBodyDialogOpened} readOnly={readOnly} nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem}
                               bodyTitle={"Request data"}
                               hasError={isErrorLocationRequest && isErrorLocationBody}
+                              ref={this.bodyRef}
                         />
                     </Row>
                 </Col>
@@ -131,7 +181,7 @@ class TechnicalProcessDescription extends React.Component{
                         return <div style={{color: errorColor}}>{error}</div>
                     }) : null
                 }
-                <Col xs={12} className={styles.col}>
+                <Col xs={12} className={styles.col} id="response_label">
                     <b>{`Response`}</b>
                     <TooltipFontIcon className={styles.response_toggle_icon} onClick={(a) => this.toggleResponseVisibleIcon(a)} tooltip={isResponseVisible ? 'Hide' : 'Show'} value={isResponseVisible ? 'arrow_drop_up' : 'arrow_drop_down'}/>
                 </Col>
@@ -155,7 +205,7 @@ class TechnicalProcessDescription extends React.Component{
                 }
             </Row>
         );
-    }
+      }
 }
 
 export default withTheme(TechnicalProcessDescription);

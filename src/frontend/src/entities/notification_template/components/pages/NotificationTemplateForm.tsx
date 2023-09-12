@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect, useRef} from "react";
+import React, {FC, useEffect, useMemo, useRef, useState} from "react";
 import {useNavigate, useParams} from "react-router";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {IForm} from "@application/interfaces/IForm";
@@ -24,6 +24,14 @@ import Button from "@app_component/base/button/Button";
 import {NotificationTemplate} from "../../classes/NotificationTemplate";
 import {IContent, INotificationTemplate} from "../../interfaces/INotificationTemplate";
 import {Content} from "../../classes/Content";
+import InputSelect from "@app_component/base/input/select/InputSelect";
+import {useAppDispatch} from "@application/utils/store";
+import {ModelArgument} from "@entity/data_aggregator/requests/models/DataAggregator";
+import Input from "@app_component/base/input/Input";
+import {AggregatorNameStyled, DataAggregatorItemsStyled } from "./styles";
+import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
+import { getAllAggregators } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
+import HelpDivider from '../help_divider/HelpDivider';
 
 
 const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
@@ -32,22 +40,53 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         checkingNotificationTemplateName, isCurrentNotificationTemplateHasUniqueName, error,
         gettingNotificationTemplate,
     } = NotificationTemplate.getReduxState();
+    const {aggregators, gettingAllAggregators} = CDataAggregator.getReduxState();
+    const [selectedAggregator, setSelectedAggregator] = useState(null);
+    const aggregatorOptions = useMemo(() => {
+        return aggregators.map(a => {return {label: a.name, value: a.id, args: a.args};});
+    }, [aggregators]);
+    const dispatch = useAppDispatch();
     const didMount = useRef(false);
     let navigate = useNavigate();
     let urlParams = useParams();
     const shouldFetchNotificationTemplate = isUpdate || isView;
+    const shouldFetchConnections = isAdd || isUpdate;
     const form = new Form({isView, isAdd, isUpdate});
     const formData = form.getFormData('Notification Template');
     let notificationTemplateId = 0;
     if(shouldFetchNotificationTemplate){
         notificationTemplateId = parseInt(urlParams.id);
     }
+
+    const initialNotificationTemplate = useMemo(() => {
+        if(!currentNotificationTemplate){
+            return null;
+        }
+        if(isUpdate && gettingAllAggregators !== API_REQUEST_STATE.FINISH){
+            return null;
+        }
+        return {
+            ...currentNotificationTemplate,
+            content: [{
+                // @ts-ignore
+                ...currentNotificationTemplate.content[0],
+                // @ts-ignore
+                subject: CDataAggregator.replaceIdsOnNames(aggregators, currentNotificationTemplate.content[0].subject),
+                // @ts-ignore
+                body: CDataAggregator.replaceIdsOnNames(aggregators, currentNotificationTemplate.content[0].body),
+            }]
+        };
+    }, [currentNotificationTemplate, gettingAllAggregators]);
     // @ts-ignore
-    const content = Content.createState<IContent>({_readOnly: isView}, isAdd ? null : currentNotificationTemplate?.content[0]);
-    const notificationTemplate = NotificationTemplate.createState<INotificationTemplate>({id: notificationTemplateId, _readOnly: isView, content}, isAdd ? null : currentNotificationTemplate);
+    const content = Content.createState<IContent>({_readOnly: isView}, isAdd ? null : initialNotificationTemplate?.content[0]);
+
+    const notificationTemplate = NotificationTemplate.createState<INotificationTemplate>({id: notificationTemplateId, _readOnly: isView, content}, isAdd ? null : initialNotificationTemplate);
     useEffect(() => {
         if(shouldFetchNotificationTemplate){
             notificationTemplate.getById()
+        }
+        if(shouldFetchConnections){
+            dispatch(getAllAggregators());
         }
     },[]);
     useEffect(() => {
@@ -74,8 +113,37 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         propertyName: "subject", props: {icon: 'subject', label: 'Subject', required: true}
     })
     const BodyInput = notificationTemplate.content.getTextarea({
-        propertyName: "body", props: {icon: 'feed', label: 'Body', required: true}
+        propertyName: "body", props: {icon: 'feed', label: 'Body', required: true, height: `calc(100% - 67px)`, style: {height: 'calc(100% - 37px)'}}
     })
+    const ConnectionForm =
+        <InputSelect
+            id={`input_connections`}
+            onChange={(option: any) => setSelectedAggregator(option)}
+            value={selectedAggregator}
+            icon={'subtitles'}
+            label={'Data Aggregator'}
+            options={aggregatorOptions}
+            isLoading={gettingAllAggregators === API_REQUEST_STATE.START}
+        />;
+    const DataAggregatorItems = selectedAggregator ? (
+        <Input value={selectedAggregator.value} label={'Arguments'} icon={'abc'} marginBottom={'20px'} display={'grid'}>
+            <DataAggregatorItemsStyled>{
+                selectedAggregator.args.length > 0 ? selectedAggregator.args.map((argument: ModelArgument) => {
+                    return (
+                        <AggregatorNameStyled
+                            key={argument.name}
+                            onClick={() => {
+                                //@ts-ignore
+                                content.updateBody(content, `${content.body} ${CDataAggregator.embraceArgument(`${selectedAggregator.label}.${argument.name}`)}`)
+                            }}
+                        >
+                            {argument.name}
+                        </AggregatorNameStyled>
+                    );
+                }) : <span>{"There are no arguments."}</span>
+            }</DataAggregatorItemsStyled>
+        </Input>
+    ) : null;
     let actions = [<Button
         key={'list_button'}
         label={formData.listButton.label}
@@ -84,7 +152,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         autoFocus={isView}
     />];
     if(isAdd || isUpdate){
-        let handleClick = isAdd ? () => notificationTemplate.add() : () => notificationTemplate.update();
+        let handleClick = isAdd ? () => notificationTemplate.add(aggregators) : () => notificationTemplate.update(aggregators);
         actions.unshift(<Button
             key={'action_button'}
             label={formData.actionButton.label}
@@ -100,8 +168,11 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             <FormSection label={{value: 'General Data'}}>
                 {NameInput}
                 {Type}
+                <HelpDivider/>
+                {ConnectionForm}
+                {DataAggregatorItems}
             </FormSection>,
-            <FormSection label={{value: 'Template Content'}}>
+            <FormSection label={{value: 'Template Content'}} inputsStyle={{height: '100%'}}>
                 {SubjectInput}
                 {BodyInput}
             </FormSection>

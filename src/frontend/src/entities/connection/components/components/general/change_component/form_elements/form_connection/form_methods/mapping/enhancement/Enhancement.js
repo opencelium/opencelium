@@ -45,7 +45,6 @@ class Enhancement extends Component{
             description: enhancement ? enhancement.description : '',
             markers: [],
         };
-        this.expertCodeRef = React.createRef();
     }
 
     componentDidMount(){
@@ -53,6 +52,7 @@ class Enhancement extends Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        const {enhancementRef} = this.props;
         if(prevProps.enhancement && (prevProps.enhancement.expertVar !== this.props.enhancement.expertVar || prevProps.enhancement.expertCode !== this.props.enhancement.expertCode
         || prevProps.enhancement.name !== this.props.enhancement.name || prevProps.enhancement.description !== this.props.enhancement.description)){
             this.setState({
@@ -63,7 +63,7 @@ class Enhancement extends Component{
             })
         }
         if(this.state.expertCode !== prevState.expertCode){
-            const newMarkers = getMarker(this.expertCodeRef.current.editor, this.state.expertCode, CEnhancement.generateNotExistVar());
+            const newMarkers = getMarker(enhancementRef.current.editor, this.state.expertCode, CEnhancement.generateNotExistVar());
             this.setState({markers: newMarkers});
         }
     }
@@ -118,7 +118,7 @@ class Enhancement extends Component{
                     }}
                 />
                 <AceEditor
-                    ref={this.expertCodeRef}
+                    ref={this.props.enhancementRef}
                     markers={markers}
                     mode="javascript"
                     theme="tomorrow"
@@ -181,4 +181,4 @@ Enhancement.propTypes = {
 Enhancement.defaultProps = {
 };
 
-export default Enhancement;
+export default React.forwardRef((props, ref) => <Enhancement enhancementRef={ref} {...props}/>);

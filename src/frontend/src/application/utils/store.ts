@@ -47,7 +47,7 @@ const middlewares = [
 ]
 
 if(process.env.isDevelopment){
-    middlewares.unshift(logger);
+    //middlewares.unshift(logger);
 }
 
 export const setupStore = () => {

@@ -42,7 +42,7 @@ export interface IConnection extends IConnectionForm{
     connectionId?: number;
     mode?: boolean;
     fieldBinding?: any;
-
+    dataAggregator?: any,
     getObjectForBackend?(): any;
 }
 
