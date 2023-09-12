@@ -369,7 +369,7 @@ export default class DetailsForProcess{
   }
 
   @AdditionalFunctions.setPopover('delete_icon')
-  async deleteLastProcess (animationSpeed: number) {
+  async deleteProcess (animationSpeed: number) {
     const processRef = this.ref.current.technicalLayoutRef.current.svgRef.current.processRef.current;
     await AdditionalFunctions.addOutlineById(['delete_icon'], true, animationSpeed);
 
