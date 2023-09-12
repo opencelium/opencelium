@@ -222,6 +222,7 @@ const animationData: IAnimationData = {
           index: "1",
           type: "operator",
           name: "if",
+          delete: true,
         },
 
       ]

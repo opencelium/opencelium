@@ -93,42 +93,46 @@ const HelpBlock = () => {
     const refs: any = {};
     refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
-    
-    if(condition){
-      const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
-
-      // add delay for first step
-      await details.openConditionDialog(reference.current);
-
-      await details.changeLeftMethod(reference.current);
-
-      await details.setFocusOnLeftParam(reference.current);
-
-      await details.changeLeftParam(reference.current);
-
-      await details.changeRelationalOperator(reference.current);
-
-      if(condition.rightStatement.property){
-        await details.setFocusOnRightProperty(reference.current);
-
-        await details.changeRightProperty(reference.current);
-
-        await details.removeFocusFromRightProperty(reference.current);
+    if(refs.animationData.delete){
+      await details.deleteOperator(reference.current);
+    }
+    else{
+      if(condition){
+        const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
+  
+        // add delay for first step
+        await details.openConditionDialog(reference.current);
+  
+        await details.changeLeftMethod(reference.current);
+  
+        await details.setFocusOnLeftParam(reference.current);
+  
+        await details.changeLeftParam(reference.current);
+  
+        await details.changeRelationalOperator(reference.current);
+  
+        if(condition.rightStatement.property){
+          await details.setFocusOnRightProperty(reference.current);
+  
+          await details.changeRightProperty(reference.current);
+  
+          await details.removeFocusFromRightProperty(reference.current);
+        }
+        
+        if(condition.rightStatement.rightMethodIndex){
+          await details.changeRightMethod(reference.current);
+        }
+        
+        if(condition.rightStatement.rightParam){
+          await details.setFocusOnRightParam(reference.current);
+  
+          await details.changeRightParam(reference.current);
+  
+          await details.removeFocusFromRightParam(reference.current);
+        }
+        
+        conditionRef.updateConnection();
       }
-      
-      if(condition.rightStatement.rightMethodIndex){
-        await details.changeRightMethod(reference.current);
-      }
-      
-      if(condition.rightStatement.rightParam){
-        await details.setFocusOnRightParam(reference.current);
-
-        await details.changeRightParam(reference.current);
-
-        await details.removeFocusFromRightParam(reference.current);
-      }
-      
-      conditionRef.updateConnection();
     }
   }
   
@@ -137,25 +141,30 @@ const HelpBlock = () => {
     
     refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
-    if(condition){
-      const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
-
-      // add delay for first step
-      await details.openConditionDialog(reference.current);
-
-      await details.changeLeftMethod(reference.current);
-
-      await details.setFocusOnLeftParam(reference.current);
-
-      await details.changeLeftParam(reference.current);
-
-      await details.changeRelationalOperator(reference.current);
-
-      await details.changeRightMethod(reference.current);
-
-      await details.changeRightParam(reference.current);
-    
-      conditionRef.updateConnection();
+    if(refs.animationData.delete){
+      await details.deleteOperator(reference.current);
+    }
+    else{
+      if(condition){
+        const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
+  
+        // add delay for first step
+        await details.openConditionDialog(reference.current);
+  
+        await details.changeLeftMethod(reference.current);
+  
+        await details.setFocusOnLeftParam(reference.current);
+  
+        await details.changeLeftParam(reference.current);
+  
+        await details.changeRelationalOperator(reference.current);
+  
+        await details.changeRightMethod(reference.current);
+  
+        await details.changeRightParam(reference.current);
+      
+        conditionRef.updateConnection();
+      }
     }
   }
 
@@ -166,111 +175,112 @@ const HelpBlock = () => {
     refs.endpointData = refs.animationData.endpoint;
     refs.currentElementId = refs.animationData.index;
     const details = new DetailsForProcess(ref, setPopoverProps, refs.animationData);
-    
-    if(refs.animationData.label){
-      // add delay for first step
-      await details.startEditLabel(reference.current);
-
-      await details.endEditLabel(reference.current);
+    if(refs.animationData.delete){
+      await details.deleteProcess(reference.current);
     }
-    
-    if(refs.endpointData){
-      await details.openUrlDialog(reference.current);
+    else{
+      if(refs.animationData.label){
+        // add delay for first step
+        await details.startEditLabel(reference.current);
 
-      await details.changeUrlMethod(refs.animationData, refs.endpointData.connectorType, reference.current);
-
-      await details.changeUrlParam(refs.animationData, reference.current);
-
-      await details.addUrlParam(refs.animationData, connectorType, reference.current);
-
-      await details.closeUrlDialog(reference.current);
-    }
-    
-    if(connectorType === 'fromConnector' && index === 0){
-      await details.openHeaderDialog(reference.current);
-
-      await details.closeHeaderDialog(reference.current);
-    }
-    
-    const bodyData = refs.animationData.body;
-
-    if(bodyData){
-      await details.openBodyDialog(reference.current);
-      let availableBodyContent: any;
-      
-      for(var i = 0; i < bodyData.length; i++){
-        if(bodyData[i].available){
-          availableBodyContent = true;
-          break;
-        }
+        await details.endEditLabel(reference.current);
       }
       
-      if(!availableBodyContent){
-        await details.openBodyObject(reference.current);
+      if(refs.endpointData){
+        await details.openUrlDialog(reference.current);
+
+        await details.changeUrlMethod(refs.animationData, refs.endpointData.connectorType, reference.current);
+
+        await details.changeUrlParam(refs.animationData, reference.current);
+
+        await details.addUrlParam(refs.animationData, connectorType, reference.current);
+
+        await details.closeUrlDialog(reference.current);
       }
-
       
-      for(let bodyIndex = 0; bodyIndex < bodyData.length; bodyIndex++){
+      if(connectorType === 'fromConnector' && index === 0){
+        await details.openHeaderDialog(reference.current);
+
+        await details.closeHeaderDialog(reference.current);
+      }
+      
+      const bodyData = refs.animationData.body;
+
+      if(bodyData){
+        await details.openBodyDialog(reference.current);
+        let availableBodyContent: any;
         
-        if(!bodyData[bodyIndex].available){
-          await details.displayBodyAddKeysButton(reference.current);
-
-          await details.clickAddKeysButton(reference.current);
-
-          await details.addBodyKeyName(bodyData[bodyIndex].keyName, reference.current);
-
-          await details.displaySubmitButtonToAddKey(reference.current);
-
-          await details.clickSubmitButtonToAddKey(reference.current);
-        }
-
-
-        await details.displayEditKeyValueButton(bodyIndex, reference.current);
-
-        await details.clickEditKeyValueButton(bodyIndex, reference.current);
-
-        await details.addBodyKeyValue(bodyData[bodyIndex].keyValue, reference.current);
-        
-        if(bodyData[bodyIndex].keyValue === '#'){
-          for(let referenceIndex = 0; referenceIndex < bodyData[bodyIndex].reference.length; referenceIndex++) {
-            for(let methodIndex = 0; methodIndex < bodyData[bodyIndex].reference[referenceIndex].method.length; methodIndex++){
-              if(methodIndex > 0){
-                await details.displayEditKeyValueButton(bodyIndex, reference.current);
-
-                await details.clickEditKeyValueButton(bodyIndex, reference.current);
-              }
-
-              const currentItemId = ref.current.props.currentTechnicalItem.id;
-              await details.changeBodyMethod(bodyData, bodyIndex, referenceIndex, methodIndex, currentItemId, reference.current);
-
-              await details.changeBodyParam(bodyData, bodyIndex, referenceIndex, methodIndex, reference.current);
-
-              await details.addBodyMethodAndParam(currentItemId, reference.current);
-            }
-
-            if(connectorType === 'toConnector' && bodyData[bodyIndex].reference[referenceIndex].enhancementDescription){
-              await details.clickOnReferenceElements(bodyIndex, reference.current);
-
-              await details.changeReferenceDescription(bodyData, bodyIndex, referenceIndex, reference.current);
-
-              await details.changeReferenceContent(bodyData, bodyIndex, referenceIndex, reference.current);
-            }
+        for(var i = 0; i < bodyData.length; i++){
+          if(bodyData[i].available){
+            availableBodyContent = true;
+            break;
           }
         }
-        else{
-          await details.clickSubmitButtonToAddValue(bodyIndex, reference.current);
+        
+        if(!availableBodyContent){
+          await details.openBodyObject(reference.current);
         }
+
+        
+        for(let bodyIndex = 0; bodyIndex < bodyData.length; bodyIndex++){
+          
+          if(!bodyData[bodyIndex].available){
+            await details.displayBodyAddKeysButton(reference.current);
+
+            await details.clickAddKeysButton(reference.current);
+
+            await details.addBodyKeyName(bodyData[bodyIndex].keyName, reference.current);
+
+            await details.displaySubmitButtonToAddKey(reference.current);
+
+            await details.clickSubmitButtonToAddKey(reference.current);
+          }
+
+
+          await details.displayEditKeyValueButton(bodyIndex, reference.current);
+
+          await details.clickEditKeyValueButton(bodyIndex, reference.current);
+
+          await details.addBodyKeyValue(bodyData[bodyIndex].keyValue, reference.current);
+          
+          if(bodyData[bodyIndex].keyValue === '#'){
+            for(let referenceIndex = 0; referenceIndex < bodyData[bodyIndex].reference.length; referenceIndex++) {
+              for(let methodIndex = 0; methodIndex < bodyData[bodyIndex].reference[referenceIndex].method.length; methodIndex++){
+                if(methodIndex > 0){
+                  await details.displayEditKeyValueButton(bodyIndex, reference.current);
+
+                  await details.clickEditKeyValueButton(bodyIndex, reference.current);
+                }
+
+                const currentItemId = ref.current.props.currentTechnicalItem.id;
+                await details.changeBodyMethod(bodyData, bodyIndex, referenceIndex, methodIndex, currentItemId, reference.current);
+
+                await details.changeBodyParam(bodyData, bodyIndex, referenceIndex, methodIndex, reference.current);
+
+                await details.addBodyMethodAndParam(currentItemId, reference.current);
+              }
+
+              if(connectorType === 'toConnector' && bodyData[bodyIndex].reference[referenceIndex].enhancementDescription){
+                await details.clickOnReferenceElements(bodyIndex, reference.current);
+
+                await details.changeReferenceDescription(bodyData, bodyIndex, referenceIndex, reference.current);
+
+                await details.changeReferenceContent(bodyData, bodyIndex, referenceIndex, reference.current);
+              }
+            }
+          }
+          else{
+            await details.clickSubmitButtonToAddValue(bodyIndex, reference.current);
+          }
+        }
+        await details.closeBodyDialog(reference.current);
       }
-      await details.closeBodyDialog(reference.current);
+              
+      if(connectorType === 'fromConnector' && index === 0){
+        await details.showResponse(reference.current);
+      }
     }
-            
-    if(connectorType === 'fromConnector' && index === 0){
-      await details.showResponse(reference.current);
-    }
-  
-    if(refs.animationData.delete){
-      await details.deleteLastProcess(reference.current);
-    }
+    
   }
 
   const animationFunction = async (connectorPanelType: ConnectorPanelType) => {
@@ -385,11 +395,7 @@ const HelpBlock = () => {
   }, [videoAnimationName])
 
   useEffect(() => {
-    if(!isVisible){
-      setStopTimer(true);
-    }
-    else{
-      setStopTimer(false);
+    if(isVisible){
       dispatch(setVideoAnimationName(''));
       dispatch(setAnimationPreviewPanelVisibility(true))
     }
