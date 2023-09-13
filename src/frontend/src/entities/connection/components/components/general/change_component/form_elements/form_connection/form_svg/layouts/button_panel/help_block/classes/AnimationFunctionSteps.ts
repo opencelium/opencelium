@@ -1,7 +1,9 @@
 import { AnimationPopoverProps } from "../AnimationPopover/interfaces";
-import { IAnimationData } from "../interfaces";
+import {ConnectorPanelType, IAnimationData} from "../interfaces";
 import AdditionalFunctions from "./AdditionalFunctions";
 import { setFocusById } from "@application/utils/utils";
+import RefFunctions
+  from "@change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/RefFunctions";
 
 export default class AnimationFunctionSteps {
   ref: any;
@@ -21,7 +23,7 @@ export default class AnimationFunctionSteps {
     return AdditionalFunctions.delay(animationSpeed);
   }
 
-  
+
   async onMouseOver(prevElementType: string, animationSpeed: number) {
     const operatorRef = this.ref.current.technicalLayoutRef.current.svgRef.current.operatorRef.current;
     const processRef = this.ref.current.technicalLayoutRef.current.svgRef.current.processRef.current;
@@ -58,30 +60,30 @@ export default class AnimationFunctionSteps {
         if(svgItems[i].id === `${connectorType}_${after}`){
 
           currentItem = animationProps.connection.fromConnector.getSvgElementByIndex(after)
-          
+
           break;
         }
       }
     }
-    
+
     if(elementType === "process" && prevElementType === "operator"){
       const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
 
       operatorCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
     }
-    
+
     else if(elementType === "process" && prevElementType === "process"){
       const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
 
       processCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
     }
-    
+
     else if(elementType === "operator" && prevElementType === "process"){
       const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
 
       processCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
     }
-    
+
     else if(elementType === "operator" && prevElementType === "operator"){
       const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
 
@@ -126,5 +128,12 @@ export default class AnimationFunctionSteps {
     const processRef = this.ref.current.technicalLayoutRef.current.svgRef.current.processRef.current;
     processRef.onClick()
   }
-  
+
+  async setCurrentItem(connector: any, index: string, animationSpeed: number){
+    const technicalLayout = RefFunctions.getTechnicalLayout(this.ref);
+    const currentItem = connector.getSvgElementByIndex(index);
+    technicalLayout.setCurrentItem(currentItem);
+    await AdditionalFunctions.delay(animationSpeed);
+  }
+
 }

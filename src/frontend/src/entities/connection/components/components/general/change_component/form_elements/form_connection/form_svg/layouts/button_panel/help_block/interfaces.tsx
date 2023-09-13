@@ -48,7 +48,7 @@ interface IScriptsData {
 }
 
 interface IAnimationDataForProcess extends IBaseAnimationData {
-  
+
   endpoint?: IEndpointData;
   body?: IBodyData[];
 }
@@ -69,29 +69,29 @@ interface IEndpointData {
 
 interface IConditionDataForIf {
   leftStatement: {
-    fromConnector: ConnectorPanelType, 
-    leftMethodIndex: string, 
+    fromConnector: ConnectorPanelType,
+    leftMethodIndex: string,
     leftParam: string
   }
   relationalOperator: RelationalOperatorForIf;
   rightStatement?: {
-    fromConnector?: ConnectorPanelType, 
-    property?: string, 
-    rightMethodIndex?: string, 
+    fromConnector?: ConnectorPanelType,
+    property?: string,
+    rightMethodIndex?: string,
     rightParam?: string
   }
 }
 
 interface IConditionDataForLoop {
   leftStatement: {
-    fromConnector: ConnectorPanelType, 
-    leftMethodIndex: string, 
+    fromConnector: ConnectorPanelType,
+    leftMethodIndex: string,
     leftParam: string
   }
   relationalOperator: RelationalOperatorForLoop;
   rightStatement: {
-    fromConnector: ConnectorPanelType, 
-    rightMethodIndex: string, 
+    fromConnector: ConnectorPanelType,
+    rightMethodIndex: string,
     rightParam: string
   }
 }
@@ -117,6 +117,7 @@ interface IBodyReferenceMethodData{
 
 type IConnectorData = IAnimationDataForProcess | IAnimationDataForIf | IAnimationDataForLoop;
 
+
 interface IConnectorType {
   fromConnector: {
     invoker: {
@@ -130,10 +131,14 @@ interface IConnectorType {
     },
     items: IConnectorData[]
   };
+  initialConnection?: any,
 }
 
 interface IAnimationData {
   [key: string]: IConnectorType;
 }
 
-export { HelpBlockProps, HelpBlockStyledProps, ConnectorPanelType, IAnimationData };
+export {
+  HelpBlockProps, HelpBlockStyledProps, ConnectorPanelType,
+  IAnimationData,
+};
