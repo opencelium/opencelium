@@ -22,9 +22,11 @@ import {
     updateAggregator
 } from '@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators';
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import TooltipButton from '@app_component/base/tooltip_button/TooltipButton';
+import { ColorTheme } from '@style/Theme';
 
 
-const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnection, readOnly}) => {
+const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnection, readOnly, tooltipButtonProps}) => {
     const dispatch = useAppDispatch();
     const {currentAggregator: currentStateAggregator, aggregators, gettingAllAggregators} = CDataAggregator.getReduxState();
     const [showDialog, setShowDialog] = useState<boolean>(false);
@@ -75,13 +77,28 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
     ];
     return (
         <React.Fragment>
-            <Button
-                isDisabled={allMethodOptions.length === 0}
-                label={'Aggregator'}
-                icon={'subtitles'}
-                isLoading={gettingAllAggregators === API_REQUEST_STATE.START}
-                handleClick={() => {setShowDialog(true); if(aggregators.length === 0){ setIsForm(true); }}}
-            />
+            {!tooltipButtonProps &&
+                <Button
+                    isDisabled={allMethodOptions.length === 0}
+                    label={'Aggregator'}
+                    icon={'subtitles'}
+                    isLoading={gettingAllAggregators === API_REQUEST_STATE.START}
+                    handleClick={() => {setShowDialog(true); if(aggregators.length === 0){ setIsForm(true); }}}
+                />
+            }
+            {tooltipButtonProps && 
+                <TooltipButton 
+                    position={tooltipButtonProps.position} 
+                    icon={tooltipButtonProps.icon} 
+                    tooltip={tooltipButtonProps.tooltip} 
+                    target={tooltipButtonProps.target} 
+                    hasBackground={tooltipButtonProps.hasBackground} 
+                    background={!showDialog ? ColorTheme.White : ColorTheme.Blue} 
+                    color={!showDialog ? ColorTheme.Gray : ColorTheme.White} 
+                    padding={tooltipButtonProps.padding} 
+                    handleClick={() => {setShowDialog(true); if(aggregators.length === 0){ setIsForm(true); }}}
+                />
+            }
             <Dialog
                 actions={actions}
                 active={showDialog}

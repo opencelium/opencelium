@@ -47,6 +47,7 @@ const ControlsBlockStyled = styled.div<ControlsBlockStyledProps>`
   .wrapper {
     display: ${(props) => (!props.isButtonPanelOpened && 'none')};
     position: absolute;
+    z-index: 1;
     left: calc(50% - 14px);
     top: 13px;
     height: 50%;
@@ -75,8 +76,9 @@ const ControlsBlockStyled = styled.div<ControlsBlockStyledProps>`
   .wrapper:nth-child(5) .button_wrap { transform: rotate(-240deg); }
   .wrapper:nth-child(6) .button_wrap { transform: rotate(-300deg); }
 
-  .save_panel{
+  .additional_panel{
     position: absolute;
+    z-index: 10000;
     background: #ffffffee;
     transform: translateY(-120%);
     display: flex;
@@ -94,6 +96,12 @@ const ControlsBlockStyled = styled.div<ControlsBlockStyledProps>`
       box-shadow: inset 0 0 0 3000px rgba(204, 203, 203, 0.3);
       filter: blur(10px);
     }
+  }
+  .additional_panel_save{
+    transform: translateY(-120%);
+  }
+  .additional_panel_template{
+    transform: translateY(80%);
   }
 `;
 

@@ -29,12 +29,12 @@ import FormConnectionSvg from "../../../FormConnectionSvg";
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
 import animationData from "./AnimationData";
 import CConnection from "@classes/content/connection/CConnection";
-import {setAnimationPaused } from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import {setAnimationPaused, toggleModalDetails } from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/content/connection/CConnectorItem";
 import { Connector } from "@entity/connector/classes/Connector";
 import {ModalConnection} from "@root/classes/ModalConnection";
 import { Connection } from "@entity/connection/classes/Connection";
-import { setVideoAnimationName, setAnimationPreviewPanelVisibility } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { setVideoAnimationName, setAnimationPreviewPanelVisibility, setIsAnamationNotFoud } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import AnimationSpeedSlider from "./AnimationSpeedSlider/AnimationSpeedSlider";
 
 import DetailsForOperators from "./classes/DetailsForOperators";
@@ -47,6 +47,7 @@ import { getAllInvokers } from "@entity/invoker/redux_toolkit/action_creators/In
 import { Invoker } from "@entity/invoker/classes/Invoker";
 import Loading from "@app_component/base/loading/Loading";
 import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
+import SyncInvokers from "../../../../form_methods/SyncInvokers";
 
 
 const prepareConnection = (connection: any, connectors: any, invokers: any) => {
@@ -75,10 +76,9 @@ const HelpBlock = () => {
   const { connectors } = Connector.getReduxState();
   const { invokers, gettingInvokers } = Invoker.getReduxState();
   const [ isVisible, setIsVisible ] = useState(false);
-  const { isButtonPanelOpened, videoAnimationName, animationSpeed, connection: connectionData } = Connection.getReduxState();
-  const { isAnimationPaused } = ModalConnection.getReduxState();
+  const { isButtonPanelOpened, videoAnimationName, animationSpeed, isAnimationNotFound } = Connection.getReduxState();
+  const { isAnimationPaused, isDetailsOpened } = ModalConnection.getReduxState();
   const [ index, setIndex ] = useState(0);
-  const [ stopTimer, setStopTimer ] = useState(false);
 
   const [connectorType, setConnectorType] = useState<ConnectorPanelType>("fromConnector");
 
@@ -94,13 +94,14 @@ const HelpBlock = () => {
     refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
     if(refs.animationData.delete){
+      await AdditionalFunctions.delay(reference.current)
       await details.deleteOperator(reference.current);
     }
     else{
       if(condition){
         const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
   
-        // add delay for first step
+        await AdditionalFunctions.delay(reference.current)
         await details.openConditionDialog(reference.current);
   
         await details.changeLeftMethod(reference.current);
@@ -142,13 +143,15 @@ const HelpBlock = () => {
     refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
     if(refs.animationData.delete){
+      await AdditionalFunctions.delay(reference.current)
       await details.deleteOperator(reference.current);
     }
     else{
       if(condition){
         const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
   
-        // add delay for first step
+        await AdditionalFunctions.delay(reference.current)
+
         await details.openConditionDialog(reference.current);
   
         await details.changeLeftMethod(reference.current);
@@ -176,11 +179,12 @@ const HelpBlock = () => {
     refs.currentElementId = refs.animationData.index;
     const details = new DetailsForProcess(ref, setPopoverProps, refs.animationData);
     if(refs.animationData.delete){
+      await AdditionalFunctions.delay(reference.current)
       await details.deleteProcess(reference.current);
     }
     else{
       if(refs.animationData.label){
-        // add delay for first step
+        await AdditionalFunctions.delay(reference.current)
         await details.startEditLabel(reference.current);
 
         await details.endEditLabel(reference.current);
@@ -207,6 +211,7 @@ const HelpBlock = () => {
       const bodyData = refs.animationData.body;
 
       if(bodyData){
+        await details.showPopoverForOpenBodyDialog(reference.current);
         await details.openBodyDialog(reference.current);
         let availableBodyContent: any;
         
@@ -300,12 +305,17 @@ const HelpBlock = () => {
     const connectorPanel = connectorPanelType === 'fromConnector' ? svgRef.fromConnectorPanelRef.current : svgRef.toConnectorPanelRef.current;
     
     if(index <= 0){
-      // add delay for first step
+      if(!isDetailsOpened){
+        dispatch(toggleModalDetails())
+      }
+      const technicalLayout = document.getElementById('modal_technical_layout_svg');
+      technicalLayout.removeAttribute('style')
+      await AdditionalFunctions.delay(reference.current)
+
       await animationSteps.clickOnPanel(connectorPanel, reference.current);
     }
-    else{      
-     await animationSteps.onMouseOver(prevElementType, reference.current);
-
+    else{
+      await animationSteps.onMouseOver(prevElementType, reference.current);
     }
   
     if(index >= 1){
@@ -353,33 +363,35 @@ const HelpBlock = () => {
   }, [])
 
   useEffect(() => {
-    if(ref.current){
-      if(videoAnimationName && index <= 0 && connectorType === 'fromConnector'){
-        const fromInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
-        const toInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
-        // @ts-ignore
-        const cData = {nodeId:null,connectionId:null,title:"",description:"",fromConnector:{nodeId:null,title:null,invoker:{name:fromInvoker},methods:[],operators:[]},toConnector:{nodeId:null,title:null,invoker:{name:toInvoker},methods:[],operators:[]},fieldBinding:[]};
-        let connection = CConnection.createConnection(cData);
-        setAnimationProps({
-            connection: prepareConnection(connection, connectors, invokers)
-        })
-      }
-      if(isButtonPanelOpened && videoAnimationName && !isAnimationPaused) {
-        if(index < animationData[videoAnimationName].fromConnector.items.length + animationData[videoAnimationName].toConnector.items.length) {
-          if(index < animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
-            animationFunction('fromConnector');
-          }
-          else if(index === animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
-            setConnectorType('toConnector');
-            setIndex(0)
-          }
-          else if(index > 0 && index < animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector'){
-            animationFunction('toConnector');
-          }
-          else if(index === animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector'){
-            setConnectorType('fromConnector')
-            dispatch(setVideoAnimationName(''));
-            setIndex(0)
+    if(animationData[videoAnimationName]){
+      if(ref.current){
+        if(videoAnimationName && index <= 0 && connectorType === 'fromConnector'){
+          const fromInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
+          const toInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
+          // @ts-ignore
+          const cData = {nodeId:null,connectionId:null,title:"",description:"",fromConnector:{nodeId:null,title:null,invoker:{name:fromInvoker},methods:[],operators:[]},toConnector:{nodeId:null,title:null,invoker:{name:toInvoker},methods:[],operators:[]},fieldBinding:[]};
+          let connection = CConnection.createConnection(cData);
+          setAnimationProps({
+              connection: prepareConnection(connection, connectors, invokers)
+          })
+        }
+        if(isButtonPanelOpened && videoAnimationName && !isAnimationPaused) {
+          if(index < animationData[videoAnimationName].fromConnector.items.length + animationData[videoAnimationName].toConnector.items.length) {
+            if(index < animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
+              animationFunction('fromConnector');
+            }
+            else if(index === animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
+              setConnectorType('toConnector');
+              setIndex(0)
+            }
+            else if(index > 0 && index < animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector'){
+              animationFunction('toConnector');
+            }
+            else if(index === animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector'){
+              setConnectorType('fromConnector')
+              dispatch(setVideoAnimationName(''));
+              setIndex(0)
+            }
           }
         }
       }
@@ -407,7 +419,7 @@ const HelpBlock = () => {
     }
   }, [connectorType])
 
-  function toggleVisible() {
+  function toggleVisibleHelpDialog() {
     setIsVisible(!isVisible);
   }
 
@@ -428,7 +440,7 @@ const HelpBlock = () => {
           background={ColorTheme.White}
           color={ColorTheme.Gray}
           padding="2px"
-          handleClick={() => toggleVisible()}
+          handleClick={() => toggleVisibleHelpDialog()}
         />
         <AnimationPopover {...popoverProps}/>
         <Dialog
@@ -485,16 +497,30 @@ const HelpBlock = () => {
             </React.Fragment>
           }
         </Dialog>
-        <TooltipButton
-          position={"bottom"}
-          icon={"menu_book"}
-          tooltip={"Documentation"}
-          target={`documentation`}
-          hasBackground={true}
-          background={ColorTheme.White}
-          color={ColorTheme.Gray}
-          padding="2px"
-          handleClick={() => {console.log('documentation')}}
+        <Dialog
+          actions={[
+            {id: 'animationNotFound', label: 'Ok', onClick: () => dispatch(setIsAnamationNotFoud(false))}
+          ]}
+          active={isAnimationNotFound}
+          toggle={null}
+          title={""}
+        >
+          <React.Fragment>
+            This help animation is currently in development. Thank you for your understanding.
+          </React.Fragment>
+        </Dialog>
+        <SyncInvokers 
+          connection={animationProps.connection} 
+          updateConnection={updateEntity} 
+          connectors={connectors}
+          tooltipButtonProps={{
+            position: "bottom",
+            icon: "description",
+            tooltip: 'Sync invokers',
+            target: 'sync_invokers',
+            hasBackground: true,
+            padding: "2px"
+          }}
         />
         <TooltipButton
           position={"bottom"}

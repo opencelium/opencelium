@@ -73,7 +73,7 @@ class ButtonPanel extends React.Component {
   }
 
   render() {
-    const { readOnly, isButtonPanelOpened, isDetailsOpened, entity, connection, updateEntity, data } = this.props;
+    const { readOnly, isButtonPanelOpened, isDetailsOpened, entity, connection, updateEntity, data, currentTechnicalItem, setCurrentTechnicalItem } = this.props;
     return (
       <div
         id="button_panel"
@@ -89,6 +89,8 @@ class ButtonPanel extends React.Component {
           connection={connection}
           entity={entity}
           updateEntity={updateEntity}
+          currentTechnicalItem={currentTechnicalItem}
+          setCurrentTechnicalItem={setCurrentTechnicalItem}
         />
         {isButtonPanelOpened && <div className={styles.button_panel_divider} />}
         <HelpBlock />

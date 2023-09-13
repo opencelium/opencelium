@@ -23,7 +23,7 @@ const animationData: IAnimationData = {
               text: "open header dialog",
             },
             {
-              functionId: "openBodyDialog",
+              functionId: "showPopoverForOpenBodyDialog",
               text: "open body dialog",
             },
             {
@@ -187,6 +187,10 @@ const animationData: IAnimationData = {
             {
               functionId: "deleteLastProcess",
               text: "delete last process",
+            },
+            {
+              functionId: "showPopoverForCreateElement",
+              text: "click to add process",
             }
           ],
           endpoint: {index: "0", param: "[0]", connectorType: "toConnector"}
@@ -222,7 +226,6 @@ const animationData: IAnimationData = {
           index: "1",
           type: "operator",
           name: "if",
-          delete: true,
         },
 
       ]
