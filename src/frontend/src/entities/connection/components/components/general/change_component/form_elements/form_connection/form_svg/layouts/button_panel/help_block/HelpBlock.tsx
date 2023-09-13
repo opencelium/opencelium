@@ -72,7 +72,7 @@ const prepareConnection = (connection: any, connectors: any, invokers: any) => {
 
 const HelpBlock = () => {
   const dispatch = useAppDispatch();
-  const [ animationProps, setAnimationProps ] = useState<any>({connection: CConnection.createConnection(), isSet: false})
+  const [ animationProps, setAnimationProps ] = useState<any>({connection: CConnection.createConnection()})
   const { connectors } = Connector.getReduxState();
   const { invokers, gettingInvokers } = Invoker.getReduxState();
   const [ isVisible, setIsVisible ] = useState(false);
@@ -373,23 +373,28 @@ const HelpBlock = () => {
   }, [])
 
   useEffect(() => {
-    if(animationData[videoAnimationName] && ref.current){
-      if(videoAnimationName && index <= 0 && connectorType === 'fromConnector' && !animationProps.isSet){
+    if(animationData[videoAnimationName] && ref.current) {
+      if (videoAnimationName && index <= 0 && connectorType === 'fromConnector') {
         const fromInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
         const toInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
         const hasInitialConnection = !!animationData[videoAnimationName].initialConnection;
-        // @ts-ignore
-        const cData = hasInitialConnection ? animationData[videoAnimationName].initialConnection : {connectionId:null,fromConnector:{invoker:{name:fromInvoker}},toConnector:{invoker:{name:toInvoker}}};
+        const cData = hasInitialConnection ? animationData[videoAnimationName].initialConnection : {
+          connectionId: null,
+          fromConnector: {invoker: {name: fromInvoker}},
+          toConnector: {invoker: {name: toInvoker}}
+        };
         let connection = CConnection.createConnection(cData);
         const newConnection = prepareConnection(connection, connectors, invokers);
-        if(!animationProps.isSet){
-          setAnimationProps({
-            connection: newConnection,
-            isSet: true,
-          })
-        }
+        setAnimationProps({
+          connection: newConnection,
+        })
       }
-      if(isButtonPanelOpened && videoAnimationName && !isAnimationPaused && animationProps.isSet) {
+    }
+  }, [videoAnimationName, index])
+
+  useEffect(() => {
+    if(animationData[videoAnimationName] && ref.current){
+      if(isButtonPanelOpened && videoAnimationName && !isAnimationPaused) {
         if(index < animationData[videoAnimationName].fromConnector.items.length + animationData[videoAnimationName].toConnector.items.length) {
           if(index < animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
             animationFunction('fromConnector');
@@ -405,14 +410,12 @@ const HelpBlock = () => {
             setConnectorType('fromConnector')
             dispatch(setVideoAnimationName(''));
             setIndex(0)
-            setAnimationProps({...animationProps, isSet: false});
-
+            setAnimationProps({...animationProps});
           }
         }
       }
     }
-
-  }, [videoAnimationName, isAnimationPaused, index, animationProps.isSet])
+  }, [videoAnimationName, isAnimationPaused, index])
 
   useEffect(() => {
     setIndex(0);
@@ -424,7 +427,7 @@ const HelpBlock = () => {
   useEffect(() => {
     if(isVisible){
       dispatch(setVideoAnimationName(''));
-      setAnimationProps({...animationProps, isSet: false});
+      setAnimationProps({...animationProps});
       dispatch(setAnimationPreviewPanelVisibility(true))
     }
   }, [isVisible])
