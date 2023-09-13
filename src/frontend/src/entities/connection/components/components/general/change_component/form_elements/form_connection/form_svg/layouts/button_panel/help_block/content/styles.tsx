@@ -47,6 +47,21 @@ const ContentStyled = styled.div<ContentStyledProps>`
     z-index: 333;
     width: 30px;
   }
+
+  .content_divider{
+    margin: 0 40px;
+    width: 2px;
+    background: #d2d2d3;
+    height: 384px;
+
+    @media (max-width: 1600px) {
+      margin: 0 15px;
+    }
+  }
+
+  @media (max-width: 1600px) {
+    padding: 15px;
+  }
 `;
 
 export { ContentStyled };

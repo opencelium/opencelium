@@ -131,11 +131,6 @@ export default class AdditionalFunctions {
                   target: elementTarget,
                   position: position
                 });
-
-                if(propertyKey === 'deleteLastProcess'){
-                  await AdditionalFunctions.delay(args);
-                  this.setPopoverProps({ isOpen: false })
-                }
               }
             }
             const result = await originalMethod.apply(this, args);

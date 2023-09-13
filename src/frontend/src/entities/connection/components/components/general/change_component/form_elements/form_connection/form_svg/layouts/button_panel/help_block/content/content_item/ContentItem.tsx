@@ -20,7 +20,8 @@ import { ContentItemProps } from "./interfaces";
 import { ContentItemStyled } from "./styles";
 
 import { useAppDispatch } from "@application/utils/store";
-import { setAnimationPreviewPanelVisibility, setVideoAnimationName } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { setAnimationPreviewPanelVisibility, setVideoAnimationName, setIsAnamationNotFoud } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import animationData from "../../AnimationData";
 
 const ContentItem: FC<ContentItemProps> = (props) => {
   const { animationImage, animationTitle, animationName } = props;
@@ -28,7 +29,15 @@ const ContentItem: FC<ContentItemProps> = (props) => {
   const dispatch = useAppDispatch();
 
   return (
-    <ContentItemStyled onClick={() => (dispatch(setAnimationPreviewPanelVisibility(false)), dispatch(setVideoAnimationName(animationName)))}>
+    <ContentItemStyled onClick={() => {
+      if(!animationData[animationName]){
+        dispatch(setIsAnamationNotFoud(true))
+      }
+      else{
+        dispatch(setAnimationPreviewPanelVisibility(false))
+        dispatch(setVideoAnimationName(animationName))
+      }
+    }}>
       <p>{animationTitle}</p>
       <img src={animationImage} alt={animationTitle} />
     </ContentItemStyled>

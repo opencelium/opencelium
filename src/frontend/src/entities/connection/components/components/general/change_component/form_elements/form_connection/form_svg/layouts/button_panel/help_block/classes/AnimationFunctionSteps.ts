@@ -16,7 +16,6 @@ export default class AnimationFunctionSteps {
   }
 
    async clickOnPanel(panelType: string, animationSpeed: number) {
-    await AdditionalFunctions.delay(animationSpeed)
     // @ts-ignore
     panelType.onClick();
 

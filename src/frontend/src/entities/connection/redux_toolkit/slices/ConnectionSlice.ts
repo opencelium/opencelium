@@ -51,8 +51,10 @@ export const LogPanelHeight = {
 };
 
 export interface ConnectionState extends ICommonState {
+  isAnimationNotFound: boolean;
   animationSpeed: number;
   isSavePanelVisible: boolean;
+  isTemplatePanelVisible: boolean;
   videoAnimationName: string;
   isAnimationPreviewPanelOpened: boolean;
   isButtonPanelOpened: boolean;
@@ -95,8 +97,10 @@ export interface ConnectionState extends ICommonState {
 }
 
 let initialState: ConnectionState = {
+  isAnimationNotFound: false,
   animationSpeed: 1000,
   isSavePanelVisible: false,
+  isTemplatePanelVisible: false,
   videoAnimationName: '',
   isAnimationPreviewPanelOpened: true,
   isButtonPanelOpened: true,
@@ -159,6 +163,9 @@ const connectionReducers = (isModal: boolean = false) => {
     setSavePanelVisibility: (state, action: PayloadAction<boolean>) => {
       state.isSavePanelVisible = action.payload;
     },
+    setTemplatePanelVisibility: (state, action: PayloadAction<boolean>) => {
+      state.isTemplatePanelVisible = action.payload;
+    },
     setAnimationPreviewPanelVisibility: (state, action: PayloadAction<boolean>) => {
       state.isAnimationPreviewPanelOpened = action.payload;
     },
@@ -167,6 +174,9 @@ const connectionReducers = (isModal: boolean = false) => {
     },
     setAnimationSpeed: (state, action: PayloadAction<number>) => {
       state.animationSpeed = action.payload;
+    },
+    setIsAnamationNotFoud: (state, action: PayloadAction<boolean>) => {
+      state.isAnimationNotFound = action.payload;
     },
     setTestingConnection: (state, action: PayloadAction<boolean>) => {
       if (action.payload) {
@@ -614,7 +624,9 @@ export const {
   setAnimationPreviewPanelVisibility,
   setVideoAnimationName,
   setSavePanelVisibility,
+  setTemplatePanelVisibility,
   setAnimationSpeed,
+  setIsAnamationNotFoud
 } = connectionSlice.actions;
 
 

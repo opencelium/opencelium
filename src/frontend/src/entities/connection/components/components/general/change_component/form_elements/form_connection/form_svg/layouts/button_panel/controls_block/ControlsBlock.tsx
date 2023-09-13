@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { FC, useEffect } from "react";
+import React, { FC } from "react";
 
 import { withTheme } from "styled-components";
 import { ControlsBlockProps } from "./interfaces";
@@ -27,12 +27,15 @@ import {
   setLogPanelHeight,
   LogPanelHeight,
   setButtonPanelVisibility,
-  setSavePanelVisibility
+  setSavePanelVisibility,
+  setTemplatePanelVisibility
 } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import { ColorTheme } from "@style/Theme";
 import { TextSize } from "@app_component/base/text/interfaces";
 import AddTemplate from "../../../../form_methods/AddTemplate";
 import LoadTemplate from "@change_component/form_elements/form_connection/form_methods/LoadTemplate";
+import DataAggregatorButton from "@entity/data_aggregator/components/dialog_button/DataAggregatorButton";
+import { CONNECTOR_FROM } from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 
 const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
   const dispatch = useAppDispatch();
@@ -42,12 +45,13 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
     isTestingConnection,
     logPanelHeight,
     isButtonPanelOpened,
-    isSavePanelVisible
+    isSavePanelVisible,
+    isTemplatePanelVisible
   } = useAppSelector((state) => state.connectionReducer);
 
   const { isFullScreen } = useAppSelector((state) => state.applicationReducer);
 
-  const { data, connection, entity, updateEntity } = props;
+  const { data, connection, entity, updateEntity, currentTechnicalItem, setCurrentTechnicalItem } = props;
 
   let saveAndExit: any, saveAndGoToSchedule: any, loadTemplateData: any;
 
@@ -56,19 +60,13 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
     saveAndGoToSchedule = data.additionalButtonsProps.saveAndGoToSchedule.onClick;
     loadTemplateData = data.additionalButtonsProps.loadTemplate.data;
   }
-  
-  // useEffect(() => {
-  //   if (isFullScreen) {
-  //     window.scrollTo({
-  //       top: findTopLeft(`technical_layout_svg`).top - 4,
-  //       behavior: "auto",
-  //     });
-  //   }
-  //   console.log(window.scrollY);
-  // }, [dispatch, isFullScreen]);
 
   const toggleVisibleSavePanel = () => {
     dispatch(setSavePanelVisibility(!isSavePanelVisible))
+  }
+
+  const toggleVisibleTemplatePanel = () => {
+    dispatch(setTemplatePanelVisibility(!isTemplatePanelVisible))
   }
 
   return (
@@ -119,40 +117,78 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
         </div>
       </div>
 
-      {/* load template */}
       <div className="wrapper">
         <div className="button_wrap">
-          <LoadTemplate 
-            data={loadTemplateData}
-            entity={entity}
-            updateEntity={updateEntity}
+          <DataAggregatorButton
             tooltipButtonProps={{
               position: "bottom",
-              icon: "download",
-              tooltip: 'Load template',
-              target: 'load_template',
+              icon: "subtitles",
+              tooltip: 'Aggregator',
+              target: 'aggregator',
               hasBackground: true,
               padding: "2px"
+            }}
+            connection={entity}
+            updateConnection={(e: any) => {
+              updateEntity(e);
+              if(currentTechnicalItem){
+                  const connector = currentTechnicalItem.connectorType === CONNECTOR_FROM ? e.fromConnector : e.toConnector;
+                  const currentItem = connector.getSvgElementByIndex(currentTechnicalItem.entity.index);
+                  setCurrentTechnicalItem(currentItem.getObject());
+              }
             }}
           />
         </div>
       </div>
 
-      {/* add template */}
       <div className="wrapper">
         <div className="button_wrap">
-        <AddTemplate
-          tooltipButtonProps={{
-            position: "bottom",
-            icon: "add",
-            tooltip: 'Add template',
-            target: 'add_template',
-            hasBackground: true,
-            padding: "2px"
-          }}
-          data={data}
-          entity={entity}
-        />
+        {!data.readOnly && (
+            <TooltipButton
+            size={TextSize.Size_40}
+            position={"bottom"}
+            icon={"text_snippet"}
+            tooltip={"Templates"}
+            target={`template_panel`}
+            hasBackground={true}
+            background={!isTemplatePanelVisible ? ColorTheme.White : ColorTheme.Blue}
+            color={!isTemplatePanelVisible ? ColorTheme.Gray : ColorTheme.White}
+            padding="2px"
+            handleClick={() => toggleVisibleTemplatePanel()}
+          />
+          )}
+          {isTemplatePanelVisible && (
+            <div className="additional_panel additional_panel_template">
+              {/* add template */}
+              <AddTemplate
+                tooltipButtonProps={{
+                  position: "bottom",
+                  icon: "add",
+                  tooltip: 'Add template',
+                  target: 'add_template',
+                  hasBackground: true,
+                  padding: "2px"
+                }}
+                data={data}
+                entity={entity}
+              />
+
+              {/* load template */}
+              <LoadTemplate 
+                data={loadTemplateData}
+                entity={entity}
+                updateEntity={updateEntity}
+                tooltipButtonProps={{
+                  position: "bottom",
+                  icon: "download",
+                  tooltip: 'Load template',
+                  target: 'load_template',
+                  hasBackground: true,
+                  padding: "2px"
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -194,7 +230,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
           />
           )}
           {isSavePanelVisible && (
-            <div className="save_panel">
+            <div className="additional_panel additional_panel_save">
               {/* save */}
               <TooltipButton
                 position={"bottom"}
@@ -260,8 +296,6 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
                 }
                 handleClick={() => saveAndGoToSchedule(entity, '/schedules/add', true)}
               />
-
-              
             </div>
           )}
         </div>
