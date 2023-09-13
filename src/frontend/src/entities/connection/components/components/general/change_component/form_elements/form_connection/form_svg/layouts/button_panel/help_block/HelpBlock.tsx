@@ -29,7 +29,7 @@ import FormConnectionSvg from "../../../FormConnectionSvg";
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
 import animationData from "./AnimationData";
 import CConnection from "@classes/content/connection/CConnection";
-import {setAnimationPaused, toggleModalDetails } from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import {setAnimationPaused, setModalCurrentTechnicalItem, toggleModalDetails } from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/content/connection/CConnectorItem";
 import { Connector } from "@entity/connector/classes/Connector";
 import {ModalConnection} from "@root/classes/ModalConnection";
@@ -48,6 +48,7 @@ import { Invoker } from "@entity/invoker/classes/Invoker";
 import Loading from "@app_component/base/loading/Loading";
 import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
 import SyncInvokers from "../../../../form_methods/SyncInvokers";
+import ReactDOM from "react-dom";
 
 
 const prepareConnection = (connection: any, connectors: any, invokers: any) => {
@@ -305,6 +306,7 @@ const HelpBlock = () => {
 
     if(index <= 0 && !hasInitialConnection){
       if(!isDetailsOpened){
+        dispatch(setModalCurrentTechnicalItem(null));
         dispatch(toggleModalDetails())
       }
       const technicalLayout = document.getElementById('modal_technical_layout_svg');
@@ -472,32 +474,24 @@ const HelpBlock = () => {
           }}
           dialogClassname={`${styles.help_dialog}`}
         >
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            left: '0',
-            zIndex: 100000,
-            padding: '15px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            background: '#FFF',
-            boxShadow: '0px 0px 5px 0px rgba(0,0,0,0.75)',
-          }}>
-            <TooltipButton
-              size={TextSize.Size_40}
-              position={"bottom"}
-              icon={isAnimationPaused ? "play_arrow" : "pause"}
-              tooltip={isAnimationPaused ? "play animation" : 'pause animation'}
-              target={`animation_play_button`}
-              hasBackground={true}
-              background={ColorTheme.White}
-              color={ColorTheme.Blue}
-              padding="2px"
-              handleClick={() => dispatch(setAnimationPaused(!isAnimationPaused))}
-            />
-            <AnimationSpeedSlider step={1000} min={1000} max={6000}/>
-          </div>
+          {ReactDOM.createPortal(
+            <div className={styles.animation_controls}>
+              <TooltipButton
+                size={TextSize.Size_40}
+                position={"bottom"}
+                icon={isAnimationPaused ? "play_arrow" : "pause"}
+                tooltip={isAnimationPaused ? "play animation" : 'pause animation'}
+                target={`animation_play_button`}
+                hasBackground={true}
+                background={ColorTheme.White}
+                color={ColorTheme.Blue}
+                padding="2px"
+                handleClick={() => dispatch(setAnimationPaused(!isAnimationPaused))}
+              />
+              <AnimationSpeedSlider step={1000} min={1000} max={6000}/>
+            </div>,
+            document.body
+          )}
           {gettingInvokers === API_REQUEST_STATE.START && <Loading className="animationDataLoading"/>}
           {gettingInvokers === API_REQUEST_STATE.FINISH &&
             <React.Fragment>
