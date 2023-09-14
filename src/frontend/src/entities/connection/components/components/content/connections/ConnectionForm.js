@@ -455,7 +455,7 @@ export function ConnectionForm(type) {
                         formClassName: styles.mode_form,
                         hint: {text: t(`${this.translationKey}.FORM.HINT_2`)},
                         header: t(`${this.translationKey}.FORM.PAGE_2`),
-                        visible: hasModeInputsSection || this.isView,
+                        visible: (hasModeInputsSection && this.isAdd) || this.isView,
                     }
                 }
             }

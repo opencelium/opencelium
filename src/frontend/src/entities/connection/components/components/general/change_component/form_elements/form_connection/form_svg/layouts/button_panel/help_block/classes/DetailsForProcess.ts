@@ -100,6 +100,7 @@ export default class DetailsForProcess{
     await AdditionalFunctions.addOutlineById([`param_generator_add_${connectorType}_${animationData.index}`])
     const paramGeneratorRef = this.ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.urlRef.current.endpointRef.current.paramGeneratorRef.current;
     paramGeneratorRef.addParam()
+    await AdditionalFunctions.removeOutlineById([`param_generator_add_${connectorType}_${animationData.index}`], true, animationSpeed)
     return AdditionalFunctions.delay(animationSpeed);
   }
 
@@ -126,14 +127,16 @@ export default class DetailsForProcess{
   }
 
   @AdditionalFunctions.setPopover('body_option')
-  async openBodyDialog (animationSpeed: number) {
+  async showPopoverForOpenBodyDialog (animationSpeed: number) {
     await AdditionalFunctions.addOutlineById(["body_label", "body_option"], true, animationSpeed);
 
-    const bodyRef = this.ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current;
-
     AdditionalFunctions.removeOutlineById(["body_label", "body_option"]);
+    
+  }
+
+  async openBodyDialog (animationSpeed: number) {
+    const bodyRef = this.ref.current.detailsRef.current.descriptionRef.current.technicalProcessDescriptionRef.current.bodyRef.current;
     bodyRef.toggleBodyVisible();
-  
     return AdditionalFunctions.delay(animationSpeed);
   }
 
@@ -334,13 +337,13 @@ export default class DetailsForProcess{
     return AdditionalFunctions.delay(animationSpeed);
   }
 
-  @AdditionalFunctions.setPopover('.react-json-view .edit-check')
+  
   async clickSubmitButtonToAddValue (index: number, animationSpeed: number) {
     
-    // const editSubmitButtonClassName = '.react-json-view .edit-check';
-    // AdditionalFunctions.addOutlineByClassName([editSubmitButtonClassName]);
+    const editSubmitButtonClassName = '.react-json-view .edit-check';
+    AdditionalFunctions.addOutlineByClassName([editSubmitButtonClassName]);
     
-    // await AdditionalFunctions.removeOutlineByClassName([editSubmitButtonClassName], true, animationSpeed);
+    await AdditionalFunctions.removeOutlineByClassName([editSubmitButtonClassName], true, animationSpeed);
     // @ts-ignore
     const parent = DetailsForProcess.searchParentElementForBodyElement(this.animationData.body[index].keyName);
     const editSubmitButton = parent.querySelector('.edit-check');
@@ -369,7 +372,7 @@ export default class DetailsForProcess{
   }
 
   @AdditionalFunctions.setPopover('delete_icon')
-  async deleteLastProcess (animationSpeed: number) {
+  async deleteProcess (animationSpeed: number) {
     const processRef = this.ref.current.technicalLayoutRef.current.svgRef.current.processRef.current;
     await AdditionalFunctions.addOutlineById(['delete_icon'], true, animationSpeed);
 

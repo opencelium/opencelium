@@ -71,12 +71,17 @@ const Dialog: FC<DialogProps> =
                     <ActionsStyled>
                         {
                             actions.map((action: ActionProps) => {
-                                return <Button key={action.label} isDisabled={action.isDisabled}
-                                               color={action.isLoading ? ColorTheme.Blue : ''}
-                                               hasBackground={!action.isLoading} isLoading={action.isLoading}
-                                               label={action.label} handleClick={action.onClick}
-                                               id={action.id ? action.id : `button_${action.label}`}
-                                               size={TextSize.Size_16} iconSize={TextSize.Size_14}/>
+                                return  <Button  
+                                            key={action.label} 
+                                            isDisabled={action.isDisabled}
+                                            color={action.isLoading ? ColorTheme.Blue : ''}
+                                            hasBackground={!action.isLoading} 
+                                            isLoading={action.isLoading}
+                                            label={action.label}
+                                            handleClick={action.onClick}
+                                            id={action.id ? action.id : `button_${action.label}`}
+                                            size={TextSize.Size_16} iconSize={TextSize.Size_14}
+                                        />
                             })
                         }
                     </ActionsStyled>

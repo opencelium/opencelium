@@ -25,4 +25,5 @@ export interface DataAggregatorProps {
     connection: CConnection,
     updateConnection: any,
     readOnly?: boolean,
+    tooltipButtonProps?: any
 }

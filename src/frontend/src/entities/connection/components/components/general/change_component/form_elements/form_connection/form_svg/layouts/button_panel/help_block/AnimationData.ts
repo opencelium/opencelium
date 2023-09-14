@@ -1,4 +1,7 @@
 import { IAnimationData } from "./interfaces";
+import {
+  configureAPIInitialConnection
+} from "@change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/InitialConnections";
 
 
 const animationData: IAnimationData = {
@@ -23,7 +26,7 @@ const animationData: IAnimationData = {
               text: "open header dialog",
             },
             {
-              functionId: "openBodyDialog",
+              functionId: "showPopoverForOpenBodyDialog",
               text: "open body dialog",
             },
             {
@@ -187,6 +190,10 @@ const animationData: IAnimationData = {
             {
               functionId: "deleteLastProcess",
               text: "delete last process",
+            },
+            {
+              functionId: "showPopoverForCreateElement",
+              text: "click to add process",
             }
           ],
           endpoint: {index: "0", param: "[0]", connectorType: "toConnector"}
@@ -195,6 +202,35 @@ const animationData: IAnimationData = {
     }
   },
   configureAPI: {
+    fromConnector: {
+      invoker: {
+        name: 'otrs',
+      },
+      items: [
+        {
+          index: "2",
+          type: "process",
+          name: "ConfigItemCreate",
+          delete: false,
+        },
+      ]
+    },
+    toConnector: {
+      invoker: {
+        name: 'otrs'
+      },
+      items: [
+        {
+          index: "0",
+          type: "process",
+          name: "TicketUpdate",
+          delete: false,
+        },
+      ]
+    },
+    initialConnection: configureAPIInitialConnection,
+  },
+  usingOperators: {
     fromConnector: {
       invoker: {
         name: 'otrs',
@@ -233,13 +269,14 @@ const animationData: IAnimationData = {
       items: [
         {
           index: "0",
-          name: "TicketSearch",
           type: "process",
-          delete: true
-        }
+          name: "ConfigItemCreate",
+          label: "Ticket Search label",
+          delete: false,
+        },
       ]
-    }
-  },
+    },
+  }
 };
 
 export default animationData;

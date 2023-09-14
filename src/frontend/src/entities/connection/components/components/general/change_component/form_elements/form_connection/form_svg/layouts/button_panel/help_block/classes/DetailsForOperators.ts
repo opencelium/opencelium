@@ -130,4 +130,15 @@ export default class DetailsForOperators {
     rightParamInput.blur();
     return AdditionalFunctions.delay(animationSpeed);
   }
+
+  @AdditionalFunctions.setPopover('delete_icon')
+  async deleteOperator (animationSpeed: number) {
+    const operatorRef = this.ref.current.technicalLayoutRef.current.svgRef.current.operatorRef.current;
+    await AdditionalFunctions.addOutlineById(['delete_icon'], true, animationSpeed);
+
+    await AdditionalFunctions.removeOutlineById(['delete_icon'])
+    operatorRef.deleteOperator();
+
+    return AdditionalFunctions.delay(animationSpeed);
+  }
 }

@@ -47,27 +47,13 @@ const Content: FC<ContentProps> = () => {
           <ContentItem key={index} {...item} />
         ))}
       </ContentBlock>
-      <div
-        style={{
-          margin: "0 40px",
-          width: "2px",
-          background: "#d2d2d3",
-          height: "384px",
-        }}
-      />
+      <div className="content_divider"/>
       <ContentBlock label="experts">
         {expertsContentData.map((item, index) => (
           <ContentItem key={index} {...item} />
         ))}
       </ContentBlock>
-      <div
-        style={{
-          margin: "0 40px",
-          width: "2px",
-          background: "#d2d2d3",
-          height: "384px",
-        }}
-      />
+      <div className="content_divider"/>
       <ContentBlock label="advanced functions">
         {advancedContentData.map((item, index) => (
           <ContentItem key={index} {...item} />
