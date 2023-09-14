@@ -11,4 +11,6 @@ public interface RegExpression {
     String wholeArray = "\\[([*]){1}\\]";
     String isNumber = "^[+-]?\\d+(\\.\\d+)?$";
     String webhook = "\\$\\{(.*?)\\}";
+    String queryParams = "\\$\\{(.*?)\\}";
+    String hasEnh = "#(([a-zA-Z0-9]+).\\(response\\)|([a-zA-Z0-9]+).\\(request\\))";
 }
