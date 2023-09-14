@@ -3,8 +3,10 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.mysql.entity.DataAggregator;
 import com.becon.opencelium.backend.mysql.service.DataAggregatorService;
 import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
+import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,6 +17,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/aggregator", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -46,6 +51,25 @@ public class AggregatorController {
         DataAggregator dataAggregator = dataAggregatorService.getById(id);
         DataAggregatorDTO dataAggregatorDTO = dataAggregatorService.convertToDto(dataAggregator);
         return ResponseEntity.ok(dataAggregatorDTO);
+    }
+
+    @Operation(summary = "Retrieves all Data Aggregator and related arguments")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Data Aggregator has been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectorResource.class)))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/all")
+    public ResponseEntity<List<DataAggregatorDTO>> getAll(@PathVariable Integer id) {
+        List<DataAggregator> daList = dataAggregatorService.findAll(id);
+        List<DataAggregatorDTO> collection = daList.stream().map(dataAggregatorService::convertToDto).toList();
+        return ResponseEntity.ok(collection);
     }
 
     @Operation(summary = "Creates new Data Aggregator in the system by accepting data in the request body")

@@ -67,4 +67,9 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
     public void deleteById(Integer id) {
         dataAggregatorRepository.deleteById(id);
     }
+
+    @Override
+    public List<DataAggregator> findAll(Integer id) {
+        return dataAggregatorRepository.findAll();
+    }
 }

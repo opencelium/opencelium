@@ -3,6 +3,8 @@ package com.becon.opencelium.backend.mysql.service;
 import com.becon.opencelium.backend.mysql.entity.DataAggregator;
 import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
 
+import java.util.List;
+
 public interface DataAggregatorService {
     DataAggregatorDTO convertToDto(DataAggregator dataAggregator);
 
@@ -13,4 +15,6 @@ public interface DataAggregatorService {
     DataAggregator getById(Integer id);
 
     void deleteById(Integer id);
+
+    List<DataAggregator> findAll(Integer id);
 }
