@@ -109,7 +109,27 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
           />
         </div>
       </div>
-      
+
+      {/* logs */}
+      <div className="wrapper">
+        <div className="button_wrap">
+          <TooltipButton
+            position={"bottom"}
+            icon={"sort"}
+            tooltip={!logPanelHeight ? "Show Logs" : "Hide Logs"}
+            target={`show_log_panel`}
+            hasBackground={true}
+            background={!logPanelHeight ? ColorTheme.White : ColorTheme.Blue}
+            color={!logPanelHeight ? ColorTheme.Gray : ColorTheme.White}
+            padding="2px"
+            handleClick={() =>
+              dispatch(setLogPanelHeight(!logPanelHeight ? LogPanelHeight.High : 0))
+            }
+          />
+        </div>
+      </div>
+
+
       {/* settings */}
       <div className="wrapper">
         <div className="button_wrap">
@@ -192,24 +212,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
         </div>
       </div>
 
-      {/* logs */}
-      <div className="wrapper">
-        <div className="button_wrap">
-          <TooltipButton
-            position={"bottom"}
-            icon={"sort"}
-            tooltip={!logPanelHeight ? "Show Logs" : "Hide Logs"}
-            target={`show_log_panel`}
-            hasBackground={true}
-            background={!logPanelHeight ? ColorTheme.White : ColorTheme.Blue}
-            color={!logPanelHeight ? ColorTheme.Gray : ColorTheme.White}
-            padding="2px"
-            handleClick={() =>
-              dispatch(setLogPanelHeight(!logPanelHeight ? LogPanelHeight.High : 0))
-            }
-          />
-        </div>
-      </div>
+      
 
       {/* save panel */}
       <div className="wrapper">

@@ -28,13 +28,50 @@ const AnimationSpeedSlider: FC<AnimationSpeedSliderProps> = (props) => {
 
   const {animationSpeed} = Connection.getReduxState();
 
-  const changeHandler = (event: any) =>{
-    dispatch(setAnimationSpeed(event.target.value));
+  const changeHandler = (event: any) => {
+    let speed;
+    switch(event.target.value){
+      case "-2":
+        speed = 4000; break;
+      case "-1":
+        speed = 2000; break;
+      case "0":
+        speed = 1000; break;
+      case "1":
+        speed = 500; break;
+      case "2":
+        speed = 250; break;
+    }
+    dispatch(setAnimationSpeed(speed));
+  }
+
+  const setValue = (data: any) => {
+    let speed;
+    switch(data){
+      case 250: 
+        speed = 2; break;
+      case 500: 
+        speed = 1; break;
+      case 1000:
+        speed = 0; break;
+      case 2000: 
+        speed = -1; break;
+      case 4000:
+        speed = -2; break;
+    }
+    return speed;
   }
 
   return (
     <AnimationSpeedSliderStyled >
-      <input type="range" {...props} value={animationSpeed} onChange={changeHandler}/>
+      <input type="range" {...props} value={setValue(animationSpeed)} onChange={changeHandler}/>
+      <div className="speed_steps">
+        <span>0.25x</span>
+        <span>0.5x</span>
+        <span>1x</span>
+        <span>2x</span>
+        <span>4x</span>
+      </div>
     </AnimationSpeedSliderStyled>
   );
 };

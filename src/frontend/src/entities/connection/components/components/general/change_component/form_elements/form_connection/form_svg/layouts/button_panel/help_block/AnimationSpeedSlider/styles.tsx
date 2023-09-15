@@ -18,15 +18,23 @@ import { AnimationSpeedSliderStyledProps } from "./interfaces";
 
 const AnimationSpeedSliderStyled = styled.div<AnimationSpeedSliderStyledProps>`
   position: relative;
-  margin-top: 3px;
-
-  &::after{
-    content: "1x 2x 3x 4x 5x 6x";
+  width: 100%;
+  input{
     position: absolute;
-    top: 15px;
-    left: 0;
-    font-size: 11px;
-    word-spacing: 7.6px;
+    transform: rotate(90deg);
+    top: 54px;
+    left: -49px;
+  }
+
+  .speed_steps{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    position: absolute;
+    font-size: 12px;
+    top: 0;
+    left: -26px;
+    gap: 9px;
   }
 `;
 
