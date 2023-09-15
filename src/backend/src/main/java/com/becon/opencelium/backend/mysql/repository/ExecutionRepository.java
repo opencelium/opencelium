@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ExecutionRepository extends JpaRepository<Execution, Integer> {
+public interface ExecutionRepository extends JpaRepository<Execution, Long> {
 
     List<Execution> findByEndTimeIsNull();
 

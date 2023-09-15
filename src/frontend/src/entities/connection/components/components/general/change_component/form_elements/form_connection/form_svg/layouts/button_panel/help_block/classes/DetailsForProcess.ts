@@ -472,7 +472,9 @@ export default class DetailsForProcess{
   @AdditionalFunctions.setPopover((args: any[]) => {
     const [bodyIndex] = args;
     const referenceElement = document.querySelectorAll('.reference_element');
-    referenceElement[bodyIndex].classList.add(`reference_element_${bodyIndex}`);
+    if(referenceElement && referenceElement[bodyIndex]){
+      referenceElement[bodyIndex].classList.add(`reference_element_${bodyIndex}`);
+    }
     return `.reference_element_${bodyIndex}`;
   })
   async clickOnReferenceElements (bodyIndex: number, animationSpeed: number) {

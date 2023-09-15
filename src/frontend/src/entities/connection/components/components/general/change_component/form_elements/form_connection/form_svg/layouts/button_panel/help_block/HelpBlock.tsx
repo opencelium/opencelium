@@ -53,23 +53,23 @@ import RefFunctions from "./classes/RefFunctions";
 
 
 const prepareConnection = (connection: any, connectors: any, invokers: any) => {
-    if(connection && connection.fromConnector && connection.toConnector) {
-        let fromInvoker = invokers.find((i: any) => i.name === connection.fromConnector.invoker.name);
-        let toInvoker = invokers.find((i: any) => i.name === connection.toConnector.invoker.name);
-        if(fromInvoker && toInvoker) {
-            connection.fromConnector.methods = connection.fromConnector.methods || [];
-            connection.fromConnector.operators = connection.fromConnector.operators || [];
-            //@ts-ignore
-            connection.fromConnector.invoker = fromInvoker;
-            connection.fromConnector.setConnectorType(CONNECTOR_FROM);
-            connection.toConnector.methods = connection.toConnector.methods || [];
-            connection.toConnector.operators = connection.toConnector.operators ||[];
-            //@ts-ignore
-            connection.toConnector.invoker = toInvoker;
-            connection.toConnector.setConnectorType(CONNECTOR_TO);
-        }
+  if(connection && connection.fromConnector && connection.toConnector) {
+    let fromInvoker = invokers.find((i: any) => i.name === connection.fromConnector.invoker.name);
+    let toInvoker = invokers.find((i: any) => i.name === connection.toConnector.invoker.name);
+    if(fromInvoker && toInvoker) {
+      connection.fromConnector.methods = connection.fromConnector.methods || [];
+      connection.fromConnector.operators = connection.fromConnector.operators || [];
+      //@ts-ignore
+      connection.fromConnector.invoker = fromInvoker;
+      connection.fromConnector.setConnectorType(CONNECTOR_FROM);
+      connection.toConnector.methods = connection.toConnector.methods || [];
+      connection.toConnector.operators = connection.toConnector.operators ||[];
+      //@ts-ignore
+      connection.toConnector.invoker = toInvoker;
+      connection.toConnector.setConnectorType(CONNECTOR_TO);
     }
-    return connection;
+  }
+  return connection;
 }
 
 const HelpBlock = () => {
@@ -515,7 +515,7 @@ const HelpBlock = () => {
                 padding="2px"
                 handleClick={() => dispatch(setAnimationPaused(!isPausedReference.current))}
               />
-              <AnimationSpeedSlider step={1000} min={1000} max={6000}/>
+              <AnimationSpeedSlider step={1} min={-2} max={2}/>
             </div>,
             document.body
           )}
