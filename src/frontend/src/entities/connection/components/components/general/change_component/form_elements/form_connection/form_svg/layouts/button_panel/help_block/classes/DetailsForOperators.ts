@@ -2,6 +2,7 @@ import { setFocusById } from "@application/utils/utils";
 import AdditionalFunctions from "./AdditionalFunctions";
 import { AnimationPopoverProps } from "../AnimationPopover/interfaces";
 import { IAnimationData } from "../interfaces";
+import RefFunctions from "./RefFunctions";
 
 
 export default class DetailsForOperators {
@@ -18,127 +19,268 @@ export default class DetailsForOperators {
 
   @AdditionalFunctions.setPopover('condition_label')
   async openConditionDialog (animationSpeed: number) {
-    const conditionRef = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
-    conditionRef.toggleEdit();
-
-    return AdditionalFunctions.delay(animationSpeed);
+    try{
+      const conditionRef = RefFunctions.getCondition(this.ref);
+      if(conditionRef){
+        conditionRef.toggleEdit();
+  
+        await AdditionalFunctions.delay(animationSpeed);
+      }
+    }
+    catch(error){
+      console.log('error');
+    }
   }
 
   @AdditionalFunctions.setPopover('.condition_method_select_left')
   async changeLeftMethod (animationSpeed: number) {
-    const leftStatementRef = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current;
-    const connectionMethods = this.ref.current.props.connection[this.condition.leftStatement.fromConnector].methods;
-
-    let leftMethod;
-    connectionMethods.forEach((element: any) => {
-      if(element.index === this.condition.leftStatement.leftMethodIndex){
-        leftMethod = element;
-        return;
+    try{
+      if(this.ref.current.props){
+        const leftStatementRef = RefFunctions.getLeftStatement(this.ref);
+        const connectionMethods = this.ref.current.props.connection[this.condition.leftStatement.fromConnector].methods;
+    
+        if(leftStatementRef && connectionMethods){
+          let leftMethod;
+          connectionMethods.forEach((element: any) => {
+            if(element.index === this.condition.leftStatement.leftMethodIndex){
+              leftMethod = element;
+              return;
+            }
+          });
+    
+          leftStatementRef.updateMethod(leftMethod);
+    
+          await AdditionalFunctions.delay(animationSpeed);
+        }
       }
-    });
-
-    leftStatementRef.updateMethod(leftMethod);
-
-    return AdditionalFunctions.delay(animationSpeed);
+      else{
+        throw new Error('props is not defined')
+      }
+    }
+    catch(error){
+      console.log('error');
+    }
   }
 
   @AdditionalFunctions.setPopover('.condition_param_select_left')
   async setFocusOnLeftParam (animationSpeed: number) {
-    const leftParamInputId = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current.paramInputRef.current.props.id;
-    setFocusById(leftParamInputId);
-    
-    return AdditionalFunctions.delay(animationSpeed);
+    try{
+      if(RefFunctions.getLeftParamInput(this.ref).props){
+        const leftParamInputId = RefFunctions.getLeftParamInput(this.ref).props.id;
+        if(leftParamInputId){
+          setFocusById(leftParamInputId);
+        
+          await AdditionalFunctions.delay(animationSpeed);
+        }
+      }
+      else{
+        throw new Error('props is not defined')
+      }
+    }
+    catch(error){
+      console.log('error')
+    }
   }
 
   
   async changeLeftParam (animationSpeed: number) {
-    const leftStatementRef = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.leftStatementRef.current;
-
-    const leftParamInputId = leftStatementRef.paramInputRef.current.props.id
+    try{
+      if(RefFunctions.getLeftParamInput(this.ref).props){
+        const leftStatementRef = RefFunctions.getLeftStatement(this.ref);
     
-    leftStatementRef.updateParam(this.condition.leftStatement.leftParam);
-
-    const leftParamInput = document.getElementById(leftParamInputId);
-    leftParamInput.blur();
-    return AdditionalFunctions.delay(animationSpeed);
+        const leftParamInputId = RefFunctions.getLeftParamInput(this.ref).props.id;
+        
+        if(leftStatementRef && leftParamInputId){
+          leftStatementRef.updateParam(this.condition.leftStatement.leftParam);
+    
+          const leftParamInput = document.getElementById(leftParamInputId);
+          if(leftParamInput){
+            leftParamInput.blur();
+          }
+          await AdditionalFunctions.delay(animationSpeed);
+        }
+      }
+      else{
+        throw new Error('props is not defined')
+      }
+    }
+    catch(error){
+      console.log('error');
+    }
   }
 
   @AdditionalFunctions.setPopover('.condition_relational_operator')
   async changeRelationalOperator (animationSpeed: number) {
-    const conditionRef = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
-    conditionRef.updateRelationalOperator({ value: this.condition.relationalOperator});
-
-    return AdditionalFunctions.delay(animationSpeed);
+    try{
+      const conditionRef = RefFunctions.getCondition(this.ref);
+      if(conditionRef){
+        conditionRef.updateRelationalOperator({ value: this.condition.relationalOperator});
+  
+        await AdditionalFunctions.delay(animationSpeed);
+      }
+    }
+    catch(error){
+      console.log("error");
+    }
   }
 
   @AdditionalFunctions.setPopover('.condition_property_input')
   async setFocusOnRightProperty (animationSpeed: number) {
-    const rightProperyInputId = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.props.operator.index;
-    setFocusById(`if_operator_property_${rightProperyInputId}`);
-    return AdditionalFunctions.delay(animationSpeed);
+    try{
+      const rightStatementRef = RefFunctions.getRightStatement(this.ref);
+      if(rightStatementRef){
+        if(rightStatementRef.props){
+          const rightPropertyInputId = rightStatementRef.props.operator.index;
+    
+          if(rightPropertyInputId){
+            setFocusById(`if_operator_property_${rightPropertyInputId}`);
+            await AdditionalFunctions.delay(animationSpeed);
+          }
+        }
+        else{
+          throw new Error('props is not defined')
+        }
+      }
+    }
+    catch(error){
+      console.log('error');
+    }
   }
 
   async changeRightProperty (animationSpeed: number) {
-    const rightStatementRef = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
-    rightStatementRef.updateProperty(this.condition.rightStatement.property);
-    return AdditionalFunctions.delay(animationSpeed);
+    try{
+      const rightStatementRef = RefFunctions.getRightStatement(this.ref);
+      if(rightStatementRef){
+        rightStatementRef.updateProperty(this.condition.rightStatement.property);
+        await AdditionalFunctions.delay(animationSpeed);
+      }
+    }
+    catch(error){
+      console.log('error');
+    }
   }
 
   async removeFocusFromRightProperty (animationSpeed: number) {
-    const rightProperyInputId = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.props.operator.index;
-    const propertyInput = document.getElementById(`if_operator_property_${rightProperyInputId}`);
-    propertyInput.blur();
-
-    return AdditionalFunctions.delay(animationSpeed);
+    try{
+      const rightStatementRef = RefFunctions.getRightStatement(this.ref);
+      if(rightStatementRef){
+        if(rightStatementRef.props){
+          const rightProperyInputId = rightStatementRef.props.operator.index;
+          if(rightProperyInputId){
+            const propertyInput = document.getElementById(`if_operator_property_${rightProperyInputId}`);
+            if(propertyInput){
+              propertyInput.blur();
+    
+              await AdditionalFunctions.delay(animationSpeed);
+            }
+          }
+        }
+        else{
+          throw new Error('props is not defined')
+        }
+      }
+    }
+    catch(error){
+      console.log('error');
+    }
   }
 
   @AdditionalFunctions.setPopover('.condition_method_select_right')
   async changeRightMethod (animationSpeed: number) {
-    const rightStatementRef = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
-    const connectionMethods = this.ref.current.props.connection[this.condition.rightStatement.fromConnector].methods;
-
-    let rightMethod;
-    connectionMethods.forEach((element: any) => {
-      if(element.index === this.condition.rightStatement.rightMethodIndex){
-        rightMethod = element;
-        return;
+    try{
+      if(this.ref.current.props){
+        const rightStatementRef = RefFunctions.getRightStatement(this.ref);
+        const connectionMethods = this.ref.current.props.connection[this.condition.rightStatement.fromConnector].methods;
+    
+        if(rightStatementRef && connectionMethods){
+          let rightMethod;
+          connectionMethods.forEach((element: any) => {
+            if(element.index === this.condition.rightStatement.rightMethodIndex){
+              rightMethod = element;
+              return;
+            }
+          })
+    
+          rightStatementRef.updateMethod(rightMethod);
+    
+          await AdditionalFunctions.delay(animationSpeed);
+        }
       }
-    })
-
-    rightStatementRef.updateMethod(rightMethod);
-
-    return AdditionalFunctions.delay(animationSpeed);
+      else{
+        throw new Error('props is not defined')
+      }
+    }
+    catch(error){
+      console.log('error');
+    }
   }
 
   @AdditionalFunctions.setPopover('.condition_param_select_right')
   async setFocusOnRightParam (animationSpeed: number) {
-    const rightParamInputId = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.paramInputRef.current.props.id;
-    setFocusById(rightParamInputId);
-    return AdditionalFunctions.delay(animationSpeed);
+    try{
+      if(RefFunctions.getRightParamInput(this.ref).props){
+        const rightParamInputId = RefFunctions.getRightParamInput(this.ref).props.id;
+        if(rightParamInputId){
+          setFocusById(rightParamInputId);
+          await AdditionalFunctions.delay(animationSpeed);
+        }
+      }
+      else{
+        throw new Error('props is not defined')
+      }
+    }
+    catch(error){
+      console.log('error');
+    }
   }
 
   async changeRightParam (animationSpeed: number) {
-    const rightStatementRef = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current;
-    rightStatementRef.updateParam(this.condition.rightStatement.rightParam);
-    
-    return AdditionalFunctions.delay(animationSpeed);
+    try{
+      const rightStatementRef = RefFunctions.getRightStatement(this.ref);
+      if(rightStatementRef){
+        rightStatementRef.updateParam(this.condition.rightStatement.rightParam);
+      
+        await AdditionalFunctions.delay(animationSpeed);
+      }
+    }
+    catch(error){
+      console.log('error');
+    }
   }
 
   async removeFocusFromRightParam (animationSpeed: number) {
-    const rightParamInputId = this.ref.current.detailsRef.current.descriptionRef.current.conditionRef.current.rightStatementRef.current.paramInputRef.current.props.id;
-    const rightParamInput = document.getElementById(rightParamInputId);
-    rightParamInput.blur();
-    return AdditionalFunctions.delay(animationSpeed);
+    try{
+      if(RefFunctions.getRightParamInput(this.ref).props){
+        const rightParamInputId = RefFunctions.getRightParamInput(this.ref).props.id;
+        if(rightParamInputId){
+          const rightParamInput = document.getElementById(rightParamInputId);
+          if(rightParamInput){
+            rightParamInput.blur();
+            await AdditionalFunctions.delay(animationSpeed);
+          }
+        }
+      }
+    }
+    catch(error){
+      console.log('error');
+    }
   }
 
   @AdditionalFunctions.setPopover('delete_icon')
   async deleteOperator (animationSpeed: number) {
-    const operatorRef = this.ref.current.technicalLayoutRef.current.svgRef.current.operatorRef.current;
-    await AdditionalFunctions.addOutlineById(['delete_icon'], true, animationSpeed);
-
-    await AdditionalFunctions.removeOutlineById(['delete_icon'])
-    operatorRef.deleteOperator();
-
-    return AdditionalFunctions.delay(animationSpeed);
+    try{
+      const operatorRef = RefFunctions.getOperator(this.ref);
+      if(operatorRef){
+        await AdditionalFunctions.addOutlineById(['delete_icon'], true, animationSpeed);
+  
+        await AdditionalFunctions.removeOutlineById(['delete_icon'])
+        operatorRef.deleteOperator();
+  
+        await AdditionalFunctions.delay(animationSpeed);
+      }
+    }
+    catch(error){
+      console.log('error');
+    }
   }
 }

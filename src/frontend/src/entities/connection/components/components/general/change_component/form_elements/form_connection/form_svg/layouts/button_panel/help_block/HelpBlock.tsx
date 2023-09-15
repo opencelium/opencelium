@@ -49,6 +49,7 @@ import Loading from "@app_component/base/loading/Loading";
 import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
 import SyncInvokers from "../../../../form_methods/SyncInvokers";
 import ReactDOM from "react-dom";
+import RefFunctions from "./classes/RefFunctions";
 
 
 const prepareConnection = (connection: any, connectors: any, invokers: any) => {
@@ -100,7 +101,7 @@ const HelpBlock = () => {
     }
     else{
       if(condition){
-        const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
+        const conditionRef = RefFunctions.getCondition(ref);
         await AdditionalFunctions.delay(reference.current)
         await details.openConditionDialog(reference.current);
 
@@ -132,7 +133,9 @@ const HelpBlock = () => {
           await details.removeFocusFromRightParam(reference.current);
         }
 
-        conditionRef.updateConnection();
+        if(conditionRef){
+          conditionRef.updateConnection();
+        }
       }
     }
   }
@@ -148,7 +151,7 @@ const HelpBlock = () => {
     }
     else{
       if(condition){
-        const conditionRef = ref.current.detailsRef.current.descriptionRef.current.conditionRef.current;
+        const conditionRef = RefFunctions.getCondition(ref);
         await AdditionalFunctions.delay(reference.current)
         await details.openConditionDialog(reference.current);
 
@@ -164,7 +167,9 @@ const HelpBlock = () => {
 
         await details.changeRightParam(reference.current);
 
-        conditionRef.updateConnection();
+        if(conditionRef){
+          conditionRef.updateConnection();
+        }
       }
     }
   }
@@ -224,7 +229,6 @@ const HelpBlock = () => {
           await details.openBodyObject(reference.current);
         }
 
-
         for(let bodyIndex = 0; bodyIndex < bodyData.length; bodyIndex++){
 
           if(!bodyData[bodyIndex].available){
@@ -249,18 +253,30 @@ const HelpBlock = () => {
           if(bodyData[bodyIndex].keyValue === '#'){
             for(let referenceIndex = 0; referenceIndex < bodyData[bodyIndex].reference.length; referenceIndex++) {
               for(let methodIndex = 0; methodIndex < bodyData[bodyIndex].reference[referenceIndex].method.length; methodIndex++){
-                if(methodIndex > 0){
-                  await details.displayEditKeyValueButton(bodyIndex, reference.current);
-
-                  await details.clickEditKeyValueButton(bodyIndex, reference.current);
+                try{
+                  if(ref.current.props){
+                    const currentItemId = ref.current.props.currentTechnicalItem.id;
+                    if(currentItemId){
+                      if(methodIndex > 0){
+                        await details.displayEditKeyValueButton(bodyIndex, reference.current);
+      
+                        await details.clickEditKeyValueButton(bodyIndex, reference.current);
+                      }
+      
+                      await details.changeBodyMethod(bodyData, bodyIndex, referenceIndex, methodIndex, currentItemId, reference.current);
+      
+                      await details.changeBodyParam(bodyData, bodyIndex, referenceIndex, methodIndex, reference.current);
+      
+                      await details.addBodyMethodAndParam(currentItemId, reference.current);
+                    }
+                  }
+                  else{
+                    throw new Error('props is not defined')
+                  }
                 }
-
-                const currentItemId = ref.current.props.currentTechnicalItem.id;
-                await details.changeBodyMethod(bodyData, bodyIndex, referenceIndex, methodIndex, currentItemId, reference.current);
-
-                await details.changeBodyParam(bodyData, bodyIndex, referenceIndex, methodIndex, reference.current);
-
-                await details.addBodyMethodAndParam(currentItemId, reference.current);
+                catch(e){
+                  console.log('ошибка', e);
+                }
               }
 
               if(connectorType === 'toConnector' && bodyData[bodyIndex].reference[referenceIndex].enhancementDescription){
@@ -300,9 +316,10 @@ const HelpBlock = () => {
     const name = animationData[videoAnimationName][connectorPanelType].items[index].name;
     const label = animationData[videoAnimationName][connectorPanelType].items[index].label;
     const prevElementType = animationData[videoAnimationName][connectorPanelType].items[index > 0 ? index - 1 : index].type;
-    const svgRef = ref.current.technicalLayoutRef.current.svgRef.current;
+    const fromConnectorPanelRef = RefFunctions.getFromConnectorPanel(ref);
+    const toConnectorPanelRef = RefFunctions.getToConnectorPanel(ref);
 
-    const connectorPanel = connectorPanelType === 'fromConnector' ? svgRef.fromConnectorPanelRef.current : svgRef.toConnectorPanelRef.current;
+    const connectorPanel = connectorPanelType === 'fromConnector' ? fromConnectorPanelRef : toConnectorPanelRef;
 
     if(index <= 0 && !hasInitialConnection){
       if(!isDetailsOpened){
@@ -333,7 +350,7 @@ const HelpBlock = () => {
     if(index >= 1 || hasInitialConnection && index === 0){
       await animationSteps.showPopoverForCreateElement(type, reference.current);
 
-      await animationSteps.createProcessOrOperator(type, animationProps, refs.animationData, connectorType, prevElementType, reference.current);
+      await animationSteps.createProcessOrOperator(animationProps, refs.animationData, connectorType, prevElementType, reference.current);
     }
 
     await animationSteps.changeElementNameOrType(type, name, reference.current);
@@ -429,6 +446,16 @@ const HelpBlock = () => {
       setAnimationProps({...animationProps, isSet: false});
       dispatch(setAnimationPreviewPanelVisibility(true))
     }
+    else{
+      let outlineElement = document.getElementById('wrapActiveElement');
+      if(outlineElement){
+        outlineElement.remove();
+      }
+      outlineElement = document.getElementById('wrapActiveElementId');
+      if(outlineElement){
+        outlineElement.remove();
+      }
+    }
   }, [isVisible])
 
   useEffect(() => {
@@ -447,7 +474,7 @@ const HelpBlock = () => {
 
   return (
     <HelpBlockStyled isButtonPanelOpened={isButtonPanelOpened}>
-      <div style={{ display: "flex", gap: "10px" }}>
+      <div style={{ display: "flex", gap: "15px" }}>
         <TooltipButton
           size={TextSize.Size_40}
           position={"bottom"}

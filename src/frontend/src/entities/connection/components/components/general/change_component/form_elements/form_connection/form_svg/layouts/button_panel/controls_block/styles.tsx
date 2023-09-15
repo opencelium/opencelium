@@ -31,7 +31,7 @@ const ControlsBlockStyled = styled.div<ControlsBlockStyledProps>`
     content: "Controls";
     position: absolute;
     left: 0;
-    bottom: -15%;
+    bottom: -27%;
     font-size: 14px;
     display: ${(props) => (!props.isButtonPanelOpened && 'none')};
   }
@@ -49,8 +49,8 @@ const ControlsBlockStyled = styled.div<ControlsBlockStyledProps>`
     position: absolute;
     z-index: 1;
     left: calc(50% - 14px);
-    top: 13px;
-    height: 50%;
+    top: -3px;
+    height: 60%;
     transform-origin: 50% 100%;
   }
   .wrapper:nth-child(2) { transform: rotate(60deg); }

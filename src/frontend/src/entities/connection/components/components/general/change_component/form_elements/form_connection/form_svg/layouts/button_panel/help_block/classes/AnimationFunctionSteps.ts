@@ -15,124 +15,186 @@ export default class AnimationFunctionSteps {
     this.setPopoverProps = setPopoverProps;
   }
 
-   async clickOnPanel(panelType: string, animationSpeed: number) {
-    // @ts-ignore
-    panelType.onClick();
+  async clickOnPanel(connectorPanel: string, animationSpeed: number) {
+    if(connectorPanel){
+      try{
+        // @ts-ignore
+        connectorPanel.onClick();
 
-    return AdditionalFunctions.delay(animationSpeed);
+        await AdditionalFunctions.delay(animationSpeed);
+      }
+      catch(error){
+        console.error('Error')
+      }
+    }
   }
 
 
   async onMouseOver(prevElementType: string, animationSpeed: number) {
-    const operatorRef = this.ref.current.technicalLayoutRef.current.svgRef.current.operatorRef.current;
-    const processRef = this.ref.current.technicalLayoutRef.current.svgRef.current.processRef.current;
-
-    if(prevElementType === "operator"){
-      operatorRef.onMouseOverSvg()
+    const operatorRef = RefFunctions.getOperator(this.ref);
+    const processRef = RefFunctions.getProcess(this.ref);
+  
+    if (prevElementType && (operatorRef || processRef)) {
+      try {
+        if (prevElementType === 'operator') {
+          operatorRef.onMouseOverSvg();
+        } else {
+          processRef.onMouseOverSvg();
+        }
+  
+        await AdditionalFunctions.delay(animationSpeed);
+      } catch (error) {
+        console.error('Error');
+      }
     }
-    else{
-      processRef.onMouseOverSvg()
-    }
-
-    return AdditionalFunctions.delay(animationSpeed)
   }
 
   @AdditionalFunctions.setPopover((args: any[]) => {
     const [type] = args;
     return type === 'process' ? 'create_process_right' : 'create_operator_right';
   })
-  async showPopoverForCreateElement(type: string, animationSpeed: number){
-    return AdditionalFunctions.delay(animationSpeed)
+  async showPopoverForCreateElement(type: string, animationSpeed: number) {
+    try {
+      await AdditionalFunctions.delay(animationSpeed);
+    } catch (error) {
+      console.error('Error');
+    }
   }
 
-  async createProcessOrOperator(type: string, animationProps: any, animationData: any, connectorType: string, prevElementType: string, animationSpeed: number) {
-    const after = animationData.after;
-    const elementType = animationData.type;
-    const direction = animationData.direction;
-    const svgRef = this.ref.current.technicalLayoutRef.current.svgRef.current;
-    const createPanelElement = document.querySelector(`#create_panel_right`).nextElementSibling;
-    let currentItem = null;
+  async createProcessOrOperator(animationProps: any, animationData: any, connectorType: string, prevElementType: string, animationSpeed: number) {
+    try{
 
-    if(after){
-      const svgItems = this.ref.current.technicalLayoutRef.current.props.connectionOverviewState.connection[connectorType].svgItems
-      for(let i = 0; i < svgItems.length; i++){
-        if(svgItems[i].id === `${connectorType}_${after}`){
-
-          currentItem = animationProps.connection.fromConnector.getSvgElementByIndex(after)
-
-          break;
+      const createPanelRight = document.querySelector(`#create_panel_right`);
+      if(createPanelRight && createPanelRight.nextElementSibling){
+        const after = animationData.after;
+        const elementType = animationData.type;
+        const direction = animationData.direction;
+        const createPanelElement = createPanelRight.nextElementSibling;
+        const technicalLayoutRef = RefFunctions.getTechnicalLayout(this.ref);
+        let currentItem = null;
+    
+        if(after && technicalLayoutRef && createPanelElement){
+          const svgItems = technicalLayoutRef.props.connectionOverviewState.connection[connectorType].svgItems
+          if(svgItems){
+            for(let i = 0; i < svgItems.length; i++){
+              if(svgItems[i].id === `${connectorType}_${after}`){
+      
+                currentItem = animationProps.connection.fromConnector.getSvgElementByIndex(after)
+      
+                break;
+              }
+            }
+          }
         }
+    
+        if(elementType === "process" && prevElementType === "operator" && createPanelElement){
+          const operatorCreatePanel = RefFunctions.getCreatePanelForOperator(this.ref);
+    
+          if(operatorCreatePanel){
+            operatorCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
+          }
+        }
+    
+        else if(elementType === "process" && prevElementType === "process" && createPanelElement){
+          const processCreatePanel = RefFunctions.getCreatePanelForProcess(this.ref);
+    
+          if(processCreatePanel) {
+            processCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
+          }
+        }
+    
+        else if(elementType === "operator" && prevElementType === "process" && createPanelElement){
+          const processCreatePanel = RefFunctions.getCreatePanelForProcess(this.ref);
+    
+          if(processCreatePanel){
+            processCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
+          }
+        }
+    
+        else if(elementType === "operator" && prevElementType === "operator" && createPanelElement){
+          const operatorCreatePanel = RefFunctions.getCreatePanelForOperator(this.ref);
+    
+          if(operatorCreatePanel){
+            operatorCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
+          }
+        }
+        await AdditionalFunctions.delay(animationSpeed);
       }
     }
-
-    if(elementType === "process" && prevElementType === "operator"){
-      const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
-
-      operatorCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
+    catch(error){
+      console.error(error);
     }
-
-    else if(elementType === "process" && prevElementType === "process"){
-      const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
-
-      processCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
-    }
-
-    else if(elementType === "operator" && prevElementType === "process"){
-      const processCreatePanel = svgRef.processRef.current.createPanelRef.current;
-
-      processCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
-    }
-
-    else if(elementType === "operator" && prevElementType === "operator"){
-      const operatorCreatePanel = svgRef.operatorRef.current.createPanelRef.current;
-
-      operatorCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
-    }
-    return AdditionalFunctions.delay(animationSpeed)
   }
 
   async changeElementNameOrType(elementType: string, name: string, animationSpeed: number){
-    const createProcessRef = this.ref.current.createElementPalenRef.current.createProcessRef.current;
-    const createOperatorRef = this.ref.current.createElementPalenRef.current.createOperatorRef.current;
-
-    if(elementType === "process"){
-      createProcessRef.changeName({label: name, value: name})
+    try{
+      const createProcessRef = RefFunctions.getCreateProcess(this.ref);
+      const createOperatorRef = RefFunctions.getCreateOperator(this.ref);
+  
+      if(createProcessRef || createOperatorRef){
+        elementType === "process" ? createProcessRef.changeName({label: name, value: name}) : createOperatorRef.changeType({label: name, value: name});
+    
+        await AdditionalFunctions.delay(animationSpeed)
+      }
     }
-    else{
-      createOperatorRef.changeType({label: name, value: name})
+    catch(error){
+      console.log(error);
     }
-
-    return AdditionalFunctions.delay(animationSpeed)
   }
 
   async changeProcessLabel(elementType: string, label: any, animationSpeed: number){
-    if(elementType === "process" && label){
-      setFocusById('new_request_label');
-      await AdditionalFunctions.delay(animationSpeed);
-
-      const createProcessRef = this.ref.current.createElementPalenRef.current.createProcessRef.current;
-      createProcessRef.changeLabel(label);
-      await AdditionalFunctions.delay(animationSpeed);
+    try{
+      const createProcessRef = RefFunctions.getCreateProcess(this.ref);
+      if(elementType === "process" && label && createProcessRef){
+        setFocusById('new_request_label');
+        await AdditionalFunctions.delay(animationSpeed);
+  
+        createProcessRef.changeLabel(label);
+        await AdditionalFunctions.delay(animationSpeed);
+      }
+    }
+    catch(error){
+      console.log(error);
     }
   }
 
   async create(elementType: string){
-    const createProcessRef = this.ref.current.createElementPalenRef.current.createProcessRef.current;
-    const createOperatorRef = this.ref.current.createElementPalenRef.current.createOperatorRef.current;
-
-    elementType === "process" ? createProcessRef.create() : createOperatorRef.create();
+    try{
+      const createProcessRef = RefFunctions.getCreateProcess(this.ref);
+      const createOperatorRef = RefFunctions.getCreateOperator(this.ref);
+  
+      if(createProcessRef || createOperatorRef){
+        elementType === "process" ? createProcessRef.create() : createOperatorRef.create();
+      }
+    }
+    catch(error){
+      console.log(error);
+    }
   }
 
   async setFocusOnCurrentElement(){
-    const processRef = this.ref.current.technicalLayoutRef.current.svgRef.current.processRef.current;
-    processRef.onClick()
+    try{
+      const processRef = RefFunctions.getProcess(this.ref);
+      if(processRef){
+        processRef.onClick()
+      }
+    }
+    catch(error){
+      console.log(error);
+    }
   }
 
   async setCurrentItem(connector: any, index: string, animationSpeed: number){
-    const technicalLayout = RefFunctions.getTechnicalLayout(this.ref);
-    const currentItem = connector.getSvgElementByIndex(index);
-    technicalLayout.setCurrentItem(currentItem);
-    await AdditionalFunctions.delay(animationSpeed);
+    try{
+      const technicalLayout = RefFunctions.getTechnicalLayout(this.ref);
+      if(technicalLayout){
+        const currentItem = connector.getSvgElementByIndex(index);
+        technicalLayout.setCurrentItem(currentItem);
+        await AdditionalFunctions.delay(animationSpeed);
+      }
+    }
+    catch(error){
+      console.log(error);
+    }
   }
-
 }

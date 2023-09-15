@@ -17,89 +17,99 @@ export default class AdditionalFunctions {
   }
 
   static async addOutlineById (idsArray: any, withDelay = false, animationSpeed = 0) {
-    positionElementOver(idsArray, 10);
+    if(idsArray.length > 0){
+      positionElementOver(idsArray, 10);
     
-    if(withDelay){
-      return AdditionalFunctions.delay(animationSpeed);
+      if(withDelay){
+        return AdditionalFunctions.delay(animationSpeed);
+      }
     }
   }
 
   static async removeOutlineById (idsArray: any, withDelay = false, animationSpeed = 0) {
-    positionElementOver(idsArray, 10, true);
-    if(withDelay){
-      return AdditionalFunctions.delay(animationSpeed);
+    if(idsArray.length > 0){
+      positionElementOver(idsArray, 10, true);
+      if(withDelay){
+        return AdditionalFunctions.delay(animationSpeed);
+      }
     }
   }
 
   static async addOutlineByClassName (classNamesArray: any, withDelay = false, animationSpeed = 0) {
-    positionElementOverByClassName(classNamesArray, 10);
-    if(withDelay){
-      return AdditionalFunctions.delay(animationSpeed);
+    if(classNamesArray.length > 0){
+      positionElementOverByClassName(classNamesArray, 10);
+      if(withDelay){
+        return AdditionalFunctions.delay(animationSpeed);
+      }
     }
   }
 
   static async removeOutlineByClassName (classNamesArray: any, withDelay = false, animationSpeed = 0) {
-    positionElementOverByClassName(classNamesArray, 10, true);
-    if(withDelay){
-      return AdditionalFunctions.delay(animationSpeed);
+    if(classNamesArray.length > 0){
+      positionElementOverByClassName(classNamesArray, 10, true);
+      if(withDelay){
+        return AdditionalFunctions.delay(animationSpeed);
+      }
     }
   }
 
   static setSvgViewBox (props: setSvgViewBoxProps) {
     const svgElement = document.getElementById(props.elementId);
-    const viewBoxValue = svgElement.getAttribute('viewBox');
-    const fromConnectorPanel = svgElement.querySelector('#fromConnector_panel_modal');
-    const toConnectorPanel = svgElement.querySelector('#toConnector_panel_modal');
+    if(svgElement){
+      const viewBoxValue = svgElement.getAttribute('viewBox');
+      const fromConnectorPanel = svgElement.querySelector('#fromConnector_panel_modal');
+      const toConnectorPanel = svgElement.querySelector('#toConnector_panel_modal');
 
-    const currentElement = props.currentSvgElementId ? svgElement.querySelector(`#${props.currentSvgElementId}`) : null;
+      const currentElement = props.currentSvgElementId ? svgElement.querySelector(`#${props.currentSvgElementId}`) : null;
 
-    const sizes = {
-      fromConnectorWidth: fromConnectorPanel.getBoundingClientRect().width,
-      toConnectorWidth: toConnectorPanel.getBoundingClientRect().width,
-      fromConnectorHeight: fromConnectorPanel.getBoundingClientRect().height,
-      toConnectorHeight: toConnectorPanel.getBoundingClientRect().height,
-      svgElementHeight: svgElement.getBoundingClientRect().height,
-      svgElementWidth: svgElement.getBoundingClientRect().width
-    }
+      const sizes = {
+        fromConnectorWidth: fromConnectorPanel.getBoundingClientRect().width,
+        toConnectorWidth: toConnectorPanel.getBoundingClientRect().width,
+        fromConnectorHeight: fromConnectorPanel.getBoundingClientRect().height,
+        toConnectorHeight: toConnectorPanel.getBoundingClientRect().height,
+        svgElementHeight: svgElement.getBoundingClientRect().height,
+        svgElementWidth: svgElement.getBoundingClientRect().width
+      }
 
-    const [x, y, width, height] = viewBoxValue.split(' ').map(parseFloat);
-    let offsetX;
-    let offsetY;
+      const [x, y, width, height] = viewBoxValue.split(' ').map(parseFloat);
+      let offsetX;
+      let offsetY;
 
-    if(props.forResult){
-      offsetX = ((sizes.fromConnectorWidth + sizes.toConnectorWidth + 50) - sizes.svgElementWidth) / 2;
-      
-      if(sizes.fromConnectorHeight > sizes.toConnectorHeight){
-        if(sizes.fromConnectorHeight > sizes.svgElementHeight){
-          offsetY = Math.abs(sizes.svgElementHeight - sizes.fromConnectorHeight);
+      if(props.forResult){
+        offsetX = ((sizes.fromConnectorWidth + sizes.toConnectorWidth + 50) - sizes.svgElementWidth) / 2;
+        
+        if(sizes.fromConnectorHeight > sizes.toConnectorHeight){
+          if(sizes.fromConnectorHeight > sizes.svgElementHeight){
+            offsetY = Math.abs(sizes.svgElementHeight - sizes.fromConnectorHeight);
+          }
+          else{
+            offsetY = sizes.fromConnectorHeight - sizes.svgElementHeight 
+          }
         }
         else{
-          offsetY = sizes.fromConnectorHeight - sizes.svgElementHeight 
+          if(sizes.toConnectorHeight > sizes.svgElementHeight){
+            offsetY = Math.abs(sizes.svgElementHeight - sizes.toConnectorHeight);
+          }
+          else{
+            offsetY = sizes.toConnectorHeight - sizes.svgElementHeight
+          }
+        }
+      } else{
+        // @ts-ignore
+        offsetY = currentElement.y.animVal.value / 2 - 50
+    
+        if(props.connectorType === 'fromConnector'){
+          offsetX = sizes.fromConnectorWidth > 350 ? sizes.fromConnectorWidth / 4 : x
+        }
+        if(props.connectorType === 'toConnector'){
+          offsetX = sizes.toConnectorWidth > 350 ? sizes.toConnectorWidth / 2 + sizes.fromConnectorWidth : sizes.fromConnectorWidth;
         }
       }
-      else{
-        if(sizes.toConnectorHeight > sizes.svgElementHeight){
-          offsetY = Math.abs(sizes.svgElementHeight - sizes.toConnectorHeight);
-        }
-        else{
-          offsetY = sizes.toConnectorHeight - sizes.svgElementHeight
-        }
-      }
-    } else{
-      // @ts-ignore
-      offsetY = currentElement.y.animVal.value / 2 - 50
-  
-      if(props.connectorType === 'fromConnector'){
-        offsetX = sizes.fromConnectorWidth > 350 ? sizes.fromConnectorWidth / 4 : x
-      }
-      if(props.connectorType === 'toConnector'){
-        offsetX = sizes.toConnectorWidth > 350 ? sizes.toConnectorWidth / 2 + sizes.fromConnectorWidth : sizes.fromConnectorWidth;
-      }
+
+      const viewBox = {x: offsetX, y: offsetY, width: width, height: height};
+
+      CSvg.setViewBox(props.elementId, viewBox);
     }
-
-    const viewBox = {x: offsetX, y: offsetY, width: width, height: height};
-
-    CSvg.setViewBox(props.elementId, viewBox);
   }
 
   static getScripts(functionName: string, animationData: any): any {
@@ -118,10 +128,17 @@ export default class AdditionalFunctions {
   }
 
   static setPopover(targetElement: string | HTMLElement | React.RefObject<HTMLElement> | ((args: any[]) => string | HTMLElement | React.RefObject<HTMLElement>), position: Placement = 'bottom') {
-    return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    if(targetElement){
+      return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
         const originalMethod = descriptor.value;
         descriptor.value = async function (...args: any[]) {
-            const elementTarget = typeof targetElement === 'function' ? targetElement(args) : targetElement;
+          const elementTarget = typeof targetElement === 'function' ? targetElement(args) : targetElement;
+          // @ts-ignore
+          if(document.getElementById(elementTarget) || document.querySelector(elementTarget)){
+            // @ts-ignore
+            console.log(elementTarget, document.getElementById(elementTarget));
+            // @ts-ignore
+            console.log(elementTarget, document.querySelector(elementTarget));
             if(elementTarget !== ''){
               const script = AdditionalFunctions.getScripts(propertyKey, this.animationData);
               if (script) {
@@ -138,10 +155,11 @@ export default class AdditionalFunctions {
             this.setPopoverProps({ isOpen: false });
             
             return result;
-          
+          }
         };
 
         return descriptor;
     };
+    }
   }
 }

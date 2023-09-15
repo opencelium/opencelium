@@ -896,7 +896,8 @@ export const generateSignature = (token, method, url, timestamp) => {
 
 export const sortAlphabeticallyByKey = (array, key) => {
     return array.sort(function(a, b) {
-        const x = a[key].toLowerCase(); const y = b[key].toLowerCase();
+        const x = a[key].toLowerCase(); 
+        const y = b[key].toLowerCase();
         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
     });
 }
@@ -930,45 +931,63 @@ export const positionElementOver = (targetElementIds, offset, hide) => {
     }
 
     let element = document.getElementById('wrapActiveElementId');
-    let targetElements = targetElementIds.map(function(id) {
-        return document.getElementById(id);
-    });
-
-    let targetRects = targetElements.map(function(targetElement) {
-        return targetElement.getBoundingClientRect();
-    });
-
-    let parentRect = element.parentElement.getBoundingClientRect();
-
-    let top = Math.max.apply(null, targetRects.map(function(rect) {
-        return rect.top - parentRect.top;
-    }));
-
-    let left = Math.min.apply(null, targetRects.map(function(rect) {
-        return rect.left - parentRect.left;
-    }));
-
-    let width = Math.max.apply(null, targetRects.map(function(rect) {
-        return rect.left - parentRect.left + rect.width;
-    })) - left;
-
-    let height = Math.max.apply(null, targetRects.map(function(rect) {
-        return rect.top - parentRect.top + rect.height;
-    })) - top;
-
-    top -= offset / 3;
-    left -= offset / 2.5;
-
-    element.style.position = 'absolute';
-    element.style.display = 'block';
-    element.style.top = top + 'px';
-    element.style.left = left + 'px';
-    element.style.width = width + 8 + 'px';
-    element.style.height = height + 'px';
-    element.style.padding = offset + 'px';
-
-    if(hide){
-        element.style.display = 'none'
+    if(element){
+        let targetElements = targetElementIds.map(function(id) {
+            if(id){
+                return document.getElementById(id);
+            }
+        });
+    
+        if(targetElements){
+            let targetRects = targetElements.map(function(targetElement) {
+                if(targetElement){
+                    return targetElement.getBoundingClientRect();
+                }
+            });
+        
+            let parentRect = element.parentElement.getBoundingClientRect();
+        
+            if(targetRects && parentRect){
+                let top = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.top - parentRect.top;
+                    }
+                }));
+            
+                let left = Math.min.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.left - parentRect.left;
+                    }
+                }));
+            
+                let width = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.left - parentRect.left + rect.width;
+                    }
+                })) - left;
+            
+                let height = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.top - parentRect.top + rect.height;
+                    }
+                })) - top;
+            
+                top -= offset / 3;
+                left -= offset / 2.5;
+            
+                element.style.position = 'absolute';
+                element.style.display = 'block';
+                element.style.top = top + 'px';
+                element.style.left = left + 'px';
+                element.style.width = width + 8 + 'px';
+                element.style.height = height + 'px';
+                element.style.padding = offset + 'px';
+            
+                if(hide){
+                    element.style.display = 'none'
+                }
+            }
+        }
     }
 }
 
@@ -982,50 +1001,68 @@ export const positionElementOverByClassName = (targetElementsClasses, offset, hi
     }
 
     let element = document.getElementById('wrapActiveElement');
-    let targetElements = targetElementsClasses.map(function(className) {
-        const el = document.querySelectorAll(className);
-        for(let i = 0; i < el.length; i++) {
-            let computedStyle = window.getComputedStyle(el[i]);
-            if(computedStyle.display !== 'none') {
-                return el[i];
+    if(element){
+        let targetElements = targetElementsClasses.map(function(className) {
+            const el = document.querySelectorAll(className);
+            if(el){
+                for(let i = 0; i < el.length; i++) {
+                    let computedStyle = window.getComputedStyle(el[i]);
+                    if(computedStyle.display !== 'none') {
+                        return el[i];
+                    }
+                }
+            }
+        });
+    
+        if(targetElements){
+            let targetRects = targetElements.map(function(targetElement) {
+                if(targetElement){
+                    return targetElement.getBoundingClientRect();
+                }
+            });
+        
+            let parentRect = element.parentElement.getBoundingClientRect();
+
+            if(targetRects && parentRect){
+                let top = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.top + Math.abs(parentRect.top);
+                    }
+                }));
+            
+                let left = Math.min.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.left - parentRect.left;
+                    }
+                }));
+            
+                let width = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.left - parentRect.left + rect.width;
+                    }
+                })) - left;
+            
+                let height = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.top - parentRect.top + rect.height;
+                    }
+                })) - top;
+            
+                top -= offset / 2;
+                left -= offset / 2;
+            
+                element.style.position = 'absolute';
+                element.style.display = 'block';
+                element.style.top = top + 'px';
+                element.style.left = left + 'px';
+                element.style.width = width + 8 + 'px';
+                element.style.height = height + 8 + 'px';
+                element.style.padding = offset + 'px';
+            
+                if(hide){
+                    element.style.display = 'none'
+                }
             }
         }
-    });
-
-    let targetRects = targetElements.map(function(targetElement) {
-        return targetElement.getBoundingClientRect();
-    });
-
-    let parentRect = element.parentElement.getBoundingClientRect();
-
-    let top = Math.max.apply(null, targetRects.map(function(rect) {
-        return rect.top + Math.abs(parentRect.top);
-    }));
-
-    let left = Math.min.apply(null, targetRects.map(function(rect) {
-        return rect.left - parentRect.left;
-    }));
-
-    let width = Math.max.apply(null, targetRects.map(function(rect) {
-        return rect.left - parentRect.left + rect.width;
-    })) - left;
-
-    let height = Math.max.apply(null, targetRects.map(function(rect) {
-        return rect.top - parentRect.top + rect.height;
-    })) - top;
-
-    top -= offset / 2;
-    left -= offset / 2;
-
-    element.style.position = 'absolute';
-    element.style.display = 'block';
-    element.style.top = top + 'px';
-    element.style.left = left + 'px';
-    element.style.width = width + 8 + 'px';
-    element.style.height = height + 8 + 'px';
-    element.style.padding = offset + 'px';
-
-    if(hide){
-        element.style.display = 'none'
     }
 }
