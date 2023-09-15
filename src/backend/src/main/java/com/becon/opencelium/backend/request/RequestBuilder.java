@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.request;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 public interface RequestBuilder<T>{

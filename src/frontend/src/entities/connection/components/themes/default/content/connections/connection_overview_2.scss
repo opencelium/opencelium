@@ -885,6 +885,10 @@ $DASHED_COLOR: #58854d;
   justify-content: center;
   transition: all 0.3s;
   background: #ffffffee;
+  opacity: 0.3;
+  &:hover{
+    opacity: 1;
+  }
   &::after{
     content: '';
     position: absolute;
@@ -968,6 +972,24 @@ $DASHED_COLOR: #58854d;
 
   .details_maximized {
     height: calc(70vh - 2px);
+  }
+}
+
+.animation_controls{ 
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100000;
+  padding: 15px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FFF;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+  opacity: 0.3;
+  transition: 0.3s;
+  &:hover{
+    opacity: 1;
   }
 }
 
