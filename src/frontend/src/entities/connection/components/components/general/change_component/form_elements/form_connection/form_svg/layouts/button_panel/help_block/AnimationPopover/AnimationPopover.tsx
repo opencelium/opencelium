@@ -31,8 +31,8 @@ const AnimationPopover: FC<AnimationPopoverProps> = (props) => {
       <Popover
         placement={position ? position : 'auto'}
         flip
-        target={target ? target : null}
-        isOpen={target && isOpen ? true : false}
+        target={target}
+        isOpen={isOpen}
       >
         <PopoverBody>
           {text}
