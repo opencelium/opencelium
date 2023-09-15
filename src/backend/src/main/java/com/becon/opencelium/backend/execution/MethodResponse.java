@@ -43,6 +43,7 @@ public class MethodResponse {
     private String exchangeType;
     private String result;
     private String responseFormat;
+    private Integer aggregatorId;
     // contains all responses <indexes, response>
     // where indexes are from loop statement represented as i, j, k -> 0, 3, 1
     private int loopDepth; // indicates how many nested loops are used to execute this method
@@ -97,6 +98,14 @@ public class MethodResponse {
 
     public void setResponseFormat(String responseFormat) {
         this.responseFormat = responseFormat;
+    }
+
+    public Integer getAggregatorId() {
+        return aggregatorId;
+    }
+
+    public void setAggregatorId(Integer aggregatorId) {
+        this.aggregatorId = aggregatorId;
     }
 
     //#ffffff.(response).id

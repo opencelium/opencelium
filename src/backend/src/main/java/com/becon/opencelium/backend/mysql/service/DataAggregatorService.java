@@ -16,5 +16,5 @@ public interface DataAggregatorService {
 
     void deleteById(Integer id);
 
-    List<DataAggregator> findAll(Integer id);
+    List<DataAggregator> findAll();
 }
