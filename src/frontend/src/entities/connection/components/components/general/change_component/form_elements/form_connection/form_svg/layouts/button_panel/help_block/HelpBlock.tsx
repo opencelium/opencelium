@@ -74,12 +74,12 @@ const prepareConnection = (connection: any, connectors: any, invokers: any) => {
 
 const HelpBlock = () => {
   const dispatch = useAppDispatch();
-  const [ animationProps, setAnimationProps ] = useState<any>({connection: CConnection.createConnection(), isSet: false})
+  const [ animationProps, setAnimationProps ] = useState<any>({connection: CConnection.createConnection()})
   const { connectors } = Connector.getReduxState();
   const { invokers, gettingInvokers } = Invoker.getReduxState();
   const [ isVisible, setIsVisible ] = useState(false);
   const { isButtonPanelOpened, videoAnimationName, animationSpeed, isAnimationNotFound } = Connection.getReduxState();
-  const { isAnimationPaused, isDetailsOpened } = ModalConnection.getReduxState();
+  const { isAnimationPaused: isPaused, isDetailsOpened } = ModalConnection.getReduxState();
   const [ index, setIndex ] = useState(0);
 
   const [connectorType, setConnectorType] = useState<ConnectorPanelType>("fromConnector");
@@ -87,6 +87,9 @@ const HelpBlock = () => {
   const [popoverProps, setPopoverProps] = useState<AnimationPopoverProps>(null);
 
   const ref = React.useRef(null);
+
+  const isPausedReference: any = React.useRef();
+  isPausedReference.current = isPaused;
 
   const reference: any = React.useRef();
   reference.current = animationSpeed;
@@ -303,7 +306,6 @@ const HelpBlock = () => {
   }
 
   const animationFunction = async (connectorPanelType: ConnectorPanelType) => {
-
     const refs: any = {};
     const initialConnection = animationData[videoAnimationName].initialConnection;
     const hasInitialConnection = (!!initialConnection && connectorPanelType === 'fromConnector');
@@ -392,23 +394,30 @@ const HelpBlock = () => {
   }, [])
 
   useEffect(() => {
+    if(videoAnimationName) {
+      const fromInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
+      const toInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
+      const hasInitialConnection = !!animationData[videoAnimationName].initialConnection;
+      const cData = hasInitialConnection ? animationData[videoAnimationName].initialConnection : {
+        connectionId: null,
+        fromConnector: {invoker: {name: fromInvoker}},
+        toConnector: {invoker: {name: toInvoker}}
+      };
+      let connection = CConnection.createConnection(cData);
+      const newConnection = prepareConnection(connection, connectors, invokers);
+      setAnimationProps({
+        connection: newConnection,
+      })
+    }
+    setIndex(0);
+    if(isPausedReference.current){
+      dispatch(setAnimationPaused(false))
+    }
+  }, [videoAnimationName])
+
+  useEffect(() => {
     if(animationData[videoAnimationName] && ref.current){
-      if(videoAnimationName && index <= 0 && connectorType === 'fromConnector' && !animationProps.isSet){
-        const fromInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
-        const toInvoker = animationData[videoAnimationName].fromConnector.invoker.name;
-        const hasInitialConnection = !!animationData[videoAnimationName].initialConnection;
-        // @ts-ignore
-        const cData = hasInitialConnection ? animationData[videoAnimationName].initialConnection : {connectionId:null,fromConnector:{invoker:{name:fromInvoker}},toConnector:{invoker:{name:toInvoker}}};
-        let connection = CConnection.createConnection(cData);
-        const newConnection = prepareConnection(connection, connectors, invokers);
-        if(!animationProps.isSet){
-          setAnimationProps({
-            connection: newConnection,
-            isSet: true,
-          })
-        }
-      }
-      if(isButtonPanelOpened && videoAnimationName && !isAnimationPaused && animationProps.isSet) {
+      if(isButtonPanelOpened && videoAnimationName && !isPausedReference.current) {
         if(index < animationData[videoAnimationName].fromConnector.items.length + animationData[videoAnimationName].toConnector.items.length) {
           if(index < animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
             animationFunction('fromConnector');
@@ -424,26 +433,17 @@ const HelpBlock = () => {
             setConnectorType('fromConnector')
             dispatch(setVideoAnimationName(''));
             setIndex(0)
-            setAnimationProps({...animationProps, isSet: false});
-
+            setAnimationProps({...animationProps});
           }
         }
       }
     }
-
-  }, [videoAnimationName, isAnimationPaused, index, animationProps.isSet])
-
-  useEffect(() => {
-    setIndex(0);
-    if(isAnimationPaused){
-      dispatch(setAnimationPaused(!isAnimationPaused))
-    }
-  }, [videoAnimationName])
+  }, [videoAnimationName, isPausedReference.current, index])
 
   useEffect(() => {
     if(isVisible){
       dispatch(setVideoAnimationName(''));
-      setAnimationProps({...animationProps, isSet: false});
+      setAnimationProps({...animationProps});
       dispatch(setAnimationPreviewPanelVisibility(true))
     }
     else{
@@ -506,14 +506,14 @@ const HelpBlock = () => {
               <TooltipButton
                 size={TextSize.Size_40}
                 position={"bottom"}
-                icon={isAnimationPaused ? "play_arrow" : "pause"}
-                tooltip={isAnimationPaused ? "play animation" : 'pause animation'}
+                icon={isPausedReference.current ? "play_arrow" : "pause"}
+                tooltip={isPausedReference.current ? "play animation" : 'pause animation'}
                 target={`animation_play_button`}
                 hasBackground={true}
                 background={ColorTheme.White}
                 color={ColorTheme.Blue}
                 padding="2px"
-                handleClick={() => dispatch(setAnimationPaused(!isAnimationPaused))}
+                handleClick={() => dispatch(setAnimationPaused(!isPausedReference.current))}
               />
               <AnimationSpeedSlider step={1000} min={1000} max={6000}/>
             </div>,

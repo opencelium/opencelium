@@ -210,7 +210,7 @@ const animationData: IAnimationData = {
         {
           index: "2",
           type: "process",
-          name: "ConfigItemCreate",
+          name: "ServiceGet",
           delete: false,
         },
       ]
@@ -223,7 +223,7 @@ const animationData: IAnimationData = {
         {
           index: "0",
           type: "process",
-          name: "TicketUpdate",
+          name: "LinkDelete",
           delete: false,
         },
       ]
@@ -239,25 +239,8 @@ const animationData: IAnimationData = {
         {
           index: "0",
           type: "process",
-          name: "TicketSearch",
-          label: "Ticket Search label",
+          name: "LinkCreate",
           delete: false,
-          body: [
-            {
-              keyName: "StateType",
-              keyValue: "state type value",
-              available: true
-            },
-            {
-              keyName: "StateType2",
-              keyValue: "state type value",
-            },
-          ]
-        },
-        {
-          index: "1",
-          type: "operator",
-          name: "if",
         },
 
       ]
@@ -267,16 +250,31 @@ const animationData: IAnimationData = {
         name: 'otrs'
       },
       items: [
+      ]
+    },
+  },
+  loremIpsum: {
+    fromConnector: {
+      invoker: {
+        name: 'otrs',
+      },
+      items: [
         {
           index: "0",
           type: "process",
-          name: "ConfigItemCreate",
-          label: "Ticket Search label",
+          name: "LinkList",
           delete: false,
         },
       ]
     },
-  }
+    toConnector: {
+      invoker: {
+        name: 'otrs'
+      },
+      items: [
+      ]
+    },
+  },
 };
 
 export default animationData;
