@@ -247,7 +247,7 @@ const InputSelect: FC<InputSelectProps> = ({
                             ref={inputSelectRef}
                             onFocus={() => toggleOptions(true)}
                             onClick={() => toggleOptions(true)}
-                            value={capitalize(searchValue)} onChange={filter}/>
+                            value={searchValue ? capitalize(searchValue) : ''} onChange={filter}/>
                     }
                 </MultipleValuesStyled>
                 {

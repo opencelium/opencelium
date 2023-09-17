@@ -30,7 +30,7 @@ interface CronSuffixStyledProps extends HTMLSpanElement{
 }
 
 interface SelectProps extends InputSelectProps{
-    isForWeek: boolean,
+    isForWeek?: boolean,
     dayShow: boolean,
 }
 
