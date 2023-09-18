@@ -72,4 +72,9 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
     public List<DataAggregator> findAll() {
         return dataAggregatorRepository.findAll();
     }
+
+    @Override
+    public Boolean existsByName(String argName) {
+        return dataAggregatorRepository.existsByName(argName);
+    }
 }

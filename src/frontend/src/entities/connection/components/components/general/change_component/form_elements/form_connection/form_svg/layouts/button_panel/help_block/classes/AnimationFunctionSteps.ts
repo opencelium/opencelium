@@ -23,9 +23,7 @@ export default class AnimationFunctionSteps {
 
         await AdditionalFunctions.delay(animationSpeed);
       }
-      catch(error){
-        console.error('Error')
-      }
+      catch(error){}
     }
   }
 
@@ -43,9 +41,7 @@ export default class AnimationFunctionSteps {
         }
   
         await AdditionalFunctions.delay(animationSpeed);
-      } catch (error) {
-        console.error('Error');
-      }
+      } catch (error) {}
     }
   }
 
@@ -56,9 +52,7 @@ export default class AnimationFunctionSteps {
   async showPopoverForCreateElement(type: string, animationSpeed: number) {
     try {
       await AdditionalFunctions.delay(animationSpeed);
-    } catch (error) {
-      console.error('Error');
-    }
+    } catch (error) {}
   }
 
   async createProcessOrOperator(animationProps: any, animationData: any, connectorType: string, prevElementType: string, animationSpeed: number) {
@@ -121,9 +115,7 @@ export default class AnimationFunctionSteps {
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.error(error);
-    }
+    catch(error){}
   }
 
   async changeElementNameOrType(elementType: string, name: string, animationSpeed: number){
@@ -137,9 +129,7 @@ export default class AnimationFunctionSteps {
         await AdditionalFunctions.delay(animationSpeed)
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async changeProcessLabel(elementType: string, label: any, animationSpeed: number){
@@ -153,9 +143,7 @@ export default class AnimationFunctionSteps {
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async create(elementType: string){
@@ -167,9 +155,7 @@ export default class AnimationFunctionSteps {
         elementType === "process" ? createProcessRef.create() : createOperatorRef.create();
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async setFocusOnCurrentElement(){
@@ -179,9 +165,7 @@ export default class AnimationFunctionSteps {
         processRef.onClick()
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async setCurrentItem(connector: any, index: string, animationSpeed: number){
@@ -193,8 +177,6 @@ export default class AnimationFunctionSteps {
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 }

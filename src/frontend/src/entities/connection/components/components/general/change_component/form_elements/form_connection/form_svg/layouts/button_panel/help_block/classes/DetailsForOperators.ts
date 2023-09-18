@@ -27,9 +27,7 @@ export default class DetailsForOperators {
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log('error');
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('.condition_method_select_left')
@@ -53,13 +51,8 @@ export default class DetailsForOperators {
           await AdditionalFunctions.delay(animationSpeed);
         }
       }
-      else{
-        throw new Error('props is not defined')
-      }
     }
-    catch(error){
-      console.log('error');
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('.condition_param_select_left')
@@ -73,13 +66,8 @@ export default class DetailsForOperators {
           await AdditionalFunctions.delay(animationSpeed);
         }
       }
-      else{
-        throw new Error('props is not defined')
-      }
     }
-    catch(error){
-      console.log('error')
-    }
+    catch(error){}
   }
 
   
@@ -100,13 +88,8 @@ export default class DetailsForOperators {
           await AdditionalFunctions.delay(animationSpeed);
         }
       }
-      else{
-        throw new Error('props is not defined')
-      }
     }
-    catch(error){
-      console.log('error');
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('.condition_relational_operator')
@@ -119,9 +102,7 @@ export default class DetailsForOperators {
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log("error");
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('.condition_property_input')
@@ -137,14 +118,9 @@ export default class DetailsForOperators {
             await AdditionalFunctions.delay(animationSpeed);
           }
         }
-        else{
-          throw new Error('props is not defined')
-        }
       }
     }
-    catch(error){
-      console.log('error');
-    }
+    catch(error){}
   }
 
   async changeRightProperty (animationSpeed: number) {
@@ -155,9 +131,7 @@ export default class DetailsForOperators {
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log('error');
-    }
+    catch(error){}
   }
 
   async removeFocusFromRightProperty (animationSpeed: number) {
@@ -175,14 +149,9 @@ export default class DetailsForOperators {
             }
           }
         }
-        else{
-          throw new Error('props is not defined')
-        }
       }
     }
-    catch(error){
-      console.log('error');
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('.condition_method_select_right')
@@ -206,13 +175,8 @@ export default class DetailsForOperators {
           await AdditionalFunctions.delay(animationSpeed);
         }
       }
-      else{
-        throw new Error('props is not defined')
-      }
     }
-    catch(error){
-      console.log('error');
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('.condition_param_select_right')
@@ -225,13 +189,8 @@ export default class DetailsForOperators {
           await AdditionalFunctions.delay(animationSpeed);
         }
       }
-      else{
-        throw new Error('props is not defined')
-      }
     }
-    catch(error){
-      console.log('error');
-    }
+    catch(error){}
   }
 
   async changeRightParam (animationSpeed: number) {
@@ -243,9 +202,7 @@ export default class DetailsForOperators {
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log('error');
-    }
+    catch(error){}
   }
 
   async removeFocusFromRightParam (animationSpeed: number) {
@@ -261,9 +218,7 @@ export default class DetailsForOperators {
         }
       }
     }
-    catch(error){
-      console.log('error');
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('delete_icon')
@@ -279,8 +234,6 @@ export default class DetailsForOperators {
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log('error');
-    }
+    catch(error){}
   }
 }

@@ -17,24 +17,12 @@ import styled from "styled-components";
 import { AnimationSpeedSliderStyledProps } from "./interfaces";
 
 const AnimationSpeedSliderStyled = styled.div<AnimationSpeedSliderStyledProps>`
-  position: relative;
-  width: 100%;
-  input{
-    position: absolute;
-    transform: rotate(90deg);
-    top: 54px;
-    left: -49px;
-  }
-
-  .speed_steps{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  .speed_label{
     font-size: 12px;
-    top: 0;
-    left: -26px;
-    gap: 9px;
   }
 `;
 

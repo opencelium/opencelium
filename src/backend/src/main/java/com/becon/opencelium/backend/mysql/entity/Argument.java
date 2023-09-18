@@ -18,7 +18,7 @@ public class Argument {
     @JoinColumn(name = "data_aggregator_id")
     private DataAggregator dataAggregator;
 
-    @OneToMany(mappedBy = "argument")
+    @OneToMany(mappedBy = "argument", fetch = FetchType.EAGER)
     private Set<ExecutionArgument> executionArguments;
 
     public Long getId() {
@@ -51,5 +51,13 @@ public class Argument {
 
     public void setDataAggregator(DataAggregator dataAggregator) {
         this.dataAggregator = dataAggregator;
+    }
+
+    public Set<ExecutionArgument> getExecutionArguments() {
+        return executionArguments;
+    }
+
+    public void setExecutionArguments(Set<ExecutionArgument> executionArguments) {
+        this.executionArguments = executionArguments;
     }
 }

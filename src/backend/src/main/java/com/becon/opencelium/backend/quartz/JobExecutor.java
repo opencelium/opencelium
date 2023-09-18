@@ -205,7 +205,7 @@ public class JobExecutor extends QuartzJobBean {
         executionContainer.getMethodResponses().stream().filter(mr -> mr.getAggregatorId() != null)
                 .forEach(mr -> {
                     DataAggregator da = dataAggregatorServiceImp.getById(mr.getAggregatorId());
-                    List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), mr.getData().values().toArray(), da.getArgs(), execution);
+                    List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), mr.getData().values().stream().toList(), da.getArgs(), execution);
                     execution.setExecutionArguments(exarg);
                 });
 
@@ -214,7 +214,7 @@ public class JobExecutor extends QuartzJobBean {
         }
     }
 
-    private List<ExecutionArgument> getExecutionArgs(String script, Object[] responses,Set<Argument> vars, Execution execution) {
+    private List<ExecutionArgument> getExecutionArgs(String script, List<?> responses, Set<Argument> args, Execution execution) {
         try {
             ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
             engine.put("dataModel", responses);
@@ -223,10 +223,10 @@ public class JobExecutor extends QuartzJobBean {
             engine.eval(script);
 
             List<ExecutionArgument> executionArguments = new ArrayList<>();
-            vars.forEach(v -> {
-                Object value = engine.get(v.getName());
+            args.forEach(arg -> {
+                Object value = engine.get(arg.getName());
                 ExecutionArgument executionArgument = new ExecutionArgument();
-                executionArgument.setArgument(v);
+                executionArgument.setArgument(arg);
                 executionArgument.setExecution(execution);
                 executionArgument.setValue(value.toString());
                 executionArguments.add(executionArgument);
