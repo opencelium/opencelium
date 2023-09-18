@@ -17,4 +17,6 @@ public interface DataAggregatorService {
     void deleteById(Integer id);
 
     List<DataAggregator> findAll();
+
+    Boolean existsByName(String name);
 }

@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.mysql.entity.DataAggregator;
 import com.becon.opencelium.backend.mysql.service.DataAggregatorService;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -108,5 +109,24 @@ public class AggregatorController {
     public ResponseEntity<?> delete(@PathVariable Integer id) {
         dataAggregatorService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Checks whether an name of aggregator is unique or not.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Returns true if a name of aggregator is unique.",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/unique/{name}")
+    public ResponseEntity<?> isNameUnique(@PathVariable String name) {
+        Boolean isUnique = !dataAggregatorService.existsByName(name);
+        ResultDTO<Boolean> resultDTO = new ResultDTO<>(isUnique);
+        return ResponseEntity.ok(resultDTO);
     }
 }
