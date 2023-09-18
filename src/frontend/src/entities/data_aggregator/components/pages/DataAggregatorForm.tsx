@@ -26,6 +26,7 @@ import {
 } from "../../redux_toolkit/action_creators/DataAggregatorCreators";
 import {useAppDispatch} from "@application/utils/store";
 import {useNavigate, useParams} from "react-router";
+import { clearError as clearDataAggregatorError } from '@entity/data_aggregator/redux_toolkit/slices/DataAggregatorSlice';
 
 const getStaticWordCompleter = (variables: string[]) => {
     return {
@@ -86,6 +87,11 @@ const DataAggregatorDialogForm:FC<IForm> =
             setName(newName);
             setNameError('');
         }
+        useEffect(() => {
+            return () => {
+                dispatch(clearDataAggregatorError());
+            }
+        }, [])
         useEffect(() => {
             const newMarkers = getMarker(scriptSegmentRef.current.editor, CAggregator.getScriptSegmentComment()+scriptSegment, CAggregator.generateNotExistVar());
             setMarkers(newMarkers)
