@@ -16,7 +16,11 @@
 
 package com.becon.opencelium.backend;
 
+import com.becon.opencelium.backend.mysql.entity.Execution;
+import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.mysql.service.ExecutionServiceImp;
+import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import org.junit.jupiter.api.Test;
@@ -28,10 +32,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ApplicationTests {
 
 	@Autowired
-	private ConnectionNodeServiceImp connectionNodeServiceImp;
+	private ExecutionServiceImp executionServiceImp;
+
+	@Autowired
+	private SchedulerServiceImp schedulerServiceImp;
 
 	@Test
 	public void contextLoads() {
+//		Execution execution = executionServiceImp.findById(5).get();
+//		System.out.println(execution);
+
 //		try	{
 //			ConnectionNode connectionNode = connectionNodeServiceImp.findByConnectionId(48L).get();
 //			System.out.println(connectionNode);

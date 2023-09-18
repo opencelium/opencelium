@@ -16,6 +16,7 @@ public class ExecutionArgument {
     @JoinColumn(name = "aggregator_argument_id")
     private Argument argument;
 
+    @Column(name = "arg_value")
     private String value;
 
     public Execution getExecution() {
