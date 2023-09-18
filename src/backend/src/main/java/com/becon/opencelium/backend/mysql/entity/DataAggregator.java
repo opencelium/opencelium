@@ -20,7 +20,7 @@ public class DataAggregator {
     @Column(name = "is_active")
     private boolean active;
 
-    @OneToMany(mappedBy = "dataAggregator", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "dataAggregator", fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     private Set<Argument> args;
 
     public int getId() {
