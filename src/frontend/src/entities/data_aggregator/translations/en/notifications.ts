@@ -28,7 +28,7 @@ export default {
         [unarchiveAggregatorById.fulfilled.type]: "The aggregator was successfully unarchived.",
     },
     rejected: {
-        [addAggregator.rejected.type]: "There is an error adding aggregator.",
+        [addAggregator.rejected.type]: {"__DEFAULT__": "There is an error adding aggregator."},
         [updateAggregator.rejected.type]: "There is an error updating aggregator.",
         [archiveAggregatorById.rejected.type]: "There is an error archiving aggregator.",
         [unarchiveAggregatorById.rejected.type]: "There is an error unarchiving aggregator.",

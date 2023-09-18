@@ -2,7 +2,6 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
 import {DataAggregatorRequest} from "@entity/data_aggregator/requests/classes/DataAggregator";
-import {NotificationTemplateRequest} from "@entity/notification_template/requests/classes/NotificationTemplate";
 
 export const addAggregator = createAsyncThunk(
     'data_aggregator/add',
@@ -10,7 +9,7 @@ export const addAggregator = createAsyncThunk(
         try {
             const checkNameRequest = new DataAggregatorRequest({endpoint: `/unique/${aggregator.name}`});
             const responseNameRequest = await checkNameRequest.checkAggregatorName();
-            if(!responseNameRequest.data.result){
+            if(responseNameRequest.data.result === false){
                 return thunkAPI.rejectWithValue(responseNameRequest.data);
             }
             const request = new DataAggregatorRequest();
@@ -30,7 +29,7 @@ export const updateAggregator = createAsyncThunk(
             if(dataAggregatorState.currentAggregator && dataAggregatorState.currentAggregator.name !== aggregator.name){
                 const checkNameRequest = new DataAggregatorRequest({endpoint: `/unique/${aggregator.name}`});
                 const responseNameRequest = await checkNameRequest.checkAggregatorName();
-                if(!responseNameRequest.data.result){
+                if(responseNameRequest.data.result === false){
                     return thunkAPI.rejectWithValue(responseNameRequest.data);
                 }
             }

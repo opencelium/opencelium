@@ -57,6 +57,9 @@ export const dataAggregatorSlice = createSlice({
     name: 'data_aggregator',
     initialState,
     reducers: {
+        clearError: (state) => {
+            state.error = null;
+        },
         setCurrentAggregator: (state, action: PayloadAction<ModelDataAggregator>) => {
             state.currentAggregator = action.payload;
         }
@@ -74,7 +77,7 @@ export const dataAggregatorSlice = createSlice({
         },
         [addAggregator.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.addingAggregator = API_REQUEST_STATE.ERROR;
-            if(!action.payload.result){
+            if(action.payload.result === false){
                 state.isCurrentAggregatorHasUniqueName = TRIPLET_STATE.FALSE;
             }
             state.error = action.payload;
@@ -166,7 +169,7 @@ export const dataAggregatorSlice = createSlice({
 })
 
 export const {
-    setCurrentAggregator,
+    setCurrentAggregator, clearError,
 } = dataAggregatorSlice.actions;
 
 export default dataAggregatorSlice.reducer;
