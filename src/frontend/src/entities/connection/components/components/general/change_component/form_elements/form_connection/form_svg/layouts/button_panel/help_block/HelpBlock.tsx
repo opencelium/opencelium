@@ -35,7 +35,7 @@ import { Connector } from "@entity/connector/classes/Connector";
 import {ModalConnection} from "@root/classes/ModalConnection";
 import { Connection } from "@entity/connection/classes/Connection";
 import { setVideoAnimationName, setAnimationPreviewPanelVisibility, setIsAnamationNotFoud } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
-import AnimationSpeedSlider from "./AnimationSpeedSlider/AnimationSpeedSlider";
+import AnimationSpeed from "./AnimationSpeed/AnimationSpeed";
 
 import DetailsForOperators from "./classes/DetailsForOperators";
 import DetailsForProcess from "./classes/DetailsForProcess";
@@ -277,9 +277,7 @@ const HelpBlock = () => {
                     throw new Error('props is not defined')
                   }
                 }
-                catch(e){
-                  console.log('ошибка', e);
-                }
+                catch(e){}
               }
 
               if(connectorType === 'toConnector' && bodyData[bodyIndex].reference[referenceIndex].enhancementDescription){
@@ -515,7 +513,7 @@ const HelpBlock = () => {
                 padding="2px"
                 handleClick={() => dispatch(setAnimationPaused(!isPausedReference.current))}
               />
-              <AnimationSpeedSlider step={1} min={-2} max={2}/>
+              <AnimationSpeed step={1} min={-2} max={2}/>
             </div>,
             document.body
           )}

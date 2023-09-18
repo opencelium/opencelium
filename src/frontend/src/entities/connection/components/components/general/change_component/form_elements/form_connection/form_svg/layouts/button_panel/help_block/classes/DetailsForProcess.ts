@@ -44,26 +44,23 @@ export default class DetailsForProcess{
         label.toggleEdit();
         
         await AdditionalFunctions.delay(animationSpeed);
+
+        AdditionalFunctions.removeOutlineById(["Label", "Label_option"]);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async endEditLabel (animationSpeed: number) {
     try{
       const label = RefFunctions.getLabel(this.ref);
       if(label){
-        AdditionalFunctions.removeOutlineById(["Label", "Label_option"]);
         label.cancelEdit();
   
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('url_option')
@@ -75,11 +72,11 @@ export default class DetailsForProcess{
         AdditionalFunctions.addOutlineById(["url_label", "url_option"]);
           
         await AdditionalFunctions.delay(animationSpeed);
+
+        AdditionalFunctions.removeOutlineById(["url_label", "url_option"]);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   
@@ -114,9 +111,7 @@ export default class DetailsForProcess{
         }
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('input_no_id')
@@ -130,9 +125,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover((args: any[]) => {
@@ -152,9 +145,7 @@ export default class DetailsForProcess{
         }
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async closeUrlDialog (animationSpeed: number) {
@@ -165,9 +156,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('header_option')
@@ -180,9 +169,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async closeHeaderDialog (animationSpeed: number) {
@@ -195,9 +182,7 @@ export default class DetailsForProcess{
         return AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('body_option')
@@ -207,9 +192,7 @@ export default class DetailsForProcess{
   
       AdditionalFunctions.removeOutlineById(["body_label", "body_option"]);
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async openBodyDialog (animationSpeed: number) {
@@ -220,9 +203,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('.react-json-view .icon-container')
@@ -238,9 +219,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('.react-json-view .click-to-add')
@@ -254,9 +233,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async clickAddKeysButton (animationSpeed: number) {
@@ -269,9 +246,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   
@@ -291,9 +266,7 @@ export default class DetailsForProcess{
         }
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   
@@ -308,9 +281,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   
@@ -325,9 +296,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('.react-json-view .click-to-edit')
@@ -347,9 +316,7 @@ export default class DetailsForProcess{
         }
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async clickEditKeyValueButton (index: any, animationSpeed: number) {
@@ -367,9 +334,7 @@ export default class DetailsForProcess{
         }
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('.react-json-view .variable-editor')
@@ -394,9 +359,7 @@ export default class DetailsForProcess{
         }
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   
@@ -430,9 +393,7 @@ export default class DetailsForProcess{
         }
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('input_no_id')
@@ -447,9 +408,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async addBodyMethodAndParam (currentItemId: any, animationSpeed: number) {
@@ -464,9 +423,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover((args: any[]) => {
@@ -492,9 +449,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('enhancement_description')
@@ -514,9 +469,7 @@ export default class DetailsForProcess{
         }
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('.ace_content')
@@ -534,9 +487,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   
@@ -559,9 +510,7 @@ export default class DetailsForProcess{
         }
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
   
   async closeBodyDialog (animationSpeed: number) {
@@ -573,9 +522,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('response_label')
@@ -591,9 +538,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   @AdditionalFunctions.setPopover('delete_icon')
@@ -609,9 +554,7 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 
   async showResult (dispatch: any, animationSpeed: number) {
@@ -626,8 +569,6 @@ export default class DetailsForProcess{
         await AdditionalFunctions.delay(animationSpeed);
       }
     }
-    catch(error){
-      console.log(error);
-    }
+    catch(error){}
   }
 }

@@ -135,10 +135,6 @@ export default class AdditionalFunctions {
           const elementTarget = typeof targetElement === 'function' ? targetElement(args) : targetElement;
           // @ts-ignore
           if(document.getElementById(elementTarget) || document.querySelector(elementTarget)){
-            // @ts-ignore
-            console.log(elementTarget, document.getElementById(elementTarget));
-            // @ts-ignore
-            console.log(elementTarget, document.querySelector(elementTarget));
             if(elementTarget !== ''){
               const script = AdditionalFunctions.getScripts(propertyKey, this.animationData);
               if (script) {

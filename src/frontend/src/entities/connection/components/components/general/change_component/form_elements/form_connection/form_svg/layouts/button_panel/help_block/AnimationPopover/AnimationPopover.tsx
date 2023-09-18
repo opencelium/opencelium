@@ -24,7 +24,7 @@ const AnimationPopover: FC<AnimationPopoverProps> = (props) => {
 
   const {target, isOpen, position, text} = props;
 
-  if(!target) return null;
+  if(!target || (!document.querySelector(target) && !document.getElementById(target))) return null;
 
   return (
     <AnimationPopoverStyled>
