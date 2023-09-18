@@ -97,6 +97,27 @@ public class AggregatorController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Modifies Data Aggregator in the system by accepting data in the request body with ID")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Data Aggregator has been successfully updated",
+                    content = @Content(schema = @Schema(implementation = DataAggregatorDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping
+    public ResponseEntity<DataAggregatorDTO> update(@RequestBody DataAggregatorDTO dataAggregatorDTO){
+        DataAggregator dataAggregator = dataAggregatorService.getById(dataAggregatorDTO.getId());
+        dataAggregator.setActive(dataAggregatorDTO.isActive());
+        dataAggregatorService.save(dataAggregator);
+        DataAggregatorDTO response = dataAggregatorService.convertToDto(dataAggregator);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "Deletes a data aggregator by provided aggregator ID")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "204",

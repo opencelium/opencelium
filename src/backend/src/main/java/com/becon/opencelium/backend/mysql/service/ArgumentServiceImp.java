@@ -14,6 +14,7 @@ public class ArgumentServiceImp implements ArgumentService {
     @Override
     public ArgumentDTO convertToDto(Argument argument) {
         ArgumentDTO argumentDTO = new ArgumentDTO();
+        argumentDTO.setId(argument.getId());
         argumentDTO.setName(argument.getName());
         argumentDTO.setDescription(argument.getDescription());
         return argumentDTO;
@@ -22,6 +23,7 @@ public class ArgumentServiceImp implements ArgumentService {
     @Override
     public Argument convertToEntity(ArgumentDTO argumentDTO) {
         Argument argument = new Argument();
+        argument.setId(argumentDTO.getId());
         argument.setName(argumentDTO.getName());
         argument.setDescription(argumentDTO.getDescription());
         return argument;
