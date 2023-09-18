@@ -93,6 +93,9 @@ public class AggregatorController {
     public ResponseEntity<DataAggregatorDTO> save(@RequestBody DataAggregatorDTO dataAggregatorDTO){
         DataAggregator dataAggregator = dataAggregatorService.convertToEntity(dataAggregatorDTO);
         dataAggregatorService.save(dataAggregator);
+
+        // added this field because after saving operation it didn't update id in dataAggregator object.
+        dataAggregator = dataAggregatorService.getById(dataAggregator.getId());
         DataAggregatorDTO response = dataAggregatorService.convertToDto(dataAggregator);
         return ResponseEntity.ok(response);
     }

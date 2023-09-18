@@ -7,6 +7,7 @@ import java.util.List;
 @Entity
 @Table(name = "aggregator_argument")
 public class Argument {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
