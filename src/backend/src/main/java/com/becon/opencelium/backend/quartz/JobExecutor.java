@@ -207,11 +207,12 @@ public class JobExecutor extends QuartzJobBean {
                     DataAggregator da = dataAggregatorServiceImp.getById(mr.getAggregatorId());
                     List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), mr.getData().values().stream().toList(), da.getArgs(), execution);
                     execution.setExecutionArguments(exarg);
+                    if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {
+                        executionServiceImp.save(execution);
+                    }
                 });
 
-        if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {
-            executionServiceImp.save(execution);
-        }
+
     }
 
     private List<ExecutionArgument> getExecutionArgs(String script, List<?> responses, Set<Argument> args, Execution execution) {
@@ -226,12 +227,14 @@ public class JobExecutor extends QuartzJobBean {
             args.forEach(arg -> {
                 Object value = engine.get(arg.getName());
                 ExecutionArgument executionArgument = new ExecutionArgument();
-                executionArgument.setArgument(arg);
+                ExecutionArgument.PK pk = new ExecutionArgument.PK(execution, arg);
                 executionArgument.setExecution(execution);
+                executionArgument.setArgument(arg);
                 executionArgument.setValue(value.toString());
                 executionArguments.add(executionArgument);
             });
 
+//            args.forEach(arg -> arg.setExecutionArguments(executionArguments));
             return executionArguments;
         } catch (Exception e) {
             e.printStackTrace();

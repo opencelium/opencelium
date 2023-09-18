@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import jakarta.persistence.*;
 
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "aggregator_argument")
@@ -19,7 +19,7 @@ public class Argument {
     private DataAggregator dataAggregator;
 
     @OneToMany(mappedBy = "argument", fetch = FetchType.EAGER)
-    private Set<ExecutionArgument> executionArguments;
+    private List<ExecutionArgument> executionArguments;
 
     public Long getId() {
         return id;
@@ -53,11 +53,11 @@ public class Argument {
         this.dataAggregator = dataAggregator;
     }
 
-    public Set<ExecutionArgument> getExecutionArguments() {
+    public List<ExecutionArgument> getExecutionArguments() {
         return executionArguments;
     }
 
-    public void setExecutionArguments(Set<ExecutionArgument> executionArguments) {
+    public void setExecutionArguments(List<ExecutionArgument> executionArguments) {
         this.executionArguments = executionArguments;
     }
 }
