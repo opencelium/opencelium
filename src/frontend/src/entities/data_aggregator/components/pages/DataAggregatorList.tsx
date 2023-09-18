@@ -28,7 +28,7 @@ const DataAggregatorList:FC =
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
-    }, [aggregators])
+    }, [JSON.stringify(aggregators)])
     const getListActions = (entity: ModelDataAggregator) => {
         return (
             <React.Fragment>
@@ -47,9 +47,9 @@ const DataAggregatorList:FC =
                         aggregator={aggregator}
                         onClick={() => {
                             if(aggregator.active === false){
-                                dispatch(archiveAggregatorById(aggregator.id));
-                            } else{
                                 dispatch(unarchiveAggregatorById(aggregator.id));
+                            } else{
+                                dispatch(archiveAggregatorById(aggregator.id));
                             }
                         }}
                     />

@@ -34,8 +34,8 @@ export const updateAggregator = createAsyncThunk(
                     return thunkAPI.rejectWithValue(responseNameRequest.data);
                 }
             }
-            const request = new DataAggregatorRequest({endpoint: `/${aggregator.id}`});
-            const response = await request.updateAggregator(aggregator);
+            const request = new DataAggregatorRequest();
+            const response = await request.addAggregator(aggregator);
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -72,7 +72,7 @@ export const archiveAggregatorById = createAsyncThunk(
     'data_aggregator/archive/byId',
     async(id: string, thunkAPI) => {
         try {
-            const request = new DataAggregatorRequest({endpoint: `active/${id}`});
+            const request = new DataAggregatorRequest({endpoint: `/${id}/status`});
             await request.archiveAggregator();
             return id;
         } catch(e){
@@ -85,7 +85,7 @@ export const unarchiveAggregatorById = createAsyncThunk(
     'data_aggregator/unarchive/byId',
     async(id: string, thunkAPI) => {
         try {
-            const request = new DataAggregatorRequest({endpoint: `active/${id}`});
+            const request = new DataAggregatorRequest({endpoint: `/${id}/status`});
             await request.unarchiveAggregator();
             return id;
         } catch(e){
@@ -98,7 +98,7 @@ export const deleteArgument = createAsyncThunk(
     'data_aggregator/argument/delete/byId',
     async(argumentId: string, thunkAPI) => {
         try {
-            const request = new DataAggregatorRequest({endpoint: `/${argumentId}`});
+            const request = new DataAggregatorRequest({endpoint: `/argument/${argumentId}`});
             await request.deleteArgument();
             return argumentId;
         } catch(e){

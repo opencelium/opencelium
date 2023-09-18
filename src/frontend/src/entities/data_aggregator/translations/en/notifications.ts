@@ -29,11 +29,9 @@ export default {
     },
     rejected: {
         [addAggregator.rejected.type]: "There is an error adding aggregator.",
-        [updateAggregator.rejected.type]: {
-            "__DEFAULT__": "There is an error updating aggregator."
-        },
-        [archiveAggregatorById.fulfilled.type]: "There is an error archiving aggregator.",
-        [unarchiveAggregatorById.fulfilled.type]: "There is an error unarchiving aggregator.",
+        [updateAggregator.rejected.type]: "There is an error updating aggregator.",
+        [archiveAggregatorById.rejected.type]: "There is an error archiving aggregator.",
+        [unarchiveAggregatorById.rejected.type]: "There is an error unarchiving aggregator.",
         [getAggregatorById.rejected.type]: {
             "__DEFAULT__": "There is an error fetching aggregator."
         },
