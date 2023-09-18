@@ -32,11 +32,11 @@ export class DataAggregatorRequest extends Request implements IDataAggregator {
     }
 
     async archiveAggregator(): Promise<AxiosResponse<IResponse>>{
-        return super.put<IResponse>({active: true});
+        return super.put<IResponse>({active: false});
     }
 
     async unarchiveAggregator(): Promise<AxiosResponse<IResponse>>{
-        return super.put<IResponse>({active: false});
+        return super.put<IResponse>({active: true});
     }
 
     async deleteArgument(): Promise<AxiosResponse<IResponse>>{

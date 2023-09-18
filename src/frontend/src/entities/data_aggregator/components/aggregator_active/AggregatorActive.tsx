@@ -24,12 +24,9 @@ const AggregatorActive: FC<AggregatorActiveProps> =
          aggregator,
          onClick,
      }) => {
-        const action = () => {
-            onClick();
-        }
         return (
             <td key={'active'}>
-                <InputSwitch readOnly={false} color={ColorTheme.Turquoise} isChecked={aggregator.active === false} position={'middle'} onClick={action}/>
+                <InputSwitch readOnly={false} color={ColorTheme.Turquoise} isChecked={aggregator.active === false} position={'middle'} onClick={onClick}/>
             </td>
         );
     }

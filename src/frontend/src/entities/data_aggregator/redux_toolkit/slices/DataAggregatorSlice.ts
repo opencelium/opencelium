@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createSlice, PayloadAction, current} from "@reduxjs/toolkit";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {ICommonState} from "@application/interfaces/core";
 import {CommonState} from "@application/utils/store";
@@ -129,7 +129,7 @@ export const dataAggregatorSlice = createSlice({
         },
         [archiveAggregatorById.fulfilled.type]: (state, action: PayloadAction<string>) => {
             state.archivingAggregator = API_REQUEST_STATE.FINISH;
-            state.aggregators = state.aggregators.map(aggregator => aggregator.id === action.payload ? {...aggregator, active: false} : aggregator);
+            state.aggregators = current(state.aggregators).map(aggregator => aggregator.id === action.payload ? {...aggregator, active: false} : aggregator);
             state.error = null;
         },
         [archiveAggregatorById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -141,7 +141,7 @@ export const dataAggregatorSlice = createSlice({
         },
         [unarchiveAggregatorById.fulfilled.type]: (state, action: PayloadAction<string>) => {
             state.unarchivingAggregator = API_REQUEST_STATE.FINISH;
-            state.aggregators = state.aggregators.map(aggregator => aggregator.id === action.payload ? {...aggregator, active: true} : aggregator);
+            state.aggregators = current(state.aggregators).map(aggregator => aggregator.id === action.payload ? {...aggregator, active: true} : aggregator);
             state.error = null;
         },
         [unarchiveAggregatorById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
