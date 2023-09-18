@@ -350,3 +350,6 @@ ALTER TABLE data_aggregator ADD CONSTRAINT unique_name UNIQUE (name);
 --changeset 3.2:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE data_aggregator ADD COLUMN is_active TINYINT(1);
 
+--changeset 3.2:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE data_aggregator ALTER COLUMN is_active SET DEFAULT 1;
+
