@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.mysql.entity.DataAggregator;
+import com.becon.opencelium.backend.mysql.service.ArgumentService;
 import com.becon.opencelium.backend.mysql.service.DataAggregatorService;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
@@ -28,10 +29,13 @@ import java.util.stream.Collectors;
 public class AggregatorController {
 
     private final DataAggregatorService dataAggregatorService;
+    private final ArgumentService argumentService;
 
     @Autowired
-    public AggregatorController(@Qualifier("DataAggregatorServiceImp") DataAggregatorService dataAggregatorService) {
+    public AggregatorController(@Qualifier("DataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
+                                @Qualifier("ArgumentServiceImp")ArgumentService argumentService) {
         this.dataAggregatorService = dataAggregatorService;
+        this.argumentService = argumentService;
     }
 
 
@@ -128,5 +132,25 @@ public class AggregatorController {
         Boolean isUnique = !dataAggregatorService.existsByName(name);
         ResultDTO<Boolean> resultDTO = new ResultDTO<>(isUnique);
         return ResponseEntity.ok(resultDTO);
+    }
+
+
+    // --------------------------------- ARGUMENTS ---------------------------------------
+    @Operation(summary = "Deletes an argument by provided argument ID and breaks relation with execution")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "204",
+                    description = "Argument has been successfully deleted.",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping("/argument/{argId}")
+    public ResponseEntity<?> deleteArgument(@PathVariable Integer argId) {
+        argumentService.deleteById(argId);
+        return ResponseEntity.noContent().build();
     }
 }

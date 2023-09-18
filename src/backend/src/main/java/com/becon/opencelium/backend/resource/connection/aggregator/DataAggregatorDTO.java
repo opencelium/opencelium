@@ -7,6 +7,7 @@ public class DataAggregatorDTO {
     private String name;
     private List<ArgumentDTO> args;
     private String script;
+    private boolean isActive;
 
     public int getId() {
         return id;
@@ -38,5 +39,13 @@ public class DataAggregatorDTO {
 
     public void setScript(String script) {
         this.script = script;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

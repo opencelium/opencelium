@@ -202,16 +202,19 @@ public class JobExecutor extends QuartzJobBean {
 
     // TODO: Refactor so that Execution of aggregator should be in separate class;
     private void executeAggregator(ExecutionContainer executionContainer, Execution execution) {
-        executionContainer.getMethodResponses().stream().filter(mr -> mr.getAggregatorId() != null)
+        executionContainer.getMethodResponses().stream()
+                .filter(mr -> mr.getAggregatorId() != null)
                 .forEach(mr -> {
                     DataAggregator da = dataAggregatorServiceImp.getById(mr.getAggregatorId());
+                    if (!da.isActive()) {
+                        return;
+                    }
                     List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), mr.getData().values().stream().toList(), da.getArgs(), execution);
                     execution.setExecutionArguments(exarg);
+                    if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {
+                        executionServiceImp.save(execution);
+                    }
                 });
-
-        if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {
-            executionServiceImp.save(execution);
-        }
     }
 
     private List<ExecutionArgument> getExecutionArgs(String script, List<?> responses, Set<Argument> args, Execution execution) {
@@ -226,12 +229,14 @@ public class JobExecutor extends QuartzJobBean {
             args.forEach(arg -> {
                 Object value = engine.get(arg.getName());
                 ExecutionArgument executionArgument = new ExecutionArgument();
-                executionArgument.setArgument(arg);
+                ExecutionArgument.PK pk = new ExecutionArgument.PK(execution, arg);
                 executionArgument.setExecution(execution);
+                executionArgument.setArgument(arg);
                 executionArgument.setValue(value.toString());
                 executionArguments.add(executionArgument);
             });
 
+//            args.forEach(arg -> arg.setExecutionArguments(executionArguments));
             return executionArguments;
         } catch (Exception e) {
             e.printStackTrace();
