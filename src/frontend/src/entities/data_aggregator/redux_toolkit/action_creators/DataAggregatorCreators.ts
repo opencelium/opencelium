@@ -27,15 +27,15 @@ export const updateAggregator = createAsyncThunk(
         try {
             // @ts-ignore
             const dataAggregatorState = thunkAPI.getState().dataAggregatorReducer;
-            if(dataAggregatorState.currentAggregator && dataAggregatorState.currentAggregator.title !== aggregator.name){
+            if(dataAggregatorState.currentAggregator && dataAggregatorState.currentAggregator.name !== aggregator.name){
                 const checkNameRequest = new DataAggregatorRequest({endpoint: `/unique/${aggregator.name}`});
                 const responseNameRequest = await checkNameRequest.checkAggregatorName();
                 if(!responseNameRequest.data.result){
                     return thunkAPI.rejectWithValue(responseNameRequest.data);
                 }
             }
-            const request = new DataAggregatorRequest();
-            const response = await request.addAggregator(aggregator);
+            const request = new DataAggregatorRequest({endpoint: `/${aggregator.id}`});
+            const response = await request.updateAggregator(aggregator);
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
