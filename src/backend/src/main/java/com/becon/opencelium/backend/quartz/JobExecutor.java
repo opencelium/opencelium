@@ -215,8 +215,6 @@ public class JobExecutor extends QuartzJobBean {
                         executionServiceImp.save(execution);
                     }
                 });
-
-
     }
 
     private List<ExecutionArgument> getExecutionArgs(String script, List<?> responses, Set<Argument> args, Execution execution) {

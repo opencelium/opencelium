@@ -18,7 +18,7 @@ public class Argument {
     @JoinColumn(name = "data_aggregator_id")
     private DataAggregator dataAggregator;
 
-    @OneToMany(mappedBy = "argument", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "argument", fetch = FetchType.EAGER, orphanRemoval = true)
     private List<ExecutionArgument> executionArguments;
 
     public Long getId() {
