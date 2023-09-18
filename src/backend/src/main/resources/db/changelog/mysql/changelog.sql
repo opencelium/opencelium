@@ -334,3 +334,13 @@ CREATE TABLE aggregator_argument (
     FOREIGN KEY (data_aggregator_id) REFERENCES data_aggregator(id)
 );
 
+--changeset 3.2:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE execution_argument (
+    execution_id bigint(20) NOT NULL,
+    aggregator_argument_id INT NOT NULL,
+    arg_value VARCHAR(255),
+    PRIMARY KEY (execution_id, aggregator_argument_id),
+    FOREIGN KEY (execution_id) REFERENCES execution(id),
+    FOREIGN KEY (aggregator_argument_id) REFERENCES aggregator_argument(id)
+);
+

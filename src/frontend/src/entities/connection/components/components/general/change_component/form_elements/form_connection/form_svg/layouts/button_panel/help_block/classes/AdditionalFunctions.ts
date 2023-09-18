@@ -4,14 +4,23 @@ import { Placement } from "react-bootstrap/esm/types";
 import { positionElementOver, positionElementOverByClassName } from "@application/utils/utils";
 import {store} from "@application/utils/store";
 
+
 export default class AdditionalFunctions {
+  static pauseTimeout: any = null;
+  static pauseFunction: any = null;
   static async delay(ms: any) {
-    return await new Promise((resolve, reject) => {
+    return await new Promise(async (resolve, reject) => {
       const isPaused = store.getState().modalConnectionReducer.isAnimationPaused;
       if (!isPaused) {
-        setTimeout(resolve, ms);
+        await new Promise(async () => {
+          setTimeout(resolve, ms);
+        })
       } else {
-        reject();
+        await new Promise(async () => {
+          this.pauseTimeout = setTimeout(resolve, 1000 * 60 * 60 * 24);
+          this.pauseFunction = resolve;
+        })
+        //reject();
       }
     });
   }
@@ -19,7 +28,7 @@ export default class AdditionalFunctions {
   static async addOutlineById (idsArray: any, withDelay = false, animationSpeed = 0) {
     if(idsArray.length > 0){
       positionElementOver(idsArray, 10);
-    
+
       if(withDelay){
         return AdditionalFunctions.delay(animationSpeed);
       }
@@ -77,13 +86,13 @@ export default class AdditionalFunctions {
 
       if(props.forResult){
         offsetX = ((sizes.fromConnectorWidth + sizes.toConnectorWidth + 50) - sizes.svgElementWidth) / 2;
-        
+
         if(sizes.fromConnectorHeight > sizes.toConnectorHeight){
           if(sizes.fromConnectorHeight > sizes.svgElementHeight){
             offsetY = Math.abs(sizes.svgElementHeight - sizes.fromConnectorHeight);
           }
           else{
-            offsetY = sizes.fromConnectorHeight - sizes.svgElementHeight 
+            offsetY = sizes.fromConnectorHeight - sizes.svgElementHeight
           }
         }
         else{
@@ -97,7 +106,7 @@ export default class AdditionalFunctions {
       } else{
         // @ts-ignore
         offsetY = currentElement.y.animVal.value / 2 - 50
-    
+
         if(props.connectorType === 'fromConnector'){
           offsetX = sizes.fromConnectorWidth > 350 ? sizes.fromConnectorWidth / 4 : x
         }
@@ -149,7 +158,7 @@ export default class AdditionalFunctions {
             const result = await originalMethod.apply(this, args);
 
             this.setPopoverProps({ isOpen: false });
-            
+
             return result;
           }
         };

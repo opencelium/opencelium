@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.mysql.service.ExecutionServiceImp;
 import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.quartz.JobExecutor;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -50,6 +52,9 @@ public class ExecutionAspect {
 
     @Autowired
     private EmailServiceImpl emailService;
+
+    @Autowired
+    private ExecutionServiceImp executionServiceImp;
 
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -116,7 +121,7 @@ public class ExecutionAspect {
 
     private String replaceConstants(String text, User user, Exception ex, EventNotification en) {
         String result = text;
-        List<String> constants = getConstants(text);
+        List<String> constants = getConstants(text, "\\{(.*?)\\}");
         Map<String, String> cValues = getConstantValues(constants, user, ex, en);
         if (cValues == null || cValues.isEmpty()) {
             return result;
@@ -127,12 +132,32 @@ public class ExecutionAspect {
             String s = "{" + constant + "}";
             result = result.replace(s, value);
         }
+
+        // for smart notification.
+        List<String> args = getConstants(text, "\\{{(.*?)\\}}");
+        Map<String, String> argsValues = getArgsValues(args, en);
+        for (Map.Entry<String, String> entry : argsValues.entrySet()) {
+            String arg = entry.getKey();
+            String value = entry.getValue();
+            String s = "{{" + arg + "}}";
+            result = result.replace(s, value);
+        }
         return result;
     }
 
-    private List<String> getConstants(String text) {
+    private Map<String, String> getArgsValues(List<String> args, EventNotification en) {
+        long lExId = en.getScheduler().getLastExecution().getId();
+        Execution execution = executionServiceImp.findById(lExId).orElse(null);
+        Objects.requireNonNull(execution);
+
+        return execution.getExecutionArguments().stream()
+                .filter(ea -> args.contains(ea.getArgument().getName()))
+                .collect(Collectors.toMap(ea -> ea.getArgument().getName(), ExecutionArgument::getValue));
+    }
+
+    private List<String> getConstants(String text, String regex) {
         ArrayList<String> constants = new ArrayList<>();
-        Pattern p = Pattern.compile("\\{(.*?)\\}");
+        Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(text);
 
         while (m.find()){

@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.quartz;
 
 import com.becon.opencelium.backend.configuration.WebSocketConfig;
+import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.ConnectorExecutor;
@@ -24,11 +25,10 @@ import com.becon.opencelium.backend.execution.ExecutionContainer;
 import com.becon.opencelium.backend.execution.log.msg.ExecutionLog;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.logger.OcLogger;
-import com.becon.opencelium.backend.mysql.entity.Execution;
-import com.becon.opencelium.backend.mysql.entity.LastExecution;
-import com.becon.opencelium.backend.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.service.*;
 import com.becon.opencelium.backend.neo4j.service.*;
+import org.openjdk.nashorn.api.scripting.JSObject;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -39,10 +39,11 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 
 @Component
 public class JobExecutor extends QuartzJobBean {
@@ -91,6 +92,9 @@ public class JobExecutor extends QuartzJobBean {
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
+
+    @Autowired
+    private DataAggregatorServiceImp dataAggregatorServiceImp;
 
     @Autowired
     private Environment environment;
@@ -157,6 +161,7 @@ public class JobExecutor extends QuartzJobBean {
                     executionContainer, connectorExecutor);
             connectionExecutor.start(scheduler);
 
+            executeAggregator(executionContainer, execution);
             logger.logAndSend("======================END_OF_EXECUTION======================");
         }catch (Exception e){
             e.printStackTrace();
@@ -175,6 +180,7 @@ public class JobExecutor extends QuartzJobBean {
                 lastExecution.setFailDuration(diffInMillSeconds);
                 lastExecutionServiceImp.save(lastExecution);
             }
+            executeAggregator(executionContainer, execution);
             throw new RuntimeException("EXECUTION_FAILED");
         }
 
@@ -192,5 +198,44 @@ public class JobExecutor extends QuartzJobBean {
             lastExecution.setSuccessExecutionId(execution.getId());
             lastExecutionServiceImp.save(lastExecution);
         }
+    }
+
+    // TODO: Refactor so that Execution of aggregator should be in separate class;
+    private void executeAggregator(ExecutionContainer executionContainer, Execution execution) {
+        executionContainer.getMethodResponses().stream().filter(mr -> mr.getAggregatorId() != null)
+                .forEach(mr -> {
+                    DataAggregator da = dataAggregatorServiceImp.getById(mr.getAggregatorId());
+                    List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), mr.getData().values().toArray(), da.getArgs(), execution);
+                    execution.setExecutionArguments(exarg);
+                });
+
+        if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {
+            executionServiceImp.save(execution);
+        }
+    }
+
+    private List<ExecutionArgument> getExecutionArgs(String script, Object[] responses,Set<Argument> vars, Execution execution) {
+        try {
+            ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+            engine.put("dataModel", responses);
+            JSObject obj = (JSObject)engine.eval("JSON.parse(dataModel)");
+            engine.put(AggrConst.RESPONSES, obj);
+            engine.eval(script);
+
+            List<ExecutionArgument> executionArguments = new ArrayList<>();
+            vars.forEach(v -> {
+                Object value = engine.get(v.getName());
+                ExecutionArgument executionArgument = new ExecutionArgument();
+                executionArgument.setArgument(v);
+                executionArgument.setExecution(execution);
+                executionArgument.setValue(value.toString());
+                executionArguments.add(executionArgument);
+            });
+
+            return executionArguments;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -66,8 +66,8 @@ public class AggregatorController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<List<DataAggregatorDTO>> getAll(@PathVariable Integer id) {
-        List<DataAggregator> daList = dataAggregatorService.findAll(id);
+    public ResponseEntity<List<DataAggregatorDTO>> getAll() {
+        List<DataAggregator> daList = dataAggregatorService.findAll();
         List<DataAggregatorDTO> collection = daList.stream().map(dataAggregatorService::convertToDto).toList();
         return ResponseEntity.ok(collection);
     }
@@ -109,5 +109,4 @@ public class AggregatorController {
         dataAggregatorService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-
 }

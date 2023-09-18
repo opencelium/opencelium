@@ -69,7 +69,7 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
     }
 
     @Override
-    public List<DataAggregator> findAll(Integer id) {
+    public List<DataAggregator> findAll() {
         return dataAggregatorRepository.findAll();
     }
 }

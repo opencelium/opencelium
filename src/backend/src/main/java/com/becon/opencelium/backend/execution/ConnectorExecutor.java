@@ -157,6 +157,7 @@ public class ConnectorExecutor {
             methodResponse.setResult("success");
             methodResponse.setData(responseContainer);
             methodResponse.setLoopDepth(loopDepth);
+            methodResponse.setAggregatorId(methodNode.getAggregatorId());
 
             List<MethodResponse> list = executionContainer.getMethodResponses();
             list.add(methodResponse);

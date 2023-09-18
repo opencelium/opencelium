@@ -262,14 +262,14 @@ const HelpBlock = () => {
                     if(currentItemId){
                       if(methodIndex > 0){
                         await details.displayEditKeyValueButton(bodyIndex, reference.current);
-      
+
                         await details.clickEditKeyValueButton(bodyIndex, reference.current);
                       }
-      
+
                       await details.changeBodyMethod(bodyData, bodyIndex, referenceIndex, methodIndex, currentItemId, reference.current);
-      
+
                       await details.changeBodyParam(bodyData, bodyIndex, referenceIndex, methodIndex, reference.current);
-      
+
                       await details.addBodyMethodAndParam(currentItemId, reference.current);
                     }
                   }
@@ -415,7 +415,7 @@ const HelpBlock = () => {
 
   useEffect(() => {
     if(animationData[videoAnimationName] && ref.current){
-      if(isButtonPanelOpened && videoAnimationName && !isPausedReference.current) {
+      if(isButtonPanelOpened && videoAnimationName) {
         if(index < animationData[videoAnimationName].fromConnector.items.length + animationData[videoAnimationName].toConnector.items.length) {
           if(index < animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
             animationFunction('fromConnector');
@@ -436,7 +436,7 @@ const HelpBlock = () => {
         }
       }
     }
-  }, [videoAnimationName, isPausedReference.current, index])
+  }, [videoAnimationName, index])
 
   useEffect(() => {
     if(isVisible){
