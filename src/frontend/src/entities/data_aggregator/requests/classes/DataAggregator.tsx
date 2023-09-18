@@ -31,7 +31,15 @@ export class DataAggregatorRequest extends Request implements IDataAggregator {
         return super.get<ModelDataAggregator[] | null>();
     }
 
-    async deleteAggregator(): Promise<AxiosResponse<IResponse>>{
+    async archiveAggregator(): Promise<AxiosResponse<IResponse>>{
+        return super.put<IResponse>({active: true});
+    }
+
+    async unarchiveAggregator(): Promise<AxiosResponse<IResponse>>{
+        return super.put<IResponse>({active: false});
+    }
+
+    async deleteArgument(): Promise<AxiosResponse<IResponse>>{
         return super.delete<IResponse>();
     }
 

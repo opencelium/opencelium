@@ -18,11 +18,14 @@ import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplica
 import {ICommonState} from "@application/interfaces/core";
 import {CommonState} from "@application/utils/store";
 import {
-    addAggregator, deleteAggregatorById, getAllAggregators, getAggregatorById,
-    updateAggregator
+    addAggregator, getAllAggregators, getAggregatorById,
+    updateAggregator, archiveAggregatorById, unarchiveAggregatorById, deleteArgument
 } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
 import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
+import {
+    deleteNotificationTemplateById
+} from "@entity/notification_template/redux_toolkit/action_creators/NotificationTemplateCreators";
 
 export interface DataAggregatorState extends ICommonState{
     isCurrentAggregatorHasUniqueName: TRIPLET_STATE,
@@ -30,7 +33,9 @@ export interface DataAggregatorState extends ICommonState{
     updatingAggregator: API_REQUEST_STATE,
     gettingAggregator: API_REQUEST_STATE,
     gettingAllAggregators: API_REQUEST_STATE,
-    deletingAggregator: API_REQUEST_STATE,
+    archivingAggregator: API_REQUEST_STATE,
+    unarchivingAggregator: API_REQUEST_STATE,
+    deletingAggregatorById: API_REQUEST_STATE,
     currentAggregator: ModelDataAggregator,
     aggregators: ModelDataAggregator[],
 }
@@ -40,7 +45,9 @@ const initialState: DataAggregatorState = {
     updatingAggregator: API_REQUEST_STATE.INITIAL,
     gettingAggregator: API_REQUEST_STATE.INITIAL,
     gettingAllAggregators: API_REQUEST_STATE.INITIAL,
-    deletingAggregator: API_REQUEST_STATE.INITIAL,
+    archivingAggregator: API_REQUEST_STATE.INITIAL,
+    unarchivingAggregator: API_REQUEST_STATE.INITIAL,
+    deletingAggregatorById: API_REQUEST_STATE.INITIAL,
     currentAggregator: null,
     aggregators: [],
     ...CommonState,
@@ -67,7 +74,7 @@ export const dataAggregatorSlice = createSlice({
         },
         [addAggregator.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.addingAggregator = API_REQUEST_STATE.ERROR;
-            if(action.payload?.message === ResponseMessages.EXISTS){
+            if(!action.payload.result){
                 state.isCurrentAggregatorHasUniqueName = TRIPLET_STATE.FALSE;
             }
             state.error = action.payload;
@@ -84,7 +91,7 @@ export const dataAggregatorSlice = createSlice({
         },
         [updateAggregator.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.updatingAggregator = API_REQUEST_STATE.ERROR;
-            if(action.payload?.message === ResponseMessages.EXISTS){
+            if(!action.payload.result){
                 state.isCurrentAggregatorHasUniqueName = TRIPLET_STATE.FALSE;
             }
             state.error = action.payload;
@@ -117,19 +124,42 @@ export const dataAggregatorSlice = createSlice({
             state.gettingAllAggregators = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
-        [deleteAggregatorById.pending.type]: (state) => {
-            state.deletingAggregator = API_REQUEST_STATE.START;
+        [archiveAggregatorById.pending.type]: (state) => {
+            state.archivingAggregator = API_REQUEST_STATE.START;
         },
-        [deleteAggregatorById.fulfilled.type]: (state, action: PayloadAction<string>) => {
-            state.deletingAggregator = API_REQUEST_STATE.FINISH;
-            state.aggregators = state.aggregators.filter(aggregator => aggregator.id !== action.payload);
-            if(state.currentAggregator && state.currentAggregator.id === action.payload){
-                state.currentAggregator = null;
+        [archiveAggregatorById.fulfilled.type]: (state, action: PayloadAction<string>) => {
+            state.archivingAggregator = API_REQUEST_STATE.FINISH;
+            state.aggregators = state.aggregators.map(aggregator => aggregator.id === action.payload ? {...aggregator, active: false} : aggregator);
+            state.error = null;
+        },
+        [archiveAggregatorById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.archivingAggregator = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [unarchiveAggregatorById.pending.type]: (state) => {
+            state.unarchivingAggregator = API_REQUEST_STATE.START;
+        },
+        [unarchiveAggregatorById.fulfilled.type]: (state, action: PayloadAction<string>) => {
+            state.unarchivingAggregator = API_REQUEST_STATE.FINISH;
+            state.aggregators = state.aggregators.map(aggregator => aggregator.id === action.payload ? {...aggregator, active: true} : aggregator);
+            state.error = null;
+        },
+        [unarchiveAggregatorById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.unarchivingAggregator = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [deleteArgument.pending.type]: (state) => {
+            state.deletingAggregatorById = API_REQUEST_STATE.START;
+        },
+        [deleteArgument.fulfilled.type]: (state, action: PayloadAction<string>) => {
+            state.deletingAggregatorById = API_REQUEST_STATE.FINISH;
+            if(state.currentAggregator){
+                state.currentAggregator = {...state.currentAggregator, args: state.currentAggregator.args.filter(a => a.id !== action.payload)};
             }
             state.error = null;
         },
-        [deleteAggregatorById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.deletingAggregator = API_REQUEST_STATE.ERROR;
+        [deleteArgument.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.deletingAggregatorById = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }
