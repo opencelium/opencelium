@@ -3,13 +3,16 @@ import CollectionView, {ViewType} from "@app_component/collection/collection_vie
 import DataAggregatorCollection from "@entity/data_aggregator/collections/DataAggregator";
 import {useAppDispatch} from "@application/utils/store";
 import {
-    getAllAggregators
+    archiveAggregatorById,
+    getAllAggregators, unarchiveAggregatorById
 } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
+import ModelDataAggregator, {ModelDataAggregatorProps} from "@entity/data_aggregator/requests/models/DataAggregator";
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
 import {TextSize} from "@app_component/base/text/interfaces";
+import {AggregatorActive} from "@entity/data_aggregator/components/aggregator_active/AggregatorActive";
+import {ListProp} from "@application/interfaces/IListCollection";
 
 
 const DataAggregatorList:FC =
@@ -34,7 +37,28 @@ const DataAggregatorList:FC =
             </React.Fragment>
         );
     };
-    const CollectionAggregator = new DataAggregatorCollection(aggregators, getListActions, true);
+    const listProps: ListProp<ModelDataAggregatorProps>[] = [
+        {
+            propertyKey: 'active',
+            getValue: (aggregator: ModelDataAggregator) => {
+                return (
+                    <AggregatorActive
+                        key={aggregator.id}
+                        aggregator={aggregator}
+                        onClick={() => {
+                            if(aggregator.active === false){
+                                dispatch(archiveAggregatorById(aggregator.id));
+                            } else{
+                                dispatch(unarchiveAggregatorById(aggregator.id));
+                            }
+                        }}
+                    />
+                )},
+            replace: true,
+            width: '10%',
+        }
+    ]
+    const CollectionAggregator = new DataAggregatorCollection(aggregators, getListActions, listProps);
     return (
         <CollectionView defaultViewType={ViewType.LIST} hasViewSection={false} hasError={!!error} shouldBeUpdated={shouldBeUpdated} collection={CollectionAggregator} isLoading={gettingAllAggregators === API_REQUEST_STATE.START}/>
     )

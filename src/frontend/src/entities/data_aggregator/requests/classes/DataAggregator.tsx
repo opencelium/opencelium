@@ -16,7 +16,7 @@ export class DataAggregatorRequest extends Request implements IDataAggregator {
     }
 
     async addAggregator(data: ModelDataAggregator): Promise<AxiosResponse<ModelDataAggregator>> {
-        return super.post<ModelDataAggregator>(data);
+        return super.post<ModelDataAggregator>({...data, active: true});
     }
 
     async updateAggregator(data: ModelDataAggregator): Promise<AxiosResponse<ModelDataAggregator>> {
