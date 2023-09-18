@@ -24,9 +24,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
-import java.time.Duration;
 import java.util.Collections;
-import java.util.Objects;
 
 public class RestCustomizer implements RestTemplateCustomizer {
 
