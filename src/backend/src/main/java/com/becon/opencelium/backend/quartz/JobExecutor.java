@@ -202,9 +202,13 @@ public class JobExecutor extends QuartzJobBean {
 
     // TODO: Refactor so that Execution of aggregator should be in separate class;
     private void executeAggregator(ExecutionContainer executionContainer, Execution execution) {
-        executionContainer.getMethodResponses().stream().filter(mr -> mr.getAggregatorId() != null)
+        executionContainer.getMethodResponses().stream()
+                .filter(mr -> mr.getAggregatorId() != null)
                 .forEach(mr -> {
                     DataAggregator da = dataAggregatorServiceImp.getById(mr.getAggregatorId());
+                    if (!da.isActive()) {
+                        return;
+                    }
                     List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), mr.getData().values().stream().toList(), da.getArgs(), execution);
                     execution.setExecutionArguments(exarg);
                     if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {

@@ -20,10 +20,7 @@ package com.becon.opencelium.backend.aspect;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.mysql.entity.*;
-import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.mysql.service.ExecutionServiceImp;
-import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
-import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.mysql.service.*;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import org.aspectj.lang.annotation.*;
 import org.quartz.JobDataMap;
@@ -98,7 +95,7 @@ public class ExecutionAspect {
                 }
                 String lang = user.getUserDetail().getLang();
                 EventContent content = en.getEventMessage().getEventContents().stream()
-                        .filter(c -> c.getLanguage().equals(lang)).findFirst().orElse(null);
+                        .filter(c -> c.getLanguage().equalsIgnoreCase(lang)).findFirst().orElse(null);
                 if (content == null) {
                     String defaultLang = LangEnum.EN.getCode();
                     content = en.getEventMessage().getEventContents().stream()
@@ -119,22 +116,10 @@ public class ExecutionAspect {
         }
     }
 
-    private String replaceConstants(String text, User user, Exception ex, EventNotification en) {
+    private String replaceArgs(String text, EventNotification en) {
         String result = text;
-        List<String> constants = getConstants(text, "\\{(.*?)\\}");
-        Map<String, String> cValues = getConstantValues(constants, user, ex, en);
-        if (cValues == null || cValues.isEmpty()) {
-            return result;
-        }
-        for (Map.Entry<String, String> entry : cValues.entrySet()) {
-            String constant = entry.getKey();
-            String value = entry.getValue();
-            String s = "{" + constant + "}";
-            result = result.replace(s, value);
-        }
-
         // for smart notification.
-        List<String> args = getConstants(text, "\\{{(.*?)\\}}");
+        List<String> args = getConstants(text, "\\{\\{([^{}]+)\\}\\}");
         Map<String, String> argsValues = getArgsValues(args, en);
         for (Map.Entry<String, String> entry : argsValues.entrySet()) {
             String arg = entry.getKey();
@@ -142,17 +127,47 @@ public class ExecutionAspect {
             String s = "{{" + arg + "}}";
             result = result.replace(s, value);
         }
+
+        return result;
+    }
+
+    private String replaceConstants(String text, User user, Exception ex, EventNotification en) {
+        String result = text;
+        List<String> constants = getConstants(text, "\\{([^{}]+)\\}(?![}])");
+        Map<String, String> cValues = getConstantValues(constants, user, ex, en);
+        if (cValues != null) {
+            for (Map.Entry<String, String> entry : cValues.entrySet()) {
+                String constant = entry.getKey();
+                String value = entry.getValue();
+                String s = "{" + constant + "}";
+                result = result.replace(s, value);
+            }
+        }
+
+        // for smart notification.
+        List<String> args = getConstants(text, "\\{\\{([^{}]+)\\}\\}");
+        Map<String, String> argsValues = getArgsValues(args, en);
+        String et = en.getEventType();
+        if (argsValues != null && (et.equalsIgnoreCase("post") || et.equalsIgnoreCase("alert"))) {
+            for (Map.Entry<String, String> entry : argsValues.entrySet()) {
+                String arg = entry.getKey();
+                String value = entry.getValue();
+                String s = "{{" + arg + "}}";
+                result = result.replace(s, value);
+            }
+        }
         return result;
     }
 
     private Map<String, String> getArgsValues(List<String> args, EventNotification en) {
-        long lExId = en.getScheduler().getLastExecution().getId();
-        Execution execution = executionServiceImp.findById(lExId).orElse(null);
+        LastExecution le = schedulerServiceImp.findById(en.getId()).get().getLastExecution();
+        long exId = Math.max(le.getFailExecutionId(), le.getSuccessExecutionId());
+        Execution execution = executionServiceImp.findById(exId).orElse(null);
         Objects.requireNonNull(execution);
-
-        return execution.getExecutionArguments().stream()
+        Map<String, String> result = execution.getExecutionArguments().stream()
                 .filter(ea -> args.contains(ea.getArgument().getName()))
                 .collect(Collectors.toMap(ea -> ea.getArgument().getName(), ExecutionArgument::getValue));
+        return result;
     }
 
     private List<String> getConstants(String text, String regex) {

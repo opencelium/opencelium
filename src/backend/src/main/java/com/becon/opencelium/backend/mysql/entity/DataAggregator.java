@@ -17,6 +17,9 @@ public class DataAggregator {
     @Column(columnDefinition = "json")
     private String script;
 
+    @Column(name = "is_active")
+    private boolean active;
+
     @OneToMany(mappedBy = "dataAggregator", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Argument> args;
 
@@ -42,6 +45,14 @@ public class DataAggregator {
 
     public void setScript(String script) {
         this.script = script;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public Set<Argument> getArgs() {
