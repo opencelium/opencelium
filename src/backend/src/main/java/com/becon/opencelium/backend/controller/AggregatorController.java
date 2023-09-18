@@ -134,6 +134,27 @@ public class AggregatorController {
         return ResponseEntity.ok(resultDTO);
     }
 
+    @Operation(summary = "Checks whether an name of aggregator is unique or not.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Returns true if a name of aggregator is unique.",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> put(@PathVariable Integer id, @RequestBody DataAggregatorDTO dataAggregatorDTO) {
+        DataAggregator dataAggregator = dataAggregatorService.getById(id);
+        dataAggregator.setActive(dataAggregatorDTO.isActive());
+        dataAggregatorService.save(dataAggregator);
+        ResultDTO<String> resultDTO = new ResultDTO<>("success");
+        return ResponseEntity.ok(resultDTO);
+    }
+
 
     // --------------------------------- ARGUMENTS ---------------------------------------
     @Operation(summary = "Deletes an argument by provided argument ID and breaks relation with execution")
