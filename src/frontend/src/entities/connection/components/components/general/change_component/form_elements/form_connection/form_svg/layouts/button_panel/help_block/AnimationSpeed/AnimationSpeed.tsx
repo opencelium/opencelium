@@ -22,6 +22,7 @@ import { useAppDispatch } from "@application/utils/store";
 import { setAnimationSpeed } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import { ColorTheme } from "@style/Theme";
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
+import AnimationFunctionSteps from "../classes/AnimationFunctionSteps";
 
 
 const AnimationSpeedSlider: FC<AnimationSpeedSliderProps> = (props) => {
@@ -31,25 +32,30 @@ const AnimationSpeedSlider: FC<AnimationSpeedSliderProps> = (props) => {
   const {animationSpeed} = Connection.getReduxState();
 
   const [animationSpeedLabel, setAnimationSpeedLabel] = useState('1x');
-  
+
   const changAnimationSpeed = (speed: number) => {
     let data: any = {};
+    const speed_05x = AnimationFunctionSteps.DefaultSpeed * 2;
+    const speed_1x = AnimationFunctionSteps.DefaultSpeed;
+    const speed_15x = AnimationFunctionSteps.DefaultSpeed * 3/4;
+    const speed_2x = AnimationFunctionSteps.DefaultSpeed / 2;
     switch(speed){
-      case 1500:
-        data.speed = 1000;
+      case speed_2x:
+        data.speed = speed_05x;
+        data.label = '0.5x';
+        break;
+      case speed_05x:
+        data.speed = speed_1x;
         data.label = '1x';
         break;
-      case 1000:
-        data.speed = 500;
+      case speed_1x:
+        data.speed = speed_15x;
         data.label = '1.5x';
         break;
-      case 500:
-        data.speed = 250;
+      case speed_15x:
+        data.speed = speed_2x;
         data.label = '2x';
         break;
-      default:
-        data.speed = 1500;
-        data.label = '0.5x';
     }
 
     dispatch(setAnimationSpeed(data.speed));

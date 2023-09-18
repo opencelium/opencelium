@@ -43,6 +43,7 @@ import { PANEL_LOCATION } from "../../components/utils/constants/app";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import { NoInfer } from "@reduxjs/toolkit/dist/tsHelpers";
 import {COLOR_MODE} from "@classes/content/connection_overview_2/CSvg";
+import AnimationFunctionSteps from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/AnimationFunctionSteps";
 
 
 export const LogPanelHeight = {
@@ -98,7 +99,7 @@ export interface ConnectionState extends ICommonState {
 
 let initialState: ConnectionState = {
   isAnimationNotFound: false,
-  animationSpeed: 1000,
+  animationSpeed: AnimationFunctionSteps.DefaultSpeed,
   isSavePanelVisible: false,
   isTemplatePanelVisible: false,
   videoAnimationName: '',

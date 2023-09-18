@@ -55,5 +55,8 @@ export const Global = createGlobalStyle`
         position: absolute; 
         background: red;
     }
+    #notificationTemplateContent>.ace_scroller.ace_scroll-left:after{
+        box-shadow: none !important;
+    }
     ${SlickCarousel}
 `;

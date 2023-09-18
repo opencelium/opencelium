@@ -33,7 +33,7 @@ const DataAggregatorList:FC<AggregatorListProps> =
     useEffect(() => {
         dispatch(getAllAggregators());
     }, [])
-    const CollectionAggregator = new DataAggregatorCollection(aggregators, getListActions);
+    const CollectionAggregator = new DataAggregatorCollection(aggregators.filter(a => !(a.active === false)), getListActions);
     return (
         <CollectionView hasTopBar={false} hasError={!!error} isLoading={gettingAllAggregators === API_REQUEST_STATE.START} collection={CollectionAggregator} hasViewSection={false} hasTitle={false} isListViewCard={false}/>
     )

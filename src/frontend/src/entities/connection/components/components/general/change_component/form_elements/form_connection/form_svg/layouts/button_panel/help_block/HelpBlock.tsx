@@ -505,7 +505,7 @@ const HelpBlock = () => {
                 size={TextSize.Size_40}
                 position={"bottom"}
                 icon={isPausedReference.current ? "play_arrow" : "pause"}
-                tooltip={isPausedReference.current ? "play animation" : 'pause animation'}
+                tooltip={isPausedReference.current ? "Play Animation" : 'Pause Animation'}
                 target={`animation_play_button`}
                 hasBackground={true}
                 background={ColorTheme.White}
