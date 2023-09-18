@@ -10,7 +10,7 @@ public class DataAggregator {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
 
     private String name;
 
@@ -20,14 +20,14 @@ public class DataAggregator {
     @Column(name = "is_active")
     private boolean active;
 
-    @OneToMany(mappedBy = "dataAggregator", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "dataAggregator", fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Argument> args;
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 

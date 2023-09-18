@@ -10,7 +10,7 @@ public class Argument {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     private String name;
     private String description;
@@ -22,11 +22,11 @@ public class Argument {
     @OneToMany(mappedBy = "argument", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<ExecutionArgument> executionArguments;
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
