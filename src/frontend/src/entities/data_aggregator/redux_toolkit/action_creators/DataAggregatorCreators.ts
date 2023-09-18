@@ -8,11 +8,11 @@ export const addAggregator = createAsyncThunk(
     'data_aggregator/add',
     async(aggregator: ModelDataAggregator, thunkAPI) => {
         try {
-            /*const checkNameRequest = new DataAggregatorRequest({endpoint: `/exists/${aggregator.name}`});
+            const checkNameRequest = new DataAggregatorRequest({endpoint: `/exists/${aggregator.name}`});
             const responseNameRequest = await checkNameRequest.checkAggregatorName();
             if(responseNameRequest.data.message === ResponseMessages.EXISTS){
                 return thunkAPI.rejectWithValue(responseNameRequest.data);
-            }*/
+            }
             const request = new DataAggregatorRequest();
             const response = await request.addAggregator(aggregator);
             return response.data;
@@ -26,14 +26,14 @@ export const updateAggregator = createAsyncThunk(
     async(aggregator: ModelDataAggregator, thunkAPI) => {
         try {
             // @ts-ignore
-            /*const dataAggregatorState = thunkAPI.getState().dataAggregatorReducer;
+            const dataAggregatorState = thunkAPI.getState().dataAggregatorReducer;
             if(dataAggregatorState.currentAggregator && dataAggregatorState.currentAggregator.title !== aggregator.name){
                 const checkNameRequest = new DataAggregatorRequest({endpoint: `/exists/${aggregator.name}`});
                 const responseNameRequest = await checkNameRequest.checkAggregatorName();
                 if(responseNameRequest.data.message === ResponseMessages.EXISTS){
                     return thunkAPI.rejectWithValue(responseNameRequest.data);
                 }
-            }*/
+            }
             const request = new DataAggregatorRequest();
             const response = await request.addAggregator(aggregator);
             return response.data;
