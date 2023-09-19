@@ -238,34 +238,6 @@ public class ConnectionController {
     }
 
 
-    public static RestTemplate getRestTemplate() throws Exception{
-        TrustManager[] acceptingTrustStrategy = new TrustManager[] {
-                new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
-                    public void checkClientTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-                    public void checkServerTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-                }
-        };
-
-        SSLContext sslContext = SSLContext.getInstance("SSL");
-        sslContext.init(null, acceptingTrustStrategy, new java.security.SecureRandom());
-        SSLConnectionSocketFactory ssl = new SSLConnectionSocketFactory(sslContext);
-        PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                .setSSLSocketFactory(ssl).build();
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connectionManager).build();
-        HttpComponentsClientHttpRequestFactory requestFactory =
-                new HttpComponentsClientHttpRequestFactory();
-        requestFactory.setHttpClient(httpClient);
-        return new RestTemplate(requestFactory);
-    }
-
-
     @Operation(summary = "Sends request to remote api by accepting api data in request body.")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
@@ -280,24 +252,7 @@ public class ConnectionController {
     })
     @PostMapping(path = "/remoteapi", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) throws Exception {
-
-        String url = apiDataResource.getUrl();
-        HttpMethod method = getMethod(apiDataResource.getMethod());
-        String body = new ObjectMapper().writeValueAsString(apiDataResource.getBody());
-        HttpHeaders header = buildHeader(apiDataResource.getHeader());
-        HttpEntity<Object> httpEntity = new HttpEntity <Object> (body, header);
-        if (body.equals("null")){
-            httpEntity = new HttpEntity <Object> (header);
-        }
-
-        RestTemplate restTemplate = getRestTemplate();
-        if (!apiDataResource.isSslOn()){
-            ClientHttpRequestFactory requestFactory =
-                    new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
-            restTemplate.setRequestFactory(requestFactory);
-        }
-        ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Deletes a list of connections based on the provided list of their corresponding IDs")
@@ -341,39 +296,5 @@ public class ConnectionController {
                 throw new RuntimeException("Http method not found");
         }
         return httpMethodType;
-    }
-
-    public HttpHeaders buildHeader(Map<String, String> header){
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setAll(header);
-        return httpHeaders;
-    }
-
-    private CloseableHttpClient getDisabledHttpsClient() {
-
-        try {
-            TrustManager[] trustAllCerts = new TrustManager[] {
-                    new X509TrustManager() {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-                        public void checkClientTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-                        public void checkServerTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-                    }
-            };
-            SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            SSLConnectionSocketFactory ssl = new SSLConnectionSocketFactory(sslContext);
-            PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                    .setSSLSocketFactory(ssl).build();
-
-            return HttpClients.custom().setConnectionManager(connectionManager).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }
