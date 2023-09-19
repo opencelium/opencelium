@@ -25,31 +25,37 @@ import {ViewType} from "@app_component/collection/collection_view/CollectionView
 import Button from "@app_component/base/button/Button";
 import {PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
 import {ColorTheme} from "@style/Theme";
+import {ISchedule} from "@entity/schedule/interfaces/ISchedule";
+import {ExecutionStatus} from "@entity/schedule/components/execution_status/ExecutionStatus";
+import {switchScheduleStatus} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
+import {AggregatorActive} from "@entity/data_aggregator/components/aggregator_active/AggregatorActive";
+import {archiveAggregatorById, unarchiveAggregatorById} from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
+import AggregatorListRaw from "@entity/data_aggregator/components/pages/AggregatorListRaw";
 
 class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
     name: string = 'dataAggregator';
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Data Aggregator'}];
     entities: ModelDataAggregator[];
     keyPropName: ModelDataAggregatorProps ='id';
-    hasSearch = false;
-    sortingProps: ModelDataAggregatorProps[] = ['name'];
+    sortingProps: ModelDataAggregatorProps[] = ['name', 'active'];
     listProps: ListProp<ModelDataAggregatorProps>[] = [{
         propertyKey: 'name',
         replace: true,
         getValue: (aggregator: ModelDataAggregator) => {
-            return <td key={`name_${aggregator.id}`}>{aggregator.name}</td>
+            return <td key={`name_${aggregator.id}`} style={{color: aggregator.active === false ? '#999' : 'unset'}}>{aggregator.name}</td>
         }
     },{
         propertyKey: 'args',
         replace: true,
         getValue: (aggregator: ModelDataAggregator) => {
-            return <td key={`args_${aggregator.id}`}>{aggregator.args.map(a => a.name).join(', ')}</td>
+            return <td key={`args_${aggregator.id}`} style={{color: aggregator.active === false ? '#999' : 'unset'}}>{aggregator.args.map(a => a.name).join(', ')}</td>
         }
     }];
     gridProps = {title: 'name'};
     translations = {
         name: 'Name',
         args: 'Arguments',
+        active: 'Archived',
     };
     hasCheckboxes = false;
     getTopActions = (viewType: ViewType, checkedIds: number[] = []) => {
@@ -64,8 +70,9 @@ class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
         return null;
     };
     hasCardLink = true;
+    ListRawComponent = AggregatorListRaw;
 
-    constructor(aggregators: any[], getListActions?: any) {
+    constructor(aggregators: any[], getListActions?: any, listProps?: ListProp<ModelDataAggregatorProps>[]) {
         super();
         let aggregatorInstances = [];
         for(let i = 0; i < aggregators.length; i++){
@@ -74,13 +81,20 @@ class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
         if(getListActions){
             this.getListActions = getListActions;
         }
+        this.hasSearch = false;
+        if(listProps && listProps.length > 0) {
+            this.hasSearch = true;
+            this.listProps = [...this.listProps, ...listProps];
+        }
         this.entities = [...aggregatorInstances];
     }
 
     search(aggregator: ModelDataAggregator, searchValue: string){
-        searchValue = searchValue.toLowerCase();
+        searchValue = searchValue.toLowerCase().trim();
         let checkName = aggregator.name ? aggregator.name.toLowerCase().indexOf(searchValue) !== -1 : false;
-        return checkName;
+        let checkArchived = searchValue.indexOf('arch') === 0 || searchValue.indexOf('zip') === 0 ? aggregator.active : false;
+        let checkUnarchived = searchValue.indexOf('unzip') === 0 ? !aggregator.active : false;
+        return checkName || checkArchived || checkUnarchived;
     }
 
     sort(sortingProp: string, sortingType: SortType): void{
@@ -91,6 +105,15 @@ class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
                         return this.asc(a.name, b.name);
                     } else{
                         return this.desc(a.name, b.name);
+                    }
+                })
+                break;
+            case 'active':
+                this.entities = this.entities.sort((a: ModelDataAggregator, b: ModelDataAggregator) => {
+                    if(sortingType === SortType.asc){
+                        return this.asc(a.active, b.active);
+                    } else{
+                        return this.desc(a.active, b.active);
                     }
                 })
                 break;

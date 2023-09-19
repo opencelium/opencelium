@@ -15,6 +15,7 @@
 
 import {useAppSelector} from "@application/utils/store";
 import {RootState} from "@application/utils/store";
+import CAggregator from "@entity/connection/components/classes/components/content/connection/data_aggregator/CAggregator";
 import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
 
 export class CDataAggregator{
@@ -23,7 +24,7 @@ export class CDataAggregator{
     }
 
     static getOptionsForSelect(dataAggregator: ModelDataAggregator[]){
-        return dataAggregator.map(o => {return {label: o.name, value: o.id};});
+        return [{label: 'is empty', value: null}, ...dataAggregator.map(o => {return {label: o.name, value: o.id};})];
     }
 
     static replaceIdsOnNames(dataAggregator: ModelDataAggregator[], string: string){
@@ -33,6 +34,8 @@ export class CDataAggregator{
                 string = splitStr.join(this.embraceArgument(`${dataAggregator[i].name}.${dataAggregator[i].args[j].name}`));
             }
         }
+        let splitStr = string.split(/{{\d}}/);
+        string = splitStr.join(this.embraceArgument(CAggregator.generateNotExistVar()))
         return string;
     }
 

@@ -5,6 +5,8 @@ import Button from "@app_component/base/button/Button";
 import {ArgumentContainer, ButtonContainer, FormContainer,} from './styles';
 import {TextSize} from "@app_component/base/text/interfaces";
 import {setFocusById} from "@application/utils/utils";
+import {useAppDispatch} from "@application/utils/store";
+import {deleteArgument as deleteArgumentById} from '../../redux_toolkit/action_creators/DataAggregatorCreators';
 
 
 const Argument:FC<ArgumentProps> =
@@ -21,6 +23,7 @@ const Argument:FC<ArgumentProps> =
         args,
         argIndex,
      }) => {
+    const dispatch = useAppDispatch();
     const [name, setName] = useState<string>(argument.name || '');
     const [nameError, setNameError] = useState<string>('');
     const [description, setDescription] = useState<string>(argument.description || '');
@@ -58,6 +61,9 @@ const Argument:FC<ArgumentProps> =
     }
     const deleteArgument = () => {
         deleteArg();
+        if(argument.id){
+            dispatch(deleteArgumentById(argument.id));
+        }
     }
     return (
         <React.Fragment>

@@ -15,6 +15,8 @@ export default class AnimationFunctionSteps {
     this.setPopoverProps = setPopoverProps;
   }
 
+  static DefaultSpeed: number = 2000;
+
   async clickOnPanel(connectorPanel: string, animationSpeed: number) {
     if(connectorPanel){
       try{
@@ -31,7 +33,7 @@ export default class AnimationFunctionSteps {
   async onMouseOver(prevElementType: string, animationSpeed: number) {
     const operatorRef = RefFunctions.getOperator(this.ref);
     const processRef = RefFunctions.getProcess(this.ref);
-  
+
     if (prevElementType && (operatorRef || processRef)) {
       try {
         if (prevElementType === 'operator') {
@@ -39,7 +41,7 @@ export default class AnimationFunctionSteps {
         } else {
           processRef.onMouseOverSvg();
         }
-  
+
         await AdditionalFunctions.delay(animationSpeed);
       } catch (error) {}
     }
@@ -66,48 +68,48 @@ export default class AnimationFunctionSteps {
         const createPanelElement = createPanelRight.nextElementSibling;
         const technicalLayoutRef = RefFunctions.getTechnicalLayout(this.ref);
         let currentItem = null;
-    
+
         if(after && technicalLayoutRef && createPanelElement){
           const svgItems = technicalLayoutRef.props.connectionOverviewState.connection[connectorType].svgItems
           if(svgItems){
             for(let i = 0; i < svgItems.length; i++){
               if(svgItems[i].id === `${connectorType}_${after}`){
-      
+
                 currentItem = animationProps.connection.fromConnector.getSvgElementByIndex(after)
-      
+
                 break;
               }
             }
           }
         }
-    
+
         if(elementType === "process" && prevElementType === "operator" && createPanelElement){
           const operatorCreatePanel = RefFunctions.getCreatePanelForOperator(this.ref);
-    
+
           if(operatorCreatePanel){
             operatorCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
           }
         }
-    
+
         else if(elementType === "process" && prevElementType === "process" && createPanelElement){
           const processCreatePanel = RefFunctions.getCreatePanelForProcess(this.ref);
-    
+
           if(processCreatePanel) {
             processCreatePanel.createProcess(createPanelElement, direction ? 'in' : 'out', currentItem);
           }
         }
-    
+
         else if(elementType === "operator" && prevElementType === "process" && createPanelElement){
           const processCreatePanel = RefFunctions.getCreatePanelForProcess(this.ref);
-    
+
           if(processCreatePanel){
             processCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
           }
         }
-    
+
         else if(elementType === "operator" && prevElementType === "operator" && createPanelElement){
           const operatorCreatePanel = RefFunctions.getCreatePanelForOperator(this.ref);
-    
+
           if(operatorCreatePanel){
             operatorCreatePanel.createOperator(createPanelElement, direction ? 'in' : 'out', currentItem);
           }
@@ -122,10 +124,10 @@ export default class AnimationFunctionSteps {
     try{
       const createProcessRef = RefFunctions.getCreateProcess(this.ref);
       const createOperatorRef = RefFunctions.getCreateOperator(this.ref);
-  
+
       if(createProcessRef || createOperatorRef){
         elementType === "process" ? createProcessRef.changeName({label: name, value: name}) : createOperatorRef.changeType({label: name, value: name});
-    
+
         await AdditionalFunctions.delay(animationSpeed)
       }
     }
@@ -138,7 +140,7 @@ export default class AnimationFunctionSteps {
       if(elementType === "process" && label && createProcessRef){
         setFocusById('new_request_label');
         await AdditionalFunctions.delay(animationSpeed);
-  
+
         createProcessRef.changeLabel(label);
         await AdditionalFunctions.delay(animationSpeed);
       }
@@ -150,7 +152,7 @@ export default class AnimationFunctionSteps {
     try{
       const createProcessRef = RefFunctions.getCreateProcess(this.ref);
       const createOperatorRef = RefFunctions.getCreateOperator(this.ref);
-  
+
       if(createProcessRef || createOperatorRef){
         elementType === "process" ? createProcessRef.create() : createOperatorRef.create();
       }

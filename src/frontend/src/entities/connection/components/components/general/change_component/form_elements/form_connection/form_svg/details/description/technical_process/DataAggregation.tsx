@@ -24,7 +24,7 @@ export default
             const connector = connection.getConnectorByType(details.connectorType);
             let dataAggregator = aggregators.find(a => a.id === optionValue.value);
             let item = connector.getItemByIndex(details.entity.index);
-            item.dataAggregator = dataAggregator.id;
+            item.dataAggregator = dataAggregator ? dataAggregator.id : null;
             const currentTechnicalItem = connector.getSvgElementByIndex(item.index);
             updateConnection(connection);
             dispatch(setCurrentTechnicalItem(currentTechnicalItem.getObject()));

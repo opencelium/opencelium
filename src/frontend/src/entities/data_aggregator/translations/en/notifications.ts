@@ -16,25 +16,22 @@
 import ActionCreators from "../../redux_toolkit/action_creators";
 
 const {
-    addAggregator, updateAggregator, deleteAggregatorById, getAggregatorById, getAllAggregators,
+    addAggregator, updateAggregator, archiveAggregatorById,
+    unarchiveAggregatorById, getAggregatorById, getAllAggregators,
 } = ActionCreators;
 
 export default {
     fulfilled: {
         [addAggregator.fulfilled.type]: "The aggregator was successfully added.",
         [updateAggregator.fulfilled.type]: "The aggregator was successfully updated.",
-        [deleteAggregatorById.fulfilled.type]: "The aggregator was successfully deleted.",
+        [archiveAggregatorById.fulfilled.type]: "The aggregator was successfully archived.",
+        [unarchiveAggregatorById.fulfilled.type]: "The aggregator was successfully unarchived.",
     },
     rejected: {
-        [addAggregator.rejected.type]: {
-            "__DEFAULT__": "There is an error adding aggregator."
-        },
-        [updateAggregator.rejected.type]: {
-            "__DEFAULT__": "There is an error updating aggregator."
-        },
-        [addAggregator.rejected.type]: {
-            "__DEFAULT__": "There is an error deleting aggregator."
-        },
+        [addAggregator.rejected.type]: {"__DEFAULT__": "There is an error adding aggregator."},
+        [updateAggregator.rejected.type]: "There is an error updating aggregator.",
+        [archiveAggregatorById.rejected.type]: "There is an error archiving aggregator.",
+        [unarchiveAggregatorById.rejected.type]: "There is an error unarchiving aggregator.",
         [getAggregatorById.rejected.type]: {
             "__DEFAULT__": "There is an error fetching aggregator."
         },

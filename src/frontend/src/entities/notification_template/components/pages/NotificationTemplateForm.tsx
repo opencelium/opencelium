@@ -30,8 +30,11 @@ import {ModelArgument} from "@entity/data_aggregator/requests/models/DataAggrega
 import Input from "@app_component/base/input/Input";
 import {AggregatorNameStyled, DataAggregatorItemsStyled } from "./styles";
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
-import { getAllAggregators } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
+import { getAllUnArchivedAggregators } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
 import HelpDivider from '../help_divider/HelpDivider';
+import {getMarker} from "@application/utils/utils";
+import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
+import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
 
 
 const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
@@ -49,6 +52,8 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const didMount = useRef(false);
     let navigate = useNavigate();
     let urlParams = useParams();
+    const bodyRef = React.useRef();
+    const [markers, setMarkers] = useState([]);
     const shouldFetchNotificationTemplate = isUpdate || isView;
     const shouldFetchConnections = isAdd || isUpdate;
     const form = new Form({isView, isAdd, isUpdate});
@@ -86,9 +91,23 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             notificationTemplate.getById()
         }
         if(shouldFetchConnections){
-            dispatch(getAllAggregators());
+            dispatch(getAllUnArchivedAggregators());
         }
     },[]);
+    useEffect(() => {
+        if(bodyRef.current) {
+            //@ts-ignore
+            if(bodyRef.current.editor.getValue() !== content.body){
+                //@ts-ignore
+                bodyRef.current.editor.setValue(content.body);
+            }
+            //@ts-ignore
+            const newMarkers = getMarker(bodyRef.current.editor, content.body, CDataAggregator.embraceArgument(CAggregator.generateNotExistVar()));
+            if (JSON.stringify(newMarkers) !== JSON.stringify(markers)) {
+                setMarkers(newMarkers);
+            }
+        }
+    }, [content.body])
     useEffect(() => {
         if (didMount.current) {
             if(error === null && (addingNotificationTemplate === API_REQUEST_STATE.FINISH || updatingNotificationTemplate === API_REQUEST_STATE.FINISH)){
@@ -174,7 +193,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             </FormSection>,
             <FormSection label={{value: 'Template Content'}} inputsStyle={{height: '100%'}}>
                 {SubjectInput}
-                {BodyInput}
+                {notificationTemplate.content.getBoby({ref: bodyRef, markers})}
             </FormSection>
         ]
     }

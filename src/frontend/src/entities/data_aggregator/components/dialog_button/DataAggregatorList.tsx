@@ -8,7 +8,7 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
 import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
 import {useAppDispatch} from "@application/utils/store";
-import {getAllAggregators} from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
+import {getAllUnArchivedAggregators} from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
@@ -31,7 +31,7 @@ const DataAggregatorList:FC<AggregatorListProps> =
         );
     };
     useEffect(() => {
-        dispatch(getAllAggregators());
+        dispatch(getAllUnArchivedAggregators());
     }, [])
     const CollectionAggregator = new DataAggregatorCollection(aggregators, getListActions);
     return (

@@ -2,6 +2,9 @@ import { IResponse } from "@application/requests/interfaces/IResponse";
 import {AxiosResponse} from "axios";
 import ModelDataAggregator from "../models/DataAggregator";
 
+export interface ArchiveAggregatorRequestProps{
+    active: boolean,
+}
 
 export interface IDataAggregator {
 
@@ -20,7 +23,13 @@ export interface IDataAggregator {
     //to get all aggregators
     getAllAggregators(): Promise<AxiosResponse<ModelDataAggregator[] | null>>,
 
-    //to delete one aggregator
-    deleteAggregator(): Promise<AxiosResponse<IResponse>>,
+    //to archive one aggregator
+    archiveAggregator(): Promise<AxiosResponse<IResponse>>,
+
+    //to unarchive one aggregator
+    unarchiveAggregator(): Promise<AxiosResponse<IResponse>>,
+
+    //to delete an argument
+    deleteArgument(): Promise<AxiosResponse<IResponse>>,
 
 }

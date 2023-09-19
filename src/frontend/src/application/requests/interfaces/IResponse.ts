@@ -32,6 +32,7 @@ export interface IResponse{
     path: string,
     status: number | string,
     timestamp: string,
+    result?: boolean | any,
 }
 
 export interface SettingsProps{

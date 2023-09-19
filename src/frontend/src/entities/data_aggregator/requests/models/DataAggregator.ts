@@ -5,6 +5,7 @@ export default interface ModelDataAggregator{
     name: string,
     assignedItems?: ModelAssignedItem[],
     args: ModelArgument[],
+    active?: boolean,
     script: string,
 }
 

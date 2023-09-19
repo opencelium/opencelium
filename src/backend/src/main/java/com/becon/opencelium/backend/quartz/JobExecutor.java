@@ -202,19 +202,22 @@ public class JobExecutor extends QuartzJobBean {
 
     // TODO: Refactor so that Execution of aggregator should be in separate class;
     private void executeAggregator(ExecutionContainer executionContainer, Execution execution) {
-        executionContainer.getMethodResponses().stream().filter(mr -> mr.getAggregatorId() != null)
+        executionContainer.getMethodResponses().stream()
+                .filter(mr -> mr.getAggregatorId() != null)
                 .forEach(mr -> {
                     DataAggregator da = dataAggregatorServiceImp.getById(mr.getAggregatorId());
-                    List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), mr.getData().values().toArray(), da.getArgs(), execution);
+                    if (!da.isActive()) {
+                        return;
+                    }
+                    List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), mr.getData().values().stream().toList(), da.getArgs(), execution);
                     execution.setExecutionArguments(exarg);
+                    if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {
+                        executionServiceImp.save(execution);
+                    }
                 });
-
-        if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {
-            executionServiceImp.save(execution);
-        }
     }
 
-    private List<ExecutionArgument> getExecutionArgs(String script, Object[] responses,Set<Argument> vars, Execution execution) {
+    private List<ExecutionArgument> getExecutionArgs(String script, List<?> responses, Set<Argument> args, Execution execution) {
         try {
             ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
             engine.put("dataModel", responses);
@@ -223,15 +226,17 @@ public class JobExecutor extends QuartzJobBean {
             engine.eval(script);
 
             List<ExecutionArgument> executionArguments = new ArrayList<>();
-            vars.forEach(v -> {
-                Object value = engine.get(v.getName());
+            args.forEach(arg -> {
+                Object value = engine.get(arg.getName());
                 ExecutionArgument executionArgument = new ExecutionArgument();
-                executionArgument.setArgument(v);
+                ExecutionArgument.PK pk = new ExecutionArgument.PK(execution, arg);
                 executionArgument.setExecution(execution);
+                executionArgument.setArgument(arg);
                 executionArgument.setValue(value.toString());
                 executionArguments.add(executionArgument);
             });
 
+//            args.forEach(arg -> arg.setExecutionArguments(executionArguments));
             return executionArguments;
         } catch (Exception e) {
             e.printStackTrace();

@@ -16,7 +16,7 @@ export class DataAggregatorRequest extends Request implements IDataAggregator {
     }
 
     async addAggregator(data: ModelDataAggregator): Promise<AxiosResponse<ModelDataAggregator>> {
-        return super.post<ModelDataAggregator>(data);
+        return super.post<ModelDataAggregator>({...data, active: true});
     }
 
     async updateAggregator(data: ModelDataAggregator): Promise<AxiosResponse<ModelDataAggregator>> {
@@ -31,7 +31,15 @@ export class DataAggregatorRequest extends Request implements IDataAggregator {
         return super.get<ModelDataAggregator[] | null>();
     }
 
-    async deleteAggregator(): Promise<AxiosResponse<IResponse>>{
+    async archiveAggregator(): Promise<AxiosResponse<IResponse>>{
+        return super.put<IResponse>({active: false});
+    }
+
+    async unarchiveAggregator(): Promise<AxiosResponse<IResponse>>{
+        return super.put<IResponse>({active: true});
+    }
+
+    async deleteArgument(): Promise<AxiosResponse<IResponse>>{
         return super.delete<IResponse>();
     }
 

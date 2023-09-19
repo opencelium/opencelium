@@ -32,6 +32,7 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
         dataAggregatorDTO.setId(dataAggregator.getId());
         dataAggregatorDTO.setName(dataAggregator.getName());
         dataAggregatorDTO.setScript(dataAggregator.getScript());
+        dataAggregatorDTO.setActive(dataAggregator.isActive());
 
         List<ArgumentDTO> argumentDtos = dataAggregator.getArgs().stream().map(argumentService::convertToDto).toList();
         dataAggregatorDTO.setArgs(argumentDtos);
@@ -43,7 +44,9 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
         DataAggregator dataAggregator = new DataAggregator();
         dataAggregator.setId(dataAggregatorDTO.getId());
         dataAggregator.setName(dataAggregatorDTO.getName());
+        dataAggregator.setActive(dataAggregatorDTO.isActive());
         dataAggregator.setScript(dataAggregatorDTO.getScript());
+        dataAggregator.setActive(dataAggregatorDTO.isActive());
 
         Set<Argument> arguments = dataAggregatorDTO.getArgs().stream()
                 .map(argumentService::convertToEntity).collect(Collectors.toSet());
@@ -71,5 +74,10 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
     @Override
     public List<DataAggregator> findAll() {
         return dataAggregatorRepository.findAll();
+    }
+
+    @Override
+    public Boolean existsByName(String argName) {
+        return dataAggregatorRepository.existsByName(argName);
     }
 }

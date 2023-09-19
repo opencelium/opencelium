@@ -6,4 +6,6 @@ import com.becon.opencelium.backend.resource.connection.aggregator.ArgumentDTO;
 public interface ArgumentService {
     ArgumentDTO convertToDto(Argument argument);
     Argument convertToEntity(ArgumentDTO argumentDTO);
+
+    void deleteById(Integer argId);
 }
