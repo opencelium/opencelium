@@ -20,9 +20,9 @@ const AnimationSpeedSliderStyled = styled.div<AnimationSpeedSliderStyledProps>`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
   .speed_label{
-    font-size: 12px;
+    font-size: 10px;
+    margin-top: -7px;
   }
 `;
 
