@@ -30,7 +30,7 @@ import {ModelArgument} from "@entity/data_aggregator/requests/models/DataAggrega
 import Input from "@app_component/base/input/Input";
 import {AggregatorNameStyled, DataAggregatorItemsStyled } from "./styles";
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
-import { getAllAggregators } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
+import { getAllUnArchivedAggregators } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
 import HelpDivider from '../help_divider/HelpDivider';
 import {getMarker} from "@application/utils/utils";
 import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
@@ -91,11 +91,16 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             notificationTemplate.getById()
         }
         if(shouldFetchConnections){
-            dispatch(getAllAggregators());
+            dispatch(getAllUnArchivedAggregators());
         }
     },[]);
     useEffect(() => {
         if(bodyRef.current) {
+            //@ts-ignore
+            if(bodyRef.current.editor.getValue() !== content.body){
+                //@ts-ignore
+                bodyRef.current.editor.setValue(content.body);
+            }
             //@ts-ignore
             const newMarkers = getMarker(bodyRef.current.editor, content.body, CDataAggregator.embraceArgument(CAggregator.generateNotExistVar()));
             if (JSON.stringify(newMarkers) !== JSON.stringify(markers)) {

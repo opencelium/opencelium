@@ -14,7 +14,7 @@ export const addAggregator = createAsyncThunk(
             }
             const request = new DataAggregatorRequest();
             const response = await request.addAggregator(aggregator);
-            return response.data;
+            return {...aggregator, id: response.data.id};
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -35,7 +35,7 @@ export const updateAggregator = createAsyncThunk(
             }
             const request = new DataAggregatorRequest();
             const response = await request.addAggregator(aggregator);
-            return response.data;
+            return {...aggregator, id: response.data.id};
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -61,6 +61,19 @@ export const getAllAggregators = createAsyncThunk(
             const request = new DataAggregatorRequest({endpoint: `/all`});
             const response = await request.getAllAggregators();
             return response.data || [];
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const getAllUnArchivedAggregators = createAsyncThunk(
+    'data_aggregator/get/all/unarchived',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new DataAggregatorRequest({endpoint: `/all`});
+            const response = await request.getAllAggregators();
+            return response.data.filter(a => !(a.active === false)) || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -112,6 +125,7 @@ export default {
     updateAggregator,
     getAggregatorById,
     getAllAggregators,
+    getAllUnArchivedAggregators,
     archiveAggregatorById,
     unarchiveAggregatorById,
     deleteArgument,
