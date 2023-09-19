@@ -17,33 +17,15 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
-
 import java.util.ArrayList;
 import java.util.List;
 
-@Document(collection = "field_binding")
 public class FieldBindingMng {
-    @Id
-    private String id;
-    @DBRef
     private List<LinkedFieldMng> from = new ArrayList<>();
-    @DBRef
     private EnhancementMng enhancement;
-    @DBRef
     private List<LinkedFieldMng> to = new ArrayList<>();
 
     public FieldBindingMng() {
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public List<LinkedFieldMng> getFrom() {

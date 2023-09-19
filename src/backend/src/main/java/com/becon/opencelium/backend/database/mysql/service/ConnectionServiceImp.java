@@ -16,52 +16,91 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mysql.entity.BusinessLayout;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.becon.opencelium.backend.database.mongodb.service.*;
+import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
-import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
+import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
-@Qualifier("adasdasdsad")
 @Service
 public class ConnectionServiceImp implements ConnectionService {
 
-    @Autowired
-    private ConnectionRepository connectionRepository;
+    private final ConnectionRepository connectionRepository;
+    private final ConnectorService connectorService;
+    private final EnhancementService enhancementService;
+    private final EnhancementMngService enhancementMngService;
+    private final ConnectionMngService connectionMngService;
+    private final SchedulerService schedulerService;
+    private final ConnectorMngService connectorMngService;
 
-    @Autowired
-    private ConnectorServiceImp connectorService;
+    public ConnectionServiceImp(
+            ConnectionRepository connectionRepository,
+            @Qualifier("connectorServiceImp") ConnectorService connectorService,
+            @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
+            @Qualifier("enhancementMngServiceImp") EnhancementMngServiceImp enhancementMngService,
+            @Qualifier("connectionMngServiceImp") ConnectionMngServiceImp connectionMngService,
+            @Lazy @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
+            @Qualifier("connectorMngServiceImp") ConnectorMngServiceImp connectorMngService) {
+        this.connectionRepository = connectionRepository;
+        this.connectorService = connectorService;
+        this.enhancementService = enhancementService;
+        this.schedulerService = schedulerService;
+        this.enhancementMngService = enhancementMngService;
+        this.connectionMngService = connectionMngService;
+        this.connectorMngService = connectorMngService;
+    }
 
-    @Autowired
-    private EnhancementServiceImp enhancementService;
-
-    @Lazy
-    @Autowired
-    private SchedulerServiceImp schedulerService;
-
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
-    private InvokerServiceImp invokerServiceImp;
 
     @Override
-    public void save(Connection connection) {
-        connectionRepository.save(connection);
+    public ConnectionMng save(Connection connection, ConnectionMng connectionMng) {
+        //checking and setting connectors to connectionMng
+        if(!connectorService.existById(connection.getToConnector())){
+            throw new ConnectorNotFoundException(connection.getToConnector());
+        }else {
+            Connector toConnector = connectorService.getById(connection.getToConnector());
+            ConnectorMng toConnectorMng = connectorMngService.toEntity(toConnector);
+            toConnectorMng.setMethods(connectionMng.getToConnector().getMethods());
+            toConnectorMng.setOperators(connectionMng.getToConnector().getOperators());
+            connectionMng.setToConnector(toConnectorMng);
+        }
+        if(!connectorService.existById(connection.getFromConnector())){
+            throw new ConnectorNotFoundException(connection.getFromConnector());
+        }else {
+            Connector fromConnector = connectorService.getById(connection.getFromConnector());
+            ConnectorMng fromConnectorMng = connectorMngService.toEntity(fromConnector);
+            fromConnectorMng.setMethods(connectionMng.getFromConnector().getMethods());
+            fromConnectorMng.setOperators(connectionMng.getFromConnector().getOperators());
+            connectionMng.setFromConnector(fromConnectorMng);
+        }
+
+        //saving connection
+        Connection savedConnection = connectionRepository.save(connection);
+        connectionMng.setConnectionId(savedConnection.getId());
+
+        //setting enhancements to connection and enhancementId to all fieldBindingMng's enhancementMng
+        for (FieldBindingMng fieldBindingMng : connectionMng.getFieldBinding()) {
+            Enhancement enhancement = enhancementMngService.toEntity(fieldBindingMng.getEnhancement());
+            enhancement.setConnection(savedConnection);
+            Enhancement savedEnhancement = enhancementService.save(enhancement);
+            fieldBindingMng.getEnhancement().setEnhancementId(savedEnhancement.getId());
+        }
+
+        //saving connectionMng
+        return connectionMngService.save(connectionMng);
     }
 
     @Override
     public void deleteById(Long id) {
-        Connection connection = connectionRepository.findById(id).get();
+        Connection connection = getById(id);
         List<Scheduler> schedulers = connection.getSchedulers();
 
         if (schedulers != null && !schedulers.isEmpty()){
@@ -70,7 +109,6 @@ public class ConnectionServiceImp implements ConnectionService {
             });
         }
         connectionRepository.deleteById(id);
-//        connectionNodeService.deleteById(id);
     }
 
     @Override
@@ -110,37 +148,60 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
-    public Connection toEntity(ConnectionDTO resource) {
+    public ConnectionMng update(Connection connection, ConnectionMng uConnectionMng) {
+        Connection rConnection = getById(connection.getId());
+        connection.setIcon(rConnection.getIcon());
+        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
+        uConnectionMng.setId(connectionMng.getId());
+        return save(connection, uConnectionMng);
+    }
+
+    @Override
+    public Connection getById(Long id) {
+        return connectionRepository.findById(id)
+                .orElseThrow(()->new ConnectionNotFoundException(id));
+    }
+
+
+    @Override
+    public Connection toEntity(ConnectionDTO connectionDTO) {
         Connection connection = new Connection();
 
-        connection.setId(resource.getConnectionId());
-        connection.setName(resource.getTitle());
-        connection.setDescription(resource.getDescription());
-        connection.setFromConnector(resource.getFromConnector().getConnectorId());
-        connection.setToConnector(resource.getToConnector().getConnectorId());
-        if (resource.getBusinessLayout() != null) {
-            BusinessLayout businessLayout = new BusinessLayout(resource.getBusinessLayout(), connection);
+        connection.setId(connectionDTO.getConnectionId());
+        connection.setName(connectionDTO.getTitle());
+        connection.setDescription(connectionDTO.getDescription());
+        connection.setFromConnector(connectionDTO.getFromConnector().getConnectorId());
+        connection.setToConnector(connectionDTO.getToConnector().getConnectorId());
+//        connection.setEnhancements(connectionDTO.getFieldBinding().stream().map(e->enhancementService.toEntity(e.getEnhancement())).toList());
+        if (connectionDTO.getBusinessLayout() != null) {
+            BusinessLayout businessLayout = new BusinessLayout(connectionDTO.getBusinessLayout(), connection);
             connection.setBusinessLayout(businessLayout);
         }
         return connection;
     }
 
     @Override
-    public ConnectionDTO toResource(Connection connection) {
+    public ConnectionDTO toDTO(Connection connection) {
         ConnectionDTO connectionResource = new ConnectionDTO();
         connectionResource.setConnectionId(connection.getId());
         connectionResource.setTitle(connection.getName());
         connectionResource.setDescription(connection.getDescription());
-        Connector from = connectorService.findById(connection.getFromConnector())
-                .orElseThrow(() -> new RuntimeException("Connector - " + connection.getFromConnector() + " not found"));
-        Connector to = connectorService.findById(connection.getToConnector())
-                .orElseThrow(() -> new RuntimeException("Connector - " + connection.getToConnector() + " not found"));
-
-        connectionResource.setFromConnector(connectorService.toMetaResource(from));
-        connectionResource.setToConnector(connectorService.toMetaResource(to));
+        Connector from = connectorService.getById(connection.getFromConnector());
+        Connector to = connectorService.getById(connection.getToConnector());
+        connectionResource.setFromConnector(connectorService.toMetaDTO(from));
+        connectionResource.setToConnector(connectorService.toMetaDTO(to));
 //        if (connection.getBusinessLayout() != null) {
 //            connectionResource.setBusinessLayout(new BusinessLayoutResource(connection.getBusinessLayout()));
 //        }
         return connectionResource;
+    }
+
+    @Override
+    public List<ConnectionDTO> toDTOAll(List<Connection> connections) {
+        ArrayList<ConnectionDTO> connectionDTOS = new ArrayList<>();
+        for (Connection connection : connections) {
+            connectionDTOS.add(toDTO(connection));
+        }
+        return connectionDTOS;
     }
 }

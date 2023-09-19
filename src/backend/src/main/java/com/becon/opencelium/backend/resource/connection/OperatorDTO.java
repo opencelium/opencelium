@@ -21,17 +21,17 @@ import jakarta.annotation.Resource;
 @Resource
 public class OperatorDTO {
 
-    private Long nodeId;
+    private String nodeId;
     private String type;
     private String index;
     private String iterator;
     private ConditionDTO condition;
 
-    public Long getNodeId() {
+    public String getNodeId() {
         return nodeId;
     }
 
-    public void setNodeId(Long nodeId) {
+    public void setNodeId(String nodeId) {
         this.nodeId = nodeId;
     }
 

@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 
@@ -24,7 +25,7 @@ import java.util.Optional;
 
 public interface ConnectionService {
 
-    void save(Connection connection);
+    ConnectionMng save(Connection connection, ConnectionMng connectionMng);
 
     void deleteById(Long id);
 
@@ -41,7 +42,14 @@ public interface ConnectionService {
 
     List<Connection> findAllByNameContains(String name);
 
-    Connection toEntity(ConnectionDTO resource);
+    ConnectionMng update(Connection connection, ConnectionMng connectionMng);
 
-    ConnectionDTO toResource(Connection connection);
+    Connection toEntity(ConnectionDTO connectionDTO);
+
+    ConnectionDTO toDTO(Connection connection);
+
+    Connection getById(Long connectionId);
+
+
+    List<ConnectionDTO> toDTOAll(List<Connection> connections);
 }

@@ -17,17 +17,12 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 
-@Document(collection = "enhancement")
 public class EnhancementMng {
-    @Id
-    private String id;
-    @Field(name = "enhance_id")
-    private Integer enhanceId;
+    @Field(name = "enhancement_id")
+    private Integer enhancementId;
     private String name;
     private String description;
     @Field(name = "expert_code")
@@ -40,7 +35,7 @@ public class EnhancementMng {
     }
 
     public EnhancementMng(Enhancement enhancement) {
-        this.enhanceId = enhancement.getId();
+        this.enhancementId = enhancement.getId();
         this.name = enhancement.getName();
         this.description = enhancement.getDescription();
         this.expertCode = enhancement.getExpertCode();
@@ -48,20 +43,12 @@ public class EnhancementMng {
         this.language = enhancement.getLanguage();
     }
 
-    public String getId() {
-        return id;
+    public Integer getEnhancementId() {
+        return enhancementId;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Integer getEnhanceId() {
-        return enhanceId;
-    }
-
-    public void setEnhanceId(Integer enhanceId) {
-        this.enhanceId = enhanceId;
+    public void setEnhancementId(Integer enhancementId) {
+        this.enhancementId = enhancementId;
     }
 
     public String getName() {

@@ -28,7 +28,7 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
     @Override
     public DataAggregatorDTO convertToDto(DataAggregator dataAggregator) {
         DataAggregatorDTO dataAggregatorDTO = new DataAggregatorDTO();
-        dataAggregatorDTO.setId(dataAggregator.getId());
+        dataAggregatorDTO.setId(String.valueOf(dataAggregator.getId()));
         dataAggregatorDTO.setName(dataAggregator.getName());
         dataAggregatorDTO.setScript(dataAggregator.getScript());
 
@@ -41,7 +41,7 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
     @Override
     public DataAggregator convertToEntity(DataAggregatorDTO dataAggregatorDTO) {
         DataAggregator dataAggregator = new DataAggregator();
-        dataAggregator.setId(dataAggregatorDTO.getId());
+        dataAggregator.setId(Integer.valueOf(dataAggregatorDTO.getId()));
         dataAggregator.setName(dataAggregatorDTO.getName());
         dataAggregator.setScript(dataAggregatorDTO.getScript());
 

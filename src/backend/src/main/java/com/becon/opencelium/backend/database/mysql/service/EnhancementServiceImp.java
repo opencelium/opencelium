@@ -16,11 +16,11 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.repository.EnhancementRepository;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,12 +29,15 @@ import java.util.Optional;
 @Service
 public class EnhancementServiceImp implements EnhancementService{
 
-    @Autowired
-    private EnhancementRepository enhancementRepository;
+    private final EnhancementRepository enhancementRepository;
+
+    public EnhancementServiceImp(EnhancementRepository enhancementRepository) {
+        this.enhancementRepository = enhancementRepository;
+    }
 
     @Override
-    public void save(Enhancement enhancement) {
-        enhancementRepository.save(enhancement);
+    public Enhancement save(Enhancement enhancement) {
+        return enhancementRepository.save(enhancement);
     }
 
     @Override
@@ -70,14 +73,14 @@ public class EnhancementServiceImp implements EnhancementService{
     }
 
     @Override
-    public Enhancement toEntity(EnhancementDTO resource) {
+    public Enhancement toEntity(EnhancementDTO enhancementDTO) {
         Enhancement enhancement = new Enhancement();
-        enhancement.setId(resource.getEnhanceId());
-        enhancement.setDescription(resource.getDescription());
-        enhancement.setName(resource.getName());
-        enhancement.setExpertCode(resource.getExpertCode());
-        enhancement.setExpertVar(resource.getExpertVar());
-        enhancement.setLanguage(resource.getLanguage());
+        enhancement.setId(enhancementDTO.getEnhanceId());
+        enhancement.setDescription(enhancementDTO.getDescription());
+        enhancement.setName(enhancementDTO.getName());
+        enhancement.setExpertCode(enhancementDTO.getExpertCode());
+        enhancement.setExpertVar(enhancementDTO.getExpertVar());
+        enhancement.setLanguage(enhancementDTO.getLanguage());
         enhancement.setSimpleCode("");
         return enhancement;
     }
@@ -90,6 +93,11 @@ public class EnhancementServiceImp implements EnhancementService{
     @Override
     public FieldBindingDTO toFieldBindingResource(Enhancement enhancement) {
         return null;
+    }
+
+    @Override
+    public boolean existById(Integer id) {
+        return enhancementRepository.existsById(id);
     }
 
 }

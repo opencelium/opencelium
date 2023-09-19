@@ -14,41 +14,37 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.database.mongodb.entity;
+package com.becon.opencelium.backend.resource.connection;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.*;
+import com.becon.opencelium.backend.database.mysql.entity.BusinessLayout;
+import com.becon.opencelium.backend.resource.connector.InvokerDTO;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.annotation.Resource;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Document(collection = "connector_node")
-public class ConnectorNodeMng {
+@Resource
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ConnectorDTO {
 
-    @Id
-    private String id;
-    @Field(name = "connector_id")
+    private String nodeId;
     private Integer connectorId;
     private String title;
     private String icon;
-    @Field(name = "ssl_cert")
     private boolean sslCert;
-    private int timeout;  //millisecond
-    @DBRef
-    private InvokerMng invoker;
-    @DBRef
-    private List<MethodMng> methods;
-    @DBRef
-    private List<OperatorMng> operators;
+    private int timeout;
+    private InvokerDTO invoker; // due to front end asked sending object, normally should be name of invoker
+    private BusinessLayout businessLayout;
+    private List<MethodDTO> methods = new ArrayList<>();
+    private List<OperatorDTO> operators = new ArrayList<>();
 
-    public ConnectorNodeMng() {
+    public String getNodeId() {
+        return nodeId;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 
     public Integer getConnectorId() {
@@ -75,11 +71,11 @@ public class ConnectorNodeMng {
         this.icon = icon;
     }
 
-    public InvokerMng getInvoker() {
+    public InvokerDTO getInvoker() {
         return invoker;
     }
 
-    public void setInvoker(InvokerMng invoker) {
+    public void setInvoker(InvokerDTO invoker) {
         this.invoker = invoker;
     }
 
@@ -99,19 +95,27 @@ public class ConnectorNodeMng {
         this.timeout = timeout;
     }
 
-    public List<MethodMng> getMethods() {
+    public BusinessLayout getBusinessLayout() {
+        return businessLayout;
+    }
+
+    public void setBusinessLayout(BusinessLayout businessLayout) {
+        this.businessLayout = businessLayout;
+    }
+
+    public List<MethodDTO> getMethods() {
         return methods;
     }
 
-    public void setMethods(List<MethodMng> methods) {
+    public void setMethods(List<MethodDTO> methods) {
         this.methods = methods;
     }
 
-    public List<OperatorMng> getOperators() {
+    public List<OperatorDTO> getOperators() {
         return operators;
     }
 
-    public void setOperators(List<OperatorMng> operators) {
+    public void setOperators(List<OperatorDTO> operators) {
         this.operators = operators;
     }
 }

@@ -25,7 +25,7 @@ import java.util.Map;
 @Resource
 public class RequestResource {
 
-    private Long nodeId;
+    private String nodeId;
     private String endpoint;
     private String method;
     private Map<String, String> header;
@@ -43,11 +43,11 @@ public class RequestResource {
         }
     }
 
-    public Long getNodeId() {
+    public String getNodeId() {
         return nodeId;
     }
 
-    public void setNodeId(Long nodeId) {
+    public void setNodeId(String nodeId) {
         this.nodeId = nodeId;
     }
 

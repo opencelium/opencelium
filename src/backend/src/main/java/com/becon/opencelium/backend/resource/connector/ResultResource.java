@@ -26,7 +26,7 @@ import java.util.Map;
 @Resource
 public class ResultResource {
 
-    private Long nodeId;
+    private String nodeId;
     private String status;
     private Map<String, String> header;
     private BodyResource body;
@@ -42,11 +42,11 @@ public class ResultResource {
         this.status = resultInv.getStatus();
     }
 
-    public Long getNodeId() {
+    public String getNodeId() {
         return nodeId;
     }
 
-    public void setNodeId(Long nodeId) {
+    public void setNodeId(String nodeId) {
         this.nodeId = nodeId;
     }
 

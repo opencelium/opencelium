@@ -17,7 +17,7 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -28,20 +28,17 @@ public class ConnectionMng {
     @Id
     private String id; // id generated in mongodb
     @Field(name = "connection_id")
+    @Indexed
     private Long connectionId; // id generated in mariadb.
     private String title;
     private String description;
     @Field(name = "from_connector")
-    @DBRef
-    private ConnectorNodeMng fromConnector;
+    private ConnectorMng fromConnector;
     @Field(name = "to_connector")
-    @DBRef
-    private ConnectorNodeMng toConnector;
+    private ConnectorMng toConnector;
     @Field(name = "field_binding")
-    @DBRef
     private List<FieldBindingMng> fieldBinding;
     @Field(name = "data_aggregator")
-    @DBRef
     private DataAggregatorMng dataAggregator;
 
     public ConnectionMng() {
@@ -79,19 +76,19 @@ public class ConnectionMng {
         this.description = description;
     }
 
-    public ConnectorNodeMng getFromConnector() {
+    public ConnectorMng getFromConnector() {
         return fromConnector;
     }
 
-    public void setFromConnector(ConnectorNodeMng fromConnector) {
+    public void setFromConnector(ConnectorMng fromConnector) {
         this.fromConnector = fromConnector;
     }
 
-    public ConnectorNodeMng getToConnector() {
+    public ConnectorMng getToConnector() {
         return toConnector;
     }
 
-    public void setToConnector(ConnectorNodeMng toConnector) {
+    public void setToConnector(ConnectorMng toConnector) {
         this.toConnector = toConnector;
     }
 

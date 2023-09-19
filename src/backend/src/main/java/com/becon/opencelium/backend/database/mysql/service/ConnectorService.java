@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
+import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ import java.util.Optional;
 public interface ConnectorService {
 
     Optional<Connector> findById(int id);
+    Connector getById(Integer id);
 
     void save(Connector connector);
 
@@ -60,4 +62,6 @@ public interface ConnectorService {
     ResponseEntity<?> getAuthorization(Connector connector);
 
     List<RequestData> buildRequestData(Connector connector);
+
+    ConnectorDTO toMetaDTO(Connector connector);
 }

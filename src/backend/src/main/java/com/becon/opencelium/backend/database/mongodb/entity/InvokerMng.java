@@ -19,8 +19,6 @@ package com.becon.opencelium.backend.database.mongodb.entity;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -29,10 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Document(collection = "invoker")
 public class InvokerMng {
-    @Id
-    private String id;
     private String name;
     private String description;
     private String hint;
@@ -59,13 +54,6 @@ public class InvokerMng {
                         (existingValue, newValue) -> existingValue, LinkedHashMap::new));
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

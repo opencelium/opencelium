@@ -16,35 +16,19 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "condition")
 public class ConditionMng {
-    @Id
-    private String id;
     @Field(name = "relational_statement")
     private String relationalOperator;
     @Field(name = "left_statement")
-    @DBRef
     private StatementMng leftStatement;
     @Field(name = "right_statement")
-    @DBRef
     private StatementMng rightStatement;
 
     public ConditionMng() {
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getRelationalOperator() {
         return relationalOperator;

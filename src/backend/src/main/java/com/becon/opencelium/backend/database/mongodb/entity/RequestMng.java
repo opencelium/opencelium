@@ -17,21 +17,14 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
 import com.becon.opencelium.backend.invoker.entity.RequestInv;
-import jakarta.annotation.Resource;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.*;
 
 import java.util.Map;
 
-@Document(collection = "request")
 public class RequestMng {
 
-    @Id
-    private String id;
     private String endpoint;
     private String method;
     private Map<String, String> header;
-    @DBRef
     private BodyMng body;
 
     public RequestMng() {
@@ -46,13 +39,6 @@ public class RequestMng {
         }
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getEndpoint() {
         return endpoint;

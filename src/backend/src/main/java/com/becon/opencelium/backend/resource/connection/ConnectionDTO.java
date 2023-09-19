@@ -22,27 +22,28 @@ import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConnectionDTO {
 
-    private Long nodeId; // id generated in neo4j
+    private String nodeId; // id generated in mongo
     private Long connectionId; // id generated in mariadb.
     private String title;
     private String description;
-    private ConnectorNodeDTO fromConnector;
-    private ConnectorNodeDTO toConnector;
-    private List<FieldBindingDTO> fieldBinding;
+    private ConnectorDTO fromConnector;
+    private ConnectorDTO toConnector;
+    private List<FieldBindingDTO> fieldBinding = new ArrayList<>();
     private BusinessLayoutResource businessLayout;
     private DataAggregatorDTO dataAggregator;
 
-    public Long getNodeId() {
+    public String getNodeId() {
         return nodeId;
     }
 
-    public void setNodeId(Long nodeId) {
+    public void setNodeId(String nodeId) {
         this.nodeId = nodeId;
     }
 
@@ -70,19 +71,19 @@ public class ConnectionDTO {
         this.description = description;
     }
 
-    public ConnectorNodeDTO getFromConnector() {
+    public ConnectorDTO getFromConnector() {
         return fromConnector;
     }
 
-    public void setFromConnector(ConnectorNodeDTO fromConnector) {
+    public void setFromConnector(ConnectorDTO fromConnector) {
         this.fromConnector = fromConnector;
     }
 
-    public ConnectorNodeDTO getToConnector() {
+    public ConnectorDTO getToConnector() {
         return toConnector;
     }
 
-    public void setToConnector(ConnectorNodeDTO toConnector) {
+    public void setToConnector(ConnectorDTO toConnector) {
         this.toConnector = toConnector;
     }
 

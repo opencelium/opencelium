@@ -17,11 +17,8 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "method")
 public class MethodMng {
     @Id
     private String id;
@@ -31,9 +28,7 @@ public class MethodMng {
     private String label;
     @Field(name = "data_integrator")
     private Integer dataAggregator;
-    @DBRef
     private RequestMng request;
-    @DBRef
     private ResponseMng response;
 
     public MethodMng() {

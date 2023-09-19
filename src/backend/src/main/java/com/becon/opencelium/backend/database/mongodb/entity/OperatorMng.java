@@ -17,10 +17,7 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "operator")
 public class OperatorMng {
 
     @Id
@@ -28,7 +25,6 @@ public class OperatorMng {
     private String type;
     private String index;
     private String iterator;
-    @DBRef
     private ConditionMng condition;
 
     public OperatorMng() {

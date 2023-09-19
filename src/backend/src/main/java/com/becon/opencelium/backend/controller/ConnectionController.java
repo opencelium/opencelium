@@ -15,8 +15,16 @@
  */
 
 package com.becon.opencelium.backend.controller;
+
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,27 +37,22 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.security.cert.X509Certificate;
-
-import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.database.mysql.service.EnhancementServiceImp;
-import com.becon.opencelium.backend.resource.ApiDataResource;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.validation.connection.ValidationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import java.io.IOException;
+import java.net.URI;
+import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -57,17 +60,17 @@ import java.util.Map;
 @Tag(name = "Connection", description = "Manages operations related to Connection management")
 public class ConnectionController {
 
-    @Autowired
-    private ConnectionServiceImp connectionService;
 
-    @Autowired
-    private EnhancementServiceImp enhancementService;
+    private final ConnectionService connectionService;
+    private final ConnectionMngService connectionMngService;
 
-    @Autowired
-    private ValidationContext validationContext;
-
-    @Autowired
-    private RestTemplate restTemplate;
+    public ConnectionController(
+            ConnectionMngService connectionMngService,
+            @Qualifier("connectionServiceImp") ConnectionService connectionService
+    ) {
+        this.connectionService = connectionService;
+        this.connectionMngService = connectionMngService;
+    }
 
     @Operation(summary = "Retrieves all connections from database")
     @ApiResponses(value = {
@@ -83,7 +86,8 @@ public class ConnectionController {
     })
     @GetMapping(path = "/all")
     public ResponseEntity<?> getAll(){
-        return ResponseEntity.ok().build();
+        List<ConnectionMng> connections = connectionMngService.getAll();
+        return ResponseEntity.ok(connectionMngService.toDTOAll(connections));
     }
 
 
@@ -118,7 +122,8 @@ public class ConnectionController {
     })
     @GetMapping(path = "/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId) {
-        return ResponseEntity.ok().build();
+        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+        return ResponseEntity.ok(connectionMngService.toDTO(connectionMng));
     }
 
     @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
@@ -134,24 +139,19 @@ public class ConnectionController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> add(@RequestBody ConnectionDTO connectionResource) throws Exception{
-        return ResponseEntity.ok().build();
-    }
+    public ResponseEntity<?> add(@RequestBody ConnectionDTO connectionDTO) throws Exception{
+        Connection connection = connectionService.toEntity(connectionDTO);
+        ConnectionMng connectionMng = connectionMngService.toEntity(connectionDTO);
 
-    @Operation(summary = "Validates a connection for correctly constructed structure")
-    @ApiResponses(value = {
-            @ApiResponse( responseCode = "200",
-                    description = "Connection has been successfully validated"),
-            @ApiResponse( responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @PostMapping(path = "/validate", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> validate(@RequestBody ConnectionDTO connectionResource) throws Exception{
-        return ResponseEntity.badRequest().build();
+        ConnectionMng savedConnectionMng = connectionService.save(connection,connectionMng);
+
+        ConnectionDTO responseConnectionDTO = connectionMngService.toDTO(savedConnectionMng);
+
+        final URI uri = MvcUriComponentsBuilder
+                .fromController(getClass())
+                .path("/{connectionId}")
+                .buildAndExpand(connection.getId()).toUri();
+        return ResponseEntity.created(uri).body(responseConnectionDTO);
     }
 
     @Operation(summary = "Modifies a connection by provided connection ID and accepting connection data in request body.")
@@ -167,9 +167,29 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "/{connectionId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> update(@PathVariable Long connectionId,
-                                    @RequestBody ConnectionDTO connectionResource) throws Exception{
+    public ResponseEntity<?> update(
+            @PathVariable Long connectionId,
+            @RequestBody ConnectionDTO connectionDTO
+    ) throws Exception{
+        Connection connection = connectionService.toEntity(connectionDTO);
+        connection.setId(connectionId);
+        ConnectionMng updated = connectionService.update(connection, connectionMngService.toEntity(connectionDTO));
+        return ResponseEntity.ok(connectionMngService.toDTO(updated));
+    }
 
+    @Operation(summary = "Validates a connection for correctly constructed structure")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Connection has been successfully validated"),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/validate", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> validate(@RequestBody ConnectionDTO connectionDTO) throws Exception{
         return ResponseEntity.badRequest().build();
     }
 
@@ -188,8 +208,7 @@ public class ConnectionController {
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id){
         connectionService.deleteById(id);
-//        connectionNodeService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Validates name of connection for uniqueness")

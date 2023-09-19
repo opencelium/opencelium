@@ -20,24 +20,25 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
+import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
-import com.becon.opencelium.backend.resource.connection.ConnectorNodeDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.becon.opencelium.backend.utility.StringUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.*;
 
-@Repository
+@Service
 public class ConnectorServiceImp implements ConnectorService{
 
     @Autowired
@@ -52,6 +53,12 @@ public class ConnectorServiceImp implements ConnectorService{
     @Override
     public Optional<Connector> findById(int id) {
         return connectorRepository.findById(id);
+    }
+
+    @Override
+    public Connector getById(Integer id) {
+        return connectorRepository.findById(id)
+                .orElseThrow(()->new ConnectorNotFoundException(id));
     }
 
     @Override
@@ -167,10 +174,10 @@ public class ConnectorServiceImp implements ConnectorService{
         return connectorResource;
     }
 
-    public ConnectorNodeDTO toMetaResource(Connector entity) {
+    public ConnectorDTO toMetaDTO(Connector entity) {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
-        ConnectorNodeDTO connectorNodeResource = new ConnectorNodeDTO();
+        ConnectorDTO connectorNodeResource = new ConnectorDTO();
         connectorNodeResource.setConnectorId(entity.getId());
         InvokerDTO invokerDTO = invokerService.toMetaResource(invokerService.findByName(entity.getInvoker()));
         connectorNodeResource.setInvoker(invokerDTO);
