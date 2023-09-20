@@ -101,7 +101,7 @@ const ControlsBlockStyled = styled.div<ControlsBlockStyledProps>`
     transform: translateY(-120%);
   }
   .additional_panel_template{
-    transform: translateY(80%);
+    transform: translateY(-120%);
   }
 `;
 
