@@ -126,6 +126,7 @@ public class ConnectorExecutor {
 // ================================= remove =========================================
         MethodResponse methodResponse;
         HashMap<String, String> responseContainer;
+        LinkedList<ResponseEntity<String>> respEnts;
         Map<String, Integer> loopsWithCurrIndex = executionContainer.getLoopIterators();
         logger.getLogEntity().setMethodData(new MethodData(methodNode.getColor()));
 // ==================================================================================
@@ -145,11 +146,14 @@ public class ConnectorExecutor {
             // adding new response message into existing data.
             methodResponse.getData()
                     .put(responseIndex, responseEntity.getBody());
+            methodResponse.getResponseEntities().add(responseEntity);
         }
         else {
             methodResponse = new MethodResponse();
             responseContainer = new LinkedHashMap<>();
+            respEnts = new LinkedList<>();
             responseContainer.put(responseIndex,responseEntity.getBody());
+            respEnts.add(responseEntity);
 
             methodResponse.setMethodKey(methodNode.getColor());
             methodResponse.setResponseFormat(methodNode.getResponseNode().getSuccess().getBody().getFormat());
@@ -158,6 +162,7 @@ public class ConnectorExecutor {
             methodResponse.setData(responseContainer);
             methodResponse.setLoopDepth(loopDepth);
             methodResponse.setAggregatorId(methodNode.getAggregatorId());
+            methodResponse.setResponseEntities(respEnts);
 
             List<MethodResponse> list = executionContainer.getMethodResponses();
             list.add(methodResponse);

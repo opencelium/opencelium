@@ -22,12 +22,14 @@ import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.execution.ExecutionContainer;
+import com.becon.opencelium.backend.execution.JsResponseObject;
 import com.becon.opencelium.backend.execution.log.msg.ExecutionLog;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.logger.OcLogger;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.service.*;
 import com.becon.opencelium.backend.neo4j.service.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openjdk.nashorn.api.scripting.JSObject;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -43,7 +45,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.function.Function;
 
 @Component
 public class JobExecutor extends QuartzJobBean {
@@ -209,7 +210,10 @@ public class JobExecutor extends QuartzJobBean {
                     if (!da.isActive()) {
                         return;
                     }
-                    List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), mr.getData().values().stream().toList(), da.getArgs(), execution);
+                    List<JsResponseObject> responseObjects = mr.getResponseEntities()
+                            .stream()
+                            .map(JsResponseObject::new).toList();
+                    List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), responseObjects, da.getArgs(), execution);
                     execution.setExecutionArguments(exarg);
                     if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {
                         executionServiceImp.save(execution);
@@ -217,10 +221,11 @@ public class JobExecutor extends QuartzJobBean {
                 });
     }
 
-    private List<ExecutionArgument> getExecutionArgs(String script, List<?> responses, Set<Argument> args, Execution execution) {
+    private List<ExecutionArgument> getExecutionArgs(String script, List<JsResponseObject> responses, Set<Argument> args, Execution execution) {
         try {
             ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-            engine.put("dataModel", responses);
+            String string = new ObjectMapper().writeValueAsString(responses);
+            engine.put("dataModel", string);
             JSObject obj = (JSObject)engine.eval("JSON.parse(dataModel)");
             engine.put(AggrConst.RESPONSES, obj);
             engine.eval(script);
@@ -229,7 +234,7 @@ public class JobExecutor extends QuartzJobBean {
             args.forEach(arg -> {
                 Object value = engine.get(arg.getName());
                 ExecutionArgument executionArgument = new ExecutionArgument();
-                ExecutionArgument.PK pk = new ExecutionArgument.PK(execution, arg);
+//                ExecutionArgument.PK pk = new ExecutionArgument.PK(execution, arg);
                 executionArgument.setExecution(execution);
                 executionArgument.setArgument(arg);
                 executionArgument.setValue(value.toString());
