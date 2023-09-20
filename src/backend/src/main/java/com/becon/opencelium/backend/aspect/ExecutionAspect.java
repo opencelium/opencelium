@@ -51,8 +51,8 @@ public class ExecutionAspect {
     @Autowired
     private EmailServiceImpl emailService;
 
-    @Autowired
-    private TeamsService teamsService;
+//    @Autowired
+//    private TeamsService teamsService;
 
     @Autowired
     private ExecutionServiceImp executionServiceImp;
@@ -116,7 +116,7 @@ public class ExecutionAspect {
                 } else if (type.equals("slack")) {
                     // slack implementation
                 } else if (type.equals("teams")) {
-                    teamsService.sendMessage(to, subject, message);
+//                    teamsService.sendMessage(to, subject, message);
                 }
             }
         }
