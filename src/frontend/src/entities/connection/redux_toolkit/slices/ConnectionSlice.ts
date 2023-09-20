@@ -143,6 +143,9 @@ let initialState: ConnectionState = {
 
 const connectionReducers = (isModal: boolean = false) => {
   const reducers: SliceCaseReducers<ConnectionState> = {
+    setCurrentConnection: (state, action: PayloadAction<any>) => {
+      state.currentConnection = action.payload;
+    },
     setJustCreatedItem: (state, action: PayloadAction<any>) => {
       state.justCreatedItem = action.payload;
     },
@@ -605,6 +608,7 @@ export const connectionSlice = createSlice({
 
 
 export const {
+  setCurrentConnection,
   addCurrentLog,
   shouldNotDrawLogMessage,
   addLogMessage,

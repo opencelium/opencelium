@@ -123,6 +123,10 @@ export function ConnectionForm(type) {
                 }
             }
 
+            componentWillUnmount(){
+                this.props.setCurrentConnection(null);
+            }
+
             setMode(mode, callback = null){
                 this.setState({mode}, callback);
             }
