@@ -20,7 +20,6 @@ import {Operation} from "../../classes/Operation";
 import {ResponseFormat} from "../../requests/models/Body";
 import {InputElementProps} from "@app_component/base/input/interfaces";
 import CXmlEditor from "@app_component/base/input/xml_view/xml_editor/classes/CXmlEditor";
-import {AceEditorProps} from "react-ace/types";
 
 interface DefaultProps{
     index?: string,
@@ -63,11 +62,11 @@ interface HeaderProps{
 
 interface JsonBodyProps extends InputElementProps{
     theme?: ITheme,
-    jsonProps: AceEditorProps,
+    jsonProps: any,
 }
 interface XmlBodyProps extends InputElementProps{
     theme?: ITheme,
-    xmlProps: AceEditorProps,
+    xmlProps: any,
 }
 
 export {
