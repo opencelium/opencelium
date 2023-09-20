@@ -19,13 +19,11 @@ import {ICommonState} from "@application/interfaces/core";
 import {CommonState} from "@application/utils/store";
 import {
     addAggregator, getAllAggregators, getAggregatorById,
-    updateAggregator, archiveAggregatorById, unarchiveAggregatorById, deleteArgument
+    updateAggregator, archiveAggregatorById, unarchiveAggregatorById, deleteArgument, getAllUnarchivedAggregators
 } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
 import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
-import {
-    deleteNotificationTemplateById
-} from "@entity/notification_template/redux_toolkit/action_creators/NotificationTemplateCreators";
+import { FormType } from "@entity/data_aggregator/components/dialog_button/interfaces";
 
 export interface DataAggregatorState extends ICommonState{
     isCurrentAggregatorHasUniqueName: TRIPLET_STATE,
@@ -33,11 +31,16 @@ export interface DataAggregatorState extends ICommonState{
     updatingAggregator: API_REQUEST_STATE,
     gettingAggregator: API_REQUEST_STATE,
     gettingAllAggregators: API_REQUEST_STATE,
+    gettingAllUnarchivedAggregators: API_REQUEST_STATE,
     archivingAggregator: API_REQUEST_STATE,
     unarchivingAggregator: API_REQUEST_STATE,
     deletingAggregatorById: API_REQUEST_STATE,
     currentAggregator: ModelDataAggregator,
     aggregators: ModelDataAggregator[],
+    unarchivedAggregators: ModelDataAggregator[],
+    isForm: boolean,
+    isDataAggregationModalToggled: boolean,
+    formType: FormType,
 }
 const initialState: DataAggregatorState = {
     isCurrentAggregatorHasUniqueName: TRIPLET_STATE.INITIAL,
@@ -45,11 +48,16 @@ const initialState: DataAggregatorState = {
     updatingAggregator: API_REQUEST_STATE.INITIAL,
     gettingAggregator: API_REQUEST_STATE.INITIAL,
     gettingAllAggregators: API_REQUEST_STATE.INITIAL,
+    gettingAllUnarchivedAggregators: API_REQUEST_STATE.INITIAL,
     archivingAggregator: API_REQUEST_STATE.INITIAL,
     unarchivingAggregator: API_REQUEST_STATE.INITIAL,
     deletingAggregatorById: API_REQUEST_STATE.INITIAL,
     currentAggregator: null,
     aggregators: [],
+    unarchivedAggregators: [],
+    isForm: false,
+    formType: 'add',
+    isDataAggregationModalToggled: false,
     ...CommonState,
 }
 
@@ -62,7 +70,16 @@ export const dataAggregatorSlice = createSlice({
         },
         setCurrentAggregator: (state, action: PayloadAction<ModelDataAggregator>) => {
             state.currentAggregator = action.payload;
-        }
+        },
+        setIsForm: (state, action: PayloadAction<boolean>) => {
+            state.isForm = action.payload;
+        },
+        setFormType: (state, action: PayloadAction<FormType>) => {
+            state.formType = action.payload;
+        },
+        toggleDataAggregatorModal: (state, action: PayloadAction<boolean>) => {
+            state.isDataAggregationModalToggled = action.payload;
+        },
     },
     extraReducers: {
         [addAggregator.pending.type]: (state) => {
@@ -127,6 +144,20 @@ export const dataAggregatorSlice = createSlice({
             state.gettingAllAggregators = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
+        [getAllUnarchivedAggregators.pending.type]: (state) => {
+            state.gettingAllUnarchivedAggregators = API_REQUEST_STATE.START;
+        },
+        [getAllUnarchivedAggregators.fulfilled.type]: (state, action: PayloadAction<ModelDataAggregator[]>) => {
+            state.gettingAllUnarchivedAggregators = API_REQUEST_STATE.FINISH;
+            state.isCurrentAggregatorHasUniqueName = TRIPLET_STATE.INITIAL;
+            state.unarchivedAggregators = action.payload;
+            state.currentAggregator = null;
+            state.error = null;
+        },
+        [getAllUnarchivedAggregators.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingAllUnarchivedAggregators = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
         [archiveAggregatorById.pending.type]: (state) => {
             state.archivingAggregator = API_REQUEST_STATE.START;
         },
@@ -169,7 +200,8 @@ export const dataAggregatorSlice = createSlice({
 })
 
 export const {
-    setCurrentAggregator, clearError,
+    setCurrentAggregator, clearError, setIsForm, setFormType,
+    toggleDataAggregatorModal,
 } = dataAggregatorSlice.actions;
 
 export default dataAggregatorSlice.reducer;

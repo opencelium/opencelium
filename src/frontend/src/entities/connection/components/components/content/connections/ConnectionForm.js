@@ -700,7 +700,7 @@ export function ConnectionForm(type) {
                 }
                 return (
                     <Form
-                        shouldScroll={this.isUpdate ? 'Methods' : ''}
+                        shouldScroll={this.isUpdate ? 'methods' : ''}
                         contents={contents}
                         translations={contentTranslations}
                         isActionInProcess={!this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)}

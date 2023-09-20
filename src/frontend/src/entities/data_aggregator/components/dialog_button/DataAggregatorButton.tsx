@@ -15,24 +15,42 @@ import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAgg
 import DataAggregatorList from './DataAggregatorList';
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import {useAppDispatch} from "@application/utils/store";
-import {setCurrentAggregator as setCurrentStateAggregator} from '@entity/data_aggregator/redux_toolkit/slices/DataAggregatorSlice';
 import {
-    addAggregator,
-    getAllAggregators,
-    updateAggregator
+    setCurrentAggregator, toggleDataAggregatorModal,
+    setIsForm, setFormType,
+} from '@entity/data_aggregator/redux_toolkit/slices/DataAggregatorSlice';
+import {
+    addAggregator, getAllUnarchivedAggregators, updateAggregator,
 } from '@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators';
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import TooltipButton from '@app_component/base/tooltip_button/TooltipButton';
 import { ColorTheme } from '@style/Theme';
 
+const prohibitEscForCode = (event: any, toggle: any) => {
+    event = event || window.event;
+    let isEscape = false;
+    if ("key" in event) {
+        isEscape = (event.key === "Escape" || event.key === "Esc");
+    } else {
+        isEscape = (event.keyCode === 27);
+    }
+    if (isEscape) {
+        if(event.target.className === 'ace_text-input'){
+            toggle(true);
+        } else{
+            toggle(false);
+        }
+    }
+}
 
 const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnection, readOnly, tooltipButtonProps}) => {
     const dispatch = useAppDispatch();
-    const {currentAggregator: currentStateAggregator, aggregators, gettingAllAggregators} = CDataAggregator.getReduxState();
-    const [showDialog, setShowDialog] = useState<boolean>(false);
-    const [isForm, setIsForm] = useState<boolean>(false);
-    const [formType, setFormType] = useState<FormType>('add');
-    const [currentAggregator, setCurrentAggregator] = useState<ModelDataAggregator>(null);
+    const {
+        currentAggregator, unarchivedAggregators, addingAggregator, updatingAggregator,
+        gettingAllAggregators, isDataAggregationModalToggled, isForm, formType,
+    } = CDataAggregator.getReduxState();
+    const [hasStartedAction, setAction] = useState<boolean>(false);
+    const [isToggleDialogDisabled, toggle] = useState<boolean>(false);
     const allMethods = connection.getAllMethods();
     const allOperators = connection.getAllOperators();
     const allMethodOptions = useMemo(() => {
@@ -41,38 +59,62 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
     const allOperatorOptions = useMemo(() => {
         return _.uniqWith(allOperators.map(o => {return {label: o.index, value: o.index }}), _.isEqual);
     }, [allOperators]);
+    const setShowDialog = (value: boolean) => {
+        dispatch(toggleDataAggregatorModal(value));
+    }
     useEffect(() => {
-        dispatch(getAllAggregators());
+        dispatch(getAllUnarchivedAggregators());
     }, [])
     useEffect(() => {
-        if(currentStateAggregator){
+        if(isDataAggregationModalToggled){
+            document.addEventListener('keydown', (e) => prohibitEscForCode(e, toggle));
+        } else{
+            document.removeEventListener('keydown', (e) => prohibitEscForCode(e, toggle));
+            toggle(false);
+        }
+    }, [isDataAggregationModalToggled])
+    useEffect(() => {
+        if(addingAggregator === API_REQUEST_STATE.FINISH && hasStartedAction){
             if(formType === 'add'){
-                connection.addDataAggregator(currentStateAggregator);
-            }
-            if(formType === 'update'){
-                connection.updateDataAggregator(currentStateAggregator);
+                connection.addDataAggregator(currentAggregator);
             }
             updateConnection(connection);
-            setIsForm(false);
-            dispatch(setCurrentStateAggregator(null));
+            dispatch(setIsForm(false));
+            dispatch(setCurrentAggregator(null));
+            setAction(false);
         }
-    }, [currentStateAggregator]);
+    }, [addingAggregator]);
+    useEffect(() => {
+        if(updatingAggregator === API_REQUEST_STATE.FINISH && hasStartedAction){
+            connection.updateDataAggregator(currentAggregator);
+            updateConnection(connection);
+            dispatch(setIsForm(false));
+            dispatch(setCurrentAggregator(null));
+            setAction(false);
+        }
+    }, [updatingAggregator]);
     const add = (aggregator: ModelDataAggregator) => {
         dispatch(addAggregator(aggregator));
+        setAction(true);
     }
     const update = (aggregator: ModelDataAggregator) => {
         dispatch(updateAggregator(aggregator));
+        setAction(true);
     }
     const actions = isForm ? [] : [
         {
             icon: 'add',
             label: 'Add Aggregator',
-            onClick: () => {setCurrentAggregator(null); setIsForm(true); setFormType('add')},
+            onClick: () => {
+                dispatch(setCurrentAggregator(null));
+                dispatch(setIsForm(true));
+                dispatch(setFormType('add'));
+            },
         },
         {
             id: 'action_data_aggregator',
             label: 'Close',
-            onClick: () => setShowDialog(!showDialog)
+            onClick: () => setShowDialog(!isDataAggregationModalToggled)
         }
     ];
     return (
@@ -83,7 +125,12 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
                     label={'Aggregator'}
                     icon={'subtitles'}
                     isLoading={gettingAllAggregators === API_REQUEST_STATE.START}
-                    handleClick={() => {setShowDialog(true); if(aggregators.length === 0){ setIsForm(true); }}}
+                    handleClick={() => {
+                        setShowDialog(true);
+                        if(unarchivedAggregators.length === 0){
+                            dispatch(setIsForm(true));
+                        }
+                    }}
                 />
             }
             {tooltipButtonProps &&
@@ -93,34 +140,43 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
                     tooltip={tooltipButtonProps.tooltip}
                     target={tooltipButtonProps.target}
                     hasBackground={tooltipButtonProps.hasBackground}
-                    background={!showDialog ? ColorTheme.White : ColorTheme.Blue}
-                    color={!showDialog ? ColorTheme.Gray : ColorTheme.White}
+                    background={!isDataAggregationModalToggled ? ColorTheme.White : ColorTheme.Blue}
+                    color={!isDataAggregationModalToggled ? ColorTheme.Gray : ColorTheme.White}
                     padding={tooltipButtonProps.padding}
-                    handleClick={() => {setShowDialog(true); if(aggregators.length === 0){ setIsForm(true); }}}
+                    handleClick={() => {
+                        setShowDialog(true);
+                        if(unarchivedAggregators.length === 0){
+                            dispatch(setIsForm(true));
+                        }
+                    }}
                 />
             }
             <Dialog
                 actions={actions}
-                active={showDialog}
-                toggle={() => setShowDialog(!showDialog)}
-                title={<DialogTitle setIsForm={setIsForm} isForm={isForm} hasList={aggregators.length > 0}/>}
+                active={isDataAggregationModalToggled}
+                toggle={isToggleDialogDisabled ? () => {} : () => setShowDialog(!isDataAggregationModalToggled)}
+                title={<DialogTitle hasList={unarchivedAggregators.length > 0}/>}
                 theme={{dialog: styles.aggregator_dialog}}
             >
                 {isForm ?
                     <AggregatorForm
-                        aggregator={currentAggregator}
-                        dataAggregator={aggregators}
+                        dataAggregator={unarchivedAggregators}
                         readOnly={readOnly}
                         allMethods={allMethodOptions}
                         allOperators={allOperatorOptions}
                         add={add}
                         update={update}
-                        formType={formType}
-                        closeForm={aggregators.length > 0 ? () => {setIsForm(false); setCurrentAggregator(null);} : null}
+                        closeForm={unarchivedAggregators.length > 0 ? () => {
+                            dispatch(setIsForm(false));
+                            dispatch(setCurrentAggregator(null));
+                        } : null}
                     />
                     :
                     <DataAggregatorList
-                        setFormType={(type: FormType, aggregator: ModelDataAggregator) => {setFormType(type); setCurrentAggregator(aggregator); setIsForm(true)}}
+                        setFormType={(type: FormType, aggregator: ModelDataAggregator) => {
+                            dispatch(setFormType(type));
+                            dispatch(setCurrentAggregator(aggregator));
+                            dispatch(setIsForm(true))}}
                     />
                 }
             </Dialog>

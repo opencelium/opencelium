@@ -12,7 +12,6 @@ export interface AggregatorFormProps {
     readOnly?: boolean,
     allMethods: { value: string, label: string }[],
     allOperators: { value: string, label: string }[],
-    aggregator: ModelDataAggregator,
     formType?: FormType,
     theme?: any,
     add: (aggregator: ModelDataAggregator) => void,

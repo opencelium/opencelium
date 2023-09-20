@@ -30,10 +30,9 @@ import {ModelArgument} from "@entity/data_aggregator/requests/models/DataAggrega
 import Input from "@app_component/base/input/Input";
 import {AggregatorNameStyled, DataAggregatorItemsStyled } from "./styles";
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
-import { getAllUnArchivedAggregators } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
+import { getAllUnarchivedAggregators } from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
 import HelpDivider from '../help_divider/HelpDivider';
 import {getMarker} from "@application/utils/utils";
-import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
 
 
@@ -91,7 +90,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             notificationTemplate.getById()
         }
         if(shouldFetchConnections){
-            dispatch(getAllUnArchivedAggregators());
+            dispatch(getAllUnarchivedAggregators());
         }
     },[]);
     useEffect(() => {

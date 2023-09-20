@@ -88,7 +88,7 @@ class FormSection extends Component {
 
   componentDidMount() {
       if(!!this.props.shouldScroll){
-          window.scrollTo({top: findTopLeft(`form_section_label_${this.props.shouldScroll}`).top - 4, behavior: "smooth"});
+          window.scrollTo({top: findTopLeft(`label_form_section_label_${this.props.shouldScroll}`).top - 4, behavior: "smooth"});
       }
   }
 

@@ -5,6 +5,10 @@ import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import {useAppDispatch} from "@application/utils/store";
 import {getAllAggregators} from "@entity/data_aggregator/redux_toolkit/action_creators/DataAggregatorCreators";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {
+    setCurrentAggregator, setFormType, setIsForm,
+    toggleDataAggregatorModal,
+} from '@entity/data_aggregator/redux_toolkit/slices/DataAggregatorSlice';
 
 export default
 ({
@@ -46,6 +50,19 @@ export default
 
     const aggregator = getAggregator();
 
+    const openDataAggregator = () => {
+        let agg = null;
+        if(currentItem && currentItem.dataAggregator){
+            agg = aggregators.find(a => a.id === currentItem.dataAggregator)
+            if(agg) {
+                dispatch(setFormType('update'));
+                dispatch(setCurrentAggregator(agg));
+                dispatch(setIsForm(true));
+                dispatch(toggleDataAggregatorModal(true));
+            }
+        }
+    }
+
     return(
         <SelectableInput
             id={`data_aggregation_options`}
@@ -54,6 +71,7 @@ export default
             changeValue={changeAggregator}
             label={'Aggregation'}
             value={aggregator}
+            onTextValueClick={openDataAggregator}
         />
     );
 }

@@ -21,7 +21,7 @@ import {IForm} from "@application/interfaces/IForm";
 import FormSection from '@app_component/form/form_section/FormSection';
 import {
     addAggregator,
-    getAggregatorById, getAllAggregators,
+    getAggregatorById,
     updateAggregator
 } from "../../redux_toolkit/action_creators/DataAggregatorCreators";
 import {useAppDispatch} from "@application/utils/store";
@@ -52,7 +52,7 @@ const DataAggregatorDialogForm:FC<IForm> =
         }
         const {
             addingAggregator, updatingAggregator, error,
-            currentAggregator, aggregators, gettingAggregator,
+            currentAggregator, gettingAggregator,
             gettingAllAggregators, isCurrentAggregatorHasUniqueName,
         } = CDataAggregator.getReduxState();
         const [markers, setMarkers] = useState<any[]>([]);
