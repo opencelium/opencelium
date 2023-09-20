@@ -51,8 +51,8 @@ public class ExecutionAspect {
     @Autowired
     private EmailServiceImpl emailService;
 
-//    @Autowired
-//    private TeamsService teamsService;
+    @Autowired
+    private TeamsService teamsService;
 
     @Autowired
     private ExecutionServiceImp executionServiceImp;
@@ -116,7 +116,7 @@ public class ExecutionAspect {
                 } else if (type.equals("slack")) {
                     // slack implementation
                 } else if (type.equals("teams")) {
-//                    teamsService.sendMessage(to, subject, message);
+                    teamsService.sendMessage(to, subject, message);
                 }
             }
         }
@@ -166,7 +166,7 @@ public class ExecutionAspect {
     }
 
     private Map<String, String> getArgsValues(List<String> args, EventNotification en) {
-        LastExecution le = schedulerServiceImp.findById(en.getId()).get().getLastExecution();
+        LastExecution le = schedulerServiceImp.findById(en.getScheduler().getId()).get().getLastExecution();
         long exId = Math.max(le.getFailExecutionId(), le.getSuccessExecutionId());
         Execution execution = executionServiceImp.findById(exId).orElse(null);
         Objects.requireNonNull(execution);
