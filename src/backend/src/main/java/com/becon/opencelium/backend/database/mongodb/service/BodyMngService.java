@@ -6,6 +6,5 @@ import com.becon.opencelium.backend.resource.connector.BodyResource;
 
 public interface BodyMngService {
     BodyMng toEntity(BodyResource bodyDTO);
-
     BodyResource toDTO(BodyMng bodyMng);
 }

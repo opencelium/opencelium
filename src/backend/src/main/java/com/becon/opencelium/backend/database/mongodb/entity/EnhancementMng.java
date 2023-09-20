@@ -34,15 +34,6 @@ public class EnhancementMng {
     public EnhancementMng() {
     }
 
-    public EnhancementMng(Enhancement enhancement) {
-        this.enhancementId = enhancement.getId();
-        this.name = enhancement.getName();
-        this.description = enhancement.getDescription();
-        this.expertCode = enhancement.getExpertCode();
-        this.expertVar = enhancement.getExpertVar();
-        this.language = enhancement.getLanguage();
-    }
-
     public Integer getEnhancementId() {
         return enhancementId;
     }

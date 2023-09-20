@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConditionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.StatementMng;
 import com.becon.opencelium.backend.resource.connection.ConditionDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;

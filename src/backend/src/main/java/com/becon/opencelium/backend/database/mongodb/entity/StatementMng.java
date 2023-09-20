@@ -28,7 +28,6 @@ public class StatementMng {
     public StatementMng() {
     }
 
-
     public String getColor() {
         return color;
     }

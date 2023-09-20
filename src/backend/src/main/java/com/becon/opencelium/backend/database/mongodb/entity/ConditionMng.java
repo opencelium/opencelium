@@ -29,7 +29,6 @@ public class ConditionMng {
     public ConditionMng() {
     }
 
-
     public String getRelationalOperator() {
         return relationalOperator;
     }

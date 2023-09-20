@@ -13,6 +13,9 @@ public class ApiDataResource {
     private Map<String, Object> body;
     private boolean sslOn;
 
+    public ApiDataResource() {
+    }
+
     public String getUrl() {
         return url;
     }

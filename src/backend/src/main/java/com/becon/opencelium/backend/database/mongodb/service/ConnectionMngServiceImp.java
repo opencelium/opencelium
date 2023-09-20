@@ -50,6 +50,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService{
     }
 
     @Override
+    public void delete(Long id) {
+        connectionMngRepository.delete(getByConnectionId(id));
+    }
+
+    @Override
     public ConnectionDTO toDTO(ConnectionMng connectionMng) {
         ConnectionDTO connectionDTO = new ConnectionDTO();
         connectionDTO.setConnectionId(connectionMng.getConnectionId());

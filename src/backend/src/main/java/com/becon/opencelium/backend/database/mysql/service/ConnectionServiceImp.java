@@ -23,13 +23,14 @@ import com.becon.opencelium.backend.database.mongodb.service.*;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
-import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ConnectionServiceImp implements ConnectionService {
@@ -62,25 +63,19 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public ConnectionMng save(Connection connection, ConnectionMng connectionMng) {
-        //checking and setting connectors to connectionMng
-        if(!connectorService.existById(connection.getToConnector())){
-            throw new ConnectorNotFoundException(connection.getToConnector());
-        }else {
-            Connector toConnector = connectorService.getById(connection.getToConnector());
-            ConnectorMng toConnectorMng = connectorMngService.toEntity(toConnector);
-            toConnectorMng.setMethods(connectionMng.getToConnector().getMethods());
-            toConnectorMng.setOperators(connectionMng.getToConnector().getOperators());
-            connectionMng.setToConnector(toConnectorMng);
-        }
-        if(!connectorService.existById(connection.getFromConnector())){
-            throw new ConnectorNotFoundException(connection.getFromConnector());
-        }else {
-            Connector fromConnector = connectorService.getById(connection.getFromConnector());
-            ConnectorMng fromConnectorMng = connectorMngService.toEntity(fromConnector);
-            fromConnectorMng.setMethods(connectionMng.getFromConnector().getMethods());
-            fromConnectorMng.setOperators(connectionMng.getFromConnector().getOperators());
-            connectionMng.setFromConnector(fromConnectorMng);
-        }
+
+        Connector toConnector = connectorService.getById(connection.getToConnector());
+        ConnectorMng toConnectorMng = connectorMngService.toEntity(toConnector);
+        toConnectorMng.setMethods(connectionMng.getToConnector().getMethods());
+        toConnectorMng.setOperators(connectionMng.getToConnector().getOperators());
+        connectionMng.setToConnector(toConnectorMng);
+
+        Connector fromConnector = connectorService.getById(connection.getFromConnector());
+        ConnectorMng fromConnectorMng = connectorMngService.toEntity(fromConnector);
+        fromConnectorMng.setMethods(connectionMng.getFromConnector().getMethods());
+        fromConnectorMng.setOperators(connectionMng.getFromConnector().getOperators());
+        connectionMng.setFromConnector(fromConnectorMng);
+
 
         //saving connection
         Connection savedConnection = connectionRepository.save(connection);
@@ -103,12 +98,13 @@ public class ConnectionServiceImp implements ConnectionService {
         Connection connection = getById(id);
         List<Scheduler> schedulers = connection.getSchedulers();
 
-        if (schedulers != null && !schedulers.isEmpty()){
+        if (schedulers != null && !schedulers.isEmpty()) {
             schedulers.forEach(s -> {
                 schedulerService.deleteById(s.getId());
             });
         }
         connectionRepository.deleteById(id);
+        connectionMngService.delete(id);
     }
 
     @Override
@@ -159,7 +155,7 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public Connection getById(Long id) {
         return connectionRepository.findById(id)
-                .orElseThrow(()->new ConnectionNotFoundException(id));
+                .orElseThrow(() -> new ConnectionNotFoundException(id));
     }
 
 

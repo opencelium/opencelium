@@ -9,7 +9,6 @@ import java.util.Set;
 public interface ArgumentMngService {
     ArgumentMng toEntity(ArgumentDTO argumentDTO);
     List<ArgumentMng> toEntityAll(Set<ArgumentDTO> argumentDTOs);
-
     Set<ArgumentDTO> toDTOAll(List<ArgumentMng> args);
     ArgumentDTO toDTO(ArgumentMng args);
 }
