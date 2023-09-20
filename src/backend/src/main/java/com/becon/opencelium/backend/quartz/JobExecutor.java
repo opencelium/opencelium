@@ -29,6 +29,7 @@ import com.becon.opencelium.backend.logger.OcLogger;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.service.*;
 import com.becon.opencelium.backend.neo4j.service.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openjdk.nashorn.api.scripting.JSObject;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -223,7 +224,8 @@ public class JobExecutor extends QuartzJobBean {
     private List<ExecutionArgument> getExecutionArgs(String script, List<JsResponseObject> responses, Set<Argument> args, Execution execution) {
         try {
             ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-            engine.put("dataModel", responses);
+            String string = new ObjectMapper().writeValueAsString(responses);
+            engine.put("dataModel", string);
             JSObject obj = (JSObject)engine.eval("JSON.parse(dataModel)");
             engine.put(AggrConst.RESPONSES, obj);
             engine.eval(script);
