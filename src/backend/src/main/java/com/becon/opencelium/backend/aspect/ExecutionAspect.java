@@ -176,10 +176,9 @@ public class ExecutionAspect {
         long exId = Math.max(le.getFailExecutionId(), le.getSuccessExecutionId());
         Execution execution = executionServiceImp.findById(exId).orElse(null);
         Objects.requireNonNull(execution);
-        Map<String, String> result = execution.getExecutionArguments().stream()
+        return execution.getExecutionArguments().stream()
                 .filter(ea -> args.contains(ea.getArgument().getName()))
-                .collect(Collectors.toMap(ea -> ea.getArgument().getName(), ExecutionArgument::getValue));
-        return result;
+                .collect(Collectors.toMap(ea -> Long.toString(ea.getArgument().getId()), ExecutionArgument::getValue));
     }
 
     private List<String> getConstants(String text, String regex) {

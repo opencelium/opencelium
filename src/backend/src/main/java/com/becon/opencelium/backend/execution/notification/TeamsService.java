@@ -9,6 +9,7 @@ public class TeamsService implements CommunicationTool {
     @Override
     public void sendMessage(String to, String subject, String text) {
         RestTemplate restTemplate = new RestTemplate();
+
     }
 
     @Override

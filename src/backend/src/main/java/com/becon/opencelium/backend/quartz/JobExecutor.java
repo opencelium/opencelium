@@ -234,7 +234,7 @@ public class JobExecutor extends QuartzJobBean {
             args.forEach(arg -> {
                 Object value = engine.get(arg.getName());
                 ExecutionArgument executionArgument = new ExecutionArgument();
-                ExecutionArgument.PK pk = new ExecutionArgument.PK(execution, arg);
+//                ExecutionArgument.PK pk = new ExecutionArgument.PK(execution, arg);
                 executionArgument.setExecution(execution);
                 executionArgument.setArgument(arg);
                 executionArgument.setValue(value.toString());
