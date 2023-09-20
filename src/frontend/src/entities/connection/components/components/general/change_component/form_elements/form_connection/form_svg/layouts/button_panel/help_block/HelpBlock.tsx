@@ -14,6 +14,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import { withTheme } from "styled-components";
 import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
 import { TextSize } from "@app_component/base/text/interfaces";
@@ -25,7 +26,7 @@ import Dialog from "@app_component/base/dialog/Dialog";
 // @ts-ignore
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import Content from "./content/Content";
-import FormConnectionSvg from "../../../FormConnectionSvg";
+import FormConnectionSvg from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
 import animationData from "./AnimationData";
 import CConnection from "@classes/content/connection/CConnection";
@@ -36,7 +37,6 @@ import {ModalConnection} from "@root/classes/ModalConnection";
 import { Connection } from "@entity/connection/classes/Connection";
 import { setVideoAnimationName, setAnimationPreviewPanelVisibility, setIsAnamationNotFoud } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import AnimationSpeed from "./AnimationSpeed/AnimationSpeed";
-
 import DetailsForOperators from "./classes/DetailsForOperators";
 import DetailsForProcess from "./classes/DetailsForProcess";
 import AdditionalFunctions from "./classes/AdditionalFunctions";
@@ -47,8 +47,7 @@ import { getAllInvokers } from "@entity/invoker/redux_toolkit/action_creators/In
 import { Invoker } from "@entity/invoker/classes/Invoker";
 import Loading from "@app_component/base/loading/Loading";
 import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
-import SyncInvokers from "../../../../form_methods/SyncInvokers";
-import ReactDOM from "react-dom";
+import SyncInvokers from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_methods/SyncInvokers";
 import RefFunctions from "./classes/RefFunctions";
 
 
@@ -513,7 +512,7 @@ const HelpBlock = () => {
                 padding="2px"
                 handleClick={() => dispatch(setAnimationPaused(!isPausedReference.current))}
               />
-              <AnimationSpeed step={1} min={-2} max={2}/>
+              <AnimationSpeed/>
             </div>,
             document.body
           )}

@@ -1,5 +1,5 @@
 import { AnimationPopoverProps } from "../AnimationPopover/interfaces";
-import {ConnectorPanelType, IAnimationData} from "../interfaces";
+import { IAnimationData } from "../interfaces";
 import AdditionalFunctions from "./AdditionalFunctions";
 import { setFocusById } from "@application/utils/utils";
 import RefFunctions

@@ -14,9 +14,6 @@
  */
 
 interface AnimationSpeedSliderProps {
-  step: number;
-  max:  number;
-  min:  number;
 }
 
 interface AnimationSpeedSliderStyledProps {
