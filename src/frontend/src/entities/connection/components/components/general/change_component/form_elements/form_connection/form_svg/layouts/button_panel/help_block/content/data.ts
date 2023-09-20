@@ -1,33 +1,33 @@
-import DefaulHelpImagePath from "@image/entities/connection/default_help_preview.png";
+import DefaultHelpImagePath from "@image/entities/connection/default_help_preview.png";
 const basicsContentData: any = [
   {
     animationTitle: "First steps",
-    animationImage: DefaulHelpImagePath,
+    animationImage: DefaultHelpImagePath,
     animationName: "firstSteps"
   },
   {
     animationTitle: "Configure API",
-    animationImage: DefaulHelpImagePath,
+    animationImage: DefaultHelpImagePath,
     animationName: "configureAPI"
   },
   {
     animationTitle: "Using Operators",
-    animationImage: DefaulHelpImagePath,
+    animationImage: DefaultHelpImagePath,
     animationName: "usingOperators"
   },
   {
     animationTitle: "Lorem Ipsum",
-    animationImage: DefaulHelpImagePath,
+    animationImage: DefaultHelpImagePath,
     animationName: "loremIpsum"
   },
   {
     animationTitle: "Methods",
-    animationImage: DefaulHelpImagePath,
+    animationImage: DefaultHelpImagePath,
     animationName: "methods"
   },
   {
     animationTitle: "Operators",
-    animationImage: DefaulHelpImagePath,
+    animationImage: DefaultHelpImagePath,
     animationName: "operators"
   },
 ];
@@ -35,17 +35,17 @@ const basicsContentData: any = [
 const expertsContentData = [
   {
     animationTitle: "Field mapping",
-    animationImage: DefaulHelpImagePath,
+    animationImage: DefaultHelpImagePath,
     animationName: "fieldMapping"
   },
   {
     animationTitle: "Remove API",
-    animationImage: DefaulHelpImagePath,
+    animationImage: DefaultHelpImagePath,
     animationName: "removeAPI"
   },
   {
     animationTitle: "Move API Meth",
-    animationImage: DefaulHelpImagePath,
+    animationImage: DefaultHelpImagePath,
     animationName: "moveAPI"
   },
 ];
@@ -53,12 +53,12 @@ const expertsContentData = [
 const advancedContentData = [
   {
     animationTitle: "Webhook",
-    animationImage: DefaulHelpImagePath,
+    animationImage: DefaultHelpImagePath,
     animationName: "webhook"
   },
   {
     animationTitle: "Add Fields",
-    animationImage: DefaulHelpImagePath,
+    animationImage: DefaultHelpImagePath,
     animationName: "addFields"
   },
 ];
