@@ -32,7 +32,7 @@ import {
 } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import { ColorTheme } from "@style/Theme";
 import { TextSize } from "@app_component/base/text/interfaces";
-import AddTemplate from "../../../../form_methods/AddTemplate";
+import AddTemplate from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_methods/AddTemplate";
 import LoadTemplate from "@change_component/form_elements/form_connection/form_methods/LoadTemplate";
 import DataAggregatorButton from "@entity/data_aggregator/components/dialog_button/DataAggregatorButton";
 import { CONNECTOR_FROM } from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
@@ -152,9 +152,9 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
             updateConnection={(e: any) => {
               updateEntity(e);
               if(currentTechnicalItem){
-                  const connector = currentTechnicalItem.connectorType === CONNECTOR_FROM ? e.fromConnector : e.toConnector;
-                  const currentItem = connector.getSvgElementByIndex(currentTechnicalItem.entity.index);
-                  setCurrentTechnicalItem(currentItem.getObject());
+                const connector = currentTechnicalItem.connectorType === CONNECTOR_FROM ? e.fromConnector : e.toConnector;
+                const currentItem = connector.getSvgElementByIndex(currentTechnicalItem.entity.index);
+                setCurrentTechnicalItem(currentItem.getObject());
               }
             }}
           />
@@ -163,19 +163,19 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
 
       <div className="wrapper">
         <div className="button_wrap">
-        {!data.readOnly && (
+          {!data.readOnly && (
             <TooltipButton
-            size={TextSize.Size_40}
-            position={"bottom"}
-            icon={"text_snippet"}
-            tooltip={"Templates"}
-            target={`template_panel`}
-            hasBackground={true}
-            background={!isTemplatePanelVisible ? ColorTheme.White : ColorTheme.Blue}
-            color={!isTemplatePanelVisible ? ColorTheme.Gray : ColorTheme.White}
-            padding="2px"
-            handleClick={() => toggleVisibleTemplatePanel()}
-          />
+              size={TextSize.Size_40}
+              position={"bottom"}
+              icon={"text_snippet"}
+              tooltip={"Templates"}
+              target={`template_panel`}
+              hasBackground={true}
+              background={!isTemplatePanelVisible ? ColorTheme.White : ColorTheme.Blue}
+              color={!isTemplatePanelVisible ? ColorTheme.Gray : ColorTheme.White}
+              padding="2px"
+              handleClick={() => toggleVisibleTemplatePanel()}
+            />
           )}
           {isTemplatePanelVisible && (
             <div className="additional_panel additional_panel_template">
@@ -211,8 +211,6 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
           )}
         </div>
       </div>
-
-      
 
       {/* save panel */}
       <div className="wrapper">
@@ -303,12 +301,6 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
           )}
         </div>
       </div>
-    
-
-      
-      
-      
-      
     </ControlsBlockStyled>
   );
 };

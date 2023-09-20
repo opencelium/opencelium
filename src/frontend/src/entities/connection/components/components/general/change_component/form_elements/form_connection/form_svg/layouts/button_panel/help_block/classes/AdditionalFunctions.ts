@@ -27,37 +27,37 @@ export default class AdditionalFunctions {
 
   static async addOutlineById (idsArray: any, withDelay = false, animationSpeed = 0) {
     if(idsArray.length > 0){
-      positionElementOver(idsArray, 10);
+      positionElementOver(idsArray, 15);
 
       if(withDelay){
-        return AdditionalFunctions.delay(animationSpeed);
+        await AdditionalFunctions.delay(animationSpeed);
       }
     }
   }
 
   static async removeOutlineById (idsArray: any, withDelay = false, animationSpeed = 0) {
     if(idsArray.length > 0){
-      positionElementOver(idsArray, 10, true);
+      positionElementOver(idsArray, 15, true);
       if(withDelay){
-        return AdditionalFunctions.delay(animationSpeed);
+        await AdditionalFunctions.delay(animationSpeed);
       }
     }
   }
 
   static async addOutlineByClassName (classNamesArray: any, withDelay = false, animationSpeed = 0) {
     if(classNamesArray.length > 0){
-      positionElementOverByClassName(classNamesArray, 10);
+      positionElementOverByClassName(classNamesArray, 15);
       if(withDelay){
-        return AdditionalFunctions.delay(animationSpeed);
+        await AdditionalFunctions.delay(animationSpeed);
       }
     }
   }
 
   static async removeOutlineByClassName (classNamesArray: any, withDelay = false, animationSpeed = 0) {
     if(classNamesArray.length > 0){
-      positionElementOverByClassName(classNamesArray, 10, true);
+      positionElementOverByClassName(classNamesArray, 15, true);
       if(withDelay){
-        return AdditionalFunctions.delay(animationSpeed);
+        await AdditionalFunctions.delay(animationSpeed);
       }
     }
   }

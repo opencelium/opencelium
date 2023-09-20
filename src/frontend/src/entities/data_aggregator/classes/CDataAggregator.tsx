@@ -24,7 +24,7 @@ export class CDataAggregator{
     }
 
     static getOptionsForSelect(dataAggregator: ModelDataAggregator[]){
-        return dataAggregator.map(o => {return {label: o.name, value: o.id};});
+        return [{label: 'is empty', value: null}, ...dataAggregator.map(o => {return {label: o.name, value: o.id};})];
     }
 
     static replaceIdsOnNames(dataAggregator: ModelDataAggregator[], string: string){

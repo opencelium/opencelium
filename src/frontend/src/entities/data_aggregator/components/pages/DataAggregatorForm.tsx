@@ -1,5 +1,5 @@
 import React, {FC, useRef, useState, useEffect, useMemo} from 'react';
-import AceEditor, { IMarker } from "react-ace";
+import AceEditor from "react-ace";
 import Arguments from "../arguments/Arguments";
 import AddArgument from "../arguments/AddArgument";
 import Input from "@app_component/base/input/Input";

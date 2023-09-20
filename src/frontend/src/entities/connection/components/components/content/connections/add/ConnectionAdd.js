@@ -23,7 +23,7 @@ import {
     updateConnection,
     testConnection,
 } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
-import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {setCurrentTechnicalItem, setCurrentConnection} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {addTemplate, getTemplatesByConnectors as fetchTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {permission} from "@entity/application/utils/permission";
@@ -61,7 +61,7 @@ function mapStateToProps(state){
 /**
  * Component to Add Connection
  */
-@connect(mapStateToProps, {updateConnection, addConnection, addTemplate, fetchConnectors, checkConnectionTitle, fetchTemplates, testConnection, setCurrentTechnicalItem})
+@connect(mapStateToProps, {updateConnection, addConnection, addTemplate, fetchConnectors, checkConnectionTitle, fetchTemplates, testConnection, setCurrentTechnicalItem, setCurrentConnection})
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @ConnectionForm('add')

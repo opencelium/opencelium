@@ -88,24 +88,24 @@ export default class DetailsForProcess{
     try{
       if(connectorType && animationData.index && this.ref.current.props){
         await AdditionalFunctions.addOutlineById([`param_generator_select_${connectorType}_${animationData.index}`], true, animationSpeed);
-  
+
         const connectionMethods = this.ref.current.props.connection[animationData.endpoint.connectorType].methods;
-  
+
         if(connectionMethods){
           let method;
-  
+
           connectionMethods.forEach((element: any) => {
             if(element.index === animationData.endpoint.index){
               method = element;
               return;
             }
           })
-  
+
           const paramGeneratorRef = RefFunctions.getParamGenerator(this.ref);
   
           if(paramGeneratorRef){
             paramGeneratorRef.updateColor(method);
-  
+            
             await AdditionalFunctions.delay(animationSpeed);
           }
         }

@@ -36,7 +36,7 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
     const allMethods = connection.getAllMethods();
     const allOperators = connection.getAllOperators();
     const allMethodOptions = useMemo(() => {
-        return _.uniqWith(allMethods.map(m => {return {label: m.label || m.name, value: m.name }}), _.isEqual);
+        return _.uniqWith(allMethods.map(m => {return {label: m.label || m.name, value: m.color, color: m.color }}), _.isEqual);
     }, [allMethods]);
     const allOperatorOptions = useMemo(() => {
         return _.uniqWith(allOperators.map(o => {return {label: o.index, value: o.index }}), _.isEqual);
@@ -86,16 +86,16 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
                     handleClick={() => {setShowDialog(true); if(aggregators.length === 0){ setIsForm(true); }}}
                 />
             }
-            {tooltipButtonProps && 
-                <TooltipButton 
-                    position={tooltipButtonProps.position} 
-                    icon={tooltipButtonProps.icon} 
-                    tooltip={tooltipButtonProps.tooltip} 
-                    target={tooltipButtonProps.target} 
-                    hasBackground={tooltipButtonProps.hasBackground} 
-                    background={!showDialog ? ColorTheme.White : ColorTheme.Blue} 
-                    color={!showDialog ? ColorTheme.Gray : ColorTheme.White} 
-                    padding={tooltipButtonProps.padding} 
+            {tooltipButtonProps &&
+                <TooltipButton
+                    position={tooltipButtonProps.position}
+                    icon={tooltipButtonProps.icon}
+                    tooltip={tooltipButtonProps.tooltip}
+                    target={tooltipButtonProps.target}
+                    hasBackground={tooltipButtonProps.hasBackground}
+                    background={!showDialog ? ColorTheme.White : ColorTheme.Blue}
+                    color={!showDialog ? ColorTheme.Gray : ColorTheme.White}
+                    padding={tooltipButtonProps.padding}
                     handleClick={() => {setShowDialog(true); if(aggregators.length === 0){ setIsForm(true); }}}
                 />
             }

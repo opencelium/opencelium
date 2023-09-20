@@ -12,7 +12,8 @@ export default interface ModelDataAggregator{
 export type ModelDataAggregatorProps = keyof ModelDataAggregator;
 
 export interface ModelAssignedItem{
-    name: string,
+    name?: string,
+    color: string,
     isPartial?: boolean,
 }
 

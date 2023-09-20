@@ -32,7 +32,7 @@ export default class CAggregator implements ModelDataAggregator{
     }
 
     deleteItem(assignedItem: ModelAssignedItem){
-        this.assignedItems = this.assignedItems.filter(item => item.name !== assignedItem.name);
+        this.assignedItems = this.assignedItems.filter(item => item.color !== assignedItem.color);
     }
 
     addArgument(argument: ModelArgument){

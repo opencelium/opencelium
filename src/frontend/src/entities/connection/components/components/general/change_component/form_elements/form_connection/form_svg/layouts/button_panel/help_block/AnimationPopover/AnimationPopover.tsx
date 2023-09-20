@@ -43,4 +43,3 @@ const AnimationPopover: FC<AnimationPopoverProps> = (props) => {
 };
 
 export default  AnimationPopover;
-

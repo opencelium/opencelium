@@ -501,14 +501,12 @@ export default class CConnection{
 
     refreshDataAggregator(aggregator){
         const assignedItems = aggregator.assignedItems;
-        const allMethods = this.getAllMethods();
         if(assignedItems) {
-            for (let i = 0; i < allMethods.length; i++) {
-                for (let j = 0; j < assignedItems.length; j++) {
-                    if (allMethods[i].name === assignedItems[j].name) {
-                        const {assignedItems, ...props} = aggregator;
-                        allMethods[i].dataAggregator = props.id;
-                    }
+            for(let i = 0; i < assignedItems.length; i++){
+                const method = this.getMethodByColor(assignedItems[i].color);
+                if(method){
+                    const {assignedItems, ...props} = aggregator;
+                    method.dataAggregator = props.id;
                 }
             }
         }

@@ -925,7 +925,7 @@ export const positionElementOver = (targetElementIds, offset, hide) => {
     if(!document.getElementById('wrapActiveElementId')){
         let div = document.createElement('div');
         div.setAttribute('id', 'wrapActiveElementId');
-        div.style = 'border: 2px solid red; width: 10px; height: 10px; z-index: 10001; display: none;';
+        div.style = 'border: 2px solid #fd9843; border-radius: 4px; z-index: 10001; display: none; box-shadow: 0px 0px 5px 0px #fd9843 inset;';
 
         document.body.appendChild(div);
     }
@@ -972,15 +972,15 @@ export const positionElementOver = (targetElementIds, offset, hide) => {
                     }
                 })) - top;
             
-                top -= offset / 3;
-                left -= offset / 2.5;
+                top -= offset / 2;
+                left -= offset / 2;
             
                 element.style.position = 'absolute';
                 element.style.display = 'block';
                 element.style.top = top + 'px';
                 element.style.left = left + 'px';
-                element.style.width = width + 8 + 'px';
-                element.style.height = height + 'px';
+                element.style.width = width + 10 + 'px';
+                element.style.height = height + 5 + 'px';
                 element.style.padding = offset + 'px';
             
                 if(hide){
@@ -995,7 +995,7 @@ export const positionElementOverByClassName = (targetElementsClasses, offset, hi
     if(!document.getElementById('wrapActiveElement')){
         let div = document.createElement('div');
         div.setAttribute('id', 'wrapActiveElement');
-        div.style = 'border: 2px solid red; width: 10px; height: 10px; z-index: 10001; display: none;';
+        div.style = 'border: 2px solid #fd9843; border-radius: 4px; z-index: 10001; display: none; box-shadow: 0px 0px 5px 0px #fd9843 inset;';
 
         document.body.appendChild(div);
     }
@@ -1055,7 +1055,7 @@ export const positionElementOverByClassName = (targetElementsClasses, offset, hi
                 element.style.display = 'block';
                 element.style.top = top + 'px';
                 element.style.left = left + 'px';
-                element.style.width = width + 8 + 'px';
+                element.style.width = width + 10 + 'px';
                 element.style.height = height + 8 + 'px';
                 element.style.padding = offset + 'px';
             

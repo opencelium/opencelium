@@ -24,7 +24,6 @@ import {IContent, IContentText, IContentTextarea} from "../interfaces/INotificat
 import {NotificationTemplateState} from "../redux_toolkit/slices/NotificationTemplateSlice";
 import AceEditor from "react-ace";
 import Input from "@app_component/base/input/Input";
-import {IAceEditorProps} from "react-ace/src/ace";
 
 export class Content extends HookStateClass implements IContent{
 
@@ -65,7 +64,7 @@ export class Content extends HookStateClass implements IContent{
         return super.getInputTextarea<IContentTextarea, InputTextareaProps>(data);
     }
 
-    getBoby(props?: Partial<IAceEditorProps | any>): ReactElement {
+    getBoby(props?: Partial<any>): ReactElement {
         const styleProps = {
             marginTop: '25px',
             display: 'inline-block',

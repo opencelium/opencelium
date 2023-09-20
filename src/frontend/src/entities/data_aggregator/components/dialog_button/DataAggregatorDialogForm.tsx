@@ -23,6 +23,7 @@ import {getMarker, setFocusById} from "@application/utils/utils";
 import {CheckboxStyled, TextStyled} from "@app_component/base/input/file/styles";
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import {API_REQUEST_STATE, TRIPLET_STATE} from '@application/interfaces/IApplication';
+import Select from "@basic_components/inputs/Select";
 
 const getStaticWordCompleter = (variables: string[]) => {
     return {
@@ -37,6 +38,22 @@ const getStaticWordCompleter = (variables: string[]) => {
         }
     }
 }
+
+
+const dot = (color = 'transparent') => ({
+    alignItems: 'center',
+    display: 'flex',
+
+    ':before': {
+        backgroundColor: color,
+        borderRadius: 10,
+        content: '" "',
+        display: 'block',
+        marginRight: 8,
+        height: 10,
+        width: 10,
+    },
+});
 
 const DataAggregatorDialogForm:FC<AggregatorFormProps> =
     ({
@@ -132,10 +149,10 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
         }
         let assignedItems = showAssignedItemsSelect ? items : [];
         if(formType === 'add'){
-            add({name, args, assignedItems: assignedItems.map(i => {return {name: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
+            add({name, args, assignedItems: assignedItems.map(i => {return {color: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
         }
         if(formType === 'update'){
-            update({id: aggregator.id, name, args, assignedItems: assignedItems.map(i => {return {name: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
+            update({id: aggregator.id, name, args, assignedItems: assignedItems.map(i => {return {color: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
         }
     }
     const addArgument = (arg: ModelArgument) => {
@@ -200,7 +217,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
                         error={nameError}
                     />
                     {!showAssignedItemsSelect &&
-                        <Input readOnly={readOnly} value={'checkbox'} label={'Method'} icon={'commit'}>
+                        <Input readOnly={readOnly} value={'checkbox'} label={'Methods'} icon={'commit'}>
                             <CheckboxStyled
                                 theme={theme}
                                 type={'checkbox'}
@@ -217,21 +234,36 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
                         </Input>
                     }
                     {showAssignedItemsSelect &&
-                        <InputSelect
-                            id={`input_aggregator_items`}
-                            readOnly={readOnly}
-                            onChange={(option: any) => setItems(option)}
-                            value={items}
-                            icon={'commit'}
-                            label={'Method'}
-                            options={allMethods}
-                            isMultiple={true}
-                            checkboxProps={{
-                                theme: theme,
-                                checked: showAssignedItemsSelect,
-                                onChange: () => toggleAssignedItemsSelect(!showAssignedItemsSelect),
-                            }}
-                        />
+                        <Input checkboxProps={{theme: theme,checked: showAssignedItemsSelect,onChange: () => toggleAssignedItemsSelect(!showAssignedItemsSelect),}} value={'methods'} label={'Methods'} icon={'commit'} marginBottom={'20px'}>
+                            <Select
+                                id={`input_aggregator_items`}
+                                name={'Methods'}
+                                value={items}
+                                isMulti={true}
+                                onChange={(option: any) => setItems(option)}
+                                options={allMethods.length > 0 ? allMethods : [{label: 'No params', value: 0, color: 'white'}]}
+                                closeOnSelect={false}
+                                placeholder={'...'}
+                                isSearchable={true}
+                                openMenuOnClick={true}
+                                maxMenuHeight={200}
+                                minMenuHeight={50}
+                                selectMenuPlaceholderStyles={{
+                                    left: `calc(50% - 10px)`,
+                                }}
+                                selectMenuContainerStyles={{
+                                    marginLeft: '70px',
+                                }}
+                                styles={{
+                                    indicatorSeparator: () => ({display: 'none'}),
+                                    dropdownIndicator: () => ({display: 'none'}),
+                                    multiValueLabel: (styles: any, { data }: any) => ({
+                                        ...styles,
+                                        ...dot(data.color)
+                                    }),
+                                }}
+                            />
+                        </Input>
                     }
                     <Input errorBottom={'-20px'} error={argsError} readOnly={readOnly} required={true} value={'arguments'} label={'Arguments'} icon={'abc'} marginBottom={'20px'}>
                         <ArgumentFormContainer>

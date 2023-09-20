@@ -20,7 +20,6 @@ import Select from "@entity/connection/components/components/general/basic_compo
 class MethodSelect extends React.Component{
     constructor(props) {
         super(props);
-        console.log(props)
     }
 
     /**

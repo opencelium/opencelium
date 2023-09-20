@@ -70,7 +70,13 @@ class Select extends Component{
     render(){
         const {inputValue} = this.state;
         const {styles, tourStep, icon, iconTooltip, label, required, isFocused, hasFocusStyle, className, tooltipTourStep, error, ...props} = this.props;
-        let {selectClassName, selectMenuStyles, selectMenuControlStyles, selectMenuValueContainer} = this.props;
+        let {
+            selectClassName,
+            selectMenuStyles,
+            selectMenuControlStyles,
+            selectMenuContainerStyles,
+            selectMenuValueContainer,
+        } = this.props;
         return (
             <ToolboxThemeInput
                 error={error}
@@ -137,6 +143,7 @@ class Select extends Component{
                         container:(provided) => ({
                             ...provided,
                             border: 'none',
+                            ...selectMenuContainerStyles,
                         }),
                     }}
                 />
@@ -167,6 +174,7 @@ Select.defaultProps = {
     selectMenuStyles: {},
     selectMenuValueContainer: {},
     selectMenuControlStyles: {},
+    selectMenuContainerStyles: {},
     error: '',
 };
 
