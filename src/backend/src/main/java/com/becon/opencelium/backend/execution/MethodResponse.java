@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.execution;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.jayway.jsonpath.JsonPath;
+import org.springframework.http.ResponseEntity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -48,6 +49,7 @@ public class MethodResponse {
     // where indexes are from loop statement represented as i, j, k -> 0, 3, 1
     private int loopDepth; // indicates how many nested loops are used to execute this method
     private HashMap<String, String> data;
+    private List<ResponseEntity<String>> responseEntities = new LinkedList<ResponseEntity<String>>();
 
     public MethodResponse() {
     }
@@ -106,6 +108,14 @@ public class MethodResponse {
 
     public void setAggregatorId(Integer aggregatorId) {
         this.aggregatorId = aggregatorId;
+    }
+
+    public List<ResponseEntity<String>> getResponseEntities() {
+        return responseEntities;
+    }
+
+    public void setResponseEntities(List<ResponseEntity<String>> responseEntities) {
+        this.responseEntities = responseEntities;
     }
 
     //#ffffff.(response).id

@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.aspect;
 
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
+import com.becon.opencelium.backend.execution.notification.TeamsService;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.service.*;
 import com.becon.opencelium.backend.quartz.JobExecutor;
@@ -49,6 +50,9 @@ public class ExecutionAspect {
 
     @Autowired
     private EmailServiceImpl emailService;
+
+    @Autowired
+    private TeamsService teamsService;
 
     @Autowired
     private ExecutionServiceImp executionServiceImp;
@@ -111,6 +115,8 @@ public class ExecutionAspect {
                     emailService.sendMessage(to, subject, message);
                 } else if (type.equals("slack")) {
                     // slack implementation
+                } else if (type.equals("teams")) {
+                    teamsService.sendMessage(to, subject, message);
                 }
             }
         }
