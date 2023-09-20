@@ -7,7 +7,9 @@ export const addAggregator = createAsyncThunk(
     'data_aggregator/add',
     async(aggregator: ModelDataAggregator, thunkAPI) => {
         try {
-            const checkNameRequest = new DataAggregatorRequest({endpoint: `/unique/${aggregator.name}`});
+            let name = aggregator.name.split('/').join('//');
+            name = encodeURIComponent(name);
+            const checkNameRequest = new DataAggregatorRequest({endpoint: `/unique/${name}`});
             const responseNameRequest = await checkNameRequest.checkAggregatorName();
             if(responseNameRequest.data.result === false){
                 return thunkAPI.rejectWithValue(responseNameRequest.data);
@@ -27,7 +29,9 @@ export const updateAggregator = createAsyncThunk(
             // @ts-ignore
             const dataAggregatorState = thunkAPI.getState().dataAggregatorReducer;
             if(dataAggregatorState.currentAggregator && dataAggregatorState.currentAggregator.name !== aggregator.name){
-                const checkNameRequest = new DataAggregatorRequest({endpoint: `/unique/${aggregator.name}`});
+                let name = aggregator.name.split('/').join('//');
+                name = encodeURIComponent(name);
+                const checkNameRequest = new DataAggregatorRequest({endpoint: `/unique/${name}`});
                 const responseNameRequest = await checkNameRequest.checkAggregatorName();
                 if(responseNameRequest.data.result === false){
                     return thunkAPI.rejectWithValue(responseNameRequest.data);
@@ -67,7 +71,7 @@ export const getAllAggregators = createAsyncThunk(
     }
 )
 
-export const getAllUnArchivedAggregators = createAsyncThunk(
+export const getAllUnarchivedAggregators = createAsyncThunk(
     'data_aggregator/get/all/unarchived',
     async(data: never, thunkAPI) => {
         try {
@@ -125,7 +129,7 @@ export default {
     updateAggregator,
     getAggregatorById,
     getAllAggregators,
-    getAllUnArchivedAggregators,
+    getAllUnarchivedAggregators,
     archiveAggregatorById,
     unarchiveAggregatorById,
     deleteArgument,

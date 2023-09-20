@@ -3,7 +3,6 @@ import AceEditor from "react-ace";
 import {
     AggregatorFormProps,
 } from "./interfaces";
-import InputSelect from "@app_component/base/input/select/InputSelect";
 import Arguments from "../arguments/Arguments";
 import AddArgument from "../arguments/AddArgument";
 import Input from "@app_component/base/input/Input";
@@ -59,31 +58,27 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
     ({
         readOnly,
         allMethods,
-        allOperators,
-        aggregator,
-        formType,
         theme,
         add,
         update,
         closeForm,
-        dataAggregator,
     }) => {
+    const {addingAggregator, updatingAggregator, isCurrentAggregatorHasUniqueName, formType, currentAggregator} = CDataAggregator.getReduxState();
     if(formType === 'view'){
         readOnly = true;
     }
-    const {addingAggregator, updatingAggregator, isCurrentAggregatorHasUniqueName} = CDataAggregator.getReduxState();
     const [markers, setMarkers] = useState<any[]>([]);
     const variablesRef = useRef(null);
     const scriptSegmentRef = useRef(null);
-    const [name, setName] = useState<string>(aggregator?.name || '');
+    const [name, setName] = useState<string>(currentAggregator?.name || '');
     const [showAssignedItemsSelect, toggleAssignedItemsSelect] = useState<boolean>(false);
     const [nameError, setNameError] = useState<string>('');
     const [items, setItems] = useState<OptionProps[]>([]);
-    const [args, setArgs] = useState(aggregator?.args || []);
+    const [args, setArgs] = useState(currentAggregator?.args || []);
     const [argsError, setArgsError] = useState<string>('');
-    const initialScript = CAggregator.splitVariablesFromScript(aggregator?.script || '');
+    const initialScript = CAggregator.splitVariablesFromScript(currentAggregator?.script || '');
     const [variables, setVariables] = useState<string>(initialScript.variables || '');
-    const [scriptSegment, setScriptSegment] = useState<string>(initialScript.scriptSegment || '');
+    const [scriptSegment, setScriptSegment] = useState<string>(initialScript.scriptSegment || CAggregator.getScriptSegmentComment());
     const [scriptSegmentError, setScriptSegmentError] = useState<string>('');
     const [hideComments, toggleComments] = useState<boolean>(false);
     const changeScriptSegment = (segment: string) => {
@@ -152,7 +147,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
             add({name, args, assignedItems: assignedItems.map(i => {return {color: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
         }
         if(formType === 'update'){
-            update({id: aggregator.id, name, args, assignedItems: assignedItems.map(i => {return {color: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
+            update({id: currentAggregator.id, name, args, assignedItems: assignedItems.map(i => {return {color: i.value.toString()}}), script: CAggregator.joinVariablesWithScriptSegment(variables, scriptSegment)});
         }
     }
     const addArgument = (arg: ModelArgument) => {
@@ -216,55 +211,57 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
                         label={'Name'}
                         error={nameError}
                     />
-                    {!showAssignedItemsSelect &&
-                        <Input readOnly={readOnly} value={'checkbox'} label={'Methods'} icon={'commit'}>
-                            <CheckboxStyled
-                                theme={theme}
-                                type={'checkbox'}
-                                checked={showAssignedItemsSelect}
-                                onChange={() => toggleAssignedItemsSelect(!showAssignedItemsSelect)}
-                            />
-                            <TextStyled
-                                hasCheckbox={true}
-                                hasBorder={false}
-                                paddingLeft={'30px'}
-                                value={'Do you want to assign for all selected methods?'}
-                                display={'inline-block'}
-                            />
-                        </Input>
-                    }
-                    {showAssignedItemsSelect &&
-                        <Input checkboxProps={{theme: theme,checked: showAssignedItemsSelect,onChange: () => toggleAssignedItemsSelect(!showAssignedItemsSelect),}} value={'methods'} label={'Methods'} icon={'commit'} marginBottom={'20px'}>
-                            <Select
-                                id={`input_aggregator_items`}
-                                name={'Methods'}
-                                value={items}
-                                isMulti={true}
-                                onChange={(option: any) => setItems(option)}
-                                options={allMethods.length > 0 ? allMethods : [{label: 'No params', value: 0, color: 'white'}]}
-                                closeOnSelect={false}
-                                placeholder={'...'}
-                                isSearchable={true}
-                                openMenuOnClick={true}
-                                maxMenuHeight={200}
-                                minMenuHeight={50}
-                                selectMenuPlaceholderStyles={{
-                                    left: `calc(50% - 10px)`,
-                                }}
-                                selectMenuContainerStyles={{
-                                    marginLeft: '70px',
-                                }}
-                                styles={{
-                                    indicatorSeparator: () => ({display: 'none'}),
-                                    dropdownIndicator: () => ({display: 'none'}),
-                                    multiValueLabel: (styles: any, { data }: any) => ({
-                                        ...styles,
-                                        ...dot(data.color)
-                                    }),
-                                }}
-                            />
-                        </Input>
-                    }
+                    {!readOnly && <React.Fragment>
+                        {!showAssignedItemsSelect &&
+                            <Input readOnly={readOnly} value={'checkbox'} label={'Methods'} icon={'commit'}>
+                                <CheckboxStyled
+                                    theme={theme}
+                                    type={'checkbox'}
+                                    checked={showAssignedItemsSelect}
+                                    onChange={() => toggleAssignedItemsSelect(!showAssignedItemsSelect)}
+                                />
+                                <TextStyled
+                                    hasCheckbox={true}
+                                    hasBorder={false}
+                                    paddingLeft={'30px'}
+                                    value={'Do you want to assign for all selected methods?'}
+                                    display={'inline-block'}
+                                />
+                            </Input>
+                        }
+                        {showAssignedItemsSelect &&
+                            <Input checkboxProps={{theme: theme,checked: showAssignedItemsSelect,onChange: () => toggleAssignedItemsSelect(!showAssignedItemsSelect),}} value={'methods'} label={'Methods'} icon={'commit'} marginBottom={'20px'}>
+                                <Select
+                                    id={`input_aggregator_items`}
+                                    name={'Methods'}
+                                    value={items}
+                                    isMulti={true}
+                                    onChange={(option: any) => setItems(option)}
+                                    options={allMethods.length > 0 ? allMethods : [{label: 'No params', value: 0, color: 'white'}]}
+                                    closeOnSelect={false}
+                                    placeholder={'...'}
+                                    isSearchable={true}
+                                    openMenuOnClick={true}
+                                    maxMenuHeight={200}
+                                    minMenuHeight={50}
+                                    selectMenuPlaceholderStyles={{
+                                        left: `calc(50% - 10px)`,
+                                    }}
+                                    selectMenuContainerStyles={{
+                                        marginLeft: '70px',
+                                    }}
+                                    styles={{
+                                        indicatorSeparator: () => ({display: 'none'}),
+                                        dropdownIndicator: () => ({display: 'none'}),
+                                        multiValueLabel: (styles: any, { data }: any) => ({
+                                            ...styles,
+                                            ...dot(data.color)
+                                        }),
+                                    }}
+                                />
+                            </Input>
+                        }
+                    </React.Fragment>}
                     <Input errorBottom={'-20px'} error={argsError} readOnly={readOnly} required={true} value={'arguments'} label={'Arguments'} icon={'abc'} marginBottom={'20px'}>
                         <ArgumentFormContainer>
                             {!readOnly && <AddArgument clearArgsError={() => setArgsError('')} args={args} add={addArgument}/>}
@@ -317,7 +314,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
                             showPrintMargin={true}
                             showGutter={true}
                             highlightActiveLine={true}
-                            value={`${CAggregator.getScriptSegmentComment()}${scriptSegment}`}
+                            value={`${scriptSegment}`}
                             height={'230px'}
                             width={'100%'}
                             readOnly={readOnly}

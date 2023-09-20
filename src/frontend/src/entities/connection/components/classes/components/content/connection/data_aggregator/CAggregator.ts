@@ -97,6 +97,7 @@ export default class CAggregator implements ModelDataAggregator{
     }
 
     static cleanCodeFromComments(code: string): string{
+        return code;
         return code.replace(/\s*\/\/.*\n/g, '\n').replace(/\s*\/\*[\s\S]*?\*\//g, '').trim();
     }
 
