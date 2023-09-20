@@ -233,15 +233,15 @@ public class JobExecutor extends QuartzJobBean {
             List<ExecutionArgument> executionArguments = new ArrayList<>();
             args.forEach(arg -> {
                 Object value = engine.get(arg.getName());
+                if (value == null) {
+                    return;
+                }
                 ExecutionArgument executionArgument = new ExecutionArgument();
-//                ExecutionArgument.PK pk = new ExecutionArgument.PK(execution, arg);
                 executionArgument.setExecution(execution);
                 executionArgument.setArgument(arg);
                 executionArgument.setValue(value.toString());
                 executionArguments.add(executionArgument);
             });
-
-//            args.forEach(arg -> arg.setExecutionArguments(executionArguments));
             return executionArguments;
         } catch (Exception e) {
             e.printStackTrace();

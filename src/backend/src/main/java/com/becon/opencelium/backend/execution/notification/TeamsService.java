@@ -5,6 +5,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class TeamsService implements CommunicationTool {
+
     @Override
     public void sendMessage(String destination, String subject, String text) {
         RestTemplate restTemplate = new RestTemplate();

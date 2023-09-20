@@ -128,11 +128,11 @@ public class ExecutionAspect {
     private String replaceArgs(String text, EventNotification en) {
         String result = text;
         // for smart notification.
-        List<String> indexes = getConstants(text, "\\{\\{([^{}]+)\\}\\}");
-        List<String> args = indexes.stream().map(i -> argumentServiceImp
-                .findById(Integer.parseInt(i)).get().getName())
-                .collect(Collectors.toList());
-        Map<String, String> argsValues = getArgsValues(args, en);
+        List<Long> indexes = getConstants(text, "\\{\\{([^{}]+)\\}\\}").stream().map(Long::getLong).toList();
+//        List<String> args = indexes.stream().map(i -> argumentServiceImp
+//                .findById(i).get().getName())
+//                .collect(Collectors.toList());
+        Map<String, String> argsValues = getArgsValues(indexes, en);
         for (Map.Entry<String, String> entry : argsValues.entrySet()) {
             String arg = entry.getKey();
             String value = entry.getValue();
@@ -158,7 +158,8 @@ public class ExecutionAspect {
 
         // for smart notification.
         List<String> args = getConstants(text, "\\{\\{([^{}]+)\\}\\}");
-        Map<String, String> argsValues = getArgsValues(args, en);
+        List<Long> indexes = args.stream().map(Long::parseLong).toList();
+        Map<String, String> argsValues = getArgsValues(indexes, en);
         String et = en.getEventType();
         if (argsValues != null && (et.equalsIgnoreCase("post") || et.equalsIgnoreCase("alert"))) {
             for (Map.Entry<String, String> entry : argsValues.entrySet()) {
@@ -171,13 +172,13 @@ public class ExecutionAspect {
         return result;
     }
 
-    private Map<String, String> getArgsValues(List<String> args, EventNotification en) {
+    private Map<String, String> getArgsValues(List<Long> indexes, EventNotification en) {
         LastExecution le = schedulerServiceImp.findById(en.getScheduler().getId()).get().getLastExecution();
         long exId = Math.max(le.getFailExecutionId(), le.getSuccessExecutionId());
         Execution execution = executionServiceImp.findById(exId).orElse(null);
         Objects.requireNonNull(execution);
         return execution.getExecutionArguments().stream()
-                .filter(ea -> args.contains(ea.getArgument().getName()))
+                .filter(ea -> indexes.contains(ea.getArgument().getId()))
                 .collect(Collectors.toMap(ea -> Long.toString(ea.getArgument().getId()), ExecutionArgument::getValue));
     }
 
