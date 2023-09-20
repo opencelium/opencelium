@@ -72,7 +72,7 @@ class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
     hasCardLink = true;
     ListRawComponent = AggregatorListRaw;
 
-    constructor(aggregators: any[], getListActions?: any, listProps?: ListProp<ModelDataAggregatorProps>[]) {
+    constructor(aggregators: any[], getListActions?: any, listProps?: ListProp<ModelDataAggregatorProps>[], AfterSearchComponents?: null, shouldShowArchived?: boolean) {
         super();
         let aggregatorInstances = [];
         for(let i = 0; i < aggregators.length; i++){
@@ -86,7 +86,8 @@ class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
             this.hasSearch = true;
             this.listProps = [...this.listProps, ...listProps];
         }
-        this.entities = [...aggregatorInstances];
+        this.AfterSearchComponents = AfterSearchComponents;
+        this.entities = shouldShowArchived ? [...aggregatorInstances] : [...aggregatorInstances].filter(a => !(a.active === false));
     }
 
     search(aggregator: ModelDataAggregator, searchValue: string){

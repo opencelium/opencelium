@@ -71,10 +71,13 @@ export class Content extends HookStateClass implements IContent{
             width: 'calc(100% - 50px)',
             marginLeft: '46px',
             marginBottom: 0,
-            height: 'calc(100% - 37px)'
+            height: 'calc(100% - 37px)',
+            borderBottom: '1px solid #e9e9e9'
         }
+        // @ts-ignore
+        const validationMessage = this.validations.body || '';
         return (
-            <Input height={`calc(100% - 67px)`} value={'body'} label={'Body'} icon={'feed'} marginBottom={'20px'}>
+            <Input errorBottom={'-7px'} error={validationMessage} required={true} height={`calc(100% - 67px)`} value={'body'} label={'Body'} icon={'feed'} marginBottom={'20px'}>
                 <AceEditor
                     {...props}
                     style={{...styleProps}}

@@ -571,6 +571,16 @@ $DASHED_COLOR: #58854d;
   .entry_padding {
     padding-left: 15px !important;
   }
+  .open_aggregator {
+    color: #c0c0c5;
+    cursor: pointer;
+    padding: 0 3px;
+  }
+  .open_aggregator:hover {
+    color: #444b4c;
+    padding: 0 3px;
+    box-shadow: #9f9f9f 0 1px 3px 0;
+  }
   .more_details {
     color: #c0c0c5;
     cursor: pointer;

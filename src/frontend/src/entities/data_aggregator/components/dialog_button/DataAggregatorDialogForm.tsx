@@ -82,7 +82,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
     const [scriptSegmentError, setScriptSegmentError] = useState<string>('');
     const [hideComments, toggleComments] = useState<boolean>(false);
     const changeScriptSegment = (segment: string) => {
-        setScriptSegment(CAggregator.cleanCodeFromComments(segment));
+        setScriptSegment(segment);
         setScriptSegmentError('');
     }
     const changeName = (newName: string) => {
@@ -90,7 +90,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
         setNameError('');
     }
     useEffect(() => {
-        const newMarkers = getMarker(scriptSegmentRef.current.editor, CAggregator.getScriptSegmentComment()+scriptSegment, CAggregator.generateNotExistVar());
+        const newMarkers = getMarker(scriptSegmentRef.current.editor, scriptSegment, CAggregator.generateNotExistVar());
         setMarkers(newMarkers)
     }, [scriptSegment])
     useEffect(() => {

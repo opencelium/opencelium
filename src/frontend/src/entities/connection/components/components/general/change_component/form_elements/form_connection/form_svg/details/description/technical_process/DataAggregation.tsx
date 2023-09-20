@@ -71,7 +71,7 @@ export default
             changeValue={changeAggregator}
             label={'Aggregation'}
             value={aggregator}
-            onTextValueClick={openDataAggregator}
+            onTextValueClick={aggregator !== 'is empty' ? openDataAggregator : null}
         />
     );
 }
