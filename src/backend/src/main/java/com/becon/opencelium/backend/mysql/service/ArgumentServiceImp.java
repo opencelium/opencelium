@@ -6,6 +6,8 @@ import com.becon.opencelium.backend.resource.connection.aggregator.ArgumentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service("ArgumentServiceImp")
 public class ArgumentServiceImp implements ArgumentService {
     @Autowired
@@ -33,4 +35,11 @@ public class ArgumentServiceImp implements ArgumentService {
     public void deleteById(Integer argId) {
         argumentRepository.deleteById(argId);
     }
+
+    @Override
+    public Optional<Argument> findById(int argId) {
+        return argumentRepository.findById(argId);
+    }
+
+
 }

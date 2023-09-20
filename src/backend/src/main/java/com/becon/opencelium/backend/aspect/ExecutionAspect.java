@@ -57,6 +57,9 @@ public class ExecutionAspect {
     @Autowired
     private ExecutionServiceImp executionServiceImp;
 
+    @Autowired
+    private ArgumentServiceImp argumentServiceImp;
+
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
     public void sendBefore(JobExecutionContext context){
@@ -125,7 +128,10 @@ public class ExecutionAspect {
     private String replaceArgs(String text, EventNotification en) {
         String result = text;
         // for smart notification.
-        List<String> args = getConstants(text, "\\{\\{([^{}]+)\\}\\}");
+        List<String> indexes = getConstants(text, "\\{\\{([^{}]+)\\}\\}");
+        List<String> args = indexes.stream().map(i -> argumentServiceImp
+                .findById(Integer.parseInt(i)).get().getName())
+                .collect(Collectors.toList());
         Map<String, String> argsValues = getArgsValues(args, en);
         for (Map.Entry<String, String> entry : argsValues.entrySet()) {
             String arg = entry.getKey();
