@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface ExecutionArgumentService {
     void saveAll(List<ExecutionArgument> executionArguments);
+    List<ExecutionArgument> findAllByExecId(Long id);
 }
