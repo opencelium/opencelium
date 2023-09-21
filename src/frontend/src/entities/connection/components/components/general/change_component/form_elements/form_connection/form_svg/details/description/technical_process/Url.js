@@ -89,7 +89,7 @@ class Url extends React.Component{
             <React.Fragment>
                 <Col id="url_label" xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Endpoint`}</Col>
                 <Col id="url_option" xs={8} className={`${styles.col}`}>
-                    <TooltipFontIcon onClick={() => this.toggleUrlVisibleIcon()} size={14} value={<span className={styles.more_details}>{`URL`}</span>} tooltip={'URL'}/>
+                    <TooltipFontIcon onClick={() => this.toggleUrlVisibleIcon()} size={14} value={<span className={styles.more_details}>{`URL`}</span>} tooltip={'Show'}/>
                 </Col>
                 {isExtended && isCurrentInfo &&
                     ReactDOM.createPortal(

@@ -162,7 +162,10 @@ const CollectionView: FC<CollectionViewProps> =
                             }
                         </ActionsStyled>
                         {hasSearch &&
-                            <InputText marginLeft={'0'} autoFocus inputHeight={'35px'} value={searchValue} onChange={(e) => search(e.target.value)} minHeight={'1'}  width={'200px'} placeholder={'Search field'}/>
+                            <InputText marginLeft={'0'} autoFocus inputHeight={'35px'} value={searchValue} onChange={(e) => search(e.target.value)} minHeight={'1'} width={'200px'} placeholder={'Search field'}/>
+                        }
+                        {
+                            collection.AfterSearchComponents
                         }
                         {hasViewSection &&
                             <ViewSectionStyled>

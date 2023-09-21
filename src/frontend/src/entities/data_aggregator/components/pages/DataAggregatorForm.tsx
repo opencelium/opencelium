@@ -65,7 +65,7 @@ const DataAggregatorDialogForm:FC<IForm> =
         const [argsError, setArgsError] = useState<string>('');
         const initialScript = CAggregator.splitVariablesFromScript(currentAggregator?.script || '');
         const [variables, setVariables] = useState<string>(initialScript.variables || '');
-        const [scriptSegment, updateScriptSegment] = useState<string>(initialScript.scriptSegment || '');
+        const [scriptSegment, updateScriptSegment] = useState<string>(initialScript.scriptSegment || CAggregator.getScriptSegmentComment());
         const [scriptSegmentError, setScriptSegmentError] = useState<string>('');
         const [hideComments, toggleComments] = useState<boolean>(false);
         const shouldFetchDataAggregator = isUpdate || isView;
@@ -80,7 +80,7 @@ const DataAggregatorDialogForm:FC<IForm> =
             updateScriptSegment(segment);
         }
         const changeScriptSegment = (segment: string) => {
-            setScriptSegment(CAggregator.cleanCodeFromComments(segment));
+            setScriptSegment(segment);
             setScriptSegmentError('');
         }
         const changeName = (newName: string) => {
@@ -93,7 +93,7 @@ const DataAggregatorDialogForm:FC<IForm> =
             }
         }, [])
         useEffect(() => {
-            const newMarkers = getMarker(scriptSegmentRef.current.editor, CAggregator.getScriptSegmentComment()+scriptSegment, CAggregator.generateNotExistVar());
+            const newMarkers = getMarker(scriptSegmentRef.current.editor, scriptSegment, CAggregator.generateNotExistVar());
             setMarkers(newMarkers)
         }, [scriptSegment])
         useEffect(() => {
@@ -313,7 +313,7 @@ const DataAggregatorDialogForm:FC<IForm> =
                             showPrintMargin={true}
                             showGutter={true}
                             highlightActiveLine={true}
-                            value={`${CAggregator.getScriptSegmentComment()}${scriptSegment}`}
+                            value={`${scriptSegment}`}
                             height={'230px'}
                             width={'100%'}
                             readOnly={readOnly}

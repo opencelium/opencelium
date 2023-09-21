@@ -42,11 +42,11 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         checkingNotificationTemplateName, isCurrentNotificationTemplateHasUniqueName, error,
         gettingNotificationTemplate,
     } = NotificationTemplate.getReduxState();
-    const {aggregators, gettingAllAggregators} = CDataAggregator.getReduxState();
+    const {unarchivedAggregators, gettingAllUnarchivedAggregators} = CDataAggregator.getReduxState();
     const [selectedAggregator, setSelectedAggregator] = useState(null);
     const aggregatorOptions = useMemo(() => {
-        return aggregators.map(a => {return {label: a.name, value: a.id, args: a.args};});
-    }, [aggregators]);
+        return unarchivedAggregators.map(a => {return {label: a.name, value: a.id, args: a.args};});
+    }, [unarchivedAggregators]);
     const dispatch = useAppDispatch();
     const didMount = useRef(false);
     let navigate = useNavigate();
@@ -66,7 +66,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         if(!currentNotificationTemplate){
             return null;
         }
-        if(isUpdate && gettingAllAggregators !== API_REQUEST_STATE.FINISH){
+        if(isUpdate && gettingAllUnarchivedAggregators !== API_REQUEST_STATE.FINISH){
             return null;
         }
         return {
@@ -75,12 +75,12 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
                 // @ts-ignore
                 ...currentNotificationTemplate.content[0],
                 // @ts-ignore
-                subject: CDataAggregator.replaceIdsOnNames(aggregators, currentNotificationTemplate.content[0].subject),
+                subject: CDataAggregator.replaceIdsOnNames(unarchivedAggregators, currentNotificationTemplate.content[0].subject),
                 // @ts-ignore
-                body: CDataAggregator.replaceIdsOnNames(aggregators, currentNotificationTemplate.content[0].body),
+                body: CDataAggregator.replaceIdsOnNames(unarchivedAggregators, currentNotificationTemplate.content[0].body),
             }]
         };
-    }, [currentNotificationTemplate, gettingAllAggregators]);
+    }, [currentNotificationTemplate, gettingAllUnarchivedAggregators]);
     // @ts-ignore
     const content = Content.createState<IContent>({_readOnly: isView}, isAdd ? null : initialNotificationTemplate?.content[0]);
 
@@ -141,7 +141,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             icon={'subtitles'}
             label={'Data Aggregator'}
             options={aggregatorOptions}
-            isLoading={gettingAllAggregators === API_REQUEST_STATE.START}
+            isLoading={gettingAllUnarchivedAggregators === API_REQUEST_STATE.START}
         />;
     const DataAggregatorItems = selectedAggregator ? (
         <Input value={selectedAggregator.value} label={'Arguments'} icon={'abc'} marginBottom={'20px'} display={'grid'}>
@@ -170,7 +170,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         autoFocus={isView}
     />];
     if(isAdd || isUpdate){
-        let handleClick = isAdd ? () => notificationTemplate.add(aggregators) : () => notificationTemplate.update(aggregators);
+        let handleClick = isAdd ? () => notificationTemplate.add(unarchivedAggregators) : () => notificationTemplate.update(unarchivedAggregators);
         actions.unshift(<Button
             key={'action_button'}
             label={formData.actionButton.label}

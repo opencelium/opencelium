@@ -13,6 +13,7 @@ import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {AggregatorActive} from "@entity/data_aggregator/components/aggregator_active/AggregatorActive";
 import {ListProp} from "@application/interfaces/IListCollection";
+import {AggregatorAllActive} from "@entity/data_aggregator/components/aggregator_all_active/AggregatorAllActive";
 
 
 const DataAggregatorList:FC =
@@ -23,12 +24,17 @@ const DataAggregatorList:FC =
         error, aggregators, gettingAllAggregators,
     } = CDataAggregator.getReduxState();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
+    const [isChecked, check] = useState<boolean>(false);
     useEffect(() => {
         dispatch(getAllAggregators());
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
-    }, [JSON.stringify(aggregators)])
+    }, [JSON.stringify(aggregators)]);
+    const doSwitch: any = () => {
+        check(!isChecked);
+    }
+    const AfterSearchComponents: any = <AggregatorAllActive isChecked={isChecked} doSwitch={doSwitch}/>;
     const getListActions = (entity: ModelDataAggregator) => {
         return (
             <React.Fragment>
@@ -58,7 +64,7 @@ const DataAggregatorList:FC =
             width: '10%',
         }
     ]
-    const CollectionAggregator = new DataAggregatorCollection(aggregators, getListActions, listProps);
+    const CollectionAggregator = new DataAggregatorCollection(aggregators, getListActions, listProps, AfterSearchComponents, isChecked);
     return (
         <CollectionView defaultViewType={ViewType.LIST} hasViewSection={false} hasError={!!error} shouldBeUpdated={shouldBeUpdated} collection={CollectionAggregator} isLoading={gettingAllAggregators === API_REQUEST_STATE.START}/>
     )
