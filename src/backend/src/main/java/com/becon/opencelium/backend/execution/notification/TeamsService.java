@@ -69,7 +69,7 @@ public class TeamsService implements CommunicationTool {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.AUTHORIZATION, token);
-        httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA.getType());
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA_VALUE);
         HttpEntity<Object> httpEntity = new HttpEntity <Object> (body, httpHeaders);
 
         restTemplate.exchange(loginUrl, method, httpEntity, String.class);
