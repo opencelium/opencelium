@@ -158,7 +158,7 @@ public class ExecutionAspect {
 
         // for smart notification.
         List<String> args = getConstants(text, "\\{\\{([^{}]+)\\}\\}");
-        List<Long> indexes = args.stream().map(Long::parseLong).toList();
+        List<Long> indexes = args.stream().filter(str -> str.matches("-?\\d+(\\.\\d+)?")).map(Long::parseLong).toList();
         Map<String, String> argsValues = getArgsValues(indexes, en);
         String et = en.getEventType();
         if (argsValues != null && (et.equalsIgnoreCase("post") || et.equalsIgnoreCase("alert"))) {
