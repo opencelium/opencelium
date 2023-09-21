@@ -70,6 +70,9 @@ export class NotificationRequest extends Request implements INotificationRequest
             recipients: notification.recipientsSelect.map(recipient => recipient.value),
             schedulerId: notification.scheduleId,
         };
+        if(mappedNotification.notificationType === 'teams'){
+            mappedNotification.recipients = ['admin@opencelium.io'];
+        }
         if(notification.id !== 0){
             return {
                 notificationId: notification.id,

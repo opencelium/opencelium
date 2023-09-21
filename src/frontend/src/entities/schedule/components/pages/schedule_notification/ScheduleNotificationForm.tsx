@@ -117,7 +117,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         propertyName: "teamSelect", props:{
             icon: 'groups',
             label: 'Team',
-            options: [{label: 'Team 1', value: 'team_1'}],
+            options: [{label: 'OpenCelium', value: 'team_1'}],
             required: true,
         }
     });
@@ -125,7 +125,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         propertyName: "channelSelect", props:{
             icon: 'workspaces',
             label: 'Channel',
-            options: [{label: 'Channel 1', value: 'channel_1'}],
+            options: [{label: 'SmartNotifications', value: 'channel_1'}],
             required: true,
         }
     });
