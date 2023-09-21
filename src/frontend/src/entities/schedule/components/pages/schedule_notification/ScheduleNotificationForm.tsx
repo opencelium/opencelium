@@ -90,7 +90,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         propertyName: "typeSelect", props:{
             icon: 'person',
             label: 'Notification Type',
-            options: [{label: 'Email', value: 'email'}],
+            options: [{label: 'Email', value: 'email'},{label: 'Teams', value: 'teams'}],
             required: true,
         }
     });
@@ -113,6 +113,22 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             isMultiple: true,
         }
     });
+    const NotificationTeamComponent = notification.getSelect({
+        propertyName: "teamSelect", props:{
+            icon: 'groups',
+            label: 'Team',
+            options: [{label: 'Team 1', value: 'team_1'}],
+            required: true,
+        }
+    });
+    const NotificationChannelComponent = notification.getSelect({
+        propertyName: "channelSelect", props:{
+            icon: 'workspaces',
+            label: 'Channel',
+            options: [{label: 'Channel 1', value: 'channel_1'}],
+            required: true,
+        }
+    });
     let actionLabel = isAdd ? 'Add' : isUpdate ? 'Update' : '';
     let action = isPlural ? () => notification.addToSelectedSchedules(selectedScheduleIds) : isAdd ? () => notification.add() : isUpdate ? () => notification.update() : null;
     return(
@@ -126,7 +142,12 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             {EventTypeComponent}
             {NotificationTypeComponent}
             {!!notification.typeSelect && NotificationTemplateComponent}
-            {!!notification.typeSelect && RecipientsComponent}
+            {!!notification.typeSelect ? notification.typeSelect.value === 'email' ? RecipientsComponent :
+                <React.Fragment>
+                    {NotificationTeamComponent}
+                    {!!notification.teamSelect && NotificationChannelComponent}
+                </React.Fragment> : null
+            }
         </Dialog>
     )
 }

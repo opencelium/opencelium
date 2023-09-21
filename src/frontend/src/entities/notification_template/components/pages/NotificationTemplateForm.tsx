@@ -124,6 +124,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             label: 'Type',
             options:[
                 {value: 'email', label: 'E-Mail'},
+                {value: 'teams', label: 'Teams'}
             ],
             required: true,
         }})

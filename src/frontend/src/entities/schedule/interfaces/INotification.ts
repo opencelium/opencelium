@@ -29,9 +29,11 @@ export interface INotificationRadios{
 }
 
 export interface INotificationSelect{
-    typeSelect: OptionProps;
+    typeSelect: OptionProps,
     templateSelect: OptionProps,
-    recipientsSelect: OptionProps[];
+    recipientsSelect: OptionProps[],
+    teamSelect: OptionProps,
+    channelSelect: OptionProps,
 }
 
 export interface INotificationText{
@@ -57,4 +59,6 @@ export interface INotification extends INotificationForm{
     notificationType?: string,
     template: INotificationTemplate,
     recipients: string[],
+    team: string,
+    channel: string,
 }
