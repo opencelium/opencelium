@@ -15,7 +15,7 @@ public class NotificationResource {
     private int notificationId;
     private int schedulerId; // should be array
     private String name;
-    private String eventType;
+    private String eventType;// post, pref, alert
     private String notificationType;
     private TemplateMessageResource template;
     //private MessageResource template;
