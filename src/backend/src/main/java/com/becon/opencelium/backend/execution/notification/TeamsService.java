@@ -32,7 +32,8 @@ public class TeamsService implements CommunicationTool {
         HttpMethod method = HttpMethod.POST;
         String body = "{\n" +
                 "    \"body\": {\n" +
-                "        \"content\": \"Subject - " + subject + ". Message: " + text + "\"\n" +
+                "        \"contentType\": \"html\",\n" +
+                "        \"content\": \"" + subject + "<br>" + text + "\"\n" +
                 "    }\n" +
                 "}";
         HttpHeaders httpHeaders = new HttpHeaders();
