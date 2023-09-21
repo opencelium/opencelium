@@ -164,6 +164,17 @@ opencelium:
     update:
       online:
         url: { insert url where portal service is located }
+  notification:
+    tools:
+      teams:
+        grant_type: grant_type
+        client_id: client_id
+        client_secret: client_secret
+        refresh_token: refresh_token
+        tenant: tenant
+        channel: channel
+        teams: teams
+        token: token
 #  rest_template:
 #      proxy:
 #        host: 127.0.0.1
