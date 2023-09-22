@@ -42,7 +42,7 @@ public class TeamsService implements CommunicationTool {
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         HttpEntity<Object> httpEntity = new HttpEntity <Object> (body, httpHeaders);
 
-        restTemplate.exchange(sendMsgUrl, HttpMethod.POST, httpEntity, String.class);
+        restTemplate.exchange(sendMsgUrl, method, httpEntity, String.class);
     }
 
     @Override

@@ -50,7 +50,7 @@ public class Webhook {
     private Date createdOn;
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST) // need to delete
+    @OneToOne(fetch = FetchType.LAZY) // need to delete
     @JoinColumn(name = "scheduler_id")
     private Scheduler scheduler;
 
