@@ -248,8 +248,8 @@ public class ConnectionController {
 
         String proxyHost = environment.getProperty("opencelium.rest_template.proxy.host");
         String proxyPort = environment.getProperty("opencelium.rest_template.proxy.port");
-        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, apiDataResource.isSslOn())
-        );
+        RestTemplateBuilder restTemplateBuilder =
+                new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, apiDataResource.isSslOn()));
         RestTemplate restTemplate = restTemplateBuilder.build();
 
         ResponseEntity<String> responseEntity = restTemplate.exchange(
