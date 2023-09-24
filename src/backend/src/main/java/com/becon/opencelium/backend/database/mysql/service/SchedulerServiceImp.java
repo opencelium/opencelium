@@ -66,7 +66,7 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void save(Scheduler scheduler) {
-
+        //TODO OC-730
     }
 
     @Override
@@ -76,12 +76,12 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void deleteById(int id) {
-
+        //TODO OC-730
     }
 
     @Override
     public void deleteAllById(List<Integer> schedulerIds) {
-
+        //TODO OC-730
     }
 
     @Override
@@ -167,12 +167,12 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void startNow(Scheduler scheduler) throws Exception{
-//        quartzUtility.runJob(scheduler);
+        //TODO OC-730
     }
 
     @Override
     public void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception{
-//        quartzUtility.runJob(scheduler, queryMap);
+        //TODO skip it
     }
 
     @Override
@@ -181,17 +181,18 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    public void disable(Scheduler scheduler) throws SchedulerException{
-//        quartzUtility.pauseTrigger(scheduler);
+    public void disable(Scheduler scheduler) throws SchedulerException {
+        //TODO OC-730
     }
 
     @Override
     public void enable(Scheduler scheduler) throws SchedulerException {
-//        quartzUtility.resumeTrigger(scheduler);
+        //TODO OC-730
     }
 
     @Override
     public List<RunningJobsResource> getAllRunningJobs() throws Exception{
+        //TODO OC-730
         return null;
     }
 

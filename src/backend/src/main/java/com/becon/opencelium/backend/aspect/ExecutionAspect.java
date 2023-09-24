@@ -22,7 +22,7 @@ import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
-import com.becon.opencelium.backend.quartz.JobExecutor;
+import com.becon.opencelium.backend.jobexecutor.JobExecutor;
 import org.aspectj.lang.annotation.*;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;

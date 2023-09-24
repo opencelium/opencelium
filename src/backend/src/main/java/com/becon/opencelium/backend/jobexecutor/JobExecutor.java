@@ -14,7 +14,7 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.quartz;
+package com.becon.opencelium.backend.jobexecutor;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -26,10 +26,6 @@ public class JobExecutor extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        execution(context);
-    }
-
-    private void execution(JobExecutionContext context) {
-
+        // Your job execution logic here
     }
 }
