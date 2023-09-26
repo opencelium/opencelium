@@ -61,7 +61,7 @@ public class WebhookServiceImp implements WebhookService {
 
         String uuid = claims.getClaim("uuid").toString();
         String tmp = claims.getClaim("userId").toString();
-        int schedulerId =  (int) claims.getClaim("schedulerId");
+        int schedulerId = ((Long)claims.getClaim("schedulerId")).intValue();
         int userId = Integer.parseInt(tmp);
 
         boolean userExists = userService.existsById(userId);
