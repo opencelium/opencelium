@@ -5,6 +5,7 @@ import org.springframework.http.MediaType;
 public class ParameterDTO {
     private String name;
     private ParamLocation in;
+    private ParamStyle style;
     private boolean explode;
     private MediaType content;
     private SchemaDTO schema;
@@ -23,6 +24,14 @@ public class ParameterDTO {
 
     public void setIn(ParamLocation in) {
         this.in = in;
+    }
+
+    public ParamStyle getStyle() {
+        return style;
+    }
+
+    public void setStyle(ParamStyle style) {
+        this.style = style;
     }
 
     public boolean isExplode() {
