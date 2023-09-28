@@ -5,7 +5,8 @@ public enum DataType {
     NUMBER("number"),
     INTEGER("integer"),
     BOOLEAN("boolean"),
-    ARRAY("array");
+    ARRAY("array"),
+    OBJECT("object");
 
     private final String type;
 
