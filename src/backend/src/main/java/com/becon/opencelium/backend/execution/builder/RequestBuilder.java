@@ -18,7 +18,7 @@ public class RequestBuilder {
 
     private URLBuilder urlBuilder;
     private HeadersBuilder headersBuilder;
-    private BodyBuilder bodyBuilder;
+    private RequestEntityBuilder requestEntityBuilder;
 
     public RequestBuilder(OperationDTO operation, ResponseContainer container) {
         this.operation = operation;
@@ -39,16 +39,16 @@ public class RequestBuilder {
         return this;
     }
 
-    public RequestBuilder withCustomBody(BodyBuilder bodyBuilder) {
-        this.bodyBuilder = bodyBuilder;
+    public RequestBuilder withCustomRequestEntity(RequestEntityBuilder requestEntityBuilder) {
+        this.requestEntityBuilder = requestEntityBuilder;
         return this;
     }
 
     public Request createRequest() {
-        var url = Objects.nonNull(urlBuilder) ? urlBuilder.buildURL(operation, container) : defaultURLBuilder();
+        var url = Objects.nonNull(urlBuilder) ? urlBuilder.build(operation, container) : defaultURLBuilder();
         var httpMethod = defaultMethod();
-        var httpHeaders = Objects.nonNull(headersBuilder) ? headersBuilder.buildHeaders(operation, container) : defaultHeadersBuilder();
-        var requestEntity = Objects.nonNull(bodyBuilder) ? bodyBuilder.buildBody(operation, container) : defaultBodyBuilder();
+        var httpHeaders = Objects.nonNull(headersBuilder) ? headersBuilder.build(operation, container) : defaultHeadersBuilder();
+        var requestEntity = Objects.nonNull(requestEntityBuilder) ? requestEntityBuilder.build(operation, container) : defaultRequestEntityBuilder();
 
         return new Request(url, httpMethod, httpHeaders, requestEntity);
     }
@@ -77,7 +77,7 @@ public class RequestBuilder {
         return headers;
     }
 
-    private RequestEntity<?> defaultBodyBuilder() {
+    private RequestEntity<?> defaultRequestEntityBuilder() {
 
         return null;
     }
