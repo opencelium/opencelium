@@ -48,7 +48,7 @@ public class ExecutionAspect {
     private UserServiceImpl userService;
 
 
-    @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
+    @Before("execution(* com.becon.opencelium.backend.jobexecutor.JobExecutor.executeInternal(..)) && args(context)")
     public void sendBefore(JobExecutionContext context){
         logger.info("------------------- PRE --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
@@ -57,7 +57,7 @@ public class ExecutionAspect {
         triggerNotifications(eventNotifications, "pre", null);
     }
 
-    @After("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
+    @After("execution(* com.becon.opencelium.backend.jobexecutor.JobExecutor.executeInternal(..)) && args(context)")
     public void sendAfter(JobExecutionContext context){
         logger.info("------------------- POST --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
@@ -66,7 +66,7 @@ public class ExecutionAspect {
         triggerNotifications(en, "post", null);
     }
 
-    @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
+    @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.jobexecutor.JobExecutor.executeInternal(..)) && args(context)",
                    throwing="ex")
     public void sendAlert(JobExecutionContext context, Exception ex){
         logger.info("------------------- EXCEPTION --------------------");
