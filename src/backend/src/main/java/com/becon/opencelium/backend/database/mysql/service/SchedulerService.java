@@ -58,4 +58,5 @@ public interface SchedulerService {
     NotificationResource toNotificationResource(EventNotification eventNotification);
     void saveNotification(EventNotification eventNotification);
     void deleteNotificationById(int id);
+    Scheduler getById(int id);
 }
