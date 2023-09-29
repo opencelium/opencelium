@@ -22,12 +22,19 @@ import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
+import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
+import com.becon.opencelium.backend.factory.SchedulerFactory;
+import com.becon.opencelium.backend.jobexecutor.SchedulingStrategy;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import org.quartz.SchedulerException;
+import org.quartz.core.QuartzScheduler;
+import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -36,37 +43,44 @@ import java.util.stream.Collectors;
 @Service
 public class SchedulerServiceImp implements SchedulerService {
 
-    @Autowired
-    private ConnectionServiceImp connectionService;
+    private final ConnectionService connectionService;
+    private final WebhookService webhookService;
+    private final ExecutionService executionService;
+    private final LastExecutionService lastExecutionService;
+    private final RecipientService recipientService;
+    private final MessageService messageService;
+    private final SchedulingStrategy schedulingStrategy;
+    private final SchedulerRepository schedulerRepository;
+    private final NotificationRepository notificationRepository;
 
-    @Autowired
-    private SchedulerRepository schedulerRepository;
 
 
-    @Autowired
-    private WebhookServiceImp webhookService;
-
-    @Autowired
-    private ExecutionServiceImp executionServiceImp;
-
-    @Autowired
-    private LastExecutionServiceImp lastExecutionServiceImp;
-
-    @Autowired
-    private ConnectorServiceImp connectorService;
-
-    @Autowired
-    private NotificationRepository notificationRepository;
-
-    @Autowired
-    private RecipientServiceImpl recipientService;
-
-    @Autowired
-    private MessageServiceImpl messageService;
+    public SchedulerServiceImp(
+            @Qualifier("connectionServiceImp") ConnectionService connectionService,
+            @Qualifier("webhookServiceImp")WebhookService webhookService,
+            @Qualifier("executionServiceImp")ExecutionService executionService,
+            @Qualifier("lastExecutionServiceImp")LastExecutionService lastExecutionService,
+            @Qualifier("messageServiceImpl")MessageService messageService,
+            @Qualifier("recipientServiceImpl")RecipientService recipientService,
+            SchedulerRepository schedulerRepository,
+            NotificationRepository notificationRepository,
+            SchedulerFactoryBean schedulerFactoryBean
+    ) {
+        this.connectionService = connectionService;
+        this.webhookService = webhookService;
+        this.executionService = executionService;
+        this.lastExecutionService = lastExecutionService;
+        this.recipientService = recipientService;
+        this.messageService = messageService;
+        this.schedulingStrategy = SchedulerFactory.createQuartzScheduler(schedulerFactoryBean.getScheduler());
+        this.notificationRepository = notificationRepository;
+        this.schedulerRepository = schedulerRepository;
+    }
 
     @Override
     public void save(Scheduler scheduler) {
-        //TODO OC-730
+        Scheduler saved = schedulerRepository.save(scheduler);
+        schedulingStrategy.addJob(saved);
     }
 
     @Override
@@ -76,12 +90,20 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void deleteById(int id) {
-        //TODO OC-730
+        synchronized (this) {
+            Scheduler scheduler = getById(id);
+            schedulerRepository.deleteById(id);
+            schedulingStrategy.deleteJob(scheduler);
+        }
     }
 
     @Override
     public void deleteAllById(List<Integer> schedulerIds) {
-        //TODO OC-730
+        for (Integer id : schedulerIds) {
+            try {
+                deleteById(id);
+            } catch (Exception ignored) {}
+        }
     }
 
     @Override
@@ -97,6 +119,11 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public Optional<Scheduler> findById(int id) {
         return schedulerRepository.findById(id);
+    }
+    @Override
+    public Scheduler getById(int id) {
+        return schedulerRepository.findById(id)
+                .orElseThrow(()->new SchedulerNotFoundException(id));
     }
 
     @Override
@@ -147,7 +174,7 @@ public class SchedulerServiceImp implements SchedulerService {
         schedulerResource.setConnection(connectionService.toDTO(entity.getConnection()));
 
         if (entity.getLastExecution() != null){
-            schedulerResource.setLastExecution(lastExecutionServiceImp.toResource(entity.getLastExecution()));
+            schedulerResource.setLastExecution(lastExecutionService.toResource(entity.getLastExecution()));
         }
         if (entity.getWebhook() != null){
             schedulerResource.setWebhook(webhookService.toResource(entity.getWebhook()));
@@ -167,7 +194,8 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void startNow(Scheduler scheduler) throws Exception{
-        //TODO OC-730
+        schedulerRepository.save(scheduler);
+        schedulingStrategy.runJob(scheduler);
     }
 
     @Override
@@ -182,18 +210,29 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void disable(Scheduler scheduler) throws SchedulerException {
-        //TODO OC-730
+        schedulingStrategy.pauseJob(scheduler);
     }
 
     @Override
     public void enable(Scheduler scheduler) throws SchedulerException {
-        //TODO OC-730
+        schedulingStrategy.resumeJob(scheduler);
     }
 
     @Override
     public List<RunningJobsResource> getAllRunningJobs() throws Exception{
-        //TODO OC-730
-        return null;
+        Map<Integer, Long> runningJobs = schedulingStrategy.getRunningJobs();
+        List<RunningJobsResource> runningJobsResources = new ArrayList<>();
+        runningJobs.forEach((k,v)->{
+            RunningJobsResource jobsResource = new RunningJobsResource();
+            Scheduler scheduler = getById(k);
+            jobsResource.setSchedulerId(scheduler.getId());
+            jobsResource.setTitle(scheduler.getTitle());
+            Connection connection = connectionService.getById(v);
+            jobsResource.setToConnector(String.valueOf(connection.getToConnector()));
+            jobsResource.setFromConnector(String.valueOf(connection.getFromConnector()));
+            runningJobsResources.add(jobsResource);
+        });
+        return runningJobsResources;
     }
 
     @Override
@@ -233,7 +272,7 @@ public class SchedulerServiceImp implements SchedulerService {
     public void saveNotification(EventNotification eventNotification) {
 
         notificationRepository.save(eventNotification);
-        eventNotification.getEventRecipients().forEach(notificationRecipient -> recipientService.save(notificationRecipient));
+        eventNotification.getEventRecipients().forEach(recipientService::save);
         messageService.save(eventNotification.getEventMessage());
     }
 
