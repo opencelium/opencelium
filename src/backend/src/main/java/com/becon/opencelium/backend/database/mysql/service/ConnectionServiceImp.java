@@ -24,9 +24,12 @@ import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.mongodb.MongoException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +65,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
 
     @Override
+    @Transactional(rollbackFor = {MongoException.class, DataAccessException.class})
     public ConnectionMng save(Connection connection, ConnectionMng connectionMng) {
 
         Connector toConnector = connectorService.getById(connection.getToConnector());
