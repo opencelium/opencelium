@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.jobexecutor.JobExecutor;
+import com.becon.opencelium.backend.jobexecutor.QuartzJobScheduler;
 import org.aspectj.lang.annotation.*;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -52,7 +53,8 @@ public class ExecutionAspect {
     public void sendBefore(JobExecutionContext context){
         logger.info("------------------- PRE --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        int schedulerId = jobDataMap.getIntValue("schedulerId");
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        int schedulerId = data.getScheduleId();
         List<EventNotification> eventNotifications = schedulerServiceImp.getAllNotifications(schedulerId);
         triggerNotifications(eventNotifications, "pre", null);
     }
@@ -61,7 +63,8 @@ public class ExecutionAspect {
     public void sendAfter(JobExecutionContext context){
         logger.info("------------------- POST --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        int schedulerId = jobDataMap.getIntValue("schedulerId");
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        int schedulerId = data.getScheduleId();
         List<EventNotification> en = schedulerServiceImp.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
     }
@@ -71,7 +74,8 @@ public class ExecutionAspect {
     public void sendAlert(JobExecutionContext context, Exception ex){
         logger.info("------------------- EXCEPTION --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        int schedulerId = jobDataMap.getIntValue("schedulerId");
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        int schedulerId = data.getScheduleId();
         List<EventNotification> en = schedulerServiceImp.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
     }
