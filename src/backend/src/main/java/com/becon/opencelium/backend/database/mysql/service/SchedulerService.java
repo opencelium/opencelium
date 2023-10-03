@@ -45,11 +45,11 @@ public interface SchedulerService {
     Scheduler toEntity(SchedulerRequestResource resource);
     SchedulerResource toResource(Scheduler entity);
 
-    void startNow(Scheduler scheduler) throws Exception;
+    void startNow(Scheduler scheduler);
     void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception;
     void saveEntity(Scheduler scheduler);
-    void disable(Scheduler scheduler) throws SchedulerException;
-    void enable(Scheduler scheduler) throws SchedulerException;
+    void disable(Scheduler scheduler);
+    void enable(Scheduler scheduler);
     List<RunningJobsResource> getAllRunningJobs() throws Exception;
 
     List<EventNotification> getAllNotifications(int schedulerId);

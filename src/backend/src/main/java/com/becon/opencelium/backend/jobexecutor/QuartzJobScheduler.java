@@ -4,7 +4,6 @@ import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
 import org.quartz.*;
-import org.quartz.core.QuartzScheduler;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -25,12 +24,10 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         try {
             final String jobName = getJobName(scheduler);
             final JobKey jobKey = new JobKey(jobName, "connection");
-            //s-c
-            //s, c
             validateCron(scheduler.getCronExp());
 
             if (quartzScheduler.checkExists(jobKey)) {
-                return;
+                throw new RuntimeException("JOB_ALREADY_EXISTS");
             }
 
             TriggerKey triggerKey = new TriggerKey(String.valueOf(scheduler.getId()), String.valueOf(scheduler.getConnection().getId()));
@@ -68,7 +65,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
 
         try {
             if (!quartzScheduler.checkExists(jobKey))
-                return;
+                throw new RuntimeException("JOB_NOT_FOUND");
             quartzScheduler.deleteJob(jobKey); //Deleting a job and unScheduling all of its Triggers
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
@@ -84,7 +81,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         try {
             Trigger currTrigger = quartzScheduler.getTrigger(new TriggerKey(String.valueOf(scheduler.getId()), String.valueOf(scheduler.getConnection().getId())));
             if (currTrigger == null) {
-                return;
+                throw new RuntimeException("JOB_NOT_FOUND");
             }
 
             CronTrigger newTrigger = newTrigger()
@@ -104,7 +101,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         final String jobName = getJobName(scheduler);
         final JobKey jobKey = new JobKey(jobName, "connection");
 
-        TriggerKey triggerKey = new TriggerKey("FIRES_ONCE-" + scheduler.getId(), String.valueOf(scheduler.getConnection().getId()));
+        TriggerKey triggerKey = new TriggerKey("FIRES_ONCE-" + System.currentTimeMillis() + "-" + scheduler.getId(), String.valueOf(scheduler.getConnection().getId()));
         Trigger trigger = newTrigger()
                 .forJob(jobKey)
                 .withIdentity(triggerKey)
@@ -138,7 +135,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         JobKey jobKey = new JobKey(jobName, "connection");
         try {
             if (!quartzScheduler.checkExists(jobKey))
-                return;
+                throw new RuntimeException("JOB_NOT_FOUND");
             quartzScheduler.resumeJob(jobKey);
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
@@ -151,7 +148,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         JobKey jobKey = new JobKey(jobName, "connection");
         try {
             if (!quartzScheduler.checkExists(jobKey))
-                return;
+                throw new RuntimeException("JOB_NOT_FOUND");
             quartzScheduler.pauseJob(jobKey);
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
@@ -165,7 +162,8 @@ public class QuartzJobScheduler implements SchedulingStrategy {
                     .stream()
                     .map(JobExecutionContext::getJobDetail)
                     .map(JobDetail::getKey)
-                    .collect(Collectors.toMap(e -> Integer.parseInt(e.getName().split("-")[0]), e -> Long.valueOf(e.getName().split("-")[1])));
+                    .collect(Collectors.toMap(e ->
+                            Integer.parseInt(e.getName().split("-")[0]), e -> Long.valueOf(e.getName().split("-")[1])));
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }
@@ -194,7 +192,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         SCHEDULER, WEBHOOK
     }
 
-    static class ScheduleData implements Serializable {
+    public static class ScheduleData implements Serializable {
         private int scheduleId;
         private TriggerType execType;
 
