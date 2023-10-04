@@ -24,6 +24,7 @@ import { TextSize } from '@app_component/base/text/interfaces';
 import { toggleDetails } from '@root/redux_toolkit/slices/ConnectionSlice';
 import { toggleModalDetails } from '@root/redux_toolkit/slices/ModalConnectionSlice';
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import TestMethodButton from './test_method/TestMethodButton';
 
 function mapStateToProps(state, props) {
   const { currentTechnicalItem, connection, connectionOverview } = mapItemsToClasses(state, props.isModal);
@@ -84,14 +85,17 @@ class Details extends React.Component {
         <div className={styles.details_data}>
           <div className={styles.title}>Details</div>
           {details ? (
-            <div className={styles.label}>
-              <Description
-                ref={this.descriptionRef}
-                readOnly={readOnly}
-                details={details}
-                updateConnection={updateConnection}
-              />
-            </div>
+            <React.Fragment>
+              <div className={styles.label}>
+                <Description
+                  ref={this.descriptionRef}
+                  readOnly={readOnly}
+                  details={details}
+                  updateConnection={updateConnection}
+                />
+              </div>
+              <TestMethodButton connection={connection}/> 
+            </React.Fragment>
           ) : (
             <div>{'There is no selected item'}</div>
           )}

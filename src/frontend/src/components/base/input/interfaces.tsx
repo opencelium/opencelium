@@ -91,6 +91,8 @@ interface ElementProps{
     paddingLeftInput?: string,
     paddingRightInput?: string,
     height?: any,
+    position?: any,
+    zIndex?: number
 }
 
 interface InputStyledProps{

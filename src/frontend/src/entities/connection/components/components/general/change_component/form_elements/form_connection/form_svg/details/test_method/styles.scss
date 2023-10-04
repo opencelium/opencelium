@@ -1,0 +1,26 @@
+.testMethod_dialog{
+  min-width: 80%;
+}
+
+.testMethod_title{
+  font-weight: normal !important;
+}
+
+.testMethod_title h5 span::before{
+  content: "Test ";
+  font-weight: normal;
+}
+
+.testMethod_title h5 span::after{
+  content: " method";
+  font-weight: normal;
+}
+
+.test_method_json{
+  background-color: #000;
+}
+
+.testMethodButton{
+  display: flex !important;
+  margin: 0 0 0 auto !important;
+}
