@@ -58,7 +58,6 @@ const TestMethodDialogForm = (props: any) => {
   const [ requestBodyData, setRequestBodyData ] = useState(currentTechnicalItem.entity.request.body?.fields || {});
   const [ errorMessage, setErrorMessage ] = useState('');
   const {remoteApiData, requestingRemoteApi } = useAppSelector(state => state.connectionEditorReducer);
-  console.log(requestingRemoteApi)
   
   const responseHeaderData = remoteApiData?.headers ? remoteApiData?.headers : null;
   const responseBodyData = remoteApiData?.body ? JSON.parse(remoteApiData?.body) : null;

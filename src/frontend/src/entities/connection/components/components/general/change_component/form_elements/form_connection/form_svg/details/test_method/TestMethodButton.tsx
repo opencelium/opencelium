@@ -1,8 +1,10 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Button from "@app_component/base/button/Button";
 import Dialog from "@app_component/base/dialog/Dialog";
 import { Connection } from "@entity/connection/classes/Connection";
 import TestMethodDialogForm from "./TestMethodDialogForm";
+import { clearRemoteApiData } from "@entity/connection/redux_toolkit/slices/EditorSlice";
+import { useAppDispatch } from "@application/utils/store";
 
 //@ts-ignore
 import styles from './styles.scss';
@@ -11,10 +13,17 @@ const TestMethodButton = (props: any) => {
   const { connection } = props;
   const { currentTechnicalItem } = Connection.getReduxState();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const dispatch = useAppDispatch();
 
   const setShowDialog = () => {
     setIsDialogOpen(!isDialogOpen);
   }
+
+  useEffect(() => {
+    if(isDialogOpen){
+      dispatch(clearRemoteApiData())
+    }
+  }, [isDialogOpen])
 
   return (
     <React.Fragment>
@@ -36,7 +45,7 @@ const TestMethodButton = (props: any) => {
           }}
           dialogClassname={`${styles.testMethod_dialog}`}
         >
-          <TestMethodDialogForm connection={connection}/>
+          <TestMethodDialogForm connection={connection} isDialogOpen={isDialogOpen}/>
         </Dialog>
     </React.Fragment>
   )

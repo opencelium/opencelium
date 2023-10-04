@@ -57,6 +57,10 @@ export const connectionEditorSlice = createSlice({
         },
         syncInvokers: (state) => {
 
+        },
+        clearRemoteApiData: (state) => {
+            state.remoteApiData = null;
+            state.requestingRemoteApi = API_REQUEST_STATE.INITIAL;
         }
     },
     extraReducers: {
@@ -79,7 +83,7 @@ export const connectionEditorSlice = createSlice({
 export const {
     toggleRequestBodyDialog, toggleResponseSuccessBodyDialog,
     toggleResponseFailBodyDialog, toggleConditionDialog,
-    syncInvokers,
+    syncInvokers, clearRemoteApiData
 } = connectionEditorSlice.actions;
 
 export default connectionEditorSlice.reducer;
