@@ -8,7 +8,7 @@ public class OperationAndContainerSetter {
         this.operation = operation;
     }
 
-    public RequestBuilder usingContainer(ResponseContainer container) {
-        return new RequestBuilder(operation, container);
+    public RequestEntityBuilder usingContainer(ResponseContainer container) {
+        return new RequestEntityBuilder(operation, container);
     }
 }
