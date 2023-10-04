@@ -22,6 +22,7 @@ const TestMethodButton = (props: any) => {
         isDisabled={false}
         label={'Test Method'}
         handleClick={() => setShowDialog()}
+        className={styles.openTestMethodDialogButton}
       />
       <Dialog
           actions={[

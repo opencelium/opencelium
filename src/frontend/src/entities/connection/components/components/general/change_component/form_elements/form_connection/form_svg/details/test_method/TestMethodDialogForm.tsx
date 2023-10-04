@@ -5,11 +5,12 @@ import { Connection } from "@entity/connection/classes/Connection";
 import Button from "@app_component/base/button/Button";
 import InputJsonView from "@app_component/base/input/json_view/InputJsonView";
 import { useAppDispatch, useAppSelector } from "@application/utils/store";
-import { requestRemoteApi } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
+import { requestRemoteApi } from "@entity/connection/redux_toolkit/action_creators/EditorCreators";
 import { RemoteApiRequestProps } from "@application/requests/interfaces/IApplication";
 import { Connector } from "@entity/connector/classes/Connector";
 //@ts-ignore
 import styles from './styles.scss';
+import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
 
 function replacePlaceholdersInUrl(inputString: any, replacementObject: any) {
   return inputString.replace(/\{([^{}]+)\}/g, (match: any, placeholderName: any) => {
@@ -48,8 +49,6 @@ const TestMethodDialogForm = (props: any) => {
     }
   })
 
-  console.log(requestData)
-
   let endpoint = replacePlaceholdersInUrl(currentTechnicalItem.entity.request.endpoint, requestData);
 
   const method = currentTechnicalItem.entity.request.method;
@@ -58,11 +57,11 @@ const TestMethodDialogForm = (props: any) => {
   const [ requestHeaderData, setRequestHeaderData ] = useState(currentTechnicalItem.entity.request.header);
   const [ requestBodyData, setRequestBodyData ] = useState(currentTechnicalItem.entity.request.body?.fields || {});
   const [ errorMessage, setErrorMessage ] = useState('');
-  const {remoteApiData} = useAppSelector(state => state.connectionEditorReducer);
-  console.log(remoteApiData?.headers)
-
+  const {remoteApiData, requestingRemoteApi } = useAppSelector(state => state.connectionEditorReducer);
+  console.log(requestingRemoteApi)
+  
   const responseHeaderData = remoteApiData?.headers ? remoteApiData?.headers : null;
-  const responseBodyData = remoteApiData?.body ? remoteApiData?.body : null;
+  const responseBodyData = remoteApiData?.body ? JSON.parse(remoteApiData?.body) : null;
  
   const testMethod = () => {
     const placeholders = findPlaceholders(dataState.url);
@@ -70,7 +69,6 @@ const TestMethodDialogForm = (props: any) => {
       setErrorMessage(`Change the placeholders (${placeholders.join(', ')}) and try again`)
     }
     else{
-      console.log(dataState);
       setErrorMessage('');
       dispatch(requestRemoteApi(dataState))
     }
@@ -149,6 +147,8 @@ const TestMethodDialogForm = (props: any) => {
             icon={'play_arrow'}
             handleClick={() => testMethod()}
             className={styles.testMethodButton}
+            isLoading={requestingRemoteApi === API_REQUEST_STATE.START}
+            isDisabled={requestingRemoteApi === API_REQUEST_STATE.START}
           />
         </TestMethodFormContainer>
         <TestMethodFormDivider/>

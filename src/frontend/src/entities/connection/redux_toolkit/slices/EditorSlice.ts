@@ -14,18 +14,29 @@
  */
 
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import { requestRemoteApi } from "../action_creators/EditorCreators";
+import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
+import { RemoteApiResponseProps } from "@application/requests/interfaces/IApplication";
+import { ICommonState } from "@application/interfaces/core";
+import { CommonState } from "@application/utils/store";
+import { IResponse } from "@application/requests/interfaces/IResponse";
 
-export interface ConnectionEditorState{
+export interface ConnectionEditorState extends ICommonState{
+    requestingRemoteApi: API_REQUEST_STATE,
+    remoteApiData: RemoteApiResponseProps,
     isRequestBodyDialogOpened: boolean,
     isResponseSuccessDialogOpened: boolean,
     isResponseFailDialogOpened: boolean,
     isConditionDialogOpened: boolean,
 }
 const initialState: ConnectionEditorState = {
+    requestingRemoteApi: API_REQUEST_STATE.INITIAL,
+    remoteApiData: null,
     isRequestBodyDialogOpened: false,
     isResponseSuccessDialogOpened: false,
     isResponseFailDialogOpened: false,
     isConditionDialogOpened: false,
+    ...CommonState,
 }
 
 export const connectionEditorSlice = createSlice({
@@ -48,6 +59,21 @@ export const connectionEditorSlice = createSlice({
 
         }
     },
+    extraReducers: {
+        [requestRemoteApi.pending.type]: (state) => {
+            state.requestingRemoteApi = API_REQUEST_STATE.START;
+            state.remoteApiData = null;
+        },
+        [requestRemoteApi.fulfilled.type]: (state, action: PayloadAction<RemoteApiResponseProps>) => {
+            state.requestingRemoteApi = API_REQUEST_STATE.FINISH;
+            state.remoteApiData = action.payload;
+            state.error = null;
+        },
+        [requestRemoteApi.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.requestingRemoteApi = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+    }
 })
 
 export const {

@@ -16,6 +16,7 @@
 import ActionCreators from "../../redux_toolkit/action_creators";
 import {getAndUpdateConnection} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import { syncInvokers } from "@entity/connection/redux_toolkit/slices/EditorSlice";
+import { requestRemoteApi } from "@entity/connection/redux_toolkit/action_creators/EditorCreators";
 
 const {testConnection, addConnection, updateConnection, deleteConnectionById, deleteConnectionsById, getConnectionById, getAllMetaConnections, getAllConnections, checkConnectionTitle, graphQLLogin} = ActionCreators;
 
@@ -28,8 +29,12 @@ export default {
         [deleteConnectionById.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully removed",
         [deleteConnectionsById.fulfilled.type]: "The selected connections were successfully removed",
         [syncInvokers.type]: "Synchronized successfully",
+        [requestRemoteApi.fulfilled.type]: "The test request was successfully fulfilled",
     },
     rejected: {
+        [requestRemoteApi.rejected.type]: {
+            "__DEFAULT__": "There is an error during the test of the method"
+        },
         [testConnection.rejected.type]: {
             "__DEFAULT__": "There is an error in during the test of the connection"
         },
