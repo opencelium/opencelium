@@ -98,14 +98,13 @@ const HelpBlock = () => {
     const refs: any = {};
     refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
+    await AdditionalFunctions.delay(reference.current)
     if(refs.animationData.delete){
-      await AdditionalFunctions.delay(reference.current)
       await details.deleteOperator(reference.current);
     }
     else{
       if(condition){
         const conditionRef = RefFunctions.getCondition(ref);
-        await AdditionalFunctions.delay(reference.current)
         await details.openConditionDialog(reference.current);
 
         await details.changeLeftMethod(reference.current);
@@ -148,14 +147,13 @@ const HelpBlock = () => {
 
     refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
+    await AdditionalFunctions.delay(reference.current)
     if(refs.animationData.delete){
-      await AdditionalFunctions.delay(reference.current)
       await details.deleteOperator(reference.current);
     }
     else{
       if(condition){
         const conditionRef = RefFunctions.getCondition(ref);
-        await AdditionalFunctions.delay(reference.current)
         await details.openConditionDialog(reference.current);
 
         await details.changeLeftMethod(reference.current);
@@ -177,20 +175,22 @@ const HelpBlock = () => {
     }
   }
 
-  const showDetailsForProcess = async () => {
+  const showDetailsForProcess = async (connectorPanelType: ConnectorPanelType) => {
     const refs: any = {};
+
+    const initialConnection = animationData[videoAnimationName].initialConnection;
+    const hasInitialConnection = (!!initialConnection && connectorPanelType === 'fromConnector');
 
     refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     refs.endpointData = refs.animationData.endpoint;
     refs.currentElementId = refs.animationData.index;
     const details = new DetailsForProcess(ref, setPopoverProps, refs.animationData);
+    await AdditionalFunctions.delay(reference.current)
     if(refs.animationData.delete){
-      await AdditionalFunctions.delay(reference.current)
       await details.deleteProcess(reference.current);
     }
     else{
       if(refs.animationData.label){
-        await AdditionalFunctions.delay(reference.current)
         await details.startEditLabel(reference.current);
 
         await details.endEditLabel(reference.current);
@@ -208,7 +208,7 @@ const HelpBlock = () => {
         await details.closeUrlDialog(reference.current);
       }
 
-      if(connectorType === 'fromConnector' && index === 0){
+      if(connectorType === 'fromConnector' && index === 0 && !hasInitialConnection){
         await details.openHeaderDialog(reference.current);
 
         await details.closeHeaderDialog(reference.current);
@@ -296,7 +296,7 @@ const HelpBlock = () => {
         await details.closeBodyDialog(reference.current);
       }
 
-      if(connectorType === 'fromConnector' && index === 0){
+      if(connectorType === 'fromConnector' && index === 0 && !hasInitialConnection){
         await details.showResponse(reference.current);
       }
     }
@@ -315,7 +315,7 @@ const HelpBlock = () => {
     const type = animationData[videoAnimationName][connectorPanelType].items[index].type;
     const name = animationData[videoAnimationName][connectorPanelType].items[index].name;
     const label = animationData[videoAnimationName][connectorPanelType].items[index].label;
-    const prevElementType = animationData[videoAnimationName][connectorPanelType].items[index > 0 ? index - 1 : index].type;
+    const prevElementType = hasInitialConnection ? 'process' : animationData[videoAnimationName][connectorPanelType].items[index > 0 ? index - 1 : index].type;
     const fromConnectorPanelRef = RefFunctions.getFromConnectorPanel(ref);
     const toConnectorPanelRef = RefFunctions.getToConnectorPanel(ref);
 
@@ -361,12 +361,13 @@ const HelpBlock = () => {
 
     animationSteps.setFocusOnCurrentElement();
 
-    const currentSvgElementId = `${connectorType}__${connectorType}_${currentElementId}${type === "process" ? "__" + name : ''}`
+    const currentSvgElementId = `${connectorType}__${connectorType}_${currentElementId}${type === "process" ? "__" + name : ''}`;
+    console.log(currentSvgElementId)
 
     AdditionalFunctions.setSvgViewBox({elementId: 'modal_technical_layout_svg', currentSvgElementId, connectorType});
 
     if(index >= 0 && name !=='if' && name !== 'loop'){
-      await showDetailsForProcess();
+      await showDetailsForProcess(connectorPanelType);
     }
     if(name === 'if'){
       // @ts-ignore
