@@ -5,7 +5,7 @@ import { Col, Row } from "reactstrap";
 // @ts-ignore
 import styles from "./styles.scss"
 
-const Shortcuts = () => { 
+const Shortcuts = () => {
 
   const getKeys = (data: any) => {
     return data.map((item: any, index: any) => (
@@ -18,15 +18,15 @@ const Shortcuts = () => {
       <Col xs={4} className={styles.col}>
         {getKeys(shortcut.keys).reduce((prev:any, curr:any, index:any) => [prev, index > 0 && ' + ', curr])}
       </Col>
-      <Col xs={7}>{shortcut.description}</Col>
+      <Col xs={7} className={styles.col}>{shortcut.description}</Col>
     </React.Fragment>
   })
 
   return (
     <React.Fragment>
       <Row style={{gap: '20px'}}>
-        <Col xs={4}>Command</Col>
-        <Col xs={7}>Description</Col>
+        <Col xs={4} className={styles.header}>Command</Col>
+        <Col xs={7} className={styles.header}>Description</Col>
         {renderShortcuts}
       </Row>
     </React.Fragment>
