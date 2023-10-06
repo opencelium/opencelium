@@ -16,16 +16,17 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.util.List;
 
 @Document(collection = "connection")
 public class ConnectionMng {
-    @Id
+    @MongoId(targetType = FieldType.OBJECT_ID)
     private String id; // id generated in mongodb
     @Field(name = "connection_id")
     @Indexed

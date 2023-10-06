@@ -1,11 +1,12 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.util.List;
 
 public class DataAggregatorMng {
-    @Id
+    @MongoId(targetType = FieldType.OBJECT_ID)
     private String id;
     private String name;
     private List<ArgumentMng> args;
