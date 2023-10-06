@@ -1,0 +1,38 @@
+
+.col {
+  padding: 0 !important;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.testMethod_icon {
+  color: #c0c0c5;
+  cursor: pointer;
+  padding: 2px;
+  margin-left: 2px;
+}
+.testMethod_icon:hover {
+  color: #444b4c;
+  padding: 2px;
+  box-shadow: #9f9f9f 0 1px 3px 0;
+}
+.testMethod_dialog{
+  min-width: 80%;
+}
+
+
+.test_method_json{
+  background-color: #000;
+}
+
+.testMethodButton{
+  display: flex !important;
+  margin: 0 0 0 auto !important;
+}
+
+.openTestMethodDialogButton{
+  margin: 20px auto 0 !important;
+  display: flex !important;
+  padding: 8px 50px !important;
+}
