@@ -23,8 +23,11 @@ export default class DetailsForOperators {
       const conditionRef = RefFunctions.getCondition(this.ref);
       if(conditionRef){
         conditionRef.toggleEdit();
-  
+        AdditionalFunctions.addOutlineById(["condition_name", "condition_label"]);
+
         await AdditionalFunctions.delay(animationSpeed);
+
+        AdditionalFunctions.removeOutlineById(["condition_name", "condition_label"]);
       }
     }
     catch(error){}
@@ -45,7 +48,6 @@ export default class DetailsForOperators {
               return;
             }
           });
-    
           leftStatementRef.updateMethod(leftMethod);
     
           await AdditionalFunctions.delay(animationSpeed);
@@ -169,7 +171,7 @@ export default class DetailsForOperators {
               return;
             }
           })
-    
+          
           rightStatementRef.updateMethod(rightMethod);
     
           await AdditionalFunctions.delay(animationSpeed);

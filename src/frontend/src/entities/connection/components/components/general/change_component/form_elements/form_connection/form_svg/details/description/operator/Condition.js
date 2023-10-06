@@ -348,7 +348,7 @@ class Condition extends React.Component{
         const errorMessages = connector ? connector.getOperatorByIndex(operator.index)?.error?.messages || [] : [];
         return(
             <React.Fragment>
-                <Col xs={4} className={styles.col} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{`Condition`}</Col>
+                <Col id='condition_name' xs={4} className={styles.col} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{`Condition`}</Col>
                 <Col id="condition_label" xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
                     <span className={styles.value} title={conditionTextTitle} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{conditionText}</span>
                     {isMouseOver && !isConditionDialogOpened && !readOnly && <EditIcon onClick={(a) => this.toggleEdit(a)}/>}

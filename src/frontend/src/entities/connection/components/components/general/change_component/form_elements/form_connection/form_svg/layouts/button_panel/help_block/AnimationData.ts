@@ -5,217 +5,8 @@ import {
 
 
 const animationData: IAnimationData = {
-  firstSteps: {
+  apiMethods: {
     fromConnector: {
-      invoker: {
-        name: 'trello'
-      },
-      items: [
-        {
-          index: "0",
-          type: "process",
-          name: "GetBoards",
-          label: "first process",
-          scripts: [
-            {
-              functionId: "startEditLabel",
-              text: "edit label",
-            },
-            {
-              functionId: "openHeaderDialog",
-              text: "open header dialog",
-            },
-            {
-              functionId: "showPopoverForOpenBodyDialog",
-              text: "open body dialog",
-            },
-            {
-              functionId: "openBodyObject",
-              text: "open body object",
-            },
-            {
-              functionId: "displayBodyAddKeysButton",
-              text: "click add keys button",
-            },
-            {
-              functionId: "addBodyKeyValue",
-              text: "add body key value",
-            },
-            {
-              functionId: "clickSubmitButtonToAddValue",
-              text: "click submit button to add value",
-            },
-            {
-              functionId: "showResponse",
-              text: "show response",
-            },
-          ],
-          body: [
-            {
-              keyName: "firstKeyName",
-              keyValue: "firstKeyValue",
-            },
-            {
-              keyName: "secondKeyName",
-              keyValue: "secondKeyValue",
-            },
-          ]
-        },
-        {
-          index: "1",
-          type: "operator",
-          name: "if",
-          scripts: [
-            {
-              functionId: "showPopoverForCreateElement",
-              text: "click to add operator",
-            },
-            {
-              functionId: "openConditionDialog",
-              text: "open condition dialog",
-            },
-            {
-              functionId: "changeLeftMethod",
-              text: "change left method",
-            },
-            {
-              functionId: "setFocusOnLeftParam",
-              text: "change left param",
-            },
-            {
-              functionId: "changeRelationalOperator",
-              text: "change relational operator",
-            },
-            {
-              functionId: "setFocusOnRightProperty",
-              text: "change property",
-            },
-            {
-              functionId: "changeRightMethod",
-              text: "change right method",
-            },
-            {
-              functionId: "setFocusOnRightParam",
-              text: "change right param",
-            },
-          ],
-          conditionForIf: {
-            leftStatement: {
-              fromConnector: "fromConnector",
-              leftMethodIndex: "0",
-              leftParam: '[0].ifLeftParam',
-            },
-            relationalOperator: "Contains",
-            rightStatement: {
-              fromConnector: "fromConnector",
-              property: 'id',
-              rightMethodIndex: '0',
-              rightParam: '[0].ifRightParam',
-            }
-          }
-        },
-      ]
-    },
-    toConnector: {
-      invoker: {
-        name: 'trello'
-      },
-      items: [
-        {
-          index: "0",
-          type: "process",
-          name: "GetBoardList",
-          label: "with reference",
-          scripts: [
-            {
-              functionId: "addBodyKeyValue",
-              text: "###",
-            },
-            {
-              functionId: "changeBodyMethod",
-              text: "change body method",
-            },
-            {
-              functionId: "changeBodyParam",
-              text: "change body param",
-            },
-            {
-              functionId: "addBodyMethodAndParam",
-              text: "add body method and param",
-            },
-            {
-              functionId: "clickOnReferenceElements",
-              text: "click on reference elements",
-            },
-            {
-              functionId: "changeReferenceDescription",
-              text: "change reference description",
-            },
-            {
-              functionId: "changeReferenceContent",
-              text: "change reference content",
-            },
-          ],
-          body: [
-            {
-              keyName: "firstKeyName",
-              keyValue: "#",
-              reference: [
-                {
-                  method: [
-                    {
-                      fromConnector: "fromConnector",
-                      index: "0",
-                      param: "[0].firstParam",
-                    },
-                    {
-                      fromConnector: "fromConnector",
-                      index: "0",
-                      param: "[0].secondParam",
-                    },
-                  ],
-                  enhancementDescription: "first reference description",
-                  enhancementContent: "RESULT_VAR = VAR_0; var TEST_VAR = RESULT_VAR;\nvar SECOND_LINE = 'some text';"
-                },
-              ]
-            },
-          ]
-        },
-        {
-          index: "1",
-          type: "process",
-          name: "GetBoards",
-          label: "with endpoint",
-          scripts: [
-            {
-              functionId: "deleteLastProcess",
-              text: "delete last process",
-            },
-            {
-              functionId: "showPopoverForCreateElement",
-              text: "click to add process",
-            }
-          ],
-          endpoint: {index: "0", param: "[0]", connectorType: "toConnector"}
-        },
-      ],
-    }
-  },
-  configureAPI: {
-    fromConnector: {
-      invoker: {
-        name: 'otrs',
-      },
-      items: [
-        {
-          index: "2",
-          type: "process",
-          name: "ServiceGet",
-          delete: false,
-        },
-      ]
-    },
-    toConnector: {
       invoker: {
         name: 'otrs'
       },
@@ -223,14 +14,84 @@ const animationData: IAnimationData = {
         {
           index: "0",
           type: "process",
-          name: "LinkDelete",
-          delete: false,
+          name: "TicketSearch",
+        },
+        {
+          index: "1",
+          type: "process",
+          name: "TicketGet",
+          label: 'Label'
         },
       ]
     },
-    initialConnection: configureAPIInitialConnection,
+    toConnector: {
+      invoker: {
+        name: 'otrs'
+      },
+      items: [],
+    }
   },
-  usingOperators: {
+  operators: {
+    fromConnector: {
+      invoker: {
+        name: 'otrs',
+      },
+      items: [
+        {
+          index: "0",
+          type: "process",
+          name: "TicketSearch",
+          label: 'Label'
+        },
+        {
+          index: "1",
+          type: "operator",
+          name: "loop",
+          conditionForLoop: {
+            leftStatement: {
+              fromConnector: "fromConnector",
+              leftMethodIndex: '0',
+              leftParam: '[0].id'
+            },
+            relationalOperator: "SplitString",
+            rightStatement: {
+              fromConnector: "fromConnector",
+              rightMethodIndex: '0',
+              rightParam: '[0].name'
+            }
+          }
+        },
+        {
+          index: "1_0",
+          type: "operator",
+          name: "if",
+          toDown: true,
+          conditionForIf: {
+            leftStatement: {
+              fromConnector: "fromConnector",
+              leftMethodIndex: '0',
+              leftParam: '[0].id'
+            },
+            relationalOperator: "Contains",
+            rightStatement: {
+              fromConnector: "fromConnector",
+              property: 'id',
+              rightMethodIndex: '0',
+              rightParam: '[0].name'
+            }
+          }
+        },
+        
+      ]
+    },
+    toConnector: {
+      invoker: {
+        name: 'otrs'
+      },
+      items: []
+    },
+  },
+  fieldMapping: {
     fromConnector: {
       invoker: {
         name: 'otrs',
@@ -240,7 +101,17 @@ const animationData: IAnimationData = {
           index: "0",
           type: "process",
           name: "LinkCreate",
-          delete: false,
+          body: [
+            {
+              keyName: 'SourceObject',
+              keyValue: "key value",
+              available: true
+            },
+            {
+              keyName: 'additionalKeyName',
+              keyValue: "additional key value",
+            },
+          ]
         },
 
       ]
@@ -251,19 +122,23 @@ const animationData: IAnimationData = {
       },
       items: [
       ]
-    },
+    }
   },
-  loremIpsum: {
+  enhancement: {
     fromConnector: {
       invoker: {
         name: 'otrs',
       },
       items: [
         {
-          index: "0",
+          index: "2",
           type: "process",
           name: "LinkList",
-          delete: false,
+          endpoint: {
+            connectorType: "fromConnector",
+            index: '1',
+            param: '[0].id'
+          }
         },
       ]
     },
@@ -272,8 +147,34 @@ const animationData: IAnimationData = {
         name: 'otrs'
       },
       items: [
+        {
+          index: "0",
+          type: "process",
+          name: "LinkList",
+          body: [
+            {
+              keyName: 'State',
+              keyValue: '#',
+              available: true,
+              reference: [
+                {
+                  method: [
+                    {
+                      fromConnector: "fromConnector",
+                      index: '1',
+                      param: '[0].id'
+                    }
+                  ],
+                  enhancementDescription: "reference description",
+                  enhancementContent: "RESULT_VAR = VAR_0; var TEST_VAR = RESULT_VAR;\nvar SECOND_LINE = 'some text';"
+                }
+              ]
+            }
+          ]
+        },
       ]
     },
+    initialConnection: configureAPIInitialConnection,
   },
 };
 
