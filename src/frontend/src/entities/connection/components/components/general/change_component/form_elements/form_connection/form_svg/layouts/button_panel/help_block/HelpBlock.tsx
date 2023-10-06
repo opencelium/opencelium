@@ -49,6 +49,7 @@ import Loading from "@app_component/base/loading/Loading";
 import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
 import SyncInvokers from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_methods/SyncInvokers";
 import RefFunctions from "./classes/RefFunctions";
+import Shortcuts from "./shortcuts/Shortcuts";
 
 
 const prepareConnection = (connection: any, connectors: any, invokers: any) => {
@@ -469,6 +470,8 @@ const HelpBlock = () => {
     setAnimationProps({...animationProps, connection: updatedEntity});
   }
 
+  const [isShorcutsDialogOpened, setIsShorcutsDialogOpened] = useState(false);
+
   return (
     <HelpBlockStyled isButtonPanelOpened={isButtonPanelOpened}>
       <div style={{ display: "flex", gap: "15px" }}>
@@ -565,8 +568,21 @@ const HelpBlock = () => {
           background={ColorTheme.White}
           color={ColorTheme.Gray}
           padding="2px"
-          handleClick={() => {console.log('shortcuts')}}
+          handleClick={() => setIsShorcutsDialogOpened(!isShorcutsDialogOpened)}
         />
+        <Dialog
+          actions={[
+            {id: 'shortcutsDialog', label: 'Ok', onClick: () => setIsShorcutsDialogOpened(!isShorcutsDialogOpened)}
+          ]}
+          active={isShorcutsDialogOpened}
+          toggle={() => setIsShorcutsDialogOpened(!isShorcutsDialogOpened)}
+          title={"Shortcuts"}
+          dialogClassname={styles.shortcutsDialog}
+        >
+          <React.Fragment>
+            <Shortcuts/>
+          </React.Fragment>
+        </Dialog>
       </div>
     </HelpBlockStyled>
   );
