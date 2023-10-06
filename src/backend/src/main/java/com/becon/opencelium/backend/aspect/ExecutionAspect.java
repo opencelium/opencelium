@@ -177,9 +177,14 @@ public class ExecutionAspect {
         long exId = Math.max(le.getFailExecutionId(), le.getSuccessExecutionId());
         Execution execution = executionServiceImp.findById(exId).orElse(null);
         Objects.requireNonNull(execution);
-        return execution.getExecutionArguments().stream()
-                .filter(ea -> indexes.contains(ea.getArgument().getId()))
-                .collect(Collectors.toMap(ea -> Long.toString(ea.getArgument().getId()), ExecutionArgument::getValue));
+        Map<String, String> resultMap = execution.getExecutionArguments().stream()
+                    .filter(ea -> indexes.contains(ea.getArgument().getId()))
+                    .collect(Collectors.toMap(ea -> Long.toString(ea.getArgument().getId()), ExecutionArgument::getValue));
+
+        indexes.stream()
+                .filter(id -> !resultMap.containsKey(Long.toString(id)))
+                .forEach(id -> resultMap.put(Long.toString(id), "NOT_AVAILABLE"));
+        return resultMap;
     }
 
     private List<String> getConstants(String text, String regex) {

@@ -1,11 +1,13 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.enums.LangEnum;
+import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
 import com.becon.opencelium.backend.mysql.entity.EventContent;
 import com.becon.opencelium.backend.mysql.entity.EventMessage;
 import com.becon.opencelium.backend.mysql.service.ContentServiceImpl;
 import com.becon.opencelium.backend.mysql.service.MessageServiceImpl;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.LanguageDTO;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
@@ -22,6 +24,7 @@ import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -218,4 +221,22 @@ public class MessageController {
         return ResponseEntity.ok().body(body);
     }
 
+    @Operation(summary = "Retrieves list of supported tools like email, teams, slack, etc...")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Returns array that contains string values like \"result\": [\"email\", \"slack\"]",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/all/tools")
+    public ResponseEntity<?> getTools() throws Exception{
+        List<String> notifyTools = Arrays.stream(NotifyTool.values()).map(Enum::toString).toList();
+        ResultDTO<List<String>> resultDTO = new ResultDTO<>(notifyTools);
+        return ResponseEntity.ok(resultDTO);
+    }
 }
