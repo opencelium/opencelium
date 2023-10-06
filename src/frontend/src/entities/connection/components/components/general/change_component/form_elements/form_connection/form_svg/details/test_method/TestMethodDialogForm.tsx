@@ -11,7 +11,8 @@ import { Connector } from "@entity/connector/classes/Connector";
 //@ts-ignore
 import styles from './styles.scss';
 import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
-
+import {setFocusById} from "@application/utils/utils";
+/*
 function replacePlaceholdersInUrl(inputString: any, replacementObject: any) {
   return inputString.replace(/\{([^{}]+)\}/g, (match: any, placeholderName: any) => {
     if (replacementObject.hasOwnProperty(placeholderName) && replacementObject[placeholderName]) {
@@ -20,11 +21,25 @@ function replacePlaceholdersInUrl(inputString: any, replacementObject: any) {
       return match;
     }
   });
+}*/
+function replacePlaceholdersInUrl(inputString: string) {
+  const referenceRegExp = /\{\%\#[0-9a-fA-F]{6}\.\((request|response)\)\.[^\%\}]*\%\}/g;
+  return inputString.replace(referenceRegExp, (match: any, placeholderName: any) => {
+      return `{REFERENCE}`;
+  });
 }
-
-function findPlaceholders(inputString: any) {
+function removeReferencesInBody(body: any) {
+  const referenceRegExp = /\"\#[0-9a-fA-F]{6}\.\((request|response)\)\.[^\"]*\"/g;
+  return JSON.parse(JSON.stringify(body).replace(referenceRegExp, (match: any, placeholderName: any) => {
+    return `""`;
+  }));
+}
+function findPlaceholders(inputString: string) {
+  return inputString.indexOf('{REFERENCE}') !== -1;
+}
+/*function findPlaceholders(inputString: any) {
   const placeholderRegex = /\{([^}]+)\}/g;
-  
+
   const matches = inputString.match(placeholderRegex);
 
   if (matches) {
@@ -33,7 +48,7 @@ function findPlaceholders(inputString: any) {
   } else {
     return false;
   }
-}
+}*/
 
 const TestMethodDialogForm = (props: any) => {
 
@@ -49,30 +64,31 @@ const TestMethodDialogForm = (props: any) => {
     }
   })
 
-  let endpoint = replacePlaceholdersInUrl(currentTechnicalItem.entity.request.endpoint, requestData);
-
+  let endpoint = replacePlaceholdersInUrl(currentTechnicalItem.entity.request.endpoint);
+  const bodyFields = removeReferencesInBody(currentTechnicalItem.entity.request.body?.fields || {});
   const method = currentTechnicalItem.entity.request.method;
   const [ dataState, setDataState ] = useState<RemoteApiRequestProps>({url: '', header: {}, method, body: {}});
   const [ endpointValue, setEndpointValue ] = useState(endpoint);
   const [ requestHeaderData, setRequestHeaderData ] = useState(currentTechnicalItem.entity.request.header);
-  const [ requestBodyData, setRequestBodyData ] = useState(currentTechnicalItem.entity.request.body?.fields || {});
+  const [ requestBodyData, setRequestBodyData ] = useState(bodyFields);
   const [ errorMessage, setErrorMessage ] = useState('');
   const {remoteApiData, requestingRemoteApi } = useAppSelector(state => state.connectionEditorReducer);
-  
+
   const responseHeaderData = remoteApiData?.headers ? remoteApiData?.headers : null;
   const responseBodyData = remoteApiData?.body ? JSON.parse(remoteApiData?.body) : null;
- 
+
   const testMethod = () => {
     const placeholders = findPlaceholders(dataState.url);
     if(placeholders){
-      setErrorMessage(`Change the placeholders (${placeholders.join(', ')}) and try again`)
+      setErrorMessage(`Please, correct the references and try again`)
+      setFocusById('input_test_method_endpoint');
     }
     else{
       setErrorMessage('');
       dispatch(requestRemoteApi(dataState))
     }
   }
- 
+
   useEffect(() => {
     setDataState({
       url: endpointValue,
@@ -104,7 +120,10 @@ const TestMethodDialogForm = (props: any) => {
             icon={'http'}
             label={'Endpoint'}
             value={endpointValue}
-            onChange={(e) => setEndpointValue(e.target.value)}
+            onChange={(e) => {
+              setErrorMessage('');
+              setEndpointValue(e.target.value);
+            }}
             error={errorMessage}
           />
           <InputText
@@ -142,7 +161,7 @@ const TestMethodDialogForm = (props: any) => {
             hasEdit={false}
           />
           <Button
-            label={'Test'}
+            label={'Send'}
             icon={'play_arrow'}
             handleClick={() => testMethod()}
             className={styles.testMethodButton}
