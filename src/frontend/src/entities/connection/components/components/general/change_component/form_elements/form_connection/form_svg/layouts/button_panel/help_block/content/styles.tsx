@@ -31,7 +31,7 @@ const ContentStyled = styled.div<ContentStyledProps>`
   align-items: flex-end;
 
   ${props => !props.isPreviewPanelOpened && `
-    padding: 0;
+    padding: 0 !important;
 
     & > div{
       display: none;
@@ -52,7 +52,7 @@ const ContentStyled = styled.div<ContentStyledProps>`
     margin: 0 40px;
     width: 2px;
     background: #d2d2d3;
-    height: 384px;
+    align-self: stretch;
 
     @media (max-width: 1600px) {
       margin: 0 15px;
@@ -60,7 +60,7 @@ const ContentStyled = styled.div<ContentStyledProps>`
   }
 
   @media (max-width: 1600px) {
-    padding: 15px;
+    padding: 40px 15px 15px;
   }
 `;
 

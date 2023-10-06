@@ -63,7 +63,7 @@ class Invokers extends ListCollection<InvokerProps>{
     };
     getListActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
         const hasDeleteButton = !this.isCurrentItem(entity);
-        const id = `${entity.name.toString().replaceAll(' ', '_')}`;
+        const id = `${entity.name.toString().split(' ').join('_')}`;
         return (
             <React.Fragment>
                 <PermissionTooltipButton target={`view_entity_${id}`} position={'top'} tooltip={'View'} href={`${entity.name}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>

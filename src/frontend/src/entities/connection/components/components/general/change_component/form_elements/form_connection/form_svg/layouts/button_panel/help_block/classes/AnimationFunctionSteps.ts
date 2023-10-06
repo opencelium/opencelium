@@ -64,7 +64,7 @@ export default class AnimationFunctionSteps {
       if(createPanelRight && createPanelRight.nextElementSibling){
         const after = animationData.after;
         const elementType = animationData.type;
-        const direction = animationData.direction;
+        const direction = animationData.toDown;
         const createPanelElement = createPanelRight.nextElementSibling;
         const technicalLayoutRef = RefFunctions.getTechnicalLayout(this.ref);
         let currentItem = null;
