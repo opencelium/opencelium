@@ -1002,6 +1002,10 @@ $DASHED_COLOR: #58854d;
   }
 }
 
+.shortcutsDialog{
+  min-width: 80vw !important;
+}
+
 @keyframes AnItemAppear {
   from {
     opacity: 0;
