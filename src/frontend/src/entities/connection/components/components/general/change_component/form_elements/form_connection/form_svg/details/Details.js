@@ -94,7 +94,6 @@ class Details extends React.Component {
                   updateConnection={updateConnection}
                 />
               </div>
-              <TestMethodButton connection={connection}/> 
             </React.Fragment>
           ) : (
             <div>{'There is no selected item'}</div>

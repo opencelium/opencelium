@@ -8,6 +8,8 @@ import { useAppDispatch } from "@application/utils/store";
 
 //@ts-ignore
 import styles from './styles.scss';
+import {Col} from "react-grid-system";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 const TestMethodButton = (props: any) => {
   const { connection } = props;
@@ -27,22 +29,17 @@ const TestMethodButton = (props: any) => {
 
   return (
     <React.Fragment>
-      <Button
-        isDisabled={false}
-        label={'Test Method'}
-        handleClick={() => setShowDialog()}
-        className={styles.openTestMethodDialogButton}
-      />
+        <Col xs={4} className={styles.col}>{`Test Method:`}</Col>
+        <Col xs={8} className={`${styles.col}`}>
+          <TooltipFontIcon onClick={() => setShowDialog()} size={11} value={<span className={styles.testMethod_icon}>{`▶`}</span>} tooltip={'Open'}/>
+        </Col>
       <Dialog
           actions={[
             {id: 'testMethod', label: 'Close', onClick: () => setShowDialog()}
           ]}
           active={isDialogOpen}
           toggle={setShowDialog}
-          title={currentTechnicalItem.name}
-          dialogTheme={{
-            title: `${styles.testMethod_title}`
-          }}
+          title={'Test Method'}
           dialogClassname={`${styles.testMethod_dialog}`}
         >
           <TestMethodDialogForm connection={connection} isDialogOpen={isDialogOpen}/>

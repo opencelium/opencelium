@@ -34,6 +34,8 @@ import DataAggregation
 
 import { setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import TestMethodButton
+    from "@change_component/form_elements/form_connection/form_svg/details/test_method/TestMethodButton";
 function mapStateToProps(state){
     const editor = state.connectionEditorReducer;
     return{
@@ -80,7 +82,7 @@ class TechnicalProcessDescription extends React.Component {
     this.setCurrentTechnicalItem(currentTechnicalItem.getObject());
   }
 
-    updateBody(connection) {
+    updateConnection(connection) {
         const { details, updateConnection } = this.props;
         const connector = connection.getConnectorByType(details.connectorType);
         const method = connector.getMethodByColor(details.entity.color);
@@ -135,6 +137,7 @@ class TechnicalProcessDescription extends React.Component {
                         </React.Fragment>
                     )
                 })}
+                {requestFormat === 'json' && <TestMethodButton connection={connection}/>}
                 <DataAggregation
                     details={details}
                     connection={connection}
@@ -156,7 +159,7 @@ class TechnicalProcessDescription extends React.Component {
                             isExtended={isExtended}
                             request={request}
                             connection={connection}
-                            updateConnection={updateConnection}
+                            updateConnection={(a) => this.updateConnection(a)}
                             method={methodItem}
                             connector={connector}
                             ref={this.urlRef}
@@ -169,7 +172,7 @@ class TechnicalProcessDescription extends React.Component {
                             items={request.header}
                             ref={this.headerRef}
                         />
-                        <Body toggleBodyDialog={toggleRequestBodyDialog} isBodyDialogOpened={isRequestBodyDialogOpened} readOnly={readOnly} nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem}
+                        <Body toggleBodyDialog={toggleRequestBodyDialog} isBodyDialogOpened={isRequestBodyDialogOpened} readOnly={readOnly} nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={(a) => this.updateConnection(a)} method={methodItem}
                               bodyTitle={"Request data"}
                               hasError={isErrorLocationRequest && isErrorLocationBody}
                               ref={this.bodyRef}
@@ -192,14 +195,14 @@ class TechnicalProcessDescription extends React.Component {
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                         <Col xs={8} className={`${styles.col}`}>{successResponse.status}</Col>
                         <Header nameOfCurrentInfo={'success_header'} isCurrentInfo={currentInfo === 'success_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={successResponse.header}/>
-                        <Body hasEnhancement={false} toggleBodyDialog={toggleResponseSuccessBodyDialog} isBodyDialogOpened={isResponseSuccessDialogOpened} nameOfCurrentInfo={'success_body'} isCurrentInfo={currentInfo === 'success_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={successResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem} bodyTitle={'Response. Success data'}/>
+                        <Body hasEnhancement={false} toggleBodyDialog={toggleResponseSuccessBodyDialog} isBodyDialogOpened={isResponseSuccessDialogOpened} nameOfCurrentInfo={'success_body'} isCurrentInfo={currentInfo === 'success_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={successResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={(a) => this.updateConnection(a)} method={methodItem} bodyTitle={'Response. Success data'}/>
                         <br/>
                         <br/>
                         <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Fail`}</b></Col>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                         <Col xs={8} className={`${styles.col}`}>{failResponse.status}</Col>
                         <Header nameOfCurrentInfo={'fail_header'} isCurrentInfo={currentInfo === 'fail_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={failResponse.header}/>
-                        <Body hasEnhancement={false} toggleBodyDialog={toggleResponseFailBodyDialog} isBodyDialogOpened={isResponseFailDialogOpened} nameOfCurrentInfo={'fail_body'} isCurrentInfo={currentInfo === 'fail_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={failResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={(a) => this.updateBody(a)} method={methodItem} bodyTitle={'Response. Fail data'}/>
+                        <Body hasEnhancement={false} toggleBodyDialog={toggleResponseFailBodyDialog} isBodyDialogOpened={isResponseFailDialogOpened} nameOfCurrentInfo={'fail_body'} isCurrentInfo={currentInfo === 'fail_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={failResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={(a) => this.updateConnection(a)} method={methodItem} bodyTitle={'Response. Fail data'}/>
                     </Row>
                 </Col>
                 }
