@@ -22,7 +22,6 @@ import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
-import org.quartz.SchedulerException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +31,9 @@ import java.util.Optional;
 public interface SchedulerService {
 
     void save(Scheduler scheduler);
+
+    Scheduler update(Scheduler scheduler);
+
     List<Scheduler> saveAll(List<Scheduler> schedulers);
     void deleteById(int id);
     void deleteAllById(List<Integer> schedulers);

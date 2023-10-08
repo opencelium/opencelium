@@ -30,6 +30,7 @@ import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,10 +76,28 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     @Transactional(rollbackFor = {RuntimeException.class})
-    public void save(Scheduler scheduler) {
+    public void save(@NonNull Scheduler scheduler) {
+        if (existsByTitle(scheduler.getTitle())){
+            throw new RuntimeException("TITLE_ALREADY_EXISTS");
+        }
         Scheduler saved = schedulerRepository.save(scheduler);
         schedulingStrategy.addJob(saved);
     }
+    @Override
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public Scheduler update(@NonNull Scheduler scheduler){
+
+        Scheduler entity = getById(scheduler.getId());
+        if (!Objects.equals(entity.getTitle(), scheduler.getTitle()) && existsByTitle(scheduler.getTitle())){
+            throw new RuntimeException("TITLE_ALREADY_EXISTS");
+        }
+
+        getById(scheduler.getId());
+        Scheduler updated = schedulerRepository.save(scheduler);
+        schedulingStrategy.rescheduleJob(updated);
+        return updated;
+    }
+
 
     @Override
     public List<Scheduler> saveAll(List<Scheduler> schedulers) {
