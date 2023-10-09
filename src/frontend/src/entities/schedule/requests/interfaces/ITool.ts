@@ -13,15 +13,12 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scheduleReducer from "./ScheduleSlice";
-import scheduleNotificationReducer from "./NotificationSlice";
-import teamsReducer from "./TeamsSlice";
-import toolReducer from "./ToolSlice";
+import {AxiosResponse} from "axios";
+import {ToolModel} from "@entity/schedule/requests/models/Tool";
 
+export default interface ITeams{
 
-export default {
-    scheduleReducer,
-    scheduleNotificationReducer,
-    teamsReducer,
-    toolReducer,
+    //to get all tools
+    getAllTools(): Promise<AxiosResponse<ToolModel[]>>,
+
 }

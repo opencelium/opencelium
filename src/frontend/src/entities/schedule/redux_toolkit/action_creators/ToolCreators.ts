@@ -1,3 +1,4 @@
+import {createAsyncThunk} from "@reduxjs/toolkit";
 /*
  *  Copyright (C) <2023>  <becon GmbH>
  *
@@ -13,15 +14,22 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scheduleReducer from "./ScheduleSlice";
-import scheduleNotificationReducer from "./NotificationSlice";
-import teamsReducer from "./TeamsSlice";
-import toolReducer from "./ToolSlice";
+import {errorHandler} from "@application/utils/utils";
+import { ToolRequest } from "@entity/schedule/requests/classes/Tool";
 
+export const getAllTools = createAsyncThunk(
+    'tool/get/all',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new ToolRequest();
+            const response = await request.getAllTools();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 
 export default {
-    scheduleReducer,
-    scheduleNotificationReducer,
-    teamsReducer,
-    toolReducer,
+    getAllTools,
 }
