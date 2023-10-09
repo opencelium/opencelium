@@ -132,6 +132,19 @@ public class InvokerServiceImp implements InvokerService {
         deleteInvoker(name);
     }
 
+    public void deleteInvokerFile(String name) {
+        try {
+            Path file = findFileByInvokerName(name).toPath();
+            if(exists(file)){
+                invokerContainer.remove(name);
+                Files.delete(file.toAbsolutePath());
+            }
+        }
+        catch (IOException e){
+            throw new StorageException("Failed to delete stored file", e);
+        }
+    }
+
     // Deletes all entries from the database where the invoker is referenced.
 //    @Override
 //    public void forceDelete(String name) {

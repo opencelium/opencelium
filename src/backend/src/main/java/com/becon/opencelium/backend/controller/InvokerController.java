@@ -291,7 +291,7 @@ public class InvokerController {
         if(connectorService.existByInvoker(name)) {
             throw new RuntimeException("Couldn't delete because invoker '" + name + "' has references to connector and connection. ");
         }
-        invokerService.delete(name);
+        invokerService.deleteInvokerFile(name);
         return ResponseEntity.noContent().build();
     }
 
