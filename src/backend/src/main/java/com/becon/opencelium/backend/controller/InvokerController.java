@@ -186,7 +186,7 @@ public class InvokerController {
         Objects.requireNonNull(doc);
         NodeList nodeList = doc.getChildNodes();
         Node node = nodeList.item(0);
-        Node nameNode = node.getChildNodes().item(1);
+        Node nameNode = node.getChildNodes().item(0);
         String filename = nameNode.getTextContent();
         if (invokerService.existsByName(filename)){
             throw new RuntimeException("INVOKER_ALREADY_EXISTS");
@@ -202,8 +202,14 @@ public class InvokerController {
             throw new RuntimeException(ex);
         }
 
-        List<Document> invokers = getAllInvokers();
+        List<Document> invokers;
         Map<String, Invoker> container = new HashMap<>();
+        try {
+            invokers = getAllInvokers();
+        } catch (Exception e) {
+            delete(filename);
+            throw new RuntimeException(e);
+        }
         invokers.forEach(document -> {
             InvokerParserImp parser = new InvokerParserImp(document);
             File f = new File(document.getDocumentURI());
@@ -211,6 +217,7 @@ public class InvokerController {
             invoker = invoker.replace("%20", " ");
             container.put(invoker, parser.parse());
         });
+
         invokerContainer.updateAll(container);
 
         Invoker invoker = invokerContainer.getByName(filename);

@@ -233,7 +233,7 @@ public class MessageController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping("/all/tools")
+    @GetMapping("/tools/all")
     public ResponseEntity<?> getTools() throws Exception{
         List<String> notifyTools = Arrays.stream(NotifyTool.values()).map(Enum::toString).toList();
         ResultDTO<List<String>> resultDTO = new ResultDTO<>(notifyTools);
