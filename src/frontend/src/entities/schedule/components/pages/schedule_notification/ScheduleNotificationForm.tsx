@@ -69,9 +69,9 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     useEffect(() => {
         if(notification.typeSelect){
             dispatch(getNotificationTemplatesByType(notification.typeSelect.value.toString()));
-        }
-        if(notification.typeSelect.value === 'teams'){
-            dispatch(getAllTeams());
+            if(notification.typeSelect.value === 'teams'){
+                dispatch(getAllTeams());
+            }
         }
     }, [notification.typeSelect])
     useEffect(() => {
@@ -155,7 +155,10 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             {EventTypeComponent}
             {NotificationTypeComponent}
             {!!notification.typeSelect && NotificationTemplateComponent}
-            {!!notification.typeSelect ? notification.typeSelect.value === 'email' ? RecipientsComponent :
+            {!!notification.typeSelect && notification.typeSelect.value === 'email' ?
+                RecipientsComponent : null
+            }
+            {!!notification.typeSelect && notification.typeSelect.value === 'teams' ?
                 <React.Fragment>
                     {NotificationTeamComponent}
                     {!!notification.teamSelect && NotificationChannelComponent}

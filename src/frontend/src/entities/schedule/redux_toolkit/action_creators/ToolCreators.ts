@@ -23,7 +23,7 @@ export const getAllTools = createAsyncThunk(
         try {
             const request = new ToolRequest();
             const response = await request.getAllTools();
-            return response.data;
+            return response.data.result;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

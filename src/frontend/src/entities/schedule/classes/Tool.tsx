@@ -16,6 +16,7 @@
 import {RootState, useAppSelector} from "@application/utils/store";
 import {OptionProps} from "@app_component/base/input/select/interfaces";
 import {ToolModel} from "@entity/schedule/requests/models/Tool";
+import {capitalize} from "@application/utils/utils";
 
 export default class Tool {
 
@@ -25,7 +26,7 @@ export default class Tool {
 
     static getToolsOptionsForSelect(tools: ToolModel[]): OptionProps[]{
         return tools.map(team => {
-            return {label: team.toUpperCase(), value: team}
+            return {label: capitalize(team), value: team}
         });
     }
 

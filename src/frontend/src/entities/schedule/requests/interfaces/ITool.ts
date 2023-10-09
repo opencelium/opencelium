@@ -16,9 +16,13 @@
 import {AxiosResponse} from "axios";
 import {ToolModel} from "@entity/schedule/requests/models/Tool";
 
+export interface GetAllToolsResponse {
+    result: ToolModel[],
+}
+
 export default interface ITeams{
 
     //to get all tools
-    getAllTools(): Promise<AxiosResponse<ToolModel[]>>,
+    getAllTools(): Promise<AxiosResponse<GetAllToolsResponse>>,
 
 }

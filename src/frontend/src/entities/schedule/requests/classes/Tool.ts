@@ -17,17 +17,17 @@ import {AxiosResponse} from "axios";
 import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {ToolModel} from "../models/Tool";
-import ITool from "../interfaces/ITool";
+import ITool, { GetAllToolsResponse } from "../interfaces/ITool";
 
 
 export class ToolRequest extends Request implements ITool{
 
     constructor(settings?: Partial<IRequestSettings>) {
-        super({url: 'tools', ...settings});
+        super({url: 'message/tools', ...settings});
     }
 
-    async getAllTools(): Promise<AxiosResponse<ToolModel[]>>{
+    async getAllTools(): Promise<AxiosResponse<GetAllToolsResponse>>{
         this.endpoint = '/all';
-        return super.get<ToolModel[]>();
+        return super.get<GetAllToolsResponse>();
     }
 }
