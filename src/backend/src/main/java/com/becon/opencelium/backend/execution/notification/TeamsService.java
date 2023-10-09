@@ -22,7 +22,7 @@ public class TeamsService implements CommunicationTool {
 
     @Override
     public void sendMessage(String destination, String subject, String text) {
-        String token = env.getProperty(nTools + ".teams.token");
+        String token = env.getProperty(nTools + ".teams.refresh_token");
         refreshToken(token);
 
         String channel = env.getProperty(nTools + ".teams.channel");
