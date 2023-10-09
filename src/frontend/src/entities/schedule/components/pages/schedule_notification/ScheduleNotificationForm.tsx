@@ -29,6 +29,7 @@ import {ScheduleNotificationFormProps} from "./interfaces";
 import {getAllTeams} from "@entity/schedule/redux_toolkit/action_creators/TeamsCreators";
 import Teams from "@entity/schedule/classes/Teams";
 import Tool from "@entity/schedule/classes/Tool";
+import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/ToolCreators";
 
 
 const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
@@ -63,6 +64,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             notification.getById()
         }
         dispatch(getNotificationRecipients());
+        dispatch(getAllTools());
     },[]);
     useEffect(() => {
         if(notification.typeSelect){

@@ -34,6 +34,7 @@ import { getAllUnarchivedAggregators } from "@entity/data_aggregator/redux_toolk
 import HelpDivider from '../help_divider/HelpDivider';
 import {getMarker} from "@application/utils/utils";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
+import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/ToolCreators";
 import Tool from "@entity/schedule/classes/Tool";
 
 
@@ -94,6 +95,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         if(shouldFetchConnections){
             dispatch(getAllUnarchivedAggregators());
         }
+        dispatch(getAllTools());
     },[]);
     useEffect(() => {
         if(bodyRef.current) {

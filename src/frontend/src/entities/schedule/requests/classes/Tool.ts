@@ -27,6 +27,7 @@ export class ToolRequest extends Request implements ITool{
     }
 
     async getAllTools(): Promise<AxiosResponse<ToolModel[]>>{
+        this.endpoint = '/all';
         return super.get<ToolModel[]>();
     }
 }
