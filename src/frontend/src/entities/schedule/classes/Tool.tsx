@@ -13,15 +13,21 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scheduleReducer from "./ScheduleSlice";
-import scheduleNotificationReducer from "./NotificationSlice";
-import teamsReducer from "./TeamsSlice";
-import toolReducer from "./ToolSlice";
+import {RootState, useAppSelector} from "@application/utils/store";
+import {OptionProps} from "@app_component/base/input/select/interfaces";
+import {ToolModel} from "@entity/schedule/requests/models/Tool";
+import {capitalize} from "@application/utils/utils";
 
+export default class Tool {
 
-export default {
-    scheduleReducer,
-    scheduleNotificationReducer,
-    teamsReducer,
-    toolReducer,
+    static getReduxState() {
+        return useAppSelector((state: RootState) => state.toolReducer);
+    }
+
+    static getToolsOptionsForSelect(tools: ToolModel[]): OptionProps[]{
+        return tools.map(team => {
+            return {label: capitalize(team), value: team}
+        });
+    }
+
 }

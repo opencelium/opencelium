@@ -34,6 +34,8 @@ import { getAllUnarchivedAggregators } from "@entity/data_aggregator/redux_toolk
 import HelpDivider from '../help_divider/HelpDivider';
 import {getMarker} from "@application/utils/utils";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
+import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/ToolCreators";
+import Tool from "@entity/schedule/classes/Tool";
 
 
 const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
@@ -42,6 +44,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         checkingNotificationTemplateName, isCurrentNotificationTemplateHasUniqueName, error,
         gettingNotificationTemplate,
     } = NotificationTemplate.getReduxState();
+    const {gettingAllTools, tools} = Tool.getReduxState();
     const {unarchivedAggregators, gettingAllUnarchivedAggregators} = CDataAggregator.getReduxState();
     const [selectedAggregator, setSelectedAggregator] = useState(null);
     const aggregatorOptions = useMemo(() => {
@@ -92,6 +95,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         if(shouldFetchConnections){
             dispatch(getAllUnarchivedAggregators());
         }
+        dispatch(getAllTools());
     },[]);
     useEffect(() => {
         if(bodyRef.current) {
@@ -122,11 +126,9 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const Type = notificationTemplate.getSelect({propertyName: 'typeSelect', props: {
             icon: 'mail',
             label: 'Type',
-            options:[
-                {value: 'email', label: 'E-Mail'},
-                {value: 'teams', label: 'Teams'}
-            ],
+            options: Tool.getToolsOptionsForSelect(tools),
             required: true,
+            isLoading: gettingAllTools === API_REQUEST_STATE.START
         }})
     const SubjectInput = notificationTemplate.content.getText({
         propertyName: "subject", props: {icon: 'subject', label: 'Subject', required: true}

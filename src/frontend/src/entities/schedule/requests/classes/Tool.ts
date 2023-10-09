@@ -13,15 +13,21 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scheduleReducer from "./ScheduleSlice";
-import scheduleNotificationReducer from "./NotificationSlice";
-import teamsReducer from "./TeamsSlice";
-import toolReducer from "./ToolSlice";
+import {AxiosResponse} from "axios";
+import Request from "@entity/application/requests/classes/Request";
+import {IRequestSettings} from "@application/requests/interfaces/IRequest";
+import {ToolModel} from "../models/Tool";
+import ITool, { GetAllToolsResponse } from "../interfaces/ITool";
 
 
-export default {
-    scheduleReducer,
-    scheduleNotificationReducer,
-    teamsReducer,
-    toolReducer,
+export class ToolRequest extends Request implements ITool{
+
+    constructor(settings?: Partial<IRequestSettings>) {
+        super({url: 'message/tools', ...settings});
+    }
+
+    async getAllTools(): Promise<AxiosResponse<GetAllToolsResponse>>{
+        this.endpoint = '/all';
+        return super.get<GetAllToolsResponse>();
+    }
 }

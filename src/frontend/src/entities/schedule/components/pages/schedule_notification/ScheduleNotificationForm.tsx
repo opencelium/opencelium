@@ -28,6 +28,8 @@ import {getNotificationRecipients} from "../../../redux_toolkit/action_creators/
 import {ScheduleNotificationFormProps} from "./interfaces";
 import {getAllTeams} from "@entity/schedule/redux_toolkit/action_creators/TeamsCreators";
 import Teams from "@entity/schedule/classes/Teams";
+import Tool from "@entity/schedule/classes/Tool";
+import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/ToolCreators";
 
 
 const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
@@ -49,6 +51,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     const {
         notificationTemplates, gettingNotificationTemplates,
     } = NotificationTemplate.getReduxState();
+    const {gettingAllTools, tools} = Tool.getReduxState();
     const {gettingAllTeams, gettingAllChannelsByTeam, teams, channels} = Teams.getReduxState();
     const dispatch = useAppDispatch();
     const notificationTemplatesOptions: OptionProps[] = notificationTemplates.map(notificationTemplate => {return {label: notificationTemplate.name, value: notificationTemplate.templateId}});
@@ -61,13 +64,14 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             notification.getById()
         }
         dispatch(getNotificationRecipients());
+        dispatch(getAllTools());
     },[]);
     useEffect(() => {
         if(notification.typeSelect){
             dispatch(getNotificationTemplatesByType(notification.typeSelect.value.toString()));
-        }
-        if(notification.typeSelect.value === 'teams'){
-            dispatch(getAllTeams());
+            if(notification.typeSelect.value === 'teams'){
+                dispatch(getAllTeams());
+            }
         }
     }, [notification.typeSelect])
     useEffect(() => {
@@ -96,8 +100,9 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         propertyName: "typeSelect", props:{
             icon: 'person',
             label: 'Notification Type',
-            options: [{label: 'Email', value: 'email'},{label: 'Teams', value: 'teams'}],
+            options: Tool.getToolsOptionsForSelect(tools),
             required: true,
+            isLoading: gettingAllTools === API_REQUEST_STATE.START
         }
     });
     const NotificationTemplateComponent = notification.getSelect({
@@ -150,7 +155,10 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             {EventTypeComponent}
             {NotificationTypeComponent}
             {!!notification.typeSelect && NotificationTemplateComponent}
-            {!!notification.typeSelect ? notification.typeSelect.value === 'email' ? RecipientsComponent :
+            {!!notification.typeSelect && notification.typeSelect.value === 'email' ?
+                RecipientsComponent : null
+            }
+            {!!notification.typeSelect && notification.typeSelect.value === 'teams' ?
                 <React.Fragment>
                     {NotificationTeamComponent}
                     {!!notification.teamSelect && NotificationChannelComponent}
