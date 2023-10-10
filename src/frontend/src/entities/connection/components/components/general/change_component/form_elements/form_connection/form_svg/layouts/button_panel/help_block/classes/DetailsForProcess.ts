@@ -222,16 +222,25 @@ export default class DetailsForProcess{
     catch(error){}
   }
 
-  @AdditionalFunctions.setPopover('.react-json-view .click-to-add')
+  
   async displayBodyAddKeysButton (animationSpeed: number) {
     try{
       const addButton = document.querySelector('.react-json-view .click-to-add');
       if(addButton){
         // @ts-ignore
         addButton.style.display = 'inline-block';
-        AdditionalFunctions.addOutlineByClassName(['.react-json-view .click-to-add']);
-        await AdditionalFunctions.delay(animationSpeed);
+        await AdditionalFunctions.addOutlineByClassName([".react-json-view .click-to-add"], true, animationSpeed);
       }
+    }
+    catch(error){}
+  }
+
+  @AdditionalFunctions.setPopover('wrapActiveElement')
+  async showPopoverForBodyAddKeysButton (animationSpeed: number){
+    try{
+      // await AdditionalFunctions.addOutlineByClassName([".react-json-view .click-to-add"], true, animationSpeed);
+  
+      AdditionalFunctions.removeOutlineByClassName([".react-json-view .click-to-add"]);
     }
     catch(error){}
   }
@@ -299,6 +308,52 @@ export default class DetailsForProcess{
     catch(error){}
   }
 
+  
+  async displayRemoveKeyButton(index: any, animationSpeed: number) {
+    try{
+      // @ts-ignore
+      const parent = DetailsForProcess.searchParentElementForBodyElement(this.animationData.body[index].keyName);
+  
+      if(parent){
+        const editButton = parent.querySelector('.click-to-remove');
+        if(editButton){
+          // @ts-ignore
+          editButton.style.display = 'inline-block';
+  
+          await AdditionalFunctions.addOutlineByClassName([".react-json-view .click-to-remove"], true, animationSpeed);
+        }
+      }
+    }
+    catch(error){}
+  }
+
+  @AdditionalFunctions.setPopover('wrapActiveElement')
+  async showPopoverForBodyRemoveKeysButton (){
+    try{
+      AdditionalFunctions.removeOutlineByClassName([".react-json-view .click-to-remove"]);
+    }
+    catch(error){}
+  }
+
+
+  async clickRemoveKeyButton (index: any, animationSpeed: number) {
+    try{
+      AdditionalFunctions.removeOutlineByClassName(['.react-json-view .click-to-remove']);
+      // @ts-ignore
+      const parent = DetailsForProcess.searchParentElementForBodyElement(this.animationData.body[index].keyName);
+      if(parent){
+        const remove = parent.querySelector('.click-to-remove-icon');
+        if(remove){
+          // @ts-ignore
+          remove.click();
+  
+          await AdditionalFunctions.delay(animationSpeed);
+        }
+      }
+    }
+    catch(error){}
+  }
+
   @AdditionalFunctions.setPopover('.react-json-view .click-to-edit')
   async displayEditKeyValueButton (index: any, animationSpeed: number) {
     try{
@@ -331,19 +386,23 @@ export default class DetailsForProcess{
           edit.click();
   
           await AdditionalFunctions.delay(animationSpeed);
+          await AdditionalFunctions.addOutlineByClassName(['.react-json-view .variable-editor']);
+          document.querySelector('#wrapActiveElement').classList.add('addBodyKeyValue')
         }
       }
     }
     catch(error){}
   }
 
-  @AdditionalFunctions.setPopover('.react-json-view .variable-editor')
+  @AdditionalFunctions.setPopover('.addBodyKeyValue')
+  async showPopoverForAddBodyKeyValue(animationSpeed: number){
+    AdditionalFunctions.removeOutlineByClassName(['.react-json-view .variable-editor'])
+  }
+  
   async addBodyKeyValue (keyValue: any, animationSpeed: number) {
     try{
       const textareaClassName = '.react-json-view .variable-editor'
-      await AdditionalFunctions.addOutlineByClassName([textareaClassName], true, animationSpeed);
-          
-      AdditionalFunctions.removeOutlineByClassName([textareaClassName])
+      
       const textarea = document.querySelector(textareaClassName);
       if(textarea){
         const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
@@ -388,7 +447,7 @@ export default class DetailsForProcess{
           if(bodyRef.JsonBodyRef.current && bodyRef.JsonBodyRef.current.props){
             bodyRef.JsonBodyRef.current.props.ReferenceComponent.self.current.updateColor(method);
       
-            await AdditionalFunctions.delay(animationSpeed);
+            await AdditionalFunctions.addOutlineById([`input_no_id`], true, animationSpeed);
           }
         }
       }
@@ -396,10 +455,10 @@ export default class DetailsForProcess{
     catch(error){}
   }
 
-  @AdditionalFunctions.setPopover('input_no_id')
+  @AdditionalFunctions.setPopover('input_no_id', 'bottom')
   async changeBodyParam (bodyData: any, bodyIndex: number, referenceIndex: number, methodIndex: number, animationSpeed: number) {
     try{
-      await AdditionalFunctions.addOutlineById([`input_no_id`], true, animationSpeed);
+      
       const bodyRef = RefFunctions.getBody(this.ref);
   
       if(bodyRef && bodyRef.JsonBodyRef.current && bodyRef.JsonBodyRef.current.props){
@@ -432,7 +491,8 @@ export default class DetailsForProcess{
     if(referenceElement && referenceElement[bodyIndex]){
       referenceElement[bodyIndex].classList.add(`reference_element_${bodyIndex}`);
     }
-    return `.reference_element_${bodyIndex}`;
+    AdditionalFunctions.addOutlineByClassName([`.reference_element_${bodyIndex}`]);
+    return `wrapActiveElement`;
   })
   async clickOnReferenceElements (bodyIndex: number, animationSpeed: number) {
     try{
@@ -466,6 +526,8 @@ export default class DetailsForProcess{
           textarea.dispatchEvent(inputEvent);
   
           await AdditionalFunctions.delay(animationSpeed);
+
+          AdditionalFunctions.removeOutlineById(['enhancement_description']);
         }
       }
     }
@@ -475,7 +537,6 @@ export default class DetailsForProcess{
   @AdditionalFunctions.setPopover('.ace_content')
   async changeReferenceContent (bodyData: any, bodyDataIndex: number, referenceIndex: number, animationSpeed: number) {
     try{
-      AdditionalFunctions.removeOutlineById(['enhancement_description']);
       const enhancementRefProps = RefFunctions.getEnhancement(this.ref).props;
       if(enhancementRefProps){
         await AdditionalFunctions.addOutlineByClassName(['.ace_content'], true, animationSpeed);
@@ -525,7 +586,7 @@ export default class DetailsForProcess{
     catch(error){}
   }
 
-  @AdditionalFunctions.setPopover('response_label')
+  @AdditionalFunctions.setPopover('response_label', 'top')
   async showResponse (animationSpeed: number) {
     try{
       const technicalProcessDescriptionRef = RefFunctions.getTechnicalProcessDescription(this.ref);

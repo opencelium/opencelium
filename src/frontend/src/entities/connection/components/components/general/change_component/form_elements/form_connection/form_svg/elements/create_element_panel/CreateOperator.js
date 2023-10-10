@@ -109,7 +109,7 @@ class CreateOperator extends React.Component{
         return(
             <React.Fragment>
                 {!itemPosition && !itemType && !isModal ? <Line style={beforeItemLineStyles}/> : null}
-                <div className={styles.create_element_panel_for_item} style={panelItemStyles}>
+                <div id="create_operator_container" className={styles.create_element_panel_for_item} style={panelItemStyles}>
                     <Select
                         id={'new_operator_type'}
                         name={'new_operator_type'}

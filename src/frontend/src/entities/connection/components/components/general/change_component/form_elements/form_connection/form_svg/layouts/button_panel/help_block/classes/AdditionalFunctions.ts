@@ -151,8 +151,9 @@ export default class AdditionalFunctions {
                   text: script.text,
                   isOpen: true,
                   target: elementTarget,
-                  position: position
+                  position
                 });
+                await AdditionalFunctions.delay(2000)
               }
             }
             const result = await originalMethod.apply(this, args);
