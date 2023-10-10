@@ -257,8 +257,16 @@ export class Notification extends HookStateClass implements INotification{
         const isValidName = this.validateName();
         const isValidType = this.validateType();
         const isValidTemplate = this.validateTemplate();
-        const isValidRecipients = this.typeSelect.value === 'email' ? this.validateRecipients() : this.validateTeam() && this.validateChannel();
-        return isValidName && isValidType && isValidTemplate && isValidRecipients;
+        let validateAdditionalData = false;
+        switch(this.typeSelect.value) {
+            case 'email':
+                validateAdditionalData = this.validateRecipients();
+                break;
+            case 'teams':
+                validateAdditionalData = this.validateTeam() && this.validateChannel();
+                break;
+        }
+        return isValidName && isValidType && isValidTemplate && validateAdditionalData;
     }
 
     @App.dispatch<INotification>(getNotificationByScheduleIdAndId, {mapping: (notification: INotification) => {return {id: notification.id, scheduleId: notification.scheduleId};}, hasNoValidation: true})

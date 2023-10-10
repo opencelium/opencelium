@@ -26,6 +26,10 @@ import {Notification} from "../../../classes/Notification";
 import {EVENT_TYPE, INotification} from "../../../interfaces/INotification";
 import {getNotificationRecipients} from "../../../redux_toolkit/action_creators/NotificationCreators";
 import {ScheduleNotificationFormProps} from "./interfaces";
+import {getAllTeams} from "@entity/schedule/redux_toolkit/action_creators/TeamsCreators";
+import Teams from "@entity/schedule/classes/Teams";
+import Tool from "@entity/schedule/classes/Tool";
+import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/ToolCreators";
 
 
 const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
@@ -47,6 +51,8 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     const {
         notificationTemplates, gettingNotificationTemplates,
     } = NotificationTemplate.getReduxState();
+    const {gettingAllTools, tools} = Tool.getReduxState();
+    const {gettingAllTeams, gettingAllChannelsByTeam, teams, channels} = Teams.getReduxState();
     const dispatch = useAppDispatch();
     const notificationTemplatesOptions: OptionProps[] = notificationTemplates.map(notificationTemplate => {return {label: notificationTemplate.name, value: notificationTemplate.templateId}});
     const recipientsOptions: OptionProps[] = recipients.map(recipient => {return {label: recipient.email, value: recipient.email}})
@@ -58,10 +64,14 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             notification.getById()
         }
         dispatch(getNotificationRecipients());
+        dispatch(getAllTools());
     },[]);
     useEffect(() => {
         if(notification.typeSelect){
             dispatch(getNotificationTemplatesByType(notification.typeSelect.value.toString()));
+            if(notification.typeSelect.value === 'teams'){
+                dispatch(getAllTeams());
+            }
         }
     }, [notification.typeSelect])
     useEffect(() => {
@@ -90,8 +100,9 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         propertyName: "typeSelect", props:{
             icon: 'person',
             label: 'Notification Type',
-            options: [{label: 'Email', value: 'email'},{label: 'Teams', value: 'teams'}],
+            options: Tool.getToolsOptionsForSelect(tools),
             required: true,
+            isLoading: gettingAllTools === API_REQUEST_STATE.START
         }
     });
     const NotificationTemplateComponent = notification.getSelect({
@@ -117,16 +128,18 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         propertyName: "teamSelect", props:{
             icon: 'groups',
             label: 'Team',
-            options: [{label: 'OpenCelium', value: 'team_1'}],
+            options: Teams.getTeamsOptionsForSelect(teams),
             required: true,
+            isLoading: gettingAllTeams === API_REQUEST_STATE.START,
         }
     });
     const NotificationChannelComponent = notification.getSelect({
         propertyName: "channelSelect", props:{
             icon: 'workspaces',
             label: 'Channel',
-            options: [{label: 'SmartNotifications', value: 'channel_1'}],
+            options: Teams.getChannelsOptionsForSelect(channels),
             required: true,
+            isLoading: gettingAllChannelsByTeam === API_REQUEST_STATE.START,
         }
     });
     let actionLabel = isAdd ? 'Add' : isUpdate ? 'Update' : '';
@@ -142,7 +155,10 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             {EventTypeComponent}
             {NotificationTypeComponent}
             {!!notification.typeSelect && NotificationTemplateComponent}
-            {!!notification.typeSelect ? notification.typeSelect.value === 'email' ? RecipientsComponent :
+            {!!notification.typeSelect && notification.typeSelect.value === 'email' ?
+                RecipientsComponent : null
+            }
+            {!!notification.typeSelect && notification.typeSelect.value === 'teams' ?
                 <React.Fragment>
                     {NotificationTeamComponent}
                     {!!notification.teamSelect && NotificationChannelComponent}

@@ -16,9 +16,12 @@
 import NotificationCreators from "./NotificationCreators";
 import ScheduleCreators from "./ScheduleCreators";
 import WebhookCreators from "./WebhookCreators";
+import TeamsCreators from "./TeamsCreators";
+import ToolCreators from './ToolCreators';
 
 export default {
     ...NotificationCreators,
     ...ScheduleCreators,
     ...WebhookCreators,
+    ...TeamsCreators,
 }

@@ -32,39 +32,22 @@ import java.util.Map;
 public interface InvokerService {
 
     Invoker toEntity(InvokerResource resource);
-
     InvokerResource toResource(Invoker entity);
-
     FunctionInvoker getTestFunction(String invokerName);
-
     FunctionInvoker getAuthFunction(String invokerName);
-
     File findFileByInvokerName(String invokerName);
-
     Invoker findByName(String name);
-
     boolean existsByName(String name);
-
     List<Invoker> findAll();
-
     void delete(String name);
-
     String findFieldType(String name, String methodName, String exchangeType, String result, String fieldName);
-
     String findFieldByPath(String invoker, String method, String path);
-
     Document getDocument(String name) throws Exception;
-
     void save(Document document);
-
     Map<String, String> findAllByPathAsString(String path);
-
     UpdateInvokerResource toUpdateInvokerResource(Map.Entry<String, String> entry) throws XPathExpressionException;
-
     Map<String, Invoker> findAllAsMap();
-
     List<FunctionInvoker> getAuthFunctions(String invoker);
-
     boolean existsByFileName(String fileName);
 
 //    Object findField(String field, Map<String, Object> body);

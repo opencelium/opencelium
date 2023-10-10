@@ -13,15 +13,12 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scheduleReducer from "./ScheduleSlice";
-import scheduleNotificationReducer from "./NotificationSlice";
-import teamsReducer from "./TeamsSlice";
-import toolReducer from "./ToolSlice";
+export interface TeamModel{
+    id: string,
+    name: string,
+}
 
-
-export default {
-    scheduleReducer,
-    scheduleNotificationReducer,
-    teamsReducer,
-    toolReducer,
+export interface TeamChannelModel{
+    id: string,
+    name: string,
 }
