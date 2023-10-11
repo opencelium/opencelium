@@ -17,7 +17,11 @@ export default class AnimationFunctionSteps {
 
   static DefaultSpeed: number = 2000;
 
-  async clickOnPanel(connectorPanel: string, animationSpeed: number) {
+  @AdditionalFunctions.setPopover((args: any[]) => {
+    const [, connectorPanelType] = args;
+    return `${connectorPanelType}_panel_modal`;
+  }, 'bottom-start')
+  async clickOnPanel(connectorPanel: string, connectorPanelType: string, animationSpeed: number) {
     if(connectorPanel){
       try{
         // @ts-ignore
@@ -120,6 +124,10 @@ export default class AnimationFunctionSteps {
     catch(error){}
   }
 
+  @AdditionalFunctions.setPopover((args: any[]) => {
+    const [elementType] = args;
+    return elementType === 'process' ? 'create_process_container' : 'create_operator_container';
+  }, "top")
   async changeElementNameOrType(elementType: string, name: string, animationSpeed: number){
     try{
       const createProcessRef = RefFunctions.getCreateProcess(this.ref);

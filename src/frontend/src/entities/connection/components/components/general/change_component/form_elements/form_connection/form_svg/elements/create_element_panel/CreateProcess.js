@@ -137,7 +137,7 @@ class CreateProcess extends React.Component{
         return(
             <React.Fragment>
                 {hasBeforeLine && !isModal ? <Line style={beforeItemLineStyles}/> : null}
-                <div className={styles.create_element_panel_for_item} style={panelItemStyles}>
+                <div id="create_process_container" className={styles.create_element_panel_for_item} style={panelItemStyles}>
                     <Select
                         id={'new_request_name'}
                         name={'new_request_name'}

@@ -37,6 +37,7 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
     } = Invoker.getReduxState();
     const [nameValidationMessage, setNameValidationMessage] = useState<string>('');
     const [authValidationMessage, setAuthValidationMessage] = useState<string>('');
+    const [operationsValidationMessage, setOperationsValidationMessage] = useState<string>('');
     const [isNotValidOperations, setNotValidOperations] = useState<any[]>([]);
     const didMount = useRef(false);
     let navigate = useNavigate();
@@ -106,6 +107,10 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
                 isValid = false;
             }
         }
+        if(invoker.operations.length === 0){
+            setOperationsValidationMessage('You need to have at least one operation');
+            isValid = false;
+        }
         const newNotValidOperations = [];
         for(let i = 0; i < localOperations.length; i++){
             if(localOperations[i].name === ''){
@@ -154,7 +159,7 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
                 {RequiredDataComponent}
             </FormSection>,
             <FormSection label={{value: "Operations"}} hasFullWidthInForm={true}>
-                <OperationItems validations={isNotValidOperations} operations={localOperations} updateOperations={setLocalOperations} isReadonly={isView}/>
+                <OperationItems error={operationsValidationMessage} validations={isNotValidOperations} operations={localOperations} updateOperations={setLocalOperations} isReadonly={isView}/>
             </FormSection>,
         ]
     }

@@ -38,8 +38,10 @@ interface IBaseAnimationData {
   delete?: boolean;
   toDown?: true | false;
   after?: string;
+  afterElementType?: "process" | "operator";
   scripts?: IScriptsData[];
   label?: string;
+  changeLabel?: string;
 }
 
 interface IScriptsData {
@@ -48,9 +50,10 @@ interface IScriptsData {
 }
 
 interface IAnimationDataForProcess extends IBaseAnimationData {
-
   endpoint?: IEndpointData;
   body?: IBodyData[];
+  header?: boolean;
+  response?: boolean;
 }
 
 interface IAnimationDataForIf extends IBaseAnimationData {
@@ -62,9 +65,9 @@ interface IAnimationDataForLoop extends IBaseAnimationData {
 }
 
 interface IEndpointData {
-  index: string;
-  param: string;
-  connectorType: ConnectorPanelType;
+  index?: string;
+  param?: string;
+  connectorType?: ConnectorPanelType;
 }
 
 interface IConditionDataForIf {
@@ -88,8 +91,8 @@ interface IConditionDataForLoop {
     leftMethodIndex: string,
     leftParam: string
   }
-  relationalOperator: RelationalOperatorForLoop;
-  rightStatement: {
+  relationalOperator?: RelationalOperatorForLoop;
+  rightStatement?: {
     fromConnector: ConnectorPanelType,
     rightMethodIndex: string,
     rightParam: string
@@ -97,9 +100,10 @@ interface IConditionDataForLoop {
 }
 
 interface IBodyData{
-  keyName: string;
-  keyValue: string;
+  keyName?: string;
+  keyValue?: string;
   available?: boolean;
+  deleteKey?: boolean;
   reference?: IBodyReferenceData[];
 }
 
