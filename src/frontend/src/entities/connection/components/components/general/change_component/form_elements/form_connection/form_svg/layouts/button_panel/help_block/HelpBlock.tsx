@@ -19,7 +19,7 @@ import { withTheme } from "styled-components";
 import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
 import { TextSize } from "@app_component/base/text/interfaces";
 import { HelpBlockStyled } from "./styles";
-import { ConnectorPanelType } from "./interfaces";
+import {ConnectorPanelType, IfOperatorFunctions, LoopOperatorFunctions, MethodFunctions} from "./interfaces";
 import { ColorTheme } from "@style/Theme";
 import { useAppDispatch } from "@application/utils/store";
 import Dialog from "@app_component/base/dialog/Dialog";
@@ -50,6 +50,9 @@ import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
 import SyncInvokers from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_methods/SyncInvokers";
 import RefFunctions from "./classes/RefFunctions";
 import Shortcuts from "./shortcuts/Shortcuts";
+import {
+  DetailsForOperatorsMethodProps
+} from "@change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/interfaces/IDetailsForOperators";
 
 
 const prepareConnection = (connection: any, connectors: any, invokers: any) => {
@@ -88,55 +91,48 @@ const HelpBlock = () => {
 
   const ref = React.useRef(null);
 
+  const videoAnimationNameReference: any = React.useRef();
+  videoAnimationNameReference.current = videoAnimationName;
+
   const isPausedReference: any = React.useRef();
   isPausedReference.current = isPaused;
 
-  const reference: any = React.useRef();
-  reference.current = animationSpeed;
+  const animationSpeedReference: any = React.useRef();
+  animationSpeedReference.current = animationSpeed;
 
   const showDetailsForOperatorIf = async (condition: any) => {
     const refs: any = {};
     refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
-    await AdditionalFunctions.delay(reference.current)
+    await AdditionalFunctions.delay(animationSpeedReference.current)
     if(refs.animationData.delete){
-      await details.deleteOperator(reference.current);
+      await details.deleteOperator(animationSpeedReference.current);
     }
     else{
       if(condition){
         const conditionRef = RefFunctions.getCondition(ref);
-        await details.openConditionDialog(reference.current);
-
-        await details.changeLeftMethod(reference.current);
-
-        await details.setFocusOnLeftParam(reference.current);
-
-        await details.changeLeftParam(reference.current);
-
-        await details.changeRelationalOperator(reference.current);
-
-        if(condition.rightStatement){
-          if(condition.rightStatement.property){
-            await details.setFocusOnRightProperty(reference.current);
-  
-            await details.changeRightProperty(reference.current);
-  
-            await details.removeFocusFromRightProperty(reference.current);
+        const operatorFunctions: IfOperatorFunctions = {
+          LeftExpression: ["openConditionDialog", "changeLeftMethod", "setFocusOnLeftParam", "changeLeftParam"],
+          RelationalOperator: "changeRelationalOperator",
+          RightExpression: {
+            PropertyExpression: ["setFocusOnRightProperty", "changeRightProperty", "removeFocusFromRightProperty"],
+            RestExpression: ["changeRightMethod", "setFocusOnRightParam", "changeRightParam", "removeFocusFromRightParam"]
           }
         }
-
-        if(condition.rightStatement){
-          await details.changeRightMethod(reference.current);
+        for(let i = 0; i < operatorFunctions.LeftExpression.length; i++){
+          await details[operatorFunctions.LeftExpression[i]](animationSpeedReference.current);
         }
-
-        if(condition.rightStatement){
-          await details.setFocusOnRightParam(reference.current);
-
-          await details.changeRightParam(reference.current);
-
-          await details.removeFocusFromRightParam(reference.current);
+        await details[operatorFunctions.RelationalOperator](animationSpeedReference.current);
+        if(condition.rightStatement) {
+          if (condition.rightStatement.property) {
+            for (let i = 0; i < operatorFunctions.RightExpression.PropertyExpression.length; i++) {
+              await details[operatorFunctions.RightExpression.PropertyExpression[i]](animationSpeedReference.current);
+            }
+          }
+          for (let i = 0; i < operatorFunctions.RightExpression.RestExpression.length; i++) {
+            await details[operatorFunctions.RightExpression.RestExpression[i]](animationSpeedReference.current);
+          }
         }
-
         if(conditionRef){
           conditionRef.updateConnection();
         }
@@ -146,30 +142,29 @@ const HelpBlock = () => {
 
   const showDetailsForOperatorLoop = async (condition: any) => {
     const refs: any = {};
-
     refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
-    await AdditionalFunctions.delay(reference.current)
+    await AdditionalFunctions.delay(animationSpeedReference.current)
     if(refs.animationData.delete){
-      await details.deleteOperator(reference.current);
+      await details.deleteOperator(animationSpeedReference.current);
     }
     else{
       if(condition){
         const conditionRef = RefFunctions.getCondition(ref);
-        await details.openConditionDialog(reference.current);
-
-        await details.changeLeftMethod(reference.current);
-
-        await details.setFocusOnLeftParam(reference.current);
-
-        await details.changeLeftParam(reference.current);
-
-        await details.changeRelationalOperator(reference.current);
-
-        await details.changeRightMethod(reference.current);
-
-        await details.changeRightParam(reference.current);
-
+        const operatorFunctions: LoopOperatorFunctions = {
+          LeftExpression: ["openConditionDialog", "changeLeftMethod", "setFocusOnLeftParam", "changeLeftParam"],
+          RelationalOperator: "changeRelationalOperator",
+          RightExpression: ["changeRightMethod", "changeRightParam"],
+        };
+        for(let i = 0; i < operatorFunctions.LeftExpression.length; i++){
+          await details[operatorFunctions.LeftExpression[i]](animationSpeedReference.current);
+        }
+        await details[operatorFunctions.RelationalOperator](animationSpeedReference.current);
+        if(condition.rightStatement){
+          for(let i = 0; i < operatorFunctions.RightExpression.length; i++){
+            await details[operatorFunctions.RightExpression[i]](animationSpeedReference.current);
+          }
+        }
         if(conditionRef){
           conditionRef.updateConnection();
         }
@@ -179,91 +174,81 @@ const HelpBlock = () => {
 
   const showDetailsForProcess = async () => {
     const refs: any = {};
-
     refs.animationData = animationData[videoAnimationName][connectorType].items[index];
     refs.endpointData = refs.animationData.endpoint;
     refs.currentElementId = refs.animationData.index;
     const details = new DetailsForProcess(ref, setPopoverProps, refs.animationData);
-    await AdditionalFunctions.delay(reference.current)
+    await AdditionalFunctions.delay(animationSpeedReference.current);
     if(refs.animationData.delete){
-      await details.deleteProcess(reference.current);
+      await details.deleteProcess(animationSpeedReference.current);
     }
     else{
+      const methodFunctions: MethodFunctions = {
+        Label: ["startEditLabel", "endEditLabel"],
+        Url: ["openUrlDialog", "changeUrlMethod", "changeUrlParam", "addUrlParam", "closeUrlDialog"],
+        Header: ["openHeaderDialog", "closeHeaderDialog"],
+        Body: {
+          KeyNotExist: [
+            "displayBodyAddKeysButton","showPopoverForBodyAddKeysButton",
+            "clickAddKeysButton","addBodyKeyName","displaySubmitButtonToAddKey",
+            "clickSubmitButtonToAddKey",
+          ],
+          DeleteKey: [
+            "displayRemoveKeyButton","showPopoverForBodyRemoveKeysButton","clickRemoveKeyButton",
+          ],
+          AddValue: [
+            "displayEditKeyValueButton","clickEditKeyValueButton",
+            "showPopoverForAddBodyKeyValue","addBodyKeyValue",
+          ],
+          SetReference: [
+              "changeBodyMethod", "changeBodyParam", "addBodyMethodAndParam"
+          ]
+        }
+      }
       if(refs.animationData.changeLabel){
-        await details.startEditLabel(reference.current);
-
-        await details.endEditLabel(reference.current);
+        for(let i = 0; i < methodFunctions.Label.length; i++){
+          await details[methodFunctions.Label[i]](animationSpeedReference.current);
+        }
       }
-
       if(refs.endpointData){
-        await details.openUrlDialog(reference.current);
-
-        await details.changeUrlMethod(refs.animationData, refs.endpointData.connectorType, reference.current);
-
-        await details.changeUrlParam(refs.animationData, reference.current);
-
-        await details.addUrlParam(refs.animationData, connectorType, reference.current);
-
-        await details.closeUrlDialog(reference.current);
+        for(let i = 0; i < methodFunctions.Url.length; i++){
+          await details[methodFunctions.Url[i]](animationSpeedReference.current, refs.animationData, methodFunctions.Url[i] === "addUrlParam" ? connectorType : refs.endpointData.connectorType);
+        }
       }
-
       if(refs.animationData.header){
-        await details.openHeaderDialog(reference.current);
-
-        await details.closeHeaderDialog(reference.current);
+        for(let i = 0; i < methodFunctions.Header.length; i++){
+          await details[methodFunctions.Header[i]](animationSpeedReference.current);
+        }
       }
-
       const bodyData = refs.animationData.body;
-
       if(bodyData){
-        await details.showPopoverForOpenBodyDialog(reference.current);
-        await details.openBodyDialog(reference.current);
+        await details.showPopoverForOpenBodyDialog(animationSpeedReference.current);
+        await details.openBodyDialog(animationSpeedReference.current);
         if(bodyData.length > 0){
           let availableBodyContent: any;
-
-          for(var i = 0; i < bodyData.length; i++){
+          for(let i = 0; i < bodyData.length; i++){
             if(bodyData[i].available){
               availableBodyContent = true;
               break;
             }
           }
-
           if(!availableBodyContent){
-            await details.openBodyObject(reference.current);
+            await details.openBodyObject(animationSpeedReference.current);
           }
-
           for(let bodyIndex = 0; bodyIndex < bodyData.length; bodyIndex++){
-
             if(!bodyData[bodyIndex].available){
-              await details.displayBodyAddKeysButton(reference.current);
-
-              await details.showPopoverForBodyAddKeysButton(reference.current);
-
-              await details.clickAddKeysButton(reference.current);
-
-              await details.addBodyKeyName(bodyData[bodyIndex].keyName, reference.current);
-
-              await details.displaySubmitButtonToAddKey(reference.current);
-
-              await details.clickSubmitButtonToAddKey(reference.current);
+              for(let i = 0; i < methodFunctions.Body.KeyNotExist.length; i++){
+                await details[methodFunctions.Body.KeyNotExist[i]](animationSpeedReference.current, bodyData[bodyIndex].keyName);
+              }
             }
-
             if(bodyData[bodyIndex].deleteKey){
-              await details.displayRemoveKeyButton(bodyIndex, reference.current);
-
-              await details.showPopoverForBodyRemoveKeysButton();
-
-              await details.clickRemoveKeyButton(bodyIndex, reference.current);
+              for(let i = 0; i < methodFunctions.Body.DeleteKey.length; i++){
+                await details[methodFunctions.Body.DeleteKey[i]](animationSpeedReference.current, bodyIndex);
+              }
             }
-
-            await details.displayEditKeyValueButton(bodyIndex, reference.current);
-
-            await details.clickEditKeyValueButton(bodyIndex, reference.current);
-
-            await details.showPopoverForAddBodyKeyValue(reference.current);
-
-            await details.addBodyKeyValue(bodyData[bodyIndex].keyValue, reference.current);
-
+            for(let i = 0; i < methodFunctions.Body.AddValue.length; i++){
+              await details[methodFunctions.Body.AddValue[i]](animationSpeedReference.current, methodFunctions.Body.AddValue[i] === "addBodyKeyValue" ? bodyData[bodyIndex].keyValue : bodyIndex);
+            }
             if(bodyData[bodyIndex].keyValue === '#'){
               for(let referenceIndex = 0; referenceIndex < bodyData[bodyIndex].reference.length; referenceIndex++) {
                 for(let methodIndex = 0; methodIndex < bodyData[bodyIndex].reference[referenceIndex].method.length; methodIndex++){
@@ -272,16 +257,12 @@ const HelpBlock = () => {
                       const currentItemId = ref.current.props.currentTechnicalItem.id;
                       if(currentItemId){
                         if(methodIndex > 0){
-                          await details.displayEditKeyValueButton(bodyIndex, reference.current);
-
-                          await details.clickEditKeyValueButton(bodyIndex, reference.current);
+                          await details.displayEditKeyValueButton(animationSpeedReference.current, bodyIndex);
+                          await details.clickEditKeyValueButton(animationSpeedReference.current, bodyIndex);
                         }
-
-                        await details.changeBodyMethod(bodyData, bodyIndex, referenceIndex, methodIndex, currentItemId, reference.current);
-
-                        await details.changeBodyParam(bodyData, bodyIndex, referenceIndex, methodIndex, reference.current);
-
-                        await details.addBodyMethodAndParam(currentItemId, reference.current);
+                        for(let i = 0; i < methodFunctions.Body.SetReference.length; i++){
+                          await details[methodFunctions.Body.SetReference[i]](animationSpeedReference.current, bodyData, bodyIndex, referenceIndex, methodIndex, currentItemId);
+                        }
                       }
                     }
                     else{
@@ -290,7 +271,6 @@ const HelpBlock = () => {
                   }
                   catch(e){}
                 }
-                
                 if(connectorType === 'toConnector' && bodyData[bodyIndex].reference[referenceIndex].enhancementDescription || connectorType === 'toConnector' && bodyData[bodyIndex].reference[referenceIndex].enhancementContent){
                   let bIndex;
                   if(bodyData[bodyIndex - 1]){
@@ -299,31 +279,27 @@ const HelpBlock = () => {
                   else{
                     bIndex = bodyIndex;
                   }
-                  await details.clickOnReferenceElements(bIndex, reference.current);
-
+                  await details.clickOnReferenceElements(animationSpeedReference.current, bIndex);
                   if(connectorType === 'toConnector' && bodyData[bodyIndex].reference[referenceIndex].enhancementDescription){
-                    await details.changeReferenceDescription(bodyData, bodyIndex, referenceIndex, reference.current);
+                    await details.changeReferenceDescription(animationSpeedReference.current, bodyData, bodyIndex, referenceIndex);
                   }
-
                   if(connectorType === 'toConnector' && bodyData[bodyIndex].reference[referenceIndex].enhancementContent){
-                    await details.changeReferenceContent(bodyData, bodyIndex, referenceIndex, reference.current);
+                    await details.changeReferenceContent(animationSpeedReference.current, bodyData, bodyIndex, referenceIndex);
                   }
                 }
               }
             }
             else{
-              await details.clickSubmitButtonToAddValue(bodyIndex, reference.current);
+              await details.clickSubmitButtonToAddValue(animationSpeedReference.current, bodyIndex);
             }
           }
         }
-        await details.closeBodyDialog(reference.current);
+        await details.closeBodyDialog(animationSpeedReference.current);
       }
-
       if(refs.animationData.response){
-        await details.showResponse(reference.current);
+        await details.showResponse(animationSpeedReference.current);
       }
     }
-
   }
 
   const animationFunction = async (connectorPanelType: ConnectorPanelType) => {
@@ -351,9 +327,9 @@ const HelpBlock = () => {
       }
       const technicalLayout = document.getElementById('modal_technical_layout_svg');
       technicalLayout.removeAttribute('style')
-      await AdditionalFunctions.delay(reference.current)
+      await AdditionalFunctions.delay(animationSpeedReference.current)
 
-      await animationSteps.clickOnPanel(connectorPanel, connectorPanelType, reference.current);
+      await animationSteps.clickOnPanel(connectorPanel, connectorPanelType, animationSpeedReference.current);
     }
     else{
       if(hasInitialConnection && index === 0){
@@ -368,8 +344,8 @@ const HelpBlock = () => {
         const firstItem = fromItems.length > 0 ? fromItems[0] : toItems.length > 0 ? toItems[0] : null;
         if(firstItem) {
           const connector = animationProps.connection.getConnectorByType(fromItems.length ? 'fromConnector' : 'toConnector');
-          await animationSteps.setCurrentItem(connector, firstItem.index, reference.current);
-          animationSteps.setFocusOnCurrentElement();
+          await animationSteps.setCurrentItem(connector, firstItem.index, animationSpeedReference.current);
+          await animationSteps.setFocusOnCurrentElement();
         }
       }
 
@@ -379,29 +355,29 @@ const HelpBlock = () => {
         const currentItem = connector.getSvgElementByIndex(refs.animationData.after);
         const technicalLayout = RefFunctions.getTechnicalLayout(ref);
         technicalLayout.setCurrentItem(currentItem);
-        await animationSteps.onMouseOver(refs.animationData.afterElementType, reference.current);
+        await animationSteps.onMouseOver(refs.animationData.afterElementType, animationSpeedReference.current);
       }
       else{
-        await animationSteps.onMouseOver(prevElementType, reference.current);
+        await animationSteps.onMouseOver(prevElementType, animationSpeedReference.current);
       }
 
     }
 
     if(index >= 1 || hasInitialConnection && index === 0){
-      await animationSteps.showPopoverForCreateElement(type, reference.current);
+      await animationSteps.showPopoverForCreateElement(type, animationSpeedReference.current);
 
       const prevElement = refs.animationData.afterElementType ? refs.animationData.afterElementType : prevElementType;
 
-      await animationSteps.createProcessOrOperator(animationProps, refs.animationData, connectorType, prevElement, reference.current);
+      await animationSteps.createProcessOrOperator(animationProps, refs.animationData, connectorType, prevElement, animationSpeedReference.current);
     }
 
-    await animationSteps.changeElementNameOrType(type, name, reference.current);
+    await animationSteps.changeElementNameOrType(type, name, animationSpeedReference.current);
 
-    await animationSteps.changeProcessLabel(type, label, reference.current);
+    await animationSteps.changeProcessLabel(type, label, animationSpeedReference.current);
 
-    animationSteps.create(type);
+    await animationSteps.create(type);
 
-    animationSteps.setFocusOnCurrentElement();
+    await animationSteps.setFocusOnCurrentElement();
 
     const currentSvgElementId = `${connectorType}__${connectorType}_${currentElementId}${type === "process" ? "__" + name : ''}`;
 
@@ -422,7 +398,7 @@ const HelpBlock = () => {
     }
     if(index === animationData[videoAnimationName].fromConnector.items.length - 1 && animationData[videoAnimationName].toConnector.items.length === 0 || index === animationData[videoAnimationName].toConnector.items.length - 1 && connectorType === 'toConnector'){
       const details = new DetailsForProcess(ref, setPopoverProps, refs.animationData);
-      await details.showResult(dispatch, reference.current);
+      await details.showResult(animationSpeedReference.current, dispatch);
     }
     setIndex(index + 1)
   }
@@ -456,28 +432,30 @@ const HelpBlock = () => {
   }, [videoAnimationName])
 
   useEffect(() => {
-    if(animationData[videoAnimationName] && ref.current){
-      if(isButtonPanelOpened && videoAnimationName) {
-        if(index < animationData[videoAnimationName].fromConnector.items.length + animationData[videoAnimationName].toConnector.items.length) {
-          if(index < animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
-            animationFunction('fromConnector');
-          }
-          else if(index === animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
-            setConnectorType('toConnector');
-            setIndex(0)
-          }
-          else if(index > 0 && index < animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector'){
-            animationFunction('toConnector');
-          }
-          else if(index === animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector'){
-            setConnectorType('fromConnector')
-            dispatch(setVideoAnimationName(''));
-            setIndex(0)
-            setAnimationProps({...animationProps});
+    (async () => {
+      if(animationData[videoAnimationName] && ref.current){
+        if(isButtonPanelOpened && videoAnimationName) {
+          if(index < animationData[videoAnimationName].fromConnector.items.length + animationData[videoAnimationName].toConnector.items.length) {
+            if(index < animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
+              await animationFunction('fromConnector');
+            }
+            else if(index === animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector'){
+              setConnectorType('toConnector');
+              setIndex(0)
+            }
+            else if(index > 0 && index < animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector'){
+              await animationFunction('toConnector');
+            }
+            else if(index === animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector'){
+              setConnectorType('fromConnector')
+              dispatch(setVideoAnimationName(''));
+              setIndex(0)
+              setAnimationProps({...animationProps});
+            }
           }
         }
       }
-    }
+    })()
   }, [videoAnimationName, index])
 
   useEffect(() => {
@@ -499,9 +477,11 @@ const HelpBlock = () => {
   }, [isVisible])
 
   useEffect(() => {
-    if(connectorType === 'toConnector'){
-      animationFunction('toConnector');
-    }
+    (async () => {
+      if(connectorType === 'toConnector'){
+        await animationFunction('toConnector');
+      }
+    })();
   }, [connectorType])
 
   function toggleVisibleHelpDialog() {
@@ -565,12 +545,12 @@ const HelpBlock = () => {
           {gettingInvokers === API_REQUEST_STATE.FINISH &&
             <React.Fragment>
               <ModalContext.Provider value={{ isModal: true }}>
-                  <FormConnectionSvg
+                <FormConnectionSvg
                   ref={ref}
                   data={{ readOnly: false }}
                   entity={animationProps.connection}
                   updateEntity={updateEntity}
-                  />
+                />
               </ModalContext.Provider>
               <Content />
             </React.Fragment>

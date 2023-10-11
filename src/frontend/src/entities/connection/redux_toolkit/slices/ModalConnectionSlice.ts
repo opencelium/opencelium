@@ -62,7 +62,7 @@ export const modalConnectionSlice = createSlice({
   name: "modal_connection",
   initialState,
   reducers: {
-    setAnimationPaused: (state, action: PayloadAction<any>) => {
+    setAnimationPaused: (state, action: PayloadAction<boolean>) => {
       state.isAnimationPaused = action.payload;
     },
     setModalJustCreatedItem: (state, action: PayloadAction<any>) => {

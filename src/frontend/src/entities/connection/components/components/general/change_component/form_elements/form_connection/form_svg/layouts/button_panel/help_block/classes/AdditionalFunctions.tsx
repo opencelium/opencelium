@@ -3,6 +3,8 @@ import { setSvgViewBoxProps } from "../interfaces/IAdditionalFunctions";
 import { Placement } from "react-bootstrap/esm/types";
 import { positionElementOver, positionElementOverByClassName } from "@application/utils/utils";
 import {store} from "@application/utils/store";
+import connectionReducer from "@root/redux_toolkit/slices/ConnectionSlice";
+import React from "react";
 
 
 export default class AdditionalFunctions {
@@ -11,16 +13,20 @@ export default class AdditionalFunctions {
   static async delay(ms: any) {
     return await new Promise(async (resolve, reject) => {
       const isPaused = store.getState().modalConnectionReducer.isAnimationPaused;
-      if (!isPaused) {
-        await new Promise(async () => {
-          setTimeout(resolve, ms);
-        })
-      } else {
-        await new Promise(async () => {
-          this.pauseTimeout = setTimeout(resolve, 1000 * 60 * 60 * 24);
-          this.pauseFunction = resolve;
-        })
-        //reject();
+      const videoAnimationName = store.getState().connectionReducer.videoAnimationName;
+      if(videoAnimationName === ''){
+        reject();
+      } else{
+        if (!isPaused) {
+          await new Promise(async () => {
+            setTimeout(resolve, ms);
+          })
+        } else {
+          await new Promise(async () => {
+            this.pauseTimeout = setTimeout(resolve, 1000 * 60 * 60 * 24);
+            this.pauseFunction = resolve;
+          })
+        }
       }
     });
   }
@@ -105,7 +111,7 @@ export default class AdditionalFunctions {
         }
       } else{
         // @ts-ignore
-        offsetY = currentElement.y.animVal.value / 2 - 50
+        offsetY = currentElement ? currentElement.y.animVal.value / 2 - 50 : 0;
 
         if(props.connectorType === 'fromConnector'){
           offsetX = sizes.fromConnectorWidth > 350 ? sizes.fromConnectorWidth / 4 : x
