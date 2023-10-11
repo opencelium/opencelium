@@ -226,6 +226,10 @@ public class InvokerController {
         invokerContainer.updateAll(container);
 
         Invoker invoker = invokerContainer.getByName(filename);
+        if (invoker.getOperations() == null) {
+            delete(filename);
+            throw new RuntimeException("Invoker should contain at least one Operation.");
+        }
         InvokerResource invokerResource = invokerService.toResource(invoker);
         final EntityModel<InvokerResource> resource = EntityModel.of(invokerResource);
         return ResponseEntity.ok().body(resource);
