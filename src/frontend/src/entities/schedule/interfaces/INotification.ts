@@ -50,11 +50,12 @@ export interface INotificationForm extends INotificationText, INotificationSelec
 }
 
 export interface INotification extends INotificationForm{
-    id?: number;
     selectedScheduleIds?: number[];
     notificationId?: number;
     scheduleId?: number,
     schedulerId?: number,
+
+    id?: number;
     type: string,
     notificationType?: string,
     template: INotificationTemplate,
