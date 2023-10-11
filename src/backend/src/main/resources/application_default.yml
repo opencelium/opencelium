@@ -164,10 +164,18 @@ opencelium:
     update:
       online:
         url: { insert url where portal service is located }
+###########################################################################
+#                                                                         #
+#   Configuration for Notification                                        #
+#                                                                         #
+#   Teams: https://learn.microsoft.com/en-us/graph/auth/auth-concepts     #
+#   Slack: https://api.slack.com/messaging/webhooks                       #
+#                                                                         #
+###########################################################################
   notification:
     tools:
       slack:
-        webhook: https://hooks.slack.com/services/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
+        webhook:
       teams:
         grant_type:
         client_id:

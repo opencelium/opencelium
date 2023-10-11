@@ -22,9 +22,8 @@ public class SlackService implements CommunicationTool {
     public void sendMessage(String destination, String subject, String text) {
         HttpMethod method = HttpMethod.POST;
         String body = "{" +
-                            "\"username\": \"OpenCelium Bot\"," +
-                            "\"icon_emoji\": \":robot_face:\"," +
-                            "\"text\": \"Von: " + subject + ";  Text:" + text + "\"\n" +
+                            "\"text\": \"Von: " + subject +
+                                      "\nText: " + text + "\"\n" +
                       "}";
         if (destination != null && !destination.isEmpty()) {
             url  = destination;

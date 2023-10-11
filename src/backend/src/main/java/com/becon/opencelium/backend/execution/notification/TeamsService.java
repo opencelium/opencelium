@@ -82,17 +82,11 @@ public class TeamsService implements CommunicationTool {
         String token = getToken(refresh_token);
         HttpMethod method = HttpMethod.POST;
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "client_credentials");
-        body.add("client_id", client_id);
-        body.add("client_secret", client_secret);
-        body.add("resource", "https://graph.microsoft.com/");
-
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         String url = "https://graph.microsoft.com/v1.0/teams";
-        HttpEntity<Object> httpEntity = new HttpEntity <Object> (body, httpHeaders);
+        HttpEntity<Object> httpEntity = new HttpEntity <Object> (httpHeaders);
         ResponseEntity<String> response = restTemplate.exchange(url, method, httpEntity, String.class);
         TeamsDto teamsDto = convertToDto(response.getBody());
         teamsDto.setType(SectionType.TEAM);
@@ -103,17 +97,11 @@ public class TeamsService implements CommunicationTool {
         String token = getToken(refresh_token);
         HttpMethod method = HttpMethod.POST;
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "client_credentials");
-        body.add("client_id", client_id);
-        body.add("client_secret", client_secret);
-        body.add("resource", "https://graph.microsoft.com/");
-
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         String url = "https://graph.microsoft.com/v1.0/teams/" + teamId + "/allChannels";
-        HttpEntity<Object> httpEntity = new HttpEntity <Object> (body, httpHeaders);
+        HttpEntity<Object> httpEntity = new HttpEntity <Object> (httpHeaders);
         ResponseEntity<String> response = restTemplate.exchange(url, method, httpEntity, String.class);
         TeamsDto teamsDto = convertToDto(response.getBody());
         teamsDto.setType(SectionType.CHANNEL);
