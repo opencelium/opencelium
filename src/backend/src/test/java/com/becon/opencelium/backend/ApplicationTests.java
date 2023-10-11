@@ -16,6 +16,8 @@
 
 package com.becon.opencelium.backend;
 
+import com.becon.opencelium.backend.execution.notification.SlackService;
+import com.becon.opencelium.backend.execution.notification.TeamsService;
 import com.becon.opencelium.backend.mysql.entity.Execution;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
@@ -32,21 +34,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ApplicationTests {
 
 	@Autowired
-	private ExecutionServiceImp executionServiceImp;
-
-	@Autowired
-	private SchedulerServiceImp schedulerServiceImp;
+	private SlackService service;
 
 	@Test
 	public void contextLoads() {
-//		Execution execution = executionServiceImp.findById(5).get();
-//		System.out.println(execution);
-
-//		try	{
-//			ConnectionNode connectionNode = connectionNodeServiceImp.findByConnectionId(48L).get();
-//			System.out.println(connectionNode);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		service.sendMessage("", "subject", "text test");
 	}
 }
