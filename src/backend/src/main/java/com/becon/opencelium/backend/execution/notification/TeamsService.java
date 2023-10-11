@@ -61,7 +61,7 @@ public class TeamsService implements CommunicationTool {
         String body = "{\n" +
                 "    \"body\": {\n" +
                 "        \"contentType\": \"html\",\n" +
-                "        \"content\": \"" + subject + "<br>" + text + "\"\n" +
+                "        \"content\": \"<b>" + subject + "</b><br>" + text + "\"\n" +
                 "    }\n" +
                 "}";
 

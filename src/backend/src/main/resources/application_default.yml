@@ -166,6 +166,8 @@ opencelium:
         url: { insert url where portal service is located }
   notification:
     tools:
+      slack:
+        webhook: https://hooks.slack.com/services/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
       teams:
         grant_type: refresh_token
         client_id: a88b0cb6-8026-44af-ab6c-3f144605a4a2
