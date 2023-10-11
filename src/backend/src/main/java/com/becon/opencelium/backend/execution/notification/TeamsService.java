@@ -83,7 +83,7 @@ public class TeamsService implements CommunicationTool {
         HttpMethod method = HttpMethod.POST;
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", grant_type);
+        body.add("grant_type", "client_credentials");
         body.add("client_id", client_id);
         body.add("client_secret", client_secret);
         body.add("resource", "https://graph.microsoft.com/");
@@ -104,7 +104,7 @@ public class TeamsService implements CommunicationTool {
         HttpMethod method = HttpMethod.POST;
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", grant_type);
+        body.add("grant_type", "client_credentials");
         body.add("client_id", client_id);
         body.add("client_secret", client_secret);
         body.add("resource", "https://graph.microsoft.com/");
