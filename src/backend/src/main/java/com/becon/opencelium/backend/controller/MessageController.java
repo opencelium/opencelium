@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.enums.LangEnum;
+import com.becon.opencelium.backend.execution.notification.TeamsService;
 import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
 import com.becon.opencelium.backend.mysql.entity.EventContent;
 import com.becon.opencelium.backend.mysql.entity.EventMessage;
@@ -11,6 +12,7 @@ import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.LanguageDTO;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
+import com.becon.opencelium.backend.resource.notification.tool.teams.TeamsDto;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,10 +41,13 @@ import java.util.stream.Stream;
 public class MessageController {
 
     @Autowired
-    MessageServiceImpl messageService;
+    private MessageServiceImpl messageService;
 
     @Autowired
-    ContentServiceImpl contentService;
+    private ContentServiceImpl contentService;
+
+    @Autowired
+    private TeamsService teamsService;
 
     @Operation(summary = "Retrieves all event messages from database")
     @ApiResponses(value = {
@@ -234,9 +239,21 @@ public class MessageController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/tools/all")
-    public ResponseEntity<?> getTools() throws Exception{
+    public ResponseEntity<?> getTools() throws Exception {
         List<String> notifyTools = Arrays.stream(NotifyTool.values()).map(Enum::toString).toList();
         ResultDTO<List<String>> resultDTO = new ResultDTO<>(notifyTools);
         return ResponseEntity.ok(resultDTO);
+    }
+
+    @GetMapping("/tools/teams/team/all")
+    public ResponseEntity<?> getAllTeamsTeam() throws Exception {
+        TeamsDto teams = teamsService.getAllTeams();
+        return ResponseEntity.ok(teams);
+    }
+
+    @GetMapping("/tools/teams/team/{teamId}/channel/all")
+    public ResponseEntity<?> getAllTeamChannels(@PathVariable String teamId) throws Exception {
+        TeamsDto channels = teamsService.getAllChannels(teamId);
+        return ResponseEntity.ok(channels);
     }
 }
