@@ -987,7 +987,7 @@ $DASHED_COLOR: #58854d;
   position: fixed;
   top: 28px;
   left: 10px;
-  z-index: 1051;
+  z-index: 1055;
   padding: 15px;
   display: flex;
   flex-direction: column;
@@ -1000,6 +1000,15 @@ $DASHED_COLOR: #58854d;
   &:hover{
     opacity: 1;
   }
+}
+
+.animation_overlay{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1054;
 }
 
 .shortcutsDialog{

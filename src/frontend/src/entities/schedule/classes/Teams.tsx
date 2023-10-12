@@ -23,6 +23,14 @@ export default class Teams {
         return useAppSelector((state: RootState) => state.teamsReducer);
     }
 
+    static getTeamOptionById(id: string, teams: TeamModel[]): any {
+        const team = teams.find(team => team.id === id);
+        return {
+            label: team.name,
+            id: team.id,
+        }
+    }
+
     static getTeamsOptionsForSelect(teams: TeamModel[]): OptionProps[]{
         return teams.map(team => {
             return {label: `${team.name} (${team.description})`, value: team.id}

@@ -30,7 +30,7 @@ import {setAnimationPaused } from "@root/redux_toolkit/slices/ModalConnectionSli
 import { Connector } from "@entity/connector/classes/Connector";
 import {ModalConnection} from "@root/classes/ModalConnection";
 import { Connection } from "@entity/connection/classes/Connection";
-import { setIsAnamationNotFoud } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { setIsAnimationNotFound } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import AnimationSpeed from "./AnimationSpeed/AnimationSpeed";
 import { AnimationPopoverProps } from "./AnimationPopover/interfaces";
 import AnimationPopover from "./AnimationPopover/AnimationPopover";
@@ -47,9 +47,8 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
   const dispatch = useAppDispatch();
   const { connectors } = Connector.getReduxState();
   const { gettingInvokers } = Invoker.getReduxState();
-  const [ isLoading, setIsLoading] = useState<boolean>(false);
   const [ isVisible, setIsVisible ] = useState(false);
-  const { isButtonPanelOpened, videoAnimationName, animationSpeed, isAnimationNotFound } = Connection.getReduxState();
+  const { isButtonPanelOpened, videoAnimationName, animationSpeed, isAnimationNotFound, isAnimationForcedToStop } = Connection.getReduxState();
   const { isAnimationPaused: isPaused, isDetailsOpened } = ModalConnection.getReduxState();
 
   const [popoverProps, setPopoverProps] = useState<AnimationPopoverProps>(null);
@@ -105,21 +104,24 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
           dialogClassname={`${styles.help_dialog}`}
         >
           {ReactDOM.createPortal(
-            <div className={styles.animation_controls}>
-              <TooltipButton
-                size={TextSize.Size_40}
-                position={"bottom"}
-                icon={isPausedReference.current ? "play_arrow" : "pause"}
-                tooltip={isPausedReference.current ? "Play Animation" : 'Pause Animation'}
-                target={`animation_play_button`}
-                hasBackground={true}
-                background={ColorTheme.White}
-                color={ColorTheme.Blue}
-                padding="2px"
-                handleClick={() => dispatch(setAnimationPaused(!isPausedReference.current))}
-              />
+            <React.Fragment>
+              <div className={styles.animation_controls}>
+                <TooltipButton
+                  size={TextSize.Size_40}
+                  position={"bottom"}
+                  icon={isPausedReference.current ? "play_arrow" : "pause"}
+                  tooltip={isPausedReference.current ? "Play Animation" : 'Pause Animation'}
+                  target={`animation_play_button`}
+                  hasBackground={true}
+                  background={ColorTheme.White}
+                  color={ColorTheme.Blue}
+                  padding="2px"
+                  handleClick={() => dispatch(setAnimationPaused(!isPausedReference.current))}
+                />
               <AnimationSpeed/>
-            </div>,
+              </div>
+              <div className={!isPausedReference.current && videoAnimationName ? styles.animation_overlay : ''}/>
+            </React.Fragment>,
             document.body
           )}
           {gettingInvokers === API_REQUEST_STATE.START && <Loading className="animationDataLoading"/>}
@@ -137,7 +139,7 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
         </Dialog>
         <Dialog
           actions={[
-            {id: 'animationNotFound', label: 'Ok', onClick: () => dispatch(setIsAnamationNotFoud(false))}
+            {id: 'animationNotFound', label: 'Ok', onClick: () => dispatch(setIsAnimationNotFound(false))}
           ]}
           active={isAnimationNotFound}
           toggle={null}
