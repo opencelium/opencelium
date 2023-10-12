@@ -72,7 +72,7 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
     const { invokers } = Invoker.getReduxState();
     const { isButtonPanelOpened, videoAnimationName, animationSpeed, isAnimationForcedToStop} = Connection.getReduxState();
     const { isAnimationPaused: isPaused, isDetailsOpened } = ModalConnection.getReduxState();
-    const [ animationProps, updateAnimationProps ] = useState<any>({connection: CConnection.createConnection()})
+    const [ animationProps, updateAnimationProps ] = useState<any>({connection: CConnection.createConnection(), update: false})
     const [ index, updateIndex ] = useState(0);
     const [connectorType, updateConnectorType] = useState<ConnectorPanelType>("fromConnector");
     const [isMount, setIsMount] = useState<boolean>(true);
@@ -131,9 +131,11 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
                 const newConnection = prepareConnection(connection, connectors, invokers);
                 setAnimationProps({
                     ...animationProps,
+                    update:!animationProps.update,
                     connection: newConnection,
                 })
             }
+            setConnectorType('fromConnector')
             setIndex(0);
             if (isPausedReference.current) {
                 dispatch(setAnimationPaused(false))
@@ -142,30 +144,34 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
     }, [videoAnimationName, isAnimationForcedToStop, isMount])
 
     useEffect(() => {
-        if(animationProps.connection?.fromConnector?.invoker?.operations && animationProps.connection?.fromConnector?.invoker?.operations.length > 0) {
-            (async () => {
-                if (animationData[videoAnimationName] && ref.current) {
-                    if (isButtonPanelOpened && videoAnimationName) {
-                        if (index < animationData[videoAnimationName].fromConnector.items.length + animationData[videoAnimationName].toConnector.items.length) {
-                            if (index < animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector') {
-                                await callAsync(async () => await animationFunction('fromConnector'), forcedToStopAnimationReference.current);
-                            } else if (index === animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector') {
-                                setConnectorType('toConnector');
-                                setIndex(0)
-                            } else if (index > 0 && index < animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector') {
-                                await callAsync(async () => await animationFunction('toConnector'), forcedToStopAnimationReference.current);
-                            } else if (index === animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector') {
-                                setConnectorType('fromConnector')
-                                dispatch(setVideoAnimationName(''));
-                                setIndex(0)
-                                setAnimationProps({...animationProps});
+        try {
+            if (animationProps.connection?.fromConnector?.invoker?.operations && animationProps.connection?.fromConnector?.invoker?.operations.length > 0) {
+                (async () => {
+                    if (animationData[videoAnimationName] && ref.current) {
+                        if (isButtonPanelOpened && videoAnimationName) {
+                            if (index < animationData[videoAnimationName].fromConnector.items.length + animationData[videoAnimationName].toConnector.items.length) {
+                                if (index < animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector') {
+                                    await callAsync(async () => await animationFunction('fromConnector'), forcedToStopAnimationReference.current);
+                                } else if (index === animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector') {
+                                    setConnectorType('toConnector');
+                                    setIndex(0)
+                                } else if (index > 0 && index < animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector') {
+                                    await callAsync(async () => await animationFunction('toConnector'), forcedToStopAnimationReference.current);
+                                } else if (index === animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector') {
+                                    setConnectorType('fromConnector')
+                                    dispatch(setVideoAnimationName(''));
+                                    setIndex(0)
+                                    setAnimationProps({...animationProps});
+                                }
                             }
                         }
                     }
-                }
-            })()
+                })()
+            }
+        }catch (e){
+            console.log(e);
         }
-    }, [animationProps.connection])
+    }, [videoAnimationName, index, animationProps.update])
 
     useEffect(() => {
         if(isVisible){
@@ -186,212 +192,222 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
     }, [isVisible])
 
     useEffect(() => {
-        (async () => {
-            if(connectorType === 'toConnector'){
-                await callAsync(async () => await animationFunction('toConnector'), forcedToStopAnimationReference.current);
-            }
-        })();
+        try {
+            (async () => {
+                if (connectorType === 'toConnector') {
+                    await callAsync(async () => await animationFunction('toConnector'), forcedToStopAnimationReference.current);
+                }
+            })();
+        } catch (e){
+            console.log(e);
+        }
     }, [connectorType])
 
     const showDetailsForOperatorIf = async (condition: any) => {
-        const refs: any = {};
-        refs.animationData = animationData[videoAnimationName][connectorType].items[index];
-        const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
-        await callAsync(async () => await AdditionalFunctions.delay(animationSpeedReference.current), forcedToStopAnimationReference.current)
-        if(refs.animationData.delete){
-            await callAsync(async () => await details.deleteOperator(animationSpeedReference.current), forcedToStopAnimationReference.current);
-        }
-        else{
-            if(condition){
-                const conditionRef = RefFunctions.getCondition(ref);
-                const operatorFunctions: IfOperatorFunctions = {
-                    LeftExpression: ["openConditionDialog", "changeLeftMethod", "setFocusOnLeftParam", "changeLeftParam"],
-                    RelationalOperator: "changeRelationalOperator",
-                    RightExpression: {
-                        PropertyExpression: ["setFocusOnRightProperty", "changeRightProperty", "removeFocusFromRightProperty"],
-                        RestExpression: ["changeRightMethod", "setFocusOnRightParam", "changeRightParam", "removeFocusFromRightParam"]
-                    }
-                }
-                for(let i = 0; i < operatorFunctions.LeftExpression.length; i++){
-                    await callAsync(async () => await details[operatorFunctions.LeftExpression[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
-                }
-                await callAsync(async () => await details[operatorFunctions.RelationalOperator](animationSpeedReference.current), forcedToStopAnimationReference.current);
-                if(condition.rightStatement) {
-                    if (condition.rightStatement.property) {
-                        for (let i = 0; i < operatorFunctions.RightExpression.PropertyExpression.length; i++) {
-                            await callAsync(async () => await details[operatorFunctions.RightExpression.PropertyExpression[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
+        try {
+            const refs: any = {};
+            refs.animationData = animationData[videoAnimationName][connectorType].items[index];
+            const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
+            await callAsync(async () => await AdditionalFunctions.delay(animationSpeedReference.current), forcedToStopAnimationReference.current)
+            if (refs.animationData.delete) {
+                await callAsync(async () => await details.deleteOperator(animationSpeedReference.current), forcedToStopAnimationReference.current);
+            } else {
+                if (condition) {
+                    const conditionRef = RefFunctions.getCondition(ref);
+                    const operatorFunctions: IfOperatorFunctions = {
+                        LeftExpression: ["openConditionDialog", "changeLeftMethod", "setFocusOnLeftParam", "changeLeftParam"],
+                        RelationalOperator: "changeRelationalOperator",
+                        RightExpression: {
+                            PropertyExpression: ["setFocusOnRightProperty", "changeRightProperty", "removeFocusFromRightProperty"],
+                            RestExpression: ["changeRightMethod", "setFocusOnRightParam", "changeRightParam", "removeFocusFromRightParam"]
                         }
                     }
-                    for (let i = 0; i < operatorFunctions.RightExpression.RestExpression.length; i++) {
-                        await callAsync(async () => await details[operatorFunctions.RightExpression.RestExpression[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
+                    for (let i = 0; i < operatorFunctions.LeftExpression.length; i++) {
+                        await callAsync(async () => await details[operatorFunctions.LeftExpression[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
+                    }
+                    await callAsync(async () => await details[operatorFunctions.RelationalOperator](animationSpeedReference.current), forcedToStopAnimationReference.current);
+                    if (condition.rightStatement) {
+                        if (condition.rightStatement.property) {
+                            for (let i = 0; i < operatorFunctions.RightExpression.PropertyExpression.length; i++) {
+                                await callAsync(async () => await details[operatorFunctions.RightExpression.PropertyExpression[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
+                            }
+                        }
+                        for (let i = 0; i < operatorFunctions.RightExpression.RestExpression.length; i++) {
+                            await callAsync(async () => await details[operatorFunctions.RightExpression.RestExpression[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
+                        }
+                    }
+                    if (conditionRef) {
+                        conditionRef.updateConnection();
                     }
                 }
-                if(conditionRef){
-                    conditionRef.updateConnection();
-                }
             }
+        } catch(e) {
+            console.log(e);
         }
     }
 
     const showDetailsForOperatorLoop = async (condition: any) => {
-        const refs: any = {};
-        refs.animationData = animationData[videoAnimationName][connectorType].items[index];
-        const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
-        await callAsync(async () => await AdditionalFunctions.delay(animationSpeedReference.current), forcedToStopAnimationReference.current);
-        if(refs.animationData.delete){
-            await callAsync(async () => await details.deleteOperator(animationSpeedReference.current), forcedToStopAnimationReference.current);
-        }
-        else{
-            if(condition){
-                const conditionRef = RefFunctions.getCondition(ref);
-                const operatorFunctions: LoopOperatorFunctions = {
-                    LeftExpression: ["openConditionDialog", "changeLeftMethod", "setFocusOnLeftParam", "changeLeftParam"],
-                    RelationalOperator: "changeRelationalOperator",
-                    RightExpression: ["changeRightMethod", "changeRightParam"],
-                };
-                for(let i = 0; i < operatorFunctions.LeftExpression.length; i++){
-                    await callAsync(async () => await details[operatorFunctions.LeftExpression[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
-                }
-                await callAsync(async () => await details[operatorFunctions.RelationalOperator](animationSpeedReference.current), forcedToStopAnimationReference.current);
-                if(condition.rightStatement){
-                    for(let i = 0; i < operatorFunctions.RightExpression.length; i++){
-                        await callAsync(async () => await details[operatorFunctions.RightExpression[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
+        try {
+            const refs: any = {};
+            refs.animationData = animationData[videoAnimationName][connectorType].items[index];
+            const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
+            await callAsync(async () => await AdditionalFunctions.delay(animationSpeedReference.current), forcedToStopAnimationReference.current);
+            if (refs.animationData.delete) {
+                await callAsync(async () => await details.deleteOperator(animationSpeedReference.current), forcedToStopAnimationReference.current);
+            } else {
+                if (condition) {
+                    const conditionRef = RefFunctions.getCondition(ref);
+                    const operatorFunctions: LoopOperatorFunctions = {
+                        LeftExpression: ["openConditionDialog", "changeLeftMethod", "setFocusOnLeftParam", "changeLeftParam"],
+                        RelationalOperator: "changeRelationalOperator",
+                        RightExpression: ["changeRightMethod", "changeRightParam"],
+                    };
+                    for (let i = 0; i < operatorFunctions.LeftExpression.length; i++) {
+                        await callAsync(async () => await details[operatorFunctions.LeftExpression[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
+                    }
+                    await callAsync(async () => await details[operatorFunctions.RelationalOperator](animationSpeedReference.current), forcedToStopAnimationReference.current);
+                    if (condition.rightStatement) {
+                        for (let i = 0; i < operatorFunctions.RightExpression.length; i++) {
+                            await callAsync(async () => await details[operatorFunctions.RightExpression[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
+                        }
+                    }
+                    if (conditionRef) {
+                        conditionRef.updateConnection();
                     }
                 }
-                if(conditionRef){
-                    conditionRef.updateConnection();
-                }
             }
+        } catch(e){
+            console.log(e);
         }
     }
 
     const showDetailsForProcess = async () => {
-        const refs: any = {};
-        refs.animationData = animationData[videoAnimationName][connectorType].items[index];
-        refs.endpointData = refs.animationData.endpoint;
-        refs.currentElementId = refs.animationData.index;
-        const details = new DetailsForProcess(ref, setPopoverProps, refs.animationData);
-        await callAsync(async () => await AdditionalFunctions.delay(animationSpeedReference.current), forcedToStopAnimationReference.current);
-        if(refs.animationData.delete){
-            await callAsync(async () => await details.deleteProcess(animationSpeedReference.current), forcedToStopAnimationReference.current);
-        }
-        else{
-            const methodFunctions: MethodFunctions = {
-                Label: ["startEditLabel", "endEditLabel"],
-                Url: ["openUrlDialog", "changeUrlMethod", "changeUrlParam", "addUrlParam", "closeUrlDialog"],
-                Header: ["openHeaderDialog", "closeHeaderDialog"],
-                Body: {
-                    KeyNotExist: [
-                        "displayBodyAddKeysButton","showPopoverForBodyAddKeysButton",
-                        "clickAddKeysButton","addBodyKeyName","displaySubmitButtonToAddKey",
-                        "clickSubmitButtonToAddKey",
-                    ],
-                    DeleteKey: [
-                        "displayRemoveKeyButton","showPopoverForBodyRemoveKeysButton","clickRemoveKeyButton",
-                    ],
-                    AddValue: [
-                        "displayEditKeyValueButton","clickEditKeyValueButton",
-                        "showPopoverForAddBodyKeyValue","addBodyKeyValue",
-                    ],
-                    SetReference: [
-                        "changeBodyMethod", "changeBodyParam", "addBodyMethodAndParam"
-                    ]
-                }
-            }
-            if(refs.animationData.changeLabel){
-                for(let i = 0; i < methodFunctions.Label.length; i++){
-                    await callAsync(async () => await details[methodFunctions.Label[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
-                }
-            }
-            if(refs.endpointData){
-                for(let i = 0; i < methodFunctions.Url.length; i++){
-                    await callAsync(async () => await details[methodFunctions.Url[i]](animationSpeedReference.current, refs.animationData, methodFunctions.Url[i] === "addUrlParam" ? connectorType : refs.endpointData.connectorType), forcedToStopAnimationReference.current);
-                }
-            }
-            if(refs.animationData.header){
-                for(let i = 0; i < methodFunctions.Header.length; i++){
-                    await callAsync(async () => await details[methodFunctions.Header[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
-                }
-            }
-            const bodyData = refs.animationData.body;
-            if(bodyData){
-                await callAsync(async () => await details.showPopoverForOpenBodyDialog(animationSpeedReference.current), forcedToStopAnimationReference.current);
-                await callAsync(async () => await details.openBodyDialog(animationSpeedReference.current), forcedToStopAnimationReference.current);
-                if(bodyData.length > 0){
-                    let availableBodyContent: any;
-                    for(let i = 0; i < bodyData.length; i++){
-                        if(bodyData[i].available){
-                            availableBodyContent = true;
-                            break;
-                        }
+        try {
+            const refs: any = {};
+            refs.animationData = animationData[videoAnimationName][connectorType].items[index];
+            refs.endpointData = refs.animationData.endpoint;
+            refs.currentElementId = refs.animationData.index;
+            const details = new DetailsForProcess(ref, setPopoverProps, refs.animationData);
+            await callAsync(async () => await AdditionalFunctions.delay(animationSpeedReference.current), forcedToStopAnimationReference.current);
+            if (refs.animationData.delete) {
+                await callAsync(async () => await details.deleteProcess(animationSpeedReference.current), forcedToStopAnimationReference.current);
+            } else {
+                const methodFunctions: MethodFunctions = {
+                    Label: ["startEditLabel", "endEditLabel"],
+                    Url: ["openUrlDialog", "changeUrlMethod", "changeUrlParam", "addUrlParam", "closeUrlDialog"],
+                    Header: ["openHeaderDialog", "closeHeaderDialog"],
+                    Body: {
+                        KeyNotExist: [
+                            "displayBodyAddKeysButton", "showPopoverForBodyAddKeysButton",
+                            "clickAddKeysButton", "addBodyKeyName", "displaySubmitButtonToAddKey",
+                            "clickSubmitButtonToAddKey",
+                        ],
+                        DeleteKey: [
+                            "displayRemoveKeyButton", "showPopoverForBodyRemoveKeysButton", "clickRemoveKeyButton",
+                        ],
+                        AddValue: [
+                            "displayEditKeyValueButton", "clickEditKeyValueButton",
+                            "showPopoverForAddBodyKeyValue", "addBodyKeyValue",
+                        ],
+                        SetReference: [
+                            "changeBodyMethod", "changeBodyParam", "addBodyMethodAndParam"
+                        ]
                     }
-                    if(!availableBodyContent){
-                        await callAsync(async () => await details.openBodyObject(animationSpeedReference.current), forcedToStopAnimationReference.current);;
+                }
+                if (refs.animationData.changeLabel) {
+                    for (let i = 0; i < methodFunctions.Label.length; i++) {
+                        await callAsync(async () => await details[methodFunctions.Label[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
                     }
-                    for(let bodyIndex = 0; bodyIndex < bodyData.length; bodyIndex++){
-                        if(!bodyData[bodyIndex].available){
-                            for(let i = 0; i < methodFunctions.Body.KeyNotExist.length; i++){
-                                await callAsync(async () => await details[methodFunctions.Body.KeyNotExist[i]](animationSpeedReference.current, bodyData[bodyIndex].keyName), forcedToStopAnimationReference.current);;
+                }
+                if (refs.endpointData) {
+                    for (let i = 0; i < methodFunctions.Url.length; i++) {
+                        await callAsync(async () => await details[methodFunctions.Url[i]](animationSpeedReference.current, refs.animationData, methodFunctions.Url[i] === "addUrlParam" ? connectorType : refs.endpointData.connectorType), forcedToStopAnimationReference.current);
+                    }
+                }
+                if (refs.animationData.header) {
+                    for (let i = 0; i < methodFunctions.Header.length; i++) {
+                        await callAsync(async () => await details[methodFunctions.Header[i]](animationSpeedReference.current), forcedToStopAnimationReference.current);
+                    }
+                }
+                const bodyData = refs.animationData.body;
+                if (bodyData) {
+                    await callAsync(async () => await details.showPopoverForOpenBodyDialog(animationSpeedReference.current), forcedToStopAnimationReference.current);
+                    await callAsync(async () => await details.openBodyDialog(animationSpeedReference.current), forcedToStopAnimationReference.current);
+                    if (bodyData.length > 0) {
+                        let availableBodyContent: any;
+                        for (let i = 0; i < bodyData.length; i++) {
+                            if (bodyData[i].available) {
+                                availableBodyContent = true;
+                                break;
                             }
                         }
-                        if(bodyData[bodyIndex].deleteKey){
-                            for(let i = 0; i < methodFunctions.Body.DeleteKey.length; i++){
-                                await callAsync(async () => await details[methodFunctions.Body.DeleteKey[i]](animationSpeedReference.current, bodyIndex), forcedToStopAnimationReference.current);;
+                        if (!availableBodyContent) {
+                            await callAsync(async () => await details.openBodyObject(animationSpeedReference.current), forcedToStopAnimationReference.current);
+                        }
+                        for (let bodyIndex = 0; bodyIndex < bodyData.length; bodyIndex++) {
+                            if (!bodyData[bodyIndex].available) {
+                                for (let i = 0; i < methodFunctions.Body.KeyNotExist.length; i++) {
+                                    await callAsync(async () => await details[methodFunctions.Body.KeyNotExist[i]](animationSpeedReference.current, bodyData[bodyIndex].keyName), forcedToStopAnimationReference.current);
+                                }
                             }
-                        }
-                        for(let i = 0; i < methodFunctions.Body.AddValue.length; i++){
-                            await callAsync(async () => await details[methodFunctions.Body.AddValue[i]](animationSpeedReference.current, methodFunctions.Body.AddValue[i] === "addBodyKeyValue" ? bodyData[bodyIndex].keyValue : bodyIndex), forcedToStopAnimationReference.current);;
-                        }
-                        if(bodyData[bodyIndex].keyValue === '#'){
-                            for(let referenceIndex = 0; referenceIndex < bodyData[bodyIndex].reference.length; referenceIndex++) {
-                                for(let methodIndex = 0; methodIndex < bodyData[bodyIndex].reference[referenceIndex].method.length; methodIndex++){
-                                    try{
-                                        if(ref.current.props){
-                                            const currentItemId = ref.current.props.currentTechnicalItem.id;
-                                            if(currentItemId){
-                                                if(methodIndex > 0){
-                                                    await callAsync(async () => await details.displayEditKeyValueButton(animationSpeedReference.current, bodyIndex), forcedToStopAnimationReference.current);;
-                                                    await callAsync(async () => await details.clickEditKeyValueButton(animationSpeedReference.current, bodyIndex), forcedToStopAnimationReference.current);;
+                            if (bodyData[bodyIndex].deleteKey) {
+                                for (let i = 0; i < methodFunctions.Body.DeleteKey.length; i++) {
+                                    await callAsync(async () => await details[methodFunctions.Body.DeleteKey[i]](animationSpeedReference.current, bodyIndex), forcedToStopAnimationReference.current);
+                                }
+                            }
+                            for (let i = 0; i < methodFunctions.Body.AddValue.length; i++) {
+                                await callAsync(async () => await details[methodFunctions.Body.AddValue[i]](animationSpeedReference.current, methodFunctions.Body.AddValue[i] === "addBodyKeyValue" ? bodyData[bodyIndex].keyValue : bodyIndex), forcedToStopAnimationReference.current);
+                            }
+                            if (bodyData[bodyIndex].keyValue === '#') {
+                                for (let referenceIndex = 0; referenceIndex < bodyData[bodyIndex].reference.length; referenceIndex++) {
+                                    for (let methodIndex = 0; methodIndex < bodyData[bodyIndex].reference[referenceIndex].method.length; methodIndex++) {
+                                        try {
+                                            if (ref.current.props) {
+                                                const currentItemId = ref.current.props.currentTechnicalItem.id;
+                                                if (currentItemId) {
+                                                    if (methodIndex > 0) {
+                                                        await callAsync(async () => await details.displayEditKeyValueButton(animationSpeedReference.current, bodyIndex), forcedToStopAnimationReference.current);
+                                                        await callAsync(async () => await details.clickEditKeyValueButton(animationSpeedReference.current, bodyIndex), forcedToStopAnimationReference.current);
+                                                    }
+                                                    for (let i = 0; i < methodFunctions.Body.SetReference.length; i++) {
+                                                        await callAsync(async () => await details[methodFunctions.Body.SetReference[i]](animationSpeedReference.current, bodyData, bodyIndex, referenceIndex, methodIndex, currentItemId), forcedToStopAnimationReference.current);
+                                                    }
                                                 }
-                                                for(let i = 0; i < methodFunctions.Body.SetReference.length; i++){
-                                                    await callAsync(async () => await details[methodFunctions.Body.SetReference[i]](animationSpeedReference.current, bodyData, bodyIndex, referenceIndex, methodIndex, currentItemId), forcedToStopAnimationReference.current);;
-                                                }
+                                            } else {
+                                                throw new Error('props is not defined')
                                             }
-                                        }
-                                        else{
-                                            throw new Error('props is not defined')
+                                        } catch (e) {
                                         }
                                     }
-                                    catch(e){}
-                                }
-                                if(connectorType === 'toConnector' && (bodyData[bodyIndex].reference[referenceIndex].enhancementDescription || bodyData[bodyIndex].reference[referenceIndex].enhancementContent)){
-                                    let bIndex: number;
-                                    if(bodyData[bodyIndex - 1]){
-                                        bIndex = bodyData[bodyIndex - 1].deleteKey ? bodyIndex - 1 : bodyIndex;
-                                    }
-                                    else{
-                                        bIndex = bodyIndex;
-                                    }
-                                    await callAsync(async () => await details.clickOnReferenceElements(animationSpeedReference.current, bIndex), forcedToStopAnimationReference.current);
-                                    if(bodyData[bodyIndex].reference[referenceIndex].enhancementDescription){
-                                        await callAsync(async () => await details.changeReferenceDescription(animationSpeedReference.current, bodyData, bodyIndex, referenceIndex), forcedToStopAnimationReference.current);
-                                    }
-                                    if(bodyData[bodyIndex].reference[referenceIndex].enhancementContent){
-                                        await callAsync(async () => await details.changeReferenceContent(animationSpeedReference.current, bodyData, bodyIndex, referenceIndex), forcedToStopAnimationReference.current);
+                                    if (connectorType === 'toConnector' && (bodyData[bodyIndex].reference[referenceIndex].enhancementDescription || bodyData[bodyIndex].reference[referenceIndex].enhancementContent)) {
+                                        let bIndex: number;
+                                        if (bodyData[bodyIndex - 1]) {
+                                            bIndex = bodyData[bodyIndex - 1].deleteKey ? bodyIndex - 1 : bodyIndex;
+                                        } else {
+                                            bIndex = bodyIndex;
+                                        }
+                                        await callAsync(async () => await details.clickOnReferenceElements(animationSpeedReference.current, bIndex), forcedToStopAnimationReference.current);
+                                        if (bodyData[bodyIndex].reference[referenceIndex].enhancementDescription) {
+                                            await callAsync(async () => await details.changeReferenceDescription(animationSpeedReference.current, bodyData, bodyIndex, referenceIndex), forcedToStopAnimationReference.current);
+                                        }
+                                        if (bodyData[bodyIndex].reference[referenceIndex].enhancementContent) {
+                                            await callAsync(async () => await details.changeReferenceContent(animationSpeedReference.current, bodyData, bodyIndex, referenceIndex), forcedToStopAnimationReference.current);
+                                        }
                                     }
                                 }
+                            } else {
+                                await callAsync(async () => await details.clickSubmitButtonToAddValue(animationSpeedReference.current, bodyIndex), forcedToStopAnimationReference.current);
                             }
                         }
-                        else{
-                            await callAsync(async () => await details.clickSubmitButtonToAddValue(animationSpeedReference.current, bodyIndex), forcedToStopAnimationReference.current);
-                        }
                     }
+                    await callAsync(async () => await details.closeBodyDialog(animationSpeedReference.current), forcedToStopAnimationReference.current);
                 }
-                await callAsync(async () => await details.closeBodyDialog(animationSpeedReference.current), forcedToStopAnimationReference.current);
+                if (refs.animationData.response) {
+                    await callAsync(async () => await details.showResponse(animationSpeedReference.current), forcedToStopAnimationReference.current);
+                }
             }
-            if(refs.animationData.response){
-                await callAsync(async () => await details.showResponse(animationSpeedReference.current), forcedToStopAnimationReference.current);
-            }
+        } catch(e) {
+            console.log(e);
         }
     }
 
@@ -506,7 +522,7 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
     }
     return (
         <ModalContext.Provider value={{ isModal: true }}>
-            {isAnimationForcedToStop ? <Loading/> :
+            {isAnimationForcedToStop ? <div style={{marginTop: '10%'}}><Loading/></div> :
                 <FormConnectionSvg
                     ref={ref}
                     data={{readOnly: false}}

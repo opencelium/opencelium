@@ -147,6 +147,11 @@ const connectionReducers = (isModal: boolean = false) => {
   const reducers: SliceCaseReducers<ConnectionState> = {
     setIsAnimationForcedToStop: (state, action: PayloadAction<boolean>) => {
       state.isAnimationForcedToStop = action.payload;
+      if(action.payload){
+        //state.animationSpeed = 0;
+      } else{
+        //state.animationSpeed = AnimationFunctionSteps.DefaultSpeed;
+      }
     },
     setCurrentConnection: (state, action: PayloadAction<any>) => {
       state.currentConnection = action.payload;
