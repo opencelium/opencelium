@@ -36,7 +36,7 @@ public class NotificationResource {
         this.recipients = eventNotification.getEventRecipients().stream()
                 .map(EventRecipient::getDestination)
                 .collect(Collectors.toList());
-        if (this.notificationType.equalsIgnoreCase(NotifyTool.SLACK.toString())) {
+        if (this.notificationType.equalsIgnoreCase(NotifyTool.TEAMS.toString())) {
             String[] teamChannel = this.recipients.get(0).split(";");
             this.team = teamChannel[0];
             this.channel = teamChannel[1];
