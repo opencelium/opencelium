@@ -335,7 +335,7 @@ const animationData: IAnimationData = {
             rightStatement: {
               rightParam: "i-doit"
             }
-          } 
+          }
         },
         {
           index: "2_0_0",
@@ -359,7 +359,7 @@ const animationData: IAnimationData = {
             },
             {
               functionId: "showPopoverForBodyAddKeysButton",
-              text: "For ConfigItemID we Create a reference"
+              text: "For ConfigItemID we create a reference"
             },
             {
               functionId: "clickOnReferenceElements",

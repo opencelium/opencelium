@@ -14,6 +14,43 @@
  */
 
 import { ITheme } from "@style/Theme";
+import {
+  DetailsForOperatorsMethodProps
+} from "@change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/interfaces/IDetailsForOperators";
+import {
+  IProcessBodyActValueButton, IProcessBodyActValueButtonProps,
+  IProcessBodyAddValueProps,
+  IProcessBodyDeleteKeyProps,
+  IProcessBodyKeyNotExistProps, IProcessBodySetReferenceProps,
+  IProcessHeaderProps,
+  IProcessLabelProps, IProcessUrlProps
+} from "@change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/interfaces/IDetailsForProcess";
+
+interface IfOperatorFunctions {
+  LeftExpression: DetailsForOperatorsMethodProps[],
+  RelationalOperator: DetailsForOperatorsMethodProps,
+  RightExpression: {
+    PropertyExpression: DetailsForOperatorsMethodProps[],
+    RestExpression: DetailsForOperatorsMethodProps[],
+  }
+}
+interface LoopOperatorFunctions {
+  LeftExpression: DetailsForOperatorsMethodProps[],
+  RelationalOperator: DetailsForOperatorsMethodProps,
+  RightExpression: DetailsForOperatorsMethodProps[],
+}
+
+interface MethodFunctions {
+  Label: IProcessLabelProps[],
+  Url: IProcessUrlProps[],
+  Header: IProcessHeaderProps[],
+  Body: {
+    KeyNotExist: IProcessBodyKeyNotExistProps[],
+    DeleteKey: IProcessBodyDeleteKeyProps[],
+    AddValue: (IProcessBodyAddValueProps | IProcessBodyActValueButtonProps)[],
+    SetReference: IProcessBodySetReferenceProps[],
+  }
+}
 
 interface HelpBlockProps {
   theme?: ITheme;
@@ -144,5 +181,6 @@ interface IAnimationData {
 
 export {
   HelpBlockProps, HelpBlockStyledProps, ConnectorPanelType,
-  IAnimationData,
+  IAnimationData, IfOperatorFunctions, LoopOperatorFunctions,
+  MethodFunctions,
 };

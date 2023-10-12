@@ -13,29 +13,40 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import { withTheme } from "styled-components";
 
 import { ContentItemProps } from "./interfaces";
 import { ContentItemStyled } from "./styles";
 
 import { useAppDispatch } from "@application/utils/store";
-import { setAnimationPreviewPanelVisibility, setVideoAnimationName, setIsAnamationNotFoud } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { setAnimationPreviewPanelVisibility, setVideoAnimationName, setIsAnimationNotFound, setIsAnimationForcedToStop } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import animationData from "../../AnimationData";
+import {Connection} from "@root/classes/Connection";
 
 const ContentItem: FC<ContentItemProps> = (props) => {
   const { animationImage, animationTitle, animationName } = props;
+    const { isAnimationForcedToStop, videoAnimationName } = Connection.getReduxState();
 
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+      if(isAnimationForcedToStop && videoAnimationName === animationName){
+          setTimeout(() => {
+              dispatch(setIsAnimationForcedToStop(false));
+          }, 2000);
+      }
+  }, [isAnimationForcedToStop]);
 
   return (
     <ContentItemStyled onClick={() => {
       if(!animationData[animationName]){
-        dispatch(setIsAnamationNotFoud(true))
+        dispatch(setIsAnimationNotFound(true))
       }
       else{
-        dispatch(setAnimationPreviewPanelVisibility(false))
-        dispatch(setVideoAnimationName(animationName))
+        dispatch(setIsAnimationForcedToStop(true));
+        dispatch(setAnimationPreviewPanelVisibility(false));
+        dispatch(setVideoAnimationName(animationName));
       }
     }}>
       <p>{animationTitle}</p>

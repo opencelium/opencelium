@@ -16,9 +16,11 @@
 export interface TeamModel{
     id: string,
     name: string,
+    description: string,
 }
 
 export interface TeamChannelModel{
     id: string,
     name: string,
+    description: string,
 }

@@ -164,17 +164,24 @@ opencelium:
     update:
       online:
         url: { insert url where portal service is located }
+###########################################################################
+#                                                                         #
+#   Configuration for Notification                                        #
+#                                                                         #
+#   Teams: https://learn.microsoft.com/en-us/graph/auth/auth-concepts     #
+#   Slack: https://api.slack.com/messaging/webhooks                       #
+#                                                                         #
+###########################################################################
   notification:
     tools:
+      slack:
+        webhook:
       teams:
-        grant_type: refresh_token
-        client_id: a88b0cb6-8026-44af-ab6c-3f144605a4a2
-        client_secret: mux7Q~61v3jA7cLt2wJTe9GiE039ynXHd4VRH
-        refresh_token: 0.ASAACGT_xLM3Oku76wQUrsfO77YMi6gmgK9Eq2w_FEYFpKLkABY.AgABAAEAAAAtyolDObpQQ5VtlI4uGjEPAgDs_wUA9P9c--5CRqd-2-AQGtnnNPIiXTGSIbrpVXGip3CbQYaaGOZUOjOe_wiMJvI3BD3N7p7ODMdXDKnKs_tRZiC9j8mkCpHga6owr-6f6rfo46rBuSmTAbuHic4icWhopX0r2VYFBtxK0xHxiDaAAclRw7XV9qrABkZ7aHhTzfmySFlUR7oj_ih1WbtohhGAknvlyvLlwEGXdVMQwmY-w1AqB5ikdFIw4CPW5jI2YWXcQPlCV0HWqNin27E-PhuzCsmUizh5s9F-2DYonJAlmdAjC2TMPYuUGBu8gIUzdRYUH90YI0cEWTUJfGgIP3xLZj7TQ9UByK5L4SjhTWyFtHN6xFX4QwlG_7hG-3E9sBkEOP_j_PldEes6Lj3eNJ-crBHm2I0PPeoFWgQINxSGdEcWnMC82G2Ntkyo5ETG1uhCGScaxLe76QKXSvqP-DMzz8GM3oQy4BZUpx4BSTUQlSrrjTJuL7wtQoU_fXj6ORqRoKiTrfaP9KIkhGZ2s3CWvUMY8hWuw3xMgl_NaUICuT1FCTw_t5OVwZW-ZV12tlVm812Ywj-yUYrYSs8yg12DQ3saMf53vzLNPJFOhcrodvK4uDSiQj-rmDyUvDqPwPlQphp31BWyvm_j_6glpGTtXBMUWDueojfSwc3bFtuaTy4oCjDw-1u-0QVyBO-jsuC_kkTac0QeEMqsEtP3pUPvr4c7jtnkIx68095ZDCkLwKp6uxWr2aqNIVwlar2KMba0163jKOjHp4za7XmYnB1OOGi-9sXvCEaDgpyV
-        tenant: c4ff6408-37b3-4b3a-bbeb-0414aec7ceef
-        channel: 19:6e82d697a36c49e8964b1295dc1f401f@thread.tacv2
-        teams: 48db6be0-4e1e-494a-a20e-83955faa1a90
-#        token: token
+        grant_type:
+        client_id:
+        client_secret:
+        refresh_token:
+        tenant:
 #  rest_template:
 #      proxy:
 #        host: 127.0.0.1

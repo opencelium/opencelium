@@ -16,21 +16,22 @@
 import {AxiosResponse} from "axios";
 import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
-import { ITeams } from "../interfaces/ITeams";
+import {GetAllChannelsResponse, GetAllTeamsResponse, ITeams} from "../interfaces/ITeams";
 import {TeamChannelModel, TeamModel} from "@entity/schedule/requests/models/Teams";
 
 
 export class TeamsRequest extends Request implements ITeams{
 
     constructor(settings?: Partial<IRequestSettings>) {
-        super({url: 'teams', ...settings});
+        super({url: 'message/tools/teams/team', ...settings});
     }
 
-    async getAllTeams(): Promise<AxiosResponse<TeamModel[]>>{
-        return super.get<TeamModel[]>();
+    async getAllTeams(): Promise<AxiosResponse<GetAllTeamsResponse>>{
+        this.endpoint = "/all";
+        return super.get<GetAllTeamsResponse>();
     }
 
-    async getAllChannelsByTeam(): Promise<AxiosResponse<TeamChannelModel[]>>{
-        return super.get<TeamChannelModel[]>();
+    async getAllChannelsByTeam(): Promise<AxiosResponse<GetAllChannelsResponse>>{
+        return super.get<GetAllChannelsResponse>();
     }
 }

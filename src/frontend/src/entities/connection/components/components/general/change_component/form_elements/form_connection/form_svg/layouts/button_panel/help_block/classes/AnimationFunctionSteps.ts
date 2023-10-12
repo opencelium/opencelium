@@ -4,6 +4,7 @@ import AdditionalFunctions from "./AdditionalFunctions";
 import { setFocusById } from "@application/utils/utils";
 import RefFunctions
   from "@change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/RefFunctions";
+import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 
 export default class AnimationFunctionSteps {
   ref: any;
@@ -63,7 +64,7 @@ export default class AnimationFunctionSteps {
 
   async createProcessOrOperator(animationProps: any, animationData: any, connectorType: string, prevElementType: string, animationSpeed: number) {
     try{
-
+      const localConnection = CConnection.createConnection(animationProps.connection);
       const createPanelRight = document.querySelector(`#create_panel_right`);
       if(createPanelRight && createPanelRight.nextElementSibling){
         const after = animationData.after;
@@ -79,7 +80,7 @@ export default class AnimationFunctionSteps {
             for(let i = 0; i < svgItems.length; i++){
               if(svgItems[i].id === `${connectorType}_${after}`){
 
-                currentItem = animationProps.connection.fromConnector.getSvgElementByIndex(after)
+                currentItem = localConnection.fromConnector.getSvgElementByIndex(after)
 
                 break;
               }

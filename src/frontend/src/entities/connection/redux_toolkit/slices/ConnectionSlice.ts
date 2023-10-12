@@ -52,6 +52,7 @@ export const LogPanelHeight = {
 };
 
 export interface ConnectionState extends ICommonState {
+  isAnimationForcedToStop: boolean,
   isAnimationNotFound: boolean;
   animationSpeed: number;
   isSavePanelVisible: boolean;
@@ -98,6 +99,7 @@ export interface ConnectionState extends ICommonState {
 }
 
 let initialState: ConnectionState = {
+  isAnimationForcedToStop: false,
   isAnimationNotFound: false,
   animationSpeed: AnimationFunctionSteps.DefaultSpeed,
   isSavePanelVisible: false,
@@ -143,6 +145,14 @@ let initialState: ConnectionState = {
 
 const connectionReducers = (isModal: boolean = false) => {
   const reducers: SliceCaseReducers<ConnectionState> = {
+    setIsAnimationForcedToStop: (state, action: PayloadAction<boolean>) => {
+      state.isAnimationForcedToStop = action.payload;
+      if(action.payload){
+        //state.animationSpeed = 0;
+      } else{
+        //state.animationSpeed = AnimationFunctionSteps.DefaultSpeed;
+      }
+    },
     setCurrentConnection: (state, action: PayloadAction<any>) => {
       state.currentConnection = action.payload;
     },
@@ -179,7 +189,7 @@ const connectionReducers = (isModal: boolean = false) => {
     setAnimationSpeed: (state, action: PayloadAction<number>) => {
       state.animationSpeed = action.payload;
     },
-    setIsAnamationNotFoud: (state, action: PayloadAction<boolean>) => {
+    setIsAnimationNotFound: (state, action: PayloadAction<boolean>) => {
       state.isAnimationNotFound = action.payload;
     },
     setTestingConnection: (state, action: PayloadAction<boolean>) => {
@@ -608,6 +618,7 @@ export const connectionSlice = createSlice({
 
 
 export const {
+  setIsAnimationForcedToStop,
   setCurrentConnection,
   addCurrentLog,
   shouldNotDrawLogMessage,
@@ -631,7 +642,7 @@ export const {
   setSavePanelVisibility,
   setTemplatePanelVisibility,
   setAnimationSpeed,
-  setIsAnamationNotFoud
+  setIsAnimationNotFound
 } = connectionSlice.actions;
 
 
