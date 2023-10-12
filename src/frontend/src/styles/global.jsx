@@ -58,5 +58,8 @@ export const Global = createGlobalStyle`
     #notificationTemplateContent>.ace_scroller.ace_scroll-left:after{
         box-shadow: none !important;
     }
+    .tooltip{
+        z-index: 1000000 !important;
+    }
     ${SlickCarousel}
 `;

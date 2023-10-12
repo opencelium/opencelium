@@ -19,12 +19,12 @@ import {Connection} from "@root/classes/Connection";
 import {ModalConnection} from "@root/classes/ModalConnection";
 import {AnimationOverlayStyled, PauseOverlayContainer} from './styles';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import {setAnimationPaused} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import {setAnimationPaused, setIsEditableAnimation} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import {useAppDispatch} from "@application/utils/store";
 const AnimationOverlay: FC = () => {
     const dispatch = useAppDispatch();
     const { videoAnimationName } = Connection.getReduxState();
-    const { isAnimationPaused } = ModalConnection.getReduxState();
+    const { isAnimationPaused, isEditableAnimation } = ModalConnection.getReduxState();
     const [onMouseOverContainer, setOnMouseOverContainer] = useState<boolean>(false);
     const onMouseOver = () => {
         if(!onMouseOverContainer){
@@ -36,12 +36,19 @@ const AnimationOverlay: FC = () => {
             setOnMouseOverContainer(false);
         }
     }
+    const onClick = () => {
+        if(!isAnimationPaused){
+            dispatch(setAnimationPaused(true));
+        } else{
+            dispatch(setIsEditableAnimation(true));
+        }
+    }
     return(
         <React.Fragment>
-            <PauseOverlayContainer isVisible={!!(!isAnimationPaused && videoAnimationName)} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave} onClick={() => dispatch(setAnimationPaused(!isAnimationPaused))}>
-                <TooltipFontIcon size={50} value={'pause'} tooltip={'Pause'}/>
+            <PauseOverlayContainer isVisible={!!((!isAnimationPaused || !isEditableAnimation) && videoAnimationName)} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave} onClick={onClick}>
+                <TooltipFontIcon size={50} value={!isAnimationPaused ? 'pause' : 'edit'} tooltip={!isAnimationPaused ? 'Pause' : 'Edit'}/>
             </PauseOverlayContainer>
-            <AnimationOverlayStyled isVisible={!!(!isAnimationPaused && videoAnimationName)} onMouseOverContainer={onMouseOverContainer}/>
+            <AnimationOverlayStyled isVisible={!!((!isAnimationPaused || !isEditableAnimation) && videoAnimationName)} onMouseOverContainer={onMouseOverContainer}/>
         </React.Fragment>
     )
 }

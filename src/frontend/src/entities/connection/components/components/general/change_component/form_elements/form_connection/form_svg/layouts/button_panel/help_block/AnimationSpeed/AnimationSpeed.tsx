@@ -23,6 +23,7 @@ import { setAnimationSpeed } from "@entity/connection/redux_toolkit/slices/Conne
 import { ColorTheme } from "@style/Theme";
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
 import AnimationFunctionSteps from "../classes/AnimationFunctionSteps";
+import {ModalConnection} from "@root/classes/ModalConnection";
 
 
 const AnimationSpeedSlider: FC<AnimationSpeedSliderProps> = (props) => {
@@ -32,7 +33,10 @@ const AnimationSpeedSlider: FC<AnimationSpeedSliderProps> = (props) => {
   const {animationSpeed} = Connection.getReduxState();
 
   const [animationSpeedLabel, setAnimationSpeedLabel] = useState('1x');
+  const { isEditableAnimation } = ModalConnection.getReduxState();
 
+  const isEditableAnimationReference: any = React.useRef();
+  isEditableAnimationReference.current = isEditableAnimation;
   const changAnimationSpeed = (speed: number) => {
     let data: any = {};
     const speed_05x = AnimationFunctionSteps.DefaultSpeed * 2;
@@ -74,6 +78,7 @@ const AnimationSpeedSlider: FC<AnimationSpeedSliderProps> = (props) => {
           color={ColorTheme.Blue}
           padding="2px"
           handleClick={() => changAnimationSpeed(animationSpeed)}
+          isDisabled={isEditableAnimationReference.current}
         />
       <div className="speed_label">{animationSpeedLabel}</div>
     </AnimationSpeedSliderStyled>

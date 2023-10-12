@@ -26,7 +26,7 @@ import Dialog from "@app_component/base/dialog/Dialog";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import Content from "./content/Content";
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
-import {setAnimationPaused } from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import {setAnimationPaused, setIsEditableAnimation} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import { Connector } from "@entity/connector/classes/Connector";
 import {ModalConnection} from "@root/classes/ModalConnection";
 import { Connection } from "@entity/connection/classes/Connection";
@@ -50,7 +50,7 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
   const { gettingInvokers } = Invoker.getReduxState();
   const [ isVisible, setIsVisible ] = useState(false);
   const { isButtonPanelOpened, videoAnimationName, animationSpeed, isAnimationNotFound, isAnimationForcedToStop } = Connection.getReduxState();
-  const { isAnimationPaused: isPaused, isDetailsOpened } = ModalConnection.getReduxState();
+  const { isAnimationPaused: isPaused, isEditableAnimation } = ModalConnection.getReduxState();
 
   const [popoverProps, setPopoverProps] = useState<AnimationPopoverProps>(null);
 
@@ -60,6 +60,8 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
   const isPausedReference: any = React.useRef();
   isPausedReference.current = isPaused;
 
+  const isEditableAnimationReference: any = React.useRef();
+  isEditableAnimationReference.current = isEditableAnimation;
   const animationSpeedReference: any = React.useRef();
   animationSpeedReference.current = animationSpeed;
 
@@ -106,8 +108,9 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
         >
           {ReactDOM.createPortal(
             <React.Fragment>
-              <div className={styles.animation_controls}>
+              <div style={{display: !!videoAnimationName ? 'block' : 'none'}} className={styles.animation_controls}>
                 <TooltipButton
+                  isDisabled={isEditableAnimationReference.current}
                   size={TextSize.Size_40}
                   position={"bottom"}
                   icon={isPausedReference.current ? "play_arrow" : "pause"}
@@ -119,7 +122,20 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
                   padding="2px"
                   handleClick={() => dispatch(setAnimationPaused(!isPausedReference.current))}
                 />
-              <AnimationSpeed/>
+                  <AnimationSpeed/>
+                  <TooltipButton
+                      size={TextSize.Size_40}
+                      position={"bottom"}
+                      icon={"edit"}
+                      tooltip={"Edit"}
+                      isDisabled={!isPausedReference.current}
+                      target={`animation_edit_button`}
+                      hasBackground={true}
+                      background={ColorTheme.White}
+                      color={ColorTheme.Blue}
+                      padding="2px"
+                      handleClick={() => dispatch(setIsEditableAnimation(!isEditableAnimationReference.current))}
+                  />
               </div>
               <AnimationOverlay/>
             </React.Fragment>,

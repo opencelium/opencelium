@@ -23,7 +23,12 @@ import FormConnectionSvg from "@entity/connection/components/components/general/
 import { ModalContext } from "@entity/connection/components/components/general/change_component/FormSection";
 import animationData from "./AnimationData";
 import CConnection from "@classes/content/connection/CConnection";
-import {setAnimationPaused, setModalCurrentTechnicalItem, toggleModalDetails } from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import {
+    setAnimationPaused,
+    setIsEditableAnimation,
+    setModalCurrentTechnicalItem,
+    toggleModalDetails
+} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/content/connection/CConnectorItem";
 import { Connector } from "@entity/connector/classes/Connector";
 import {ModalConnection} from "@root/classes/ModalConnection";
@@ -137,6 +142,8 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
             }
             setConnectorType('fromConnector')
             setIndex(0);
+            dispatch(setIsEditableAnimation(false));
+            dispatch(setAnimationPaused(false));
             if (isPausedReference.current) {
                 dispatch(setAnimationPaused(false))
             }

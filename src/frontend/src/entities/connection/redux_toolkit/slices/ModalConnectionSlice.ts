@@ -22,6 +22,7 @@ import {COLOR_MODE} from "@classes/content/connection_overview_2/CSvg";
 import { LogPanelHeight } from "./ConnectionSlice";
 
 export interface ConnectionState extends ICommonState {
+  isEditableAnimation: boolean;
   isAnimationPaused: boolean;
   testConnection: any;
   currentTechnicalItem: any;
@@ -40,6 +41,7 @@ export interface ConnectionState extends ICommonState {
 }
 
 let initialState: ConnectionState = {
+  isEditableAnimation: false,
   isAnimationPaused: false,
   moveTestButton: 0,
   currentTechnicalItem: null,
@@ -62,6 +64,9 @@ export const modalConnectionSlice = createSlice({
   name: "modal_connection",
   initialState,
   reducers: {
+    setIsEditableAnimation: (state, action: PayloadAction<boolean>) => {
+      state.isEditableAnimation = action.payload;
+    },
     setAnimationPaused: (state, action: PayloadAction<boolean>) => {
       state.isAnimationPaused = action.payload;
     },
@@ -216,6 +221,7 @@ export const {
     setModalJustDeletedItem,
     setModalTestingConnection,
     setAnimationPaused,
+    setIsEditableAnimation,
 } = modalConnectionSlice.actions;
 
 
