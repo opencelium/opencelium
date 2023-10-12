@@ -70,19 +70,35 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         dispatch(getNotificationRecipients());
         dispatch(getAllTools());
     },[]);
-        useEffect(() => {
-            if(notification.typeSelect){
-                dispatch(getNotificationTemplatesByType(notification.typeSelect.value.toString()));
-                if(notification.typeSelect.value === 'teams'){
-                    dispatch(getAllTeams());
-                }
+    useEffect(() => {
+        if(notification.typeSelect){
+            dispatch(getNotificationTemplatesByType(notification.typeSelect.value.toString()));
+            if(notification.typeSelect.value === 'teams'){
+                dispatch(getAllTeams());
             }
-        }, [notification.typeSelect])
+        }
+    }, [notification.typeSelect])
     useEffect(() => {
         if(notification.teamSelect && notification.teamSelect.value){
             dispatch(getAllChannelsByTeam(notification.teamSelect.value.toString()));
         }
     }, [notification.teamSelect])
+    useEffect(() => {
+        if(gettingAllTeams === API_REQUEST_STATE.FINISH){
+            if(currentNotification.team){
+                //@ts-ignore
+                notification.updateTeamSelect(Teams.getTeamOptionById(currentNotification.team, teams));
+            }
+        }
+    }, [gettingAllTeams])
+    useEffect(() => {
+        if(gettingAllChannelsByTeam === API_REQUEST_STATE.FINISH){
+            if(currentNotification.channel){
+                //@ts-ignore
+                notification.updateChannelSelect(Teams.getChannelOptionById(currentNotification.channel, channels));
+            }
+        }
+    }, [gettingAllChannelsByTeam])
     useEffect(() => {
         if (didMount.current) {
             if(error === null && (addingNotification === API_REQUEST_STATE.FINISH || updatingNotification === API_REQUEST_STATE.FINISH)){

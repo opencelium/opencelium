@@ -37,6 +37,14 @@ export default class Teams {
         });
     }
 
+    static getChannelOptionById(id: string, channels: TeamChannelModel[]): any {
+        const channel = channels.find(channel => channel.id === id);
+        return {
+            label: channel.name,
+            id: channel.id,
+        }
+    }
+
     static getChannelsOptionsForSelect(channels: TeamChannelModel[]): OptionProps[]{
         return channels.map(channel => {
             return {label: channel.name, value: channel.id}
