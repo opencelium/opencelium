@@ -59,7 +59,7 @@ const prepareConnection = (connection: any, connectors: any, invokers: any) => {
 
 const callAsync = async (func: any, isMount: boolean) => {
     if(isMount){
-        func();
+        await func();
     }
 }
 
@@ -74,23 +74,24 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
     const [ index, updateIndex ] = useState(0);
     const [connectorType, updateConnectorType] = useState<ConnectorPanelType>("fromConnector");
 
+    const ref = React.useRef(null);
+    const mountedRef = React.useRef(true);
     const setAnimationProps = (data: any) => {
-        if (ref.current) {
+        if (mountedRef.current) {
             updateAnimationProps(data);
         }
     }
     const setIndex = (data: any) => {
-        if (ref.current) {
+        if (mountedRef.current) {
             updateIndex(data);
         }
     }
     const setConnectorType = (data: ConnectorPanelType) => {
-        if (ref.current) {
+        if (mountedRef.current) {
             updateConnectorType(data);
         }
     }
 
-    const ref = React.useRef(null);
 
     const videoAnimationNameReference: any = React.useRef();
     videoAnimationNameReference.current = videoAnimationName;
@@ -103,17 +104,17 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
 
     useEffect(() => {
         return () => {
-            ref.current = false
+            mountedRef.current = false
         }
-    })
+    }, [])
 
     const showDetailsForOperatorIf = async (condition: any) => {
         const refs: any = {};
         refs.animationData = animationData[videoAnimationName][connectorType].items[index];
         const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
-        await callAsync(async () => await AdditionalFunctions.delay(animationSpeedReference.current), ref.current)
+        await callAsync(async () => await AdditionalFunctions.delay(animationSpeedReference.current), mountedRef.current)
         if(refs.animationData.delete){
-            await callAsync(async () => await details.deleteOperator(animationSpeedReference.current), ref.current);
+            await callAsync(async () => await details.deleteOperator(animationSpeedReference.current), mountedRef.current);
         }
         else{
             if(condition){
@@ -127,17 +128,17 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
                     }
                 }
                 for(let i = 0; i < operatorFunctions.LeftExpression.length; i++){
-                    await callAsync(async () => await details[operatorFunctions.LeftExpression[i]](animationSpeedReference.current), ref.current);
+                    await callAsync(async () => await details[operatorFunctions.LeftExpression[i]](animationSpeedReference.current), mountedRef.current);
                 }
-                await callAsync(async () => await details[operatorFunctions.RelationalOperator](animationSpeedReference.current), ref.current);
+                await callAsync(async () => await details[operatorFunctions.RelationalOperator](animationSpeedReference.current), mountedRef.current);
                 if(condition.rightStatement) {
                     if (condition.rightStatement.property) {
                         for (let i = 0; i < operatorFunctions.RightExpression.PropertyExpression.length; i++) {
-                            await callAsync(async () => await details[operatorFunctions.RightExpression.PropertyExpression[i]](animationSpeedReference.current), ref.current);
+                            await callAsync(async () => await details[operatorFunctions.RightExpression.PropertyExpression[i]](animationSpeedReference.current), mountedRef.current);
                         }
                     }
                     for (let i = 0; i < operatorFunctions.RightExpression.RestExpression.length; i++) {
-                        await callAsync(async () => await details[operatorFunctions.RightExpression.RestExpression[i]](animationSpeedReference.current), ref.current);
+                        await callAsync(async () => await details[operatorFunctions.RightExpression.RestExpression[i]](animationSpeedReference.current), mountedRef.current);
                     }
                 }
                 if(conditionRef){
@@ -151,9 +152,9 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
         const refs: any = {};
         refs.animationData = animationData[videoAnimationName][connectorType].items[index];
         const details = new DetailsForOperators(ref, setPopoverProps, condition, refs.animationData);
-        await callAsync(async () => await AdditionalFunctions.delay(animationSpeedReference.current), ref.current);
+        await callAsync(async () => await AdditionalFunctions.delay(animationSpeedReference.current), mountedRef.current);
         if(refs.animationData.delete){
-            await callAsync(async () => await details.deleteOperator(animationSpeedReference.current), ref.current);
+            await callAsync(async () => await details.deleteOperator(animationSpeedReference.current), mountedRef.current);
         }
         else{
             if(condition){
@@ -164,12 +165,12 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
                     RightExpression: ["changeRightMethod", "changeRightParam"],
                 };
                 for(let i = 0; i < operatorFunctions.LeftExpression.length; i++){
-                    await callAsync(async () => await details[operatorFunctions.LeftExpression[i]](animationSpeedReference.current), ref.current);;
+                    await callAsync(async () => await details[operatorFunctions.LeftExpression[i]](animationSpeedReference.current), mountedRef.current);;
                 }
-                await callAsync(async () => await details[operatorFunctions.RelationalOperator](animationSpeedReference.current), ref.current);;
+                await callAsync(async () => await details[operatorFunctions.RelationalOperator](animationSpeedReference.current), mountedRef.current);;
                 if(condition.rightStatement){
                     for(let i = 0; i < operatorFunctions.RightExpression.length; i++){
-                        await callAsync(async () => await details[operatorFunctions.RightExpression[i]](animationSpeedReference.current), ref.current);;
+                        await callAsync(async () => await details[operatorFunctions.RightExpression[i]](animationSpeedReference.current), mountedRef.current);;
                     }
                 }
                 if(conditionRef){

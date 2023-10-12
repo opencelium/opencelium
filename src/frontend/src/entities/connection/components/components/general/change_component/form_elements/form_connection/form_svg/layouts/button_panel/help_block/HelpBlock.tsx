@@ -47,7 +47,6 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
   const dispatch = useAppDispatch();
   const { connectors } = Connector.getReduxState();
   const { gettingInvokers } = Invoker.getReduxState();
-  const [ isLoading, setIsLoading] = useState<boolean>(false);
   const [ isVisible, setIsVisible ] = useState(false);
   const { isButtonPanelOpened, videoAnimationName, animationSpeed, isAnimationNotFound } = Connection.getReduxState();
   const { isAnimationPaused: isPaused, isDetailsOpened } = ModalConnection.getReduxState();
@@ -126,10 +125,10 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
           {gettingInvokers === API_REQUEST_STATE.FINISH &&
             <React.Fragment>
               <ModalContext.Provider value={{ isModal: true }}>
-                  <AnimationEditor
-                      setPopoverProps={setPopoverProps}
-                      isVisible={isVisible}
-                  />
+                <AnimationEditor
+                    setPopoverProps={setPopoverProps}
+                    isVisible={isVisible}
+                />
               </ModalContext.Provider>
               <Content />
             </React.Fragment>
