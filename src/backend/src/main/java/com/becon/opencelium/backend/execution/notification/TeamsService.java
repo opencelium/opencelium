@@ -45,7 +45,7 @@ public class TeamsService implements CommunicationTool {
     @Value("${opencelium.notification.tools.teams.refresh_token}")
     private String refresh_token;
 
-    @Value("${opencelium.notification.tools.teams.refresh_token}")
+    @Value("${opencelium.notification.tools.teams.tenant}")
     private String tenant;
 
 
@@ -80,7 +80,7 @@ public class TeamsService implements CommunicationTool {
 
     public TeamsDto getAllTeams() {
         String token = getToken(refresh_token);
-        HttpMethod method = HttpMethod.POST;
+        HttpMethod method = HttpMethod.GET;
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
@@ -95,7 +95,7 @@ public class TeamsService implements CommunicationTool {
 
     public TeamsDto getAllChannels(String teamId) {
         String token = getToken(refresh_token);
-        HttpMethod method = HttpMethod.POST;
+        HttpMethod method = HttpMethod.GET;
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
