@@ -36,10 +36,12 @@ public class NotificationResource {
         this.recipients = eventNotification.getEventRecipients().stream()
                 .map(EventRecipient::getDestination)
                 .collect(Collectors.toList());
-        if (this.notificationType.equalsIgnoreCase(NotifyTool.TEAMS.toString())) {
+        if (this.notificationType.equalsIgnoreCase(NotifyTool.TEAMS.toString()) && !recipients.isEmpty()) {
             String[] teamChannel = this.recipients.get(0).split(";");
-            this.team = teamChannel[0];
-            this.channel = teamChannel[1];
+            if (teamChannel.length == 2) {
+                this.team = teamChannel[0];
+                this.channel = teamChannel[1];
+            }
             recipients.clear();
         }
     }
