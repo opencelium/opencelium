@@ -32,7 +32,7 @@ const TestMethodButton = (props: any) => {
     <React.Fragment>
         <Col xs={4} className={styles.col}>{`Test Method:`}</Col>
         <Col xs={8} className={`${styles.col}`}>
-          <TooltipFontIcon onClick={() => setShowDialog()} size={11} value={<span className={styles.testMethod_icon} style={{fontFamily: theme.text.fontFamily}}>{`▶`}</span>} tooltip={'Open'}/>
+          <TooltipFontIcon onClick={() => setShowDialog()} size={14} value={<span className={styles.testMethod_icon} style={{fontFamily: theme.text.fontFamily}}>{`▶`}</span>} tooltip={'Open'}/>
         </Col>
       <Dialog
           actions={[

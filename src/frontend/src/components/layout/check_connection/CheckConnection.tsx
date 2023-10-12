@@ -68,7 +68,7 @@ const CheckConnectionComponent: FC =
         return (
             <Dialog
                 actions={[]}
-                active={checkingConnection === API_REQUEST_STATE.ERROR}
+                active={checkingConnection === API_REQUEST_STATE.ERROR && timerId === null}
                 toggle={exit}
                 title={''}
                 hasNoBody={true}

@@ -66,16 +66,16 @@ const Dialog: FC<DialogProps> =
                     {children}
                 </ModalBody>
             }
-            {hasNoBody ? children :
+            {!hasNoBody &&
                 <ModalFooter style={{borderTop: 'none'}} className={dialogTheme.footer}>
                     <ActionsStyled>
                         {
                             actions.map((action: ActionProps) => {
-                                return  <Button  
-                                            key={action.label} 
+                                return  <Button
+                                            key={action.label}
                                             isDisabled={action.isDisabled}
                                             color={action.isLoading ? ColorTheme.Blue : ''}
-                                            hasBackground={!action.isLoading} 
+                                            hasBackground={!action.isLoading}
                                             isLoading={action.isLoading}
                                             label={action.label}
                                             handleClick={action.onClick}
