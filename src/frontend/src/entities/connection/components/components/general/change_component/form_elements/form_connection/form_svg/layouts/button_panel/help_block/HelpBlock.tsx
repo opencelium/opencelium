@@ -41,6 +41,7 @@ import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
 import SyncInvokers from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_methods/SyncInvokers";
 import Shortcuts from "./shortcuts/Shortcuts";
 import AnimationEditor from './AnimationEditor';
+import AnimationOverlay from "./AnimationOverlay";
 
 
 const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, updateEntity}) => {
@@ -120,7 +121,7 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
                 />
               <AnimationSpeed/>
               </div>
-              <div className={!isPausedReference.current && videoAnimationName ? styles.animation_overlay : ''}/>
+              <AnimationOverlay/>
             </React.Fragment>,
             document.body
           )}
