@@ -23,7 +23,7 @@ export const getAllTeams = createAsyncThunk(
         try {
             const request = new TeamsRequest();
             const response = await request.getAllTeams();
-            return response.data;
+            return response.data.value;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -35,7 +35,7 @@ export const getAllChannelsByTeam = createAsyncThunk(
         try {
             const request = new TeamsRequest({endpoint: `/${teamId}/channel/all`});
             const response = await request.getAllChannelsByTeam();
-            return response.data;
+            return response.data.value;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

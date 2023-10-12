@@ -26,7 +26,7 @@ import {Notification} from "../../../classes/Notification";
 import {EVENT_TYPE, INotification} from "../../../interfaces/INotification";
 import {getNotificationRecipients} from "../../../redux_toolkit/action_creators/NotificationCreators";
 import {ScheduleNotificationFormProps} from "./interfaces";
-import {getAllTeams} from "@entity/schedule/redux_toolkit/action_creators/TeamsCreators";
+import {getAllChannelsByTeam, getAllTeams} from "@entity/schedule/redux_toolkit/action_creators/TeamsCreators";
 import Teams from "@entity/schedule/classes/Teams";
 import Tool from "@entity/schedule/classes/Tool";
 import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/ToolCreators";
@@ -66,14 +66,19 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         dispatch(getNotificationRecipients());
         dispatch(getAllTools());
     },[]);
-    useEffect(() => {
-        if(notification.typeSelect){
-            dispatch(getNotificationTemplatesByType(notification.typeSelect.value.toString()));
-            if(notification.typeSelect.value === 'teams'){
-                dispatch(getAllTeams());
+        useEffect(() => {
+            if(notification.typeSelect){
+                dispatch(getNotificationTemplatesByType(notification.typeSelect.value.toString()));
+                if(notification.typeSelect.value === 'teams'){
+                    dispatch(getAllTeams());
+                }
             }
+        }, [notification.typeSelect])
+    useEffect(() => {
+        if(notification.teamSelect && notification.teamSelect.value){
+            dispatch(getAllChannelsByTeam(notification.teamSelect.value.toString()));
         }
-    }, [notification.typeSelect])
+    }, [notification.teamSelect])
     useEffect(() => {
         if (didMount.current) {
             if(error === null && (addingNotification === API_REQUEST_STATE.FINISH || updatingNotification === API_REQUEST_STATE.FINISH)){
