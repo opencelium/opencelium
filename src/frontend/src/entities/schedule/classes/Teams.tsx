@@ -23,25 +23,35 @@ export default class Teams {
         return useAppSelector((state: RootState) => state.teamsReducer);
     }
 
+    static getLabelForOption(team: TeamModel): string {
+        return `${team.name} (${team.description})`;
+    }
+
     static getTeamOptionById(id: string, teams: TeamModel[]): any {
         const team = teams.find(team => team.id === id);
+        if(!team){
+            return null;
+        }
         return {
-            label: team.name,
-            id: team.id,
+            label: this.getLabelForOption(team),
+            value: team.id,
         }
     }
 
     static getTeamsOptionsForSelect(teams: TeamModel[]): OptionProps[]{
         return teams.map(team => {
-            return {label: `${team.name} (${team.description})`, value: team.id}
+            return {label: this.getLabelForOption(team), value: team.id}
         });
     }
 
     static getChannelOptionById(id: string, channels: TeamChannelModel[]): any {
         const channel = channels.find(channel => channel.id === id);
+        if(!channel){
+            return null;
+        }
         return {
             label: channel.name,
-            id: channel.id,
+            value: channel.id,
         }
     }
 

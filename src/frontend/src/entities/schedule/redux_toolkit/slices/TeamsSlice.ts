@@ -40,6 +40,12 @@ export const teamsSlice = createSlice({
     name: 'teams',
     initialState,
     reducers: {
+        clearAllTeams: (state) => {
+            state.teams = [];
+        },
+        clearAllChannels: (state) => {
+            state.channels = [];
+        },
     },
     extraReducers: {
         [getAllTeams.pending.type]: (state) => {
@@ -70,6 +76,7 @@ export const teamsSlice = createSlice({
 })
 
 export const {
+    clearAllTeams, clearAllChannels,
 } = teamsSlice.actions;
 
 export const actions = {

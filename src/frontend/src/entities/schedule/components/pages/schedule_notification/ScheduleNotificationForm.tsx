@@ -30,6 +30,8 @@ import {getAllChannelsByTeam, getAllTeams} from "@entity/schedule/redux_toolkit/
 import Teams from "@entity/schedule/classes/Teams";
 import Tool from "@entity/schedule/classes/Tool";
 import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/ToolCreators";
+import {clearAllChannels, clearAllTeams } from "@entity/schedule/redux_toolkit/slices/TeamsSlice";
+import {clearChannelFromCurrentNotification, clearCurrentNotification, clearTeamFromCurrentNotification } from "@entity/schedule/redux_toolkit/slices/NotificationSlice";
 
 
 const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
@@ -64,14 +66,23 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         _readOnly: isView,
     }, isAdd ? null : currentNotification);
     useEffect(() => {
+        dispatch(clearCurrentNotification());
         if(shouldFetchScheduleNotification){
-            notification.getById()
+            notification.getById();
         }
         dispatch(getNotificationRecipients());
         dispatch(getAllTools());
+        return () => {
+            dispatch(clearCurrentNotification());
+            dispatch(clearAllTeams());
+            dispatch(clearAllChannels());
+        }
     },[]);
     useEffect(() => {
         if(notification.typeSelect){
+            dispatch(clearAllTeams());
+            dispatch(clearAllChannels());
+            //dispatch(clearTeamFromCurrentNotification());
             dispatch(getNotificationTemplatesByType(notification.typeSelect.value.toString()));
             if(notification.typeSelect.value === 'teams'){
                 dispatch(getAllTeams());
@@ -80,22 +91,34 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     }, [notification.typeSelect])
     useEffect(() => {
         if(notification.teamSelect && notification.teamSelect.value){
+            dispatch(clearAllChannels());
+            if(currentNotification && notification.teamSelect.value !== currentNotification.team){
+                dispatch(clearChannelFromCurrentNotification());
+                //@ts-ignore
+                notification.updateChannelSelect(notification, null);
+            }
             dispatch(getAllChannelsByTeam(notification.teamSelect.value.toString()));
         }
     }, [notification.teamSelect])
     useEffect(() => {
         if(gettingAllTeams === API_REQUEST_STATE.FINISH){
-            if(currentNotification.team){
-                //@ts-ignore
-                notification.updateTeamSelect(Teams.getTeamOptionById(currentNotification.team, teams));
+            if(currentNotification && currentNotification.team){
+                const selectedTeam = Teams.getTeamOptionById(currentNotification.team, teams);
+                if(selectedTeam){
+                    //@ts-ignore
+                    notification.updateTeamSelect(notification, selectedTeam);
+                }
             }
         }
     }, [gettingAllTeams])
     useEffect(() => {
         if(gettingAllChannelsByTeam === API_REQUEST_STATE.FINISH){
-            if(currentNotification.channel){
-                //@ts-ignore
-                notification.updateChannelSelect(Teams.getChannelOptionById(currentNotification.channel, channels));
+            if(currentNotification && currentNotification.channel){
+                const selectedChannel = Teams.getChannelOptionById(currentNotification.channel, channels);
+                if(selectedChannel){
+                    //@ts-ignore
+                    notification.updateChannelSelect(notification, selectedChannel);
+                }
             }
         }
     }, [gettingAllChannelsByTeam])
