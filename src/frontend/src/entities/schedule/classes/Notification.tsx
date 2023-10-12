@@ -102,15 +102,15 @@ export class Notification extends HookStateClass implements INotification{
             this.recipientsSelect = this.recipients.map(recipient => {return {label: recipient, value: recipient};})
         }
         this.teamSelect = notification?.teamSelect || null;
-        this.team = notification?.team || '';
+        this.team = notification?.team || '';/*
         if(!this.teamSelect && this.team !== ''){
             this.teamSelect = {label: capitalize(this.team), value: this.team};
-        }
+        }*/
         this.channelSelect = notification?.channelSelect || null;
-        this.channel = notification?.channel || '';
+        this.channel = notification?.channel || '';/*
         if(!this.channelSelect && this.channel !== ''){
             this.channelSelect = {label: capitalize(this.channel), value: this.channel};
-        }
+        }*/
         // @ts-ignore
         this.dispatch = notification.dispatch ? notification.dispatch : useAppDispatch();
     }

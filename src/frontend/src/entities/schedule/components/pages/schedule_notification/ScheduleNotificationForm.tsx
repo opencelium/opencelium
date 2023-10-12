@@ -58,7 +58,11 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     const recipientsOptions: OptionProps[] = recipients.map(recipient => {return {label: recipient.email, value: recipient.email}})
     const didMount = useRef(false);
     const shouldFetchScheduleNotification = isUpdate || isView;
-    const notification = Notification.createState<INotification>({id: notificationId, scheduleId: schedule ? schedule.id : 0, _readOnly: isView}, isAdd ? null : currentNotification);
+    const notification = Notification.createState<INotification>({
+        id: notificationId,
+        scheduleId: schedule ? schedule.id : 0,
+        _readOnly: isView,
+    }, isAdd ? null : currentNotification);
     useEffect(() => {
         if(shouldFetchScheduleNotification){
             notification.getById()
