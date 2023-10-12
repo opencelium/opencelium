@@ -30,7 +30,7 @@ import {setAnimationPaused } from "@root/redux_toolkit/slices/ModalConnectionSli
 import { Connector } from "@entity/connector/classes/Connector";
 import {ModalConnection} from "@root/classes/ModalConnection";
 import { Connection } from "@entity/connection/classes/Connection";
-import { setIsAnamationNotFoud } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { setIsAnimationNotFound } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import AnimationSpeed from "./AnimationSpeed/AnimationSpeed";
 import { AnimationPopoverProps } from "./AnimationPopover/interfaces";
 import AnimationPopover from "./AnimationPopover/AnimationPopover";
@@ -48,7 +48,7 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
   const { connectors } = Connector.getReduxState();
   const { gettingInvokers } = Invoker.getReduxState();
   const [ isVisible, setIsVisible ] = useState(false);
-  const { isButtonPanelOpened, videoAnimationName, animationSpeed, isAnimationNotFound } = Connection.getReduxState();
+  const { isButtonPanelOpened, videoAnimationName, animationSpeed, isAnimationNotFound, isAnimationForcedToStop } = Connection.getReduxState();
   const { isAnimationPaused: isPaused, isDetailsOpened } = ModalConnection.getReduxState();
 
   const [popoverProps, setPopoverProps] = useState<AnimationPopoverProps>(null);
@@ -125,10 +125,10 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
           {gettingInvokers === API_REQUEST_STATE.FINISH &&
             <React.Fragment>
               <ModalContext.Provider value={{ isModal: true }}>
-                <AnimationEditor
-                    setPopoverProps={setPopoverProps}
-                    isVisible={isVisible}
-                />
+                  <AnimationEditor
+                      setPopoverProps={setPopoverProps}
+                      isVisible={isVisible}
+                  />
               </ModalContext.Provider>
               <Content />
             </React.Fragment>
@@ -136,7 +136,7 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
         </Dialog>
         <Dialog
           actions={[
-            {id: 'animationNotFound', label: 'Ok', onClick: () => dispatch(setIsAnamationNotFoud(false))}
+            {id: 'animationNotFound', label: 'Ok', onClick: () => dispatch(setIsAnimationNotFound(false))}
           ]}
           active={isAnimationNotFound}
           toggle={null}
