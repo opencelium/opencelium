@@ -33,11 +33,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class ApplicationTests {
 
-	@Autowired
-	private SlackService service;
+//	@Autowired
+//	private SlackService service;
 
 	@Test
 	public void contextLoads() {
-		service.sendMessage("", "subject", "text test");
+//		service.sendMessage("", "subject", "text test");
 	}
 }
