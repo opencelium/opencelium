@@ -16,12 +16,21 @@
 import {AxiosResponse} from "axios";
 import {TeamChannelModel, TeamModel} from "@entity/schedule/requests/models/Teams";
 
+export interface GetAllResponse<T, V> {
+    type: T,
+    value: V[]
+}
+
+export type GetAllTeamsResponse = GetAllResponse<"CHANNEL", TeamModel>;
+
+export type GetAllChannelsResponse = GetAllResponse<"TEAM", TeamChannelModel>;
+
 export interface ITeams{
 
     //to get all teams
-    getAllTeams(): Promise<AxiosResponse<TeamModel[]>>,
+    getAllTeams(): Promise<AxiosResponse<GetAllTeamsResponse>>,
 
     //to get all channels by team
-    getAllChannelsByTeam(): Promise<AxiosResponse<TeamChannelModel[]>>,
+    getAllChannelsByTeam(): Promise<AxiosResponse<GetAllChannelsResponse>>,
 
 }

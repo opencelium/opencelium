@@ -33,7 +33,7 @@ export const getAllChannelsByTeam = createAsyncThunk(
     'schedule/notification/get/all/channels/by/team',
     async(teamId: string, thunkAPI) => {
         try {
-            const request = new TeamsRequest({endpoint: `/${teamId}`});
+            const request = new TeamsRequest({endpoint: `/${teamId}/channel/all`});
             const response = await request.getAllChannelsByTeam();
             return response.data;
         } catch(e){
