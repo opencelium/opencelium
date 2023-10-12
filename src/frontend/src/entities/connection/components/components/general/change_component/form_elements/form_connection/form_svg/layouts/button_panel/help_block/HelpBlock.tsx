@@ -104,21 +104,24 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
           dialogClassname={`${styles.help_dialog}`}
         >
           {ReactDOM.createPortal(
-            <div className={styles.animation_controls}>
-              <TooltipButton
-                size={TextSize.Size_40}
-                position={"bottom"}
-                icon={isPausedReference.current ? "play_arrow" : "pause"}
-                tooltip={isPausedReference.current ? "Play Animation" : 'Pause Animation'}
-                target={`animation_play_button`}
-                hasBackground={true}
-                background={ColorTheme.White}
-                color={ColorTheme.Blue}
-                padding="2px"
-                handleClick={() => dispatch(setAnimationPaused(!isPausedReference.current))}
-              />
+            <React.Fragment>
+              <div className={styles.animation_controls}>
+                <TooltipButton
+                  size={TextSize.Size_40}
+                  position={"bottom"}
+                  icon={isPausedReference.current ? "play_arrow" : "pause"}
+                  tooltip={isPausedReference.current ? "Play Animation" : 'Pause Animation'}
+                  target={`animation_play_button`}
+                  hasBackground={true}
+                  background={ColorTheme.White}
+                  color={ColorTheme.Blue}
+                  padding="2px"
+                  handleClick={() => dispatch(setAnimationPaused(!isPausedReference.current))}
+                />
               <AnimationSpeed/>
-            </div>,
+              </div>
+              <div className={!isPausedReference.current && videoAnimationName ? styles.animation_overlay : ''}/>
+            </React.Fragment>,
             document.body
           )}
           {gettingInvokers === API_REQUEST_STATE.START && <Loading className="animationDataLoading"/>}

@@ -177,7 +177,7 @@ opencelium:
       slack:
         webhook:
       teams:
-        grant_type:
+        grant_type: refresh_token
         client_id:
         client_secret:
         refresh_token:

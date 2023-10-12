@@ -110,8 +110,10 @@ export default class AdditionalFunctions {
           }
         }
       } else{
-        // @ts-ignore
-        offsetY = currentElement ? currentElement.y.animVal.value / 2 - 50 : 0;
+        if(currentElement){
+          // @ts-ignore
+          offsetY = currentElement.y.animVal.value / 2 - 50
+        }
 
         if(props.connectorType === 'fromConnector'){
           offsetX = sizes.fromConnectorWidth > 350 ? sizes.fromConnectorWidth / 4 : x
