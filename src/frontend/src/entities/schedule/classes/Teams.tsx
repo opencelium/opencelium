@@ -25,7 +25,7 @@ export default class Teams {
 
     static getTeamsOptionsForSelect(teams: TeamModel[]): OptionProps[]{
         return teams.map(team => {
-            return {label: team.name, value: team.id}
+            return {label: `${team.name} (${team.description})`, value: team.id}
         });
     }
 

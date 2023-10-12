@@ -34,8 +34,8 @@ const ContentItem: FC<ContentItemProps> = (props) => {
         dispatch(setIsAnamationNotFoud(true))
       }
       else{
-        dispatch(setAnimationPreviewPanelVisibility(false))
-        dispatch(setVideoAnimationName(animationName))
+        dispatch(setAnimationPreviewPanelVisibility(false));
+        dispatch(setVideoAnimationName(animationName));
       }
     }}>
       <p>{animationTitle}</p>

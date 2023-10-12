@@ -93,7 +93,10 @@ class ButtonPanel extends React.Component {
           setCurrentTechnicalItem={setCurrentTechnicalItem}
         />
         {isButtonPanelOpened && <div className={styles.button_panel_divider} />}
-        <HelpBlock />
+        <HelpBlock
+            entity={entity}
+            updateEntity={updateEntity}
+        />
       </div>
     );
   }

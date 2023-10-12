@@ -108,7 +108,7 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
             }
         }
         if(invoker.operations.length === 0){
-            setOperationsValidationMessage('You need to have at least one operation');
+            setOperationsValidationMessage('Invoker should contain at least one operation');
             isValid = false;
         }
         const newNotValidOperations = [];

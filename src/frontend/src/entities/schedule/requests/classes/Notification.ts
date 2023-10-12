@@ -62,7 +62,7 @@ export class NotificationRequest extends Request implements INotificationRequest
     }
 
     backendMap(notification: INotification){
-        let mappedNotification = {
+        let mappedNotification: any = {
             name: notification.name,
             eventType: notification.eventType,
             notificationType: notification.typeSelect.value,
@@ -70,8 +70,14 @@ export class NotificationRequest extends Request implements INotificationRequest
             recipients: notification.recipientsSelect.map(recipient => recipient.value),
             schedulerId: notification.scheduleId,
         };
-        if(mappedNotification.notificationType === 'teams'){
-            mappedNotification.recipients = ['admin@opencelium.io'];
+        switch (mappedNotification.notificationType){
+            case 'email':
+                mappedNotification.recipients = notification.recipientsSelect.map(recipient => recipient.value);
+                break;
+            case 'teams':
+                mappedNotification.team = notification.teamSelect.value;
+                mappedNotification.channel = notification.channelSelect.value;
+                break;
         }
         if(notification.id !== 0){
             return {
