@@ -97,10 +97,7 @@ public class ExecutionAspect {
             }
             for (EventRecipient er : en.getEventRecipients()) {
                 User user = userService.findByEmail(er.getDestination()).orElse(null);
-                if (user == null) {
-                    continue;
-                }
-                String lang = user.getUserDetail().getLang();
+                String lang =  user == null ? "en" : user.getUserDetail().getLang();
                 EventContent content = en.getEventMessage().getEventContents().stream()
                         .filter(c -> c.getLanguage().equalsIgnoreCase(lang)).findFirst().orElse(null);
                 if (content == null) {
