@@ -1,13 +1,18 @@
 import DefaultHelpImagePath from "@image/entities/connection/default_help_preview.png";
+import APIMethodImagePath from "@image/entities/connection/animations/api_methods.png";
+import OperatorsImagePath from "@image/entities/connection/animations/operators.png";
+import FieldMappingImagePath from "@image/entities/connection/animations/field_mapping.png";
+import EnhancementImagePath from "@image/entities/connection/animations/enhancement.png";
+
 const basicsContentData: any = [
   {
     animationTitle: "API methods",
-    animationImage: DefaultHelpImagePath,
+    animationImage: APIMethodImagePath,
     animationName: "apiMethods"
   },
   {
     animationTitle: "Operators",
-    animationImage: DefaultHelpImagePath,
+    animationImage: OperatorsImagePath,
     animationName: "operators"
   }
 ];
@@ -15,12 +20,12 @@ const basicsContentData: any = [
 const expertsContentData = [
   {
     animationTitle: "Field mapping",
-    animationImage: DefaultHelpImagePath,
+    animationImage: FieldMappingImagePath,
     animationName: "fieldMapping"
   },
   {
     animationTitle: "Enhancement",
-    animationImage: DefaultHelpImagePath,
+    animationImage: EnhancementImagePath,
     animationName: "enhancement"
   }
 ];

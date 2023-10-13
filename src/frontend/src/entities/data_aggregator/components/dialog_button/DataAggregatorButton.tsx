@@ -47,7 +47,7 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
     const dispatch = useAppDispatch();
     const {
         currentAggregator, unarchivedAggregators, addingAggregator, updatingAggregator,
-        gettingAllAggregators, isDataAggregationModalToggled, isForm, formType,
+        gettingAllAggregators, isDataAggregatorModalToggled, isForm, formType,
     } = CDataAggregator.getReduxState();
     const [hasStartedAction, setAction] = useState<boolean>(false);
     const [isToggleDialogDisabled, toggle] = useState<boolean>(false);
@@ -66,13 +66,13 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
         dispatch(getAllUnarchivedAggregators());
     }, [])
     useEffect(() => {
-        if(isDataAggregationModalToggled){
+        if(isDataAggregatorModalToggled){
             document.addEventListener('keydown', (e) => prohibitEscForCode(e, toggle));
         } else{
             document.removeEventListener('keydown', (e) => prohibitEscForCode(e, toggle));
             toggle(false);
         }
-    }, [isDataAggregationModalToggled])
+    }, [isDataAggregatorModalToggled])
     useEffect(() => {
         if(addingAggregator === API_REQUEST_STATE.FINISH && hasStartedAction){
             if(formType === 'add'){
@@ -114,7 +114,7 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
         {
             id: 'action_data_aggregator',
             label: 'Close',
-            onClick: () => setShowDialog(!isDataAggregationModalToggled)
+            onClick: () => setShowDialog(!isDataAggregatorModalToggled)
         }
     ];
     return (
@@ -140,8 +140,8 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
                     tooltip={tooltipButtonProps.tooltip}
                     target={tooltipButtonProps.target}
                     hasBackground={tooltipButtonProps.hasBackground}
-                    background={!isDataAggregationModalToggled ? ColorTheme.White : ColorTheme.Blue}
-                    color={!isDataAggregationModalToggled ? ColorTheme.Gray : ColorTheme.White}
+                    background={!isDataAggregatorModalToggled ? ColorTheme.White : ColorTheme.Blue}
+                    color={!isDataAggregatorModalToggled ? ColorTheme.Gray : ColorTheme.White}
                     padding={tooltipButtonProps.padding}
                     handleClick={() => {
                         setShowDialog(true);
@@ -153,8 +153,8 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
             }
             <Dialog
                 actions={actions}
-                active={isDataAggregationModalToggled}
-                toggle={isToggleDialogDisabled ? () => {} : () => setShowDialog(!isDataAggregationModalToggled)}
+                active={isDataAggregatorModalToggled}
+                toggle={isToggleDialogDisabled ? () => {} : () => setShowDialog(!isDataAggregatorModalToggled)}
                 title={<DialogTitle hasList={unarchivedAggregators.length > 0}/>}
                 theme={{dialog: styles.aggregator_dialog}}
             >

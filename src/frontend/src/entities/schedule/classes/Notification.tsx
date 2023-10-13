@@ -52,7 +52,7 @@ export class Notification extends HookStateClass implements INotification{
     name: string = '';
 
     @App.inputType
-    eventType: EVENT_TYPE = EVENT_TYPE.PRE;
+    eventType: EVENT_TYPE = EVENT_TYPE.POST;
 
     @App.inputType
     typeSelect: OptionProps;
@@ -85,7 +85,7 @@ export class Notification extends HookStateClass implements INotification{
         this.id = notification?.id || notification?.notificationId || 0;
         this.scheduleId = notification?.scheduleId || notification?.schedulerId || 0;
         this.name = notification?.name || '';
-        this.eventType = notification?.eventType || EVENT_TYPE.PRE;
+        this.eventType = notification?.eventType || EVENT_TYPE.POST;
         this.typeSelect = notification?.typeSelect || null;
         this.type = notification?.type || notification?.notificationType || '';
         if(!this.typeSelect && this.type !== ''){

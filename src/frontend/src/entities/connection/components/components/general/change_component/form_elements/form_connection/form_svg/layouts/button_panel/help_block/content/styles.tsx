@@ -29,6 +29,7 @@ const ContentStyled = styled.div<ContentStyledProps>`
   display: flex;
   justify-content: center;
   align-items: flex-end;
+  z-index: 100003;
 
   ${props => !props.isPreviewPanelOpened && `
     padding: 0 !important;
