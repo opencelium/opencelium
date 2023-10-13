@@ -144,9 +144,7 @@ class TechnicalProcessDescription extends React.Component {
                     currentItem={details.entity}
                     updateConnection={updateConnection}
                 />
-                <br/>
-                <br/>
-                <Col xs={12} className={styles.col}><b>{`Request`}</b></Col>
+                <Col xs={12} className={styles.col} style={{marginTop: "20px"}}><b>{`Request`}</b></Col>
                 <Col xs={12} className={styles.col} style={{marginBottom: '10px'}}>
                     <Row className={styles.row}>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Method:`}</Col>
@@ -196,9 +194,7 @@ class TechnicalProcessDescription extends React.Component {
                         <Col xs={8} className={`${styles.col}`}>{successResponse.status}</Col>
                         <Header nameOfCurrentInfo={'success_header'} isCurrentInfo={currentInfo === 'success_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={successResponse.header}/>
                         <Body hasEnhancement={false} toggleBodyDialog={toggleResponseSuccessBodyDialog} isBodyDialogOpened={isResponseSuccessDialogOpened} nameOfCurrentInfo={'success_body'} isCurrentInfo={currentInfo === 'success_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={successResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={(a) => this.updateConnection(a)} method={methodItem} bodyTitle={'Response. Success data'}/>
-                        <br/>
-                        <br/>
-                        <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Fail`}</b></Col>
+                        <Col style={{marginTop: '10px'}} xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Fail`}</b></Col>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                         <Col xs={8} className={`${styles.col}`}>{failResponse.status}</Col>
                         <Header nameOfCurrentInfo={'fail_header'} isCurrentInfo={currentInfo === 'fail_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={failResponse.header}/>
