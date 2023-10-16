@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.aspect;
 
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
+import com.becon.opencelium.backend.execution.notification.SlackService;
 import com.becon.opencelium.backend.execution.notification.TeamsService;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.service.*;
@@ -29,6 +30,7 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -55,10 +57,16 @@ public class ExecutionAspect {
     private TeamsService teamsService;
 
     @Autowired
+    private SlackService slackService;
+
+    @Autowired
     private ExecutionServiceImp executionServiceImp;
 
     @Autowired
     private ArgumentServiceImp argumentServiceImp;
+
+    @Value("${opencelium.notification.tools.slack.webhook}")
+    private String slackWebhook;
 
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -95,6 +103,9 @@ public class ExecutionAspect {
             if (!en.getEventType().equals(eventType)){
                 continue;
             }
+            if (en.getEventRecipients() == null | en.getEventRecipients().isEmpty()) {
+                en.getEventRecipients().add(new EventRecipient(slackWebhook));
+            }
             for (EventRecipient er : en.getEventRecipients()) {
                 User user = userService.findByEmail(er.getDestination()).orElse(null);
                 String lang =  user == null ? "en" : user.getUserDetail().getLang();
@@ -111,12 +122,16 @@ public class ExecutionAspect {
                 subject = replaceConstants(content.getSubject(), user, ex, en);
                 to = er.getDestination();
                 String type = en.getEventMessage().getType();// email, slack, jira, etc
-                if (type.equals("email")) {
-                    emailService.sendMessage(to, subject, message);
-                } else if (type.equals("slack")) {
-                    // slack implementation
-                } else if (type.equals("teams")) {
-                    teamsService.sendMessage(to, subject, message);
+                try {
+                    if (type.equals("email")) {
+                        emailService.sendMessage(to, subject, message);
+                    } else if (type.equals("slack")) {
+                        slackService.sendMessage(to, subject, message);
+                    } else if (type.equals("teams")) {
+                        teamsService.sendMessage(to, subject, message);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
