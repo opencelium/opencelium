@@ -25,7 +25,7 @@ const ContentItemStyled = styled.div<ContentItemStyledProps>`
   }
   img {
     width: 120px;
-    height: 80px;
+    height: 65px;
   }
 `;
 

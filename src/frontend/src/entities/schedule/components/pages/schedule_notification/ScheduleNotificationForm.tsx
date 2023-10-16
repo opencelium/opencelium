@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect, useRef} from "react";
+import React, {FC, useEffect, useRef, useState} from "react";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {useAppDispatch} from "@application/utils/store";
 import {OptionProps} from "@app_component/base/input/select/interfaces";
@@ -55,6 +55,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     } = NotificationTemplate.getReduxState();
     const {gettingAllTools, tools} = Tool.getReduxState();
     const {gettingAllTeams, gettingAllChannelsByTeam, teams, channels} = Teams.getReduxState();
+    const [showEventTypeAlertMessage, toggleEventTypeAlertMessage] = useState<boolean>(false);
     const dispatch = useAppDispatch();
     const notificationTemplatesOptions: OptionProps[] = notificationTemplates.map(notificationTemplate => {return {label: notificationTemplate.name, value: notificationTemplate.templateId}});
     const recipientsOptions: OptionProps[] = recipients.map(recipient => {return {label: recipient.email, value: recipient.email}})
@@ -78,6 +79,13 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             dispatch(clearAllChannels());
         }
     },[]);
+    useEffect(() => {
+        if(notification.eventType !== 'post'){
+            toggleEventTypeAlertMessage(true);
+        } else {
+            toggleEventTypeAlertMessage(false);
+        }
+    }, [notification.eventType])
     useEffect(() => {
         if(notification.typeSelect){
             dispatch(clearAllTeams());
@@ -134,6 +142,9 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     const TitleInput = notification.getText({
         propertyName: "name", props: {autoFocus: true, icon: 'person', label: 'Name', required: true, isLoading: checkingNotificationName === API_REQUEST_STATE.START, error: isCurrentNotificationHasUniqueName === TRIPLET_STATE.FALSE ? 'The title must be unique' : ''}
     })
+    const SlackWebhookInput = notification.getText({
+        propertyName: "slackWebhook", props: {icon: 'link', label: 'Webhook'}
+    })
     const EventTypeComponent = notification.getRadios({propertyName: 'eventType', props: {
         icon: 'description',
         label: 'Event Type',
@@ -155,7 +166,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     });
     const NotificationTemplateComponent = notification.getSelect({
         propertyName: "templateSelect", props:{
-            icon: 'person',
+            icon: 'text_snippet',
             label: 'Template',
             options: notificationTemplatesOptions,
             required: true,
@@ -201,10 +212,18 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         >
             {TitleInput}
             {EventTypeComponent}
+            {showEventTypeAlertMessage && (
+                <div style={{padding: '0 50px 20px'}}>
+                    <b>{`Hint: `}</b>{"Data Aggregator works only for Post."}
+                </div>
+            )}
             {NotificationTypeComponent}
             {!!notification.typeSelect && NotificationTemplateComponent}
             {!!notification.typeSelect && notification.typeSelect.value === 'email' ?
                 RecipientsComponent : null
+            }
+            {!!notification.typeSelect && notification.typeSelect.value === 'slack' ?
+                SlackWebhookInput : null
             }
             {!!notification.typeSelect && notification.typeSelect.value === 'teams' ?
                 <React.Fragment>

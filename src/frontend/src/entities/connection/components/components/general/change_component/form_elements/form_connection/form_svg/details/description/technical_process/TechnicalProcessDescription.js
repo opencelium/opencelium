@@ -29,8 +29,8 @@ import TooltipFontIcon from "@entity/connection/components/components/general/ba
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
 import {withTheme} from "styled-components";
-import DataAggregation
-    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregation";
+import DataAggregator
+    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregator";
 
 import { setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
@@ -137,8 +137,8 @@ class TechnicalProcessDescription extends React.Component {
                         </React.Fragment>
                     )
                 })}
-                {requestFormat === 'json' && <TestMethodButton connection={connection}/>}
-                <DataAggregation
+                {/*{requestFormat === 'json' && <TestMethodButton connection={connection}/>}*/}
+                <DataAggregator
                     details={details}
                     connection={connection}
                     currentItem={details.entity}

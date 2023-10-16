@@ -37,7 +37,8 @@ export interface INotificationSelect{
 }
 
 export interface INotificationText{
-    name: string;
+    name: string,
+    slackWebhook: string,
 }
 
 export interface INotificationForm extends INotificationText, INotificationSelect, INotificationRadios, IForm<INotificationText, INotificationSelect, INotificationRadios, {}, {}, {}>{

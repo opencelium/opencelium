@@ -161,15 +161,20 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
                                     await callAsync(async () => await animationFunction('fromConnector'), forcedToStopAnimationReference.current);
                                 } else if (index === animationData[videoAnimationName].fromConnector.items.length && connectorType === 'fromConnector') {
                                     setConnectorType('toConnector');
-                                    setIndex(0)
+                                    setIndex(0);
                                 } else if (index > 0 && index < animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector') {
                                     await callAsync(async () => await animationFunction('toConnector'), forcedToStopAnimationReference.current);
                                 } else if (index === animationData[videoAnimationName].toConnector.items.length && connectorType === 'toConnector') {
                                     setConnectorType('fromConnector')
                                     dispatch(setVideoAnimationName(''));
+                                    dispatch(setAnimationPreviewPanelVisibility(true));
                                     setIndex(0)
                                     setAnimationProps({...animationProps});
                                 }
+                            }
+                            if(index === animationData[videoAnimationName].fromConnector.items.length && animationData[videoAnimationName].toConnector.items.length === 0){
+                                dispatch(setVideoAnimationName(''));
+                                dispatch(setAnimationPreviewPanelVisibility(true));
                             }
                         }
                     }

@@ -70,13 +70,20 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
       dispatch(getAllInvokers())
     }
   }, [])
-
+    useEffect(() => {
+        if(isEditableAnimationReference.current){
+            setPopoverProps({ isOpen: false });
+        }
+    }, [isEditableAnimationReference.current])
   function toggleVisibleHelpDialog() {
     setIsVisible(!isVisible);
   }
 
   const [isShortcutsDialogOpened, setIsShortcutsDialogOpened] = useState(false);
-
+  const animationControlStyle: any = {};
+  if(videoAnimationName === '' || isEditableAnimationReference.current){
+      animationControlStyle.display = 'none';
+  }
   return (
     <HelpBlockStyled isButtonPanelOpened={isButtonPanelOpened}>
       <div style={{ display: "flex", gap: "15px" }}>
@@ -108,7 +115,7 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
         >
           {ReactDOM.createPortal(
             <React.Fragment>
-              <div style={{display: !!videoAnimationName ? 'block' : 'none'}} className={styles.animation_controls}>
+              <div style={animationControlStyle} className={styles.animation_controls}>
                 <TooltipButton
                   isDisabled={isEditableAnimationReference.current}
                   size={TextSize.Size_40}
@@ -122,20 +129,20 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
                   padding="2px"
                   handleClick={() => dispatch(setAnimationPaused(!isPausedReference.current))}
                 />
-                  <AnimationSpeed/>
-                  <TooltipButton
-                      size={TextSize.Size_40}
-                      position={"bottom"}
-                      icon={"edit"}
-                      tooltip={"Edit"}
-                      isDisabled={!isPausedReference.current}
-                      target={`animation_edit_button`}
-                      hasBackground={true}
-                      background={ColorTheme.White}
-                      color={ColorTheme.Blue}
-                      padding="2px"
-                      handleClick={() => dispatch(setIsEditableAnimation(!isEditableAnimationReference.current))}
-                  />
+                <AnimationSpeed/>
+                <TooltipButton
+                  size={TextSize.Size_40}
+                  position={"bottom"}
+                  icon={"stop"}
+                  tooltip={"Stop"}
+                  isDisabled={!isPausedReference.current}
+                  target={`animation_edit_button`}
+                  hasBackground={true}
+                  background={ColorTheme.White}
+                  color={ColorTheme.Blue}
+                  padding="2px"
+                  handleClick={() => dispatch(setIsEditableAnimation(true))}
+                />
               </div>
               <AnimationOverlay/>
             </React.Fragment>,

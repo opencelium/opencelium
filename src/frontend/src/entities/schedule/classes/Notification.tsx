@@ -52,7 +52,10 @@ export class Notification extends HookStateClass implements INotification{
     name: string = '';
 
     @App.inputType
-    eventType: EVENT_TYPE = EVENT_TYPE.PRE;
+    slackWebhook: string = '';
+
+    @App.inputType
+    eventType: EVENT_TYPE = EVENT_TYPE.POST;
 
     @App.inputType
     typeSelect: OptionProps;
@@ -85,12 +88,13 @@ export class Notification extends HookStateClass implements INotification{
         this.id = notification?.id || notification?.notificationId || 0;
         this.scheduleId = notification?.scheduleId || notification?.schedulerId || 0;
         this.name = notification?.name || '';
-        this.eventType = notification?.eventType || EVENT_TYPE.PRE;
+        this.eventType = notification?.eventType || EVENT_TYPE.POST;
         this.typeSelect = notification?.typeSelect || null;
         this.type = notification?.type || notification?.notificationType || '';
         if(!this.typeSelect && this.type !== ''){
             this.typeSelect = {label: capitalize(this.type), value: this.type};
         }
+        this.slackWebhook = notification && notification.slackWebhook ? notification.slackWebhook : this.type === 'slack' ? notification?.recipients && notification.recipients.length > 0 ? notification.recipients[0] : '' : '';
         this.templateSelect = notification?.templateSelect || null;
         this.template = notification?.template || null;
         if(!this.templateSelect && this.template){
@@ -264,6 +268,9 @@ export class Notification extends HookStateClass implements INotification{
                 break;
             case 'teams':
                 validateAdditionalData = this.validateTeam() && this.validateChannel();
+                break;
+            case 'slack':
+                validateAdditionalData = true;
                 break;
         }
         return isValidName && isValidType && isValidTemplate && validateAdditionalData;

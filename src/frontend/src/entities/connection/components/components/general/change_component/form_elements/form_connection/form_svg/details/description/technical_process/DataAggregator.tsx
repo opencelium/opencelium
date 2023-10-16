@@ -65,11 +65,11 @@ export default
 
     return(
         <SelectableInput
-            id={`data_aggregation_options`}
+            id={`data_aggregator_options`}
             readOnly={readOnly}
             options={CDataAggregator.getOptionsForSelect(aggregators)}
             changeValue={changeAggregator}
-            label={'Aggregation'}
+            label={'Aggregator'}
             value={aggregator}
             onTextValueClick={aggregator !== 'is empty' ? openDataAggregator : null}
         />

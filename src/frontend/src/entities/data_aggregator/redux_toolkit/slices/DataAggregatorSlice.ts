@@ -39,7 +39,7 @@ export interface DataAggregatorState extends ICommonState{
     aggregators: ModelDataAggregator[],
     unarchivedAggregators: ModelDataAggregator[],
     isForm: boolean,
-    isDataAggregationModalToggled: boolean,
+    isDataAggregatorModalToggled: boolean,
     formType: FormType,
 }
 const initialState: DataAggregatorState = {
@@ -57,7 +57,7 @@ const initialState: DataAggregatorState = {
     unarchivedAggregators: [],
     isForm: false,
     formType: 'add',
-    isDataAggregationModalToggled: false,
+    isDataAggregatorModalToggled: false,
     ...CommonState,
 }
 
@@ -78,7 +78,7 @@ export const dataAggregatorSlice = createSlice({
             state.formType = action.payload;
         },
         toggleDataAggregatorModal: (state, action: PayloadAction<boolean>) => {
-            state.isDataAggregationModalToggled = action.payload;
+            state.isDataAggregatorModalToggled = action.payload;
         },
     },
     extraReducers: {

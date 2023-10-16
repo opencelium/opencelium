@@ -26,8 +26,8 @@ import {CTechnicalProcess} from "@entity/connection/components/classes/component
 import {withTheme} from "styled-components";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {connect} from "react-redux";
-import DataAggregation
-    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregation";
+import DataAggregator
+    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregator";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 function mapStateToProps(state, props){
@@ -68,7 +68,7 @@ class Description extends React.Component{
                         return <div style={{color: errorColor}}>{error}</div>
                     })
                 }
-                <DataAggregation
+                <DataAggregator
                     details={details}
                     connection={connection}
                     currentItem={details.entity}
