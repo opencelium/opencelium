@@ -22,8 +22,8 @@ public class SlackService implements CommunicationTool {
     public void sendMessage(String destination, String subject, String text) {
         HttpMethod method = HttpMethod.POST;
         String body = "{" +
-                            "\"text\": \"Von: " + subject +
-                                      "\nText: " + text + "\"\n" +
+                            "\"text\": \"" + subject +
+                                      "\n" + text + "\"\n" +
                       "}";
         if (destination != null && !destination.isEmpty()) {
             url  = destination;
