@@ -180,7 +180,7 @@ public class ExecutionAspect {
 
         indexes.stream()
                 .filter(id -> !resultMap.containsKey(Long.toString(id)))
-                .forEach(id -> resultMap.put(Long.toString(id), "NOT_AVAILABLE"));
+                .forEach(id -> resultMap.put(Long.toString(id), "n/a"));
         return resultMap;
     }
 
