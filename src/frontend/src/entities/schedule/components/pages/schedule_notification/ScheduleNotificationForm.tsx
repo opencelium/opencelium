@@ -142,6 +142,9 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     const TitleInput = notification.getText({
         propertyName: "name", props: {autoFocus: true, icon: 'person', label: 'Name', required: true, isLoading: checkingNotificationName === API_REQUEST_STATE.START, error: isCurrentNotificationHasUniqueName === TRIPLET_STATE.FALSE ? 'The title must be unique' : ''}
     })
+    const SlackWebhookInput = notification.getText({
+        propertyName: "slackWebhook", props: {icon: 'link', label: 'Webhook'}
+    })
     const EventTypeComponent = notification.getRadios({propertyName: 'eventType', props: {
         icon: 'description',
         label: 'Event Type',
@@ -163,7 +166,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     });
     const NotificationTemplateComponent = notification.getSelect({
         propertyName: "templateSelect", props:{
-            icon: 'person',
+            icon: 'text_snippet',
             label: 'Template',
             options: notificationTemplatesOptions,
             required: true,
@@ -218,6 +221,9 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             {!!notification.typeSelect && NotificationTemplateComponent}
             {!!notification.typeSelect && notification.typeSelect.value === 'email' ?
                 RecipientsComponent : null
+            }
+            {!!notification.typeSelect && notification.typeSelect.value === 'slack' ?
+                SlackWebhookInput : null
             }
             {!!notification.typeSelect && notification.typeSelect.value === 'teams' ?
                 <React.Fragment>
