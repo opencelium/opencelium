@@ -13,18 +13,21 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import NotificationCreators from "./NotificationCreators";
-import ScheduleCreators from "./ScheduleCreators";
-import WebhookCreators from "./WebhookCreators";
-import TeamsCreators from "./TeamsCreators";
-import SlackCreators from "./SlackCreator";
-import ToolCreators from './ToolCreators';
+import {AxiosResponse} from "axios";
+import Request from "@entity/application/requests/classes/Request";
+import {IRequestSettings} from "@application/requests/interfaces/IRequest";
+import {ISlack, GetWebhookResponse} from "../interfaces/ISlack";
 
-export default {
-    ...NotificationCreators,
-    ...ScheduleCreators,
-    ...WebhookCreators,
-    ...TeamsCreators,
-    ...SlackCreators,
-    ...ToolCreators,
+
+export class SlackRequest extends Request implements ISlack{
+
+    constructor(settings?: Partial<IRequestSettings>) {
+        super({url: 'message/tools/slack', ...settings});
+    }
+
+    async getWebhook(): Promise<AxiosResponse<GetWebhookResponse>>{
+        this.endpoint = "/webhook";
+        return super.get<GetWebhookResponse>();
+    }
+
 }
