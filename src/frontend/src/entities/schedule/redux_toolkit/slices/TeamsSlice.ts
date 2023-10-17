@@ -21,14 +21,14 @@ import {CommonState} from "@application/utils/store";
 import {TeamChannelModel, TeamModel} from "@entity/schedule/requests/models/Teams";
 import {getAllChannelsByTeam, getAllTeams} from "@entity/schedule/redux_toolkit/action_creators/TeamsCreators";
 
-export interface ScheduleState extends ICommonState{
+export interface TeamsState extends ICommonState{
     teams: TeamModel[],
     channels: TeamChannelModel[],
     gettingAllTeams: API_REQUEST_STATE,
     gettingAllChannelsByTeam: API_REQUEST_STATE,
 }
 
-const initialState: ScheduleState = {
+const initialState: TeamsState = {
     teams: [],
     channels: [],
     gettingAllTeams: API_REQUEST_STATE.INITIAL,

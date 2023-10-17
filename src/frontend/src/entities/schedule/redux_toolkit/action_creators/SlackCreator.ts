@@ -13,18 +13,23 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import NotificationCreators from "./NotificationCreators";
-import ScheduleCreators from "./ScheduleCreators";
-import WebhookCreators from "./WebhookCreators";
-import TeamsCreators from "./TeamsCreators";
-import SlackCreators from "./SlackCreator";
-import ToolCreators from './ToolCreators';
+import {createAsyncThunk} from "@reduxjs/toolkit";
+import {SlackRequest} from "@entity/schedule/requests/classes/Slack";
+import {errorHandler} from "@application/utils/utils";
+
+export const getSlackWebhook = createAsyncThunk(
+    'schedule/notification/get/slack/webhook',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new SlackRequest();
+            const response = await request.getWebhook();
+            return response.data.result;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 
 export default {
-    ...NotificationCreators,
-    ...ScheduleCreators,
-    ...WebhookCreators,
-    ...TeamsCreators,
-    ...SlackCreators,
-    ...ToolCreators,
+    getSlackWebhook,
 }

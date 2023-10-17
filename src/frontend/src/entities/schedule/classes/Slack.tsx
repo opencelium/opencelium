@@ -13,18 +13,12 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import NotificationCreators from "./NotificationCreators";
-import ScheduleCreators from "./ScheduleCreators";
-import WebhookCreators from "./WebhookCreators";
-import TeamsCreators from "./TeamsCreators";
-import SlackCreators from "./SlackCreator";
-import ToolCreators from './ToolCreators';
+import {RootState, useAppSelector} from "@application/utils/store";
 
-export default {
-    ...NotificationCreators,
-    ...ScheduleCreators,
-    ...WebhookCreators,
-    ...TeamsCreators,
-    ...SlackCreators,
-    ...ToolCreators,
+export default class Teams {
+
+    static getReduxState(){
+        return useAppSelector((state: RootState) => state.slackReducer);
+    }
+
 }

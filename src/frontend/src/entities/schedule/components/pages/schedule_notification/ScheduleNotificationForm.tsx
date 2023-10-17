@@ -32,6 +32,8 @@ import Tool from "@entity/schedule/classes/Tool";
 import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/ToolCreators";
 import {clearAllChannels, clearAllTeams } from "@entity/schedule/redux_toolkit/slices/TeamsSlice";
 import {clearChannelFromCurrentNotification, clearCurrentNotification, clearTeamFromCurrentNotification } from "@entity/schedule/redux_toolkit/slices/NotificationSlice";
+import Slack from "@entity/schedule/classes/Slack";
+import {getSlackWebhook} from "@entity/schedule/redux_toolkit/action_creators/SlackCreator";
 
 
 const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
@@ -55,6 +57,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
     } = NotificationTemplate.getReduxState();
     const {gettingAllTools, tools} = Tool.getReduxState();
     const {gettingAllTeams, gettingAllChannelsByTeam, teams, channels} = Teams.getReduxState();
+    const {gettingWebhook, webhook} = Slack.getReduxState();
     const [showEventTypeAlertMessage, toggleEventTypeAlertMessage] = useState<boolean>(false);
     const dispatch = useAppDispatch();
     const notificationTemplatesOptions: OptionProps[] = notificationTemplates.map(notificationTemplate => {return {label: notificationTemplate.name, value: notificationTemplate.templateId}});
@@ -90,10 +93,14 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         if(notification.typeSelect){
             dispatch(clearAllTeams());
             dispatch(clearAllChannels());
-            //dispatch(clearTeamFromCurrentNotification());
             dispatch(getNotificationTemplatesByType(notification.typeSelect.value.toString()));
-            if(notification.typeSelect.value === 'teams'){
-                dispatch(getAllTeams());
+            switch(notification.typeSelect.value) {
+                case 'teams':
+                    dispatch(getAllTeams());
+                    break;
+                case 'slack':
+                    dispatch(getSlackWebhook());
+                    break;
             }
         }
     }, [notification.typeSelect])
@@ -143,7 +150,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         propertyName: "name", props: {autoFocus: true, icon: 'person', label: 'Name', required: true, isLoading: checkingNotificationName === API_REQUEST_STATE.START, error: isCurrentNotificationHasUniqueName === TRIPLET_STATE.FALSE ? 'The title must be unique' : ''}
     })
     const SlackWebhookInput = notification.getText({
-        propertyName: "slackWebhook", props: {icon: 'link', label: 'Webhook'}
+        propertyName: "slackWebhook", props: {icon: 'link', label: 'Webhook', isLoading: gettingWebhook === API_REQUEST_STATE.START, defaultValue: webhook}
     })
     const EventTypeComponent = notification.getRadios({propertyName: 'eventType', props: {
         icon: 'description',
