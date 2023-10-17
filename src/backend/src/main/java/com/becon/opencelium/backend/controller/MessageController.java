@@ -262,7 +262,7 @@ public class MessageController {
     }
 
     @GetMapping("/tools/slack/webhook")
-    public ResponseEntity<?> getSlackWebhook(@PathVariable String teamId) throws Exception {
+    public ResponseEntity<?> getSlackWebhook() throws Exception {
         String webhook = env.getProperty("opencelium.notification.tools.slack.webhook");
         ResultDTO<String> webhookDto = new ResultDTO<>(webhook);
         return ResponseEntity.ok(webhookDto);
