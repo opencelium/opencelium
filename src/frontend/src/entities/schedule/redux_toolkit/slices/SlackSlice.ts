@@ -36,7 +36,11 @@ const initialState: SlackState = {
 export const slackSlice = createSlice({
     name: 'slack',
     initialState,
-    reducers: {},
+    reducers: {
+        clearWebhook: (state) => {
+            state.webhook = '';
+        }
+    },
     extraReducers: {
         [getSlackWebhook.pending.type]: (state) => {
             state.gettingWebhook = API_REQUEST_STATE.START;
@@ -53,7 +57,7 @@ export const slackSlice = createSlice({
     }
 })
 
-export const {} = slackSlice.actions;
+export const {clearWebhook} = slackSlice.actions;
 
 export const actions = {}
 
