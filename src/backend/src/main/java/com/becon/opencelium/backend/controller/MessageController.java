@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpMethod;
@@ -48,6 +49,9 @@ public class MessageController {
 
     @Autowired
     private TeamsService teamsService;
+
+    @Autowired
+    private Environment env;
 
     @Operation(summary = "Retrieves all event messages from database")
     @ApiResponses(value = {
@@ -255,5 +259,12 @@ public class MessageController {
     public ResponseEntity<?> getAllTeamChannels(@PathVariable String teamId) throws Exception {
         TeamsDto channels = teamsService.getAllChannels(teamId);
         return ResponseEntity.ok(channels);
+    }
+
+    @GetMapping("/tools/slack/webhook")
+    public ResponseEntity<?> getSlackWebhook(@PathVariable String teamId) throws Exception {
+        String webhook = env.getProperty("opencelium.notification.tools.slack.webhook");
+        ResultDTO<String> webhookDto = new ResultDTO<>(webhook);
+        return ResponseEntity.ok(webhookDto);
     }
 }
