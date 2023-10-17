@@ -1,13 +1,22 @@
 package com.becon.opencelium.backend.resource.execution;
 
+import java.util.List;
 import java.util.Map;
 
 public class SchemaDTO {
     private DataType type;
     private String value;
     private Map<String, SchemaDTO> properties;
-    private SchemaDTO items;
+    private List<SchemaDTO> items;
     private XmlObjectDTO xml;
+
+    public SchemaDTO() {
+    }
+
+    public SchemaDTO(DataType dataType, String value){
+        this.type = dataType;
+        this.value = value;
+    }
 
     public DataType getType() {
         return type;
@@ -33,11 +42,11 @@ public class SchemaDTO {
         this.properties = properties;
     }
 
-    public SchemaDTO getItems() {
+    public List<SchemaDTO> getItems() {
         return items;
     }
 
-    public void setItems(SchemaDTO items) {
+    public void setItems(List<SchemaDTO> items) {
         this.items = items;
     }
 

@@ -29,10 +29,6 @@ public class ConnectorMng {
     @Field(name = "connector_id")
     private Integer connectorId;
     private String title;
-    private String icon;
-    @Field(name = "ssl_cert")
-    private boolean sslCert;
-    private int timeout;  //millisecond
     private List<MethodMng> methods;
     private List<OperatorMng> operators;
 
@@ -61,30 +57,6 @@ public class ConnectorMng {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-    public boolean isSslCert() {
-        return sslCert;
-    }
-
-    public void setSslCert(boolean sslCert) {
-        this.sslCert = sslCert;
-    }
-
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
     }
 
     public List<MethodMng> getMethods() {
