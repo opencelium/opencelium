@@ -12,8 +12,8 @@ import { ColorTheme } from '@style/Theme';
 export default ({connection, updateConnection, connectors, tooltipButtonProps}: {connection: CConnection, updateConnection: any, connectors: any[], tooltipButtonProps: any}) => {
     const dispatch = useAppDispatch();
     const sync = () => {
-        const fromConnector = connectors.find(c => c.id === connection.fromConnector.id);
-        const toConnector = connectors.find(c => c.id === connection.toConnector.id);
+        const fromConnector = connectors.find(c => c.connectorId === connection.fromConnector.id);
+        const toConnector = connectors.find(c => c.connectorId === connection.toConnector.id);
         const fromInvoker = fromConnector ? fromConnector.invoker : null;
         const toInvoker = toConnector ? toConnector.invoker : null;
         for(let i = 0; i < connection.fromConnector.methods.length; i++){
@@ -34,7 +34,7 @@ export default ({connection, updateConnection, connectors, tooltipButtonProps}: 
 
     return (
         <React.Fragment>
-            {!tooltipButtonProps && 
+            {!tooltipButtonProps &&
                 <Button
                     icon={'description'}
                     size={TextSize.Size_16}
@@ -44,16 +44,16 @@ export default ({connection, updateConnection, connectors, tooltipButtonProps}: 
                     onClick={sync}
                 />
             }
-            {tooltipButtonProps && 
-                <TooltipButton 
-                    position={tooltipButtonProps.position} 
-                    icon={tooltipButtonProps.icon} 
-                    tooltip={tooltipButtonProps.tooltip} 
-                    target={tooltipButtonProps.target} 
-                    hasBackground={tooltipButtonProps.hasBackground} 
-                    background={ColorTheme.White} 
-                    color={ColorTheme.Gray} 
-                    padding={tooltipButtonProps.padding} 
+            {tooltipButtonProps &&
+                <TooltipButton
+                    position={tooltipButtonProps.position}
+                    icon={tooltipButtonProps.icon}
+                    tooltip={tooltipButtonProps.tooltip}
+                    target={tooltipButtonProps.target}
+                    hasBackground={tooltipButtonProps.hasBackground}
+                    background={ColorTheme.White}
+                    color={ColorTheme.Gray}
+                    padding={tooltipButtonProps.padding}
                     handleClick={() => sync()}
                 />
             }
