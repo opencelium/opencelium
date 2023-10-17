@@ -34,6 +34,7 @@ import {clearAllChannels, clearAllTeams } from "@entity/schedule/redux_toolkit/s
 import {clearChannelFromCurrentNotification, clearCurrentNotification, clearTeamFromCurrentNotification } from "@entity/schedule/redux_toolkit/slices/NotificationSlice";
 import Slack from "@entity/schedule/classes/Slack";
 import {getSlackWebhook} from "@entity/schedule/redux_toolkit/action_creators/SlackCreator";
+import {clearWebhook} from "@entity/schedule/redux_toolkit/slices/SlackSlice";
 
 
 const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
@@ -90,9 +91,16 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         }
     }, [notification.eventType])
     useEffect(() => {
+        if(gettingWebhook === API_REQUEST_STATE.FINISH && webhook){
+            //@ts-ignore
+            notification.updateSlackWebhook(notification, webhook);
+        }
+    }, [gettingWebhook])
+    useEffect(() => {
         if(notification.typeSelect){
             dispatch(clearAllTeams());
             dispatch(clearAllChannels());
+            dispatch(clearWebhook());
             dispatch(getNotificationTemplatesByType(notification.typeSelect.value.toString()));
             switch(notification.typeSelect.value) {
                 case 'teams':
@@ -150,7 +158,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         propertyName: "name", props: {autoFocus: true, icon: 'person', label: 'Name', required: true, isLoading: checkingNotificationName === API_REQUEST_STATE.START, error: isCurrentNotificationHasUniqueName === TRIPLET_STATE.FALSE ? 'The title must be unique' : ''}
     })
     const SlackWebhookInput = notification.getText({
-        propertyName: "slackWebhook", props: {icon: 'link', label: 'Webhook', isLoading: gettingWebhook === API_REQUEST_STATE.START, defaultValue: webhook}
+        propertyName: "slackWebhook", props: {icon: 'link', label: 'Webhook', isLoading: gettingWebhook === API_REQUEST_STATE.START}
     })
     const EventTypeComponent = notification.getRadios({propertyName: 'eventType', props: {
         icon: 'description',

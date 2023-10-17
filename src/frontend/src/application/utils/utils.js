@@ -896,7 +896,7 @@ export const generateSignature = (token, method, url, timestamp) => {
 
 export const sortAlphabeticallyByKey = (array, key) => {
     return array.sort(function(a, b) {
-        const x = a[key].toLowerCase(); 
+        const x = a[key].toLowerCase();
         const y = b[key].toLowerCase();
         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
     });
@@ -937,44 +937,44 @@ export const positionElementOver = (targetElementIds, offset, hide) => {
                 return document.getElementById(id);
             }
         });
-    
+
         if(targetElements){
             let targetRects = targetElements.map(function(targetElement) {
                 if(targetElement){
                     return targetElement.getBoundingClientRect();
                 }
             });
-        
+
             let parentRect = element.parentElement.getBoundingClientRect();
-        
+
             if(targetRects && parentRect){
                 let top = Math.max.apply(null, targetRects.map(function(rect) {
                     if(rect){
                         return rect.top - parentRect.top;
                     }
                 }));
-            
+
                 let left = Math.min.apply(null, targetRects.map(function(rect) {
                     if(rect){
                         return rect.left - parentRect.left;
                     }
                 }));
-            
+
                 let width = Math.max.apply(null, targetRects.map(function(rect) {
                     if(rect){
                         return rect.left - parentRect.left + rect.width;
                     }
                 })) - left;
-            
+
                 let height = Math.max.apply(null, targetRects.map(function(rect) {
                     if(rect){
                         return rect.top - parentRect.top + rect.height;
                     }
                 })) - top;
-            
+
                 top -= offset / 2;
                 left -= offset / 2;
-            
+
                 element.style.position = 'absolute';
                 element.style.display = 'block';
                 element.style.top = top + 'px';
@@ -982,7 +982,7 @@ export const positionElementOver = (targetElementIds, offset, hide) => {
                 element.style.width = width + 10 + 'px';
                 element.style.height = height + 5 + 'px';
                 element.style.padding = offset + 'px';
-            
+
                 if(hide){
                     element.style.display = 'none'
                 }
@@ -1013,14 +1013,14 @@ export const positionElementOverByClassName = (targetElementsClasses, offset, hi
                 }
             }
         });
-    
+
         if(targetElements){
             let targetRects = targetElements.map(function(targetElement) {
                 if(targetElement){
                     return targetElement.getBoundingClientRect();
                 }
             });
-        
+
             let parentRect = element.parentElement.getBoundingClientRect();
 
             if(targetRects && parentRect){
@@ -1029,28 +1029,28 @@ export const positionElementOverByClassName = (targetElementsClasses, offset, hi
                         return rect.top + Math.abs(parentRect.top);
                     }
                 }));
-            
+
                 let left = Math.min.apply(null, targetRects.map(function(rect) {
                     if(rect){
                         return rect.left - parentRect.left;
                     }
                 }));
-            
+
                 let width = Math.max.apply(null, targetRects.map(function(rect) {
                     if(rect){
                         return rect.left - parentRect.left + rect.width;
                     }
                 })) - left;
-            
+
                 let height = Math.max.apply(null, targetRects.map(function(rect) {
                     if(rect){
                         return rect.top - parentRect.top + rect.height;
                     }
                 })) - top;
-            
+
                 top -= offset / 2;
                 left -= offset / 2;
-            
+
                 element.style.position = 'absolute';
                 element.style.display = 'block';
                 element.style.top = top + 'px';
@@ -1058,11 +1058,30 @@ export const positionElementOverByClassName = (targetElementsClasses, offset, hi
                 element.style.width = width + 10 + 'px';
                 element.style.height = height + 8 + 'px';
                 element.style.padding = offset + 'px';
-            
+
                 if(hide){
                     element.style.display = 'none'
                 }
             }
         }
     }
+}
+
+export function replaceVariables(code, variableMap) {
+    // Create a regular expression pattern to match variables
+    const variablePattern = /(\b[a-zA-Z_][a-zA-Z0-9_]*)\b/g;
+
+    // Use the replace method with a callback function
+    const replacedCode = code.replace(variablePattern, (match, variable) => {
+        // Check if the variable exists in the variableMap
+        if (variableMap.hasOwnProperty(variable)) {
+            // Replace the variable with its corresponding value
+            return variableMap[variable];
+        } else {
+            // If the variable is not found in the variableMap, leave it unchanged
+            return match;
+        }
+    });
+
+    return replacedCode;
 }

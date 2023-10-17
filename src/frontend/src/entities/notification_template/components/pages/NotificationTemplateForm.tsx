@@ -100,17 +100,12 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     useEffect(() => {
         if(bodyRef.current) {
             //@ts-ignore
-            if(bodyRef.current.editor.getValue() !== content.body){
-                //@ts-ignore
-                bodyRef.current.editor.setValue(content.body);
-            }
-            //@ts-ignore
             const newMarkers = getMarker(bodyRef.current.editor, content.body, CDataAggregator.embraceArgument(CAggregator.generateNotExistVar()));
             if (JSON.stringify(newMarkers) !== JSON.stringify(markers)) {
                 setMarkers(newMarkers);
             }
         }
-    }, [content.body])
+    }, [content.body, markers])
     useEffect(() => {
         if (didMount.current) {
             if(error === null && (addingNotificationTemplate === API_REQUEST_STATE.FINISH || updatingNotificationTemplate === API_REQUEST_STATE.FINISH)){
