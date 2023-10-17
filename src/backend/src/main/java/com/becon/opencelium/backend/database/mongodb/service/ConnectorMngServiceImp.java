@@ -24,10 +24,6 @@ public class ConnectorMngServiceImp implements ConnectorMngService{
     public ConnectorMng toEntity(ConnectorDTO connectorDTO) {
         ConnectorMng connectorMng = new ConnectorMng();
         connectorMng.setConnectorId(connectorDTO.getConnectorId());
-        connectorMng.setTitle(connectorDTO.getTitle());
-        connectorMng.setTimeout(connectorDTO.getTimeout());
-        connectorMng.setSslCert(connectorDTO.isSslCert());
-        connectorMng.setIcon(connectorDTO.getIcon());
         connectorMng.setMethods(methodMngService.toEntityAll(connectorDTO.getMethods()));
         connectorMng.setOperators(operatorMngService.toEntityAll(connectorDTO.getOperators()));
         return connectorMng;
@@ -38,10 +34,7 @@ public class ConnectorMngServiceImp implements ConnectorMngService{
         ConnectorDTO connectorDTO = new ConnectorDTO();
         connectorDTO.setConnectorId(connectorMng.getConnectorId());
         connectorDTO.setNodeId(connectorMng.getId());
-        connectorDTO.setIcon(connectorMng.getIcon());
-        connectorDTO.setTimeout(connectorMng.getTimeout());
         connectorDTO.setTitle(connectorMng.getTitle());
-        connectorDTO.setSslCert(connectorMng.isSslCert());
         connectorDTO.setMethods(methodMngService.toDTOAll(connectorMng.getMethods()));
         connectorDTO.setOperators(operatorMngService.toDTOAll(connectorMng.getOperators()));
         return connectorDTO;
@@ -51,10 +44,7 @@ public class ConnectorMngServiceImp implements ConnectorMngService{
     public ConnectorMng toEntity(Connector connector) {
         ConnectorMng connectorMng = new ConnectorMng();
         connectorMng.setConnectorId(connector.getId());
-        connectorMng.setIcon(connector.getIcon());
-        connectorMng.setTimeout(connector.getTimeout());
         connectorMng.setTitle(connector.getTitle());
-        connectorMng.setSslCert(connector.isSslCert());
         return connectorMng;
     }
 }
