@@ -13,6 +13,7 @@ import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.http.MediaType;
@@ -66,9 +67,9 @@ public class RestCustomizer implements RestTemplateCustomizer {
         requestFactory.setConnectTimeout(timeout);
 
         // Setting proxy
-        if (proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty()) {
-            HttpRoutePlanner routePlanner = new CustomRoutePlanner(new HttpHost(proxyHost, proxyPort));
-            HttpClient httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).build();
+        if (proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty() && !sslCert) {
+            HttpClient httpClient = getHttpClientWithProxy();
+            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
             requestFactory.setHttpClient(httpClient);
         }
         restTemplate.setRequestFactory(requestFactory);
@@ -77,6 +78,13 @@ public class RestCustomizer implements RestTemplateCustomizer {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setSupportedMediaTypes(Collections.singletonList(MediaType.ALL));
         restTemplate.getMessageConverters().add(converter);
+    }
+
+    private HttpClient getHttpClientWithProxy() {
+        HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+        return HttpClientBuilder.create()
+                .setRoutePlanner(new DefaultProxyRoutePlanner(proxy))
+                .build();
     }
 
     private CloseableHttpClient getDisabledHttpsClient() {
@@ -102,23 +110,15 @@ public class RestCustomizer implements RestTemplateCustomizer {
                     .setSSLSocketFactory(ssl).build();
 
             if(proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty()) {
-                HttpHost proxy = new HttpHost("PROXY_SERVER_HOST", "PROXY_SERVER_PORT");
-                return HttpClients.custom().setProxy(proxy).setConnectionManager(connectionManager).build();
+                HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+                return  HttpClientBuilder.create()
+                        .setConnectionManager(connectionManager)
+                        .setRoutePlanner(new DefaultProxyRoutePlanner(proxy))
+                        .build();
             }
             return HttpClients.custom().setConnectionManager(connectionManager).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    static class CustomRoutePlanner extends DefaultProxyRoutePlanner {
-        CustomRoutePlanner(HttpHost proxy) {
-            super(proxy);
-        }
-
-        @Override
-        protected HttpHost determineProxy(HttpHost target, HttpContext context) throws HttpException {
-            return super.determineProxy(target, context);
         }
     }
 }
