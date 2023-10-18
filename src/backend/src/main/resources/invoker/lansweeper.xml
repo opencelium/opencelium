@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
+    <name>lansweeper</name>
+    <description>personal token</description>
+    <hint>This graphql interface provides a token auth. Its only provides one api operation, where you can flexible set up the query. The URL should look like this https://192.168.10.1/graphql</hint>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="token" type="string" visibility="protected"/>
+    </requiredData>
+    <authType>token</authType>
+    <operations>
+        <operation name="ConnectionTest" type="test">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Token {token}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="query" type="string">{ me { id username email name surname fullName imageUrl language profiles { site { id name } } } }</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body data="raw" format="object" type="string">
+                        <field name="data" type="object"></field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="Query" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">Token {token}</item>
+                </header>
+                <body data="graphql" format="json" type="object">
+                    <field name="query" type="object"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body data="graphql" format="json" type="object">
+                        <field name="data" type="object">
+                            <field name="site" type="object">
+                                <field name="assetResources" type="object">
+                                    <field name="items" type="array"></field>
+                                </field>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>
