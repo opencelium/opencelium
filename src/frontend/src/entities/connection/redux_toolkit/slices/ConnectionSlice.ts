@@ -33,7 +33,8 @@ import {
   deleteTestConnectionById,
   getAllConnections,
   getAllMetaConnections,
-  getAndUpdateConnection,
+  getAndUpdateConnectionTitle,
+    getAndUpdateConnectionDescription,
   getConnectionById,
   testConnection,
   updateConnection,
@@ -399,29 +400,56 @@ const connectionReducers = (isModal: boolean = false) => {
         state.addingTestConnection = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },
-      [getAndUpdateConnection.pending.type]: (state, action: any) => {
+      [getAndUpdateConnectionTitle.pending.type]: (state, action: any) => {
         state.updatingConnection = API_REQUEST_STATE.START;
       },
-      [getAndUpdateConnection.fulfilled.type]: (
-        state,
-        action: PayloadAction<IConnection>
+      [getAndUpdateConnectionTitle.fulfilled.type]: (
+          state,
+          action: PayloadAction<IConnection>
       ) => {
         state.updatingConnection = API_REQUEST_STATE.FINISH;
         state.connections = state.connections.map((connection) =>
-          connection.connectionId === action.payload.connectionId
-            ? action.payload
-            : connection
+            connection.connectionId === action.payload.connectionId
+                ? action.payload
+                : connection
         );
         state.metaConnections = state.metaConnections.map((connection) =>
-          connection.connectionId === action.payload.connectionId
-            ? action.payload
-            : connection
+            connection.connectionId === action.payload.connectionId
+                ? action.payload
+                : connection
         );
         state.error = null;
       },
-      [getAndUpdateConnection.rejected.type]: (
-        state,
-        action: PayloadAction<IResponse>
+      [getAndUpdateConnectionTitle.rejected.type]: (
+          state,
+          action: PayloadAction<IResponse>
+      ) => {
+        state.updatingConnection = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [getAndUpdateConnectionDescription.pending.type]: (state, action: any) => {
+        state.updatingConnection = API_REQUEST_STATE.START;
+      },
+      [getAndUpdateConnectionDescription.fulfilled.type]: (
+          state,
+          action: PayloadAction<IConnection>
+      ) => {
+        state.updatingConnection = API_REQUEST_STATE.FINISH;
+        state.connections = state.connections.map((connection) =>
+            connection.connectionId === action.payload.connectionId
+                ? action.payload
+                : connection
+        );
+        state.metaConnections = state.metaConnections.map((connection) =>
+            connection.connectionId === action.payload.connectionId
+                ? action.payload
+                : connection
+        );
+        state.error = null;
+      },
+      [getAndUpdateConnectionDescription.rejected.type]: (
+          state,
+          action: PayloadAction<IResponse>
       ) => {
         state.updatingConnection = API_REQUEST_STATE.ERROR;
         state.error = action.payload;

@@ -28,7 +28,7 @@ import {ColorTheme} from "@style/Theme";
 import {DuplicateIcon} from "@root/components/duplicate_icon/DuplicateIcon";
 import {ConnectionProps, IConnection} from "../interfaces/IConnection";
 import {Connection} from "../classes/Connection";
-import {deleteConnectionsById, getAndUpdateConnection,} from "../redux_toolkit/action_creators/ConnectionCreators";
+import {deleteConnectionsById, getAndUpdateConnectionTitle, getAndUpdateConnectionDescription} from "../redux_toolkit/action_creators/ConnectionCreators";
 import {ConnectionPermissions} from "../constants";
 import InlineEditInput from "@app_component/collection/collection_view/InlineEditInput";
 import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
@@ -49,7 +49,9 @@ class Connections extends ListCollection<ConnectionProps>{
                         maxLength={100}
                         isInProcess={this.updatingConnection === API_REQUEST_STATE.START}
                         updateValue={(newValue) => {
-                            this.dispatch(getAndUpdateConnection({...entity, title: newValue}))
+                            if(newValue !== entity.title){
+                                this.dispatch(getAndUpdateConnectionTitle({...entity, title: newValue}))
+                            }
                         }}
                         initialValue={entity.title}
                     />
@@ -62,8 +64,7 @@ class Connections extends ListCollection<ConnectionProps>{
                         maxLength={250}
                         isInProcess={this.updatingConnection === API_REQUEST_STATE.START}
                         updateValue={(newValue) => {
-                            entity.description = newValue;
-                            this.dispatch(getAndUpdateConnection(entity))
+                            this.dispatch(getAndUpdateConnectionDescription({...entity, description: newValue}))
                         }}
                         initialValue={entity.description}
                     />
