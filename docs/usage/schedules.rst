@@ -82,22 +82,30 @@ Current triggering schedules are displayed down after the list. You can follow t
 .. |image0| image:: ../img/schedule/0.png
    :align: middle
 .. |image1| image:: ../img/schedule/1.png
+   :width: 30
 .. |image2| image:: ../img/schedule/2.png
+   :width: 30
 .. |image3| image:: ../img/schedule/3.png
+   :width: 30
 .. |image4| image:: ../img/schedule/4.png
+   :width: 30
 .. |image5| image:: ../img/schedule/5.png
    :align: middle
+   :width: 400
 .. |image6| image:: ../img/schedule/6.png
    :align: middle
    :width: 400
 .. |image7| image:: ../img/schedule/7.png
    :align: middle
 .. |image10| image:: ../img/schedule/10.png
+   :width: 30
 .. |image11| image:: ../img/schedule/11.png
+   :width: 30
    :align: middle
 .. |image13| image:: ../img/schedule/13.png
    :align: middle
 .. |image14| image:: ../img/schedule/14.png
+   :width: 30
 .. |image15| image:: ../img/schedule/15.png
    :width: 300
    :align: middle
@@ -108,3 +116,4 @@ Current triggering schedules are displayed down after the list. You can follow t
 .. |image20| image:: ../img/schedule/20.png
 .. |image21| image:: ../img/schedule/21.png
 .. |image24| image:: ../img/schedule/24.png
+   :width: 120
