@@ -1,7 +1,10 @@
 package com.becon.opencelium.backend.configuration.cutomizer;
 
 import com.becon.opencelium.backend.constant.SecurityConstant;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -31,6 +34,8 @@ public class RestCustomizer implements RestTemplateCustomizer {
 
     private String proxyHost;
     private String proxyPort;
+    private String proxyUser;
+    private String proxyPass;
     private boolean sslCert = false;
     private int timeout = 0;
 
@@ -48,11 +53,13 @@ public class RestCustomizer implements RestTemplateCustomizer {
         this.sslCert = sslCert;
     }
 
-    public RestCustomizer(String host, String port, boolean sslCert, int timeout) {
+    public RestCustomizer(String host, String port, String proxyUser, String proxyPass, boolean sslCert, int timeout) {
         this.proxyHost = host;
         this.proxyPort = port;
         this.sslCert = sslCert;
         this.timeout = timeout;
+        this.proxyUser = proxyUser;
+        this.proxyPass = proxyPass;
     }
 
     @Override
@@ -68,9 +75,8 @@ public class RestCustomizer implements RestTemplateCustomizer {
 
         // Setting proxy
         if (proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty() && !sslCert) {
-            HttpClient httpClient = getHttpClientWithProxy();
-            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
-            requestFactory.setHttpClient(httpClient);
+            requestFactory = new HttpComponentsClientHttpRequestFactory(getHttpClientWithProxy());
+//            requestFactory.setHttpClient(httpClient);
         }
         restTemplate.setRequestFactory(requestFactory);
 
@@ -81,8 +87,17 @@ public class RestCustomizer implements RestTemplateCustomizer {
     }
 
     private HttpClient getHttpClientWithProxy() {
-        HttpHost proxy = new HttpHost(proxyHost, proxyPort);
-        return HttpClientBuilder.create()
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        if (proxyPass != null && !proxyPass.isEmpty() && proxyUser != null && !proxyUser.isEmpty()) {
+            BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+            credsProvider.setCredentials(
+                    new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
+                    new UsernamePasswordCredentials(proxyUser, proxyPass.toCharArray())
+            );
+            httpClientBuilder.setDefaultCredentialsProvider(credsProvider);
+        }
+        HttpHost proxy = new HttpHost(proxyHost, Integer.parseInt(proxyPort));
+        return httpClientBuilder
                 .setRoutePlanner(new DefaultProxyRoutePlanner(proxy))
                 .build();
     }
@@ -111,7 +126,16 @@ public class RestCustomizer implements RestTemplateCustomizer {
 
             if(proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty()) {
                 HttpHost proxy = new HttpHost(proxyHost, proxyPort);
-                return  HttpClientBuilder.create()
+                HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+                if (proxyPass != null && !proxyPass.isEmpty() && proxyUser != null && !proxyUser.isEmpty()) {
+                    BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+                    credsProvider.setCredentials(
+                            new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
+                            new UsernamePasswordCredentials("bocffjov", "tgjzz8pvelfc".toCharArray())
+                    );
+                    httpClientBuilder.setDefaultCredentialsProvider(credsProvider);
+                }
+                return  httpClientBuilder
                         .setConnectionManager(connectionManager)
                         .setRoutePlanner(new DefaultProxyRoutePlanner(proxy))
                         .build();
