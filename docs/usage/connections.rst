@@ -50,8 +50,10 @@ information about the selected element.
 
 If you want to set or to change the *Label* of the connection, just move your mouse
 over it in *Details* and click on edit icon. Under the *Format* you can find an
-*Aggregator* that also could be (re)set. You can create a new aggregator
-pressing on the button |image31|.
+*Aggregator* that also could be (re)set. If you want to know more, please
+read `Here
+<https://docs.opencelium.io/en/dev/usage/admin.html#data-aggregator>`_.
+You can create a new aggregator pressing on the button |image31|.
 
 In the *Details* panel you can see *Endpoint* and *Body* under the **Request** paragraph
 that could be modified clicking on their placeholders.

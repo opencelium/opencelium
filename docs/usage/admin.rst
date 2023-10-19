@@ -139,7 +139,9 @@ The list of aggregators displays: *name, *arguments* and *archived* status.
 
 The archive status means what aggregators should be disabled and invisible in the system.
 You can switch it clicking on the status. If you want to see the archived aggregators then
-toggle the switcher |data_aggregator_archive_switcher|
+toggle the switcher.
+
+|data_aggregator_archive_switcher|
 
 If you want to create an aggregator you need to provide a *name*, *arguments* and the *script*.
 *Arguments* are used inside of the notification it self. You should assign to them an accumulated
@@ -217,6 +219,7 @@ read the `Administration
    :width: 400
 .. |data_aggregator_archive_switcher| image:: ../img/data_aggregator/archive_switcher.png
    :width: 120
+   :align: middle
 
 .. |image_group_0| image:: ../img/group/image1.png
    :align: middle
