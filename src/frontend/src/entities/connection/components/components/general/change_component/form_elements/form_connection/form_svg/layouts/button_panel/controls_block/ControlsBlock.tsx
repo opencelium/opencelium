@@ -161,7 +161,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
         </div>
       </div>
 
-      <div className="wrapper">
+      <div className="wrapper" style={{zIndex: 10}}>
         <div className="button_wrap">
           {!data.readOnly && (
             <TooltipButton

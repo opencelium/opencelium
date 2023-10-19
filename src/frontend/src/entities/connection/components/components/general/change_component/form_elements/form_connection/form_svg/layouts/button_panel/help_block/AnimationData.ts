@@ -457,6 +457,39 @@ const animationData: IAnimationData = {
         }
       ]
     },
+  },
+  webhook: {
+    fromConnector: {
+      invoker: {
+        name: 'otrs'
+      },
+      items: [
+        {
+          index: "0",
+          type: "process",
+          name: "TicketGet",
+          scripts: [
+            {
+              functionId: "showPopoverForAddBodyKeyValue",
+              text: "Here we set the webhook using next format: ${webhook}"
+            },
+          ],
+          body: [
+            {
+              available: true,
+              keyName: "TicketID",
+              keyValue: '${TicketID}',
+            },
+          ]
+        },
+      ]
+    },
+    toConnector: {
+      invoker: {
+        name: "otrs"
+      },
+      items: [],
+    }
   }
 };
 
