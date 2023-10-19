@@ -13,7 +13,8 @@ html_favicon = 'img/favicon32x32.png'
 numpydoc_show_class_members = False
 class_members_toctree = False
 file_insertion_enabled = False
-extensions = ['sphinx.ext.intersphinx']
+extensions = ['sphinx.ext.intersphinx', 'sphinx_rtd_theme']
+html_theme = "sphinx_rtd_theme"
 
 source_suffix = ['.rst','.md']
 copyright = str(datetime.now().year)
@@ -21,7 +22,6 @@ version = 'latest'
 release = 'latest'
 exclude_patterns = ['_build']
 htmlhelp_basename = 'openceliumapi'
-
 
 def setup(app):
     app.add_javascript('js/custom.js')
