@@ -136,16 +136,22 @@ On the bottom you can find the Action Panel.
 Here you can make most actions regarding to the connection:
 
 |image32| - testing the current connection creating a temporal connection and schedule.
+
 |image33| - saving options: save, save and close, save and go to add schedule (correspondingly |image13|).
+
 |image34| - resize the *methods* section to fullscreen and back.
+
 |image35| - toggle log panel that shows a test connection log messages.
+
 |image36| - configuration that help you to set *name* and *description* in add/update connection form,
 also you can set a color mode of the method and its name/label font size.
 
 |image37|
 
 |image38| - toggle data aggregator.
+
 |image39| - template options: create a new template or load existing one (correspondingly |image14|).
+
 |image40| - animation tool for explaining how to use the *method* section. It simulate the method's editor
 with the predefined data following with scripts that describe steps.
 
@@ -165,6 +171,7 @@ clicking on any place you can see the pause/play/stop icons.
 |image41| - synchronize invokers. Sometimes you need to change the invoker file manually. The connection
 that uses these invokers will not update them automatically, because for some cases it is not needed.
 That is why you can sync by your own using this feature.
+
 |image42| - shortcuts
 
 |image16|
