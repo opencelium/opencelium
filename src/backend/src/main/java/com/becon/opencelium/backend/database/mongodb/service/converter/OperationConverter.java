@@ -3,19 +3,24 @@ package com.becon.opencelium.backend.database.mongodb.service.converter;
 import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
+import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Component
 public class OperationConverter {
+    private final InvokerService invokerService;
+
+    public OperationConverter(@Qualifier("invokerServiceImp") InvokerService invokerService) {
+        this.invokerService = invokerService;
+    }
 
     public OperationDTO toOperation(MethodMng method) {
         MediaType mediaType = MediaType.valueOf(method.getRequest().getHeader().get("Content-Type"));
@@ -66,7 +71,7 @@ public class OperationConverter {
 
             boolean explode = false; //it may be changed when the parameter is object
             if (split.length == 1) {
-                parameterDTO.setSchema(getSchema(value, getType(value)));
+                parameterDTO.setSchema(getSchema(value, DataType.STRING));
             }//for primitive
             else if (split[0].contains("=")) {
                 explode = true;
@@ -75,7 +80,7 @@ public class OperationConverter {
                 Map<String, SchemaDTO> map = new HashMap<>();
                 for (String s : split) {
                     String[] pairs = s.split("=");
-                    map.put(pairs[0], getSchema(pairs[1], getType(pairs[1])));
+                    map.put(pairs[0], getSchema(pairs[1], DataType.STRING));
                 }
                 schemaDTO.setProperties(map);
                 parameterDTO.setSchema(schemaDTO);
@@ -90,19 +95,19 @@ public class OperationConverter {
     }
 
     private List<ParameterDTO> getPathParameters(String path, MediaType mediaType) {
-        if (path == null || !path.matches(".*\\{.+}.*")) {
+        if (path == null || !path.matches(".*\\{#.+}.*")) {
             return Collections.emptyList();
         } else {
             List<ParameterDTO> list = new ArrayList<>();
             String[] split = path.split("/");
             for (String s : split) {
-                if (s.matches("\\{.+}")) {
+                if (s.matches("\\{#.+}")) {
                     ParameterDTO parameterDTO = new ParameterDTO();
                     parameterDTO.setIn(ParamLocation.PATH);
                     parameterDTO.setName(s.substring(1, s.length() - 1));
                     parameterDTO.setStyle(ParamStyle.SIMPLE);
                     parameterDTO.setContent(mediaType);
-                    parameterDTO.setSchema(getSchema(s, DataType.STRING));
+                    parameterDTO.setSchema(getSchema(s.substring(1, s.length() - 1), DataType.STRING));
                     list.add(parameterDTO);
                 }
             }
@@ -124,7 +129,8 @@ public class OperationConverter {
 
         for (Map.Entry<String, String> entry : pairs.entrySet()) {
             ParameterDTO parameterDTO = new ParameterDTO();
-            String value = URLDecoder.decode(entry.getValue(), StandardCharsets.UTF_8);
+//            String value = URLDecoder.decode(entry.getValue(), StandardCharsets.UTF_8);
+            String value = entry.getValue().replace("%20", " ");
             if (entry.getKey().matches(".+[\\[.+\\]]")) {
                 objects.insert(entry.getKey(), value);
                 continue;
@@ -133,10 +139,12 @@ public class OperationConverter {
                 dealWithArray(value, parameterDTO);
             }// if it is array deals with it
             else {
-                DataType type = getType(entry.getValue());
                 parameterDTO.setStyle(ParamStyle.FORM);
                 parameterDTO.setExplode(true);
-                parameterDTO.setSchema(getSchema(value, type));
+                if (value.matches("\\{#.+}")) {
+                    value = value.substring(1, value.length() - 1);
+                }
+                parameterDTO.setSchema(getSchema(value, DataType.STRING));
             }// if it isn't array and object then it is primitive(number,integer, boolean, string)
 
             parameterDTO.setName(entry.getKey());
@@ -202,12 +210,16 @@ public class OperationConverter {
 
         SchemaDTO schemaDTO = new SchemaDTO();
         if (node.getValue() != null) {
+            String value = node.getValue();
+            if (value.matches("\\{#.+}")) {
+                value = value.substring(1, value.length() - 1);
+            }
             schemaDTO.setType(DataType.STRING);
-            schemaDTO.setValue(node.getValue());
+            schemaDTO.setValue(value);
             return schemaDTO;
         }
         String firstKey = node.getFields().get(0).getKey();
-        if (isThatType(firstKey, DataType.INTEGER)) {
+        if (firstKey.matches("[\\d+]")) {
             if (schemaDTO.getItems() == null) {
                 schemaDTO.setItems(new ArrayList<>());
             }
@@ -231,8 +243,15 @@ public class OperationConverter {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(obj);
         if (obj == null || type == null) return null;
-
-        if (type != DataType.OBJECT & type != DataType.ARRAY) {
+        if (type == DataType.STRING) {
+            String value = String.valueOf(obj);
+            if (value.startsWith("#")) {
+                schemaDTO.setType(DataType.valueOf(invokerService.findFieldType("", value)));
+            } else {
+                schemaDTO.setType(DataType.STRING);
+            }
+            schemaDTO.setValue(value);
+        } else if (type != DataType.OBJECT & type != DataType.ARRAY) {
             schemaDTO.setType(type);
             schemaDTO.setValue(String.valueOf(obj));
         } else if (obj instanceof List<?> items) {
@@ -259,34 +278,8 @@ public class OperationConverter {
         SchemaDTO schemaDTO = new SchemaDTO();
         schemaDTO.setType(DataType.ARRAY);
         List<SchemaDTO> schemas = new ArrayList<>();
-
-        DataType dataType = DataType.NUMBER;
         for (String s : split) {
-            if (!isThatType(s, DataType.NUMBER)) {
-                dataType = DataType.STRING;
-                break;
-            }
-        }
-        if (dataType == DataType.NUMBER) {
-            dataType = DataType.INTEGER;
-            for (String s : split) {
-                if (!isThatType(s, DataType.INTEGER)) {
-                    dataType = DataType.NUMBER;
-                    break;
-                }
-            }
-        }
-        if (dataType == DataType.STRING) {
-            dataType = DataType.BOOLEAN;
-            for (String s : split) {
-                if (!isThatType(s, DataType.BOOLEAN)) {
-                    dataType = DataType.STRING;
-                    break;
-                }
-            }
-        }
-        for (String s : split) {
-            schemas.add(getSchema(s, dataType));
+            schemas.add(getSchema(s, DataType.STRING));
         }
         schemaDTO.setItems(schemas);
         return schemaDTO;
@@ -313,13 +306,11 @@ public class OperationConverter {
     }
 
     private DataType getType(Object obj) {
-        if (obj instanceof Number) {
-            if (obj instanceof Integer) {
-                return DataType.INTEGER;
-            } else {
-                return DataType.NUMBER;
-            }
-        } else if (obj instanceof Boolean) {
+        if (obj instanceof Integer) {
+            return DataType.INTEGER;
+        } else if (obj instanceof Number){
+            return DataType.NUMBER;
+        }else if (obj instanceof Boolean) {
             return DataType.BOOLEAN;
         } else if (obj instanceof String) {
             return DataType.STRING;
@@ -329,27 +320,5 @@ public class OperationConverter {
             return DataType.OBJECT;
         }
         return null;
-    }
-
-    private DataType getType(String source) {
-        if (isThatType(source, DataType.INTEGER)) return DataType.INTEGER;
-        if (isThatType(source, DataType.NUMBER)) return DataType.NUMBER;
-        if (isThatType(source, DataType.BOOLEAN)) return DataType.BOOLEAN;
-        return DataType.STRING;
-    }
-
-    private boolean isThatType(String value, DataType type) {
-        try {
-            switch (type) {
-                case NUMBER -> Double.parseDouble(value);
-                case INTEGER -> Integer.parseInt(value);
-                case BOOLEAN -> {
-                    return Objects.equals(value, "true") || Objects.equals(value, "false");
-                }
-            }
-        } catch (NumberFormatException | NullPointerException e) {
-            return false;
-        }
-        return true;
     }
 }
