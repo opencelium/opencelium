@@ -16,8 +16,8 @@ be triggered. Setting all data, you will see a list of the nearest triggering ti
 |image11|
 
 The list of schedules displays next information: *title, connection, cron*,
-time of *last success* trigger, time of *last failed* trigger, *duration* time, *logs*
-and *status*.
+time of *last success* trigger, time of *last failed* trigger, *duration* time, *status*
+and *logs*.
 
 |image0|
 
@@ -25,7 +25,7 @@ The *title* you can change directly inline double clicking on its text.
 
 |image15|
 
-If background of status is grey, it means that job was not still triggered,
+If the background of status is grey, it means that job was not still triggered,
 if green - last performance was successful and red, if it was failed.
 There is also a switcher that gives you an ability to enable or disable schedule.
 If the cron job of the schedule was not set, then you cannot change the status.
@@ -40,34 +40,36 @@ Due to it the user can trigger this connection using only url. To get
 this url, just click on the |image4|. The url is stored in the
 buffer. Now you can paste it where you need.
 
-*Notifications* are such functionality that allows you to be notified via emails when
-pre, post or alert event happens. You can also apply the same notification for multiple
-schedules. Just select needed schedules and press on the notification button. |image16|
+*Notification* is such a feature that allows you to be notified via emails, slack or teams when
+pre, post or alert event happens.
+
+.. note::
+	The aggregator applied only for post events.
+
+You can also apply the same notification for multiple schedules. Just select needed schedules and
+press on the notification button |image24|
 
 |image5|
 
-After clicking on add, provide *name*, *event*, *notification type*.
+After clicking on add, provide *name*, *event*, *notification type* and after *template*.
 
 |image6|
 
-Choosing type you need to select template of that type and recipients who gets a notification.
+For E-mail type you need to select the recipients who gets a notification.
 
 |image7|
+
+For Slack type you need to provide the webhook of the channel.
+
+|image18|
+
+For Teams type your need to select the team and its channel.
+
+|image19|
 
 After creating the notification you will see a list of notifications and search to look for them
 by name, event or notification type. Also, you can update or delete the corresponding notification,
 if you mouse over on one of them and click on the icon.
-
-|image8|
-
-*Update* schedule gives an opportunity to update the name of the schedule.
-
-|image9|
-
-There are three additional multiple actions for the selected schedules: *start* - trigger schedules,
-*enable* and *disable* which are on and off the jobs.
-
-|image12|
 
 Current triggering schedules are displayed down after the list. You can follow the process.
 
@@ -90,20 +92,19 @@ Current triggering schedules are displayed down after the list. You can follow t
    :width: 400
 .. |image7| image:: ../img/schedule/7.png
    :align: middle
-.. |image8| image:: ../img/schedule/8.png
-   :align: middle
-.. |image9| image:: ../img/schedule/9.png
-   :align: middle
 .. |image10| image:: ../img/schedule/10.png
 .. |image11| image:: ../img/schedule/11.png
-   :align: middle
-.. |image12| image:: ../img/schedule/12.png
    :align: middle
 .. |image13| image:: ../img/schedule/13.png
    :align: middle
 .. |image14| image:: ../img/schedule/14.png
 .. |image15| image:: ../img/schedule/15.png
+   :width: 300
    :align: middle
-.. |image16| image:: ../img/schedule/16.png
 .. |image17| image:: ../img/schedule/17.png
    :align: middle
+.. |image18| image:: ../img/schedule/18.png
+.. |image19| image:: ../img/schedule/19.png
+.. |image20| image:: ../img/schedule/20.png
+.. |image21| image:: ../img/schedule/21.png
+.. |image24| image:: ../img/schedule/24.png
