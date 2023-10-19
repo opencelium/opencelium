@@ -114,6 +114,5 @@ Current triggering schedules are displayed down after the list. You can follow t
 .. |image18| image:: ../img/schedule/18.png
 .. |image19| image:: ../img/schedule/19.png
 .. |image20| image:: ../img/schedule/20.png
-.. |image21| image:: ../img/schedule/21.png
 .. |image24| image:: ../img/schedule/24.png
    :width: 120

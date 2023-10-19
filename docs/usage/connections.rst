@@ -50,28 +50,10 @@ information about the selected element.
 
 If you want to set or to change the *Label* of the connection, just move your mouse
 over it in *Details* and click on edit icon. Under the *Format* you can find an
-*Aggregator* that also could be (re)set.
-
-*Aggregator* is a feature that provides a possibility to notify a user after the
-triggered connection (this happens in *Schedules*). You can create a new aggregator
+*Aggregator* that also could be (re)set. You can create a new aggregator
 pressing on the button |image31|.
 
-Here you will see a list of existed aggregators that displaying: *name* and *arguments*
-
-|image17|
-
-or a form to create a new one, if still not exist.
-
-|image18|
-
-Setting *Methods* you can optionally define where should this aggregator be applied after creating.
-
-|image19|
-
-*Arguments* are used inside of the notification it self. You should assign to them an accumulated
-value inside of the script section.
-
-Returning to the *Details* panel you can see *Endpoint* and *Body* under the **Request** paragraph
+In the *Details* panel you can see *Endpoint* and *Body* under the **Request** paragraph
 that could be modified clicking on their placeholders.
 
 There is a possibility to add a parameter into the *Endpoint* (except the first

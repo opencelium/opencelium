@@ -14,13 +14,14 @@ The list provides *Name* and *Type* information.
 
 Here you can as usually add, update or delete the template. When you add or update it, you
 need to fill out *General Data* and *Template Content*. First one has a *name* and a *type* of
-the template.
+the template. Type could be: *Email*, *Slack*, *Teams*.
 
-|general_data|
+*Data Aggregator* input is only for help. You can find there the desired aggregator and his arguments.
+Clicking on the argument, it will be placed inside of the *body*.
 
-On the second form you enter a *subject* and a  *body* of the template.
+In *Template Content* you enter a *subject* and a *body* of the template.
 
-|template_content|
+|form|
 
 All fields here are required.
 
@@ -30,7 +31,5 @@ All fields here are required.
 
 .. |list| image:: ../img/usecases/notification_templates/list.png
    :align: middle
-.. |general_data| image:: ../img/usecases/notification_templates/general_data.png
-   :align: middle
-.. |template_content| image:: ../img/usecases/notification_templates/template_content.png
+.. |form| image:: ../img/usecases/notification_templates/form.png
    :align: middle
