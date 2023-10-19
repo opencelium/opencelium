@@ -136,16 +136,22 @@ On the bottom you can find the Action Panel.
 Here you can make most actions regarding to the connection:
 
 |image32| - testing the current connection creating a temporal connection and schedule.
+
 |image33| - saving options: save, save and close, save and go to add schedule (correspondingly |image13|).
+
 |image34| - resize the *methods* section to fullscreen and back.
+
 |image35| - toggle log panel that shows a test connection log messages.
+
 |image36| - configuration that help you to set *name* and *description* in add/update connection form,
 also you can set a color mode of the method and its name/label font size.
 
 |image37|
 
 |image38| - toggle data aggregator.
+
 |image39| - template options: create a new template or load existing one (correspondingly |image14|).
+
 |image40| - animation tool for explaining how to use the *method* section. It simulate the method's editor
 with the predefined data following with scripts that describe steps.
 
@@ -165,6 +171,7 @@ clicking on any place you can see the pause/play/stop icons.
 |image41| - synchronize invokers. Sometimes you need to change the invoker file manually. The connection
 that uses these invokers will not update them automatically, because for some cases it is not needed.
 That is why you can sync by your own using this feature.
+
 |image42| - shortcuts
 
 |image16|
@@ -198,7 +205,9 @@ On the left side in the *methods* section you can see the zoom in and zoom out a
 .. |image12| image:: ../img/connection/12.png
    :align: middle
 .. |image13| image:: ../img/connection/13.png
+   :width: 110
 .. |image14| image:: ../img/connection/14.png
+   :width: 70
 .. |image15| image:: ../img/connection/15.png
    :align: middle
 .. |image16| image:: ../img/connection/16.png
@@ -210,6 +219,7 @@ On the left side in the *methods* section you can see the zoom in and zoom out a
 .. |image19| image:: ../img/connection/19.png
    :align: middle
 .. |image20| image:: ../img/connection/20.png
+   :width: 30
 .. |image21| image:: ../img/connection/21.png
    :align: middle
 .. |image22| image:: ../img/connection/22.png
@@ -218,18 +228,30 @@ On the left side in the *methods* section you can see the zoom in and zoom out a
    :align: middle
 .. |image25| image:: ../img/connection/25.png
    :align: middle
+   :width: 150
 .. |image26| image:: ../img/connection/26.png
    :align: middle
 .. |image31| image:: ../img/connection/31.png
+   :width: 90
 .. |image32| image:: ../img/connection/32.png
+   :width: 110
 .. |image33| image:: ../img/connection/33.png
+   :width: 30
 .. |image34| image:: ../img/connection/34.png
+   :width: 30
 .. |image35| image:: ../img/connection/35.png
+   :width: 30
 .. |image36| image:: ../img/connection/36.png
+   :width: 30
 .. |image37| image:: ../img/connection/37.png
    :align: middle
 .. |image38| image:: ../img/connection/38.png
+   :width: 30
 .. |image39| image:: ../img/connection/39.png
+   :width: 30
 .. |image40| image:: ../img/connection/40.png
+   :width: 30
 .. |image41| image:: ../img/connection/41.png
+   :width: 30
 .. |image42| image:: ../img/connection/42.png
+   :width: 30
