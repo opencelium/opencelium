@@ -23,6 +23,9 @@ release = 'latest'
 exclude_patterns = ['_build']
 htmlhelp_basename = 'openceliumapi'
 
-def setup(app):
-    app.add_javascript('js/custom.js')
-    app.add_stylesheet('css/custom.css')
+html_js_files = [
+    'js/custom.js',
+]
+html_css_files = [
+    'css/custom.js',
+]
