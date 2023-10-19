@@ -40,13 +40,14 @@ public class OperationConverter {
         List<ParameterDTO> parameters = getHeaderParameters(request.getHeader(), mediaType);
 
         UriComponents uriComponents = UriComponentsBuilder.fromUriString(request.getEndpoint()).build();
+        int index = request.getEndpoint().indexOf("?");
+        if(index!=-1){
+            String query = request.getEndpoint().substring(index+1);
+            parameters.addAll(getQueryParameters(query, mediaType));
+        }
+        //adding path params
         String path = uriComponents.getPath();
-        String query = uriComponents.getQuery();
-
-        //adding path params
         parameters.addAll(getPathParameters(path, mediaType));
-        //adding path params
-        parameters.addAll(getQueryParameters(query, mediaType));
 
         //should be added cookies params
 
@@ -116,7 +117,7 @@ public class OperationConverter {
     }
 
     private List<ParameterDTO> getQueryParameters(String query, MediaType mediaType) {
-        if (query == null) return Collections.emptyList();
+        if (query == null || query.trim().isBlank()) return Collections.emptyList();
         List<ParameterDTO> parameters = new ArrayList<>(); //stores all parameters
         HashMap<String, String> pairs = new HashMap<>(); //stores k,v pairs
         Tree objects = new Tree(); //data structure for storing and retrieve objects
@@ -246,7 +247,7 @@ public class OperationConverter {
         if (type == DataType.STRING) {
             String value = String.valueOf(obj);
             if (value.startsWith("#")) {
-                schemaDTO.setType(DataType.valueOf(invokerService.findFieldType("", value)));
+                schemaDTO.setType(DataType.valueOf(invokerService.findFieldType("", value).toUpperCase()));
             } else {
                 schemaDTO.setType(DataType.STRING);
             }
@@ -279,6 +280,9 @@ public class OperationConverter {
         schemaDTO.setType(DataType.ARRAY);
         List<SchemaDTO> schemas = new ArrayList<>();
         for (String s : split) {
+            if (s.matches("\\{#.+}")) {
+                s = s.substring(1, s.length() - 1);
+            }
             schemas.add(getSchema(s, DataType.STRING));
         }
         schemaDTO.setItems(schemas);
