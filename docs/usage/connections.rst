@@ -198,7 +198,9 @@ On the left side in the *methods* section you can see the zoom in and zoom out a
 .. |image12| image:: ../img/connection/12.png
    :align: middle
 .. |image13| image:: ../img/connection/13.png
+   :width: 110
 .. |image14| image:: ../img/connection/14.png
+   :width: 70
 .. |image15| image:: ../img/connection/15.png
    :align: middle
 .. |image16| image:: ../img/connection/16.png
@@ -210,6 +212,7 @@ On the left side in the *methods* section you can see the zoom in and zoom out a
 .. |image19| image:: ../img/connection/19.png
    :align: middle
 .. |image20| image:: ../img/connection/20.png
+   :width: 30
 .. |image21| image:: ../img/connection/21.png
    :align: middle
 .. |image22| image:: ../img/connection/22.png
@@ -218,18 +221,30 @@ On the left side in the *methods* section you can see the zoom in and zoom out a
    :align: middle
 .. |image25| image:: ../img/connection/25.png
    :align: middle
+   :width: 150
 .. |image26| image:: ../img/connection/26.png
    :align: middle
 .. |image31| image:: ../img/connection/31.png
+   :width: 90
 .. |image32| image:: ../img/connection/32.png
+   :width: 110
 .. |image33| image:: ../img/connection/33.png
+   :width: 30
 .. |image34| image:: ../img/connection/34.png
+   :width: 30
 .. |image35| image:: ../img/connection/35.png
+   :width: 30
 .. |image36| image:: ../img/connection/36.png
+   :width: 30
 .. |image37| image:: ../img/connection/37.png
    :align: middle
 .. |image38| image:: ../img/connection/38.png
+   :width: 30
 .. |image39| image:: ../img/connection/39.png
+   :width: 30
 .. |image40| image:: ../img/connection/40.png
+   :width: 30
 .. |image41| image:: ../img/connection/41.png
+   :width: 30
 .. |image42| image:: ../img/connection/42.png
+   :width: 30
