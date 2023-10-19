@@ -154,10 +154,12 @@ public class JobExecutor extends QuartzJobBean {
         }
         String proxyHost = environment.getProperty(YamlPropConst.PROXY_HOST);
         String proxyPort = environment.getProperty(YamlPropConst.PROXY_PORT);
+        String proxyUser = environment.getProperty(YamlPropConst.PROXY_USER);
+        String proxyPass = environment.getProperty(YamlPropConst.PROXY_PASS);
         try {
             ConnectorExecutor connectorExecutor = new ConnectorExecutor(invokerService, executionContainer,
                     fieldNodeServiceImp, methodNodeServiceImp,
-                    connectorService, statementNodeService, logger, proxyHost, proxyPort);
+                    connectorService, statementNodeService, logger, proxyHost, proxyPort, proxyUser, proxyPass);
             ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,
                     executionContainer, connectorExecutor);
             connectionExecutor.start(scheduler);

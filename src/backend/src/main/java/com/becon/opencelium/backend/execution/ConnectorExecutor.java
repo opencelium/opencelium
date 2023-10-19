@@ -78,11 +78,14 @@ public class ConnectorExecutor {
     private final OcLogger<ExecutionLog> logger;
     private final String proxyHost;
     private final String proxyPort;
+    private final String proxyPass;
+    private final String proxyUser;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
                              FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeServiceImp,
                              ConnectorServiceImp connectorService, VariableNodeServiceImp statementNodeService,
-                             OcLogger<ExecutionLog> logger, String proxyHost, String proxyPort) {
+                             OcLogger<ExecutionLog> logger, String proxyHost, String proxyPort,
+                             String proxyUser, String proxyPass) {
         this.invokerService = invokerService;
         this.executionContainer = executionContainer;
         this.fieldNodeService = fieldNodeService;
@@ -92,6 +95,8 @@ public class ConnectorExecutor {
         this.logger = logger;
         this.proxyHost = proxyHost;
         this.proxyPort = proxyPort;
+        this.proxyUser = proxyUser;
+        this.proxyPass = proxyPass;
     }
 
     public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
@@ -695,7 +700,8 @@ public class ConnectorExecutor {
 
     public RestTemplate createRestTemplate(Connector connector) {
         int timeout = connector.getTimeout();
-        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, connector.isSslCert(), timeout));
+        RestTemplateBuilder restTemplateBuilder =
+                new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, proxyUser, proxyPass, connector.isSslCert(), timeout));
         if (timeout > 0) {
             restTemplateBuilder.setReadTimeout(Duration.ofMillis(timeout));
         }
