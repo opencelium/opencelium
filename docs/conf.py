@@ -27,5 +27,5 @@ html_js_files = [
     'js/custom.js',
 ]
 html_css_files = [
-    'css/custom.js',
+    'css/custom.css',
 ]
