@@ -35,18 +35,22 @@ const DefaultListRaw: FC<DefaultListRawProps> =
                     let element = e.target;
                     if(element && e.detail === 1) {
                         while (true) {
-                            if(element.id === id){
-                                navigate(url, {replace: false})
-                                break;
-                            }
-                            if(element.onclick || element.tagName.toLowerCase() === 'input'){
+                            if(element.onclick || element.tagName.toLowerCase() === 'input' || element.tagName.toLowerCase() === 'textarea'){
                                 break;
                             } else{
+                                if(element.id === id){
+                                    navigate(url, {replace: false})
+                                    break;
+                                }
                                 if(element.parentElement){
                                     element = element.parentElement;
                                 } else{
                                     break;
                                 }
+                            }
+                            if(element.id === id){
+                                navigate(url, {replace: false})
+                                break;
                             }
                         }
                     }

@@ -28,10 +28,7 @@ for(let i = 0; i < 10; i++){
     options.push({label: `${10 + i * 2}`, value: 10 + i * 2});
 }
 
-const LabelSize: FC<{isModal?: boolean}> = ({isModal}) => {
-    const dispatch = useAppDispatch();
-    const {processTextSize} = Connection.getReduxState();
-    const setConfiguration = isModal ? setModalPanelConfigurations : setPanelConfigurations;
+const LabelSize: FC<{isModal?: boolean, value: number, onChange: (value: number) => void}> = ({isModal, value, onChange}) => {
     return (
         <InputSelect
             id={`input_label_size`}
@@ -39,8 +36,8 @@ const LabelSize: FC<{isModal?: boolean}> = ({isModal}) => {
             label={'Label Size'}
             marginTop={'50px'}
             options={options}
-            onChange={(option: any) => dispatch(setConfiguration({processTextSize: option.value}))}
-            value={options.find(o => o.value === processTextSize)}
+            onChange={(option: any) => onChange(option.value)}
+            value={options.find(o => o.value === value)}
         />
     )
 }

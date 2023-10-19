@@ -743,12 +743,13 @@ $DASHED_COLOR: #58854d;
 }
 .configurations_icon_title {
   margin-bottom: 10px;
+  padding-top: 30px;
 }
 
 .configurations_icon_process_color_modes {
   width: 430px;
   height: 80px;
-  margin: 0 auto;
+  margin: 0 0 0 50px;
 }
 
 .configurations_icon_process_color_mode {
@@ -756,7 +757,7 @@ $DASHED_COLOR: #58854d;
   height: 80px;
   cursor: pointer;
   float: left;
-  margin-right: 20px;
+  margin-right: 14px;
   border-radius: 10px;
   border: 2px solid black;
   position: relative;

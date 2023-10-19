@@ -18,7 +18,7 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import Button from "@app_component/base/button/Button";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
 import { OptionProps } from '@app_component/base/input/select/interfaces';
-import {getMarker, setFocusById} from "@application/utils/utils";
+import {getMarker, replaceVariables, setFocusById} from "@application/utils/utils";
 import {CheckboxStyled, TextStyled} from "@app_component/base/input/file/styles";
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import {API_REQUEST_STATE, TRIPLET_STATE} from '@application/interfaces/IApplication';
@@ -165,9 +165,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
         if(scriptSegment === args[index].name){
             newScriptSegment = arg.name;
         }
-        newScriptSegment = newScriptSegment.split(` ${args[index].name}`).join(` ${arg.name}`);
-        newScriptSegment = newScriptSegment.split(`${args[index].name} `).join(`${arg.name} `);
-        newScriptSegment = newScriptSegment.split(`\n${args[index].name}`).join(`\n${arg.name}`);
+        newScriptSegment = replaceVariables(newScriptSegment, {[args[index].name]: arg.name});
         setScriptSegment(newScriptSegment);
         const newArgs = [...args];
         newArgs[index] = arg;
@@ -179,11 +177,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
         newVariables = newVariables.split(`\nvar ${args[index].name};`).join(``);
         setVariables(newVariables);
         let newScriptSegment = scriptSegment;
-        newScriptSegment = newScriptSegment.split(` ${args[index].name}`).join(` ${CAggregator.generateNotExistVar()}`);
-        newScriptSegment = newScriptSegment.split(`\n${args[index].name}`).join(`\n${CAggregator.generateNotExistVar()}`);
-        if(newScriptSegment.indexOf(args[index].name) === 0){
-            newScriptSegment = CAggregator.generateNotExistVar() + newScriptSegment.substring(args[index].name.length);
-        }
+        newScriptSegment = replaceVariables(newScriptSegment, {[args[index].name]: CAggregator.generateNotExistVar()});
         setScriptSegment(newScriptSegment);
         const newArgs = [...args];
         newArgs.splice(index, 1);

@@ -96,11 +96,14 @@ const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
                 <ListStyled>
                     {notificationEntities.length === 0 && <EmptyListStyled value={'There are no notifications'}/>}
                     {notificationEntities.map(notification => {
+                        const name = notification.name.length > 20 ? `${notification.name.substring(0, 20)}...` : notification.name;
                         return (
-                            <div key={notification.id}>
-                                <span>{`${notification.name} (${notification.eventType}/${notification.type})`}</span>
-                                <TooltipButton target={`delete_schedule_notification_${notification.id}`} tooltip={'Delete'} float={'right'} iconSize={TextSize.Size_20} hasConfirmation={true} confirmationText={'Do you really want to delete?'} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} handleClick={() => notification.deleteById()}/>
-                                <TooltipButton target={`update_schedule_notification_${notification.id}`} tooltip={'Update'} float={'right'} iconSize={TextSize.Size_20} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} handleClick={() => onUpdate(notification)}/>
+                            <div key={notification.id} style={{display: 'flex', justifyContent: 'space-between'}}>
+                                <span title={notification.name}>{`${name} (${notification.eventType}/${notification.type})`}</span>
+                                <div style={{display: 'flex'}}>
+                                    <TooltipButton target={`update_schedule_notification_${notification.id}`} tooltip={'Update'} float={'right'} iconSize={TextSize.Size_20} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} handleClick={() => onUpdate(notification)}/>
+                                    <TooltipButton target={`delete_schedule_notification_${notification.id}`} tooltip={'Delete'} float={'right'} iconSize={TextSize.Size_20} hasConfirmation={true} confirmationText={'Do you really want to delete?'} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} handleClick={() => notification.deleteById()}/>
+                                </div>
                             </div>
                         );
                     })}

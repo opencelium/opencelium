@@ -92,7 +92,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
           />
         </div>
       </div>
-      
+
       {/* resize */}
       <div className="wrapper">
         <div className="button_wrap">
@@ -133,7 +133,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
       {/* settings */}
       <div className="wrapper">
         <div className="button_wrap">
-          <ConfigurationsIcon />
+          <ConfigurationsIcon connection={connection} updateConnection={updateEntity} readOnly={props.readOnly}/>
         </div>
       </div>
 
@@ -194,7 +194,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
               />
 
               {/* load template */}
-              <LoadTemplate 
+              <LoadTemplate
                 data={loadTemplateData}
                 entity={entity}
                 updateEntity={updateEntity}
@@ -253,7 +253,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
                 }
                 handleClick={() => data.justUpdate(connection)}
               />
-              
+
               {/* add/update and close */}
               <TooltipButton
                 position={"bottom"}

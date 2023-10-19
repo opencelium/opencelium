@@ -14,7 +14,7 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
-import {getAndUpdateConnection} from "@root/redux_toolkit/action_creators/ConnectionCreators";
+import {getAndUpdateConnectionTitle, getAndUpdateConnectionDescription} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import { syncInvokers } from "@entity/connection/redux_toolkit/slices/EditorSlice";
 import { requestRemoteApi } from "@entity/connection/redux_toolkit/action_creators/EditorCreators";
 
@@ -25,7 +25,8 @@ export default {
         [testConnection.fulfilled.type]: "Test run was successfully triggered",
         [addConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully added",
         [updateConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully updated",
-        [getAndUpdateConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully updated",
+        [getAndUpdateConnectionTitle.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully updated",
+        [getAndUpdateConnectionDescription.fulfilled.type]: "The connection description was successfully updated",
         [deleteConnectionById.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully removed",
         [deleteConnectionsById.fulfilled.type]: "The selected connections were successfully removed",
         [syncInvokers.type]: "Synchronized successfully",
@@ -56,7 +57,10 @@ export default {
         [updateConnection.rejected.type]: {
             "__DEFAULT__": "The connection was not updated"
         },
-        [getAndUpdateConnection.rejected.type]: {
+        [getAndUpdateConnectionTitle.rejected.type]: {
+            "__DEFAULT__": "The connection was not updated"
+        },
+        [getAndUpdateConnectionDescription.rejected.type]: {
             "__DEFAULT__": "The connection was not updated"
         },
         [deleteConnectionById.rejected.type]: {
