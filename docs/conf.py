@@ -21,7 +21,6 @@ version = 'latest'
 release = 'latest'
 exclude_patterns = ['_build']
 htmlhelp_basename = 'openceliumapi'
-html_theme = 'sphinx_rtd_theme'
 
 
 def setup(app):
