@@ -2,6 +2,15 @@
 Changelog
 *********
 
+3.1.2
+===
+:Date: Juli 27, 2023
+
+HotFix
+--------
+
+* add proxy feature (OC-636)
+
 3.1.1
 ===
 :Date: June 23, 2023

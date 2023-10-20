@@ -110,7 +110,7 @@ part and calls that should be used in *Connection*.
 |image_admin_2|
 
 For subscribers there is also a possibility to add and to update actions. `Here
-<https://docs.opencelium.io/en/dev/usecases/manage_invokers.html>`_, you can read more
+<https://docs.opencelium.io/en/dev/management/invokers.html>`_, you can read more
 information.
 
 Templates
@@ -118,14 +118,14 @@ Templates
 
 These are business templates. In other words, they are connections that are saved as templates for
 often use. `Here
-<https://docs.opencelium.io/en/dev/usecases/manage_templates.html>`_, you can read how to manage with them.
+<https://docs.opencelium.io/en/dev/management/templates.html>`_, you can read how to manage with them.
 
 Notification Templates
 """""""""""""""""
 
 Notification Templates are templates that are used in scheduler jobs to notify users for three event
 types: *pre*, *post*, and *alert*. `Here
-<https://docs.opencelium.io/en/dev/usecases/manage_notification_templates.html>`_, you can read how to manage with them.
+<https://docs.opencelium.io/en/dev/management/notification_templates.html>`_, you can read how to manage with them.
 
 Data Aggregator
 """""""""""""""""

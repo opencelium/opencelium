@@ -73,17 +73,17 @@ functionality for each template. The second deletion is on the second form secti
 when you choose the *Template Mode*.
 
 
-.. |add_template_dialog| image:: ../img/usecases/manage_templates/add_template_dialog.png
+.. |add_template_dialog| image:: ../img/management/templates/add_template_dialog.png
    :align: middle
-.. |import_template_dialog| image:: ../img/usecases/manage_templates/import_template_dialog.png
+.. |import_template_dialog| image:: ../img/management/templates/import_template_dialog.png
    :align: middle
-.. |template_backend_placement| image:: ../img/usecases/manage_templates/template_backend_placement.png
+.. |template_backend_placement| image:: ../img/management/templates/template_backend_placement.png
    :align: middle
-.. |download_icon| image:: ../img/usecases/manage_templates/download_icon.png
-.. |choose_mode_form| image:: ../img/usecases/manage_templates/choose_mode_form.png
+.. |download_icon| image:: ../img/management/templates/download_icon.png
+.. |choose_mode_form| image:: ../img/management/templates/choose_mode_form.png
    :align: middle
-.. |choose_template| image:: ../img/usecases/manage_templates/choose_template.png
+.. |choose_template| image:: ../img/management/templates/choose_template.png
    :align: middle
-.. |selected_template| image:: ../img/usecases/manage_templates/selected_template.png
+.. |selected_template| image:: ../img/management/templates/selected_template.png
    :align: middle
-.. |list_upgrade_icon| image:: ../img/usecases/manage_templates/list_upgrade_icon.png
+.. |list_upgrade_icon| image:: ../img/management/templates/list_upgrade_icon.png

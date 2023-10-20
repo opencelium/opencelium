@@ -34,9 +34,9 @@ This documentation is organized into a couple of sections:
    :caption: Use Cases
    :maxdepth: 2
 
-   usecases/manage_templates
-   usecases/manage_notification_templates
-   usecases/manage_invokers
+   management/templates
+   management/notification_templates
+   management/invokers
 
 .. toctree::
    :caption: Services
@@ -44,6 +44,15 @@ This documentation is organized into a couple of sections:
 
    services/db2api
    services/csv2api
+
+.. toctree::
+   :caption: Media
+   :maxdepth: 2
+
+    Website <https://opencelium.io>
+    Service Portal <https://service.opencelium.io>
+    Video Tutorials <https://www.youtube.com/playlist?list=PLh_5t7kd2fySIqh6XxCB94lGXvU5lXbQ4>
+    Webinars <https://www.youtube.com/playlist?list=PLh_5t7kd2fyScueyWSRhOn16acRFEBmgO>
 
 .. toctree::
    :caption: Tools
@@ -60,17 +69,7 @@ This documentation is organized into a couple of sections:
    Changelogs <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
 
 .. toctree::
-   :caption: REST API Reference
-   :maxdepth: 2
-
-   api/authentication
-   api/user_management
-   api/user_group
-   api/component
-   api/permission
-   api/connector
-   api/connection
-   api/schedule
+   :caption: REST API Reference <https://opencelium-demo.becon.de:9090/swagger-ui/index.html>
 
 ##################
 License
