@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.resource.notification;
 
+import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
 import com.becon.opencelium.backend.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.mysql.entity.EventRecipient;
 import jakarta.annotation.Resource;
@@ -15,11 +16,13 @@ public class NotificationResource {
     private int notificationId;
     private int schedulerId; // should be array
     private String name;
-    private String eventType;
+    private String eventType;// post, pref, alert
     private String notificationType;
     private TemplateMessageResource template;
     //private MessageResource template;
     private List<String> recipients = new ArrayList<>();
+    private String team;
+    private String channel;
 
     public NotificationResource(EventNotification eventNotification){
 
@@ -33,7 +36,14 @@ public class NotificationResource {
         this.recipients = eventNotification.getEventRecipients().stream()
                 .map(EventRecipient::getDestination)
                 .collect(Collectors.toList());
-
+        if (this.notificationType.equalsIgnoreCase(NotifyTool.TEAMS.toString()) && !recipients.isEmpty()) {
+            String[] teamChannel = this.recipients.get(0).split(";");
+            if (teamChannel.length == 2) {
+                this.team = teamChannel[0];
+                this.channel = teamChannel[1];
+            }
+            recipients.clear();
+        }
     }
 
     public NotificationResource() {
@@ -120,5 +130,21 @@ public class NotificationResource {
 
     public void setTemplate(int id, String name) {
         this.template = new TemplateMessageResource(id, name);
+    }
+
+    public String getTeam() {
+        return team;
+    }
+
+    public void setTeam(String team) {
+        this.team = team;
+    }
+
+    public String getChannel() {
+        return channel;
+    }
+
+    public void setChannel(String channel) {
+        this.channel = channel;
     }
 }

@@ -16,26 +16,29 @@
 import {FC, useEffect, useState} from "react";
 import Socket, {Message} from "@application/classes/socket/Socket";
 import {addCurrentLog, clearCurrentLogs} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {addModalCurrentLog, clearModalCurrentLogs} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import { Auth } from "@application/classes/Auth";
 import {useAppDispatch} from "@application/utils/store";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
-import { Connection } from "@entity/connection/classes/Connection";
 import { Schedule } from "@entity/schedule/classes/Schedule";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/content/connection/CConnectorItem";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
+const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean, isModal?: boolean}> =
     ({
         shouldClear,
         connection,
+        isModal,
     }) => {
         const dispatch = useAppDispatch();
         const {authUser} = Auth.getReduxState();
         const {testSchedule} = Schedule.getReduxState();
         const [socket, setSocket] = useState<Socket>(null);
+        const addLog = isModal ? addModalCurrentLog : addCurrentLog;
+        const clearLogs = isModal ? clearModalCurrentLogs : clearCurrentLogs;
         const saveLogs = (message: Message): void => {
             const data = ConnectionLogs.parseMessage(connection, message);
-            dispatch(addCurrentLog(data));
+            dispatch(addLog(data));
         }
         const subscribeLogs = () => {
             if(testSchedule) {
@@ -65,7 +68,7 @@ const SyncLogs: FC<{connection: CConnection, shouldClear?: boolean}> =
         }, [testSchedule?.schedulerId]);
         useEffect(() => {
             if(shouldClear){
-                dispatch(clearCurrentLogs());
+                dispatch(clearLogs([]));
             }
         }, [shouldClear])
         return null;
@@ -75,4 +78,4 @@ SyncLogs.defaultProps = {
     shouldClear: false,
 }
 
-export default SyncLogs;
+export default GetModalProp()(SyncLogs);

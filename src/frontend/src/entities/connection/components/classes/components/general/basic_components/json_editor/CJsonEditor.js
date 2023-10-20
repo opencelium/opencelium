@@ -20,10 +20,13 @@ export class CJsonEditor extends CBodyEditor{
         return '{ ... }';
     }
 
-    static getClassName(params = {isDraft: false, noPlaceholder: false}){
+    static getClassName(params = {isDraft: false, noPlaceholder: false, isFullHeight: false}){
         let className = params.isDraft ? 'method_body_draft' : 'method_body';
         if(params.noPlaceholder){
             className = 'method_body_no_placeholder';
+        }
+        if(params.isFullHeight){
+            className = 'method_body_full_height';
         }
         return className;
     }

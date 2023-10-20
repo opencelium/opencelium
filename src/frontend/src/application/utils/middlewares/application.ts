@@ -27,7 +27,7 @@ import {
 } from '@application/redux_toolkit/slices/ApplicationSlice';
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
-import {getThemesFromServicePortal, saveThemesInServicePortal} from "@entity/application/utils/utils";
+import {saveThemesInServicePortal} from "@entity/application/utils/utils";
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (getLogoName.fulfilled.type === action.type) {

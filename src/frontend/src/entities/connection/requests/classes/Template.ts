@@ -18,7 +18,7 @@ import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {ITemplate} from "../../interfaces/ITemplate";
-import {ITemplateRequest} from "../interfaces/ITemplate";
+import {DeleteTemplatesByIdRequestProps, ImportTemplateResponse, ITemplateRequest} from "../interfaces/ITemplate";
 import ModelTemplate from "../models/Template";
 
 export class TemplateRequest extends Request implements ITemplateRequest{
@@ -31,9 +31,9 @@ export class TemplateRequest extends Request implements ITemplateRequest{
         return super.get<IResponse>();
     }
 
-    async importTemplate(template: FormData): Promise<AxiosResponse<IResponse>>{
+    async importTemplate(data: FormData): Promise<AxiosResponse<ImportTemplateResponse>>{
         this.url = 'storage/template';
-        return super.post<IResponse>(template);
+        return super.post<ImportTemplateResponse>(data);
     }
 
     async exportTemplate(): Promise<AxiosResponse<ITemplate>>{
@@ -65,7 +65,8 @@ export class TemplateRequest extends Request implements ITemplateRequest{
         return super.delete<ITemplate>();
     }
 
-    async deleteTemplatesById(templateIds: number[]): Promise<AxiosResponse<number[]>>{
-        return super.delete<number[]>({data: templateIds});
+    async deleteTemplatesById(data: DeleteTemplatesByIdRequestProps): Promise<AxiosResponse<IResponse>>{
+        this.endpoint = '/list/delete';
+        return super.put<IResponse>(data);
     }
 }

@@ -378,6 +378,7 @@ public class ActionUtility {
         methodNode.setName(methodResource.getName());
         methodNode.setColor(methodResource.getColor());
         methodNode.setLabel(methodResource.getLabel());
+        methodNode.setAggregatorId(methodResource.getDataAggregator());
         return methodNode;
     }
 

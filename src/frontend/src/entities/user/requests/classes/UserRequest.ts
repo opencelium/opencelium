@@ -17,7 +17,7 @@ import {AxiosResponse} from "axios";
 import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import IUserRequest from "../interfaces/IUserRequest";
+import IUserRequest, {DeleteUsersByIdRequestProps} from "../interfaces/IUserRequest";
 import ModelUser from "../models/User";
 import ModelUserPoust from "../models/UserPoust";
 
@@ -52,8 +52,9 @@ export default class UserRequest extends Request implements IUserRequest{
         return super.delete<IResponse>();
     }
 
-    async deleteUsersById(userIds: number[]): Promise<AxiosResponse<number[]>>{
-        return super.delete<number[]>({data: userIds});
+    async deleteUsersById(data: DeleteUsersByIdRequestProps): Promise<AxiosResponse<IResponse>>{
+        this.endpoint = '/list/delete';
+        return super.put<IResponse>(data);
     }
 
     async uploadUserImage(data: FormData): Promise<AxiosResponse<ModelUser>>{

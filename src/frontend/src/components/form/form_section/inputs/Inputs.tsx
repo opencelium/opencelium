@@ -22,15 +22,17 @@ const Inputs: FC<InputsProps> =
     ({
         height,
         children,
+        style,
     }) => {
     return (
-        <InputsStyled height={height}>
+        <InputsStyled height={height} style={style}>
             {children}
         </InputsStyled>
     )
 }
 
 Inputs.defaultProps = {
+    style: {},
 }
 
 

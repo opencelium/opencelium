@@ -20,7 +20,6 @@ import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
-import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 @Node("Method")
 public class MethodNode {
@@ -32,6 +31,7 @@ public class MethodNode {
     private String color;
     private String name;
     private String label;
+    private Integer aggregatorId;
 
     @Relationship(type = "has_request", direction = Relationship.Direction.OUTGOING)
     private RequestNode requestNode;
@@ -115,5 +115,13 @@ public class MethodNode {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public Integer getAggregatorId() {
+        return aggregatorId;
+    }
+
+    public void setAggregatorId(Integer aggregatorId) {
+        this.aggregatorId = aggregatorId;
     }
 }

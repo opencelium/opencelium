@@ -32,9 +32,11 @@ import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.becon.opencelium.backend.utility.FileNameUtils;
+import com.becon.opencelium.backend.utility.PathUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.w3c.dom.Document;
@@ -110,6 +112,16 @@ public class InvokerServiceImp implements InvokerService {
     }
 
     @Override
+    public boolean existsByFileName(String fileName) {
+        String ext = FileNameUtils.getExtension(fileName);
+        if (ext == null || ext.isEmpty()) {
+            fileName += ".xml";
+        }
+        Path path = Path.of(PathConstant.INVOKER + fileName);
+        return exists(path);
+    }
+
+    @Override
     public List<Invoker> findAll() {
         return new ArrayList<>(invokerContainer.getInvokers().values());
     }
@@ -118,6 +130,19 @@ public class InvokerServiceImp implements InvokerService {
     public void delete(String name) {
         Objects.requireNonNull(name);
         deleteInvoker(name);
+    }
+
+    public void deleteInvokerFile(String name) {
+        try {
+            Path file = findFileByInvokerName(name).toPath();
+            if(exists(file)){
+                invokerContainer.remove(name);
+                Files.delete(file.toAbsolutePath());
+            }
+        }
+        catch (IOException e){
+            throw new StorageException("Failed to delete stored file", e);
+        }
     }
 
     // Deletes all entries from the database where the invoker is referenced.
@@ -146,7 +171,7 @@ public class InvokerServiceImp implements InvokerService {
             Path file = findFileByInvokerName(name).toPath();
             if(exists(file)){
                 invokerContainer.remove(name);
-                Files.delete(file);
+                Files.delete(file.toAbsolutePath());
             }
         }
         catch (IOException e){

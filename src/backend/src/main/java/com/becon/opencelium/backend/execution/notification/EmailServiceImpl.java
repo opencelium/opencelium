@@ -8,7 +8,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EmailServiceImpl implements EmailService {
+public class EmailServiceImpl implements CommunicationTool {
 
     @Autowired(required = false)
     private JavaMailSender emailSender;
@@ -17,7 +17,7 @@ public class EmailServiceImpl implements EmailService {
     private Environment env;
 
     @Override
-    public void sendMessage(String to, String subject, String text) {
+    public void sendMessage(String destination, String subject, String text) {
         if (emailSender == null) {
             return;
         }
@@ -26,7 +26,7 @@ public class EmailServiceImpl implements EmailService {
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(to);
+            message.setTo(destination);
             message.setSubject(subject);
             message.setText(text);
             if (senderName != null && !senderName.isEmpty()) {

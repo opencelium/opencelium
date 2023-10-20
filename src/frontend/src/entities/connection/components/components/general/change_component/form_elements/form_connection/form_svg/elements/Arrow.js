@@ -24,13 +24,14 @@ import {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorI
 import DashedElement from "@change_component/form_elements/form_connection/form_svg/elements/process/DashedElement";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
+import {ConnectionLogType} from "@root/interfaces/IConnection";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 export const ARROW_WIDTH = 2;
 
 
-function mapStateToProps(state){
-    const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
         currentLogs: connectionOverview.currentLogs,
@@ -39,6 +40,7 @@ function mapStateToProps(state){
     }
 }
 
+@GetModalProp()
 @connect(mapStateToProps, {})
 class Arrow extends React.Component{
     constructor(props) {
@@ -50,15 +52,16 @@ class Arrow extends React.Component{
         }
     }
 
-    onMouseOver(){
+    onMouseOver(e){
         const {from, to, currentTechnicalItem, connection, isItemDraggable} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
+        const shouldCheckOutReferences = currentTechnicalItem ? !e.altKey : true;
         if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseOver && currentTechnicalItem.entity.index !== from.entity.index && currentTechnicalItem.entity.index !== to.entity.index){
             let {line1, line2, arrow} = CCoordinates.getLinkCoordinates(from, to);
             const isInsideDirection = line1 !== null && line2 !== null;
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            let isAvailableForDragging = connector.areIndexesUnderScope(from.entity, currentTechnicalItem.entity, isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM, currentTechnicalItem.isSelectedAll);
+            let isAvailableForDragging = connector.areIndexesUnderScope(from.entity, currentTechnicalItem.entity, isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM, currentTechnicalItem.isSelectedAll, shouldCheckOutReferences);
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(from.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
@@ -133,7 +136,7 @@ class Arrow extends React.Component{
         const isArrowVertical = arrow.x1 === arrow.x2;
         const isArrowHorizontal = arrow.y1 === arrow.y2;
         let hasArrowAlert = false;
-        if(from && from.entity instanceof COperatorItem){
+        if (from && from.entity instanceof COperatorItem) {
             if(hasDashAnimation){
                 if(currentLog?.operatorData?.isNextMethodOutside){
                     hasDashAnimationHorizontal = true;
@@ -148,38 +151,20 @@ class Arrow extends React.Component{
         if(hasArrowDashAnimation){
             markerStyle = '_dashed';
         }
-        if(logPanelHeight !== 0 && from && from.entity instanceof COperatorItem){
-            if(currentLog && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`){
-                if(isArrowVertical && currentLog.operatorData && currentLog.operatorData.conditionResult === false){
-                    stroke = '#d24545';
-                    hasArrowAlert = true;
-                    markerStyle = '_rejected_placeholder';
-                }
-            }
-        }
         let logStroke = '';
-        if(logPanelHeight !== 0) {
-            const logsWithoutLastItem = currentLogs.filter(l => l.index !== currentLog.index);
-            for (let i = 0; i < logsWithoutLastItem.length; i++) {
-                if (from.id === `${logsWithoutLastItem[i].connectorType}_${logsWithoutLastItem[i].index}`) {
-                    if (isArrowVertical && logsWithoutLastItem[i].operatorData && logsWithoutLastItem[i].operatorData.conditionResult === false) {
-                        logStroke = '#d24545';
-                        hasArrowAlert = true;
-                        markerStyle = '_rejected_placeholder';
-                    } else {
-                        logStroke = '#58854d';
-                        markerStyle = '_dashed';
-                    }
-                    break;
-                }
-            }
-            if(isArrowVertical) {
-                const logsWithFalseConditionResult = currentLogs.filter(l => l.operatorData && l.operatorData.conditionResult === false);
-                for (let i = 0; i < logsWithFalseConditionResult.length; i++) {
-                    if (from.id === `${logsWithFalseConditionResult[i].connectorType}_${logsWithFalseConditionResult[i].index}`) {
-                        logStroke = '#d24545';
-                        hasArrowAlert = true;
-                        markerStyle = '_rejected_placeholder';
+        if(logPanelHeight !== 0){
+            if(currentLog && currentLog.type === ConnectionLogType.ERROR && `${from.id}_${to.id}` === `${from.id}_${currentLog.connectorType}_${currentLog.index}`){
+                stroke = '#d24545';
+                hasArrowAlert = true;
+                markerStyle = '_rejected_placeholder';
+            } else {
+                const logsWithoutLastItem = currentLogs.filter(l => l.index !== currentLog.index);
+                for (let i = 0; i < logsWithoutLastItem.length; i++) {
+                    if (from.id === `${logsWithoutLastItem[i].connectorType}_${logsWithoutLastItem[i].index}`) {
+                        if (!(isArrowVertical && logsWithoutLastItem[i].operatorData && logsWithoutLastItem[i].operatorData.conditionResult === false)) {
+                            logStroke = '#58854d';
+                            markerStyle = '_dashed';
+                        }
                         break;
                     }
                 }
@@ -271,7 +256,7 @@ class Arrow extends React.Component{
                         </text>
                     </React.Fragment>
                 }
-                <rect id={`arrow_from__${from.id}__${isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM}`} data-movable={isAvailableForDragging} onMouseOver={() => this.onMouseOver()} onMouseLeave={() => this.onMouseLeave()} className={styles.process_placeholder_background} {...processPlaceholderBackgroundCoord}/>
+                <rect id={`arrow_from__${from.id}__${isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM}`} data-movable={isAvailableForDragging} onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={() => this.onMouseLeave()} className={styles.process_placeholder_background} {...processPlaceholderBackgroundCoord}/>
             </React.Fragment>
         );
     }

@@ -25,8 +25,8 @@ interface LabelStyledProps{
 }
 
 interface LabelProps extends LabelStyledProps{
-    value?: string,
     id?: string,
+    value?: string,
     onClick?: MouseEventHandler<HTMLSpanElement>,
 }
 

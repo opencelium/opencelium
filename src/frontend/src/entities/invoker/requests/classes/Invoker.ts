@@ -19,7 +19,10 @@ import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IInvoker} from "../../interfaces/IInvoker";
 import {IOperation} from "../../interfaces/IOperation";
-import {IInvokerRequest, UpdateMethodProps} from "../interfaces/IInvoker";
+import {
+    DeleteInvokerByNameRequestProps, ImportInvokerResponse,
+    IInvokerRequest, UpdateMethodProps, CheckInvokerUniquenessResponse,
+} from "../interfaces/IInvoker";
 import ModelInvoker from "../models/Invoker";
 
 
@@ -29,17 +32,21 @@ export class InvokerRequest extends Request implements IInvokerRequest{
         super({url: 'invoker', ...settings});
     }
 
-    async importInvoker(invoker: FormData): Promise<AxiosResponse<IInvoker>>{
+    async importInvoker(data: FormData): Promise<AxiosResponse<ImportInvokerResponse>>{
         this.url = 'storage/invoker';
-        return super.post<IInvoker>(invoker);
+        return super.post<ImportInvokerResponse>(data);
     }
 
     async updateOperation(data: UpdateMethodProps): Promise<AxiosResponse<IOperation>>{
         return super.post<IOperation>(data);
     }
 
-    async checkInvokerTitle(): Promise<AxiosResponse<IResponse>>{
-        return super.get<IResponse>();
+    async checkInvokerName(): Promise<AxiosResponse<CheckInvokerUniquenessResponse>>{
+        return super.get<CheckInvokerUniquenessResponse>();
+    }
+
+    async checkInvokerFilename(): Promise<AxiosResponse<CheckInvokerUniquenessResponse>>{
+        return super.get<CheckInvokerUniquenessResponse>();
     }
 
     async getInvokerByName(): Promise<AxiosResponse<IInvoker>>{
@@ -62,8 +69,9 @@ export class InvokerRequest extends Request implements IInvokerRequest{
         return super.delete<IInvoker>();
     }
 
-    async deleteInvokersByName(invokerNames: string[]): Promise<AxiosResponse<IResponse>>{
-        return super.delete<IResponse>({data: invokerNames});
+    async deleteInvokersByName(data: DeleteInvokerByNameRequestProps): Promise<AxiosResponse<IResponse>>{
+        this.endpoint = '/list/delete';
+        return super.put<IResponse>(data);
     }
 
     async uploadInvokerImage(data: FormData): Promise<AxiosResponse<IInvoker>>{

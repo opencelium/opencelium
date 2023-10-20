@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.mysql.service;
 import com.becon.opencelium.backend.mysql.entity.Execution;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ExecutionService {
 
@@ -27,4 +28,6 @@ public interface ExecutionService {
     void deleteAllBySchedulerId(int schedulerId);
 
     List<Execution> getExecutionsBySchedulerId(int schedulerId);
+
+    Optional<Execution> findById(long id);
 }

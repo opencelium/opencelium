@@ -793,7 +793,7 @@
   font-size: 16px;
   outline: none;
   padding: 8px 0;
-  overflow-x: scroll;
+  overflow-x: auto;
   cursor: auto;
 }
 .method_endpoint_content_editable::-webkit-scrollbar {
@@ -1067,8 +1067,17 @@
 .method_body_no_placeholder{
   @extend .method_body;
   width: 100%;
-  max-height: calc(100% - 24px);
   box-shadow: none;
+  position: unset;
+  padding: 0;
+  max-height: calc(100% - 170px);
+  overflow-y: auto;
+  transition: unset;
+  animation: unset;
+}
+.method_body_full_height {
+  @extend .method_body_no_placeholder;
+  max-height: calc(100% - 100px);
 }
 
 .method_body_draft{

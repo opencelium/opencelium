@@ -82,7 +82,9 @@ public class StorageConfiguration {
         List<Connector> connectors = connectorService.findAll();
         connectors.forEach(c -> {
             List<RequestData> requestData = c.getRequestData();
-            List<RequiredData> requiredData = invokerContainer.getByName(c.getInvoker()).getRequiredData();
+            List<RequiredData> requiredData = invokerContainer
+                    .getByName(c.getInvoker())
+                    .getRequiredData();
 
             requestData.forEach(request -> {
                 RequiredData required = requiredData.stream().filter(rq -> rq.getName().equals(request.getField())).findFirst().orElse(null);

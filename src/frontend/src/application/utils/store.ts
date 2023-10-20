@@ -20,6 +20,7 @@ import {createStateSyncMiddleware, withReduxStateSync} from "redux-state-sync";
 import {reducers, middlewares as EntitiesMiddlewares, syncStateConfig} from '@entity/index';
 import authReducer from '../redux_toolkit/slices/AuthSlice';
 import applicationReducer from '../redux_toolkit/slices/ApplicationSlice';
+import checkConnectionReducer from '../redux_toolkit/slices/CheckConnectionSlice';
 
 import {ICommonState} from "../interfaces/core";
 import {authMiddleware} from "./middlewares/auth";
@@ -34,6 +35,7 @@ const syncConfig: any = {
 const rootReducer = combineReducers({
     authReducer,
     applicationReducer,
+    checkConnectionReducer,
     ...reducers,
 })
 const middlewares = [
@@ -45,7 +47,7 @@ const middlewares = [
 ]
 
 if(process.env.isDevelopment){
-    middlewares.unshift(logger);
+    // middlewares.unshift(logger);
 }
 
 export const setupStore = () => {

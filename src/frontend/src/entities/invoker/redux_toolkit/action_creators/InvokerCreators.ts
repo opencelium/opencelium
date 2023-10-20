@@ -21,15 +21,29 @@ import { IInvoker } from "../../interfaces/IInvoker";
 import {UpdateMethodProps} from "../../requests/interfaces/IInvoker";
 
 
+export const checkInvokerFileName = createAsyncThunk(
+    'invoker/exist/filename',
+    async(filename: string, thunkAPI) => {
+        try {
+            const checkFilenameRequest = new InvokerRequest({endpoint: `/file/exists/${filename}`})
+            const checkFilenameResponse = await checkFilenameRequest.checkInvokerFilename();
+            return checkFilenameResponse.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 export const importInvoker = createAsyncThunk(
     'invoker/import',
     async(invokerFile: Blob, thunkAPI) => {
         try {
             let data = new FormData();
             data.append('file', invokerFile);
-            const request = new InvokerRequest({isFormData: true});
-            const response = await request.importInvoker(data);
-            return response.data;
+            const importRequest = new InvokerRequest({isFormData: true});
+            const importResponse = await importRequest.importInvoker(data);
+            const getRequest = new InvokerRequest({endpoint: `/${importResponse.data.id}`});
+            const getResponse = await getRequest.getInvokerByName();
+            return getResponse.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -54,7 +68,7 @@ export const checkInvokerName = createAsyncThunk(
     async(name: string, thunkAPI) => {
         try {
             const request = new InvokerRequest({endpoint: `/exists/${name}`});
-            const response = await request.checkInvokerTitle();
+            const response = await request.checkInvokerName();
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -66,11 +80,11 @@ export const addInvoker = createAsyncThunk(
     'invoker/add',
     async(invoker: IInvoker, thunkAPI) => {
         try {
-            /*const checkNameRequest = new InvokerRequest({endpoint: `/check/${invoker.name}`});
-            const responseNameRequest = await checkNameRequest.checkInvokerTitle();
-            if (responseNameRequest.data.message === ResponseMessages.EXISTS) {
-                return thunkAPI.rejectWithValue(responseNameRequest.data);
-            }*/
+            const checkNameRequest = new InvokerRequest({endpoint: `/exists/${invoker.name}`});
+            const responseNameRequest = await checkNameRequest.checkInvokerName();
+            if (responseNameRequest.data.result === true) {
+                return thunkAPI.rejectWithValue({message: ResponseMessages.EXISTS});
+            }
             const request = new InvokerRequest();
             const response = await request.addInvoker(invoker);
             if (invoker.icon) {
@@ -97,10 +111,10 @@ export const updateInvoker = createAsyncThunk(
             // @ts-ignore
             const invokerState = thunkAPI.getState().invokerReducer;
             if(invokerState.currentInvoker.name !== invoker.name ){
-                const checkNameRequest = new InvokerRequest({endpoint: `/check/${invoker.name}`});
-                const responseNameRequest = await checkNameRequest.checkInvokerTitle();
-                if (responseNameRequest.data.message === ResponseMessages.EXISTS) {
-                    return thunkAPI.rejectWithValue(responseNameRequest.data);
+                const checkNameRequest = new InvokerRequest({endpoint: `/exists/${invoker.name}`});
+                const responseNameRequest = await checkNameRequest.checkInvokerName();
+                if (responseNameRequest.data.result === true) {
+                    return thunkAPI.rejectWithValue({message: ResponseMessages.EXISTS});
                 }
             }
             const request = new InvokerRequest();
@@ -166,7 +180,7 @@ export const deleteInvokersByName = createAsyncThunk(
     async(invokerNames: string[], thunkAPI) => {
         try {
             const request = new InvokerRequest();
-            await request.deleteInvokersByName(invokerNames);
+            await request.deleteInvokersByName({identifiers: invokerNames});
             return invokerNames;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -207,6 +221,7 @@ export default {
     importInvoker,
     updateOperation,
     checkInvokerName,
+    checkInvokerFileName,
     addInvoker,
     updateInvoker,
     getInvokerByName,

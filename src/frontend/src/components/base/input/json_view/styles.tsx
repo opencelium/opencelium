@@ -15,7 +15,7 @@
 
 import {ElementProps} from "../../input/interfaces";
 
-const getReactJsonStyles = ({paddingLeft, paddingRight, width, isIconInside, hasIcon, marginTop, marginBottom, theme}: ElementProps) => {
+const getReactJsonStyles = ({paddingLeft, paddingRight, width, isIconInside, hasIcon, marginTop, marginBottom, theme, position, zIndex}: ElementProps) => {
     return {
         display: `inline-block`,
         outline: `none`,
@@ -27,6 +27,8 @@ const getReactJsonStyles = ({paddingLeft, paddingRight, width, isIconInside, has
         marginLeft: `${!hasIcon || isIconInside ? 0 : theme.input.iconInputDistance}`,
         marginTop: `${marginTop || 0}`,
         marginBottom: `${marginBottom || 0}`,
+        position,
+        zIndex
     };
 }
 export {

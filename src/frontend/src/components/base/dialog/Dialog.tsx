@@ -35,6 +35,8 @@ const Dialog: FC<DialogProps> =
         dialogClassname,
         dialogTheme,
         styles,
+        hasNoActions,
+        hasNoBody,
     }) => {
     const [isOpen, toggleDialog] = useState(active);
     useEffect(() => {
@@ -57,20 +59,34 @@ const Dialog: FC<DialogProps> =
             }}, 500);
     }
     return (
-        <Modal id={`modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} style={styles.modal} className={dialogClassname} modalClassName={dialogTheme.modal} contentClassName={dialogTheme.content} wrapClassName={dialogTheme.wrapper}>
+        <Modal id={`modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} style={styles.modal} className={dialogClassname} modalClassName={dialogTheme.modal} contentClassName={dialogTheme.content} wrapClassName={dialogTheme.wrapper} backdropClassName={dialogTheme.backdrop}>
             {title && <ModalHeader toggle={toggle} className={dialogTheme.title} style={styles.header}><Text value={title} size={TextSize.Size_20} isBold={true}/></ModalHeader>}
-            <ModalBody style={styles.body}>
-                {children}
-            </ModalBody>
-            <ModalFooter style={{borderTop: 'none'}}>
-                <ActionsStyled>
-                {
-                    actions.map((action: ActionProps) => {
-                        return <Button key={action.label} isDisabled={action.isDisabled} color={action.isLoading ? ColorTheme.Blue : ''} hasBackground={!action.isLoading} isLoading={action.isLoading} label={action.label} handleClick={action.onClick} id={action.id ? action.id : `button_${action.label}`} size={TextSize.Size_16} iconSize={TextSize.Size_14}/>
-                    })
-                }
-                </ActionsStyled>
-            </ModalFooter>
+            {hasNoBody ? children :
+                <ModalBody style={styles.body} className={dialogTheme.body}>
+                    {children}
+                </ModalBody>
+            }
+            {!hasNoBody &&
+                <ModalFooter style={{borderTop: 'none'}} className={dialogTheme.footer}>
+                    <ActionsStyled>
+                        {
+                            actions.map((action: ActionProps) => {
+                                return  <Button
+                                            key={action.label}
+                                            isDisabled={action.isDisabled}
+                                            color={action.isLoading ? ColorTheme.Blue : ''}
+                                            hasBackground={!action.isLoading}
+                                            isLoading={action.isLoading}
+                                            label={action.label}
+                                            handleClick={action.onClick}
+                                            id={action.id ? action.id : `button_${action.label}`}
+                                            size={TextSize.Size_16} iconSize={TextSize.Size_14}
+                                        />
+                            })
+                        }
+                    </ActionsStyled>
+                </ModalFooter>
+            }
         </Modal>
     )
 }
@@ -82,11 +98,14 @@ Dialog.defaultProps = {
         content: '',
         title: '',
         wrapper: '',
+        backdrop: '',
     },
     styles: {
         modal: null,
         header: null,
-    }
+    },
+    hasNoBody: false,
+    hasNoActions: false,
 }
 
 

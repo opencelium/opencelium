@@ -31,16 +31,31 @@ export interface UpdateMethodProps{
     fields: FieldProps[]
 }
 
+export interface ImportInvokerResponse {
+    id: string,
+}
+
+export interface DeleteInvokerByNameRequestProps{
+    identifiers: string[],
+}
+
+export interface CheckInvokerUniquenessResponse {
+    result: boolean,
+}
+
 export interface IInvokerRequest{
 
     //to import invoker as an xml file
-    importInvoker(invoker: FormData): Promise<AxiosResponse<IInvoker>>,
+    importInvoker(invoker: FormData): Promise<AxiosResponse<ImportInvokerResponse>>,
 
     //to update a single operation
     updateOperation(data: UpdateMethodProps): Promise<AxiosResponse<IOperation>>,
 
-    //to check if invoker with such title already exists
-    checkInvokerTitle(): Promise<AxiosResponse<IResponse>>,
+    //to check if invoker with such name already exists
+    checkInvokerName(): Promise<AxiosResponse<CheckInvokerUniquenessResponse>>,
+
+    //to check if invoker with such filename already exists
+    checkInvokerFilename(): Promise<AxiosResponse<CheckInvokerUniquenessResponse>>,
 
     //to get invoker by name
     getInvokerByName(): Promise<AxiosResponse<IInvoker>>,
@@ -61,7 +76,7 @@ export interface IInvokerRequest{
     deleteInvokerByName(): Promise<AxiosResponse<IInvoker>>,
 
     //to delete invokers by id
-    deleteInvokersByName(invoker: string[]): Promise<AxiosResponse<IResponse>>,
+    deleteInvokersByName(args: DeleteInvokerByNameRequestProps): Promise<AxiosResponse<IResponse>>,
 
     //to upload image of invoker
     uploadInvokerImage(data: FormData): Promise<AxiosResponse<IInvoker>>,

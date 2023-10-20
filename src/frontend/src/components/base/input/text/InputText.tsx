@@ -51,6 +51,7 @@ const InputText: FC<InputTextProps> = ({
     paddingLeft,
     paddingRight,
     checkBackground,
+    errorBottom,
     ...props
 }) => {
     if(!isVisible){
@@ -66,7 +67,7 @@ const InputText: FC<InputTextProps> = ({
     const showPassword = type === InputTextType.Password && checked;
     const hasLabel = label !== '';
     return(
-        <Input overflow={overflow} height={height} paddingTop={paddingTop} marginTop={marginTop} background={background} minHeight={minHeight} marginLeft={marginLeft} width={width} paddingLeft={paddingLeft} paddingRight={paddingRight}
+        <Input errorBottom={errorBottom} overflow={overflow} height={height} paddingTop={paddingTop} marginTop={marginTop} background={background} minHeight={minHeight} marginLeft={marginLeft} width={width} paddingLeft={paddingLeft} paddingRight={paddingRight}
                afterInputComponent={hasCheck ? <CheckStyled tabIndex={readOnly ? -1 : 0} background={checkBackground} hasBackground={false} icon={checked ? 'visibility_off' : 'visibility'} paddingRight={paddingRight} paddingTop={paddingTop ? paddingTop : '0'} color={ColorTheme.Blue} marginTop={hasLabel ? '20px' : 0} handleClick={changeHandler}/> : null}
                display={display} hasUnderline={hasUnderline} readOnly={readOnly} value={value} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputStyled

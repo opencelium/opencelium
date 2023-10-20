@@ -16,12 +16,11 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
-import com.becon.opencelium.backend.mysql.entity.BusinessLayout;
 import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
+import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.util.List;
 
@@ -37,6 +36,7 @@ public class ConnectionResource {
     private ConnectorNodeResource toConnector;
     private List<FieldBindingResource> fieldBinding;
     private BusinessLayoutResource businessLayout;
+    private DataAggregatorDTO dataAggregator;
 
     public Long getNodeId() {
         return nodeId;
@@ -100,5 +100,13 @@ public class ConnectionResource {
 
     public void setBusinessLayout(BusinessLayoutResource businessLayout) {
         this.businessLayout = businessLayout;
+    }
+
+    public DataAggregatorDTO getDataAggregator() {
+        return dataAggregator;
+    }
+
+    public void setDataAggregator(DataAggregatorDTO dataAggregator) {
+        this.dataAggregator = dataAggregator;
     }
 }

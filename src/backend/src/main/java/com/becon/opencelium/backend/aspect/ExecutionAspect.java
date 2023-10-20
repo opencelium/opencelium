@@ -19,10 +19,10 @@ package com.becon.opencelium.backend.aspect;
 
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
+import com.becon.opencelium.backend.execution.notification.SlackService;
+import com.becon.opencelium.backend.execution.notification.TeamsService;
 import com.becon.opencelium.backend.mysql.entity.*;
-import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
-import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.mysql.service.*;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import org.aspectj.lang.annotation.*;
 import org.quartz.JobDataMap;
@@ -30,11 +30,13 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -50,6 +52,21 @@ public class ExecutionAspect {
 
     @Autowired
     private EmailServiceImpl emailService;
+
+    @Autowired
+    private TeamsService teamsService;
+
+    @Autowired
+    private SlackService slackService;
+
+    @Autowired
+    private ExecutionServiceImp executionServiceImp;
+
+    @Autowired
+    private ArgumentServiceImp argumentServiceImp;
+
+    @Value("${opencelium.notification.tools.slack.webhook}")
+    private String slackWebhook;
 
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -86,14 +103,14 @@ public class ExecutionAspect {
             if (!en.getEventType().equals(eventType)){
                 continue;
             }
+            if (en.getEventRecipients() == null | en.getEventRecipients().isEmpty()) {
+                en.getEventRecipients().add(new EventRecipient(slackWebhook));
+            }
             for (EventRecipient er : en.getEventRecipients()) {
                 User user = userService.findByEmail(er.getDestination()).orElse(null);
-                if (user == null) {
-                    continue;
-                }
-                String lang = user.getUserDetail().getLang();
+                String lang =  user == null ? "en" : user.getUserDetail().getLang();
                 EventContent content = en.getEventMessage().getEventContents().stream()
-                        .filter(c -> c.getLanguage().equals(lang)).findFirst().orElse(null);
+                        .filter(c -> c.getLanguage().equalsIgnoreCase(lang)).findFirst().orElse(null);
                 if (content == null) {
                     String defaultLang = LangEnum.EN.getCode();
                     content = en.getEventMessage().getEventContents().stream()
@@ -105,34 +122,86 @@ public class ExecutionAspect {
                 subject = replaceConstants(content.getSubject(), user, ex, en);
                 to = er.getDestination();
                 String type = en.getEventMessage().getType();// email, slack, jira, etc
-                if (type.equals("email")) {
-                    emailService.sendMessage(to, subject, message);
-                } else if (type.equals("slack")) {
-                    // slack implementation
+                try {
+                    if (type.equals("email")) {
+                        emailService.sendMessage(to, subject, message);
+                    } else if (type.equals("slack")) {
+                        slackService.sendMessage(to, subject, message);
+                    } else if (type.equals("teams")) {
+                        teamsService.sendMessage(to, subject, message);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
 
+    private String replaceArgs(String text, EventNotification en) {
+        String result = text;
+        // for smart notification.
+        List<Long> indexes = getConstants(text, "\\{\\{([^{}]+)\\}\\}").stream().map(Long::getLong).toList();
+//        List<String> args = indexes.stream().map(i -> argumentServiceImp
+//                .findById(i).get().getName())
+//                .collect(Collectors.toList());
+        Map<String, String> argsValues = getArgsValues(indexes, en);
+        for (Map.Entry<String, String> entry : argsValues.entrySet()) {
+            String arg = entry.getKey();
+            String value = entry.getValue();
+            String s = "{{" + arg + "}}";
+            result = result.replace(s, value);
+        }
+
+        return result;
+    }
+
     private String replaceConstants(String text, User user, Exception ex, EventNotification en) {
         String result = text;
-        List<String> constants = getConstants(text);
+        List<String> constants = getConstants(text, "\\{([^{}]+)\\}(?![}])");
         Map<String, String> cValues = getConstantValues(constants, user, ex, en);
-        if (cValues == null || cValues.isEmpty()) {
-            return result;
+        if (cValues != null) {
+            for (Map.Entry<String, String> entry : cValues.entrySet()) {
+                String constant = entry.getKey();
+                String value = entry.getValue();
+                String s = "{" + constant + "}";
+                result = result.replace(s, value);
+            }
         }
-        for (Map.Entry<String, String> entry : cValues.entrySet()) {
-            String constant = entry.getKey();
-            String value = entry.getValue();
-            String s = "{" + constant + "}";
-            result = result.replace(s, value);
+
+        // for smart notification.
+        List<String> args = getConstants(text, "\\{\\{([^{}]+)\\}\\}");
+        List<Long> indexes = args.stream().filter(str -> str.matches("-?\\d+(\\.\\d+)?")).map(Long::parseLong).toList();
+        Map<String, String> argsValues = getArgsValues(indexes, en);
+        String et = en.getEventType();
+        if (argsValues != null && (et.equalsIgnoreCase("post") || et.equalsIgnoreCase("alert"))) {
+            for (Map.Entry<String, String> entry : argsValues.entrySet()) {
+                String arg = entry.getKey();
+                String value = entry.getValue();
+                String s = "{{" + arg + "}}";
+                result = result.replace(s, value);
+            }
         }
         return result;
     }
 
-    private List<String> getConstants(String text) {
+    private Map<String, String> getArgsValues(List<Long> indexes, EventNotification en) {
+        LastExecution le = schedulerServiceImp.findById(en.getScheduler().getId()).get().getLastExecution();
+        long exId = Math.max(le.getFailExecutionId(), le.getSuccessExecutionId());
+        Execution execution = executionServiceImp.findById(exId).orElse(null);
+        Objects.requireNonNull(execution);
+        Map<String, String> resultMap = execution.getExecutionArguments().stream()
+                    .filter(ea -> indexes.contains(ea.getArgument().getId()))
+                    .collect(Collectors.toMap(ea -> Long.toString(ea.getArgument().getId()), ExecutionArgument::getValue));
+
+        indexes.stream()
+                .filter(id -> !resultMap.containsKey(Long.toString(id)))
+                .forEach(id -> resultMap.put(Long.toString(id), "n/a"));
+        return resultMap;
+    }
+
+    private List<String> getConstants(String text, String regex) {
         ArrayList<String> constants = new ArrayList<>();
-        Pattern p = Pattern.compile("\\{(.*?)\\}");
+        Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(text);
 
         while (m.find()){

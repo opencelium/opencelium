@@ -36,6 +36,10 @@ import ContentLoading from "@app_component/base/loading/ContentLoading";
 import {ConnectionPermissions} from "@root/constants";
 import {IF_OPERATOR} from "@classes/content/connection/operator/COperatorItem";
 import LoadTemplate from "@change_component/form_elements/form_connection/form_methods/LoadTemplate";
+import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
+import DataAggregatorButton
+    from "@entity/data_aggregator/components/dialog_button/DataAggregatorButton";
+import SyncInvokers from "@change_component/form_elements/form_connection/form_methods/SyncInvokers";
 
 /**
  * common component to add and update Connection
@@ -63,7 +67,7 @@ export function ConnectionForm(type) {
                         toConnector: '',
                         template: '',
                     },
-                    validateLogicResult: {toggleFlag: false, operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}},
+                    validateLogicResult: {toggleFlag: false, operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}, methods: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}},
                     connection: CConnection.createConnection(),
                     entity: null,
                     mode: EXPERT_MODE,
@@ -117,6 +121,10 @@ export function ConnectionForm(type) {
                         connection: CConnection.createConnection({...this.props.connection, error}),
                     })
                 }
+            }
+
+            componentWillUnmount(){
+                this.props.setCurrentConnection(null);
             }
 
             setMode(mode, callback = null){
@@ -236,7 +244,7 @@ export function ConnectionForm(type) {
             }
 
             getMethodsFormSection(){
-                const {t, connectors} = this.props;
+                const {t, connectors, checkingConnectionTitle} = this.props;
                 return {
                     ...INPUTS.CONNECTION_SVG,
                     label: t(`${this.translationKey}.FORM.METHODS`),
@@ -246,7 +254,20 @@ export function ConnectionForm(type) {
                     readOnly: this.isView,
                     errors: this.state.validateLogicResult,
                     justUpdate: (entity) => this.justUpdate(entity),
-                    testConnection: (entity) => this.testConnection(entity)
+                    testConnection: (entity) => this.testConnection(entity),
+                    additionalButtonsProps: {
+                        saveAndExit: {
+                            isLoading: !this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START),
+                            onClick: (a) => this.doAction(a)
+                        },
+                        saveAndGoToSchedule:{
+                            isLoading: this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START),
+                            onClick: (a) => this.doActionAndGoToScheduler(a)
+                        },
+                        loadTemplate: {
+                            data: this.getSecondFormSection().inputs[1]
+                        }
+                    }
                 };
             }
 
@@ -345,12 +366,12 @@ export function ConnectionForm(type) {
             validateLogic(entity) {
                 const fromConnectorOperators = entity.fromConnector.operators;
                 const toConnectorOperators = entity.toConnector.operators;
-                const errors = {operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}};
+                const errors = {operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}, methods: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}};
                 const checkOperator = (connector, connectorType) => {
                     connector.forEach((operator) => {
                         const condition = operator.condition;
                         let operatorErrors = [];
-                        if(!condition.leftStatement || !condition.leftStatement.color || !condition.leftStatement.field){
+                        if(!condition.leftStatement || !condition.leftStatement.color){
                             operatorErrors.push('Left Statement is missing');
                         }
                         if(operator.type === IF_OPERATOR && !condition.relationalOperator){
@@ -364,9 +385,37 @@ export function ConnectionForm(type) {
                         }
                     })
                 }
+                const checkFieldBinding = () => {
+                    entity.fieldBinding.forEach((binding) => {
+                        let newError = '';
+                        if(binding.to){
+                            if(binding.to.length === 1){
+                                if(binding.enhancement.expertCode.split(CEnhancement.generateNotExistVar()).length > 1){
+                                    newError = `Such variable does not exist in the enhancement for the field: ${binding.to[0].field}.`;
+                                }
+                            }
+                        }
+                        if(newError){
+                            const color = binding.to[0].color;
+                            const index = entity.getMethodByColor(color).index;
+                            const connectorType = entity.getConnectorByMethodColor(color).getConnectorType();
+                            let findIndex = errors.methods[connectorType].findIndex(e => e.index === index);
+                            if(findIndex === -1){
+                                errors.methods[connectorType].push({
+                                    index: entity.getMethodByColor(color).index,
+                                    location: 'request.body.fields',
+                                    errors: [newError],
+                                })
+                            } else{
+                                errors.methods[connectorType][findIndex].errors.push(newError);
+                            }
+                        }
+                    })
+                }
                 checkOperator(fromConnectorOperators, CONNECTOR_FROM);
                 checkOperator(toConnectorOperators, CONNECTOR_TO);
-                const hasErrors = errors.operators[CONNECTOR_FROM].length > 0 || errors.operators[CONNECTOR_TO].length > 0;
+                checkFieldBinding();
+                const hasErrors = errors.operators[CONNECTOR_FROM].length > 0 || errors.operators[CONNECTOR_TO].length > 0 || errors.methods[CONNECTOR_FROM].length > 0 || errors.methods[CONNECTOR_TO].length > 0;
                 return {passed: !hasErrors, result: errors};
             }
 
@@ -375,47 +424,52 @@ export function ConnectionForm(type) {
              */
             addTemplate(template){
                 const {addTemplate} = this.props;
-                addTemplate({version: template.version, name: template.name, description: template.description, connection: template.entity.getObject()});
+                addTemplate({version: template.version, name: template.name, description: template.description, connection: template.entity.getObjectWithoutDataAggregator()});
             }
 
-            getSecondThirdFormsSections(){
+            getSecondFormSection(){
                 const {hasModeInputsSection, validationMessages, hasMethodsInputsSection, mode} = this.state;
-                const {t, connectors} = this.props;
+                const {t, connectors, checkingConnectionTitle} = this.props;
                 let connectorMenuItems = this.getConnectorMenuItems();
-                let result = [];
-                const secondFormSection = {
-                    inputs: [
-                        {
-                            ...INPUTS.CONNECTOR_READONLY,
-                            label: t(`${this.translationKey}.FORM.CONNECTORS`),
-                            placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
-                            source: connectorMenuItems,
-                            connectors,
-                            hasApiDocs: true,
-                            readOnly: true,
-                            style: {margin: '0 65px'},
-                        },{
-                            ...INPUTS.MODE,
-                            error: validationMessages.template,
-                            label: t(`${this.translationKey}.FORM.MODE`),
-                            confirmationLabels:{title: t(`${this.translationKey}.CONFIRMATION.TITLE`), message: t(`${this.translationKey}.CONFIRMATION.MESSAGE`)},
-                            modeLabels: {expert: t(`${this.translationKey}.FORM.EXPERT_MODE`), template: t(`${this.translationKey}.FORM.TEMPLATE_MODE`)},
-                            required: true,
-                            readOnly: false,
-                            connectors: connectors,
-                            mode,
-                            setMode: (a, b = null) => this.setMode(a, b),
-                        },
-                    ],
-                    formClassName: styles.mode_form,
-                    hint: {text: t(`${this.translationKey}.FORM.HINT_2`)},
-                    header: t(`${this.translationKey}.FORM.PAGE_2`),
-                    visible: (hasModeInputsSection || this.isView) && !this.isUpdate,
-                };
                 if(!this.isView){
-                    result.push(secondFormSection);
+                    return {
+                        inputs: [
+                            {
+                                ...INPUTS.CONNECTOR_READONLY,
+                                label: t(`${this.translationKey}.FORM.CONNECTORS`),
+                                placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
+                                source: connectorMenuItems,
+                                connectors,
+                                hasApiDocs: true,
+                                readOnly: true,
+                                style: {margin: '0 65px'},
+                            },{
+                                ...INPUTS.MODE,
+                                error: validationMessages.template,
+                                label: t(`${this.translationKey}.FORM.MODE`),
+                                confirmationLabels:{title: t(`${this.translationKey}.CONFIRMATION.TITLE`), message: t(`${this.translationKey}.CONFIRMATION.MESSAGE`)},
+                                modeLabels: {expert: t(`${this.translationKey}.FORM.EXPERT_MODE`), template: t(`${this.translationKey}.FORM.TEMPLATE_MODE`)},
+                                required: true,
+                                readOnly: false,
+                                connectors: connectors,
+                                mode,
+                                setMode: (a, b = null) => this.setMode(a, b),
+                            },
+                        ],
+                        formClassName: styles.mode_form,
+                        hint: {text: t(`${this.translationKey}.FORM.HINT_2`)},
+                        header: t(`${this.translationKey}.FORM.PAGE_2`),
+                        visible: (hasModeInputsSection && this.isAdd) || this.isView,
+                    }
                 }
-                const thirdFormSection = {
+            }
+
+            getThirdFormSection(){
+                const {hasMethodsInputsSection} = this.state;
+                const {t} = this.props;
+                let connectorMenuItems = this.getConnectorMenuItems();
+
+                return {
                     inputs: [
                         {
                             ...INPUTS.CONNECTOR_READONLY,
@@ -425,6 +479,7 @@ export function ConnectionForm(type) {
                             readOnly: true,
                             hasAddMethod: true,
                             style: {margin: '0 65px'},
+
                         },
                         this.getMethodsFormSection(),
                     ],
@@ -433,8 +488,6 @@ export function ConnectionForm(type) {
                     header: t(`${this.translationKey}.FORM.PAGE_3`),
                     visible: hasMethodsInputsSection || this.isView,
                 }
-                result.push(thirdFormSection);
-                return result;
             }
 
             justUpdate(entity){
@@ -539,7 +592,7 @@ export function ConnectionForm(type) {
 
             render(){
                 const {validationMessages, connection} = this.state;
-                const {t, error, checkingConnectionTitle, fetchingConnectors} = this.props;
+                const {t, error, checkingConnectionTitle, fetchingConnectors, setCurrentTechnicalItem, currentTechnicalItem} = this.props;
                 if((!this.isView && fetchingConnectors !== API_REQUEST_STATE.FINISH) || (!this.isAdd && !this.isFetchedConnection)){
                     return <ContentLoading/>;
                 }
@@ -552,6 +605,7 @@ export function ConnectionForm(type) {
                     contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.redirectUrl};
                 }
                 contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.redirectUrl};
+
                 let contents = [
                     {
                         inputs: [
@@ -574,7 +628,8 @@ export function ConnectionForm(type) {
                         header: t(`${this.translationKey}.FORM.PAGE_1`),
                         visible: this.isAdd || this.isView,
                     },
-                    ...this.getSecondThirdFormsSections(),
+                    this.getSecondFormSection(),
+                    this.getThirdFormSection()
                 ];
                 const additionalButtons = (entity, updateEntity) => {
                     if(this.isView || contents.length < 2){
@@ -587,11 +642,11 @@ export function ConnectionForm(type) {
                     if(this.isUpdate){
                         button = <Button icon={'autorenew'} isLoading={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)} title={t('UPDATE.UPDATE_BUTTON_AND_GO_TO_SCHEDULER')} onClick={() => this.doActionAndGoToScheduler(entity)} size={TextSize.Size_16}/>;
                     }
-                    const isDisabled = entity.fromConnector.methods.length === 0 && entity.fromConnector.operators.length === 0
-                                        && entity.toConnector.methods.length === 0 && entity.toConnector.operators.length === 0;
+                    const isDisabled = entity.fromConnector.methods.length === 0 && entity.fromConnector.operators.length === 0 && entity.toConnector.methods.length === 0 && entity.toConnector.operators.length === 0;
                     return(
                         <React.Fragment>
-                            {button}
+                            {!this.isUpdate && <React.Fragment>
+                                {button}
                             <div style={{float: 'left'}}>
                                 <AddTemplate
                                     data={contents[2].inputs[1]}
@@ -604,14 +659,33 @@ export function ConnectionForm(type) {
                                     }}
                                 />
                             </div>
+                            <div style={{float: 'left'}}>
+                                <DataAggregatorButton
+                                    readOnly={this.isView}
+                                    connection={entity}
+                                    updateConnection={(e) => {
+                                        updateEntity(e);
+                                        if(currentTechnicalItem){
+                                            const connector = currentTechnicalItem.connectorType === CONNECTOR_FROM ? e.fromConnector : e.toConnector;
+                                            const currentItem = connector.getSvgElementByIndex(currentTechnicalItem.entity.index);
+                                            setCurrentTechnicalItem(currentItem.getObject());
+                                        }
+                                    }}
+                                />
+                            </div>
                             {this.isUpdate &&
-                                <div style={{float: 'left'}}>
-                                    <LoadTemplate
-                                        data={contents[1].inputs[1]}
-                                        entity={entity}
-                                        updateEntity={updateEntity}
-                                    />
-                                </div>
+                                <React.Fragment>
+                                    <div style={{float: 'left'}}>
+                                        <LoadTemplate
+                                            data={contents[1].inputs[1]}
+                                            entity={entity}
+                                            updateEntity={updateEntity}
+                                        />
+                                    </div>
+                                    <div style={{float: 'left'}}>
+                                        <SyncInvokers connection={entity} updateConnection={updateEntity} connectors={connectors}/>
+                                    </div>
+                                </React.Fragment>
                             }
                             <Button
                                 key={'list_button'}
@@ -620,12 +694,13 @@ export function ConnectionForm(type) {
                                 href={'/connections'}
                                 size={TextSize.Size_16}
                             />
+                            </React.Fragment>}
                         </React.Fragment>
                     );
                 }
                 return (
                     <Form
-                        shouldScroll={this.isUpdate ? 'Methods' : ''}
+                        shouldScroll={this.isUpdate ? 'methods' : ''}
                         contents={contents}
                         translations={contentTranslations}
                         isActionInProcess={!this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)}

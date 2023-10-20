@@ -17,15 +17,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import {connect} from "react-redux";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-function mapStateToProps(state){
-    const connectionOverview = state.connectionReducer;
+function mapStateToProps(state, props){
+    const {connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         isTestingConnection: connectionOverview.isTestingConnection,
     };
 }
 
-@connect(mapStateToProps, {})
+@GetModalProp()
+@connect(mapStateToProps, {}, null, {forwardRef: true})
 class Panel extends React.Component{
     constructor(props) {
         super(props);
@@ -47,7 +50,7 @@ class Panel extends React.Component{
         const hasAction = !readOnly && !isTestingConnection;
         return(
             <React.Fragment>
-                <svg id={`${connectorType}_panel`} x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
+                <svg id={`${connectorType}_panel${this.props.isModal ? '_modal' : ''}`} x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
                     <rect onClick={hasAction ? () => this.onClick() : () => {}} x={rectPosition.x} y={rectPosition.y} width={rectPosition.width} height={rectPosition.height} className={styles.connector_item_panel} style={{cursor: isEmpty && hasAction ? 'pointer' : 'move'}}/>
                     <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={rectPosition.y - 6} className={styles.connector_item_text}>
                         {invokerName}

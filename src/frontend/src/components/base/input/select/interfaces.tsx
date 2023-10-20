@@ -71,6 +71,7 @@ interface InputSelectProps extends InputElementProps{
     callback?: (reference: any, newValue?: any)=>void,
     className?: string,
     maxMultiValues?: number,
+    checkboxProps?: any,
 }
 
 interface OptionsStyledProps extends ElementProps{

@@ -14,9 +14,11 @@
  */
 
 import applicationReducer from "./ApplicationSlice";
+import checkConnectionReducer from "./CheckConnectionSlice";
 import {actions} from './ApplicationSlice'
 
 export default {
     applicationReducer,
+    checkConnectionReducer,
     actions,
 }

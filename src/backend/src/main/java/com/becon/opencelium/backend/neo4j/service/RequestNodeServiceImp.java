@@ -16,9 +16,14 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
+import com.becon.opencelium.backend.neo4j.entity.HeaderNode;
+import com.becon.opencelium.backend.neo4j.entity.ItemNode;
 import com.becon.opencelium.backend.neo4j.entity.RequestNode;
 import com.becon.opencelium.backend.resource.connector.RequestResource;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class RequestNodeServiceImp implements RequestNodeService{
@@ -28,13 +33,20 @@ public class RequestNodeServiceImp implements RequestNodeService{
             return null;
         }
         RequestResource requestResource = new RequestResource();
-//        requestResource.setNodeId(requestNode.getId());
         requestResource.setEndpoint(requestNode.getEndpoint());
         requestResource.setMethod(requestNode.getMethod());
         if (requestNode.getBodyNode() != null){
             requestResource.setBody(BodyNodeServiceImp.toResource(requestNode.getBodyNode()));
         }
-        requestResource.setHeader(null);
+        requestResource.setHeader(convertHeaderNodeToMap(requestNode.getHeaderNode()));
         return requestResource;
+    }
+
+    private static Map<String, String> convertHeaderNodeToMap(HeaderNode headerNode){
+        if (headerNode == null || headerNode.getItems() == null || headerNode.getItems().isEmpty()) {
+            return null;
+        }
+
+        return headerNode.getItems().stream().collect(Collectors.toMap(ItemNode::getName, ItemNode::getValue));
     }
 }

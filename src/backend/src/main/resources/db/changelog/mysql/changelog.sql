@@ -317,3 +317,42 @@ SELECT VERSION();
 --changeset 3.1.2:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 SELECT VERSION();
 
+--changeset 3.2:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE data_aggregator (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    script LONGTEXT
+);
+
+--changeset 3.2:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE aggregator_argument (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    data_aggregator_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    UNIQUE KEY unique_aggregator_argument_per_aggregator (data_aggregator_id, name),
+    FOREIGN KEY (data_aggregator_id) REFERENCES data_aggregator(id)
+);
+
+--changeset 3.2:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE execution_argument (
+    execution_id bigint(20) NOT NULL,
+    aggregator_argument_id INT NOT NULL,
+    arg_value VARCHAR(255),
+    PRIMARY KEY (execution_id, aggregator_argument_id),
+    FOREIGN KEY (execution_id) REFERENCES execution(id),
+    FOREIGN KEY (aggregator_argument_id) REFERENCES aggregator_argument(id)
+);
+
+--changeset 3.2:4 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE data_aggregator ADD CONSTRAINT unique_name UNIQUE (name);
+
+--changeset 3.2:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE data_aggregator ADD COLUMN is_active TINYINT(1);
+
+--changeset 3.2:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE data_aggregator ALTER COLUMN is_active SET DEFAULT 1;
+
+--changeset 3.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE webhook MODIFY COLUMN token LONGTEXT;
+

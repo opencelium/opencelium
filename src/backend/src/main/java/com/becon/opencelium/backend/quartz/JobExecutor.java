@@ -17,18 +17,20 @@
 package com.becon.opencelium.backend.quartz;
 
 import com.becon.opencelium.backend.configuration.WebSocketConfig;
+import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.execution.ExecutionContainer;
+import com.becon.opencelium.backend.execution.JsResponseObject;
 import com.becon.opencelium.backend.execution.log.msg.ExecutionLog;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.logger.OcLogger;
-import com.becon.opencelium.backend.mysql.entity.Execution;
-import com.becon.opencelium.backend.mysql.entity.LastExecution;
-import com.becon.opencelium.backend.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.service.*;
 import com.becon.opencelium.backend.neo4j.service.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.openjdk.nashorn.api.scripting.JSObject;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -39,10 +41,10 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class JobExecutor extends QuartzJobBean {
@@ -91,6 +93,9 @@ public class JobExecutor extends QuartzJobBean {
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
+
+    @Autowired
+    private DataAggregatorServiceImp dataAggregatorServiceImp;
 
     @Autowired
     private Environment environment;
@@ -149,14 +154,17 @@ public class JobExecutor extends QuartzJobBean {
         }
         String proxyHost = environment.getProperty(YamlPropConst.PROXY_HOST);
         String proxyPort = environment.getProperty(YamlPropConst.PROXY_PORT);
+        String proxyUser = environment.getProperty(YamlPropConst.PROXY_USER);
+        String proxyPass = environment.getProperty(YamlPropConst.PROXY_PASS);
         try {
             ConnectorExecutor connectorExecutor = new ConnectorExecutor(invokerService, executionContainer,
                     fieldNodeServiceImp, methodNodeServiceImp,
-                    connectorService, statementNodeService, logger, proxyHost, proxyPort);
+                    connectorService, statementNodeService, logger, proxyHost, proxyPort, proxyUser, proxyPass);
             ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,
                     executionContainer, connectorExecutor);
             connectionExecutor.start(scheduler);
 
+            executeAggregator(executionContainer, execution);
             logger.logAndSend("======================END_OF_EXECUTION======================");
         }catch (Exception e){
             e.printStackTrace();
@@ -175,6 +183,7 @@ public class JobExecutor extends QuartzJobBean {
                 lastExecution.setFailDuration(diffInMillSeconds);
                 lastExecutionServiceImp.save(lastExecution);
             }
+            executeAggregator(executionContainer, execution);
             throw new RuntimeException("EXECUTION_FAILED");
         }
 
@@ -192,5 +201,53 @@ public class JobExecutor extends QuartzJobBean {
             lastExecution.setSuccessExecutionId(execution.getId());
             lastExecutionServiceImp.save(lastExecution);
         }
+    }
+
+    // TODO: Refactor so that Execution of aggregator should be in separate class;
+    private void executeAggregator(ExecutionContainer executionContainer, Execution execution) {
+        executionContainer.getMethodResponses().stream()
+                .filter(mr -> mr.getAggregatorId() != null)
+                .forEach(mr -> {
+                    DataAggregator da = dataAggregatorServiceImp.getById(mr.getAggregatorId());
+                    if (!da.isActive()) {
+                        return;
+                    }
+                    List<JsResponseObject> responseObjects = mr.getResponseEntities()
+                            .stream()
+                            .map(JsResponseObject::new).toList();
+                    List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), responseObjects, da.getArgs(), execution);
+                    execution.setExecutionArguments(exarg);
+                    if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {
+                        executionServiceImp.save(execution);
+                    }
+                });
+    }
+
+    private List<ExecutionArgument> getExecutionArgs(String script, List<JsResponseObject> responses, Set<Argument> args, Execution execution) {
+        try {
+            ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+            String string = new ObjectMapper().writeValueAsString(responses);
+            engine.put("dataModel", string);
+            JSObject obj = (JSObject)engine.eval("JSON.parse(dataModel)");
+            engine.put(AggrConst.RESPONSES, obj);
+            engine.eval(script);
+
+            List<ExecutionArgument> executionArguments = new ArrayList<>();
+            args.forEach(arg -> {
+                Object value = engine.get(arg.getName());
+                if (value == null) {
+                    return;
+                }
+                ExecutionArgument executionArgument = new ExecutionArgument();
+                executionArgument.setExecution(execution);
+                executionArgument.setArgument(arg);
+                executionArgument.setValue(value.toString());
+                executionArguments.add(executionArgument);
+            });
+            return executionArguments;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

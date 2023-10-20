@@ -1,7 +1,10 @@
 package com.becon.opencelium.backend.configuration.cutomizer;
 
 import com.becon.opencelium.backend.constant.SecurityConstant;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -13,6 +16,7 @@ import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.http.MediaType;
@@ -24,14 +28,14 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
-import java.time.Duration;
 import java.util.Collections;
-import java.util.Objects;
 
 public class RestCustomizer implements RestTemplateCustomizer {
 
     private String proxyHost;
     private String proxyPort;
+    private String proxyUser;
+    private String proxyPass;
     private boolean sslCert = false;
     private int timeout = 0;
 
@@ -49,11 +53,13 @@ public class RestCustomizer implements RestTemplateCustomizer {
         this.sslCert = sslCert;
     }
 
-    public RestCustomizer(String host, String port, boolean sslCert, int timeout) {
+    public RestCustomizer(String host, String port, String proxyUser, String proxyPass, boolean sslCert, int timeout) {
         this.proxyHost = host;
         this.proxyPort = port;
         this.sslCert = sslCert;
         this.timeout = timeout;
+        this.proxyUser = proxyUser;
+        this.proxyPass = proxyPass;
     }
 
     @Override
@@ -68,10 +74,9 @@ public class RestCustomizer implements RestTemplateCustomizer {
         requestFactory.setConnectTimeout(timeout);
 
         // Setting proxy
-        if (proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty()) {
-            HttpRoutePlanner routePlanner = new CustomRoutePlanner(new HttpHost(proxyHost, proxyPort));
-            HttpClient httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).build();
-            requestFactory.setHttpClient(httpClient);
+        if (proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty() && !sslCert) {
+            requestFactory = new HttpComponentsClientHttpRequestFactory(getHttpClientWithProxy());
+//            requestFactory.setHttpClient(httpClient);
         }
         restTemplate.setRequestFactory(requestFactory);
 
@@ -79,6 +84,22 @@ public class RestCustomizer implements RestTemplateCustomizer {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setSupportedMediaTypes(Collections.singletonList(MediaType.ALL));
         restTemplate.getMessageConverters().add(converter);
+    }
+
+    private HttpClient getHttpClientWithProxy() {
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        if (proxyPass != null && !proxyPass.isEmpty() && proxyUser != null && !proxyUser.isEmpty()) {
+            BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+            credsProvider.setCredentials(
+                    new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
+                    new UsernamePasswordCredentials(proxyUser, proxyPass.toCharArray())
+            );
+            httpClientBuilder.setDefaultCredentialsProvider(credsProvider);
+        }
+        HttpHost proxy = new HttpHost(proxyHost, Integer.parseInt(proxyPort));
+        return httpClientBuilder
+                .setRoutePlanner(new DefaultProxyRoutePlanner(proxy))
+                .build();
     }
 
     private CloseableHttpClient getDisabledHttpsClient() {
@@ -104,23 +125,24 @@ public class RestCustomizer implements RestTemplateCustomizer {
                     .setSSLSocketFactory(ssl).build();
 
             if(proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty()) {
-                HttpHost proxy = new HttpHost("PROXY_SERVER_HOST", "PROXY_SERVER_PORT");
-                return HttpClients.custom().setProxy(proxy).setConnectionManager(connectionManager).build();
+                HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+                HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+                if (proxyPass != null && !proxyPass.isEmpty() && proxyUser != null && !proxyUser.isEmpty()) {
+                    BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+                    credsProvider.setCredentials(
+                            new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
+                            new UsernamePasswordCredentials("bocffjov", "tgjzz8pvelfc".toCharArray())
+                    );
+                    httpClientBuilder.setDefaultCredentialsProvider(credsProvider);
+                }
+                return  httpClientBuilder
+                        .setConnectionManager(connectionManager)
+                        .setRoutePlanner(new DefaultProxyRoutePlanner(proxy))
+                        .build();
             }
             return HttpClients.custom().setConnectionManager(connectionManager).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    static class CustomRoutePlanner extends DefaultProxyRoutePlanner {
-        CustomRoutePlanner(HttpHost proxy) {
-            super(proxy);
-        }
-
-        @Override
-        protected HttpHost determineProxy(HttpHost target, HttpContext context) throws HttpException {
-            return super.determineProxy(target, context);
         }
     }
 }

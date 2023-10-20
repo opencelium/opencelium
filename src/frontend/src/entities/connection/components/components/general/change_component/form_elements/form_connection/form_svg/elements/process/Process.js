@@ -31,10 +31,12 @@ import DashedElement from "./DashedElement";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
 import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {toggleRequestBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
+import {setModalJustDeletedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-function mapStateToProps(state){
-    const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         isTestingConnection: connectionOverview.isTestingConnection,
         colorMode: connectionOverview.colorMode,
@@ -47,11 +49,11 @@ function mapStateToProps(state){
     }
 }
 
-@connect(mapStateToProps, {setJustDeletedItem})
+@GetModalProp()
+@connect(mapStateToProps, {setJustDeletedItem, setModalJustDeletedItem, toggleRequestBodyDialog}, null, {forwardRef: true})
 class Process extends React.Component{
     constructor(props) {
         super(props)
-
         this.state = {
             technicalRectClassName: '',
             isMouseOverPlaceholder: false,
@@ -60,6 +62,8 @@ class Process extends React.Component{
             isMouseOver: false,
             showCreatePanel: false,
         }
+        this.createPanelRef = React.createRef();
+        this.setJustDeletedItem = props.isModal ? props.setModalJustDeletedItem : props.setJustDeletedItem;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -107,7 +111,7 @@ class Process extends React.Component{
         }
     }
 
-    onMouseOverSvg(){
+    onMouseOverSvg(e){
         const {currentTechnicalItem, connection, process, isItemDraggable, isCreateElementPanelOpened} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
         const isItemOver = isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== process.entity.index;
@@ -190,14 +194,19 @@ class Process extends React.Component{
         }
     }
 
+    onDoubleClick(){
+        this.onClick();
+        this.props.toggleRequestBodyDialog();
+    }
+
     deleteProcess(e){
-        const {deleteProcess, process, setJustDeletedItem} = this.props;
-        setJustDeletedItem({index: process.entity.index, connectorType: process.connectorType});
+        const {deleteProcess, process} = this.props;
+        this.setJustDeletedItem({index: process.entity.index, connectorType: process.connectorType});
         this.setState({
             showCreatePanel: false,
         })
         setTimeout(() => {
-            setJustDeletedItem(null);
+            this.setJustDeletedItem(null);
             deleteProcess(process);
         }, 450)
         if(e){
@@ -267,9 +276,9 @@ class Process extends React.Component{
         const prevLog = currentLogs.length > 1 ? currentLogs[currentLogs.length - 2] : null;
         // || (currentLog.message === ConnectionLogs.BreakMessage && prevLog && !prevLog.hasNextItem)
         const hasDashAnimation = logPanelHeight !== 0 && currentLog
-            && ((currentLog.message !== ConnectionLogs.BreakMessage && currentLog.message !== ConnectionLogs.EndOfExecutionMessage))
+            && currentLog.shouldDraw && ((currentLog.message !== ConnectionLogs.BreakMessage && currentLog.message !== ConnectionLogs.EndOfExecutionMessage))
             && currentLog.index === process.entity.index && currentLog.connectorType === process.connectorType && currentLog.message !== '';
-        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === process.entity.index) !== -1 ? '#58854d' : '';
+        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.shouldDraw && l.index === process.entity.index && l.connectorType === process.connectorType) !== -1 ? '#58854d' : '';
         const isJustCreatedItem = this.isJustCreatedItem();
         const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;
         return(
@@ -283,7 +292,8 @@ class Process extends React.Component{
                                     {...props}
                                     id={`${process.getHtmlIdName()}_rect`}
                                     fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color}
-                                    onClick={(a) => {this.onClick(a)}}
+                                    onClick={() => this.onClick()}
+                                    onDoubleClick={() => this.onDoubleClick()}
                                     onMouseDown={(a) => {this.onMouseDown(a)}}
                                     x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
                                     className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${technicalRectClassName} ${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
@@ -360,6 +370,7 @@ class Process extends React.Component{
                 }
                 {showCreatePanel &&
                     <CreatePanel
+                        ref={this.createPanelRef}
                         element={process}
                         onMouseLeave={(a) => this.onMouseLeaveSvg(a)}
                         setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}

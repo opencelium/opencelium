@@ -22,20 +22,21 @@ import {InputTextType} from "../text/interfaces";
 
 const InputTextarea: FC<InputTextareaProps> =
     ({
-         maxLength,
-         value,
-         placeholder,
-         required,
-         label,
-         onChange,
-         icon,
-         color,
-         error,
-         isLoading,
-         isIconInside,
-         rows,
-         readOnly,
-         ...props
+        maxLength,
+        value,
+        placeholder,
+        required,
+        label,
+        onChange,
+        icon,
+        color,
+        error,
+        isLoading,
+        isIconInside,
+        rows,
+        readOnly,
+        height,
+        ...props
      }) => {
         const hasLabel = label !== '';
         let minHeight = 24 * rows + 40;
@@ -44,7 +45,7 @@ const InputTextarea: FC<InputTextareaProps> =
         }
         return (
             <Input isTextarea readOnly={readOnly} value={value} maxLength={maxLength} placeholder={placeholder} required={required}
-                   label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside} minHeight={minHeight}>
+                   label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside} minHeight={minHeight} height={height}>
                 <TextareaStyled
                     isTextarea
                     emphasizeColor={color}

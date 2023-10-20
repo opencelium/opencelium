@@ -152,7 +152,7 @@ management:
       show-details: always
 
 opencelium:
-  version: 3.1.2
+  version: 3.2
   debug_mode: true
   reboot:
     path: src/backend/src/main/resources/bashfile/restart.sh
@@ -164,7 +164,27 @@ opencelium:
     update:
       online:
         url: { insert url where portal service is located }
+###########################################################################
+#                                                                         #
+#   Configuration for Notification                                        #
+#                                                                         #
+#   Teams: https://learn.microsoft.com/en-us/graph/auth/auth-concepts     #
+#   Slack: https://api.slack.com/messaging/webhooks                       #
+#                                                                         #
+###########################################################################
+  notification:
+    tools:
+      slack:
+        webhook:
+      teams:
+        grant_type: refresh_token
+        client_id:
+        client_secret:
+        refresh_token:
+        tenant:
 #  rest_template:
 #      proxy:
 #        host: 127.0.0.1
 #        port: 8082
+#        username: ####
+#        password: ####

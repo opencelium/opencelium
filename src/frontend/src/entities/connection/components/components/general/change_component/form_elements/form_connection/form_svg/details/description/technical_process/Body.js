@@ -23,35 +23,54 @@ import {BODY_FORMAT} from "@entity/connection/components/classes/components/cont
 import JsonBody from "@change_component/form_elements/form_connection/form_methods/method/JsonBody";
 import XmlBody from "@change_component/form_elements/form_connection/form_methods/method/XmlBody";
 import Enhancement from "@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Enhancement";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 import {isNumber, subArrayToString} from "@application/utils/utils";
 import CEnhancement from "@entity/connection/components/classes/components/content/connection/field_binding/CEnhancement";
 import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
 import {markFieldNameAsArray} from "@change_component//form_elements/form_connection/form_methods/help";
 import GraphQLBody from "@change_component/form_elements/form_connection/form_methods/method/GraphQLBody";
+import ReferenceInformation
+    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/reference_information/ReferenceInformation";
+import {withTheme} from "styled-components";
+
 
 class Body extends React.Component{
     constructor(props) {
         super(props);
 
         this.state = {
-            isBodyVisible: false,
             currentFieldName: '',
             currentEnhancement: null,
+            isToggledIcon: true,
+            isToggledReferenceIcon: false,
         }
+        this.JsonBodyRef = React.createRef();
+        this.enhancementRef = React.createRef();
+    }
+
+    getBodyDialogState(){
+
+    }
+
+    toggleReferenceIcon(isToggledReferenceIcon){
+        this.setState({isToggledReferenceIcon});
     }
 
     toggleBodyVisible(){
-        const {connection, updateConnection, setCurrentInfo, nameOfCurrentInfo} = this.props;
-        if(!this.state.isBodyVisible) {
+        const {
+            connection, updateConnection, setCurrentInfo, nameOfCurrentInfo,
+            isBodyDialogOpened, toggleBodyDialog,
+        } = this.props;
+        if(!isBodyDialogOpened) {
             connection.currentEnhancemnet = null;
         }
         if(setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
         updateConnection(connection);
+        toggleBodyDialog();
         this.setState({
-            isBodyVisible: !this.state.isBodyVisible,
             currentEnhancement: null,
             currentFieldName: '',
+            isToggledIcon: true,
+            isToggledReferenceIcon: false,
         });
     }
 
@@ -66,25 +85,33 @@ class Body extends React.Component{
         });
     }
 
-    setCurrentEnhancementClickingOnPointer(e, value){
-        const {connection, connector} = this.props;
+    setCurrentEnhancementClickingOnPointer(e, value, fieldName = ''){
+        const {connection, connector, method} = this.props;
         /*if(connector.getConnectorType() === CONNECTOR_FROM){
             return;
         }*/
-        let fieldName = '';
-        if(value.namespace.length > 1){
-            for(let i = 1; i < value.namespace.length; i++){
-                if((i + 1) < value.namespace.length && isNumber(value.namespace[i + 1])){
-                    fieldName += markFieldNameAsArray(value.namespace[i], value.namespace[i + 1]);
-                    i++;
-                } else{
-                    fieldName += value.namespace[i];
+        let bindingItem = null;
+        if(fieldName === '') {
+            if (value.namespace.length > 1) {
+                for (let i = 1; i < value.namespace.length; i++) {
+                    if ((i + 1) < value.namespace.length && isNumber(value.namespace[i + 1])) {
+                        fieldName += markFieldNameAsArray(value.namespace[i], value.namespace[i + 1]);
+                        i++;
+                    } else {
+                        fieldName += value.namespace[i];
+                    }
+                    fieldName += '.';
                 }
-                fieldName += '.';
             }
+            fieldName += value.variable.name;
+            bindingItem = this.getCurrentBindingItem(fieldName);
+        } else{
+            bindingItem = connection.fieldBinding.find(item => {
+                return item.to.findIndex(elem => {
+                    return elem.color === method.color && elem.field === fieldName;
+                }) !== -1;
+            });
         }
-        fieldName += value.variable.name;
-        let bindingItem = this.getCurrentBindingItem(fieldName);
         if(bindingItem){
             bindingItem = bindingItem.to[0];
             connection.setCurrentFieldBindingTo(bindingItem);
@@ -119,6 +146,7 @@ class Body extends React.Component{
     }
 
     renderBody(){
+        const {isToggledReferenceIcon} = this.state;
         const {readOnly, method, connection, isDraft, source, connector} = this.props;
         if(method.isGraphQLData()){
             return (
@@ -140,8 +168,10 @@ class Body extends React.Component{
             case BODY_FORMAT.JSON:
                 return (
                     <JsonBody
+                        ref={this.JsonBodyRef}
                         id={'description_body'}
                         isDraft={isDraft}
+                        isFullHeight={!isToggledReferenceIcon}
                         readOnly={readOnly}
                         method={connector.getMethodByIndex(method.index)}
                         connection={connection}
@@ -183,25 +213,59 @@ class Body extends React.Component{
         }
         return(
             <div className={styles.data}>
-                <Enhancement readOnly={readOnly} enhancement={{...currentEnhancement}} setEnhancement={(a) => this.setCurrentEnhancement(a)}/>
+                <Enhancement ref={this.enhancementRef} readOnly={readOnly} enhancement={{...currentEnhancement}} setEnhancement={(a) => this.setCurrentEnhancement(a)}/>
             </div>
         );
     }
 
     renderInfo(){
-        const {bodyTitle, connector, isExtended, readOnly} = this.props;
-        const hasEnhancement = true;
+        const {isToggledIcon, isToggledReferenceIcon} = this.state;
+        const {bodyTitle, isExtended, readOnly, source, method, connector, connection, hasEnhancement} = this.props;
+        let gridStyles = {};
+        if(isToggledReferenceIcon && !isToggledIcon){
+            gridStyles.gridTemplateRows = 'calc(100% - 40px) 40px';
+        }
+        if(!isToggledReferenceIcon && isToggledIcon){
+            gridStyles.gridTemplateRows = '40px calc(100% - 40px)';
+        }
+        if(!isToggledReferenceIcon && !isToggledIcon){
+            gridStyles.gridTemplateRows = '40px 40px';
+        }
+        if(isToggledReferenceIcon && isToggledIcon){
+            gridStyles.gridTemplateRows = '25% calc(100%)';
+        }
+        if(!hasEnhancement){
+            gridStyles.gridTemplateRows = 'unset';
+        }
         return(
             <React.Fragment>
-                <div className={hasEnhancement ? styles.body_data_with_enhancement : styles.body_data}>
-                    <div><b>{bodyTitle}</b></div>
-                    {this.renderBody()}
-                </div>
-                {true &&
-                    <div className={styles.body_enhancement}>
-                        <div><b>{'Enhancement'}</b></div>
-                        {this.renderEnhancement()}
+                <div className={hasEnhancement ? styles.body_data_with_enhancement : styles.body_data_without_enhancement} style={gridStyles}>
+                    {hasEnhancement && <ReferenceInformation
+                        body={source}
+                        method={method}
+                        connection={connection}
+                        toggleIcon={(a) => this.toggleReferenceIcon(a)}
+                        isToggledIcon={isToggledReferenceIcon}
+                        onReferenceClick={(fieldName) => this.setCurrentEnhancementClickingOnPointer(null, null, fieldName)}
+                    />}
+                    <div>
+                        <div>
+                            <b>{bodyTitle}</b>
+                            <TooltipFontIcon
+                                tooltipPosition={'right'}
+                                style={{verticalAlign: 'middle',cursor: 'pointer'}}
+                                onClick={() => this.setState({isToggledIcon: !isToggledIcon})}
+                                tooltip={isToggledIcon ? 'Hide' : 'Show'}
+                                value={isToggledIcon ? 'expand_less' : 'chevron_right'}
+                            />
+                        </div>
+                        {isToggledIcon && this.renderBody()}
                     </div>
+                </div>
+                {hasEnhancement && <div className={styles.body_enhancement}>
+                    <div><b>{'Enhancement'}</b></div>
+                    {this.renderEnhancement()}
+                </div>
                 }
                 {isExtended && !readOnly &&
                     <Button
@@ -215,15 +279,15 @@ class Body extends React.Component{
     }
 
     render(){
-        const {isBodyVisible} = this.state;
-        const {connector, isExtended, isCurrentInfo, method} = this.props;
+        const {connector, isExtended, isCurrentInfo, method, isBodyDialogOpened, hasError, theme} = this.props;
+        const errorColor = hasError ? theme?.input?.error?.color || '#9b2e2e' : 'unset';
         const isGraphQLData = method.isGraphQLData();
-        const hasEnhancement = true && !isGraphQLData;
+        const hasEnhancement = this.props.hasEnhancement && !isGraphQLData;
         return(
             <React.Fragment>
-                <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
-                <Col xs={8} className={`${styles.col}`}>
-                    <TooltipFontIcon onClick={(a) => this.toggleBodyVisible(a)} size={14} value={<span className={styles.more_details}>{`...`}</span>} tooltip={'Body'}/>
+                <Col id='body_label' xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
+                <Col id='body_option' xs={8} className={`${styles.col}`}>
+                    <TooltipFontIcon onClick={(a) => this.toggleBodyVisible(a)} size={14} value={<span className={styles.more_details}>{`...`}</span>} tooltip={'Show'}/>
                 </Col>
                 {isExtended && isCurrentInfo &&
                     ReactDOM.createPortal(
@@ -232,10 +296,14 @@ class Body extends React.Component{
                 }
                 <Dialog
                     actions={[{label: 'Ok', onClick: (a) => this.toggleBodyVisible(a), id: 'header_ok'}]}
-                    active={isBodyVisible && !isExtended}
+                    active={isBodyDialogOpened && !isExtended}
                     toggle={(a) => this.toggleBodyVisible(a)}
                     title={'Body'}
-                    theme={{dialog: isGraphQLData ? styles.body_dialog_graphql : hasEnhancement ? styles.body_dialog_with_enhancement : styles.body_dialog, content: styles.body_content}}
+                    theme={{
+                        dialog: isGraphQLData ? styles.body_dialog_graphql : hasEnhancement ? styles.body_dialog_with_enhancement : styles.body_dialog,
+                        content: styles.body_content,
+                        body: styles.enhancement_dialog_body,
+                    }}
                 >
                     {this.renderInfo()}
                 </Dialog>
@@ -246,6 +314,8 @@ class Body extends React.Component{
 
 Body.defaultProps = {
     isDraft: false,
+    hasEnhancement: true,
+    hasError: false,
 };
 
-export default Body;
+export default withTheme(Body);

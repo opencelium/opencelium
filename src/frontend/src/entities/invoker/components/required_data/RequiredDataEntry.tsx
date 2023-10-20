@@ -47,7 +47,7 @@ const RequiredDataEntry: FC<RequiredDataEntryProps> =
             />
             <InputSelect
                 id={`required_data_visibility_${index || entry.key}`}
-                minHeight={30   }
+                minHeight={30}
                 width={'30%'}
                 label={hasLabels ? 'Visibility' : ''}
                 value={visibility}

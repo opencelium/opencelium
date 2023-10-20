@@ -30,22 +30,21 @@ import CSvg from "@entity/connection/components/classes/components/content/conne
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {CTechnicalOperator} from "@entity/connection/components/classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CONNECTOR_FROM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
-import CMethodItem from "@classes/content/connection/method/CMethodItem";
-import COperatorItem from "@classes/content/connection/operator/COperatorItem";
-import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import CFieldBinding from "@classes/content/connection/field_binding/CFieldBinding";
 import {Dialog} from "@app_component/base/dialog/Dialog";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import GetModalProp from "@entity/connection/components/decorators/GetModalProp";
 
-function mapStateToProps(state){
-    const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
         isTestingConnection: connectionOverview.isTestingConnection,
     };
 }
 
-@connect(mapStateToProps, {setCurrentTechnicalItem})
+@GetModalProp()
+@connect(mapStateToProps, {}, null, {forwardRef: true})
 class Svg extends React.Component {
     constructor(props) {
         super(props);
@@ -66,6 +65,10 @@ class Svg extends React.Component {
         }
         this.svgRef = React.createRef();
         this.resetRatio = false;
+        this.processRef = React.createRef();
+        this.operatorRef = React.createRef();
+        this.fromConnectorPanelRef = React.createRef();
+        this.toConnectorPanelRef = React.createRef();
     }
 
 
@@ -161,7 +164,7 @@ class Svg extends React.Component {
     setCoordinatesForCreateElementPanel(e, type, itemPosition){
         const {setCreateElementPanelPosition, layoutPosition} = this.props;
         if(typeof setCreateElementPanelPosition === 'function'){
-            const clientRect = e.target.getBoundingClientRect();
+            const clientRect = e instanceof SVGGElement ? e.getBoundingClientRect() : e.target.getBoundingClientRect();
             let x = clientRect.x;
             let y = clientRect.y;
             x += clientRect.width + 8;
@@ -360,6 +363,7 @@ class Svg extends React.Component {
             }
             connection.addFieldBinding(CFieldBinding.createFieldBinding(newFieldBinding));
         })
+        connection.removeDuplicatesFromFieldBinding();
         updateConnection(connection);
         if(result.currentItem){
             connector.setCurrentItem(result.currentItem);
@@ -405,10 +409,17 @@ class Svg extends React.Component {
         }
     }
 
+    zoomIn(){
+        this.onWheel({shiftKey: true, wheelDelta: 300, deltaY: -250, detail: 0, clientX: 0, clientY: 0, preventDefault: () => {}})
+    }
+    zoomOut(){
+        this.onWheel({shiftKey: true, wheelDelta: -300, deltaY: 250, detail: 0, clientX: 0, clientY: 0, preventDefault: () => {}})
+    }
+
     renderItems(){
         const {
             isItemDraggable, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened,
-            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll, isTestingConnection, isCreateElementPanelOpened,
+            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll, isTestingConnection, isCreateElementPanelOpened, setRef
         } = this.props;
         return items.map((item,key) => {
             let currentItem = null;
@@ -421,6 +432,7 @@ class Svg extends React.Component {
                 case 'if':
                     return(
                         <Operator
+                            ref={this.operatorRef}
                             key={key}
                             isItemDraggable={isItemDraggable && !isTestingConnection}
                             type={'if'}
@@ -439,6 +451,7 @@ class Svg extends React.Component {
                 case 'loop':
                     return(
                         <Operator
+                            ref={this.operatorRef}
                             key={key}
                             isItemDraggable={isItemDraggable && !isTestingConnection}
                             type={'loop'}
@@ -457,6 +470,7 @@ class Svg extends React.Component {
                 default:
                     return(
                         <Process
+                            ref={this.processRef}
                             key={key}
                             isItemDraggable={isItemDraggable && !isTestingConnection}
                             process={item}
@@ -520,6 +534,35 @@ class Svg extends React.Component {
         let svgStyle = this.props.style ? {...this.props.style} : {};
         return(
             <React.Fragment>
+                <div style={{
+                    position: "absolute",
+                    top: '30px',
+                    left: '5px',
+                    display: 'grid',
+                    background: '#fff',
+                    padding: '5px',
+                    borderRadius: '3px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                }}>
+                    <TooltipFontIcon
+                        wrapStyles={{borderBottom: '1px solid #eee', lineHeight: 0, paddingBottom: '5px'}}
+                        size={20}
+                        onClick={() => this.zoomIn()}
+                        tooltip={<span>Zoom in<br/>(Shift + Forward Scroll)</span>}
+                        value={'add'}
+                        tooltipPosition={'right'}
+                        isButton={true}
+                    />
+                    <TooltipFontIcon
+                        wrapStyles={{lineHeight: 0, paddingTop: '5px'}}
+                        size={20}
+                        onClick={() => this.zoomOut()}
+                        tooltip={<span>Zoom out<br/>(Shift + Backward Scroll)</span>}
+                        value={'remove'}
+                        tooltipPosition={'right'}
+                        isButton={true}
+                    />
+                </div>
                 <svg
                     id={svgId}
                     style={svgStyle}
@@ -540,6 +583,7 @@ class Svg extends React.Component {
                     </defs>
                     {fromConnectorPanelParams && toConnectorPanelParams &&
                         <ConnectorPanels
+                            ref={{fromConnector: this.fromConnectorPanelRef, toConnector: this.toConnectorPanelRef}}
                             fromConnectorPanelParams={fromConnectorPanelParams}
                             toConnectorPanelParams={toConnectorPanelParams}
                             connection={connection}

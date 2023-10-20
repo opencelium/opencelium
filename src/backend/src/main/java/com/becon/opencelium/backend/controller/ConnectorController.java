@@ -70,9 +70,6 @@ public class ConnectorController {
     @Autowired
     private ConnectionNodeServiceImp connectionNodeService;
 
-    @Autowired
-    private RestTemplate restTemplate;
-
     @Operation(summary = "Retrieves a connector from database by provided connector ID")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
@@ -246,7 +243,7 @@ public class ConnectorController {
         Map<String, Object> failBody = null;
         String formatType = "";
         String type = "";
-        if (functionInvoker.getResponse().getFail().getBody() != null) {
+        if (functionInvoker.getResponse().getFail() != null && functionInvoker.getResponse().getFail().getBody() != null) {
             formatType = functionInvoker.getResponse().getFail().getBody().getFormat();
             failBody = functionInvoker.getResponse().getFail().getBody().getFields();
         }

@@ -25,13 +25,9 @@ public class AppConfiguration {
 
     @Bean
     public RestTemplate restTemplate() {
-        String proxyHost = env.getProperty(YamlPropConst.PROXY_HOST);
-        String proxyPort = env.getProperty(YamlPropConst.PROXY_PORT);
-        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
-
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder(new RestCustomizer());
         return restTemplateBuilder
-                .setReadTimeout(Duration.ofMillis(SecurityConstant.READ_TIMEOUT))
-                .additionalCustomizers(new RestCustomizer(proxyHost, proxyPort)).build();
+                .setReadTimeout(Duration.ofMillis(SecurityConstant.READ_TIMEOUT)).build();
     }
 
     @Bean

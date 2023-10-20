@@ -22,12 +22,15 @@ import {
 } from "./styles";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {useAppDispatch} from "@application/utils/store";
-import {setLogPanelHeight, clearCurrentLogs, LogPanelHeight} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {clearCurrentLogs} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {clearModalCurrentLogs} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import LogMessage from "@change_component/form_elements/form_connection/form_svg/layouts/logs/LogMessage";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-const LogPanel: FC = ({}) => {
+const LogPanel: FC<{isModal?: boolean}> = ({isModal}) => {
     const dispatch = useAppDispatch();
+    const clearLogs = isModal ? clearModalCurrentLogs : clearCurrentLogs;
     const {isFullScreen} = Application.getReduxState();
     const {
         currentLogs, logPanelHeight, currentTechnicalItem,
@@ -54,50 +57,7 @@ const LogPanel: FC = ({}) => {
         <React.Fragment>
             <TopStyled logPanelHeight={logPanelHeight}>
                 {logPanelHeight !== 0 && <HeaderStyled value={'Logs'} width={isDetailsOpened ? 'calc(100% - 300px)' : '100%'}/>}
-                {logPanelHeight === LogPanelHeight.High &&
-                    <ToggleButtonStyled
-                        iconSize={TextSize.Size_20}
-                        position={'top'}
-                        icon={'expand_more'}
-                        tooltip={'Show less'}
-                        target={`toggle_log_panel`}
-                        hasBackground={false}
-                        handleClick={() => dispatch(setLogPanelHeight(LogPanelHeight.Medium))}
-                    />
-                }
-                {logPanelHeight === LogPanelHeight.Medium &&
-                    <ToggleSmallButtonContainerStyled>
-                        <ToggleSmallButtonStyled
-                            iconSize={TextSize.Size_12}
-                            position={'top'}
-                            icon={'expand_less'}
-                            tooltip={'Show More'}
-                            target={`toggle_more_log_panel`}
-                            hasBackground={false}
-                            handleClick={() => dispatch(setLogPanelHeight(LogPanelHeight.High))}
-                        />
-                        <ToggleSmallButtonStyled
-                            iconSize={TextSize.Size_12}
-                            position={'bottom'}
-                            icon={'expand_more'}
-                            tooltip={'Hide'}
-                            target={`toggle_less_log_panel`}
-                            hasBackground={false}
-                            handleClick={() => dispatch(setLogPanelHeight(0))}
-                        />
-                    </ToggleSmallButtonContainerStyled>
-                }
-                {logPanelHeight === 0 &&
-                    <ToggleButtonStyled
-                        iconSize={TextSize.Size_20}
-                        position={'right'}
-                        icon={'expand_less'}
-                        tooltip={'Show Logs'}
-                        target={`toggle_log_panel`}
-                        hasBackground={false}
-                        handleClick={() => dispatch(setLogPanelHeight(LogPanelHeight.Medium))}
-                    />
-                }
+
                 {logPanelHeight !== 0 && <ClearButtonStyled
                     right={isDetailsOpened ? isFullScreen ? 312 : 300 : isFullScreen ? 12 : 2}
                     iconSize={TextSize.Size_20}
@@ -107,7 +67,7 @@ const LogPanel: FC = ({}) => {
                     tooltip={'Clear Logs'}
                     target={`clear_log_panel`}
                     hasBackground={false}
-                    handleClick={() => dispatch(clearCurrentLogs())}
+                    handleClick={() => dispatch(clearLogs([]))}
                 />}
             </TopStyled>
             {logPanelHeight !== 0 &&
@@ -124,6 +84,7 @@ const LogPanel: FC = ({}) => {
                             return (
                                 <LogMessage
                                     key={key}
+                                    index={key}
                                     {...messageProps}
                                     style={{background: log?.methodData?.color || '#fff'}}
                                     message={log.message}
@@ -139,4 +100,4 @@ const LogPanel: FC = ({}) => {
     );
 }
 
-export default LogPanel;
+export default GetModalProp()(LogPanel);

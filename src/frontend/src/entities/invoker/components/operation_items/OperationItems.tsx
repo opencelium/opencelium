@@ -26,6 +26,8 @@ import {DeleteButtonStyled, HeaderStyled, MethodTitleStyled, OperationItemsStyle
     RightContainerStyled, TestConnectionIconStyled, ValidationMessageStyled} from './styles';
 import {TextSize} from "@app_component/base/text/interfaces";
 import {isJsonString} from "@application/utils/utils";
+import {ErrorStyled} from "@app_component/base/input/styles";
+import {Text} from "@app_component/base/text/Text";
 
 const OperationItems: FC<OperationItemsProps> =
     ({
@@ -33,6 +35,7 @@ const OperationItems: FC<OperationItemsProps> =
         isReadonly,
         updateOperations,
         validations,
+        error,
     }) => {
     const [collapseKey, setCollapseKey] = useState('');
     const [newOperation, setNewOperation] = useState<Operation>(new Operation());
@@ -120,6 +123,7 @@ const OperationItems: FC<OperationItemsProps> =
                     </Card>
                 )})
             }
+            <ErrorStyled errorBottom={'2px'} paddingLeft={'12px'}><Text value={error} size={TextSize.Size_12} color={ColorTheme.Red}/></ErrorStyled>
         </OperationItemsStyled>
     )
 }
@@ -128,6 +132,7 @@ OperationItems.defaultProps = {
     isReadonly: false,
     operations: [],
     validations: [],
+    error: '',
 }
 
 

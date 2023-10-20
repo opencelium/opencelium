@@ -32,11 +32,13 @@ import DashedElement from "@change_component/form_elements/form_connection/form_
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
 import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {toggleConditionDialog} from "@root/redux_toolkit/slices/EditorSlice";
+import {setModalJustDeletedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-function mapStateToProps(state){
-    const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
         logPanelHeight: connectionOverview.logPanelHeight,
@@ -47,7 +49,8 @@ function mapStateToProps(state){
     }
 }
 
-@connect(mapStateToProps, {setJustDeletedItem})
+@GetModalProp()
+@connect(mapStateToProps, {setJustDeletedItem, toggleConditionDialog, setModalJustDeletedItem}, null, {forwardRef: true})
 class Operator extends React.Component{
     constructor(props) {
         super(props)
@@ -61,6 +64,8 @@ class Operator extends React.Component{
             isMouseOver: false,
             showCreatePanel: false,
         }
+        this.createPanelRef = React.createRef();
+        this.setJustDeletedItem = props.isModal ? props.setModalJustDeletedItem : props.setJustDeletedItem;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -228,15 +233,20 @@ class Operator extends React.Component{
         }
     }
 
+    onDoubleClick(){
+        this.onClick();
+        this.props.toggleConditionDialog();
+    }
+
     deleteOperator(e){
-        const {connection, operator, updateConnection, setCurrentItem, setJustDeletedItem} = this.props;
+        const {connection, operator, updateConnection, setCurrentItem} = this.props;
         const connector = connection.getConnectorByType(operator.connectorType);
         this.setState({
             showCreatePanel: false,
         })
-        setJustDeletedItem({index: operator.entity.index, connectorType: operator.connectorType});
+        this.setJustDeletedItem({index: operator.entity.index, connectorType: operator.connectorType});
         setTimeout(() => {
-            setJustDeletedItem(null);
+            this.setJustDeletedItem(null);
             if(connector){
                 if(connector.getConnectorType() === CONNECTOR_FROM){
                     connection.removeFromConnectorOperator(operator.entity);
@@ -329,7 +339,7 @@ class Operator extends React.Component{
             && (currentLog.message !== ConnectionLogs.BreakMessage || (currentLog.message === ConnectionLogs.BreakMessage && currentLog.operatorData && !currentLog.operatorData.conditionResult) && currentLog.message !== ConnectionLogs.EndOfExecutionMessage)
             && currentLog.index === operator.entity.index && currentLog.connectorType === operator.connectorType && currentLog.message !== '';
         const hasDeleteIcon = isCurrent && !readOnly && !isTestingConnection;
-        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index) !== -1 ? '#58854d' : '';
+        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index && l.connectorType === operator.connectorType) !== -1 ? '#58854d' : '';
         const isJustCreatedItem = this.isJustCreatedItem();
         const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;
         return(
@@ -343,7 +353,8 @@ class Operator extends React.Component{
                                 return <polygon
                                     onMouseDown={(a) => this.onMouseDown(a)}
                                     onMouseUp={(a) => this.onMouseUp(a)}
-                                    onClick={(a) => this.onClick(a)}
+                                    onClick={() => this.onClick()}
+                                    onDoubleClick={() => this.onDoubleClick()}
                                     points={points}
                                     style={{...polygonStyle, ...errorStyles}}
                                     className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
@@ -367,7 +378,8 @@ class Operator extends React.Component{
                                 return <polygon
                                     onMouseDown={(a) => this.onMouseDown(a)}
                                     onMouseUp={(a) => this.onMouseUp(a)}
-                                    onClick={(a) => this.onClick(a)}
+                                    onClick={() => this.onClick()}
+                                    onDoubleClick={() => this.onDoubleClick()}
                                     points={points}
                                     style={{...polygonStyle, ...errorStyles}}
                                     className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
@@ -497,6 +509,7 @@ class Operator extends React.Component{
                 {this.renderOperator(type)}
                 {showCreatePanel &&
                     <CreatePanel
+                        ref={this.createPanelRef}
                         element={operator}
                         onMouseLeave={(a) => this.onMouseLeaveSvg(a)}
                         setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}

@@ -44,6 +44,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import liquibase.util.file.FilenameUtils;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
@@ -61,6 +63,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -130,6 +135,44 @@ public class InvokerController {
         return ResponseEntity.ok(invokerResources);
     }
 
+    @Operation(summary = "Checks by name whether an invoker exist or not")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Property 'result' contains a boolean value true(exists) or false(not exists)",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/exists/{invokerName}")
+    public ResponseEntity<ResultDTO<Boolean>> existsByName(@PathVariable String invokerName) throws Exception {
+        Boolean result = invokerService.existsByName(invokerName);
+        ResultDTO<Boolean> resultDTO = new ResultDTO<>(result);
+        return ResponseEntity.ok(resultDTO);
+    }
+
+    @Operation(summary = "Checks by filename whether an invoker exist or not")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Property 'result' contains a boolean value true(exists) or false(not exists)",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/file/exists/{fileName}")
+    public ResponseEntity<ResultDTO<Boolean>> existsByFileName(@PathVariable String fileName) throws Exception {
+        Boolean result = invokerService.existsByFileName(fileName);
+        ResultDTO<Boolean> resultDTO = new ResultDTO<>(result);
+        return ResponseEntity.ok(resultDTO);
+    }
+
     @Operation(summary = "Creates new invoker")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
@@ -143,13 +186,13 @@ public class InvokerController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> save(@RequestBody InvokerXMLResource invokerXMLResource)  {
+    public ResponseEntity<?> save(@RequestBody InvokerXMLResource invokerXMLResource) throws Exception  {
         Document doc = convertStringToXMLDocument(invokerXMLResource.getXml());
         Objects.requireNonNull(doc);
-        NodeList nodeList = doc.getChildNodes();
-        Node node = nodeList.item(0);
-        Node nameNode = node.getChildNodes().item(1);
-        String filename = nameNode.getTextContent();
+        XPathFactory xPathFactory = XPathFactory.newInstance();
+        XPath xpath = xPathFactory.newXPath();
+        XPathExpression expression = xpath.compile("/invoker/name");
+        String filename = expression.evaluate(doc);
         if (invokerService.existsByName(filename)){
             throw new RuntimeException("INVOKER_ALREADY_EXISTS");
         }
@@ -164,8 +207,14 @@ public class InvokerController {
             throw new RuntimeException(ex);
         }
 
-        List<Document> invokers = getAllInvokers();
+        List<Document> invokers;
         Map<String, Invoker> container = new HashMap<>();
+        try {
+            invokers = getAllInvokers();
+        } catch (Exception e) {
+            delete(filename);
+            throw new RuntimeException(e);
+        }
         invokers.forEach(document -> {
             InvokerParserImp parser = new InvokerParserImp(document);
             File f = new File(document.getDocumentURI());
@@ -173,9 +222,14 @@ public class InvokerController {
             invoker = invoker.replace("%20", " ");
             container.put(invoker, parser.parse());
         });
+
         invokerContainer.updateAll(container);
 
         Invoker invoker = invokerContainer.getByName(filename);
+        if (invoker.getOperations() == null) {
+            delete(filename);
+            throw new RuntimeException("Invoker should contain at least one Operation.");
+        }
         InvokerResource invokerResource = invokerService.toResource(invoker);
         final EntityModel<InvokerResource> resource = EntityModel.of(invokerResource);
         return ResponseEntity.ok().body(resource);
@@ -194,9 +248,9 @@ public class InvokerController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/{name}/dependency")
-    public ResponseEntity<?> hasDependency(@PathVariable String name){
-        ResultDTO<String> resultDTO = connectorService.existByInvoker(name)
-                ? new ResultDTO<>("true") : new ResultDTO<>("false");
+    public ResponseEntity<ResultDTO<Boolean>> hasDependency(@PathVariable String name){
+        Boolean result = connectorService.existByInvoker(name);
+        ResultDTO<Boolean> resultDTO = new ResultDTO<>(result);
         return ResponseEntity.ok(resultDTO);
     }
 
@@ -246,8 +300,8 @@ public class InvokerController {
         if(connectorService.existByInvoker(name)) {
             throw new RuntimeException("Couldn't delete because invoker '" + name + "' has references to connector and connection. ");
         }
-        invokerService.delete(name);
-        return ResponseEntity.ok().build();
+        invokerService.deleteInvokerFile(name);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Deletes a collection of invokers based on the provided list of their corresponding 'names'.")
@@ -338,6 +392,7 @@ public class InvokerController {
                     .map(location::relativize);
 
             return allInvokers.map(p -> new File(location.toString() + "/" + p.getFileName()))
+                    .filter(f -> f.getName().endsWith(".xml"))
                     .map(file -> {
                         try {
                             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();

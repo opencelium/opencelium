@@ -39,9 +39,11 @@ export const importTemplate = createAsyncThunk(
         try {
             let data = new FormData();
             data.append('file', templateFile);
-            const request = new TemplateRequest({isFormData: true});
-            const response = await request.importTemplate(data);
-            return response.data;
+            const importRequest = new TemplateRequest({isFormData: true});
+            const importResponse = await importRequest.importTemplate(data);
+            const getRequest = new TemplateRequest({endpoint: `/${importResponse.data.id}`});
+            const getResponse = await getRequest.getTemplateById();
+            return getResponse.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -156,11 +158,11 @@ export const deleteTemplateById = createAsyncThunk(
 
 export const deleteTemplatesById = createAsyncThunk(
     'template/delete/selected/byId',
-    async(templateIds: number[], thunkAPI) => {
+    async(identifiers: number[], thunkAPI) => {
         try {
             const request = new TemplateRequest();
-            await request.deleteTemplatesById(templateIds);
-            return templateIds;
+            await request.deleteTemplatesById({identifiers});
+            return identifiers;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

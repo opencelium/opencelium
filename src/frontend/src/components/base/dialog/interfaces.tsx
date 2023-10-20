@@ -29,6 +29,9 @@ interface DialogThemeProps{
     wrapper?: string,
     title?: string,
     dialog?: string,
+    body?: string,
+    footer?: string,
+    backdrop?: string,
 }
 
 interface DialogStylesProps{
@@ -47,6 +50,8 @@ interface DialogProps{
     dialogClassname?: string,
     dialogTheme?: DialogThemeProps,
     styles?: DialogStylesProps,
+    hasNoBody?: boolean,
+    hasNoActions?: boolean,
 }
 
 export {

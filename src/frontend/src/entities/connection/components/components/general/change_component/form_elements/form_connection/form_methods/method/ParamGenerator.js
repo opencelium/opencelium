@@ -45,6 +45,8 @@ class ParamGenerator extends Component {
         const {top, left} = findTopLeft(props.parent);
         this.top = top;
         this.left = left;
+
+        this.selectRef = React.createRef();
     }
 
     componentDidMount(){
@@ -95,7 +97,7 @@ class ParamGenerator extends Component {
      * to change field value
      */
     onChangeField(field){
-        this.setState({field}, this.setIdValue());
+        this.setState({field}, () => this.setIdValue());
     }
 
     /**
@@ -132,13 +134,15 @@ class ParamGenerator extends Component {
         const {connection} = this.props;
         let method = connection.getConnectorMethodByColor(color);
         let paramSource = null;
+        const operation = method.invoker.operations.find(o => o.name === method.name);
+        const source = operation ? operation : method;
         if(method) {
             switch (responseType) {
                 case RESPONSE_SUCCESS:
-                    paramSource = method.response.success;
+                    paramSource = source.response.success;
                     break;
                 case RESPONSE_FAIL:
-                    paramSource = method.response.fail;
+                    paramSource = source.response.fail;
                     break;
             }
         }
@@ -175,6 +179,7 @@ class ParamGenerator extends Component {
         return (
             <div style={selectThemeInputStyle} className={themeGeneratorFormMethod}>
                 <Select
+                    ref={this.selectRef}
                     id={`param_generator_select_${this.props.connector.getConnectorType()}_${this.props.method.index}`}
                     name={'...'}
                     value={value}

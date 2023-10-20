@@ -41,16 +41,8 @@ import com.becon.opencelium.backend.execution.statement.operator.Operator;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.*;
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.core5.http.HttpHost;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -58,15 +50,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -90,11 +78,14 @@ public class ConnectorExecutor {
     private final OcLogger<ExecutionLog> logger;
     private final String proxyHost;
     private final String proxyPort;
+    private final String proxyPass;
+    private final String proxyUser;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
                              FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeServiceImp,
                              ConnectorServiceImp connectorService, VariableNodeServiceImp statementNodeService,
-                             OcLogger<ExecutionLog> logger, String proxyHost, String proxyPort) {
+                             OcLogger<ExecutionLog> logger, String proxyHost, String proxyPort,
+                             String proxyUser, String proxyPass) {
         this.invokerService = invokerService;
         this.executionContainer = executionContainer;
         this.fieldNodeService = fieldNodeService;
@@ -104,6 +95,8 @@ public class ConnectorExecutor {
         this.logger = logger;
         this.proxyHost = proxyHost;
         this.proxyPort = proxyPort;
+        this.proxyUser = proxyUser;
+        this.proxyPass = proxyPass;
     }
 
     public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
@@ -138,6 +131,7 @@ public class ConnectorExecutor {
 // ================================= remove =========================================
         MethodResponse methodResponse;
         HashMap<String, String> responseContainer;
+        LinkedList<ResponseEntity<String>> respEnts;
         Map<String, Integer> loopsWithCurrIndex = executionContainer.getLoopIterators();
         logger.getLogEntity().setMethodData(new MethodData(methodNode.getColor()));
 // ==================================================================================
@@ -157,11 +151,14 @@ public class ConnectorExecutor {
             // adding new response message into existing data.
             methodResponse.getData()
                     .put(responseIndex, responseEntity.getBody());
+            methodResponse.getResponseEntities().add(responseEntity);
         }
         else {
             methodResponse = new MethodResponse();
             responseContainer = new LinkedHashMap<>();
+            respEnts = new LinkedList<>();
             responseContainer.put(responseIndex,responseEntity.getBody());
+            respEnts.add(responseEntity);
 
             methodResponse.setMethodKey(methodNode.getColor());
             methodResponse.setResponseFormat(methodNode.getResponseNode().getSuccess().getBody().getFormat());
@@ -169,6 +166,8 @@ public class ConnectorExecutor {
             methodResponse.setResult("success");
             methodResponse.setData(responseContainer);
             methodResponse.setLoopDepth(loopDepth);
+            methodResponse.setAggregatorId(methodNode.getAggregatorId());
+            methodResponse.setResponseEntities(respEnts);
 
             List<MethodResponse> list = executionContainer.getMethodResponses();
             list.add(methodResponse);
@@ -240,10 +239,10 @@ public class ConnectorExecutor {
 //        }
         ResponseEntity responseEntity;
         if (header.getContentType() == (getResponseContentType(header, functionInvoker))) {
-            responseEntity = restTemplate.exchange(uri, method ,httpEntity, String.class);
+            responseEntity = this.restTemplate.exchange(uri, method ,httpEntity, String.class);
         } else {
             responseEntity = InvokerRequestBuilder
-                .convertToStringResponse(restTemplate.exchange(uri, method ,httpEntity, Object.class));
+                .convertToStringResponse(this.restTemplate.exchange(uri, method ,httpEntity, Object.class));
         }
         logger.logAndSend("Response : " + responseEntity.getBody());
         return responseEntity;
@@ -316,7 +315,6 @@ public class ConnectorExecutor {
             return "null";
         }
         Map<String, Object> fields = replaceValues(bodyNode.getFields());
-//        body = fieldNodeService.deleteEmptyFields(body); // user should determine which fields should be in body.
         Object content = null;
         if (bodyNode.getType() != null && bodyNode.getType().equals("array")){
             List<Object> c = new ArrayList<>();
@@ -702,10 +700,8 @@ public class ConnectorExecutor {
 
     public RestTemplate createRestTemplate(Connector connector) {
         int timeout = connector.getTimeout();
-        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
-        restTemplateBuilder.additionalCustomizers(
-                new RestCustomizer(proxyHost, proxyPort, connector.isSslCert(), timeout)
-        );
+        RestTemplateBuilder restTemplateBuilder =
+                new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, proxyUser, proxyPass, connector.isSslCert(), timeout));
         if (timeout > 0) {
             restTemplateBuilder.setReadTimeout(Duration.ofMillis(timeout));
         }

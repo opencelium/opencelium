@@ -17,9 +17,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {Col} from "react-grid-system";
+import ReactDOM from "react-dom";
+import {withTheme} from "styled-components";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import {setFocusById} from "@application/utils/utils";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {toggleConditionDialog} from "@entity/connection/redux_toolkit/slices/EditorSlice";
+import {setModalCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ModalConnectionSlice";
 import Dialog from "@entity/connection/components/components/general/basic_components/Dialog";
 import {EditIcon, ViewIcon} from "../Icons";
 import LeftStatement
@@ -34,22 +38,31 @@ import RightStatement
     from "@change_component/form_elements/form_connection/form_svg/details/description/operator/condition/RightStatement";
 import CProcess from "@entity/connection/components/classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@entity/connection/components/classes/components/content/connection_overview_2/operator/COperator";
-import ReactDOM from "react-dom";
 import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
-import {withTheme} from "styled-components";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
+function mapStateToProps(state){
+    const editor = state.connectionEditorReducer;
+    return{
+        isConditionDialogOpened: editor.isConditionDialogOpened,
+    };
+}
 
-@connect(null, {setCurrentTechnicalItem})
+@GetModalProp()
+@connect(mapStateToProps, {setCurrentTechnicalItem, toggleConditionDialog, setModalCurrentTechnicalItem}, null, {forwardRef: true})
 class Condition extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
             isMouseOver: false,
-            isOpenEditDialog: false,
             condition: {
                 ...this.getConditionFromProps(props),
             }
         }
+        this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
+        this.leftStatementRef = React.createRef();
+        this.relationOperatorRef = React.createRef();
+        this.rightStatementRef = React.createRef();
     }
 
     hasLeftMethod(){
@@ -148,7 +161,7 @@ class Condition extends React.Component{
     }
 
     mouseOver(){
-        if(!this.state.isOpenEditDialog){
+        if(!this.props.isConditionDialogOpened){
             this.setState({
                 isMouseOver: true,
             });
@@ -156,7 +169,7 @@ class Condition extends React.Component{
     }
 
     mouseLeave(){
-        if(!this.state.isOpenEditDialog) {
+        if(!this.props.isConditionDialogOpened) {
             this.setState({
                 isMouseOver: false,
             });
@@ -164,16 +177,16 @@ class Condition extends React.Component{
     }
 
     toggleEdit(){
-        const {setCurrentInfo, nameOfCurrentInfo} = this.props;
+        const {setCurrentInfo, nameOfCurrentInfo, isConditionDialogOpened, toggleConditionDialog} = this.props;
         let newState = {
-            isOpenEditDialog: !this.state.isOpenEditDialog,
         }
-        if(newState.isOpenEditDialog){
+        if(!isConditionDialogOpened){
             newState.condition = this.getConditionFromProps(this.props);
         }
         if(setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
+        toggleConditionDialog()
         this.setState(newState, () => {
-            if(this.state.isOpenEditDialog){
+            if(isConditionDialogOpened){
                 setFocusById('details_condition');
             }
         });
@@ -181,7 +194,7 @@ class Condition extends React.Component{
 
     updateConnection(){
         const {condition} = this.state;
-        const {connection, details, updateConnection, setCurrentTechnicalItem} = this.props;
+        const {connection, details, updateConnection, setCurrentTechnicalItem, toggleConditionDialog} = this.props;
         const operator = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
         const operatorItem = connector.getOperatorByIndex(operator.index);
@@ -201,11 +214,11 @@ class Condition extends React.Component{
         operatorItem.error = null;
         updateConnection(connection);
         let currentTechnicalItem = connector.getSvgElementByIndex(operator.index);
-        setCurrentTechnicalItem(currentTechnicalItem.getObject());
+        this.setCurrentTechnicalItem(currentTechnicalItem.getObject());
         this.setState({
-            isOpenEditDialog: !this.state.isOpenEditDialog,
             isMouseOver: false,
         })
+        toggleConditionDialog();
     }
 
     checkIfOperatorHasThreeParams(isForLoop = false){
@@ -256,7 +269,7 @@ class Condition extends React.Component{
     }
 
     renderInfo(){
-        const {isOpenEditDialog, condition} = this.state;
+        const {condition} = this.state;
         const {connection, details, readOnly, isExtended} = this.props;
         const operator = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
@@ -270,6 +283,7 @@ class Condition extends React.Component{
         return(
             <React.Fragment>
                 <LeftStatement
+                    ref={this.leftStatementRef}
                     {...this.props}
                     operator={operator}
                     condition={condition}
@@ -284,6 +298,7 @@ class Condition extends React.Component{
                 {(isIfOperator || isLeftInputStringForLoopOperator) &&
                 <React.Fragment>
                     <RelationalOperator
+                        ref={this.relationOperatorRef}
                         isLoopOperator={isLoopOperator}
                         isIfOperator={isIfOperator}
                         relationalOperator={condition.relationalOperator}
@@ -294,6 +309,7 @@ class Condition extends React.Component{
                         isOperatorHasValue={() => this.isOperatorHasValue(isLoopOperator)}
                     />
                     <RightStatement
+                        ref={this.rightStatementRef}
                         {...this.props}
                         placeholder={placeholder}
                         condition={condition}
@@ -321,8 +337,8 @@ class Condition extends React.Component{
     }
 
     render(){
-        const {isMouseOver, isOpenEditDialog} = this.state;
-        const {details, isExtended, isCurrentInfo, readOnly, theme, connection} = this.props;
+        const {isMouseOver} = this.state;
+        const {details, isExtended, isCurrentInfo, readOnly, theme, connection, isConditionDialogOpened} = this.props;
         const operator = details.entity;
         const conditionText = operator.condition.generateStatementText();
         const conditionTextTitle = operator.condition.generateStatementText(true);
@@ -332,11 +348,11 @@ class Condition extends React.Component{
         const errorMessages = connector ? connector.getOperatorByIndex(operator.index)?.error?.messages || [] : [];
         return(
             <React.Fragment>
-                <Col xs={4} className={styles.col} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{`Condition`}</Col>
-                <Col xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
+                <Col id='condition_name' xs={4} className={styles.col} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{`Condition`}</Col>
+                <Col id="condition_label" xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
                     <span className={styles.value} title={conditionTextTitle} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{conditionText}</span>
-                    {isMouseOver && !isOpenEditDialog && !readOnly && <EditIcon onClick={(a) => this.toggleEdit(a)}/>}
-                    {isMouseOver && !isOpenEditDialog && readOnly && <ViewIcon onClick={(a) => this.toggleEdit(a)}/>}
+                    {isMouseOver && !isConditionDialogOpened && !readOnly && <EditIcon onClick={(a) => this.toggleEdit(a)}/>}
+                    {isMouseOver && !isConditionDialogOpened && readOnly && <ViewIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isExtended && isCurrentInfo &&
                         ReactDOM.createPortal(
                             this.renderInfo(), document.getElementById('extended_details_information')
@@ -344,7 +360,7 @@ class Condition extends React.Component{
                     }
                     <Dialog
                         actions={[{label, onClick: (a) => this.updateConnection(a), id: 'condition_apply'}]}
-                        active={isOpenEditDialog && !isExtended}
+                        active={isConditionDialogOpened && !isExtended}
                         toggle={(a) => this.toggleEdit(a)}
                         title={'Condition'}
                         theme={{dialog: styles.condition_dialog}}

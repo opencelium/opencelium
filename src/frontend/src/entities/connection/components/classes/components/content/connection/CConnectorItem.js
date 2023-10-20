@@ -184,7 +184,19 @@ export default class CConnectorItem{
         errors.forEach(errorData => {
             const index = this._operators.findIndex(operator => operator.index === errorData.index);
             if(index !== -1){
-                this._operators[index].error = {hasError: true, location: '', messages: errorData.errors};
+                this._operators[index].error = {hasError: true, location: errorData.location || '', messages: errorData.errors};
+                hasNewErrors = true;
+            }
+        })
+        return hasNewErrors;
+    }
+
+    setErrorsForMethods(errors){
+        let hasNewErrors = false;
+        errors.forEach(errorData => {
+            const index = this._methods.findIndex(method => method.index === errorData.index);
+            if(index !== -1){
+                this._methods[index].error = {hasError: true, location: errorData.location || '', messages: errorData.errors};
                 hasNewErrors = true;
             }
         })
@@ -294,7 +306,7 @@ export default class CConnectorItem{
         return methods.filter(m => m !== null).map(m => m.index);
     }
 
-    getReferencesForMethod(method){
+    getReferencesForMethod(method, shouldCheckOutReferences = true){
         const allMethodReferences = this.getAllMethodReferences();
         const allOperatorReferences = this.getAllOperatorReferences();
         let inReferences = new Set([]);
@@ -303,20 +315,22 @@ export default class CConnectorItem{
             if(allMethodReferences[i].element === method.index){
                 inReferences = new Set([...inReferences, ...allMethodReferences[i].references]);
             } else{
-                if(allMethodReferences[i].references.findIndex(ref => ref === method.index) !== -1){
+                if(shouldCheckOutReferences && allMethodReferences[i].references.findIndex(ref => ref === method.index) !== -1){
                     outReferences.add(allMethodReferences[i].element);
                 }
             }
         }
-        for(let i = 0; i < allOperatorReferences.length; i++){
-            if(allOperatorReferences[i].references.findIndex(ref => ref === method.index) !== -1){
-                outReferences.add(allOperatorReferences[i].element);
+        if(shouldCheckOutReferences){
+            for(let i = 0; i < allOperatorReferences.length; i++){
+                if(allOperatorReferences[i].references.findIndex(ref => ref === method.index) !== -1){
+                    outReferences.add(allOperatorReferences[i].element);
+                }
             }
         }
         return {inReferences: Array.from(inReferences), outReferences: Array.from(outReferences)};
     }
 
-    getReferencesForOperator(operator){
+    getReferencesForOperator(operator, shouldCheckOutReferences = true){
         let operatorReferences = new Set([]);
         const allReferences = this.getAllMethodReferences();
         let inReferences = new Set([]);
@@ -325,7 +339,7 @@ export default class CConnectorItem{
             if(allReferences[i].element.indexOf(operator.index) === 0) {
                 inReferences = new Set([...inReferences, ...allReferences[i].references]);
             }
-            if(allReferences[i].references.findIndex(ref => ref.indexOf(operator.index) === 0) !== -1){
+            if(shouldCheckOutReferences && allReferences[i].references.findIndex(ref => ref.indexOf(operator.index) === 0) !== -1){
                 outReferences.add(allReferences[i].element);
             }
         }
@@ -362,7 +376,7 @@ export default class CConnectorItem{
         return Array.from(new Set([...inReferences, ...outReferences, ...operatorReferences]));
     }
 
-    getReferencesForItem(item, isSelectedAll = false){
+    getReferencesForItem(item, isSelectedAll = false, shouldCheckOutReferences = true){
         const isOperator = item instanceof COperatorItem;
         let result = !isOperator ? {inReferences: [], outReferences: []} : [];
         let items = [item];
@@ -372,10 +386,10 @@ export default class CConnectorItem{
         for(let i = 0; i < items.length; i++){
             let itemResult;
             if(isOperator){
-                itemResult = this.getReferencesForOperator(items[i]);
+                itemResult = this.getReferencesForOperator(items[i], shouldCheckOutReferences);
                 result = [...result, ...itemResult];
             } else{
-                itemResult = this.getReferencesForMethod(items[i]);
+                itemResult = this.getReferencesForMethod(items[i], shouldCheckOutReferences);
                 result = {
                     inReferences: [...result.inReferences, ...itemResult.inReferences],
                     outReferences: [...result.outReferences, ...itemResult.outReferences],
@@ -398,8 +412,8 @@ export default class CConnectorItem{
         return result;
     }
 
-    areIndexesUnderScopeForOperator(scopeElement, draggableElement, isSelectedAll = false){
-        let indexes = this.getReferencesForItem(draggableElement, isSelectedAll);
+    areIndexesUnderScopeForOperator(scopeElement, draggableElement, isSelectedAll = false, shouldCheckOutReferences = true){
+        let indexes = this.getReferencesForItem(draggableElement, isSelectedAll, shouldCheckOutReferences);
         const draggableElementIndex = draggableElement.index;
         indexes = sortConnectorItemIndexes(indexes);
         let startIndex = '0';
@@ -455,8 +469,8 @@ export default class CConnectorItem{
         }
         return false;
     }
-    areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode, isSelectedAll = false){
-        let indexes = this.getReferencesForItem(draggableElement, isSelectedAll);
+    areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode, isSelectedAll = false, shouldCheckOutReferences = true){
+        let indexes = this.getReferencesForItem(draggableElement, isSelectedAll, shouldCheckOutReferences);
         let startIndex = '0';
         let endIndex = '';
         let inReferences = sortConnectorItemIndexes(indexes.inReferences);
@@ -498,15 +512,15 @@ export default class CConnectorItem{
         return checkStartIndex && checkEndIndex && checkNextItemOfOperator;
     }
 
-    areIndexesUnderScope(scopeElement, draggableElement, mode, isSelectedAll = false){
+    areIndexesUnderScope(scopeElement, draggableElement, mode, isSelectedAll = false, shouldCheckOutReferences = true){
         if(!scopeElement || !draggableElement){
             return false;
         }
         const isDraggableItemOperator = draggableElement instanceof COperatorItem;
         if(isDraggableItemOperator){
-            return this.areIndexesUnderScopeForOperator(scopeElement, draggableElement, isSelectedAll);
+            return this.areIndexesUnderScopeForOperator(scopeElement, draggableElement, isSelectedAll, shouldCheckOutReferences);
         } else{
-            return this.areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode, isSelectedAll);
+            return this.areIndexesUnderScopeForMethod(scopeElement, draggableElement, mode, isSelectedAll, shouldCheckOutReferences);
         }
     }
 
@@ -798,9 +812,9 @@ export default class CConnectorItem{
         }
     }
 
-    updateInvokerForMethods(){
+    updateInvokerForMethods(invoker = null){
         for(let i = 0; i < this._methods.length; i++){
-            this._methods[i].invoker = this._invoker;
+            this._methods[i].invoker = invoker || this._invoker;
         }
     }
 
@@ -1568,7 +1582,7 @@ export default class CConnectorItem{
                         });
                     }
                     if(decreasedIndex === '0'){
-                        return methods.reverse()
+                        return methods
                     }
                     decreasedIndex = this.decreaseIndex(decreasedIndex);
                 }
@@ -1627,9 +1641,14 @@ export default class CConnectorItem{
         for (let i = 0; i < this._operators.length; i++){
             operators.push(this._operators[i].getObjectForConnectionOverview());
         }
+        let methods = [];
+        for (let i = 0; i < this._methods.length; i++){
+            methods.push(this._methods[i].getObjectForConnectionOverview());
+        }
         return {
             ...this.getObject(),
             operators,
+            methods,
             title: this._title,
             invoker: this._invoker.getObject(),
             currentItemIndex: this._currentItem ? this._currentItem.index : '',

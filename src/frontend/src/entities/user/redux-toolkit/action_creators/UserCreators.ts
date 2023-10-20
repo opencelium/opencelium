@@ -128,11 +128,11 @@ export const deleteUserById = createAsyncThunk(
 
 export const deleteUsersById = createAsyncThunk(
     'user/delete/selected/byId',
-    async(userIds: number[], thunkAPI) => {
+    async(identifiers: number[], thunkAPI) => {
         try {
             const request = new UserRequest();
-            await request.deleteUsersById(userIds);
-            return userIds;
+            await request.deleteUsersById({identifiers});
+            return identifiers;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

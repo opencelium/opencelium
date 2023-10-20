@@ -18,7 +18,7 @@ import {actions} from '../../redux_toolkit/slices/ApplicationSlice';
 
 const {
     login, getResources, getVersion, updateResources, getGlobalSearchData, getAllComponents,
-    addTicket, openExternalUrl, updateThemes
+    addTicket, openExternalUrl, updateThemes, checkConnection, requestRemoteApi
 } = ActionCreators;
 
 const {setThemes} = actions;
@@ -38,8 +38,14 @@ export default {
             "Bad credentials": "Wrong email or password",
             "Network Error": "The server connection problem."
         },
+        [checkConnection.rejected.type]: {
+            "__DEFAULT__": "Your session has stopped. Please log in again or you will be log out."
+        },
         [getResources.rejected.type]: {
             "__DEFAULT__": "The request of getting resources was rejected."
+        },
+        [requestRemoteApi.rejected.type]: {
+            "__DEFAULT__": "The request was rejected."
         },
         [updateResources.rejected.type]: {
             "__DEFAULT__": ""
