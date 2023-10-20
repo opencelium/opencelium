@@ -69,7 +69,9 @@ This documentation is organized into a couple of sections:
    Changelogs <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
 
 .. toctree::
-   :caption: REST API Reference <https://opencelium-demo.becon.de:9090/swagger-ui/index.html>
+   :caption: REST API Reference
+
+   Swagger <https://github.com/opencelium/opencelium/>
 
 ##################
 License
