@@ -4,6 +4,33 @@ Changelog
 
 |
 |
+3.2
+========
+
+:Date: October 20, 2023
+
+Features
+--------
+
+* Data Aggregator
+* Extended Notification Type: added slack and teams support
+* New Connection Panel for actions
+* Animation tutorial
+* Shortcuts for connection editor
+* Invoker synchronization for connection
+* Delete reference option in method's body
+* Added legends for references in methods' body
+* Protection from auto log out when the session is expired
+
+Fixes
+--------
+
+* Add invoker with empty operations (OC-665)
+* Delete of selected templates (OC-670)
+* Saving methods' headers (OC-734)
+* Proxy bug (OC-758)
+
+|
 3.1.2
 ========
 

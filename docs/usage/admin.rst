@@ -130,7 +130,7 @@ types: *pre*, *post*, and *alert*. `Here
 Data Aggregator
 """""""""""""""""
 
-*Aggregator* is a feature that provides a possibility to notify a user after the
+Data Aggregator is a feature that provides a possibility to notify a user after the
 triggered connection (this happens in *Schedules*). `Here
 <https://docs.opencelium.io/en/dev/management/aggregator.html>`_, you can read how to manage with them.
 

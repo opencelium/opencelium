@@ -57,6 +57,7 @@ The last step, go the *Schedules* and create a notification with a *post* event 
    :width: 120
    :align: middle
 .. |schedule_notification_add_form| image:: ../img/data_aggregator/schedule_notification_add_form.png
+   :width: 400
    :align: middle
 .. |notification_template_form| image:: ../img/management/notification_templates/form.png
    :align: middle
