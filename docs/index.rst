@@ -34,9 +34,10 @@ This documentation is organized into a couple of sections:
    :caption: Management
    :maxdepth: 2
 
-   management/templates
-   management/notification_templates
-   management/invokers
+   management/template
+   management/notification_template
+   management/aggregator
+   management/invoker
 
 .. toctree::
    :caption: Services
