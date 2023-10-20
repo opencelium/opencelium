@@ -1,5 +1,5 @@
 ##################
-Manage Notification Templates
+Notification Templates
 ##################
 
 Notification Templates can be managed from UI. Let us consider the next use cases.

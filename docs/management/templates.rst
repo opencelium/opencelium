@@ -1,5 +1,5 @@
 ##################
-Manage Business Templates
+Business Templates
 ##################
 
 Business Templates can be managed both from UI and from server directly. Let us consider the next use cases.

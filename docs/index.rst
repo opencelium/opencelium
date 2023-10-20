@@ -31,7 +31,7 @@ This documentation is organized into a couple of sections:
    usage/admin
 
 .. toctree::
-   :caption: Use Cases
+   :caption: Management
    :maxdepth: 2
 
    management/templates
@@ -50,7 +50,7 @@ This documentation is organized into a couple of sections:
    :maxdepth: 2
 
     Website <https://opencelium.io>
-    Service Portal <https://service.opencelium.io>
+    Service Portal (only for subscribers) <https://service.opencelium.io>
     Video Tutorials <https://www.youtube.com/playlist?list=PLh_5t7kd2fySIqh6XxCB94lGXvU5lXbQ4>
     Webinars <https://www.youtube.com/playlist?list=PLh_5t7kd2fyScueyWSRhOn16acRFEBmgO>
 
