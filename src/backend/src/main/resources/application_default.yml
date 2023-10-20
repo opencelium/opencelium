@@ -153,17 +153,22 @@ management:
 
 opencelium:
   version: 3.2
-  debug_mode: true
   reboot:
     path: src/backend/src/main/resources/bashfile/restart.sh
+    assistant:
+      update:
+        online:
+          url: { insert url where portal service is located }
+###########################################################################
+#                                                                         #
+#   Is customizable                                                       #
+#                                                                         #
+###########################################################################
+  debug_mode: true
   token:
     secret: becon.opencelium
     activity-time: 18000
     experation-time: 86400
-  assistant:
-    update:
-      online:
-        url: { insert url where portal service is located }
 ###########################################################################
 #                                                                         #
 #   Configuration for Notification                                        #
