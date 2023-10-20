@@ -71,7 +71,7 @@ This documentation is organized into a couple of sections:
 .. toctree::
    :caption: REST API Reference
 
-   Swagger <https://github.com/opencelium/opencelium/>
+   Swagger <https://opencelium-demo.becon.de:9090/swagger-ui/index.html>
 
 ##################
 License
