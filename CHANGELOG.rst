@@ -2,6 +2,7 @@
 Changelog
 *********
 
+
 3.1.2
 ===
 :Date: Juli 27, 2023
@@ -10,6 +11,7 @@ HotFix
 --------
 
 * add proxy feature (OC-636)
+
 
 3.1.1
 ===
@@ -118,6 +120,7 @@ Fixes
 * session expired appeared when try to download a template (OC-473)
 * error during creating a field (OC-468)
 
+
 2.3
 ===
 :Date: June 21, 2022
@@ -143,6 +146,7 @@ Fixes
 * scheduler add error (OC-459)
 * scheduler update error (OC-460)
 * template delete error (OC-461)
+
 
 2.2
 ===
@@ -170,6 +174,7 @@ Fixes
 * new invokers and templates are available (OC-443)
 * new frontend engine has some issuesÃ¢â‚¬Â¦ (OC-438)
 * error during updateing a connector (OC-439)
+
 
 2.1
 ===
@@ -227,6 +232,7 @@ Fixes
 * Layout problems when deleting a connection (OC-384)
 * Wrong position of the title from dashboard widget (OC-362)
 
+
 1.4
 ===
 :Date: Mai 19, 2021
@@ -248,6 +254,7 @@ Fixes
 * Creates a white method what could not use (OC-299)
 * Wrong synax generated on a query by using ref generator (OC-330)
 
+
 1.3
 ===
 :Date: November 30, 2020
@@ -266,6 +273,7 @@ Fixes
 * Added property "sessionTime" when generating token (OC-257)
 * Fixed bug where liquebase throw an exception (OC-257)
 * Fixed bug in TooltipFontIcon (OC-160)
+
 
 1.2
 ===
@@ -299,6 +307,7 @@ Fixes
 * Backend creates job even crontab entered wrong (OC-251)
 * Fix bug when updating connector with null value of image property (OC-258)
 
+
 1.1
 ===
 :Date: April 7, 2020
@@ -327,6 +336,7 @@ Fixes
 * Connection get error via notification (OC-189)
 * Scheduler saving (OC-250)
 * First execution job will not be updated on scheduler view (OC-225)
+
 
 Major Relase :loudspeaker:
 ============
