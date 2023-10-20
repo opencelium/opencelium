@@ -34,6 +34,11 @@ const AnimationOverlay: FC<{theme?: ITheme}> = ({theme}) => {
     const { isAnimationPaused, isEditableAnimation } = ModalConnection.getReduxState();
     const [onMouseOverContainer, setOnMouseOverContainer] = useState<boolean>(false);
     const [showLabelContainer, toggleLabelContainer] = useState<boolean>(false);
+    useEffect(() => {
+        if(!videoAnimationName){
+            setOnMouseOverContainer(false);
+        }
+    }, [videoAnimationName])
     const onMouseOver = () => {
         if(!onMouseOverContainer){
             setOnMouseOverContainer(true);

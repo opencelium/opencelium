@@ -94,8 +94,8 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
           tooltip={"Help"}
           target={`help_connection_button`}
           hasBackground={true}
-          background={ColorTheme.White}
-          color={ColorTheme.Gray}
+          background={!isVisible ? ColorTheme.White : ColorTheme.Blue}
+          color={!isVisible ? ColorTheme.Gray : ColorTheme.White}
           padding="2px"
           handleClick={() => toggleVisibleHelpDialog()}
         />
@@ -170,7 +170,7 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
           title={""}
         >
           <React.Fragment>
-            This help animation is currently in development. Thank you for your understanding.
+              {"This help animation is currently in development. Thank you for your understanding."}
           </React.Fragment>
         </Dialog>
         <SyncInvokers
@@ -192,8 +192,8 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
           tooltip={"Shortcuts"}
           target={`shortcuts`}
           hasBackground={true}
-          background={ColorTheme.White}
-          color={ColorTheme.Gray}
+          background={!isShortcutsDialogOpened ? ColorTheme.White : ColorTheme.Blue}
+          color={!isShortcutsDialogOpened ? ColorTheme.Gray : ColorTheme.White}
           padding="2px"
           handleClick={() => setIsShortcutsDialogOpened(!isShortcutsDialogOpened)}
         />

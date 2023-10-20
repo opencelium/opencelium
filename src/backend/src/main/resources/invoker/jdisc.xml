@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
+    <name>JDisc</name>
+    <description>JDisc Discovery is an on-premise IT service management solution for midsize and large enterprises. The solution serves IT departments in industries such as education, IT consulting and logistics.</description>
+    <hint>This graphql interface provides a token auth. Its only provides one api operation, where you can flexible set up the query. The URL should look like this https://192.168.10.1/graphql</hint>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+	    <item name="password" type="string" visibility="public"/>
+        <item name="token" type="string" visibility="private">%{login.body.data.authentication.login.accessToken}</item>
+    </requiredData>
+    <authType>token</authType>
+    <operations>
+        <operation name="login" type="test">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                     <field name="query" type="string">mutation($user: String, $password: String) {authentication { login(login: $user, password: $password){ status accessToken refreshToken }}}</field>
+                     <field name="variables" type="object">
+                        <field name="user" type="string">{username}</field>
+                        <field name="password" type="string">{password}</field>
+                     </field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+		            <body data="raw" format="object" type="string">
+                      <field name="data" type="object">
+                        <field name="authentication" type="object">
+                          <field name="login" type="object">
+                            <field name="accessToken" type="string"/>                          
+                          </field>
+                        </field>
+                      </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+       </operation>
+        <operation name="Query" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body data="graphql" format="json" type="object">
+                  <field name="query" type="object"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body data="graphql" format="json" type="object">
+                      <field name="data" type="object">
+                      <field name="devices" type="object">
+                        <field name="findAll" type="array"><field name="id" type="string"/><field name="name" type="string"/><field name="serialNumber" type="string"/><field name="operatingSystem" type="object"><field name="osVersion" type="string"/></field></field>
+                      </field>                      
+                      </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+       </operation>       
+    </operations>
+</invoker>

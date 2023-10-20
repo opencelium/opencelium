@@ -1,5 +1,5 @@
 ##################
-Manage Invoker (only for subscribers)
+Invoker (only for subscribers)
 ##################
 
 
@@ -44,19 +44,19 @@ The last but not least step you add operations that will be used during *Connect
 |image8|
 
 
-.. |image0| image:: ../img/usecases/manage_invokers/add_0.png
-.. |image1| image:: ../img/usecases/manage_invokers/add_1.png
+.. |image0| image:: ../img/management/invokers/add_0.png
+.. |image1| image:: ../img/management/invokers/add_1.png
    :align: middle
-.. |image2| image:: ../img/usecases/manage_invokers/add_2.png
+.. |image2| image:: ../img/management/invokers/add_2.png
    :align: middle
-.. |image3| image:: ../img/usecases/manage_invokers/add_3.png
+.. |image3| image:: ../img/management/invokers/add_3.png
    :align: middle
-.. |image4| image:: ../img/usecases/manage_invokers/add_4.png
+.. |image4| image:: ../img/management/invokers/add_4.png
    :align: middle
-.. |image5| image:: ../img/usecases/manage_invokers/add_5.png
+.. |image5| image:: ../img/management/invokers/add_5.png
    :align: middle
-.. |image6| image:: ../img/usecases/manage_invokers/add_6.png
-.. |image7| image:: ../img/usecases/manage_invokers/add_7.png
+.. |image6| image:: ../img/management/invokers/add_6.png
+.. |image7| image:: ../img/management/invokers/add_7.png
    :align: middle
-.. |image8| image:: ../img/usecases/manage_invokers/add_8.png
+.. |image8| image:: ../img/management/invokers/add_8.png
    :align: middle

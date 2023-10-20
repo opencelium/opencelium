@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+   ~// Copyright (C) <2020> <becon GmbH>
+   ~//
+   ~// This file is licensed under the OpenCelium license agreement.
+   ~//
+   ~// If you purchased an OpenCelium subscription you can use this file
+   ~// under the terms of the OpenCelium license agreement.
+   ~// License agreement and license key will be shipped with the order
+   ~// confirmation.
+-->
+<invoker type="RESTful">
+    <name>CheckMK</name>
+    <description>Checkmk is a leading tool for Infrastructure and Application Monitoring. Simple configuration, scalable, flexible. Open Source and Enterprise.</description>
+    <hint>CheckMK is a monitoring tool. Read api documentation https://checkmk.de/cms_web_api_references.html</hint>
+    <icon>checkmk.png</icon>
+    <requiredData>
+        <item name="url" type="string" visibility="public">http://{HostnameOrIP}/{SiteName}/check_mk/webapi.py</item>
+        <item name="_username" type="string" visibility="public"/>
+        <item name="_secret" type="string" visibility="protected"/>
+    </requiredData>
+    <authType>endpointAuth</authType>
+    <operations>
+        <operation name="connection_check" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}?_username={_username}&amp;_secret={_secret}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/x-www-form-urlencoded</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                   <field name="result" type="string"/>
+                   <field name="result_code" type="string"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="result" type="string"/>
+                        <field name="result_code" type="string"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">text/plain</item>
+                    </header>
+            <body type="object" format="json" data="raw">
+                        <field name="error" type="string">1</field>
+                    </body> 
+                </fail>
+            </response>
+        </operation>
+        <operation name="get_all_hosts" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}?_username={_username}&amp;_secret={_secret}&amp;action=get_all_hosts</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/x-www-form-urlencoded</item>
+            </header>
+                <body type="object" format="json" data="raw">
+                   <field name="result" type="string"/>
+                   <field name="result_code" type="string"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="result" type="object"></field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="string">1</field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="get_host_names" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}?_username={_username}&amp;_secret={_secret}&amp;action=get_host_names</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/x-www-form-urlencoded</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                   <field name="result" type="string"/>
+                   <field name="result_code" type="string"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="result" type="array"></field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="string">1</field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="get_host" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}?_username={_username}&amp;_secret={_secret}&amp;action=get_host&amp;effective_attributes=1</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/x-www-form-urlencoded</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="hostname" type="string"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="result" type="object">
+                            <field name="hostname" type="string"/>
+                            <field name="path" type="string"/>
+                            <field name="attributes" type="object">
+                               <field name="ipaddress" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="string">1</field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="add_host" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}?_username={_username}&amp;_secret={_secret}&amp;action=add_host</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/x-www-form-urlencoded</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="hostname" type="string"/>
+                    <field name="folder" type="string"/>
+                    <field name="attributes" type="object">
+                        <field name="ipaddress" type="string"/>
+                        <field name="site" type="string"/>
+                    </field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body>
+                        <field name="result" type="string"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="string">1</field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="delete_host" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}?_username={_username}&amp;_secret={_secret}&amp;action=delete_host</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/x-www-form-urlencoded</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="hostname" type="string"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="result" type="string"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="string">1</field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="get_inventory" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/../host_inv_api.py?_username={_username}&amp;_secret={_secret}&amp;output_format=json&amp;host=</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/x-www-form-urlencoded</item>
+                </header>
+		<body type="object" format="json" data="raw">
+		  <field name="result" type="string"/>
+		  <field name="result_code" type="string"/>
+		</body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="result" type="object">
+                          <field name="hardware" type="object">
+                            <field name="components" type="object">
+                              <field name="chassis" type="array">
+                                 <field name="serial" type="string"/>
+                                 <field name="model" type="string"/>                                 
+                              </field>
+                            </field>                                 
+                          </field>
+                        <field name="software" type="object">
+                            <field name="packages" type="array">
+                              <field name="name" type="string"/>
+                            </field>                                 
+                          </field>                                  
+                        </field>    
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="string">1</field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="activate_changes" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}?_username={_username}&amp;_secret={_secret}&amp;action=activate_changes</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/x-www-form-urlencoded</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="mode" type="string"/>
+                    <field name="sites" type="array"/>
+                    <field name="allow_foreign_changes" type="string"/>
+                    <field name="comment" type="string"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="result" type="string"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/x-www-form-urlencoded</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="string">1</field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

@@ -24,8 +24,8 @@ const ContentItemStyled = styled.div<ContentItemStyledProps>`
     color: #000;
   }
   img {
-    width: 120px;
-    height: 65px;
+    width: 150px;
+    height: 85px;
   }
 `;
 

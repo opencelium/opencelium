@@ -177,9 +177,15 @@ const connectionReducers = (isModal: boolean = false) => {
     },
     setSavePanelVisibility: (state, action: PayloadAction<boolean>) => {
       state.isSavePanelVisible = action.payload;
+      if(action.payload){
+        state.isTemplatePanelVisible = false;
+      }
     },
     setTemplatePanelVisibility: (state, action: PayloadAction<boolean>) => {
       state.isTemplatePanelVisible = action.payload;
+      if(action.payload){
+        state.isSavePanelVisible = false;
+      }
     },
     setAnimationPreviewPanelVisibility: (state, action: PayloadAction<boolean>) => {
       state.isAnimationPreviewPanelOpened = action.payload;

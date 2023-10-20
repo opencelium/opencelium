@@ -72,7 +72,9 @@ const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
             return new Notification(notification);
         })
         .filter(notification => {
-            return notification.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
+            return notification.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1
+                || notification.type.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1
+                || notification.eventType.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
         });
     const checkIfClickedOutside = (e: any) => {
         const listNode = document.getElementById('schedule_notification_list');

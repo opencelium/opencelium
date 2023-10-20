@@ -110,7 +110,7 @@ part and calls that should be used in *Connection*.
 |image_admin_2|
 
 For subscribers there is also a possibility to add and to update actions. `Here
-<https://docs.opencelium.io/en/dev/usecases/manage_invokers.html>`_, you can read more
+<https://docs.opencelium.io/en/dev/management/invoker.html>`_, you can read more
 information.
 
 Templates
@@ -118,40 +118,22 @@ Templates
 
 These are business templates. In other words, they are connections that are saved as templates for
 often use. `Here
-<https://docs.opencelium.io/en/dev/usecases/manage_templates.html>`_, you can read how to manage with them.
+<https://docs.opencelium.io/en/dev/management/template.html>`_, you can read how to manage with them.
 
 Notification Templates
 """""""""""""""""
 
 Notification Templates are templates that are used in scheduler jobs to notify users for three event
 types: *pre*, *post*, and *alert*. `Here
-<https://docs.opencelium.io/en/dev/usecases/manage_notification_templates.html>`_, you can read how to manage with them.
+<https://docs.opencelium.io/en/dev/management/notification_template.html>`_, you can read how to manage with them.
 
 Data Aggregator
 """""""""""""""""
 
-*Aggregator* is a feature that provides a possibility to notify a user after the
-triggered connection (this happens in *Schedules*).
+Data Aggregator is a feature that provides a possibility to notify a user after the
+triggered connection (this happens in *Schedules*). `Here
+<https://docs.opencelium.io/en/dev/management/aggregator.html>`_, you can read how to manage with them.
 
-The list of aggregators displays: *name, *arguments* and *archived* status.
-
-|data_aggregator_list|
-
-The archive status means what aggregators should be disabled and invisible in the system.
-You can switch it clicking on the status. If you want to see the archived aggregators then
-toggle the switcher.
-
-|data_aggregator_archive_switcher|
-
-If you want to create an aggregator you need to provide a *name*, *arguments* and the *script*.
-*Arguments* are used inside of the notification it self. You should assign to them an accumulated
-value inside of the script section.
-
-|data_aggregator_form|
-
-Setting *Methods* you can optionally define where should this aggregator be applied after creating.
-
-|data_aggregator_methods|
 
 Update Assistant
 """""""""""""""""
@@ -208,17 +190,6 @@ read the `Administration
 .. |image_user_4| image:: ../img/user/image5.png
    :align: middle
 .. |image_user_5| image:: ../img/user/image6.png
-   :align: middle
-
-.. |data_aggregator_form| image:: ../img/data_aggregator/form.png
-   :align: middle
-.. |data_aggregator_list| image:: ../img/data_aggregator/list.png
-   :align: middle
-.. |data_aggregator_methods| image:: ../img/data_aggregator/methods.png
-   :align: middle
-   :width: 400
-.. |data_aggregator_archive_switcher| image:: ../img/data_aggregator/archive_switcher.png
-   :width: 120
    :align: middle
 
 .. |image_group_0| image:: ../img/group/image1.png

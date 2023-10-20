@@ -1,5 +1,5 @@
 ##################
-Manage Notification Templates
+Notification Template
 ##################
 
 Notification Templates can be managed from UI. Let us consider the next use cases.
@@ -29,7 +29,7 @@ All fields here are required.
 	You can use next references inside the body: USER_NAME, USER_SURNAME, USER_TITLE, USER_DEPARTMENT, CONNECTION_ID, CONNECTION_NAME,, SCHEDULER_ID, SCHEDULER_TITLE.
     Just embrace it in curly brackets, for example: *{CONNECTION_ID}*
 
-.. |list| image:: ../img/usecases/notification_templates/list.png
+.. |list| image:: ../img/management/notification_templates/list.png
    :align: middle
-.. |form| image:: ../img/usecases/notification_templates/form.png
+.. |form| image:: ../img/management/notification_templates/form.png
    :align: middle

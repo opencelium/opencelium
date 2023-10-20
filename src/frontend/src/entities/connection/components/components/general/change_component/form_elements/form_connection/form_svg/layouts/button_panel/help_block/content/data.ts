@@ -3,6 +3,7 @@ import APIMethodImagePath from "@image/entities/connection/animations/api_method
 import OperatorsImagePath from "@image/entities/connection/animations/operators.png";
 import FieldMappingImagePath from "@image/entities/connection/animations/field_mapping.png";
 import EnhancementImagePath from "@image/entities/connection/animations/enhancement.png";
+import WebhookImagePath from "@image/entities/connection/animations/webhook.png";
 
 const basicsContentData: any = [
   {
@@ -33,7 +34,7 @@ const expertsContentData = [
 const advancedContentData = [
   {
     animationTitle: "Webhook",
-    animationImage: DefaultHelpImagePath,
+    animationImage: WebhookImagePath,
     animationName: "webhook"
   }
 ];
