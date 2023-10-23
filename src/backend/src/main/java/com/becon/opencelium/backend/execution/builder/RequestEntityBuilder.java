@@ -12,7 +12,10 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.becon.opencelium.backend.constant.RegExpression.hasEnh;
 
 public class RequestEntityBuilder {
     private final OperationDTO operation;
@@ -94,13 +97,17 @@ public class RequestEntityBuilder {
                 throw new IllegalStateException("schema and data type must not be null");
             }
 
-            return switch(schema.getType()) {
+            if (referenced(schema.getValue())) {
+                return container.getValueByRef(schema.getValue());
+            }
+
+            return switch (schema.getType()) {
                 case OBJECT -> constructObject(schema, container);
                 case ARRAY -> constructArray(schema, container);
-                case STRING -> constructString(schema, container);
-                case NUMBER -> constructNumber(schema, container);
-                case INTEGER -> constructInteger(schema, container);
-                case BOOLEAN -> constructBoolean(schema, container);
+                case STRING -> constructString(schema);
+                case NUMBER -> constructNumber(schema);
+                case INTEGER -> constructInteger(schema);
+                case BOOLEAN -> constructBoolean(schema);
             };
         }
 
@@ -109,75 +116,67 @@ public class RequestEntityBuilder {
         }
 
         private static String constructObject(SchemaDTO schema, ResponseContainer container) {
-            if(schema.getProperties() == null) {
+            Map<String, SchemaDTO> properties = schema.getProperties();
+
+            if (properties == null) {
                 return "{}";
             }
 
-            String object = schema.getProperties().entrySet().stream()
-                    .map(entry -> fieldWriter(entry.getKey()) + ":" +construct(entry.getValue(), container))
+            String object = properties.entrySet().stream()
+                    .map(entry -> fieldWriter(entry.getKey()) + ":" + construct(entry.getValue(), container))
                     .collect(Collectors.joining(", "));
 
             return "{" + object + "}";
         }
 
         private static String constructArray(SchemaDTO schema, ResponseContainer container) {
-            if(schema.getItems() == null) {
+            List<SchemaDTO> items = schema.getItems();
+
+            if (items == null) {
                 return "[]";
             }
 
-            String array = schema.getItems().stream()
+            String array = items.stream()
                     .map(item -> construct(item, container))
                     .collect(Collectors.joining(", "));
 
             return "[" + array + "]";
         }
 
-        private static String constructString(SchemaDTO schema, ResponseContainer container) {
-            if(referenced(schema.getValue())) {
-                return "\"" + container.getValueByRef(schema.getValue()) + "\"";
-            }
-
-            if(schema.getValue() == null) {
+        private static String constructString(SchemaDTO schema) {
+            if (schema.getValue() == null) {
                 return "\"" + DEFAULT_STRING + "\"";
             }
+
             return "\"" + schema.getValue() + "\"";
         }
 
-        private static String constructNumber(SchemaDTO schema, ResponseContainer container) {
-            if(referenced(schema.getValue())) {
-                return container.getValueByRef(schema.getValue());
-            }
-
-            if(schema.getValue() == null) {
+        private static String constructNumber(SchemaDTO schema) {
+            if (schema.getValue() == null) {
                 return DEFAULT_INTEGER.toString();
             }
+
             return schema.getValue();
         }
 
-        private static String constructInteger(SchemaDTO schema, ResponseContainer container) {
-            if(referenced(schema.getValue())) {
-                return container.getValueByRef(schema.getValue());
-            }
-
-            if(schema.getValue() == null) {
+        private static String constructInteger(SchemaDTO schema) {
+            if (schema.getValue() == null) {
                 return DEFAULT_INTEGER.toString();
             }
+
             return schema.getValue();
         }
 
-        private static String constructBoolean(SchemaDTO schema, ResponseContainer container) {
-            if(referenced(schema.getValue())) {
-                return container.getValueByRef(schema.getValue());
-            }
-
-            if(schema.getValue() == null) {
+        private static String constructBoolean(SchemaDTO schema) {
+            if (schema.getValue() == null) {
                 return DEFAULT_BOOLEAN.toString();
             }
+
             return schema.getValue();
         }
 
         private static boolean referenced(String value) {
-            return false;
+            return Pattern.matches(hasEnh, value);
         }
     }
 }
