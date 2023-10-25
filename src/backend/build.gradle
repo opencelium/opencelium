@@ -32,6 +32,10 @@ tasks.named('bootJar') {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+test {
+	useJUnitPlatform()
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-neo4j'
@@ -54,6 +58,8 @@ dependencies {
 	implementation 'wsdl4j:wsdl4j:1.6.3'
 	implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	runtimeOnly 'mysql:mysql-connector-java'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

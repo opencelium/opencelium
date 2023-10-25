@@ -1,10 +1,10 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
-import com.becon.opencelium.backend.resource.connector.BodyResource;
+import com.becon.opencelium.backend.resource.connector.BodyDTO;
 
 
 public interface BodyMngService {
-    BodyMng toEntity(BodyResource bodyDTO);
-    BodyResource toDTO(BodyMng bodyMng);
+    BodyMng toEntity(BodyDTO bodyDTO);
+    BodyDTO toDTO(BodyMng bodyMng);
 }

@@ -1,12 +1,11 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
-import com.becon.opencelium.backend.resource.connector.RequestResource;
-import org.springframework.stereotype.Service;
+import com.becon.opencelium.backend.resource.connector.RequestDTO;
 
 public interface RequestMngService {
 
-    RequestMng toEntity(RequestResource requestDTO);
+    RequestMng toEntity(RequestDTO requestDTO);
 
-    RequestResource toDTO(RequestMng requestMng);
+    RequestDTO toDTO(RequestMng requestMng);
 }

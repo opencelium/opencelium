@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FieldBindingMng {
-    private List<LinkedFieldMng> from = new ArrayList<>();
+    private List<LinkedFieldMng> from;
     private EnhancementMng enhancement;
-    private List<LinkedFieldMng> to = new ArrayList<>();
+    private List<LinkedFieldMng> to;
 
     public FieldBindingMng() {
     }

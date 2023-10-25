@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
-import com.becon.opencelium.backend.resource.connector.RequestResource;
+import com.becon.opencelium.backend.resource.connector.RequestDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ public class RequestMngServiceImp implements RequestMngService{
     }
 
     @Override
-    public RequestMng toEntity(RequestResource requestDTO) {
+    public RequestMng toEntity(RequestDTO requestDTO) {
         RequestMng requestMng = new RequestMng();
         requestMng.setEndpoint(requestDTO.getEndpoint());
         requestMng.setMethod(requestDTO.getMethod());
@@ -25,8 +25,8 @@ public class RequestMngServiceImp implements RequestMngService{
 
 
     @Override
-    public RequestResource toDTO(RequestMng requestMng) {
-        RequestResource requestDTO = new RequestResource();
+    public RequestDTO toDTO(RequestMng requestMng) {
+        RequestDTO requestDTO = new RequestDTO();
         requestDTO.setHeader(requestMng.getHeader());
         requestDTO.setMethod(requestMng.getMethod());
         requestDTO.setEndpoint(requestMng.getEndpoint());

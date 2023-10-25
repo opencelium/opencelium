@@ -4,17 +4,17 @@ import com.becon.opencelium.backend.invoker.entity.Body;
 
 import java.util.Map;
 
-public class BodyResource {
+public class BodyDTO {
 
     private String type;
     private String format;
     private String data;
     private Map<String, Object> fields;
 
-    public BodyResource() {
+    public BodyDTO() {
     }
 
-    public BodyResource(Body body) {
+    public BodyDTO(Body body) {
         this.type = body.getType();
         this.format = body.getFormat();
         this.data = body.getData();
