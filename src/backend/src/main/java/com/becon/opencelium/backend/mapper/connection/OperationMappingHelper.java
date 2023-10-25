@@ -14,14 +14,14 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class OperationMapper {
+public class OperationMappingHelper {
     private final InvokerService invokerService;
-    public static final String HEADER_CONTENT_TYPE = "Content-Type";
-    public static final String REGEX_REF_PARAMETER = "\\{#.+}";
-    public static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
-    public static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
+    private static final String HEADER_CONTENT_TYPE = "Content-Type";
+    private static final String REGEX_REF_PARAMETER = "\\{#.+}";
+    private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
+    private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
 
-    public OperationMapper(@Qualifier("invokerServiceImp") InvokerService invokerService) {
+    public OperationMappingHelper(@Qualifier("invokerServiceImp") InvokerService invokerService) {
         this.invokerService = invokerService;
     }
 

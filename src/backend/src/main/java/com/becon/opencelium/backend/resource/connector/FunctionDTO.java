@@ -24,8 +24,8 @@ public class FunctionDTO {
 
     private String name;
     private String type;
-    private RequestResource request;
-    private ResponseResource response;
+    private RequestDTO request;
+    private ResponseDTO response;
 
     public FunctionDTO() {
     }
@@ -33,8 +33,8 @@ public class FunctionDTO {
     public FunctionDTO(FunctionInvoker functionInvoker) {
         this.name = functionInvoker.getName();
         this.type = functionInvoker.getType();
-        this.request =  new RequestResource(functionInvoker.getRequest());
-        this.response = new ResponseResource(functionInvoker.getResponse());
+        this.request =  new RequestDTO(functionInvoker.getRequest());
+        this.response = new ResponseDTO(functionInvoker.getResponse());
     }
 
     public String getName() {
@@ -53,19 +53,19 @@ public class FunctionDTO {
         this.type = type;
     }
 
-    public RequestResource getRequest() {
+    public RequestDTO getRequest() {
         return request;
     }
 
-    public void setRequest(RequestResource request) {
+    public void setRequest(RequestDTO request) {
         this.request = request;
     }
 
-    public ResponseResource getResponse() {
+    public ResponseDTO getResponse() {
         return response;
     }
 
-    public void setResponse(ResponseResource response) {
+    public void setResponse(ResponseDTO response) {
         this.response = response;
     }
 }

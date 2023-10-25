@@ -16,8 +16,8 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
-import com.becon.opencelium.backend.resource.connector.RequestResource;
-import com.becon.opencelium.backend.resource.connector.ResponseResource;
+import com.becon.opencelium.backend.resource.connector.RequestDTO;
+import com.becon.opencelium.backend.resource.connector.ResponseDTO;
 import jakarta.annotation.Resource;
 
 @Resource
@@ -29,8 +29,8 @@ public class MethodDTO {
     private String color;
     private String label;
     private Integer dataAggregator;
-    private RequestResource request;
-    private ResponseResource response;
+    private RequestDTO request;
+    private ResponseDTO response;
 
     public String getNodeId() {
         return nodeId;
@@ -72,19 +72,19 @@ public class MethodDTO {
         this.label = label;
     }
 
-    public RequestResource getRequest() {
+    public RequestDTO getRequest() {
         return request;
     }
 
-    public void setRequest(RequestResource request) {
+    public void setRequest(RequestDTO request) {
         this.request = request;
     }
 
-    public ResponseResource getResponse() {
+    public ResponseDTO getResponse() {
         return response;
     }
 
-    public void setResponse(ResponseResource response) {
+    public void setResponse(ResponseDTO response) {
         this.response = response;
     }
 

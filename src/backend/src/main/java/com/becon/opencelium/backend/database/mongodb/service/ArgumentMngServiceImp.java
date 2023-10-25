@@ -13,7 +13,7 @@ import java.util.Set;
 public class ArgumentMngServiceImp implements ArgumentMngService{
 
     @Override
-    public Set<ArgumentDTO> toDTOAll(List<ArgumentMng> args) {
+    public Set<ArgumentDTO> toDTOAll(Set<ArgumentMng> args) {
         HashSet<ArgumentDTO> argumentDTOS = new HashSet<>();
         for (ArgumentMng arg : args) {
             argumentDTOS.add(toDTO(arg));
@@ -38,8 +38,8 @@ public class ArgumentMngServiceImp implements ArgumentMngService{
     }
 
     @Override
-    public List<ArgumentMng> toEntityAll(Set<ArgumentDTO> argumentDTOs) {
-        ArrayList<ArgumentMng> argumentMngs = new ArrayList<>();
+    public Set<ArgumentMng> toEntityAll(Set<ArgumentDTO> argumentDTOs) {
+        Set<ArgumentMng> argumentMngs = new HashSet<>();
         for (ArgumentDTO argumentDTO : argumentDTOs) {
             argumentMngs.add(toEntity(argumentDTO));
         }

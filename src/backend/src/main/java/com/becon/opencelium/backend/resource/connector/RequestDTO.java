@@ -18,28 +18,27 @@ package com.becon.opencelium.backend.resource.connector;
 
 import com.becon.opencelium.backend.invoker.entity.RequestInv;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Map;
 
 @Resource
-public class RequestResource {
+public class RequestDTO {
 
     private String nodeId;
     private String endpoint;
     private String method;
     private Map<String, String> header;
-    private BodyResource body;
+    private BodyDTO body;
 
-    public RequestResource() {
+    public RequestDTO() {
     }
 
-    public RequestResource(RequestInv requestInv) {
+    public RequestDTO(RequestInv requestInv) {
         this.endpoint = requestInv.getEndpoint();
         this.method = requestInv.getMethod();
         this.header = requestInv.getHeader();
         if (requestInv.getBody() != null) {
-            this.body = new BodyResource(requestInv.getBody());
+            this.body = new BodyDTO(requestInv.getBody());
         }
     }
 
@@ -75,11 +74,11 @@ public class RequestResource {
         this.header = header;
     }
 
-    public BodyResource getBody() {
+    public BodyDTO getBody() {
         return body;
     }
 
-    public void setBody(BodyResource body) {
+    public void setBody(BodyDTO body) {
         this.body = body;
     }
 }

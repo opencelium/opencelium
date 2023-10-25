@@ -7,7 +7,7 @@ import java.util.Set;
 public class DataAggregatorDTO {
     private String id;
     private String name;
-    private Set<ArgumentDTO> args = new HashSet<>();
+    private Set<ArgumentDTO> args;
     private String script;
 
     public String getId() {
