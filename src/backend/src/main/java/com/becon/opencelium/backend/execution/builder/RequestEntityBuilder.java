@@ -246,25 +246,17 @@ public class RequestEntityBuilder {
                 value = container.getValueByRef(value);
             }
 
-            // define template for deep object
-            final String template = "%s[%s]=%s";
-
-            var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+            var properties = isReferenced ? stringToMap(value) : schema.getProperties();
 
             if (CollectionUtils.isEmpty(properties)) {
                 throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.PIPE_DELIMITED.getStyle()));
             }
 
-            // TODO rewrite this to work with nested object and arrays
+            // replace referenced fields if exists
+            replaceRefs(schema, container);
+
             return properties.entrySet().stream()
-                    .map(entry -> {
-                        String val = entry.getValue().getValue();
-                        if (referenced(val)) {
-                            val = container.getValueByRef(val);
-                        }
-                        return Map.entry(entry.getKey(), val);
-                    })
-                    .map(entry -> String.format(template, parameter.getName(), entry.getKey(), entry.getValue()))
+                    .map(entry -> deepObjectToString(parameter.getName() + "[" + entry.getKey() + "]", entry.getValue()))
                     .collect(Collectors.joining("&"));
         }
 
@@ -289,23 +281,23 @@ public class RequestEntityBuilder {
             final String PIPE = "|";
 
             if (schema.getType() == DataType.ARRAY) {
-                var items = isReferenced ? convertToList(value) : schema.getItems();
+                var items = isReferenced ? stringToList(value) : schema.getItems();
 
                 if (CollectionUtils.isEmpty(items)) {
                     throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.PIPE_DELIMITED.getStyle()));
                 }
 
-                return convertToString(items, "", PIPE, container);
+                return listToString(items, "", PIPE, container);
             }
 
             // handle case for object
-            var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+            var properties = isReferenced ? stringToMap(value) : schema.getProperties();
 
             if (CollectionUtils.isEmpty(properties)) {
                 throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.PIPE_DELIMITED.getStyle()));
             }
 
-            return convertToString(properties, "", PIPE, PIPE, container);
+            return mapToString(properties, "", PIPE, PIPE, container);
         }
 
         private static String constructSpaceDelimited(ParameterDTO parameter, ResponseContainer container) {
@@ -329,23 +321,23 @@ public class RequestEntityBuilder {
             final String SPACE = "%20";
 
             if (schema.getType() == DataType.ARRAY) {
-                var items = isReferenced ? convertToList(value) : schema.getItems();
+                var items = isReferenced ? stringToList(value) : schema.getItems();
 
                 if (CollectionUtils.isEmpty(items)) {
                     throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.SPACE_DELIMITED.getStyle()));
                 }
 
-                return convertToString(items, "", SPACE, container);
+                return listToString(items, "", SPACE, container);
             }
 
             // handle case for object
-            var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+            var properties = isReferenced ? stringToMap(value) : schema.getProperties();
 
             if (CollectionUtils.isEmpty(properties)) {
                 throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.SPACE_DELIMITED.getStyle()));
             }
 
-            return convertToString(properties, "", SPACE, SPACE, container);
+            return mapToString(properties, "", SPACE, SPACE, container);
         }
 
         private static String constructSimple(ParameterDTO parameter, ResponseContainer container) {
@@ -360,7 +352,7 @@ public class RequestEntityBuilder {
             }
 
             if (schema.getType() == DataType.OBJECT) {
-                var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+                var properties = isReferenced ? stringToMap(value) : schema.getProperties();
 
                 if (CollectionUtils.isEmpty(properties)) {
                     throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.SIMPLE.getStyle()));
@@ -368,17 +360,17 @@ public class RequestEntityBuilder {
 
                 String separator = parameter.isExplode() ? "=" : ",";
 
-                return convertToString(properties, "", separator, ",", container);
+                return mapToString(properties, "", separator, ",", container);
             }
 
             if (schema.getType() == DataType.ARRAY) {
-                var items = isReferenced ? convertToList(value) : schema.getItems();
+                var items = isReferenced ? stringToList(value) : schema.getItems();
 
                 if (CollectionUtils.isEmpty(items)) {
                     throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.SIMPLE.getStyle()));
                 }
 
-                return convertToString(items, "", ",", container);
+                return listToString(items, "", ",", container);
             }
 
             if (ObjectUtils.isEmpty(value)) {
@@ -400,7 +392,7 @@ public class RequestEntityBuilder {
             }
 
             if (schema.getType() == DataType.OBJECT) {
-                var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+                var properties = isReferenced ? stringToMap(value) : schema.getProperties();
 
                 if (CollectionUtils.isEmpty(properties)) {
                     return parameter.getName() + "=";
@@ -410,11 +402,11 @@ public class RequestEntityBuilder {
                 String delimiter = parameter.isExplode() ? "&" : ",";
                 String prefix = parameter.isExplode() ? "" : parameter.getName() + "=";
 
-                return convertToString(properties, prefix, separator, delimiter, container);
+                return mapToString(properties, prefix, separator, delimiter, container);
             }
 
             if (schema.getType() == DataType.ARRAY) {
-                var items = isReferenced ? convertToList(value) : schema.getItems();
+                var items = isReferenced ? stringToList(value) : schema.getItems();
 
                 if (CollectionUtils.isEmpty(items)) {
                     return parameter.getName() + "=";
@@ -423,7 +415,7 @@ public class RequestEntityBuilder {
                 String delimiter = parameter.isExplode() ? "&" + parameter.getName() + "=" : ",";
                 String prefix = parameter.getName() + "=";
 
-                return convertToString(items, prefix, delimiter, container);
+                return listToString(items, prefix, delimiter, container);
             }
 
             // For primitive types return 'paramName=' + value if it is not empty
@@ -444,7 +436,7 @@ public class RequestEntityBuilder {
             final String prefix = ".";
 
             if (schema.getType() == DataType.OBJECT) {
-                var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+                var properties = isReferenced ? stringToMap(value) : schema.getProperties();
 
                 if (CollectionUtils.isEmpty(properties)) {
                     return prefix;
@@ -452,17 +444,17 @@ public class RequestEntityBuilder {
 
                 String separator = parameter.isExplode() ? "=" : ".";
 
-                return convertToString(properties, prefix, separator, ".", container);
+                return mapToString(properties, prefix, separator, ".", container);
             }
 
             if (schema.getType() == DataType.ARRAY) {
-                var items = isReferenced ? convertToList(value) : schema.getItems();
+                var items = isReferenced ? stringToList(value) : schema.getItems();
 
                 if (CollectionUtils.isEmpty(items)) {
                     return prefix;
                 }
 
-                return convertToString(items, prefix, ".", container);
+                return listToString(items, prefix, ".", container);
             }
 
             // For primitive types return value if it is not empty, otherwise prefix itself
@@ -481,7 +473,7 @@ public class RequestEntityBuilder {
             }
 
             if (schema.getType() == DataType.OBJECT) {
-                var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+                var properties = isReferenced ? stringToMap(value) : schema.getProperties();
 
                 if (CollectionUtils.isEmpty(properties)) {
                     return ";" + parameter.getName();
@@ -491,11 +483,11 @@ public class RequestEntityBuilder {
                 String delimiter = parameter.isExplode() ? ";" : ",";
                 String prefix = parameter.isExplode() ? ";" : ";" + parameter.getName() + "=";
 
-                return convertToString(properties, prefix, separator, delimiter, container);
+                return mapToString(properties, prefix, separator, delimiter, container);
             }
 
             if (schema.getType() == DataType.ARRAY) {
-                var items = isReferenced ? convertToList(value) : schema.getItems();
+                var items = isReferenced ? stringToList(value) : schema.getItems();
 
                 if (CollectionUtils.isEmpty(items)) {
                     return ";" + parameter.getName();
@@ -504,7 +496,7 @@ public class RequestEntityBuilder {
                 String delimiter = parameter.isExplode() ? ";" + parameter.getName() + "=" : ",";
                 String prefix = ";" + parameter.getName() + "=";
 
-                return convertToString(items, prefix, delimiter, container);
+                return listToString(items, prefix, delimiter, container);
             }
 
             // For primitive types return ';paramName=' + value if it is not empty
@@ -513,7 +505,7 @@ public class RequestEntityBuilder {
                     ";" + parameter.getName() + "=" + value;
         }
 
-        private static String convertToString(List<SchemaDTO> items, String prefix, String delimiter, ResponseContainer container) {
+        private static String listToString(List<SchemaDTO> items, String prefix, String delimiter, ResponseContainer container) {
             return prefix + items.stream()
                     .map(item -> {
                         String value = item.getValue();
@@ -525,7 +517,7 @@ public class RequestEntityBuilder {
                     .collect(Collectors.joining(delimiter));
         }
 
-        private static String convertToString(Map<String, SchemaDTO> properties, String prefix, String separator, String delimiter, ResponseContainer container) {
+        private static String mapToString(Map<String, SchemaDTO> properties, String prefix, String separator, String delimiter, ResponseContainer container) {
             return prefix + properties.entrySet().stream()
                     .map(entry -> {
                         String value = entry.getValue().getValue();
@@ -537,12 +529,71 @@ public class RequestEntityBuilder {
                     .collect(Collectors.joining(delimiter));
         }
 
-        private static List<SchemaDTO> convertToList(String jsonString) {
+        private static String deepObjectToString(String pointer, SchemaDTO schema) {
+            if (schema.getType() != DataType.OBJECT && schema.getType() != DataType.ARRAY) {
+                return pointer + "=" + schema.getValue() ;
+            }
+
+            if (schema.getType() == DataType.ARRAY) {
+                int index = 0;
+                for(SchemaDTO item : schema.getItems()) {
+                    deepObjectToString(pointer + "[" + index + "]", item);
+                    index++;
+                }
+            }
+
+            for (Map.Entry<String, SchemaDTO> property : schema.getProperties().entrySet()) {
+                return deepObjectToString(pointer + "[" + property.getKey() + "]", property.getValue());
+            }
+            // TODO what to do if object is empty?
             return null;
         }
 
-        private static Map<String, SchemaDTO> convertToMap(String jsonString) {
+        private static List<SchemaDTO> stringToList(String jsonString) {
             return null;
+        }
+
+        private static Map<String, SchemaDTO> stringToMap(String jsonString) {
+            return null;
+        }
+
+        private static void replaceRefs(SchemaDTO schema, ResponseContainer container) {
+            String value = schema.getValue();
+            boolean isReferenced = referenced(value);
+            if (isReferenced) {
+                value = container.getValueByRef(value);
+            }
+
+            if (schema.getType() != DataType.OBJECT && schema.getType() != DataType.ARRAY) {
+                // if schema has a primitive type then just replace value and return
+                schema.setValue(value);
+                return;
+            }
+
+            if (schema.getType() == DataType.ARRAY) {
+                // get real items if referenced
+                var items = isReferenced ? stringToList(value) : schema.getItems();
+
+                // set schemas' fields accordingly
+                schema.setValue(null);
+                schema.setItems(items);
+
+                if (CollectionUtils.isEmpty(items)) return;
+
+                items.forEach(item -> replaceRefs(item, container));
+                return;
+            }
+
+            // get real properties if referenced
+            var properties = isReferenced ? stringToMap(value) : schema.getProperties();
+
+            // set schemas' fields accordingly
+            schema.setValue(null);
+            schema.setProperties(properties);
+
+            if (CollectionUtils.isEmpty(properties)) return;
+
+            properties.forEach((name, schemaDTO) -> replaceRefs(schemaDTO, container));
         }
 
         private static void validateParamStyleAndLocationsPair(ParamStyle currentStyle, ParamLocation currentLocation, List<ParamLocation> validLocations) {
