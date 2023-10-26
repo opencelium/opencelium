@@ -3,12 +3,14 @@ package com.becon.opencelium.backend.execution.builder;
 import com.becon.opencelium.backend.resource.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ParamLocation;
+import com.becon.opencelium.backend.resource.execution.ParamStyle;
 import com.becon.opencelium.backend.resource.execution.ParameterDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.net.URI;
 import java.util.List;
@@ -100,7 +102,13 @@ public class RequestEntityBuilder {
     }
 
     private String defaultRequestEntityBuilder() {
-        return RequestEntityBuilderHelper.construct(operation.getRequestBody().getSchema(), container);
+        var body = operation.getRequestBody();
+
+        if(ObjectUtils.isEmpty(body)) {
+            return "";
+        }
+
+        return RequestEntityBuilderHelper.construct(body.getSchema(), container);
     }
 
     private static boolean referenced(String value) {
@@ -119,7 +127,11 @@ public class RequestEntityBuilder {
             }
 
             if (referenced(schema.getValue())) {
-                return container.getValueByRef(schema.getValue());
+                String value = container.getValueByRef(schema.getValue());
+                if (schema.getType() == DataType.STRING) {
+                    return "\"" + value + "\"";
+                }
+                return value;
             }
 
             return switch (schema.getType()) {
@@ -139,12 +151,12 @@ public class RequestEntityBuilder {
         private static String constructObject(SchemaDTO schema, ResponseContainer container) {
             Map<String, SchemaDTO> properties = schema.getProperties();
 
-            if (properties == null) {
+            if (CollectionUtils.isEmpty(properties)) {
                 return "{}";
             }
 
             String object = properties.entrySet().stream()
-                    .map(entry -> fieldWriter(entry.getKey()) + ":" + construct(entry.getValue(), container))
+                    .map(entry -> fieldWriter(entry.getKey()) + ": " + construct(entry.getValue(), container))
                     .collect(Collectors.joining(", "));
 
             return "{" + object + "}";
@@ -153,7 +165,7 @@ public class RequestEntityBuilder {
         private static String constructArray(SchemaDTO schema, ResponseContainer container) {
             List<SchemaDTO> items = schema.getItems();
 
-            if (items == null) {
+            if (CollectionUtils.isEmpty(items)) {
                 return "[]";
             }
 
@@ -199,6 +211,8 @@ public class RequestEntityBuilder {
 
     private static class ParameterBuilderHelper {
 
+        private final static String EMPTY_VALUE_ERROR = "PramStyle of %s should not be empty";
+
         public static String construct(ParameterDTO parameter, ResponseContainer container) {
             if (parameter == null || parameter.getStyle() == null) {
                 throw new IllegalStateException("parameter and parameter style must not be null");
@@ -216,27 +230,33 @@ public class RequestEntityBuilder {
         }
 
         private static String constructDeepObject(ParameterDTO parameter, ResponseContainer container) {
-            if (ParamLocation.QUERY != parameter.getIn()) {
-                throw new IllegalStateException("Parameter type of DeepObject is used only in query");
-            }
+            validateParamStyleAndLocationsPair(ParamStyle.DEEP_OBJECT, parameter.getIn(), List.of(ParamLocation.QUERY));
 
             if (!parameter.isExplode()) {
-                throw new IllegalStateException("explode must be true for parameter with type DeepObject");
+                throw new IllegalStateException("explode must be true for parameter with type " + ParamStyle.DEEP_OBJECT.getStyle());
             }
 
             SchemaDTO schema = parameter.getSchema();
-            if (DataType.OBJECT != schema.getType()) {
-                throw new IllegalStateException("Parameter type of DeepObject is used only for data type object");
+
+            validateParamStyleAndDataTypesPair(ParamStyle.DEEP_OBJECT, schema.getType(), List.of(DataType.OBJECT));
+
+            String value = schema.getValue();
+            boolean isReferenced = referenced(value);
+            if (isReferenced) {
+                value = container.getValueByRef(value);
             }
 
-            if (referenced(schema.getValue())) {
-                //TODO reconstruct referenced object if this is possible?
-                return container.getValueByRef(schema.getValue());
-            }
-
+            // define template for deep object
             final String template = "%s[%s]=%s";
 
-            return schema.getProperties().entrySet().stream()
+            var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+
+            if (CollectionUtils.isEmpty(properties)) {
+                throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.PIPE_DELIMITED.getStyle()));
+            }
+
+            // TODO rewrite this to work with nested object and arrays
+            return properties.entrySet().stream()
                     .map(entry -> {
                         String val = entry.getValue().getValue();
                         if (referenced(val)) {
@@ -249,307 +269,298 @@ public class RequestEntityBuilder {
         }
 
         private static String constructPipeDelimited(ParameterDTO parameter, ResponseContainer container) {
-            if (ParamLocation.QUERY != parameter.getIn()) {
-                throw new IllegalStateException("Parameter type of PipeDelimited is used only in query");
-            }
+            validateParamStyleAndLocationsPair(ParamStyle.PIPE_DELIMITED, parameter.getIn(), List.of(ParamLocation.QUERY));
 
             if (parameter.isExplode()) {
-                throw new IllegalStateException("explode must be false for parameter with type PipeDelimited");
+                throw new IllegalStateException("explode must be false for parameter with type " + ParamStyle.PIPE_DELIMITED.getStyle());
             }
 
             SchemaDTO schema = parameter.getSchema();
-            if (DataType.OBJECT != schema.getType() && DataType.ARRAY != schema.getType()) {
-                throw new IllegalStateException("Parameter type of PipeDelimited is used only for data type object and array");
+
+            validateParamStyleAndDataTypesPair(ParamStyle.PIPE_DELIMITED, schema.getType(), List.of(DataType.OBJECT, DataType.ARRAY));
+
+            String value = schema.getValue();
+            boolean isReferenced = referenced(value);
+            if (isReferenced) {
+                value = container.getValueByRef(value);
             }
 
-            if (referenced(schema.getValue())) {
-                //TODO reconstruct referenced object if this is possible?
-                return container.getValueByRef(schema.getValue());
-            }
-
-            // define pipe delimiter
+            // define pipe delimiter (= | )
             final String PIPE = "|";
 
             if (schema.getType() == DataType.ARRAY) {
-                // check if array is not empty
-                if (CollectionUtils.isEmpty(schema.getItems())) {
-                    throw new IllegalStateException("query param should not be empty if paramStyle is pipeDelimited");
+                var items = isReferenced ? convertToList(value) : schema.getItems();
+
+                if (CollectionUtils.isEmpty(items)) {
+                    throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.PIPE_DELIMITED.getStyle()));
                 }
-                return schema.getItems().stream()
-                        .map(item -> {
-                            String val = item.getValue();
-                            if (referenced(val)) {
-                                val = container.getValueByRef(val);
-                            }
-                            return val;
-                        })
-                        .collect(Collectors.joining(PIPE));
+
+                return convertToString(items, "", PIPE, container);
             }
 
-            // check if object is not empty
-            if (CollectionUtils.isEmpty(schema.getProperties())) {
-                throw new IllegalStateException("query param should not be empty if paramStyle is pipeDelimited");
+            // handle case for object
+            var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+
+            if (CollectionUtils.isEmpty(properties)) {
+                throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.PIPE_DELIMITED.getStyle()));
             }
 
-            return schema.getProperties().entrySet().stream()
-                    .map(entry -> {
-                        String val = entry.getValue().getValue();
-                        if (referenced(val)) {
-                            val = container.getValueByRef(val);
-                        }
-                        return entry.getKey() + PIPE + val;
-                    })
-                    .collect(Collectors.joining(PIPE));
+            return convertToString(properties, "", PIPE, PIPE, container);
         }
 
         private static String constructSpaceDelimited(ParameterDTO parameter, ResponseContainer container) {
-            if (ParamLocation.QUERY != parameter.getIn()) {
-                throw new IllegalStateException("Parameter type of SpaceDelimited is used only in query");
-            }
+            validateParamStyleAndLocationsPair(ParamStyle.SPACE_DELIMITED, parameter.getIn(), List.of(ParamLocation.QUERY));
 
             if (parameter.isExplode()) {
-                throw new IllegalStateException("explode must be false for parameter with type SpaceDelimited");
+                throw new IllegalStateException("explode must be false for parameter with type " + ParamStyle.SPACE_DELIMITED.getStyle());
             }
 
             SchemaDTO schema = parameter.getSchema();
-            if (DataType.OBJECT != schema.getType() && DataType.ARRAY != schema.getType()) {
-                throw new IllegalStateException("Parameter type of SpaceDelimited is used only for data type object and array");
+
+            validateParamStyleAndDataTypesPair(ParamStyle.SPACE_DELIMITED, schema.getType(), List.of(DataType.OBJECT, DataType.ARRAY));
+
+            String value = schema.getValue();
+            boolean isReferenced = referenced(value);
+            if (isReferenced) {
+                value = container.getValueByRef(value);
             }
 
-            if (referenced(schema.getValue())) {
-                //TODO reconstruct referenced object if this is possible?
-                return container.getValueByRef(schema.getValue());
-            }
-
-            // define space delimiter
+            // define delimiter (= space)
             final String SPACE = "%20";
 
             if (schema.getType() == DataType.ARRAY) {
-                // check if array is not empty
-                if (CollectionUtils.isEmpty(schema.getItems())) {
-                    throw new IllegalStateException("query param should not be empty if paramStyle is spaceDelimited");
+                var items = isReferenced ? convertToList(value) : schema.getItems();
+
+                if (CollectionUtils.isEmpty(items)) {
+                    throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.SPACE_DELIMITED.getStyle()));
                 }
-                return schema.getItems().stream()
-                        .map(item -> {
-                            String val = item.getValue();
-                            if (referenced(val)) {
-                                val = container.getValueByRef(val);
-                            }
-                            return val;
-                        })
-                        .collect(Collectors.joining(SPACE));
+
+                return convertToString(items, "", SPACE, container);
             }
 
-            // check if object is not empty
-            if (CollectionUtils.isEmpty(schema.getProperties())) {
-                throw new IllegalStateException("query param should not be empty if paramStyle is spaceDelimited");
+            // handle case for object
+            var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+
+            if (CollectionUtils.isEmpty(properties)) {
+                throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.SPACE_DELIMITED.getStyle()));
             }
 
-            return schema.getProperties().entrySet().stream()
-                    .map(entry -> {
-                        String val = entry.getValue().getValue();
-                        if (referenced(val)) {
-                            val = container.getValueByRef(val);
-                        }
-                        return entry.getKey() + SPACE + val;
-                    })
-                    .collect(Collectors.joining(SPACE));
+            return convertToString(properties, "", SPACE, SPACE, container);
         }
 
         private static String constructSimple(ParameterDTO parameter, ResponseContainer container) {
-            if (ParamLocation.PATH != parameter.getIn() && ParamLocation.HEADER != parameter.getIn()) {
-                throw new IllegalStateException("Parameter type of Simple is used in path and header");
-            }
+            validateParamStyleAndLocationsPair(ParamStyle.SIMPLE, parameter.getIn(), List.of(ParamLocation.PATH, ParamLocation.HEADER));
 
             SchemaDTO schema = parameter.getSchema();
 
-            if (referenced(schema.getValue())) {
-                //TODO reconstruct referenced object if this is possible?
-                return container.getValueByRef(schema.getValue());
+            String value = schema.getValue();
+            boolean isReferenced = referenced(value);
+            if (isReferenced) {
+                value = container.getValueByRef(value);
             }
 
             if (schema.getType() == DataType.OBJECT) {
+                var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+
+                if (CollectionUtils.isEmpty(properties)) {
+                    throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.SIMPLE.getStyle()));
+                }
+
                 String separator = parameter.isExplode() ? "=" : ",";
 
-                return schema.getProperties().entrySet().stream()
-                        .map(entry -> {
-                            String val = entry.getValue().getValue();
-                            if (referenced(val)) {
-                                val = container.getValueByRef(val);
-                            }
-                            return entry.getKey() + separator + val;
-                        })
-                        .collect(Collectors.joining(","));
+                return convertToString(properties, "", separator, ",", container);
             }
 
             if (schema.getType() == DataType.ARRAY) {
-                return schema.getItems().stream()
-                        .map(item -> {
-                            String val = item.getValue();
-                            if (referenced(val)) {
-                                val = container.getValueByRef(val);
-                            }
-                            return val;
-                        })
-                        .collect(Collectors.joining(","));
+                var items = isReferenced ? convertToList(value) : schema.getItems();
+
+                if (CollectionUtils.isEmpty(items)) {
+                    throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.SIMPLE.getStyle()));
+                }
+
+                return convertToString(items, "", ",", container);
             }
 
-            String val = schema.getValue();
-            if (referenced(val)) {
-                return container.getValueByRef(val);
+            if (ObjectUtils.isEmpty(value)) {
+                throw new IllegalStateException(String.format(EMPTY_VALUE_ERROR, ParamStyle.SIMPLE.getStyle()));
             }
 
-            return val;
+            return value;
         }
 
         private static String constructForm(ParameterDTO parameter, ResponseContainer container) {
-            if (ParamLocation.QUERY != parameter.getIn() && ParamLocation.COOKIE != parameter.getIn()) {
-                throw new IllegalStateException("Parameter type of Simple is used in query and cookie");
-            }
+            validateParamStyleAndLocationsPair(ParamStyle.FORM, parameter.getIn(), List.of(ParamLocation.QUERY, ParamLocation.COOKIE));
 
             SchemaDTO schema = parameter.getSchema();
 
-            if (referenced(schema.getValue())) {
-                //TODO reconstruct referenced object if this is possible?
-                return container.getValueByRef(schema.getValue());
+            String value = schema.getValue();
+            boolean isReferenced = referenced(value);
+            if (isReferenced) {
+                value = container.getValueByRef(value);
             }
 
             if (schema.getType() == DataType.OBJECT) {
+                var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+
+                if (CollectionUtils.isEmpty(properties)) {
+                    return parameter.getName() + "=";
+                }
+
                 String separator = parameter.isExplode() ? "=" : ",";
                 String delimiter = parameter.isExplode() ? "&" : ",";
                 String prefix = parameter.isExplode() ? "" : parameter.getName() + "=";
 
-                return prefix + schema.getProperties().entrySet().stream()
-                        .map(entry -> {
-                            String val = entry.getValue().getValue();
-                            if (referenced(val)) {
-                                val = container.getValueByRef(val);
-                            }
-                            return entry.getKey() + separator + val;
-                        })
-                        .collect(Collectors.joining(delimiter));
+                return convertToString(properties, prefix, separator, delimiter, container);
             }
 
             if (schema.getType() == DataType.ARRAY) {
+                var items = isReferenced ? convertToList(value) : schema.getItems();
+
+                if (CollectionUtils.isEmpty(items)) {
+                    return parameter.getName() + "=";
+                }
+
                 String delimiter = parameter.isExplode() ? "&" + parameter.getName() + "=" : ",";
                 String prefix = parameter.getName() + "=";
 
-                return prefix + schema.getItems().stream()
-                        .map(item -> {
-                            String val = item.getValue();
-                            if (referenced(val)) {
-                                val = container.getValueByRef(val);
-                            }
-                            return val;
-                        })
-                        .collect(Collectors.joining(delimiter));
+                return convertToString(items, prefix, delimiter, container);
             }
 
-            String val = schema.getValue();
-            if (referenced(val)) {
-                return parameter.getName() + "=" + container.getValueByRef(val);
-            }
-
-            return parameter.getName() + "=" + val;
+            // For primitive types return 'paramName=' + value if it is not empty
+            return ObjectUtils.isEmpty(value) ? parameter.getName() + "=" : parameter.getName() + "=" + value;
         }
 
         private static String constructLabel(ParameterDTO parameter, ResponseContainer container) {
-            if (ParamLocation.PATH != parameter.getIn()) {
-                throw new IllegalStateException("Parameter type of Simple is used only in path");
-            }
+            validateParamStyleAndLocationsPair(ParamStyle.LABEL, parameter.getIn(), List.of(ParamLocation.PATH));
 
             SchemaDTO schema = parameter.getSchema();
 
-            if (referenced(schema.getValue())) {
-                //TODO reconstruct referenced object if this is possible?
-                return container.getValueByRef(schema.getValue());
+            String value = schema.getValue();
+            boolean isReferenced = referenced(value);
+            if (isReferenced) {
+                value = container.getValueByRef(value);
             }
 
-            String prefix = ".";
+            final String prefix = ".";
 
             if (schema.getType() == DataType.OBJECT) {
+                var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+
+                if (CollectionUtils.isEmpty(properties)) {
+                    return prefix;
+                }
+
                 String separator = parameter.isExplode() ? "=" : ".";
 
-                return prefix + schema.getProperties().entrySet().stream()
-                        .map(entry -> {
-                            String val = entry.getValue().getValue();
-                            if (referenced(val)) {
-                                val = container.getValueByRef(val);
-                            }
-                            return entry.getKey() + separator + val;
-                        })
-                        .collect(Collectors.joining("."));
+                return convertToString(properties, prefix, separator, ".", container);
             }
 
             if (schema.getType() == DataType.ARRAY) {
-                return prefix + schema.getItems().stream()
-                        .map(item -> {
-                            String val = item.getValue();
-                            if (referenced(val)) {
-                                val = container.getValueByRef(val);
-                            }
-                            return val;
-                        })
-                        .collect(Collectors.joining("."));
+                var items = isReferenced ? convertToList(value) : schema.getItems();
+
+                if (CollectionUtils.isEmpty(items)) {
+                    return prefix;
+                }
+
+                return convertToString(items, prefix, ".", container);
             }
 
-            String val = schema.getValue();
-            if (referenced(val)) {
-                return prefix + container.getValueByRef(val);
-            }
-
-            return prefix + val;
+            // For primitive types return value if it is not empty, otherwise prefix itself
+            return ObjectUtils.isEmpty(value) ? prefix : prefix + value;
         }
 
         private static String constructMatrix(ParameterDTO parameter, ResponseContainer container) {
-            if (ParamLocation.PATH != parameter.getIn()) {
-                throw new IllegalStateException("Parameter type of Simple is used only in path");
-            }
+            validateParamStyleAndLocationsPair(ParamStyle.MATRIX, parameter.getIn(), List.of(ParamLocation.PATH));
 
             SchemaDTO schema = parameter.getSchema();
 
-            if (referenced(schema.getValue())) {
-                //TODO reconstruct referenced object if this is possible?
-                return container.getValueByRef(schema.getValue());
+            String value = schema.getValue();
+            boolean isReferenced = referenced(value);
+            if (isReferenced) {
+                value = container.getValueByRef(value);
             }
 
             if (schema.getType() == DataType.OBJECT) {
+                var properties = isReferenced ? convertToMap(value) : schema.getProperties();
+
+                if (CollectionUtils.isEmpty(properties)) {
+                    return ";" + parameter.getName();
+                }
+
                 String separator = parameter.isExplode() ? "=" : ",";
                 String delimiter = parameter.isExplode() ? ";" : ",";
                 String prefix = parameter.isExplode() ? ";" : ";" + parameter.getName() + "=";
 
-                return prefix + schema.getProperties().entrySet().stream()
-                        .map(entry -> {
-                            String val = entry.getValue().getValue();
-                            if (referenced(val)) {
-                                val = container.getValueByRef(val);
-                            }
-                            return entry.getKey() + separator + val;
-                        })
-                        .collect(Collectors.joining(delimiter));
+                return convertToString(properties, prefix, separator, delimiter, container);
             }
 
             if (schema.getType() == DataType.ARRAY) {
+                var items = isReferenced ? convertToList(value) : schema.getItems();
+
+                if (CollectionUtils.isEmpty(items)) {
+                    return ";" + parameter.getName();
+                }
+
                 String delimiter = parameter.isExplode() ? ";" + parameter.getName() + "=" : ",";
                 String prefix = ";" + parameter.getName() + "=";
 
-                return prefix + schema.getItems().stream()
-                        .map(item -> {
-                            String val = item.getValue();
-                            if (referenced(val)) {
-                                val = container.getValueByRef(val);
-                            }
-                            return val;
-                        })
-                        .collect(Collectors.joining(delimiter));
+                return convertToString(items, prefix, delimiter, container);
             }
 
-            String val = schema.getValue();
-            if (referenced(val)) {
-                return ";" + parameter.getName() + "=" + container.getValueByRef(val);
+            // For primitive types return ';paramName=' + value if it is not empty
+            return ObjectUtils.isEmpty(value) ?
+                    ";" + parameter.getName() :
+                    ";" + parameter.getName() + "=" + value;
+        }
+
+        private static String convertToString(List<SchemaDTO> items, String prefix, String delimiter, ResponseContainer container) {
+            return prefix + items.stream()
+                    .map(item -> {
+                        String value = item.getValue();
+                        if (referenced(value)) {
+                            value = container.getValueByRef(value);
+                        }
+                        return value;
+                    })
+                    .collect(Collectors.joining(delimiter));
+        }
+
+        private static String convertToString(Map<String, SchemaDTO> properties, String prefix, String separator, String delimiter, ResponseContainer container) {
+            return prefix + properties.entrySet().stream()
+                    .map(entry -> {
+                        String value = entry.getValue().getValue();
+                        if (referenced(value)) {
+                            value = container.getValueByRef(value);
+                        }
+                        return entry.getKey() + separator + value;
+                    })
+                    .collect(Collectors.joining(delimiter));
+        }
+
+        private static List<SchemaDTO> convertToList(String jsonString) {
+            return null;
+        }
+
+        private static Map<String, SchemaDTO> convertToMap(String jsonString) {
+            return null;
+        }
+
+        private static void validateParamStyleAndLocationsPair(ParamStyle currentStyle, ParamLocation currentLocation, List<ParamLocation> validLocations) {
+            if(validLocations.contains(currentLocation)) {
+                return;
             }
 
-            return ";" + parameter.getName() + "=" + val;
+            String locations = validLocations.stream().map(ParamLocation::getLocation).collect(Collectors.joining(", "));
+            throw new IllegalStateException(String.format("ParamStyle of '%s' is used only in [%s]", currentStyle.getStyle(), locations));
+        }
+
+        private static void validateParamStyleAndDataTypesPair(ParamStyle currentStyle, DataType currentType, List<DataType> validTypes) {
+            if(validTypes.contains(currentType)) {
+                return;
+            }
+
+            String dataTypes = validTypes.stream().map(DataType::getType).collect(Collectors.joining(", "));
+            throw new IllegalStateException(String.format("ParamStyle of '%s' is used only with [%s] types", currentStyle.getStyle(), dataTypes));
         }
     }
 }
