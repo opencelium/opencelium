@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ResultMng;
-import com.becon.opencelium.backend.resource.connector.ResultResource;
+import com.becon.opencelium.backend.resource.connector.ResultDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ public class ResultMngServiceImp implements ResultMngService{
     }
 
     @Override
-    public ResultMng toEntity(ResultResource resultDTO) {
+    public ResultMng toEntity(ResultDTO resultDTO) {
         ResultMng resultMng = new ResultMng();
         resultMng.setStatus(resultDTO.getStatus());
         resultMng.setHeader(resultDTO.getHeader());
@@ -23,8 +23,8 @@ public class ResultMngServiceImp implements ResultMngService{
     }
 
     @Override
-    public ResultResource toDTO(ResultMng resultMng) {
-        ResultResource resultDTO = new ResultResource();
+    public ResultDTO toDTO(ResultMng resultMng) {
+        ResultDTO resultDTO = new ResultDTO();
         resultDTO.setHeader(resultMng.getHeader());
         resultDTO.setStatus(resultMng.getStatus());
         resultDTO.setBody(bodyMngService.toDTO(resultMng.getBody()));

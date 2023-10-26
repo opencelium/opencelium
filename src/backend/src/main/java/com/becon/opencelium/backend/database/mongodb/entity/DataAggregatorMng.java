@@ -1,14 +1,15 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.util.List;
+import java.util.Set;
 
 public class DataAggregatorMng {
-    @Id
+    @MongoId(targetType = FieldType.OBJECT_ID)
     private String id;
     private String name;
-    private List<ArgumentMng> args;
+    private Set<ArgumentMng> args;
     private String script;
 
     public DataAggregatorMng() {
@@ -30,11 +31,11 @@ public class DataAggregatorMng {
         this.name = name;
     }
 
-    public List<ArgumentMng> getArgs() {
+    public Set<ArgumentMng> getArgs() {
         return args;
     }
 
-    public void setArgs(List<ArgumentMng> args) {
+    public void setArgs(Set<ArgumentMng> args) {
         this.args = args;
     }
 

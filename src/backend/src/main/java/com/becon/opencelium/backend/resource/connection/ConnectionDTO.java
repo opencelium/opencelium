@@ -35,7 +35,7 @@ public class ConnectionDTO {
     private String description;
     private ConnectorDTO fromConnector;
     private ConnectorDTO toConnector;
-    private List<FieldBindingDTO> fieldBinding = new ArrayList<>();
+    private List<FieldBindingDTO> fieldBinding;
     private BusinessLayoutResource businessLayout;
     private DataAggregatorDTO dataAggregator;
 

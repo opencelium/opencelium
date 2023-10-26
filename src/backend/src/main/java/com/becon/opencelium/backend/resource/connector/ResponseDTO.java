@@ -18,25 +18,24 @@ package com.becon.opencelium.backend.resource.connector;
 
 import com.becon.opencelium.backend.invoker.entity.ResponseInv;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 @Resource
-public class ResponseResource {
+public class ResponseDTO {
 
     private String nodeId;
 
     private String name = "response";
-    private ResultResource success;
-    private ResultResource fail;
+    private ResultDTO success;
+    private ResultDTO fail;
 
-    public ResponseResource() {
+    public ResponseDTO() {
     }
 
-    public ResponseResource(ResponseInv responseInv) {
-        this.success = new ResultResource(responseInv.getSuccess());
+    public ResponseDTO(ResponseInv responseInv) {
+        this.success = new ResultDTO(responseInv.getSuccess());
 
         if (responseInv.getFail() != null) {
-            this.fail = new ResultResource(responseInv.getFail());
+            this.fail = new ResultDTO(responseInv.getFail());
         }
     }
 
@@ -52,19 +51,19 @@ public class ResponseResource {
         return name;
     }
 
-    public ResultResource getSuccess() {
+    public ResultDTO getSuccess() {
         return success;
     }
 
-    public void setSuccess(ResultResource success) {
+    public void setSuccess(ResultDTO success) {
         this.success = success;
     }
 
-    public ResultResource getFail() {
+    public ResultDTO getFail() {
         return fail;
     }
 
-    public void setFail(ResultResource fail) {
+    public void setFail(ResultDTO fail) {
         this.fail = fail;
     }
 }

@@ -36,8 +36,8 @@ public class ConnectorDTO {
     private int timeout;
     private InvokerDTO invoker; // due to front end asked sending object, normally should be name of invoker
     private BusinessLayout businessLayout;
-    private List<MethodDTO> methods = new ArrayList<>();
-    private List<OperatorDTO> operators = new ArrayList<>();
+    private List<MethodDTO> methods;
+    private List<OperatorDTO> operators;
 
     public String getNodeId() {
         return nodeId;

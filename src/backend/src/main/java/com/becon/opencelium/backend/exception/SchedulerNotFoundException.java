@@ -14,35 +14,20 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.invoker.entity;
+package com.becon.opencelium.backend.exception;
 
-import com.becon.opencelium.backend.resource.connector.ResponseDTO;
+import com.becon.opencelium.backend.constant.ExceptionConstant;
 
-public class ResponseInv {
-    private ResultInv success;
-    private ResultInv fail;
+public class SchedulerNotFoundException extends RuntimeException{
 
-    public ResponseInv() {
+    private final int id;
+
+    public SchedulerNotFoundException(final int id) {
+        super(ExceptionConstant.SCHEDULER_NOT_FOUND);
+        this.id = id;
     }
 
-    public ResponseInv(ResponseDTO responseDTO) {
-        this.success = new ResultInv(responseDTO.getSuccess());
-        this.fail = new ResultInv(responseDTO.getFail());
-    }
-
-    public ResultInv getSuccess() {
-        return success;
-    }
-
-    public void setSuccess(ResultInv success) {
-        this.success = success;
-    }
-
-    public ResultInv getFail() {
-        return fail;
-    }
-
-    public void setFail(ResultInv fail) {
-        this.fail = fail;
+    public int getId() {
+        return id;
     }
 }

@@ -10,6 +10,14 @@ public class SchemaDTO {
     private List<SchemaDTO> items;
     private XmlObjectDTO xml;
 
+    public SchemaDTO() {
+    }
+
+    public SchemaDTO(DataType dataType, String value){
+        this.type = dataType;
+        this.value = value;
+    }
+
     public DataType getType() {
         return type;
     }

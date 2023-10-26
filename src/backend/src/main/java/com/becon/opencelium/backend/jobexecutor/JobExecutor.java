@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 public class JobExecutor extends QuartzJobBean {
 
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    public void executeInternal(JobExecutionContext context) throws JobExecutionException {
         // Your job execution logic here
     }
 }

@@ -16,22 +16,19 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.*;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.util.List;
 
 public class ConnectorMng {
 
-    @Id
+    @MongoId(targetType = FieldType.OBJECT_ID)
     private String id;
     @Field(name = "connector_id")
     private Integer connectorId;
     private String title;
-    private String icon;
-    @Field(name = "ssl_cert")
-    private boolean sslCert;
-    private int timeout;  //millisecond
     private List<MethodMng> methods;
     private List<OperatorMng> operators;
 
@@ -60,30 +57,6 @@ public class ConnectorMng {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-    public boolean isSslCert() {
-        return sslCert;
-    }
-
-    public void setSslCert(boolean sslCert) {
-        this.sslCert = sslCert;
-    }
-
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
     }
 
     public List<MethodMng> getMethods() {

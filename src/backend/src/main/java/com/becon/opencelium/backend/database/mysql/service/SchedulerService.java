@@ -22,7 +22,6 @@ import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
-import org.quartz.SchedulerException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +31,9 @@ import java.util.Optional;
 public interface SchedulerService {
 
     void save(Scheduler scheduler);
+
+    Scheduler update(Scheduler scheduler);
+
     List<Scheduler> saveAll(List<Scheduler> schedulers);
     void deleteById(int id);
     void deleteAllById(List<Integer> schedulers);
@@ -45,11 +47,11 @@ public interface SchedulerService {
     Scheduler toEntity(SchedulerRequestResource resource);
     SchedulerResource toResource(Scheduler entity);
 
-    void startNow(Scheduler scheduler) throws Exception;
+    void startNow(Scheduler scheduler);
     void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception;
     void saveEntity(Scheduler scheduler);
-    void disable(Scheduler scheduler) throws SchedulerException;
-    void enable(Scheduler scheduler) throws SchedulerException;
+    void disable(Scheduler scheduler);
+    void enable(Scheduler scheduler);
     List<RunningJobsResource> getAllRunningJobs() throws Exception;
 
     List<EventNotification> getAllNotifications(int schedulerId);
@@ -58,4 +60,5 @@ public interface SchedulerService {
     NotificationResource toNotificationResource(EventNotification eventNotification);
     void saveNotification(EventNotification eventNotification);
     void deleteNotificationById(int id);
+    Scheduler getById(int id);
 }

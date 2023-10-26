@@ -16,22 +16,22 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.util.List;
 
 @Document(collection = "connection")
 public class ConnectionMng {
-    @Id
+    @MongoId(targetType = FieldType.OBJECT_ID)
     private String id; // id generated in mongodb
     @Field(name = "connection_id")
     @Indexed
     private Long connectionId; // id generated in mariadb.
     private String title;
-    private String description;
     @Field(name = "from_connector")
     private ConnectorMng fromConnector;
     @Field(name = "to_connector")
@@ -66,14 +66,6 @@ public class ConnectionMng {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public ConnectorMng getFromConnector() {

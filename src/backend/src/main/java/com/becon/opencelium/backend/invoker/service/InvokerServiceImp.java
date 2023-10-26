@@ -164,33 +164,9 @@ public class InvokerServiceImp implements InvokerService {
     }
 
     //TODO: need to add path of field
+    // path = response.success.val1.val2.val3;
     @Override
-    public String findFieldType(String invokerName, String methodName, String exchangeType, String result, String fieldName) {
-        Body body = null;
-
-        if (exchangeType.equals("response") && result.equals("success")){
-            body = invokerContainer.getByName(invokerName).getOperations().stream()
-                    .filter(o -> o.getName().equals(methodName))
-                    .map(o -> o.getResponse().getSuccess().getBody()).findFirst().get();
-        } else if (exchangeType.equals("response") && result.equals("fail")){
-            body = invokerContainer.getByName(invokerName).getOperations().stream()
-                    .filter(o -> o.getName().equals(methodName))
-                    .map(o -> o.getResponse().getFail().getBody()).findFirst().get();
-        } else if (exchangeType.equals("request")) {
-            Invoker invoker = invokerContainer.getByName(invokerName);
-            FunctionInvoker functionInvoker = invoker.getOperations().stream()
-                    .filter(o -> o.getName().equals(methodName)).findFirst()
-                    .orElseThrow(()->new RuntimeException(methodName + " not found in invoker file " + "'" + invokerName + "'"));
-            body = functionInvoker.getRequest().getBody();
-        }
-
-        Object type = findField(fieldName, body.getFields());
-
-        if(type instanceof HashMap){
-            return "object";
-        } else if (type instanceof ArrayList){
-            return "array";
-        }
+    public String findFieldType(String invokerName, String path) {
         return "string";
     }
 

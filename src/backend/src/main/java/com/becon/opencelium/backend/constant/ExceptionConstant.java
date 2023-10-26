@@ -40,4 +40,7 @@ public interface ExceptionConstant {
 
     // ----------------------------------------- Enhancement ----------------------------------------------- //
     String ENHANCEMENT_NOT_FOUND = "ENHANCEMENT_NOT_FOUND";
+
+    // ----------------------------------------- Scheduler ----------------------------------------------- //
+    String SCHEDULER_NOT_FOUND = "SCHEDULER_NOT_FOUND";
 }

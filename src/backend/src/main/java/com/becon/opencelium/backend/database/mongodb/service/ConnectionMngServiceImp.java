@@ -59,8 +59,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService{
         ConnectionDTO connectionDTO = new ConnectionDTO();
         connectionDTO.setConnectionId(connectionMng.getConnectionId());
         connectionDTO.setNodeId(connectionMng.getId());
-        connectionDTO.setTitle(connectionMng.getTitle());
-        connectionDTO.setDescription(connectionMng.getDescription());
         connectionDTO.setToConnector(connectorMngService.toDTO(connectionMng.getToConnector()));
         connectionDTO.setFromConnector(connectorMngService.toDTO(connectionMng.getFromConnector()));
         connectionDTO.setDataAggregator(dataAggregatorMngService.toDTO(connectionMng.getDataAggregator()));
@@ -82,7 +80,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService{
         Connection connection = new Connection();
         connection.setId(connectionMng.getConnectionId());
         connection.setName(connectionMng.getTitle());
-        connection.setDescription(connectionMng.getDescription());
         connection.setFromConnector(connectionMng.getFromConnector().getConnectorId());
         connection.setToConnector(connectionMng.getToConnector().getConnectorId());
         return connection;
@@ -94,7 +91,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService{
         connectionMng.setConnectionId(dto.getConnectionId());
         connectionMng.setId(dto.getNodeId());
         connectionMng.setTitle(dto.getTitle());
-        connectionMng.setDescription(dto.getDescription());
         connectionMng.setToConnector(connectorMngService.toEntity(dto.getToConnector()));
         connectionMng.setFromConnector(connectorMngService.toEntity(dto.getFromConnector()));
         connectionMng.setFieldBinding(fieldBindingMngService.toEntityAll(dto.getFieldBinding()));
