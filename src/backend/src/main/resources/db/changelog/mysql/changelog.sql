@@ -355,3 +355,6 @@ ALTER TABLE data_aggregator ALTER COLUMN is_active SET DEFAULT 1;
 
 --changeset 3.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE webhook MODIFY COLUMN token LONGTEXT;
+
+--changeset 4.0:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+SELECT VERSION();
