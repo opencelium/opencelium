@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,22 +29,24 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
     @Override
     public DataAggregatorDTO convertToDto(DataAggregator dataAggregator) {
         DataAggregatorDTO dataAggregatorDTO = new DataAggregatorDTO();
-        dataAggregatorDTO.setId(String.valueOf(dataAggregator.getId()));
+        dataAggregatorDTO.setId(dataAggregator.getId());
         dataAggregatorDTO.setName(dataAggregator.getName());
         dataAggregatorDTO.setScript(dataAggregator.getScript());
+        dataAggregatorDTO.setActive(dataAggregator.isActive());
 
-        Set<ArgumentDTO> argumentDtoList = dataAggregator.getArgs().stream().map(argumentService::convertToDto)
-                .collect(Collectors.toSet());
-        dataAggregatorDTO.setArgs(argumentDtoList);
+        List<ArgumentDTO> argumentDtos = dataAggregator.getArgs().stream().map(argumentService::convertToDto).toList();
+        dataAggregatorDTO.setArgs(argumentDtos);
         return dataAggregatorDTO;
     }
 
     @Override
     public DataAggregator convertToEntity(DataAggregatorDTO dataAggregatorDTO) {
         DataAggregator dataAggregator = new DataAggregator();
-        dataAggregator.setId(Integer.valueOf(dataAggregatorDTO.getId()));
+        dataAggregator.setId(dataAggregatorDTO.getId());
         dataAggregator.setName(dataAggregatorDTO.getName());
+        dataAggregator.setActive(dataAggregatorDTO.isActive());
         dataAggregator.setScript(dataAggregatorDTO.getScript());
+        dataAggregator.setActive(dataAggregatorDTO.isActive());
 
         Set<Argument> arguments = dataAggregatorDTO.getArgs().stream()
                 .map(argumentService::convertToEntity).collect(Collectors.toSet());
@@ -66,5 +69,15 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
     @Override
     public void deleteById(Integer id) {
         dataAggregatorRepository.deleteById(id);
+    }
+
+    @Override
+    public List<DataAggregator> findAll() {
+        return dataAggregatorRepository.findAll();
+    }
+
+    @Override
+    public Boolean existsByName(String argName) {
+        return dataAggregatorRepository.existsByName(argName);
     }
 }

@@ -10,21 +10,24 @@ public class DataAggregator {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
 
     private String name;
 
     @Column(columnDefinition = "json")
     private String script;
 
-    @OneToMany(mappedBy = "dataAggregator", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Column(name = "is_active")
+    private boolean active;
+
+    @OneToMany(mappedBy = "dataAggregator", fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     private Set<Argument> args;
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -42,6 +45,14 @@ public class DataAggregator {
 
     public void setScript(String script) {
         this.script = script;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public Set<Argument> getArgs() {
