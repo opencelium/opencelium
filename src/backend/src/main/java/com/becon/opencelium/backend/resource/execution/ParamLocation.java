@@ -4,7 +4,7 @@ public enum ParamLocation {
     HEADER("header"),
     QUERY("query"),
     PATH("path"),
-    COOKIES("cookies");
+    COOKIE("cookie");
 
     private final String location;
 

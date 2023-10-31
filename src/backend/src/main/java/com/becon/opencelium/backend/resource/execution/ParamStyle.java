@@ -2,12 +2,12 @@ package com.becon.opencelium.backend.resource.execution;
 
 public enum ParamStyle {
     MATRIX("matrix"),
-    TABLE("table"),
+    LABEL("label"),
     FORM("form"),
     SIMPLE("simple"),
-    SPACE_DELIMITED("space_delimited"),
-    PIPE_DELIMITED("pipe_delimited"),
-    DEEP_OBJECT("deep_object");
+    SPACE_DELIMITED("spaceDelimited"),
+    PIPE_DELIMITED("pipeDelimited"),
+    DEEP_OBJECT("deepObject");
 
     private final String style;
 
