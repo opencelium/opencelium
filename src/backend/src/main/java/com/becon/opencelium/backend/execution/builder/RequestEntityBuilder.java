@@ -13,6 +13,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -550,11 +553,65 @@ public class RequestEntityBuilder {
         }
 
         private static List<SchemaDTO> stringToList(String jsonString) {
-            return null;
+            if (jsonString == null) {
+                return null;
+            }
+
+            if (Objects.equals(jsonString, "[]")) {
+                return new ArrayList<>();
+            }
+            // remove arrays' square braces
+            jsonString = jsonString.substring(1, jsonString.length() - 1);
+
+            String[] items = jsonString.split(", ");
+            int len = items.length;
+
+            List<SchemaDTO> res = new ArrayList<>();
+            for (int i = 0; i < len; i++) {
+                if (items[i].startsWith("\"")) { // check if there is a string that contains ", "
+                    // remove double quotes of type string
+                    String val = items[i].substring(1);
+                    for (int j = i + 1; j < len; j++) {
+                        i++;
+                        val += ", " + items[j];
+                        if (items[j].endsWith("\"")) {
+                            val = val.substring(0, val.length() - 1);
+                            res.add(new SchemaDTO(DataType.STRING, val));
+                            break;
+                        }
+                    }
+                } else {
+                    res.add(new SchemaDTO(DataType.STRING, items[i]));
+                }
+            }
+
+            return res;
         }
 
         private static Map<String, SchemaDTO> stringToMap(String jsonString) {
-            return null;
+            if (jsonString == null) {
+                return null;
+            }
+
+            if (Objects.equals(jsonString, "{}")) {
+                return new HashMap<>();
+            }
+            // remove objects' curly braces
+            jsonString = jsonString.substring(1, jsonString.length() - 1);
+
+            String[] properties = jsonString.split(", ");
+
+            Map<String, SchemaDTO> res = new LinkedHashMap<>();
+            for (String property : properties) {
+                String[] pair = property.split(": ");
+
+                // remove double quotes from field name
+                String key = pair[0].substring(1, pair[0].length() - 1);
+                SchemaDTO value = new SchemaDTO(DataType.STRING, pair[1]);
+                res.put(key, value);
+            }
+
+            return res;
         }
 
         private static void replaceRefs(SchemaDTO schema, ResponseContainer container) {
