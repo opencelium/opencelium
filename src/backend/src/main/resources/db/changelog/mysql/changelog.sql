@@ -343,3 +343,15 @@ CREATE TABLE execution_argument (
     FOREIGN KEY (execution_id) REFERENCES execution(id),
     FOREIGN KEY (aggregator_argument_id) REFERENCES aggregator_argument(id)
 );
+
+--changeset 3.2:4 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE data_aggregator ADD CONSTRAINT unique_name UNIQUE (name);
+
+--changeset 3.2:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE data_aggregator ADD COLUMN is_active TINYINT(1);
+
+--changeset 3.2:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE data_aggregator ALTER COLUMN is_active SET DEFAULT 1;
+
+--changeset 3.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE webhook MODIFY COLUMN token LONGTEXT;
