@@ -29,6 +29,7 @@ public abstract class ConnectionMapper {
             @Mapping(target = "dataAggregator", qualifiedByName = {"dataAggregatorMapper", "toEntity"})
     })
     public abstract ConnectionMng toEntity(ConnectionDTO connectorDTO);
+
     @Named("toDTO")
     @Mappings({
             @Mapping(target = "nodeId", source = "id"),
