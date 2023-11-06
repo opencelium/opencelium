@@ -358,3 +358,9 @@ ALTER TABLE webhook MODIFY COLUMN token LONGTEXT;
 
 --changeset 4.0:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 SELECT VERSION();
+
+--changeset 4.0:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table connection modify from_connector int null;
+
+--changeset 4.0:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table connection modify to_connector int null;

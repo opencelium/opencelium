@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.repository.EnhancementRepository;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
@@ -41,8 +40,8 @@ public class EnhancementServiceImp implements EnhancementService{
     }
 
     @Override
-    public void saveAll(List<Enhancement> enhancement) {
-        enhancementRepository.saveAll(enhancement);
+    public List<Enhancement> saveAll(List<Enhancement> enhancement) {
+        return enhancementRepository.saveAll(enhancement);
     }
 
     @Override

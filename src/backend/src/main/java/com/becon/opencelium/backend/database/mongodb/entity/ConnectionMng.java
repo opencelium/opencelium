@@ -36,10 +36,6 @@ public class ConnectionMng {
     private ConnectorMng fromConnector;
     @Field(name = "to_connector")
     private ConnectorMng toConnector;
-    @Field(name = "field_binding")
-    private List<FieldBindingMng> fieldBinding;
-    @Field(name = "data_aggregator")
-    private DataAggregatorMng dataAggregator;
 
     public ConnectionMng() {
     }
@@ -84,19 +80,4 @@ public class ConnectionMng {
         this.toConnector = toConnector;
     }
 
-    public List<FieldBindingMng> getFieldBinding() {
-        return fieldBinding;
-    }
-
-    public void setFieldBinding(List<FieldBindingMng> fieldBinding) {
-        this.fieldBinding = fieldBinding;
-    }
-
-    public DataAggregatorMng getDataAggregator() {
-        return dataAggregator;
-    }
-
-    public void setDataAggregator(DataAggregatorMng dataAggregator) {
-        this.dataAggregator = dataAggregator;
-    }
 }

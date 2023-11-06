@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
@@ -53,14 +54,20 @@ public class ConnectionController {
     private final Environment environment;
     private final ConnectionService connectionService;
     private final ConnectionMngService connectionMngService;
+    private final Mapper<ConnectionMng,ConnectionDTO> connectionMngMapper;
+    private final Mapper<Connection,ConnectionDTO> connectionMapper;
 
     public ConnectionController(
             Environment environment,
-            ConnectionMngService connectionMngService,
-            @Qualifier("connectionServiceImp") ConnectionService connectionService
+            Mapper<ConnectionMng,ConnectionDTO> connectionMngMapper,
+            Mapper<Connection,ConnectionDTO> connectionMapper,
+            @Qualifier("connectionServiceImp") ConnectionService connectionService,
+            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService
     ) {
         this.environment = environment;
         this.connectionService = connectionService;
+        this.connectionMngMapper = connectionMngMapper;
+        this.connectionMapper = connectionMapper;
         this.connectionMngService = connectionMngService;
     }
 
@@ -79,7 +86,7 @@ public class ConnectionController {
     @GetMapping(path = "/all")
     public ResponseEntity<?> getAll() {
         List<ConnectionMng> connections = connectionMngService.getAll();
-        return ResponseEntity.ok(connectionMngService.toDTOAll(connections));
+        return ResponseEntity.ok(connectionMngMapper.toDTOAll(connections));
     }
 
 
@@ -115,7 +122,7 @@ public class ConnectionController {
     @GetMapping(path = "/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId) {
         ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
-        return ResponseEntity.ok(connectionMngService.toDTO(connectionMng));
+        return ResponseEntity.ok(connectionMngMapper.toDTO(connectionMng));
     }
 
     @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
@@ -132,10 +139,10 @@ public class ConnectionController {
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> add(@RequestBody ConnectionDTO connectionDTO) throws Exception {
-        Connection connection = connectionService.toEntity(connectionDTO);
-        ConnectionMng connectionMng = connectionMngService.toEntity(connectionDTO);
+        Connection connection = connectionMapper.toEntity(connectionDTO);
+        ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
         ConnectionMng savedConnectionMng = connectionService.save(connection, connectionMng);
-        ConnectionDTO responseConnectionDTO = connectionMngService.toDTO(savedConnectionMng);
+        ConnectionDTO responseConnectionDTO = connectionMngMapper.toDTO(savedConnectionMng);
 
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
@@ -158,10 +165,10 @@ public class ConnectionController {
     })
     @PutMapping(path = "/{connectionId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable Long connectionId, @RequestBody ConnectionDTO connectionDTO) throws Exception {
-        Connection connection = connectionService.toEntity(connectionDTO);
+        Connection connection = connectionMapper.toEntity(connectionDTO);
         connection.setId(connectionId);
-        ConnectionMng updatedConnectionMng = connectionService.update(connection, connectionMngService.toEntity(connectionDTO));
-        return ResponseEntity.ok(connectionMngService.toDTO(updatedConnectionMng));
+        ConnectionMng updatedConnectionMng = connectionService.update(connection, connectionMngMapper.toEntity(connectionDTO));
+        return ResponseEntity.ok(connectionMngMapper.toDTO(updatedConnectionMng));
     }
 
     @Operation(summary = "Validates a connection for correctly constructed structure")

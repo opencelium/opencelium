@@ -1,24 +1,24 @@
-package com.becon.opencelium.backend.mapper.connection;
+package com.becon.opencelium.backend.mapper.mongo;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ResultMng;
 import com.becon.opencelium.backend.resource.connector.ResultDTO;
-import org.mapstruct.Mapper;
+import com.becon.opencelium.backend.mapper.base.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
-@Mapper(
+@org.mapstruct.Mapper(
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         componentModel = "spring",
-        uses = BodyMapper.class
+        uses = BodyMngMapper.class
 )
-@Named("resultMapper")
-public interface ResultMapper {
+@Named("resultMngMapper")
+public interface ResultMngMapper extends Mapper<ResultMng, ResultDTO>{
     @Named("toDTO")
-    @Mapping(target = "body", qualifiedByName = {"bodyMapper","toDTO"})
+    @Mapping(target = "body", qualifiedByName = {"bodyMngMapper","toDTO"})
     ResultDTO toDTO(ResultMng resultMng);
 
     @Named("toEntity")
-    @Mapping(target = "body", qualifiedByName = {"bodyMapper","toEntity"})
+    @Mapping(target = "body", qualifiedByName = {"bodyMngMapper","toEntity"})
     ResultMng toEntity(ResultDTO resultDTO);
 }

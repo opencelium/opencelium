@@ -5,6 +5,4 @@ import com.becon.opencelium.backend.resource.connection.ConditionDTO;
 
 
 public interface ConditionMngService {
-    ConditionMng toEntity(ConditionDTO conditionDTO);
-    ConditionDTO toDTO(ConditionMng conditionMng);
 }

@@ -44,12 +44,5 @@ public interface ConnectionService {
 
     ConnectionMng update(Connection connection, ConnectionMng connectionMng);
 
-    Connection toEntity(ConnectionDTO connectionDTO);
-
-    ConnectionDTO toDTO(Connection connection);
-
     Connection getById(Long connectionId);
-
-
-    List<ConnectionDTO> toDTOAll(List<Connection> connections);
 }

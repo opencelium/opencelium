@@ -37,7 +37,6 @@ public class ConnectionDTO {
     private ConnectorDTO toConnector;
     private List<FieldBindingDTO> fieldBinding;
     private BusinessLayoutResource businessLayout;
-    private DataAggregatorDTO dataAggregator;
 
     public String getNodeId() {
         return nodeId;
@@ -101,13 +100,5 @@ public class ConnectionDTO {
 
     public void setBusinessLayout(BusinessLayoutResource businessLayout) {
         this.businessLayout = businessLayout;
-    }
-
-    public DataAggregatorDTO getDataAggregator() {
-        return dataAggregator;
-    }
-
-    public void setDataAggregator(DataAggregatorDTO dataAggregator) {
-        this.dataAggregator = dataAggregator;
     }
 }

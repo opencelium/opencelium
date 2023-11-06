@@ -21,7 +21,7 @@ import com.becon.opencelium.backend.invoker.entity.RequestInv;
 import java.util.Map;
 
 public class RequestMng {
-
+    private String nodeId;
     private String endpoint;
     private String method;
     private Map<String, String> header;
@@ -70,5 +70,13 @@ public class RequestMng {
 
     public void setBody(BodyMng body) {
         this.body = body;
+    }
+
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 }

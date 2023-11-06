@@ -1,30 +1,32 @@
-package com.becon.opencelium.backend.mapper.connection;
+package com.becon.opencelium.backend.mapper.utils;
 
 import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-@Component
-public class OperationMappingHelper {
-    private final InvokerService invokerService;
+@Mapper(componentModel = "spring")
+@Named("OperationMappingHelper")
+public abstract class OperationMappingHelper {
+    @Autowired
+    @Qualifier("invokerServiceImp")
+    private InvokerService invokerService;
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String REGEX_REF_PARAMETER = "\\{#.+}";
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
 
-    public OperationMappingHelper(@Qualifier("invokerServiceImp") InvokerService invokerService) {
-        this.invokerService = invokerService;
-    }
-
+    @Named("toOperation")
     public OperationDTO toOperation(@NonNull MethodMng method) {
         MediaType mediaType = MediaType.valueOf(method.getRequest().getHeader().get(HEADER_CONTENT_TYPE));
         OperationDTO operationDTO = new OperationDTO();
