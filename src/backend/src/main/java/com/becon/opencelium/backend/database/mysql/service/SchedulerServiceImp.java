@@ -25,6 +25,8 @@ import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepositor
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
 import com.becon.opencelium.backend.factory.SchedulerFactory;
 import com.becon.opencelium.backend.jobexecutor.SchedulingStrategy;
+import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
@@ -50,6 +52,7 @@ public class SchedulerServiceImp implements SchedulerService {
     private final SchedulingStrategy schedulingStrategy;
     private final SchedulerRepository schedulerRepository;
     private final NotificationRepository notificationRepository;
+    private final Mapper<Connection, ConnectionDTO> connectionMapper;
 
 
     public SchedulerServiceImp(
@@ -61,7 +64,8 @@ public class SchedulerServiceImp implements SchedulerService {
             @Qualifier("recipientServiceImpl") RecipientService recipientService,
             SchedulerRepository schedulerRepository,
             NotificationRepository notificationRepository,
-            SchedulerFactoryBean schedulerFactoryBean
+            SchedulerFactoryBean schedulerFactoryBean,
+            Mapper<Connection, ConnectionDTO> connectionMapper
     ) {
         this.connectionService = connectionService;
         this.webhookService = webhookService;
@@ -72,6 +76,7 @@ public class SchedulerServiceImp implements SchedulerService {
         this.schedulingStrategy = SchedulerFactory.createQuartzScheduler(schedulerFactoryBean.getScheduler());
         this.notificationRepository = notificationRepository;
         this.schedulerRepository = schedulerRepository;
+        this.connectionMapper = connectionMapper;
     }
 
     @Override
@@ -188,7 +193,7 @@ public class SchedulerServiceImp implements SchedulerService {
         schedulerResource.setStatus(entity.getStatus());
         schedulerResource.setCronExp(entity.getCronExp());
         schedulerResource.setDebugMode(entity.getDebugMode());
-        schedulerResource.setConnection(connectionService.toDTO(entity.getConnection()));
+        schedulerResource.setConnection(connectionMapper.toDTO(entity.getConnection()));
 
         if (entity.getLastExecution() != null) {
             schedulerResource.setLastExecution(lastExecutionService.toResource(entity.getLastExecution()));

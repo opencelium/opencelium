@@ -30,7 +30,7 @@ public interface ConnectionMapper extends Mapper<Connection, ConnectionDTO> {
             @Mapping(target = "fromConnector", source = "fromConnector.connectorId"),
             @Mapping(target = "toConnector", source = "toConnector.connectorId"),
             @Mapping(target = "enhancements",
-                    expression = "java((dto.getFieldBinding() != null) ? dto.getFieldBinding().stream().map(e->enhancementMapper.toEntity(e.getEnhancement())).toList() : null)"),
+                    expression = "java((dto.getFieldBinding() != null) ? dto.getFieldBinding().stream().map(e -> enhancementMapper.toEntity(e.getEnhancement())).toList() : null)"),
             @Mapping(target = "businessLayout",
                     expression = "java((dto.getBusinessLayout() != null) ? new BusinessLayout(dto.getBusinessLayout(), connection) : null)")
     })
