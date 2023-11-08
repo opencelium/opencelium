@@ -4,7 +4,6 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.utils.HelperMapper;
-import com.becon.opencelium.backend.mapper.utils.ImageUtils;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.utility.StringUtility;
 import org.mapstruct.Mapping;

@@ -27,7 +27,8 @@ import org.springframework.context.annotation.Lazy;
 )
 @Named("helperMapper")
 public abstract class HelperMapper {
-    @Autowired @Lazy
+    @Autowired
+    @Lazy
     @Qualifier("connectorServiceImp")
     private ConnectorService connectorService;
     @Autowired
@@ -35,33 +36,42 @@ public abstract class HelperMapper {
     private InvokerService invokerService;
     @Autowired
     private InvokerMapper invokerMapper;
-    @Autowired @Lazy
+    @Autowired
+    @Lazy
     private ConnectorMapper connectorMapper;
 
 
     @Named("toConnectorDTO")
-    public ConnectorDTO toConnectorDTO(ConnectorMng connectorMng){
+    public ConnectorDTO toConnectorDTO(ConnectorMng connectorMng) {
         ConnectorDTO connectorDTO = toDTO(connectorMng);
-        Connector connector = connectorService.getById(connectorDTO.getConnectorId());
-        connectorDTO.setIcon(connector.getIcon());
-        connectorDTO.setTimeout(connector.getTimeout());
-        connectorDTO.setSslCert(connector.isSslCert());
-        connectorDTO.setInvoker(getInvokerDTO(connector.getInvoker()));
+        Connector connector = connectorService.findById(connectorDTO.getConnectorId()).orElse(null);
+        if (connector != null) {
+            connectorDTO.setIcon(connector.getIcon());
+            connectorDTO.setTimeout(connector.getTimeout());
+            connectorDTO.setSslCert(connector.isSslCert());
+            connectorDTO.setInvoker(getInvokerDTO(connector.getInvoker()));
+        }
         return connectorDTO;
     }
+
     @Named("getConnectorDTOById")
-    public ConnectorDTO getConnectorDTOById(int id){
-        return connectorMapper.toDTO(connectorService.getById(id));
+    public ConnectorDTO getConnectorDTOById(int id) {
+        return connectorMapper.toDTO(connectorService.findById(id).orElse(null));
     }
+
     @Mappings({
             @Mapping(target = "nodeId", source = "id"),
-            @Mapping(target = "methods", qualifiedByName = {"methodMngMapper","toDTOAll"}),
-            @Mapping(target = "operators", qualifiedByName = {"operatorMngMapper","toDTOAll"})
+            @Mapping(target = "methods", qualifiedByName = {"methodMngMapper", "toDTOAll"}),
+            @Mapping(target = "operators", qualifiedByName = {"operatorMngMapper", "toDTOAll"})
     })
     protected abstract ConnectorDTO toDTO(ConnectorMng connectorMng);
 
     @Named("getInvokerDTO")
-    public InvokerDTO getInvokerDTO(String invoker){
-        return invokerMapper.toDTO(invokerService.findByName(invoker));
+    public InvokerDTO getInvokerDTO(String invoker) {
+        try {
+            return invokerMapper.toDTO(invokerService.findByName(invoker));
+        } catch (Exception e) {
+            return new InvokerDTO();
+        }
     }
 }
