@@ -72,24 +72,6 @@ public class EnhancementServiceImp implements EnhancementService{
     }
 
     @Override
-    public Enhancement toEntity(EnhancementDTO enhancementDTO) {
-        Enhancement enhancement = new Enhancement();
-        enhancement.setId(enhancementDTO.getEnhanceId());
-        enhancement.setDescription(enhancementDTO.getDescription());
-        enhancement.setName(enhancementDTO.getName());
-        enhancement.setExpertCode(enhancementDTO.getExpertCode());
-        enhancement.setExpertVar(enhancementDTO.getExpertVar());
-        enhancement.setLanguage(enhancementDTO.getLanguage());
-        enhancement.setSimpleCode("");
-        return enhancement;
-    }
-
-    @Override
-    public EnhancementDTO toResource(Enhancement entity) {
-        return new EnhancementDTO(entity);
-    }
-
-    @Override
     public FieldBindingDTO toFieldBindingResource(Enhancement enhancement) {
         return null;
     }

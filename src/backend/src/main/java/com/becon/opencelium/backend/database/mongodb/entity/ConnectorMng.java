@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 import org.springframework.data.mongodb.core.mapping.MongoId;
@@ -29,7 +30,9 @@ public class ConnectorMng {
     @Field(name = "connector_id")
     private Integer connectorId;
     private String title;
+    @DBRef
     private List<MethodMng> methods;
+    @DBRef
     private List<OperatorMng> operators;
 
     public ConnectorMng() {

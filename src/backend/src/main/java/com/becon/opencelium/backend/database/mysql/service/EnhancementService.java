@@ -31,8 +31,6 @@ public interface EnhancementService {
     Enhancement findByFieldId(Long fieldId);
     Optional<Enhancement> findById(Integer enhId);
     void deleteAll(List<Enhancement> enhancements);
-    Enhancement toEntity(EnhancementDTO resource);
-    EnhancementDTO toResource(Enhancement entity);
     FieldBindingDTO toFieldBindingResource(Enhancement enhancement);
 
     boolean existById(Integer id);

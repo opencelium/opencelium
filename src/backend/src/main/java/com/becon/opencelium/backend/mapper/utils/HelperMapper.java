@@ -44,6 +44,9 @@ public abstract class HelperMapper {
     @Named("toConnectorDTO")
     public ConnectorDTO toConnectorDTO(ConnectorMng connectorMng) {
         ConnectorDTO connectorDTO = toDTO(connectorMng);
+        if (connectorDTO == null) {
+            return null;
+        }
         Connector connector = connectorService.findById(connectorDTO.getConnectorId()).orElse(null);
         if (connector != null) {
             connectorDTO.setIcon(connector.getIcon());

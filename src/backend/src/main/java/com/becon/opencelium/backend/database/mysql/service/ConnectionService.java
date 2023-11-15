@@ -18,7 +18,6 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,4 +44,6 @@ public interface ConnectionService {
     ConnectionMng update(Connection connection, ConnectionMng connectionMng);
 
     Connection getById(Long connectionId);
+
+    Long createEmptyConnection();
 }

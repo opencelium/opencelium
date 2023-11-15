@@ -17,12 +17,10 @@
 package com.becon.opencelium.backend.resource.connection;
 
 import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
-import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Resource
@@ -33,9 +31,10 @@ public class ConnectionDTO {
     private Long connectionId; // id generated in mariadb.
     private String title;
     private String description;
+    private String icon;
     private ConnectorDTO fromConnector;
     private ConnectorDTO toConnector;
-    private List<FieldBindingDTO> fieldBinding;
+    private List<FieldBindingDTO> fieldBindings;
     private BusinessLayoutResource businessLayout;
 
     public String getNodeId() {
@@ -86,12 +85,12 @@ public class ConnectionDTO {
         this.toConnector = toConnector;
     }
 
-    public List<FieldBindingDTO> getFieldBinding() {
-        return fieldBinding;
+    public List<FieldBindingDTO> getFieldBindings() {
+        return fieldBindings;
     }
 
-    public void setFieldBinding(List<FieldBindingDTO> fieldBinding) {
-        this.fieldBinding = fieldBinding;
+    public void setFieldBindings(List<FieldBindingDTO> fieldBinding) {
+        this.fieldBindings = fieldBinding;
     }
 
     public BusinessLayoutResource getBusinessLayout() {
@@ -100,5 +99,13 @@ public class ConnectionDTO {
 
     public void setBusinessLayout(BusinessLayoutResource businessLayout) {
         this.businessLayout = businessLayout;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 }

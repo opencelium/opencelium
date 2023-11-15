@@ -16,62 +16,12 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
-import org.springframework.data.mongodb.core.mapping.Field;
-
-
 public class EnhancementMng {
-    @Field(name = "enhancement_id")
-    private Integer enhancementId;
-    private String name;
-    private String description;
-    @Field(name = "expert_code")
-    private String expertCode;
-    @Field(name = "expert_var")
-    private String expertVar;
+    private String script;
+    private String variables;
     private String language;
 
     public EnhancementMng() {
-    }
-
-    public Integer getEnhancementId() {
-        return enhancementId;
-    }
-
-    public void setEnhancementId(Integer enhancementId) {
-        this.enhancementId = enhancementId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getExpertCode() {
-        return expertCode;
-    }
-
-    public void setExpertCode(String expertCode) {
-        this.expertCode = expertCode;
-    }
-
-    public String getExpertVar() {
-        return expertVar;
-    }
-
-    public void setExpertVar(String expertVar) {
-        this.expertVar = expertVar;
     }
 
     public String getLanguage() {
@@ -80,5 +30,21 @@ public class EnhancementMng {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public String getScript() {
+        return script;
+    }
+
+    public void setScript(String script) {
+        this.script = script;
+    }
+
+    public String getVariables() {
+        return variables;
+    }
+
+    public void setVariables(String variables) {
+        this.variables = variables;
     }
 }

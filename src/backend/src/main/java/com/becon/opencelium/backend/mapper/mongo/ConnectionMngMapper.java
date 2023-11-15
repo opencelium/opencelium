@@ -13,7 +13,8 @@ import org.mapstruct.ReportingPolicy;
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         uses = {
-                ConnectorMngMapper.class
+                ConnectorMngMapper.class,
+                FieldBindingMngMapper.class
         }
 )
 @Named("connectionMngMapper")
@@ -22,7 +23,9 @@ public interface ConnectionMngMapper extends Mapper<ConnectionMng,ConnectionDTO>
     @Mappings({
             @Mapping(target = "id", source = "nodeId"),
             @Mapping(target = "toConnector", qualifiedByName = {"connectorMngMapper", "toEntity"}),
-            @Mapping(target = "fromConnector", qualifiedByName = {"connectorMngMapper", "toEntity"})
+            @Mapping(target = "fromConnector", qualifiedByName = {"connectorMngMapper", "toEntity"}),
+            @Mapping(target = "fieldBindings", qualifiedByName = {"fieldBindingMngMapper", "toEntityAll"})
+
     })
     ConnectionMng toEntity(ConnectionDTO connectorDTO);
 
@@ -30,7 +33,8 @@ public interface ConnectionMngMapper extends Mapper<ConnectionMng,ConnectionDTO>
     @Mappings({
             @Mapping(target = "nodeId", source = "id"),
             @Mapping(target = "toConnector", qualifiedByName = {"connectorMngMapper", "toDTO"}),
-            @Mapping(target = "fromConnector", qualifiedByName = {"connectorMngMapper", "toDTO"})
+            @Mapping(target = "fromConnector", qualifiedByName = {"connectorMngMapper", "toDTO"}),
+            @Mapping(target = "fieldBindings", qualifiedByName = {"fieldBindingMngMapper", "toDTOAll"})
     })
     ConnectionDTO toDTO(ConnectionMng connectorMng);
 }

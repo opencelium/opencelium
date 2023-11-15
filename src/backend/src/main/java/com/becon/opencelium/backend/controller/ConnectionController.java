@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
@@ -25,6 +26,7 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -54,13 +56,15 @@ public class ConnectionController {
     private final Environment environment;
     private final ConnectionService connectionService;
     private final ConnectionMngService connectionMngService;
-    private final Mapper<ConnectionMng,ConnectionDTO> connectionMngMapper;
-    private final Mapper<Connection,ConnectionDTO> connectionMapper;
+    private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
+    private final Mapper<Connection, ConnectionDTO> connectionMapper;
+    private final Mapper<OperatorMng, OperatorDTO> operatorMapper;
 
     public ConnectionController(
             Environment environment,
-            Mapper<ConnectionMng,ConnectionDTO> connectionMngMapper,
-            Mapper<Connection,ConnectionDTO> connectionMapper,
+            Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
+            Mapper<Connection, ConnectionDTO> connectionMapper,
+            Mapper<OperatorMng, OperatorDTO> operatorMapper,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService
     ) {
@@ -69,6 +73,7 @@ public class ConnectionController {
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
         this.connectionMngService = connectionMngService;
+        this.operatorMapper = operatorMapper;
     }
 
     @Operation(summary = "Retrieves all connections from database")
@@ -125,6 +130,31 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngMapper.toDTO(connectionMng));
     }
 
+    //TODO: description must be changed
+    @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully created",
+                    content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping
+    public ResponseEntity<?> createEmptyConnection() throws Exception {
+        Long id = connectionService.createEmptyConnection();
+        ConnectionDTO connectionDTO = new ConnectionDTO();
+        connectionDTO.setConnectionId(id);
+
+        final URI uri = MvcUriComponentsBuilder
+                .fromController(getClass())
+                .buildAndExpand().toUri();
+        return ResponseEntity.created(uri).body(connectionDTO);
+    }
+
     @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -138,17 +168,16 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> add(@RequestBody ConnectionDTO connectionDTO) throws Exception {
+    public ResponseEntity<?> save(@RequestBody ConnectionDTO connectionDTO) throws Exception {
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
-        ConnectionMng savedConnectionMng = connectionService.save(connection, connectionMng);
-        ConnectionDTO responseConnectionDTO = connectionMngMapper.toDTO(savedConnectionMng);
+        ConnectionMng savedConnection = connectionService.save(connection, connectionMng);
+        ConnectionDTO dto = connectionMngMapper.toDTO(savedConnection);
 
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
-                .path("/{connectionId}")
-                .buildAndExpand(connection.getId()).toUri();
-        return ResponseEntity.created(uri).body(responseConnectionDTO);
+                .buildAndExpand().toUri();
+        return ResponseEntity.created(uri).body(dto);
     }
 
     @Operation(summary = "Modifies a connection by provided connection ID and accepting connection data in request body.")
@@ -166,9 +195,43 @@ public class ConnectionController {
     @PutMapping(path = "/{connectionId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable Long connectionId, @RequestBody ConnectionDTO connectionDTO) throws Exception {
         Connection connection = connectionMapper.toEntity(connectionDTO);
+        ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
         connection.setId(connectionId);
-        ConnectionMng updatedConnectionMng = connectionService.update(connection, connectionMngMapper.toEntity(connectionDTO));
-        return ResponseEntity.ok(connectionMngMapper.toDTO(updatedConnectionMng));
+        ConnectionMng updatedConnection = connectionService.update(connection, connectionMng);
+        return ResponseEntity.ok(connectionMngMapper.toDTO(updatedConnection));
+    }
+
+    @Operation(summary = "")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Operator has been successfully created",
+                    content = @Content(schema = @Schema(implementation = OperatorDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/{connectionId}/connector/{connectorId}/operator", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> addOperator(
+            @PathVariable Long connectionId,
+            @PathVariable Integer connectorId,
+            @RequestBody OperatorDTO operatorDTO
+    ) throws Exception {
+        OperatorMng operatorMng =
+                connectionMngService.addOperator(
+                        connectionId,
+                        connectorId,
+                        operatorMapper.toEntity(operatorDTO)
+                );
+
+        final URI uri = MvcUriComponentsBuilder
+                .fromController(getClass())
+                .path("/{connectionId}/connector/{connectorId}/operator")
+                .buildAndExpand(connectionId, connectorId).toUri();
+
+        return ResponseEntity.created(uri).body(operatorMng);
     }
 
     @Operation(summary = "Validates a connection for correctly constructed structure")

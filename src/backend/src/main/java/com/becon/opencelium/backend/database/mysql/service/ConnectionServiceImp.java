@@ -17,16 +17,14 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
+import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
-import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.mongodb.MongoException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
@@ -43,26 +41,24 @@ public class ConnectionServiceImp implements ConnectionService {
     private final ConnectionRepository connectionRepository;
     private final ConnectorService connectorService;
     private final ConnectionMngService connectionMngService;
+    private final FieldBindingMngService fieldBindingMngService;
     private final SchedulerService schedulerService;
     private final EnhancementService enhancementService;
-    private final Mapper<Connector, ConnectorDTO> connectorMapper;
-    private final Mapper<ConnectorMng, ConnectorDTO> connectorMngMapper;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("connectionMngServiceImp") ConnectionMngServiceImp connectionMngService,
+            @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
             @Lazy @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
-            @Qualifier("enhancementServiceImp")EnhancementService enhancementService,
-            Mapper<Connector, ConnectorDTO> connectorMapper,
-            Mapper<ConnectorMng, ConnectorDTO> connectorMngMapper) {
+            @Qualifier("enhancementServiceImp") EnhancementService enhancementService
+    ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
+        this.fieldBindingMngService = fieldBindingMngService;
         this.schedulerService = schedulerService;
         this.connectionMngService = connectionMngService;
         this.enhancementService = enhancementService;
-        this.connectorMapper = connectorMapper;
-        this.connectorMngMapper = connectorMngMapper;
     }
 
 
@@ -70,27 +66,34 @@ public class ConnectionServiceImp implements ConnectionService {
     @Transactional(rollbackFor = {MongoException.class, DataAccessException.class})
     public ConnectionMng save(Connection connection, ConnectionMng connectionMng) {
 
-        Connector toConnector = connectorService.getById(connection.getToConnector());
-        ConnectorMng toConnectorMng = connectorMngMapper.toEntity(connectorMapper.toDTO(toConnector));
-        toConnectorMng.setMethods(connectionMng.getToConnector().getMethods());
-        toConnectorMng.setOperators(connectionMng.getToConnector().getOperators());
-        connectionMng.setToConnector(toConnectorMng);
+        connectorService.getById(connection.getToConnector());
+        connectorService.getById(connection.getFromConnector());
 
-        Connector fromConnector = connectorService.getById(connection.getFromConnector());
-        ConnectorMng fromConnectorMng = connectorMngMapper.toEntity(connectorMapper.toDTO(fromConnector));
-        fromConnectorMng.setMethods(connectionMng.getFromConnector().getMethods());
-        fromConnectorMng.setOperators(connectionMng.getFromConnector().getOperators());
-        connectionMng.setFromConnector(fromConnectorMng);
-        //saving enhancements
-//        List<Enhancement> savedEnhancements = enhancementService.saveAll(connection.getEnhancements());
-//        connection.setEnhancements(savedEnhancements);
+        //bind fields
+        fieldBindingMngService.bind(connectionMng);
+
+        List<Enhancement> enhancements = connection.getEnhancements();
+        connection.setEnhancements(null);
 
         //saving connection
         Connection savedConnection = connectionRepository.save(connection);
-        connectionMng.setConnectionId(savedConnection.getId());
+
+        //saving enhancements
+        enhancements.forEach(enhancement -> enhancement.setConnection(savedConnection));
+        enhancementService.saveAll(enhancements);
 
         //saving connectionMng
+        connectionMng.setConnectionId(savedConnection.getId());
         return connectionMngService.save(connectionMng);
+    }
+
+    @Override
+    public Long createEmptyConnection() {
+        Connection saved = connectionRepository.save(new Connection());
+        ConnectionMng connectionMng = new ConnectionMng();
+        connectionMng.setConnectionId(saved.getId());
+        connectionMngService.save(connectionMng);
+        return saved.getId();
     }
 
     @Override
@@ -145,10 +148,8 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public ConnectionMng update(Connection connection, ConnectionMng uConnectionMng) {
-        Connection rConnection = getById(connection.getId());
-        connection.setIcon(rConnection.getIcon());
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
-        uConnectionMng.setId(connectionMng.getId());
+        getById(connection.getId());
+        connectionMngService.getByConnectionId(connection.getId());
         return save(connection, uConnectionMng);
     }
 

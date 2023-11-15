@@ -16,10 +16,12 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+@Document(collection ="method")
 public class MethodMng {
     @MongoId(targetType = FieldType.OBJECT_ID)
     private String id;

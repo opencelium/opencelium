@@ -12,19 +12,19 @@ import org.mapstruct.*;
 )
 @Named("enhancementMapper")
 public interface EnhancementMapper extends Mapper<Enhancement, EnhancementDTO> {
-    @Override
     @Named("toEntity")
     @Mappings({
-            @Mapping(target = "id", source = "enhanceId"),
             @Mapping(target = "simpleCode", expression = "java(\"\")"),
+            @Mapping(target = "expertCode", source = "script"),
+            @Mapping(target = "expertVar", source = "variables")
     })
     Enhancement toEntity(EnhancementDTO dto);
 
-    @Override
     @Named("toDTO")
     @Mappings({
-            @Mapping(target = "enhanceId", source = "id"),
             @Mapping(target = "simpleCode",ignore = true),
+            @Mapping(target = "script", source = "expertCode"),
+            @Mapping(target = "variables", source = "expertVar")
     })
     EnhancementDTO toDTO(Enhancement entity);
 }

@@ -1,3 +1,9 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
-public interface OperatorMngService { }
+import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
+
+import java.util.List;
+
+public interface OperatorMngService {
+    List<OperatorMng> saveAll(List<OperatorMng> operators);
+}

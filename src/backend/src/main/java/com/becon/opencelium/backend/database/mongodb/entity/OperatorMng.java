@@ -16,9 +16,11 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+@Document(collection = "operator")
 public class OperatorMng {
 
     @MongoId(targetType = FieldType.OBJECT_ID)
