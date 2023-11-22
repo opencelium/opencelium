@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 
 import { withTheme } from "styled-components";
 import { ControlsBlockProps } from "./interfaces";
@@ -30,6 +30,7 @@ import {
   setSavePanelVisibility,
   setTemplatePanelVisibility
 } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { getAllConnections } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import { ColorTheme } from "@style/Theme";
 import { TextSize } from "@app_component/base/text/interfaces";
 import AddTemplate from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_methods/AddTemplate";
@@ -46,14 +47,24 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
     logPanelHeight,
     isButtonPanelOpened,
     isSavePanelVisible,
-    isTemplatePanelVisible
+    isTemplatePanelVisible,
+    connections
   } = useAppSelector((state) => state.connectionReducer);
+
+  useEffect(() => {
+    dispatch(getAllConnections())
+  }, [])
 
   const { isFullScreen } = useAppSelector((state) => state.applicationReducer);
 
   const { data, connection, entity, updateEntity, currentTechnicalItem, setCurrentTechnicalItem } = props;
 
   let saveAndExit: any, saveAndGoToSchedule: any, loadTemplateData: any;
+
+  const [titleData, setTitleData] = useState<{title?: string, fromConfigurations?: boolean}>({});
+  const [descriptionData, setDescriptionData] = useState<{description?: string, fromConfigurations?: boolean}>({});
+
+  const [errorAction, setErrorAction] = useState({});
 
   if(data.additionalButtonsProps){
     saveAndExit = data.additionalButtonsProps.saveAndExit.onClick;
@@ -67,6 +78,55 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
 
   const toggleVisibleTemplatePanel = () => {
     dispatch(setTemplatePanelVisibility(!isTemplatePanelVisible))
+  }
+
+  const getTitle = (title: any) => {
+    setTitleData({title, fromConfigurations: true})
+  }
+
+  const getDescription = (description: any) => {
+    setDescriptionData({description, fromConfigurations: true})
+  }
+
+  const checkTitle = ({title, fromConfigurations}: any) => {
+    const specialCharacters = /[\/\\]/;
+    const connectionExist = connections.find(c => c.title === title && c.id !== connection.id);
+    if (title === '' && fromConfigurations) {
+      return {error: true, message: 'Title is a required field'};
+    }
+    else if(specialCharacters.test(title)){
+      return {error: true, message: 'Title cannot contain \"/\" and \"\\\" characters'};
+    }
+    else if(connectionExist){
+      return {error: true, message: 'Connection with such title already exist'};
+    }
+    else{
+      return {error: false, message: ''}
+    }
+  }
+
+  const updateConnection = (action: string) => {
+    const check = checkTitle(titleData);
+    if(check.error){
+      setErrorAction(check);
+    }
+    else{
+      if(titleData.fromConfigurations){
+        connection.title = titleData.title;
+      }
+      if(descriptionData.fromConfigurations){
+        connection.description = descriptionData.description;
+      }
+      if(action === 'update'){
+        data.justUpdate(connection)
+      }
+      else if(action === 'saveAndExit'){
+        saveAndExit(connection)
+      }
+      else if(action === 'saveAndGoToSchedule'){
+        saveAndGoToSchedule(connection, '/schedules/add', true)
+      }
+    }
   }
 
   return (
@@ -133,7 +193,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
       {/* settings */}
       <div className="wrapper">
         <div className="button_wrap">
-          <ConfigurationsIcon connection={connection} updateConnection={updateEntity} readOnly={props.readOnly}/>
+          <ConfigurationsIcon connection={connection} updateConnection={updateEntity} readOnly={props.readOnly} getTitle={getTitle} errorAction={errorAction} getDescription={getDescription}/>
         </div>
       </div>
 
@@ -251,7 +311,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
                   addingConnection === API_REQUEST_STATE.START ||
                   updatingConnection === API_REQUEST_STATE.START
                 }
-                handleClick={() => data.justUpdate(connection)}
+                handleClick={() => updateConnection('update')}
               />
 
               {/* add/update and close */}
@@ -273,7 +333,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
                   addingConnection === API_REQUEST_STATE.START ||
                   updatingConnection === API_REQUEST_STATE.START
                 }
-                onClick={() => saveAndExit(entity)}
+                onClick={() => updateConnection('saveAndExit')}
               />
 
               {/* add/update and go add/update schedule */}
@@ -295,7 +355,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
                   addingConnection === API_REQUEST_STATE.START ||
                   updatingConnection === API_REQUEST_STATE.START
                 }
-                handleClick={() => saveAndGoToSchedule(entity, '/schedules/add', true)}
+                handleClick={() => updateConnection('saveAndGoToSchedule')}
               />
             </div>
           )}

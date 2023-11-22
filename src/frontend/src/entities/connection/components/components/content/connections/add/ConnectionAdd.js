@@ -38,6 +38,7 @@ function mapStateToProps(state){
     const template = state.templateReducer
     const connector = state.connectorReducer;
     const connection = state.connectionReducer;
+    const category = state.categoryReducer;
     const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
         authUser,
@@ -54,6 +55,7 @@ function mapStateToProps(state){
         checkTitleResult: connection.isCurrentConnectionHasUniqueTitle,
         validatingFormMethods: connection.validatingFormMethods,
         validateFormMethodsResult: connection.validateFormMethodsResult,
+        categories: category.categories
     };
 }
 

@@ -66,12 +66,13 @@ export const ALL_COLORS = [
  */
 export default class CConnection{
 
-    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false){
+    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false, categoryId = null){
         if(connectionId !== 0){
             this._id = isId(connectionId) ? connectionId : 0;
         }
         this._title = title;
         this._description = description;
+        this._categoryId = categoryId;
         if(fromConnector !== null){
             fromConnector.connectorType = CONNECTOR_FROM;
         }
@@ -143,7 +144,8 @@ export default class CConnection{
         const template = connection && connection.hasOwnProperty('template') ? connection.template : null;
         const error = connection && connection.hasOwnProperty('error') ? connection.error : null;
         const readOnly = connection && connection.hasOwnProperty('readOnly') ? connection.readOnly : false;
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly);
+        const categoryId = connection && connection.hasOwnProperty('categoryId') ? connection.categoryId : null;
+        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly, categoryId);
     }
 
     static duplicateConnection(connection){
@@ -439,6 +441,14 @@ export default class CConnection{
 
     set description(description){
         this._description = description;
+    }
+
+    get categoryId(){
+        return this._categoryId;
+    }
+
+    set categoryId(categoryId){
+        this._categoryId = categoryId;
     }
 
     get fromConnector(){
@@ -941,6 +951,7 @@ export default class CConnection{
             fromConnector,
             toConnector,
             fieldBinding,
+            categoryId: this._categoryId,
         };
         if(this.hasOwnProperty('_id')){
             obj.id = this._id;

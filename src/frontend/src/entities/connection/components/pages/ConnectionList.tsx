@@ -28,12 +28,14 @@ import {ExternalApplicationStatus} from "@entity/external_application/requests/i
 import {INotification, NotificationType} from "@application/interfaces/INotification";
 import { addNotification } from '@application/redux_toolkit/slices/ApplicationSlice';
 import { ConnectionPermissions } from '@entity/connection/constants';
+import { Category } from '@entity/category/classes/Category';
 
 const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
     const {gettingMetaConnections, metaConnections, deletingConnectionsById, updatingConnection} = Connection.getReduxState();
     const {neo4jCheckResults} = ExternalApplication.getReduxState();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
+    const { activeCategory } = Category.getReduxState();
     useEffect(() => {
         dispatch(getAllMetaConnections());
         dispatch(checkNeo4j())
@@ -54,7 +56,14 @@ const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions
             dispatch(addNotification(notification))
         }
     },[neo4jCheckResults])
-    const CConnections = new Connections(metaConnections, dispatch, deletingConnectionsById, updatingConnection);
+    let filteredConnections;
+    if(activeCategory){
+        filteredConnections = metaConnections.filter(c => c.title === activeCategory || activeCategory === 'All')
+    }
+    else{
+        filteredConnections = metaConnections;
+    }
+    const CConnections = new Connections(filteredConnections, dispatch, deletingConnectionsById, updatingConnection);
     return (
         <CollectionView collection={CConnections} shouldBeUpdated={shouldBeUpdated} isLoading={gettingMetaConnections === API_REQUEST_STATE.START} componentPermission={ConnectionPermissions}/>
     )
