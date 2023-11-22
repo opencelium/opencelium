@@ -31,11 +31,10 @@ import {Schedule} from "../classes/Schedule";
 import {
     deleteSchedulesById,
     startSchedule,
-    switchScheduleStatus, updateSchedule
+    switchScheduleStatus, switchScheduleLogsStatus
 } from "../redux_toolkit/action_creators/ScheduleCreators";
 import {deleteWebhook, getWebhook} from "../redux_toolkit/action_creators/WebhookCreators";
 import {copyWebhookToClipboard} from "../redux_toolkit/slices/ScheduleSlice";
-import {SchedulesIdRequestProps} from "../requests/interfaces/ISchedule";
 import {SchedulePermissions} from "../constants";
 import {LastSuccessExecution} from "../components/last_success_execution/LastSuccessExecution";
 import ScheduleNotificationsIcon
@@ -43,10 +42,10 @@ import ScheduleNotificationsIcon
 import {ExecutionStatus} from "../components/execution_status/ExecutionStatus";
 import LastDurationExecution from "../components/last_duration_execution/LastDurationExecution";
 import LastFailExecution from "../components/last_fail_execution/LastFailExecution";
-import {InlineEditInput} from "@app_component/collection/collection_view/InlineEditInput";
 import SelectedNotificationButton
     from "@entity/schedule/components/selected_notification_button/SelectedNotificationButton";
 import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
+import InputSwitch from "@app_component/base/input/switch/InputSwitch";
 
 class Schedules extends ListCollection<ScheduleProps>{
     name: string = 'schedules';
@@ -57,41 +56,21 @@ class Schedules extends ListCollection<ScheduleProps>{
     getListRawUrl = (entity: ISchedule) => `${entity.id}/update`;
     ListRawComponent = DefaultListRaw;
     sortingProps: ScheduleProps[] = ['title'];
-    listProps: ListProp<ScheduleProps>[] = [{
-        propertyKey: 'title',
+    listProps: ListProp<ScheduleProps>[] = [
+    {
+        propertyKey: 'status',
         getValue: (schedule: ISchedule) => {
-            if(schedule.webhook){
-                return (
-                    <div style={{position: 'relative'}}>
-                        <Button iconSize={TextSize.Size_12} position={'absolute'} icon={'file_copy'} hasBackground={false} color={ColorTheme.Turquoise} handleClick={() => {
-                            copyStringToClipboard(schedule.webhook.url);
-                            this.dispatch(copyWebhookToClipboard())
-                        }}/>
-                        <InlineEditInput
-                            maxLength={100}
-                            isInProcess={this.updatingSchedule === API_REQUEST_STATE.START}
-                            updateValue={(newValue) => {
-                                schedule.title = newValue;
-                                this.dispatch(updateSchedule(schedule.getModel(true)));
-                            }}
-                            initialValue={schedule.title}
-                        />
-                    </div>
-                );
-            } else{
-                return(
-                    <InlineEditInput
-                        isInProcess={this.updatingSchedule === API_REQUEST_STATE.START}
-                        updateValue={(newValue) => {
-                            schedule.title = newValue;
-                            this.dispatch(updateSchedule(schedule.getModel(true)));
-                        }}
-                        initialValue={schedule.title}
-                    />
-                );
-            }
-        },
-        width: '15%',
+            return (
+                <ExecutionStatus
+                    readOnly={!schedule.cronExp}
+                    key={schedule.id}
+                    schedule={schedule}
+                    hasActions={this.hasActions}
+                    onClick={() => {schedule.status = schedule.status === 0 ? 1 : 0; this.dispatch(switchScheduleStatus(schedule.getModel()))}}
+                />
+            )},
+        replace: true,
+        width: '10%',
     }, {
         propertyKey: 'connection.title',
         width: '15%',
@@ -131,27 +110,41 @@ class Schedules extends ListCollection<ScheduleProps>{
         getValue: (schedule: ISchedule) => {return <LastDurationExecution schedule={schedule}/>},
         width: '10%',
     }, {
-        propertyKey: 'status',
+        propertyKey: 'debugMode',
         getValue: (schedule: ISchedule) => {
-            return (
-                <ExecutionStatus
-                    readOnly={!schedule.cronExp}
-                    key={schedule.id}
-                    schedule={schedule}
-                    hasActions={this.hasActions}
-                    onClick={() => {schedule.status = schedule.status === 0 ? 1 : 0; this.dispatch(switchScheduleStatus(schedule.getModel()))}}
-                />
-            )},
-        replace: true,
+            return  <InputSwitch 
+                        readOnly={false} 
+                        color={ColorTheme.Turquoise} 
+                        isChecked={schedule.debugMode}
+                        position={'middle'} 
+                        onClick={() => this.dispatch(switchScheduleLogsStatus({
+                            ...schedule.getModel(), debugMode: !schedule.debugMode
+                        }))}
+                    />
+        },
         width: '10%',
     }, {
-        propertyKey: 'debugMode',
-        getValue: (schedule: ISchedule) => {return schedule.debugMode ? 'on' : 'off'},
+        propertyKey: 'webhook',
+        getValue: (schedule: ISchedule) => {
+            if(schedule.webhook){
+                return (
+                    <Button 
+                        iconSize={TextSize.Size_12} 
+                        icon={'file_copy'} 
+                        hasBackground={false} 
+                        color={ColorTheme.Turquoise} 
+                        handleClick={() => {
+                            copyStringToClipboard(schedule.webhook.url);
+                            this.dispatch(copyWebhookToClipboard())
+                        }}
+                    />
+                );
+            }
+        },
         width: '10%',
     }];
     gridProps = {title: 'title'};
     translations = {
-        title: 'Title',
         connectionTitle: 'Connection',
         cronExp: 'Cron',
         lastSuccessExecution: 'Last Success',
@@ -159,6 +152,7 @@ class Schedules extends ListCollection<ScheduleProps>{
         lastDuration: 'Last Duration',
         status: 'Status',
         debugMode: 'Logs',
+        webhook: 'W'
     };
     getTopActions = (viewType: ViewType, checkedIds: number[] = []) => {
         const hasSearch = this.hasSearch && this.entities.length > 0;
