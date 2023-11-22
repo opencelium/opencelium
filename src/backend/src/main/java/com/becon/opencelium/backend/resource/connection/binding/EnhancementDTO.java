@@ -22,7 +22,7 @@ import jakarta.annotation.Resource;
 
 @Resource
 public class EnhancementDTO {
-    private String name;
+    private String title;
     private String description;
     private String script;
     private String variables;
@@ -33,19 +33,19 @@ public class EnhancementDTO {
     }
 
     public EnhancementDTO(Enhancement enhancement) {
-        this.name = enhancement.getName();
+        this.title = enhancement.getTitle();
         this.description = enhancement.getDescription();
-        this.script = enhancement.getExpertCode();
-        this.variables = enhancement.getExpertVar();
+        this.script = enhancement.getScript();
+        this.variables = enhancement.getVariables();
         this.simpleCode = null;
         this.language = enhancement.getLanguage();
     }
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDescription() {
@@ -69,7 +69,7 @@ public class EnhancementDTO {
     }
 
     public void setVariables(String variables) {
-        this.variables = this.variables;
+        this.variables = variables;
     }
 
     public SimpleCodeDTO getSimpleCode() {

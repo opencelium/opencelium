@@ -21,7 +21,6 @@ import org.mapstruct.ReportingPolicy;
 public interface ConnectionMngMapper extends Mapper<ConnectionMng,ConnectionDTO> {
     @Named("toEntity")
     @Mappings({
-            @Mapping(target = "id", source = "nodeId"),
             @Mapping(target = "toConnector", qualifiedByName = {"connectorMngMapper", "toEntity"}),
             @Mapping(target = "fromConnector", qualifiedByName = {"connectorMngMapper", "toEntity"}),
             @Mapping(target = "fieldBindings", qualifiedByName = {"fieldBindingMngMapper", "toEntityAll"})
@@ -31,7 +30,6 @@ public interface ConnectionMngMapper extends Mapper<ConnectionMng,ConnectionDTO>
 
     @Named("toDTO")
     @Mappings({
-            @Mapping(target = "nodeId", source = "id"),
             @Mapping(target = "toConnector", qualifiedByName = {"connectorMngMapper", "toDTO"}),
             @Mapping(target = "fromConnector", qualifiedByName = {"connectorMngMapper", "toDTO"}),
             @Mapping(target = "fieldBindings", qualifiedByName = {"fieldBindingMngMapper", "toDTOAll"})

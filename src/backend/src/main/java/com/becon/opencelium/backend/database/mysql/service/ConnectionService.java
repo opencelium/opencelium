@@ -18,6 +18,8 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.github.fge.jsonpatch.JsonPatch;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -35,8 +37,8 @@ public interface ConnectionService {
     List<Connection> findAll();
 
     boolean existsByName(String name);
-    boolean existsById(Long id);
 
+    boolean existsById(Long id);
     List<Connection> findAllByConnectorId(int connectorId);
 
     List<Connection> findAllByNameContains(String name);
@@ -46,4 +48,12 @@ public interface ConnectionService {
     Connection getById(Long connectionId);
 
     Long createEmptyConnection();
+
+    void patchUpdate(Long connectionId, JsonPatch patch);
+
+    String addOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch);
+
+    String addMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch);
+
+    String addEnhancement(Long connectionId, String fieldBindingId, JsonPatch patch);
 }

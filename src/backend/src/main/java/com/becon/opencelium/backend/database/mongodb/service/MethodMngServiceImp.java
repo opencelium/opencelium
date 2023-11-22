@@ -18,4 +18,9 @@ public class MethodMngServiceImp implements MethodMngService {
     public List<MethodMng> saveAll(List<MethodMng> methods) {
         return methodMngRepository.saveAll(methods);
     }
+
+    @Override
+    public MethodMng save(MethodMng methodMng) {
+        return methodMngRepository.save(methodMng);
+    }
 }

@@ -22,7 +22,7 @@ import jakarta.annotation.Resource;
 @Resource
 public class ResponseDTO {
 
-    private String nodeId;
+    private String id;
 
     private String name = "response";
     private ResultDTO success;
@@ -39,12 +39,12 @@ public class ResponseDTO {
         }
     }
 
-    public String getNodeId() {
-        return nodeId;
+    public String getId() {
+        return id;
     }
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {

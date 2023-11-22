@@ -28,6 +28,9 @@ import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -47,6 +50,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/connection", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -58,22 +62,19 @@ public class ConnectionController {
     private final ConnectionMngService connectionMngService;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
-    private final Mapper<OperatorMng, OperatorDTO> operatorMapper;
 
     public ConnectionController(
             Environment environment,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
-            Mapper<OperatorMng, OperatorDTO> operatorMapper,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService
-    ) {
+            ) {
         this.environment = environment;
         this.connectionService = connectionService;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
         this.connectionMngService = connectionMngService;
-        this.operatorMapper = operatorMapper;
     }
 
     @Operation(summary = "Retrieves all connections from database")
@@ -155,6 +156,67 @@ public class ConnectionController {
         return ResponseEntity.created(uri).body(connectionDTO);
     }
 
+    //TODO: need to add description
+    @PatchMapping(path = "/{connectionId}", consumes = "application/json-patch+json")
+    public ResponseEntity<?> patchUpdate(@PathVariable Long connectionId, @RequestBody JsonPatch patch){
+        connectionService.patchUpdate(connectionId, patch);
+        return ResponseEntity.ok().build();
+    }
+
+    //TODO: need to add description
+    @PatchMapping(
+            path = {
+                    "/{connectionId}/connector/{connectorId}/operator/{operatorId}",
+                    "/{connectionId}/connector/{connectorId}/operator"
+            },
+            consumes = "application/json-patch+json"
+    )
+    public ResponseEntity<?> addOperator(
+            @PathVariable Long connectionId,
+            @PathVariable Integer connectorId,
+            @PathVariable Optional<String> operatorId,
+            @RequestBody JsonPatch patch
+    ){
+        String id = connectionService.addOperator(connectionId, connectorId, operatorId.orElse(null), patch);
+        return ResponseEntity.ok(id);
+    }
+
+    //TODO: need to add description
+    @PatchMapping(
+            path = {
+                    "/{connectionId}/connector/{connectorId}/method/{methodId}",
+                    "/{connectionId}/connector/{connectorId}/method"
+            },
+            consumes = "application/json-patch+json"
+    )
+    public ResponseEntity<?> addMethod(
+            @PathVariable Long connectionId,
+            @PathVariable Integer connectorId,
+            @PathVariable Optional<String> methodId,
+            @RequestBody JsonPatch patch
+    ){
+        String id = connectionService.addMethod(connectionId, connectorId, methodId.orElse(null), patch);
+        return ResponseEntity.ok(id);
+    }
+
+    //TODO: need to add description
+    @PatchMapping(
+            path = {
+                    "/{connectionId}/fieldBinding",
+                    "/{connectionId}/fieldBinding/{fieldBindingId}"
+            },
+            consumes = "application/json-patch+json"
+    )
+    public ResponseEntity<?> addEnhancement(
+            @PathVariable Long connectionId,
+            @PathVariable Optional<String> fieldBindingId,
+            @RequestBody JsonPatch patch
+    ){
+        String id = connectionService.addEnhancement(connectionId, fieldBindingId.orElse(""), patch);
+        return ResponseEntity.ok(id);
+    }
+
+
     @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -199,39 +261,6 @@ public class ConnectionController {
         connection.setId(connectionId);
         ConnectionMng updatedConnection = connectionService.update(connection, connectionMng);
         return ResponseEntity.ok(connectionMngMapper.toDTO(updatedConnection));
-    }
-
-    @Operation(summary = "")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201",
-                    description = "Operator has been successfully created",
-                    content = @Content(schema = @Schema(implementation = OperatorDTO.class))),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @PostMapping(path = "/{connectionId}/connector/{connectorId}/operator", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> addOperator(
-            @PathVariable Long connectionId,
-            @PathVariable Integer connectorId,
-            @RequestBody OperatorDTO operatorDTO
-    ) throws Exception {
-        OperatorMng operatorMng =
-                connectionMngService.addOperator(
-                        connectionId,
-                        connectorId,
-                        operatorMapper.toEntity(operatorDTO)
-                );
-
-        final URI uri = MvcUriComponentsBuilder
-                .fromController(getClass())
-                .path("/{connectionId}/connector/{connectorId}/operator")
-                .buildAndExpand(connectionId, connectorId).toUri();
-
-        return ResponseEntity.created(uri).body(operatorMng);
     }
 
     @Operation(summary = "Validates a connection for correctly constructed structure")

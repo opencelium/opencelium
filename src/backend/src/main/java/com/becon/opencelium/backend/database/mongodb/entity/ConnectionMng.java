@@ -25,15 +25,14 @@ import java.util.List;
 public class ConnectionMng {
     @MongoId(targetType = FieldType.OBJECT_ID)
     private String id; // id generated in mongodb
-    @Field(name = "connection_id")
     @Indexed
+    @Field(name = "connection_id")
     private Long connectionId; // id generated in mariadb.
     private String title;
     @Field(name = "from_connector")
     private ConnectorMng fromConnector;
     @Field(name = "to_connector")
     private ConnectorMng toConnector;
-
     @DBRef
     private List<FieldBindingMng> fieldBindings;
     public ConnectionMng() {

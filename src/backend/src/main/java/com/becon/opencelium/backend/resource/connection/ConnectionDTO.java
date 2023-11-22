@@ -27,7 +27,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConnectionDTO {
 
-    private String nodeId; // id generated in mongo
+    private String id; // id generated in mongo
     private Long connectionId; // id generated in mariadb.
     private String title;
     private String description;
@@ -37,12 +37,12 @@ public class ConnectionDTO {
     private List<FieldBindingDTO> fieldBindings;
     private BusinessLayoutResource businessLayout;
 
-    public String getNodeId() {
-        return nodeId;
+    public String getId() {
+        return id;
     }
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Long getConnectionId() {

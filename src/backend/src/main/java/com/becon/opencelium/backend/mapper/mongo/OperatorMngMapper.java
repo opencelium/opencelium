@@ -18,14 +18,12 @@ import java.util.List;
 public interface OperatorMngMapper extends Mapper<OperatorMng, OperatorDTO> {
     @Named("toEntity")
     @Mappings({
-            @Mapping(target = "id", source = "nodeId"),
             @Mapping(target = "condition", qualifiedByName ={"conditionMngMapper", "toEntity"})
     })
     OperatorMng toEntity(OperatorDTO operatorDTO);
 
     @Named("toDTO")
     @Mappings({
-            @Mapping(target = "nodeId", source = "id"),
             @Mapping(target = "condition", qualifiedByName ={"conditionMngMapper", "toDTO"})
     })
     OperatorDTO toDTO(OperatorMng operatorMng);

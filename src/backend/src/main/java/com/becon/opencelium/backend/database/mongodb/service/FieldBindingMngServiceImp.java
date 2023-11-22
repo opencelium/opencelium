@@ -4,10 +4,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.FieldBindingRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class FieldBindingMngServiceImp implements FieldBindingMngService {
@@ -20,6 +17,21 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     @Override
     public List<FieldBindingMng> saveAll(List<FieldBindingMng> fieldBindings) {
         return fieldBindingRepository.saveAll(fieldBindings);
+    }
+
+    @Override
+    public FieldBindingMng save(FieldBindingMng fieldBindingMng) {
+        return fieldBindingRepository.save(fieldBindingMng);
+    }
+
+    @Override
+    public Optional<FieldBindingMng> findById(String fieldBindingId) {
+        return fieldBindingRepository.findById(fieldBindingId);
+    }
+
+    @Override
+    public List<FieldBindingMng> findAllByEnhancementId(List<Integer> ids) {
+        return fieldBindingRepository.findAllByEnhancementIdIn(ids);
     }
 
     @Override

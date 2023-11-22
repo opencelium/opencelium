@@ -18,4 +18,9 @@ public class OperatorMngServiceImp implements OperatorMngService{
     public List<OperatorMng> saveAll(List<OperatorMng> operators) {
         return operatorMngRepository.saveAll(operators);
     }
+
+    @Override
+    public OperatorMng save(OperatorMng operatorMng) {
+        return operatorMngRepository.save(operatorMng);
+    }
 }

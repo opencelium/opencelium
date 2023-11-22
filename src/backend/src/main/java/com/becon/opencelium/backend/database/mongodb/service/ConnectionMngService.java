@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.github.fge.jsonpatch.JsonPatch;
 
 import java.util.List;
 
@@ -15,5 +15,9 @@ public interface ConnectionMngService {
 
     void delete(Long id);
 
-    OperatorMng addOperator(Long connectionId, Integer connectorId, OperatorMng toEntity);
+    String addMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch);
+
+    String addOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch);
+
+    FieldBindingMng addEnhancement(Long connectionId, JsonPatch patch, FieldBindingMng fieldBindingMng);
 }

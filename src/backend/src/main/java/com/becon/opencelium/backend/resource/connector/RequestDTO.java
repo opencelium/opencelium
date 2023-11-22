@@ -24,7 +24,7 @@ import java.util.Map;
 @Resource
 public class RequestDTO {
 
-    private String nodeId;
+    private String id;
     private String endpoint;
     private String method;
     private Map<String, String> header;
@@ -42,12 +42,12 @@ public class RequestDTO {
         }
     }
 
-    public String getNodeId() {
-        return nodeId;
+    public String getId() {
+        return id;
     }
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getEndpoint() {

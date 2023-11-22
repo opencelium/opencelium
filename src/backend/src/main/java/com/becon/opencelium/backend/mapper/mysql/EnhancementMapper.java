@@ -15,16 +15,12 @@ public interface EnhancementMapper extends Mapper<Enhancement, EnhancementDTO> {
     @Named("toEntity")
     @Mappings({
             @Mapping(target = "simpleCode", expression = "java(\"\")"),
-            @Mapping(target = "expertCode", source = "script"),
-            @Mapping(target = "expertVar", source = "variables")
     })
     Enhancement toEntity(EnhancementDTO dto);
 
     @Named("toDTO")
     @Mappings({
             @Mapping(target = "simpleCode",ignore = true),
-            @Mapping(target = "script", source = "expertCode"),
-            @Mapping(target = "variables", source = "expertVar")
     })
     EnhancementDTO toDTO(Enhancement entity);
 }

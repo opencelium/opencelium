@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface OperatorMngService {
     List<OperatorMng> saveAll(List<OperatorMng> operators);
+
+    OperatorMng save(OperatorMng operatorMng);
 }

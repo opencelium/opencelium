@@ -17,14 +17,25 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
 import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
+import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
+import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
+import com.becon.opencelium.backend.utility.patch.PatchHelper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
 import com.mongodb.MongoException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
@@ -32,6 +43,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +56,12 @@ public class ConnectionServiceImp implements ConnectionService {
     private final FieldBindingMngService fieldBindingMngService;
     private final SchedulerService schedulerService;
     private final EnhancementService enhancementService;
+    private final PatchHelper patchHelper;
+    private final Mapper<Connector, ConnectorDTO> connectorMapper;
+    private final Mapper<ConnectorMng, ConnectorDTO> connectorMngMapper;
+    private final Mapper<Enhancement, EnhancementDTO> enhancementMapper;
+    private final Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMapper;
+    private final ObjectMapper objectMapper;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -51,7 +69,13 @@ public class ConnectionServiceImp implements ConnectionService {
             @Qualifier("connectionMngServiceImp") ConnectionMngServiceImp connectionMngService,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
             @Lazy @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
-            @Qualifier("enhancementServiceImp") EnhancementService enhancementService
+            @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
+            PatchHelper patchHelper,
+            Mapper<Connector, ConnectorDTO> connectorMapper,
+            Mapper<ConnectorMng, ConnectorDTO> connectorMngMapper,
+            Mapper<Enhancement, EnhancementDTO> enhancementMapper,
+            Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMapper,
+            ObjectMapper objectMapper
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -59,6 +83,12 @@ public class ConnectionServiceImp implements ConnectionService {
         this.schedulerService = schedulerService;
         this.connectionMngService = connectionMngService;
         this.enhancementService = enhancementService;
+        this.patchHelper = patchHelper;
+        this.connectorMapper = connectorMapper;
+        this.connectorMngMapper = connectorMngMapper;
+        this.enhancementMapper = enhancementMapper;
+        this.fieldBindingMapper = fieldBindingMapper;
+        this.objectMapper = objectMapper;
     }
 
 
@@ -97,6 +127,74 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    public void patchUpdate(Long connectionId, JsonPatch patch) {
+        Connection connection = getById(connectionId);
+        connection.setEnhancements(null);
+        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+
+        Connection updatedConnection = patchHelper.patch(patch, connection, Connection.class);
+        JsonPatch patchForConnectionMng = removeAndCorrectForConnectionMng(patch);
+        ConnectionMng updatedConnectionMng = patchHelper.patch(patchForConnectionMng, connectionMng, ConnectionMng.class);
+
+        saveAfterPatchUpdate(updatedConnection, updatedConnectionMng);
+    }
+
+    private JsonPatch removeAndCorrectForConnectionMng(JsonPatch patch) {
+        JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        while(nodes.hasNext()) {
+            String path = nodes.next().get("path").textValue();
+            if(path.equals("/fromConnector") || path.equals("/toConnector")){
+                nodes.remove();
+            }
+        }
+        return objectMapper.convertValue(jsonNode, JsonPatch.class);
+    }
+
+    private void saveAfterPatchUpdate(Connection connection, ConnectionMng connectionMng) {
+
+        if (connection.getFromConnector() != 0 || connection.getFromConnector() != 0 && connection.getFromConnector() != connectionMng.getFromConnector().getConnectorId()) {
+            Connector fromConnector = connectorService.getById(connection.getFromConnector());
+            connectionMng.setFromConnector(connectorMngMapper.toEntity(connectorMapper.toDTO(fromConnector)));
+        }
+
+        if (connection.getToConnector() != 0 || connection.getToConnector() != 0 && connection.getToConnector() != connectionMng.getToConnector().getConnectorId()) {
+            Connector toConnector = connectorService.getById(connection.getToConnector());
+            connectionMng.setToConnector(connectorMngMapper.toEntity(connectorMapper.toDTO(toConnector)));
+        }
+        connectionRepository.save(connection);
+        connectionMngService.save(connectionMng);
+    }
+    @Override
+    public String addOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch) {
+        return connectionMngService.addOperator(connectionId, connectorId, operatorId, patch);
+    }
+
+    @Override
+    public String addMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch) {
+        return connectionMngService.addMethod(connectionId, connectorId, methodId, patch);
+    }
+
+    @Override
+    public String addEnhancement(Long connectionId, String fieldBindingId, JsonPatch patch) {
+        Connection connection = getById(connectionId);
+
+        FieldBindingMng fieldBindingMng = fieldBindingMngService.findById(fieldBindingId).orElse(new FieldBindingMng());
+
+        FieldBindingMng savedFieldBinding = connectionMngService.addEnhancement(connectionId, patch, fieldBindingMng);
+
+        //getting enhancement from saved fieldBinding
+        Enhancement enhancement = enhancementMapper.toEntity(fieldBindingMapper.toDTO(savedFieldBinding).getEnhancement());
+        enhancement.setConnection(connection);
+        Enhancement savedEnhancement = enhancementService.save(enhancement);
+
+        savedFieldBinding.setEnhancementId(savedEnhancement.getId());
+        fieldBindingMngService.save(fieldBindingMng);
+
+        return savedFieldBinding.getFieldBindingId();
+    }
+
+    @Override
     public void deleteById(Long id) {
         Connection connection = getById(id);
         List<Scheduler> schedulers = connection.getSchedulers();
@@ -128,12 +226,12 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public List<Connection> findAllByNameContains(String name) {
-        return connectionRepository.findAllByNameContains(name);
+        return connectionRepository.findAllByTitleContains(name);
     }
 
     @Override
     public boolean existsByName(String name) {
-        return connectionRepository.existsByName(name);
+        return connectionRepository.existsByTitle(name);
     }
 
     @Override

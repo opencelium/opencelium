@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -12,6 +13,9 @@ public class FieldBindingMng {
     @MongoId(targetType = FieldType.OBJECT_ID)
     @Field(name = "field_binding_id")
     private String fieldBindingId;
+    @Indexed
+    @Field(name = "enhancement_id")
+    private Integer enhancementId;
     private List<LinkedFieldMng> from;
     private EnhancementMng enhancement;
     private List<LinkedFieldMng> to;
@@ -49,5 +53,13 @@ public class FieldBindingMng {
 
     public void setFieldBindingId(String fieldBindingId) {
         this.fieldBindingId = fieldBindingId;
+    }
+
+    public Integer getEnhancementId() {
+        return enhancementId;
+    }
+
+    public void setEnhancementId(Integer enhancementId) {
+        this.enhancementId = enhancementId;
     }
 }

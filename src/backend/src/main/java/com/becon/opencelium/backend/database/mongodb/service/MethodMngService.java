@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface MethodMngService {
     List<MethodMng> saveAll(List<MethodMng> methods);
+
+    MethodMng save(MethodMng methodMng);
 }

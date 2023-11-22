@@ -16,6 +16,10 @@
 
 package com.becon.opencelium.backend.utility;
 
+import com.becon.opencelium.backend.constant.PathConstant;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -45,5 +49,14 @@ public class StringUtility {
         return parts.stream()
                 .filter(p -> p.contains(".jpg") || p.contains("jpeg") || p.contains("png"))
                 .findFirst().orElseThrow(() -> new RuntimeException("Format should be jpg, jpeg or png"));
+    }
+
+    public static String resolveImagePath(String image) {
+        if (image == null || image.trim().isBlank()) {
+            return null;
+        }
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
+        String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
+        return imagePath + image;
     }
 }

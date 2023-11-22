@@ -18,7 +18,6 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.repository.EnhancementRepository;
-import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class EnhancementServiceImp implements EnhancementService{
+public class EnhancementServiceImp implements EnhancementService {
 
     private final EnhancementRepository enhancementRepository;
 
@@ -62,6 +61,7 @@ public class EnhancementServiceImp implements EnhancementService{
 
     @Override
     public Optional<Enhancement> findById(Integer enhId) {
+        if (enhId == null) return Optional.empty();
         return enhancementRepository.findById(enhId);
     }
 

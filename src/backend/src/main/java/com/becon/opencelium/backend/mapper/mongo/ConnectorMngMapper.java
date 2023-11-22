@@ -27,7 +27,6 @@ public interface ConnectorMngMapper extends Mapper<ConnectorMng, ConnectorDTO> {
 
     @Named("toEntity")
     @Mappings({
-            @Mapping(target = "id", source = "nodeId"),
             @Mapping(target = "methods", qualifiedByName = {"methodMngMapper","toEntityAll"}),
             @Mapping(target = "operators", qualifiedByName = {"operatorMngMapper","toEntityAll"})
     })
