@@ -1,12 +1,16 @@
 package com.becon.opencelium.backend.execution;
 
-import com.becon.opencelium.backend.execution.action.Action;
-import com.becon.opencelium.backend.execution.action.Operation;
-import com.becon.opencelium.backend.execution.oc721.RequiredData;
+import com.becon.opencelium.backend.execution.action.Loop;
+import com.becon.opencelium.backend.execution.oc721.Operation;
+
+import java.util.Map;
 
 public interface ExecutionManager {
     String getQueryParam(String param);
-    void addAction(Action action);
-    RequiredData getRequiredData(String ctorId);
+
+    void addLoop(Loop loop);
+
+    Map<String, String> getRequiredData(String ctorId);
+
     Operation findOperationByColor(String color);
 }

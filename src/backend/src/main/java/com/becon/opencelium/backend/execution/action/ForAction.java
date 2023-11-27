@@ -7,9 +7,4 @@ public class ForAction implements Action, Loop {
     private String counterName;
     private Integer counterValue;
     private ExecutionManager executionManager;
-
-    @Override
-    public Object execute(String ref) {
-        return null;
-    }
 }

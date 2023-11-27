@@ -1,19 +1,14 @@
-package com.becon.opencelium.backend.execution.action;
+package com.becon.opencelium.backend.execution.oc721;
 
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
 
-public class Operation implements Action {
+public class Operation {
     private String id;
     private String color;
     private Integer aggregatorId;
-    private RequestEntity<?> request;
+    private Map<String, RequestEntity<?>> requests;
     private Map<String, ResponseEntity<?>> responses;
-
-    @Override
-    public Object execute(String ref) {
-        return null;
-    }
 }
