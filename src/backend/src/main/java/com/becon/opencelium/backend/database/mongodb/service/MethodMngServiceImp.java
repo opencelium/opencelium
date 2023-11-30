@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.repository.MethodMngRepository;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,5 +23,10 @@ public class MethodMngServiceImp implements MethodMngService {
     @Override
     public MethodMng save(MethodMng methodMng) {
         return methodMngRepository.save(methodMng);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        methodMngRepository.delete(methodMngRepository.findById(id).orElse(new MethodMng()));
     }
 }

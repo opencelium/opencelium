@@ -8,4 +8,6 @@ public interface MethodMngService {
     List<MethodMng> saveAll(List<MethodMng> methods);
 
     MethodMng save(MethodMng methodMng);
+
+    void deleteById(String id);
 }

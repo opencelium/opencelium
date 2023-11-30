@@ -81,4 +81,9 @@ public class EnhancementServiceImp implements EnhancementService {
         return enhancementRepository.existsById(id);
     }
 
+    @Override
+    public void deleteById(Integer id) {
+        enhancementRepository.deleteById(id);
+    }
+
 }

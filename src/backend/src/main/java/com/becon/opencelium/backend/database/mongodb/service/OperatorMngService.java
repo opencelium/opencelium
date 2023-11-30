@@ -8,4 +8,6 @@ public interface OperatorMngService {
     List<OperatorMng> saveAll(List<OperatorMng> operators);
 
     OperatorMng save(OperatorMng operatorMng);
+
+    void deleteById(String id);
 }

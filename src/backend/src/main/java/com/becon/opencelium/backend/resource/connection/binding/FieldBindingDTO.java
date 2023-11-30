@@ -25,6 +25,7 @@ import java.util.List;
 @Resource
 public class FieldBindingDTO {
     private String fieldBindingId;
+    private Integer enhancementId;
     private List<LinkedFieldDTO> from;
     private EnhancementDTO enhancement;
     private List<LinkedFieldDTO> to;
@@ -59,5 +60,13 @@ public class FieldBindingDTO {
 
     public void setFieldBindingId(String fieldBindingId) {
         this.fieldBindingId = fieldBindingId;
+    }
+
+    public Integer getEnhancementId() {
+        return enhancementId;
+    }
+
+    public void setEnhancementId(Integer enhancementId) {
+        this.enhancementId = enhancementId;
     }
 }

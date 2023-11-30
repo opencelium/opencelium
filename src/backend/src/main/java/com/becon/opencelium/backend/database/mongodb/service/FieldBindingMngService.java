@@ -15,4 +15,6 @@ public interface FieldBindingMngService {
 
     Optional<FieldBindingMng> findById(String fieldBindingId);
     List<FieldBindingMng> findAllByEnhancementId(List<Integer> ids);
+
+    void deleteById(String id);
 }

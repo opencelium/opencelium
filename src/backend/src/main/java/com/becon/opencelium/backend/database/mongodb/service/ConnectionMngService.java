@@ -15,9 +15,11 @@ public interface ConnectionMngService {
 
     void delete(Long id);
 
-    String addMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch);
+    String updateMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch);
 
-    String addOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch);
+    String updateOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch);
 
-    FieldBindingMng addEnhancement(Long connectionId, JsonPatch patch, FieldBindingMng fieldBindingMng);
+    FieldBindingMng updateFieldBinding(Long connectionId, JsonPatch patch, FieldBindingMng fieldBindingMng);
+
+    ConnectionMng patchUpdate(Long connectionId, JsonPatch patch);
 }

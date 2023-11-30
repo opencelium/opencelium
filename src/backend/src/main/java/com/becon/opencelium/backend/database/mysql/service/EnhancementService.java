@@ -34,4 +34,7 @@ public interface EnhancementService {
     FieldBindingDTO toFieldBindingResource(Enhancement enhancement);
 
     boolean existById(Integer id);
+
+    void deleteById(Integer id);
+
 }

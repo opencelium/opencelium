@@ -4,10 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Collection;
 
 @Component
@@ -32,7 +36,7 @@ public class PatchHelper {
         JsonNode jsonNode = applyPatch(patch, targetBean);
         try {
             return convert(jsonNode, beanClass);
-        } catch (JsonProcessingException e){
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
@@ -50,7 +54,34 @@ public class PatchHelper {
         return mapper.treeToValue(jsonNode, beanClass);
     }
 
-    public <T extends Collection<?>> Integer parseToIndex(String index, T list) {
-        return (index.equals("-")) ? list.size() - 1 : Integer.parseInt(index);
+    public JsonPatch getJsonPatch(String op, String path, Object value) {
+        if (value == null) {
+            return getJsonPatch(op, path);
+        }
+        ObjectNode node = JsonNodeFactory.instance.objectNode();
+        ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
+        node.put("op", op);
+        node.put("path", path);
+        node.set("value", mapper.valueToTree(value));
+        arrayNode.add(node);
+        try {
+            return JsonPatch.fromJson(arrayNode);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
+
+    public JsonPatch getJsonPatch(String op, String path) {
+        ObjectNode node = JsonNodeFactory.instance.objectNode();
+        ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
+        node.put("op", op);
+        node.put("path", path);
+        arrayNode.add(node);
+        try {
+            return JsonPatch.fromJson(arrayNode);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

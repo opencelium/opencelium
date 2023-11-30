@@ -23,4 +23,9 @@ public class OperatorMngServiceImp implements OperatorMngService{
     public OperatorMng save(OperatorMng operatorMng) {
         return operatorMngRepository.save(operatorMng);
     }
+
+    @Override
+    public void deleteById(String id) {
+        operatorMngRepository.deleteById(id);
+    }
 }

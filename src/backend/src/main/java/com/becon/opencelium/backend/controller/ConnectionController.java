@@ -18,18 +18,15 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.container.ConnectionHistoryManager;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -62,19 +59,21 @@ public class ConnectionController {
     private final ConnectionMngService connectionMngService;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
+    private final ConnectionHistoryManager connectionHistoryManager;
 
     public ConnectionController(
             Environment environment,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
-            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService
-            ) {
+            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
+            ConnectionHistoryManager connectionHistoryManager) {
         this.environment = environment;
         this.connectionService = connectionService;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
         this.connectionMngService = connectionMngService;
+        this.connectionHistoryManager = connectionHistoryManager;
     }
 
     @Operation(summary = "Retrieves all connections from database")
@@ -127,8 +126,8 @@ public class ConnectionController {
     })
     @GetMapping(path = "/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId) {
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
-        return ResponseEntity.ok(connectionMngMapper.toDTO(connectionMng));
+        ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId);
+        return ResponseEntity.ok(connectionDTO);
     }
 
     //TODO: description must be changed
@@ -159,7 +158,9 @@ public class ConnectionController {
     //TODO: need to add description
     @PatchMapping(path = "/{connectionId}", consumes = "application/json-patch+json")
     public ResponseEntity<?> patchUpdate(@PathVariable Long connectionId, @RequestBody JsonPatch patch){
+        Connection connection = connectionService.getById(connectionId);
         connectionService.patchUpdate(connectionId, patch);
+        connectionHistoryManager.push(connectionService.getById(connectionId), connection);
         return ResponseEntity.ok().build();
     }
 
@@ -177,7 +178,7 @@ public class ConnectionController {
             @PathVariable Optional<String> operatorId,
             @RequestBody JsonPatch patch
     ){
-        String id = connectionService.addOperator(connectionId, connectorId, operatorId.orElse(null), patch);
+        String id = connectionService.updateOperator(connectionId, connectorId, operatorId.orElse(null), patch);
         return ResponseEntity.ok(id);
     }
 
@@ -195,7 +196,7 @@ public class ConnectionController {
             @PathVariable Optional<String> methodId,
             @RequestBody JsonPatch patch
     ){
-        String id = connectionService.addMethod(connectionId, connectorId, methodId.orElse(null), patch);
+        String id = connectionService.updateMethod(connectionId, connectorId, methodId.orElse(null), patch);
         return ResponseEntity.ok(id);
     }
 
@@ -212,8 +213,14 @@ public class ConnectionController {
             @PathVariable Optional<String> fieldBindingId,
             @RequestBody JsonPatch patch
     ){
-        String id = connectionService.addEnhancement(connectionId, fieldBindingId.orElse(""), patch);
+        String id = connectionService.updateEnhancement(connectionId, fieldBindingId.orElse(""), patch);
         return ResponseEntity.ok(id);
+    }
+    @GetMapping(path = "/undo/{connectionId}")
+    public ResponseEntity<?> undo(@PathVariable Long connectionId){
+        connectionService.undo(connectionId);
+        ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId);
+        return ResponseEntity.ok(connectionDTO);
     }
 
 

@@ -27,14 +27,19 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
+import com.becon.opencelium.backend.container.ConnectionHistoryManager;
+import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.mongodb.MongoException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,6 +48,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +67,10 @@ public class ConnectionServiceImp implements ConnectionService {
     private final Mapper<ConnectorMng, ConnectorDTO> connectorMngMapper;
     private final Mapper<Enhancement, EnhancementDTO> enhancementMapper;
     private final Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMapper;
+    private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
+    private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ObjectMapper objectMapper;
+    private final ConnectionHistoryManager historyManager;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -75,8 +84,9 @@ public class ConnectionServiceImp implements ConnectionService {
             Mapper<ConnectorMng, ConnectorDTO> connectorMngMapper,
             Mapper<Enhancement, EnhancementDTO> enhancementMapper,
             Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMapper,
-            ObjectMapper objectMapper
-    ) {
+            Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
+            Mapper<Connection, ConnectionDTO> connectionMapper, ObjectMapper objectMapper,
+            ConnectionHistoryManager historyManager) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -88,7 +98,10 @@ public class ConnectionServiceImp implements ConnectionService {
         this.connectorMngMapper = connectorMngMapper;
         this.enhancementMapper = enhancementMapper;
         this.fieldBindingMapper = fieldBindingMapper;
+        this.connectionMngMapper = connectionMngMapper;
+        this.connectionMapper = connectionMapper;
         this.objectMapper = objectMapper;
+        this.historyManager = historyManager;
     }
 
 
@@ -129,69 +142,156 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public void patchUpdate(Long connectionId, JsonPatch patch) {
         Connection connection = getById(connectionId);
-        connection.setEnhancements(null);
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
 
-        Connection updatedConnection = patchHelper.patch(patch, connection, Connection.class);
-        JsonPatch patchForConnectionMng = removeAndCorrectForConnectionMng(patch);
-        ConnectionMng updatedConnectionMng = patchHelper.patch(patchForConnectionMng, connectionMng, ConnectionMng.class);
+        removeEnhancement(patch, connection);
 
-        saveAfterPatchUpdate(updatedConnection, updatedConnectionMng);
+        JsonPatch forConnection = extractForConnection(patch);
+        JsonPatch forConnectionMng = extractForConnectionMng(patch);
+
+        ConnectionMng updatedConnectionMng = connectionMngService.patchUpdate(connectionId, forConnectionMng);
+
+        connection.getEnhancements().forEach(e -> e.setConnection(null));
+        Connection updatedConnection = patchHelper.patch(forConnection, connection, Connection.class);
+
+        updatedConnection.getEnhancements().forEach(e -> e.setConnection(connection));
+        enhancementService.saveAll(updatedConnection.getEnhancements());
+        updatedConnection.setEnhancements(null);
+
+        addConnectors(updatedConnection, updatedConnectionMng);
+
+        connectionRepository.save(updatedConnection);
+        connectionMngService.save(updatedConnectionMng);
     }
 
-    private JsonPatch removeAndCorrectForConnectionMng(JsonPatch patch) {
+    private void removeEnhancement(JsonPatch patch, Connection connection) {
         JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
         Iterator<JsonNode> nodes = jsonNode.elements();
-        while(nodes.hasNext()) {
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            String path = next.get("path").textValue();
+            String op = next.get("op").textValue();
+            if (op.equals("remove") && (path.matches("/fieldBindings/\\d+"))) {
+                enhancementService.deleteAll(connection.getEnhancements());
+            }
+        }
+    }
+
+    private JsonPatch extractForConnection(JsonPatch patch) {
+        JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        List<JsonNode> nodeList = new ArrayList<>();
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            String path = next.get("path").textValue();
+            if (path.matches("/fieldBindings/\\d+")) {
+                path = path.replace("fieldBindings", "enhancements");
+                String op = next.get("op").textValue();
+                JsonNode value = next.get("value");
+                if (op.equals("remove")) {
+                    ObjectNode node = JsonNodeFactory.instance.objectNode();
+                    node.put("op", op);
+                    node.put("path", path);
+                    nodeList.add(node);
+                } else {
+                    JsonNode fbNode = objectMapper.valueToTree(value);
+                    FieldBindingMng fieldBindingMng = objectMapper.convertValue(fbNode, FieldBindingMng.class);
+                    Enhancement enhancement = enhancementMapper.toEntity(fieldBindingMapper.toDTO(fieldBindingMng).getEnhancement());
+                    enhancement.setId(fieldBindingMng.getEnhancementId());
+                    ObjectNode node = JsonNodeFactory.instance.objectNode();
+                    node.put("op", op);
+                    node.put("path", path);
+                    node.set("value", objectMapper.valueToTree(enhancement));
+                    nodeList.add(node);
+                }
+            } else if (path.equals("/title") ||
+                    path.equals("/description") ||
+                    path.equals("/icon") ||
+                    path.equals("/fromConnector") ||
+                    path.equals("/toConnector")) {
+                nodeList.add(next);
+            }
+        }
+        return objectMapper.convertValue(nodeList, JsonPatch.class);
+    }
+
+    private JsonPatch extractForConnectionMng(JsonPatch patch) {
+        JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        while (nodes.hasNext()) {
             String path = nodes.next().get("path").textValue();
-            if(path.equals("/fromConnector") || path.equals("/toConnector")){
+            if (path.equals("/fromConnector") || path.equals("/toConnector")) {
                 nodes.remove();
             }
         }
         return objectMapper.convertValue(jsonNode, JsonPatch.class);
     }
 
-    private void saveAfterPatchUpdate(Connection connection, ConnectionMng connectionMng) {
-
-        if (connection.getFromConnector() != 0 || connection.getFromConnector() != 0 && connection.getFromConnector() != connectionMng.getFromConnector().getConnectorId()) {
+    private void addConnectors(Connection connection, ConnectionMng connectionMng) {
+        //if connection have fromConnector AND either connectionMng's fromConnector is null
+        //or it's id is not equal to connection's id
+        //then we must change/add fromConnector to connectionMng
+        if (connection.getFromConnector() != 0 && (connectionMng.getFromConnector() == null || connection.getFromConnector() != connectionMng.getFromConnector().getConnectorId())) {
             Connector fromConnector = connectorService.getById(connection.getFromConnector());
             connectionMng.setFromConnector(connectorMngMapper.toEntity(connectorMapper.toDTO(fromConnector)));
         }
-
-        if (connection.getToConnector() != 0 || connection.getToConnector() != 0 && connection.getToConnector() != connectionMng.getToConnector().getConnectorId()) {
+        //this is the same with fromConnector's
+        if (connection.getToConnector() != 0 && (connectionMng.getToConnector() == null || connection.getToConnector() != connectionMng.getToConnector().getConnectorId())) {
             Connector toConnector = connectorService.getById(connection.getToConnector());
             connectionMng.setToConnector(connectorMngMapper.toEntity(connectorMapper.toDTO(toConnector)));
         }
-        connectionRepository.save(connection);
-        connectionMngService.save(connectionMng);
-    }
-    @Override
-    public String addOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch) {
-        return connectionMngService.addOperator(connectionId, connectorId, operatorId, patch);
     }
 
     @Override
-    public String addMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch) {
-        return connectionMngService.addMethod(connectionId, connectorId, methodId, patch);
+    public String updateOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch) {
+        return connectionMngService.updateOperator(connectionId, connectorId, operatorId, patch);
     }
 
     @Override
-    public String addEnhancement(Long connectionId, String fieldBindingId, JsonPatch patch) {
+    public String updateMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch) {
+        return connectionMngService.updateMethod(connectionId, connectorId, methodId, patch);
+    }
+
+    @Override
+    public String updateEnhancement(Long connectionId, String fieldBindingId, JsonPatch patch) {
         Connection connection = getById(connectionId);
-
         FieldBindingMng fieldBindingMng = fieldBindingMngService.findById(fieldBindingId).orElse(new FieldBindingMng());
 
-        FieldBindingMng savedFieldBinding = connectionMngService.addEnhancement(connectionId, patch, fieldBindingMng);
+        FieldBindingMng updatedFieldBinding = connectionMngService.updateFieldBinding(connectionId, patch, fieldBindingMng);
 
-        //getting enhancement from saved fieldBinding
-        Enhancement enhancement = enhancementMapper.toEntity(fieldBindingMapper.toDTO(savedFieldBinding).getEnhancement());
-        enhancement.setConnection(connection);
-        Enhancement savedEnhancement = enhancementService.save(enhancement);
+        if (isRemove(patch)) {
+            enhancementService.deleteById(updatedFieldBinding.getEnhancementId());
+        } else {
+            Enhancement enhancement = enhancementMapper.toEntity(fieldBindingMapper.toDTO(updatedFieldBinding).getEnhancement());
+            enhancement.setId(updatedFieldBinding.getEnhancementId());
+            enhancement.setConnection(connection);
+            Enhancement savedEnhancement = enhancementService.save(enhancement);
 
-        savedFieldBinding.setEnhancementId(savedEnhancement.getId());
-        fieldBindingMngService.save(fieldBindingMng);
+            updatedFieldBinding.setEnhancementId(savedEnhancement.getId());
+            fieldBindingMngService.save(updatedFieldBinding);
+        }
+        return updatedFieldBinding.getFieldBindingId();
+    }
 
-        return savedFieldBinding.getFieldBindingId();
+    private boolean isRemove(JsonPatch patch) {
+        JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            String op = next.get("op").asText();
+            String path = next.get("path").asText();
+            if (op.equals("remove") && path.equals("")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void undo(Long connectionId) {
+        Command command = historyManager.undo(connectionId);
+        if (command != null) {
+            patchUpdate(command.getConnectionId(), command.getJsonPatch());
+        }
     }
 
     @Override
@@ -255,5 +355,33 @@ public class ConnectionServiceImp implements ConnectionService {
     public Connection getById(Long id) {
         return connectionRepository.findById(id)
                 .orElseThrow(() -> new ConnectionNotFoundException(id));
+    }
+
+    @Override
+    public ConnectionDTO getFullConnection(Long connectionId) {
+        Connection connection = getById(connectionId);
+        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+
+        ConnectionDTO connectionDTOMng = connectionMngMapper.toDTO(connectionMng);
+        ConnectionDTO connectionDTO = connectionMapper.toDTO(connection);
+
+        connectionDTOMng.setDescription(connectionDTO.getDescription());
+        connectionDTOMng.setIcon(connectionDTO.getIcon());
+        connectionDTOMng.setBusinessLayout(connectionDTO.getBusinessLayout());
+
+        if (connectionDTOMng.getFromConnector() != null) {
+            ConnectorDTO temp = connectionDTOMng.getFromConnector();
+            connectionDTOMng.setFromConnector(connectorMapper.toDTO(connectorService.getById(connection.getFromConnector())));
+            connectionDTOMng.getFromConnector().setOperators(temp.getOperators());
+            connectionDTOMng.getFromConnector().setMethods(temp.getMethods());
+        }
+
+        if (connectionDTOMng.getToConnector() != null) {
+            ConnectorDTO temp = connectionDTOMng.getToConnector();
+            connectionDTOMng.setToConnector(connectorMapper.toDTO(connectorService.getById(connection.getToConnector())));
+            connectionDTOMng.getToConnector().setOperators(temp.getOperators());
+            connectionDTOMng.getToConnector().setMethods(temp.getMethods());
+        }
+        return connectionDTOMng;
     }
 }

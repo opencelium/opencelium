@@ -35,6 +35,13 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     }
 
     @Override
+    public void deleteById(String id) {
+        FieldBindingMng fieldBindingMng = new FieldBindingMng();
+        fieldBindingMng.setFieldBindingId(id);
+        fieldBindingRepository.delete(fieldBindingMng);
+    }
+
+    @Override
     public void bind(ConnectionMng connectionMng) {
         List<FieldBindingMng> fieldBindings = connectionMng.getFieldBindings();
         ArrayList<MethodMng> methods = new ArrayList<>(connectionMng.getFromConnector().getMethods().size() + connectionMng.getToConnector().getMethods().size());
