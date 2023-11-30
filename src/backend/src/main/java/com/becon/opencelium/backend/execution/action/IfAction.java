@@ -7,4 +7,8 @@ public class IfAction implements Action {
     private String rightValue;
     private LogicalOperator logicalOperator;
     private ExecutionManager executionManager;
+
+    public boolean execute() {
+        return true;
+    }
 }

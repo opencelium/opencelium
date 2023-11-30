@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.resource.execution;
 
 import com.becon.opencelium.backend.execution.action.LogicalOperator;
 
-public class ActionDTO implements Executable {
+public class OperatorDTO implements Executable {
     private ActionType type;
     private String execOrder;
     private String iterator;

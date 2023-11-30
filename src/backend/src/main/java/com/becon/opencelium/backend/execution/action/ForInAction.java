@@ -7,4 +7,9 @@ public class ForInAction implements Action, Loop {
     private String counterName;
     private Integer counterValue;
     private ExecutionManager executionManager;
+
+    @Override
+    public boolean execute() {
+        return false;
+    }
 }
