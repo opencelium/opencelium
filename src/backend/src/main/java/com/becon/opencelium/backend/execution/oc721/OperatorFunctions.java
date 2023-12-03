@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution.action;
+package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.resource.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;

@@ -1,20 +1,20 @@
 package com.becon.opencelium.backend.resource.execution;
 
-import com.becon.opencelium.backend.execution.action.LogicalOperator;
+import com.becon.opencelium.backend.execution.oc721.LogicalOperator;
 
 public class OperatorDTO implements Executable {
-    private ActionType type;
+    private OperatorType type;
     private String execOrder;
     private String iterator;
     private LogicalOperator logicalOperator;
     private String leftValueReference;
     private String rightValueReference;
 
-    public ActionType getType() {
+    public OperatorType getType() {
         return type;
     }
 
-    public void setType(ActionType type) {
+    public void setType(OperatorType type) {
         this.type = type;
     }
 

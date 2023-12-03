@@ -1,16 +1,20 @@
 package com.becon.opencelium.backend.execution;
 
-import com.becon.opencelium.backend.execution.action.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public interface ExecutionManager {
     String getQueryParam(String param);
 
-    void addLoop(Loop loop);
+    LinkedHashMap<String, String> getLoops();
 
     Map<String, String> getRequiredData(String ctorId);
 
-    Operation findOperationByColor(String color);
+    Optional<Operation> findOperationByColor(String color);
+
+    SchemaDTO getValByRef(String ref);
 }
