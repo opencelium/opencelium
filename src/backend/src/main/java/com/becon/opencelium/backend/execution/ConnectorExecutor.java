@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -28,8 +29,24 @@ public class ConnectorExecutor {
         this.executionManager = executionManager;
     }
 
-    private Executable getNextExecutable(boolean previousResult) {
-        return executables.poll();
+    private void start() {
+        List<Executable> body = new ArrayList<>();
+
+        while(!executables.isEmpty()) {
+            Executable current = executables.peek();
+
+            String head = current.getExecOrder();
+
+            while(current != null && current.getExecOrder().startsWith(head)) {
+
+                body.add(executables.poll());
+
+                // 'current' evaluates to null if queue become empty
+                current = executables.peek();
+            }
+
+            execute(body, 0);
+        }
     }
 
     private void execute(List<Executable> body, int index) {
@@ -89,7 +106,7 @@ public class ConnectorExecutor {
         String startingExecOrder = operatorDTO.getExecOrder();
         String currentExecOrder = operatorDTO.getExecOrder();
 
-        while (!result && currentExecOrder.contains(startingExecOrder) && index < body.size()) {
+        while (!result && currentExecOrder.startsWith(startingExecOrder) && index < body.size()) {
             currentExecOrder = body.get(index++).getExecOrder();
         }
 
