@@ -21,7 +21,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
     @Override
     public Object getQueryParam(String param) {
-        return null;
+        return queryParams.getOrDefault(param, null);
     }
 
     @Override
@@ -36,6 +36,6 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
     @Override
     public Optional<Operation> findOperationByColor(String color) {
-        return Optional.empty();
+        return operations.stream().filter(operation -> operation.getColor().equals(color)).findFirst();
     }
 }
