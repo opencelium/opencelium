@@ -50,7 +50,7 @@ public interface ConnectionService {
 
     Long createEmptyConnection();
 
-    void patchUpdate(Long connectionId, JsonPatch patch);
+    void update(Long connectionId, JsonPatch patch);
 
     String updateOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch);
 

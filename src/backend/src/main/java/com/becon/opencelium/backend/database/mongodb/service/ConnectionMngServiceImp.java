@@ -1,9 +1,11 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
+import com.becon.opencelium.backend.container.Command;
+import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
-import com.becon.opencelium.backend.container.Command;
-import com.becon.opencelium.backend.container.ConnectionHistoryManager;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionHistoryService;
+import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,7 +14,10 @@ import com.github.fge.jsonpatch.JsonPatch;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ConnectionMngServiceImp implements ConnectionMngService {
@@ -22,7 +27,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final OperatorMngService operatorMngService;
     private final PatchHelper patchHelper;
     private final ObjectMapper objectMapper;
-    private final ConnectionHistoryManager connectionHistoryManager;
+    private final ConnectionUpdateTracker connectionUpdateTracker;
+    private final ConnectionHistoryService connectionHistoryService;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
@@ -31,14 +37,17 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             @Qualifier("operatorMngServiceImp") OperatorMngService operatorMngService,
             PatchHelper patchHelper,
             ObjectMapper objectMapper,
-            ConnectionHistoryManager connectionHistoryManager) {
+            ConnectionUpdateTracker connectionUpdateTracker,
+            @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService connectionHistoryService
+    ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
         this.methodMngService = methodMngService;
         this.operatorMngService = operatorMngService;
         this.patchHelper = patchHelper;
         this.objectMapper = objectMapper;
-        this.connectionHistoryManager = connectionHistoryManager;
+        this.connectionUpdateTracker = connectionUpdateTracker;
+        this.connectionHistoryService = connectionHistoryService;
     }
 
     @Override
@@ -97,14 +106,16 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 method = connectionMng.getFromConnector().getMethods().get(index);
                 MethodMng patchedMethod = patchHelper.patch(patch, method, MethodMng.class);
                 MethodMng savedMethod = methodMngService.save(patchedMethod);
-                connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("replace", "/fromConnector/methods/" + (connectionMng.getFromConnector().getMethods().size() - 1), method)));
+                connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("replace", "/fromConnector/methods/" + (connectionMng.getFromConnector().getMethods().size() - 1), method)));
+                connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("replace", "/fromConnector/methods/" + (connectionMng.getFromConnector().getMethods().size() - 1), savedMethod), Action.MODIFY);
                 return savedMethod.getId();
             } else {
                 index = findIndexOfMethod(connectionMng.getToConnector(), methodId);
                 method = connectionMng.getToConnector().getMethods().get(index);
                 MethodMng patchedMethod = patchHelper.patch(patch, method, MethodMng.class);
                 MethodMng savedMethod = methodMngService.save(patchedMethod);
-                connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("replace", "/toConnector/methods/" + (connectionMng.getToConnector().getMethods().size() - 1), method)));
+                connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("replace", "/toConnector/methods/" + (connectionMng.getToConnector().getMethods().size() - 1), method)));
+                connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("replace", "/toConnector/methods/" + (connectionMng.getToConnector().getMethods().size() - 1), savedMethod), Action.MODIFY);
                 return savedMethod.getId();
             }
         }
@@ -120,13 +131,15 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 connectionMng.getFromConnector().setMethods(new ArrayList<>());
             connectionMng.getFromConnector().getMethods().add(savedMethod);
             save(connectionMng);
-            connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("remove", "/fromConnector/methods/" + (connectionMng.getFromConnector().getMethods().size() - 1))));
+            connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("remove", "/fromConnector/methods/" + (connectionMng.getFromConnector().getMethods().size() - 1))));
+            connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("add", "/fromConnector/methods/" + (connectionMng.getFromConnector().getMethods().size() - 1), savedMethod), Action.MODIFY);
         } else {
             if (connectionMng.getToConnector().getMethods() == null)
                 connectionMng.getToConnector().setMethods(new ArrayList<>());
             connectionMng.getToConnector().getMethods().add(savedMethod);
             save(connectionMng);
-            connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("remove", "/toConnector/methods/" + (connectionMng.getToConnector().getMethods().size() - 1))));
+            connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("remove", "/toConnector/methods/" + (connectionMng.getToConnector().getMethods().size() - 1))));
+            connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("add", "/toConnector/methods/" + (connectionMng.getToConnector().getMethods().size() - 1), savedMethod), Action.MODIFY);
         }
         return savedMethod.getId();
     }
@@ -146,14 +159,16 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 operator = connectionMng.getFromConnector().getOperators().get(index);
                 OperatorMng patchedOperator = patchHelper.patch(patch, operator, OperatorMng.class);
                 OperatorMng savedOperator = operatorMngService.save(patchedOperator);
-                connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("replace", "/fromConnector/operators/" + (connectionMng.getFromConnector().getOperators().size() - 1), operator)));
+                connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("replace", "/fromConnector/operators/" + (connectionMng.getFromConnector().getOperators().size() - 1), operator)));
+                connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("replace", "/fromConnector/operators/" + (connectionMng.getFromConnector().getOperators().size() - 1), savedOperator), Action.MODIFY);
                 return savedOperator.getId();
             } else {
                 index = findIndexOfOperator(connectionMng.getToConnector(), operatorId);
                 operator = connectionMng.getToConnector().getOperators().get(index);
                 OperatorMng patchedOperator = patchHelper.patch(patch, operator, OperatorMng.class);
                 OperatorMng savedOperator = operatorMngService.save(patchedOperator);
-                connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("replace", "/toConnector/operators/" + (connectionMng.getToConnector().getOperators().size() - 1), operator)));
+                connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("replace", "/toConnector/operators/" + (connectionMng.getToConnector().getOperators().size() - 1), operator)));
+                connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("replace", "/toConnector/operators/" + (connectionMng.getToConnector().getOperators().size() - 1), savedOperator), Action.MODIFY);
                 return savedOperator.getId();
             }
         }
@@ -167,14 +182,16 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             OperatorMng removed = connectionMng.getFromConnector().getOperators().remove(index);
             operatorMngService.deleteById(operatorId);
             save(connectionMng);
-            connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("add", "/fromConnector/operators/" + index, removed)));
+            connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("add", "/fromConnector/operators/" + index, removed)));
+            connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("remove", "/fromConnector/operators/" + index), Action.MODIFY);
             return removed.getId();
         } else {
             int index = findIndexOfOperator(connectionMng.getToConnector(), operatorId);
             OperatorMng removed = connectionMng.getToConnector().getOperators().remove(index);
             operatorMngService.deleteById(operatorId);
             save(connectionMng);
-            connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("add", "/toConnector/operators/" + index, removed)));
+            connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("add", "/toConnector/operators/" + index, removed)));
+            connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("remove", "/toConnector/operators/" + index), Action.MODIFY);
             return removed.getId();
         }
     }
@@ -189,13 +206,15 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 connectionMng.getFromConnector().setOperators(new ArrayList<>());
             connectionMng.getFromConnector().getOperators().add(savedOperator);
             save(connectionMng);
-            connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("remove", "/fromConnector/operators/" + (connectionMng.getFromConnector().getOperators().size() - 1))));
+            connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("remove", "/fromConnector/operators/" + (connectionMng.getFromConnector().getOperators().size() - 1))));
+            connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("add", "/fromConnector/operators/" + (connectionMng.getFromConnector().getOperators().size() - 1), savedOperator), Action.MODIFY);
         } else {
             if (connectionMng.getToConnector().getOperators() == null)
                 connectionMng.getToConnector().setOperators(new ArrayList<>());
             connectionMng.getToConnector().getOperators().add(savedOperator);
             save(connectionMng);
-            connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("remove", "/toConnector/operators/" + (connectionMng.getToConnector().getOperators().size() - 1))));
+            connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("remove", "/toConnector/operators/" + (connectionMng.getToConnector().getOperators().size() - 1))));
+            connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("add", "/toConnector/operators/" + (connectionMng.getToConnector().getOperators().size() - 1), savedOperator), Action.MODIFY);
         }
         return savedOperator.getId();
     }
@@ -211,20 +230,23 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 connectionMng.setFieldBindings(new ArrayList<>());
             connectionMng.getFieldBindings().add(saved);
             save(connectionMng);
-            connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("remove", "/fieldBindings/" + (connectionMng.getFieldBindings().size() - 1))));
+            connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("remove", "/fieldBindings/" + (connectionMng.getFieldBindings().size() - 1))));
+            connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("add", "/fieldBindings/" + (connectionMng.getFieldBindings().size() - 1), saved), Action.MODIFY);
             return saved;
         } else if (isRemove(patch)) {
             int index = findIndexOfEnhancement(connectionMng, fieldBindingMng.getFieldBindingId());
             FieldBindingMng removed = connectionMng.getFieldBindings().remove(index);
             fieldBindingMngService.deleteById(removed.getFieldBindingId());
             save(connectionMng);
-            connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("add", "/fieldBindings/" + index, removed)));
+            connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("add", "/fieldBindings/" + index, removed)));
+            connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("remove", "/fieldBindings/" + index), Action.MODIFY);
             return removed;
         } else {
             int index = findIndexOfEnhancement(connectionMng, fieldBindingMng.getFieldBindingId());
             FieldBindingMng toUpdate = connectionMng.getFieldBindings().get(index);
             FieldBindingMng patched = patchHelper.patch(patch, toUpdate, FieldBindingMng.class);
-            connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("replace", "/fieldBindings/" + index, toUpdate)));
+            connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("replace", "/fieldBindings/" + index, toUpdate)));
+            connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("replace", "/fieldBindings/" + index, patched), Action.MODIFY);
             return fieldBindingMngService.save(patched);
         }
     }
@@ -245,14 +267,16 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             MethodMng removed = connectionMng.getFromConnector().getMethods().remove(index);
             methodMngService.deleteById(methodId);
             save(connectionMng);
-            connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("add", "/fromConnector/methods/" + index, removed)));
+            connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("add", "/fromConnector/methods/" + index, removed)));
+            connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("remove", "/fromConnector/methods/" + index), Action.MODIFY);
             return removed.getId();
         } else {
             int index = findIndexOfMethod(connectionMng.getToConnector(), methodId);
             MethodMng removed = connectionMng.getToConnector().getMethods().remove(index);
             methodMngService.deleteById(methodId);
             save(connectionMng);
-            connectionHistoryManager.push(new Command(connectionId, patchHelper.getJsonPatch("add", "/toConnector/methods/" + index, removed)));
+            connectionUpdateTracker.push(new Command(connectionId, patchHelper.getJsonPatch("add", "/toConnector/methods/" + index, removed)));
+            connectionHistoryService.makeHistoryAndSave(connectionId, patchHelper.getJsonPatch("remove", "/toConnector/methods/" + index), Action.MODIFY);
             return removed.getId();
         }
     }

@@ -376,3 +376,16 @@ alter table enhancement change expert_var variables text;
 
 --changeset 4.0:8 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 alter table connection change name title varchar(128);
+
+--changeset 4.0:9 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+create table connection_history(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY ,
+    connection_id INT(11) NOT NULL ,
+    user_id INT(11) NOT NULL,
+    oc_version VARCHAR(10) NOT NULL,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    json_patch JSON,
+    action  VARCHAR(45),
+    FOREIGN KEY (connection_id) REFERENCES connection(id),
+    FOREIGN KEY (user_id) REFERENCES user(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

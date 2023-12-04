@@ -22,13 +22,11 @@ import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
 import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
-import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
-import com.becon.opencelium.backend.container.ConnectionHistoryManager;
+import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.container.Command;
+import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
@@ -55,7 +53,6 @@ import java.util.Optional;
 
 @Service
 public class ConnectionServiceImp implements ConnectionService {
-
     private final ConnectionRepository connectionRepository;
     private final ConnectorService connectorService;
     private final ConnectionMngService connectionMngService;
@@ -70,7 +67,8 @@ public class ConnectionServiceImp implements ConnectionService {
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ObjectMapper objectMapper;
-    private final ConnectionHistoryManager historyManager;
+    private final ConnectionUpdateTracker historyManager;
+    private final ConnectionHistoryService connectionHistoryService;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -79,14 +77,17 @@ public class ConnectionServiceImp implements ConnectionService {
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
             @Lazy @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
+            @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService connectionHistoryService,
             PatchHelper patchHelper,
             Mapper<Connector, ConnectorDTO> connectorMapper,
             Mapper<ConnectorMng, ConnectorDTO> connectorMngMapper,
             Mapper<Enhancement, EnhancementDTO> enhancementMapper,
             Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMapper,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
-            Mapper<Connection, ConnectionDTO> connectionMapper, ObjectMapper objectMapper,
-            ConnectionHistoryManager historyManager) {
+            Mapper<Connection, ConnectionDTO> connectionMapper,
+            ObjectMapper objectMapper,
+            ConnectionUpdateTracker historyManager
+    ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -102,6 +103,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.connectionMapper = connectionMapper;
         this.objectMapper = objectMapper;
         this.historyManager = historyManager;
+        this.connectionHistoryService = connectionHistoryService;
     }
 
 
@@ -136,19 +138,17 @@ public class ConnectionServiceImp implements ConnectionService {
         ConnectionMng connectionMng = new ConnectionMng();
         connectionMng.setConnectionId(saved.getId());
         connectionMngService.save(connectionMng);
+        connectionHistoryService.makeHistoryAndSave(saved, null, Action.CREATE);
         return saved.getId();
     }
 
-    @Override
-    public void patchUpdate(Long connectionId, JsonPatch patch) {
-        Connection connection = getById(connectionId);
-
+    private Connection patchUpdate(Connection connection, JsonPatch patch) {
         removeEnhancement(patch, connection);
 
         JsonPatch forConnection = extractForConnection(patch);
         JsonPatch forConnectionMng = extractForConnectionMng(patch);
 
-        ConnectionMng updatedConnectionMng = connectionMngService.patchUpdate(connectionId, forConnectionMng);
+        ConnectionMng updatedConnectionMng = connectionMngService.patchUpdate(connection.getId(), forConnectionMng);
 
         connection.getEnhancements().forEach(e -> e.setConnection(null));
         Connection updatedConnection = patchHelper.patch(forConnection, connection, Connection.class);
@@ -159,8 +159,15 @@ public class ConnectionServiceImp implements ConnectionService {
 
         addConnectors(updatedConnection, updatedConnectionMng);
 
-        connectionRepository.save(updatedConnection);
         connectionMngService.save(updatedConnectionMng);
+        return connectionRepository.save(updatedConnection);
+    }
+
+    @Override
+    public void update(Long connectionId, JsonPatch patch) {
+        Connection connection = getById(connectionId);
+        Connection updated = patchUpdate(connection, patch);
+        historyManager.pushAndMakeHistory(updated, connection);
     }
 
     private void removeEnhancement(JsonPatch patch, Connection connection) {
@@ -290,7 +297,12 @@ public class ConnectionServiceImp implements ConnectionService {
     public void undo(Long connectionId) {
         Command command = historyManager.undo(connectionId);
         if (command != null) {
-            patchUpdate(command.getConnectionId(), command.getJsonPatch());
+            try {
+                patchUpdate(getById(command.getConnectionId()), command.getJsonPatch());
+                connectionHistoryService.makeHistoryAndSave(getById(connectionId), command.getJsonPatch(), Action.UNDO);
+            } catch (Exception e) {
+                historyManager.push(command);
+            }
         }
     }
 
@@ -306,6 +318,7 @@ public class ConnectionServiceImp implements ConnectionService {
         }
         connectionRepository.deleteById(id);
         connectionMngService.delete(id);
+        connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);
     }
 
     @Override

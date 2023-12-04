@@ -44,7 +44,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     @Override
     public void bind(ConnectionMng connectionMng) {
         List<FieldBindingMng> fieldBindings = connectionMng.getFieldBindings();
-        ArrayList<MethodMng> methods = new ArrayList<>(connectionMng.getFromConnector().getMethods().size() + connectionMng.getToConnector().getMethods().size());
+        ArrayList<MethodMng> methods = new ArrayList<>();
         methods.addAll(connectionMng.getFromConnector().getMethods());
         methods.addAll(connectionMng.getToConnector().getMethods());
 
