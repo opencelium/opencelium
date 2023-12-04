@@ -57,7 +57,7 @@ public class Operation {
     public static Operation fromDTO(OperationDTO operationDTO) {
         Operation operation = new Operation();
 
-        // TODO: correct mapping
+        // TODO: correct DTO mapping
         operation.setId(operationDTO.getName());
         operation.setColor(operationDTO.getOperationId());
 

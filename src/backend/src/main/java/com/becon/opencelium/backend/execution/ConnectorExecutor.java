@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
+import com.becon.opencelium.backend.execution.oc721.Extractor;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.resource.execution.Executable;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
@@ -22,22 +23,25 @@ public class ConnectorExecutor {
     // stores OperationDTO, and OperatorDTO in sorted order by execOrder;
     private final PriorityQueue<Executable> executables;
     private final ExecutionManager executionManager;
+    private final Extractor referenceExtractor;
     private RestTemplate restTemplate;
 
-    public ConnectorExecutor(PriorityQueue<Executable> executables, ExecutionManager executionManager) {
+    public ConnectorExecutor(PriorityQueue<Executable> executables, ExecutionManager executionManager, Extractor referenceExtractor) {
         this.executables = executables;
         this.executionManager = executionManager;
+        this.referenceExtractor = referenceExtractor;
     }
 
     private void start() {
-        List<Executable> body = new ArrayList<>();
+        List<Executable> body;
 
-        while(!executables.isEmpty()) {
+        while (!executables.isEmpty()) {
             Executable current = executables.peek();
 
             String head = current.getExecOrder();
+            body = new ArrayList<>();
 
-            while(current != null && current.getExecOrder().startsWith(head)) {
+            while (current != null && current.getExecOrder().startsWith(head)) {
 
                 body.add(executables.poll());
 
@@ -76,7 +80,7 @@ public class ConnectorExecutor {
 
         RequestEntity<?> requestEntity = RequestEntityBuilder.start()
                 .forOperation(operationDTO)
-                .usingReferences(executionManager::getValByRef)
+                .usingReferences(referenceExtractor::extractValue)
                 .createRequest();
 
         ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
@@ -96,8 +100,8 @@ public class ConnectorExecutor {
     private void executeIfOperator(List<Executable> body, int index) {
         OperatorDTO operatorDTO = (OperatorDTO) body.get(index);
 
-        SchemaDTO leftValue = executionManager.getValByRef(operatorDTO.getLeftValueReference());
-        SchemaDTO rightValue = executionManager.getValByRef(operatorDTO.getRightValueReference());
+        SchemaDTO leftValue = referenceExtractor.extractValue(operatorDTO.getLeftValueReference());
+        SchemaDTO rightValue = referenceExtractor.extractValue(operatorDTO.getRightValueReference());
 
         boolean result = operatorDTO.getLogicalOperator().algorithm.apply(leftValue, rightValue);
 
@@ -116,7 +120,7 @@ public class ConnectorExecutor {
     private void executeForOperator(List<Executable> body, int index) {
         OperatorDTO operatorDTO = (OperatorDTO) body.get(index);
 
-        List<SchemaDTO> loopingList = executionManager.getValByRef(operatorDTO.getLeftValueReference()).getItems();
+        List<SchemaDTO> loopingList = referenceExtractor.extractValue(operatorDTO.getLeftValueReference()).getItems();
 
         if (ObjectUtils.isEmpty(loopingList)) {
             return;
@@ -125,11 +129,11 @@ public class ConnectorExecutor {
         // move index to execute body of 'for' operator
         index++;
         for (int i = 0; i < loopingList.size(); i++) {
-            // put current loops 'iterator' and 'value'
+            // add current loops' 'iterator' and 'value'
             executionManager.getLoops().put(operatorDTO.getIterator(), String.valueOf(i));
             execute(body, index);
         }
-        // remove the loop
+        // remove executed loop from ExecutionManager
         executionManager.getLoops().remove(operatorDTO.getIterator());
     }
 
@@ -142,6 +146,6 @@ public class ConnectorExecutor {
             return "#";
         }
 
-        return String.join(", ", loops.keySet());
+        return String.join(", ", loops.values());
     }
 }
