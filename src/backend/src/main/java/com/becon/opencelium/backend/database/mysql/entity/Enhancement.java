@@ -26,17 +26,16 @@ public class Enhancement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "title")
+    private String title;
 
     @Column(name = "description")
     private String description;
+    @Column(name = "script")
+    private String script;
 
-    @Column(name = "expert_code")
-    private String expertCode;
-
-    @Column(name = "expert_var")
-    private String expertVar;
+    @Column(name = "variables")
+    private String variables;
 
     @Column(name = "simple_code")
     private String simpleCode;
@@ -48,6 +47,9 @@ public class Enhancement {
     @JoinColumn(name = "connection_id")
     private Connection connection;
 
+    public Enhancement() {
+    }
+
     public Integer getId() {
         return id;
     }
@@ -56,12 +58,12 @@ public class Enhancement {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDescription() {
@@ -72,21 +74,6 @@ public class Enhancement {
         this.description = description;
     }
 
-    public String getExpertCode() {
-        return expertCode;
-    }
-
-    public void setExpertCode(String expertCode) {
-        this.expertCode = expertCode;
-    }
-
-    public String getExpertVar() {
-        return expertVar;
-    }
-
-    public void setExpertVar(String expertVar) {
-        this.expertVar = expertVar;
-    }
 
     public String getSimpleCode() {
         return simpleCode;
@@ -110,5 +97,21 @@ public class Enhancement {
 
     public void setConnection(Connection connection) {
         this.connection = connection;
+    }
+
+    public String getScript() {
+        return script;
+    }
+
+    public void setScript(String script) {
+        this.script = script;
+    }
+
+    public String getVariables() {
+        return variables;
+    }
+
+    public void setVariables(String variables) {
+        this.variables = variables;
     }
 }

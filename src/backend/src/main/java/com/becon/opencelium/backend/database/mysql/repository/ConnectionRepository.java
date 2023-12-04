@@ -26,10 +26,10 @@ import java.util.List;
 
 @Repository
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {
-    boolean existsByName(String name);
+    boolean existsByTitle(String title);
 
     @Query(value = "select * from connection where from_connector = ?1 or to_connector = ?1", nativeQuery = true)
     LinkedList<Connection> findAllByConnectorId(int connectorId);
 
-    List<Connection> findAllByNameContains(String name);
+    List<Connection> findAllByTitleContains(String title);
 }

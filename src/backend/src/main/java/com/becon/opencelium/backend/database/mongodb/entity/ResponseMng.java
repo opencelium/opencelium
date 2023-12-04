@@ -19,7 +19,7 @@ package com.becon.opencelium.backend.database.mongodb.entity;
 import com.becon.opencelium.backend.invoker.entity.ResponseInv;
 
 public class ResponseMng {
-    private String nodeId;
+    private String id;
     private String name = "response";
     private ResultMng success;
     private ResultMng fail;
@@ -59,11 +59,11 @@ public class ResponseMng {
         this.fail = fail;
     }
 
-    public String getNodeId() {
-        return nodeId;
+    public String getId() {
+        return id;
     }
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
+    public void setId(String id) {
+        this.id = id;
     }
 }

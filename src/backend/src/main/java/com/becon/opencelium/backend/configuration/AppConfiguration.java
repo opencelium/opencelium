@@ -2,7 +2,10 @@ package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.constant.SecurityConstant;
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.HttpHost;
@@ -35,6 +38,15 @@ public class AppConfiguration {
         YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
         yamlFactory.setResources(new ClassPathResource("application.yml"));
         return yamlFactory;
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.ALWAYS)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .findAndRegisterModules();
     }
 
     private CloseableHttpClient buildHttpClient() {

@@ -7,6 +7,7 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.utils.HelperMapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
+import com.becon.opencelium.backend.utility.StringUtility;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -20,17 +21,20 @@ import java.util.List;
                 EnhancementMapper.class,
                 HelperMapper.class
         },
-        imports = BusinessLayout.class
+        imports = {
+                BusinessLayout.class,
+                StringUtility.class
+        }
 )
 public interface ConnectionMapper extends Mapper<Connection, ConnectionDTO> {
     @Override
     @Mappings({
             @Mapping(target = "id", source = "connectionId"),
-            @Mapping(target = "name", source = "title"),
             @Mapping(target = "fromConnector", source = "fromConnector.connectorId"),
             @Mapping(target = "toConnector", source = "toConnector.connectorId"),
+            @Mapping(target = "icon", expression = "java(StringUtility.findImageFromUrl(dto.getIcon()))"),
             @Mapping(target = "enhancements",
-                    expression = "java((dto.getFieldBinding() != null) ? dto.getFieldBinding().stream().map(e -> enhancementMapper.toEntity(e.getEnhancement())).toList() : null)"),
+                    expression = "java((dto.getFieldBindings() != null) ? dto.getFieldBindings().stream().map(e -> enhancementMapper.toEntity(e.getEnhancement())).toList() : null)"),
             @Mapping(target = "businessLayout",
                     expression = "java((dto.getBusinessLayout() != null) ? new BusinessLayout(dto.getBusinessLayout(), connection) : null)")
     })
@@ -39,9 +43,10 @@ public interface ConnectionMapper extends Mapper<Connection, ConnectionDTO> {
     @Override
     @Mappings({
             @Mapping(target = "connectionId", source = "id"),
-            @Mapping(target = "title", source = "name"),
             @Mapping(target = "fromConnector", qualifiedByName = {"helperMapper","getConnectorDTOById"}),
             @Mapping(target = "toConnector", qualifiedByName = {"helperMapper","getConnectorDTOById"}),
+            @Mapping(target = "icon", expression = "java(StringUtility.resolveImagePath(entity.getIcon()))"),
+            @Mapping(target = "fieldBindings", source = "enhancements", qualifiedByName = {"helperMapper", "getFieldBindings"}),
             @Mapping(target = "businessLayout", ignore = true)
     })
     ConnectionDTO toDTO(Connection entity);

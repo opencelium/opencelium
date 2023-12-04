@@ -17,10 +17,7 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-import org.springframework.data.mongodb.core.mapping.MongoId;
+import org.springframework.data.mongodb.core.mapping.*;
 
 import java.util.List;
 
@@ -28,15 +25,16 @@ import java.util.List;
 public class ConnectionMng {
     @MongoId(targetType = FieldType.OBJECT_ID)
     private String id; // id generated in mongodb
-    @Field(name = "connection_id")
     @Indexed
+    @Field(name = "connection_id")
     private Long connectionId; // id generated in mariadb.
     private String title;
     @Field(name = "from_connector")
     private ConnectorMng fromConnector;
     @Field(name = "to_connector")
     private ConnectorMng toConnector;
-
+    @DBRef
+    private List<FieldBindingMng> fieldBindings;
     public ConnectionMng() {
     }
 
@@ -80,4 +78,11 @@ public class ConnectionMng {
         this.toConnector = toConnector;
     }
 
+    public List<FieldBindingMng> getFieldBindings() {
+        return fieldBindings;
+    }
+
+    public void setFieldBindings(List<FieldBindingMng> fieldBindings) {
+        this.fieldBindings = fieldBindings;
+    }
 }

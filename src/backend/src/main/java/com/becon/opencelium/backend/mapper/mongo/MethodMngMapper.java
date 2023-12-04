@@ -22,14 +22,12 @@ public interface MethodMngMapper extends Mapper<MethodMng, MethodDTO> {
 
     @Named("toEntity")
     @Mappings({
-            @Mapping(target = "id", source = "nodeId"),
             @Mapping(target = "request", qualifiedByName = {"requestMngMapper", "toEntity"}),
             @Mapping(target = "response", qualifiedByName = {"responseMngMapper", "toEntity"})
     })
     MethodMng toEntity(MethodDTO methodDTO);
     @Named("toDTO")
     @Mappings({
-            @Mapping(target = "nodeId", source = "id"),
             @Mapping(target = "request", qualifiedByName = {"requestMngMapper", "toDTO"}),
             @Mapping(target = "response", qualifiedByName = {"responseMngMapper", "toDTO"})
     })

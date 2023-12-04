@@ -364,3 +364,15 @@ alter table connection modify from_connector int null;
 
 --changeset 4.0:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 alter table connection modify to_connector int null;
+
+--changeset 4.0:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table enhancement change name title varchar(255);
+
+--changeset 4.0:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table enhancement change expert_code script text;
+
+--changeset 4.0:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table enhancement change expert_var variables text;
+
+--changeset 4.0:8 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table connection change name title varchar(128);

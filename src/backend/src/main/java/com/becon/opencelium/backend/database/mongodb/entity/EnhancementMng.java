@@ -16,38 +16,17 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
-import org.springframework.data.mongodb.core.mapping.Field;
-
-
 public class EnhancementMng {
-    @Field(name = "enhancement_id")
-    private Integer enhancementId;
-    private String name;
+    private String title;
     private String description;
-    @Field(name = "expert_code")
-    private String expertCode;
-    @Field(name = "expert_var")
-    private String expertVar;
-    private String language;
+    private String script;
 
-    public EnhancementMng() {
+    public String getTitle() {
+        return title;
     }
 
-    public Integer getEnhancementId() {
-        return enhancementId;
-    }
-
-    public void setEnhancementId(Integer enhancementId) {
-        this.enhancementId = enhancementId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDescription() {
@@ -58,20 +37,10 @@ public class EnhancementMng {
         this.description = description;
     }
 
-    public String getExpertCode() {
-        return expertCode;
-    }
+    private String variables;
+    private String language;
 
-    public void setExpertCode(String expertCode) {
-        this.expertCode = expertCode;
-    }
-
-    public String getExpertVar() {
-        return expertVar;
-    }
-
-    public void setExpertVar(String expertVar) {
-        this.expertVar = expertVar;
+    public EnhancementMng() {
     }
 
     public String getLanguage() {
@@ -80,5 +49,21 @@ public class EnhancementMng {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public String getScript() {
+        return script;
+    }
+
+    public void setScript(String script) {
+        this.script = script;
+    }
+
+    public String getVariables() {
+        return variables;
+    }
+
+    public void setVariables(String variables) {
+        this.variables = variables;
     }
 }

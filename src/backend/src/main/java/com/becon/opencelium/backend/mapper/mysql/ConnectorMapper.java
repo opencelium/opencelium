@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.mapper.mysql;
 
-import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.utils.HelperMapper;
@@ -10,9 +9,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.net.URI;
 
 @org.mapstruct.Mapper(
         componentModel = "spring",
@@ -41,15 +37,8 @@ public interface ConnectorMapper extends Mapper<Connector, ConnectorDTO> {
     @Named("toDTO")
     @Mappings({
             @Mapping(target = "connectorId", source = "id"),
-            @Mapping(target = "icon", qualifiedByName = "resolveImagePath"),
+            @Mapping(target = "icon", expression = "java(StringUtility.resolveImagePath(entity.getIcon()))"),
             @Mapping(target = "invoker", qualifiedByName = {"helperMapper", "getInvokerDTO"})
     })
     ConnectorDTO toDTO(Connector entity);
-
-    @Named("resolveImagePath")
-    default String resolveImagePath(String image) {
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
-        return image + imagePath;
-    }
 }

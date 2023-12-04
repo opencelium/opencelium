@@ -174,7 +174,7 @@ public class ExecutionAspect {
                     cValues.put(c, Long.toString(connection.getId()));
                     break;
                 case "CONNECTION_NAME":
-                    cValues.put(c, connection.getName());
+                    cValues.put(c, connection.getTitle());
                     break;
                 case "SCHEDULER_ID":
                     cValues.put(c, Integer.toString(scheduler.getId()));
