@@ -20,8 +20,8 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public Object getQueryParam(String param) {
-        return queryParams.getOrDefault(param, null);
+    public Map<String, Object> getQueryParams() {
+        return queryParams;
     }
 
     @Override
