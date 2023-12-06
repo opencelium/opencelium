@@ -4,7 +4,10 @@ import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
+import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.database.mysql.service.RequestDataService;
+import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.mongo.FieldBindingMngMapper;
 import com.becon.opencelium.backend.mapper.mongo.MethodMngMapper;
@@ -12,8 +15,10 @@ import com.becon.opencelium.backend.mapper.mongo.OperatorMngMapper;
 import com.becon.opencelium.backend.mapper.mysql.ConnectorMapper;
 import com.becon.opencelium.backend.mapper.mysql.EnhancementMapper;
 import com.becon.opencelium.backend.mapper.mysql.InvokerMapper;
+import com.becon.opencelium.backend.mapper.mysql.RequestDataMapper;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
+import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +27,7 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Mapper(
         componentModel = "spring",
@@ -41,6 +47,10 @@ public abstract class HelperMapper {
     @Autowired
     @Qualifier("invokerServiceImp")
     private InvokerService invokerService;
+
+    @Autowired
+    @Qualifier("requestDataServiceImp")
+    private RequestDataService requestDataService;
     @Autowired
     @Qualifier("fieldBindingMngServiceImp")
     private FieldBindingMngService fieldBindingMngService;
@@ -56,6 +66,10 @@ public abstract class HelperMapper {
     @Autowired
     @Lazy
     private FieldBindingMngMapper fieldBindingMngMapper;
+
+    @Autowired
+    @Lazy
+    private RequestDataMapper requestDataMapper;
 
 
     @Named("toConnectorDTO")
@@ -109,5 +123,32 @@ public abstract class HelperMapper {
         } catch (Exception e) {
             return new InvokerDTO();
         }
+    }
+
+    @Named("processRequestData")
+    public List<RequestData> processRequestData(ConnectorResource dto){
+        List<RequestData> requestData = requestDataMapper.toEntity(dto.getRequestData());
+        requestData.forEach(r -> {
+            RequestData data = requestDataService.findByConnectorIdAndField(dto.getConnectorId(), r.getField()).orElse(null);
+            if (data != null){
+                r.setId(data.getId());
+            }
+            Connector connector = new Connector();
+            connector.setId(dto.getConnectorId());
+            r.setConnector(connector);
+        });
+
+        List<RequiredData> requiredData = invokerService.findByName(dto.getInvoker().getName()).getRequiredData();
+
+        requestData.forEach(data -> {
+            String visibility = requiredData.stream()
+                    .filter(d -> d.getName().equals(data.getField()))
+                    .map(RequiredData::getVisibility)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Visibility not found while converting to entity for field:" + data.getField()));
+
+            data.setVisibility(visibility);
+        });
+        return requestData;
     }
 }

@@ -7,21 +7,26 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @org.mapstruct.Mapper(
-        componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        unmappedSourcePolicy = ReportingPolicy.IGNORE
+        componentModel = "spring"
 )
 @Named("requestDataMapper")
 public interface RequestDataMapper extends Mapper<List<RequestData>, Map<String,String>> {
-    @Override
+
+    @Named("toEntity")
     default List<RequestData> toEntity(Map<String, String> dto) {
-        return null;
+        if(dto==null) return null;
+        return dto.entrySet().stream()
+                .map(k -> new RequestData(k.getKey(), k.getValue()))
+                .collect(Collectors.toList());
     }
 
-    @Override
+    @Named("toDTO")
     default Map<String, String> toDTO(List<RequestData> entity) {
-        return null;
+        if(entity==null) return null;
+        return entity.stream().filter(field -> field.getVisibility().equals("public"))
+                .collect(Collectors.toMap(RequestData::getField, RequestData::getValue));
     }
 }

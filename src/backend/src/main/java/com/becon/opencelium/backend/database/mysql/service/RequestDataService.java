@@ -25,6 +25,10 @@ import java.util.Optional;
 public interface RequestDataService {
 
     Optional<RequestData> findByConnectorIdAndField(int connectorId, String field);
-    List<RequestData> toEntity(Map<String, String> resource);
-    Map<String, String> toResource(List<RequestData>  requestData);
+
+    List<RequestData> saveAll(List<RequestData> requestData);
+    void prepare();
+
+//    List<RequestData> toEntity(Map<String, String> resource);
+//    Map<String, String> toResource(List<RequestData>  requestData);
 }

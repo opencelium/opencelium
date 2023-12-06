@@ -30,6 +30,7 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.FileDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -111,10 +112,12 @@ public class FileController {
 //    private InvokerContainer invokerContainer;
 
     private final UserStorageService storageService;
+    private final Mapper<Connector, ConnectorResource> connectorMapper;
 
     @Autowired
-    public FileController(UserStorageService storageService) {
+    public FileController(UserStorageService storageService, Mapper<Connector, ConnectorResource> connectorMapper) {
         this.storageService = storageService;
+        this.connectorMapper = connectorMapper;
     }
 
     @Operation(summary = "Uploads profile picture of a user by provided user email")
@@ -464,7 +467,7 @@ public class FileController {
             // Save file in storage
             storageService.store(file, newFilename);
             connectorService.save(connector);
-            ConnectorResource resource = connectorService.toResource(connector);
+            ConnectorResource resource = connectorMapper.toDTO(connector);
             return ResponseEntity.ok().body(resource);
         } catch (Exception e){
             throw new RuntimeException(e);

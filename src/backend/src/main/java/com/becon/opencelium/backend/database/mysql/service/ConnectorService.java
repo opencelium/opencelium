@@ -31,7 +31,7 @@ public interface ConnectorService {
     Optional<Connector> findById(int id);
     Connector getById(Integer id);
 
-    void save(Connector connector);
+    Connector save(Connector connector);
 
     void saveAll(List<Connector> connectors);
 
@@ -47,15 +47,9 @@ public interface ConnectorService {
 
     List<Connector> findAllByInvoker(String title);
 
-    List<RequestData> getRequestData(Integer ctorId);
-
     List<Connector> findAllByTitleContains(String title);
 
     List<Connector> findAll();
-
-    Connector toEntity(ConnectorResource resource);
-
-    ConnectorResource toResource(Connector entity);
 
     ResponseEntity<?> checkCommunication(Connector connector) throws JsonProcessingException;
 
@@ -63,5 +57,4 @@ public interface ConnectorService {
 
     List<RequestData> buildRequestData(Connector connector);
 
-    ConnectorDTO toMetaDTO(Connector connector);
 }
