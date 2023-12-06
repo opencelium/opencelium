@@ -1,12 +1,19 @@
 package com.becon.opencelium.backend.resource.execution;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
@@ -119,6 +126,24 @@ public class SchemaDTOUtils {
         return ObjectUtils.isEmpty(schema) ? "" : schema.getValue();
     }
 
+    public static SchemaDTO fromJSON(String jsonString) {
+        try {
+            return fromJSONNode(new ObjectMapper().readTree(jsonString));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static SchemaDTO fromXML(String xmlString) {
+        try {
+            // first convert 'xmlString' to JsonNode by using XmlMapper.
+            // Drawback: it converts NUMBER and BOOLEAN to STRING
+            return fromJSONNode(new XmlMapper().readTree(xmlString.getBytes()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static String toXML(String tag, boolean topLayer, SchemaDTO schema) {
         DataType type = schema.getType();
 
@@ -198,5 +223,62 @@ public class SchemaDTOUtils {
         if (value == null) return tagWriter(tag, "");
 
         return "<" + tag + ">" + value + "</" + tag + ">";
+    }
+
+    private static SchemaDTO fromJSONNode(JsonNode jsonNode) {
+        JsonNodeType nodeType = jsonNode.getNodeType();
+
+        SchemaDTO result = new SchemaDTO();
+
+        if (nodeType == JsonNodeType.OBJECT) {
+            result.setType(DataType.OBJECT);
+
+            Map<String, SchemaDTO> properties = new HashMap<>();
+
+            Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
+
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+
+                properties.put(field.getKey(), fromJSONNode(field.getValue()));
+            }
+
+            result.setProperties(properties);
+        } else if (nodeType == JsonNodeType.ARRAY) {
+            result.setType(DataType.ARRAY);
+
+            List<SchemaDTO> items = new ArrayList<>();
+
+            Iterator<JsonNode> elements = jsonNode.elements();
+
+            while (elements.hasNext()) {
+                JsonNode element = elements.next();
+
+                items.add(fromJSONNode(element));
+            }
+
+            result.setItems(items);
+        } else if (nodeType == JsonNodeType.BOOLEAN) {
+            result.setType(DataType.BOOLEAN);
+            result.setValue(jsonNode.asText());
+        } else if (nodeType == JsonNodeType.STRING) {
+            result.setType(DataType.STRING);
+            result.setValue(jsonNode.asText());
+        } else if (nodeType == JsonNodeType.NUMBER) {
+            String value = jsonNode.asText();
+
+            if (value.contains(".")) {
+                result.setType(DataType.NUMBER);
+            } else {
+                result.setType(DataType.INTEGER);
+            }
+
+            result.setValue(value);
+        } else {
+            // for BINARY, MISSING, NULL, POJO JsonNodeType types
+            result = null;
+        }
+
+        return result;
     }
 }
