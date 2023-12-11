@@ -143,11 +143,20 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     private Connection patchUpdate(Connection connection, JsonPatch patch) {
-        removeEnhancement(patch, connection);
-
+        if (removeEnhancement(patch, connection)) {
+            JsonPatch forConnectionMng = extractForConnectionMng(patch);
+            connectionMngService.patchUpdate(connection.getId(), forConnectionMng);
+            return connection;
+        }
         JsonPatch forConnection = extractForConnection(patch);
+        Integer[] ids = undoDeletedEnhancement(forConnection, connection);
+        if (ids[0] != -1) {
+            JsonPatch forConnectionMng = extractForConnectionMng(patch);
+            connectionMngService.patchUpdate(connection.getId(), forConnectionMng);
+            fieldBindingMngService.updateEnhancementId(ids[0], ids[1]);
+            return connection;
+        }
         JsonPatch forConnectionMng = extractForConnectionMng(patch);
-
         ConnectionMng updatedConnectionMng = connectionMngService.patchUpdate(connection.getId(), forConnectionMng);
 
         connection.getEnhancements().forEach(e -> e.setConnection(null));
@@ -163,6 +172,7 @@ public class ConnectionServiceImp implements ConnectionService {
         return connectionRepository.save(updatedConnection);
     }
 
+
     @Override
     public void update(Long connectionId, JsonPatch patch) {
         Connection connection = getById(connectionId);
@@ -170,7 +180,7 @@ public class ConnectionServiceImp implements ConnectionService {
         historyManager.pushAndMakeHistory(updated, connection);
     }
 
-    private void removeEnhancement(JsonPatch patch, Connection connection) {
+    private boolean removeEnhancement(JsonPatch patch, Connection connection) {
         JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
         Iterator<JsonNode> nodes = jsonNode.elements();
         while (nodes.hasNext()) {
@@ -178,9 +188,34 @@ public class ConnectionServiceImp implements ConnectionService {
             String path = next.get("path").textValue();
             String op = next.get("op").textValue();
             if (op.equals("remove") && (path.matches("/fieldBindings/\\d+"))) {
-                enhancementService.deleteAll(connection.getEnhancements());
+                int index = Integer.parseInt(path.split("/")[2]);
+                enhancementService.deleteById(connection.getEnhancements().get(index).getId());
+                connection.getEnhancements().remove(index);
+                return true;
             }
         }
+        return false;
+    }
+
+    private Integer[] undoDeletedEnhancement(JsonPatch patch, Connection connection) {
+        Integer[] res = {-1, -1};
+        JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            String path = next.get("path").textValue();
+            String op = next.get("op").textValue();
+            if (op.equals("add") && (path.matches("/enhancements/\\d+"))) {
+                Connection patched = patchHelper.patch(patch, connection, Connection.class);
+                int index = Integer.parseInt(path.split("/")[2]);
+                Enhancement enhancement = patched.getEnhancements().get(index);
+                enhancement.setConnection(connection);
+                Enhancement saved = enhancementService.save(enhancement);
+                res[0] = enhancement.getId() == null ? -1 : enhancement.getId();
+                res[1] = saved.getId();
+            }
+        }
+        return res;
     }
 
     private JsonPatch extractForConnection(JsonPatch patch) {

@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface FieldBindingRepository extends MongoRepository<FieldBindingMng, String> {
     List<FieldBindingMng> findAllByEnhancementIdIn(List<Integer> enhancementIds);
-    @Query(value="{'_id' : ?0}", delete = true)
-    public void deleteById(String id);
+
+    FieldBindingMng findByEnhancementId(Integer id);
 }

@@ -42,6 +42,13 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     }
 
     @Override
+    public void updateEnhancementId(Integer oldId, Integer newId) {
+        FieldBindingMng old = fieldBindingRepository.findByEnhancementId(oldId);
+        old.setEnhancementId(newId);
+        fieldBindingRepository.save(old);
+    }
+
+    @Override
     public void bind(ConnectionMng connectionMng) {
         List<FieldBindingMng> fieldBindings = connectionMng.getFieldBindings();
         ArrayList<MethodMng> methods = new ArrayList<>();

@@ -17,4 +17,6 @@ public interface FieldBindingMngService {
     List<FieldBindingMng> findAllByEnhancementId(List<Integer> ids);
 
     void deleteById(String id);
+
+    void updateEnhancementId(Integer oldId, Integer newId);
 }

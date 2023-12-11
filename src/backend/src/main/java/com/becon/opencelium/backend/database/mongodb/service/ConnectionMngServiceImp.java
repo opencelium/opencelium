@@ -256,6 +256,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         ConnectionMng connectionMng = getByConnectionId(connectionId);
         ConnectionMng updated = patchHelper.patch(patch, connectionMng, ConnectionMng.class);
         removeOrUpdateChildFields(connectionMng, patch);
+        save(updated);
         return updated;
     }
 
