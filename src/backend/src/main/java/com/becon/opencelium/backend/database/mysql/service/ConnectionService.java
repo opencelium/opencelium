@@ -31,8 +31,6 @@ public interface ConnectionService {
 
     void deleteById(Long id);
 
-    void delete(Connection connection);
-
     Optional<Connection> findById(Long id);
 
     List<Connection> findAll();

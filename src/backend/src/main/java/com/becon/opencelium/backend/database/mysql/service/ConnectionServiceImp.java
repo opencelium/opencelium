@@ -67,7 +67,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ObjectMapper objectMapper;
-    private final ConnectionUpdateTracker historyManager;
+    private final ConnectionUpdateTracker updateTracker;
     private final ConnectionHistoryService connectionHistoryService;
 
     public ConnectionServiceImp(
@@ -86,7 +86,7 @@ public class ConnectionServiceImp implements ConnectionService {
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             ObjectMapper objectMapper,
-            ConnectionUpdateTracker historyManager
+            ConnectionUpdateTracker updateTracker
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -102,15 +102,21 @@ public class ConnectionServiceImp implements ConnectionService {
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
         this.objectMapper = objectMapper;
-        this.historyManager = historyManager;
+        this.updateTracker = updateTracker;
         this.connectionHistoryService = connectionHistoryService;
     }
+
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------
+    // public methods
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
     @Override
     @Transactional(rollbackFor = {MongoException.class, DataAccessException.class})
     public ConnectionMng save(Connection connection, ConnectionMng connectionMng) {
 
+        //checking existence of connectors
         connectorService.getById(connection.getToConnector());
         connectorService.getById(connection.getFromConnector());
 
@@ -132,6 +138,10 @@ public class ConnectionServiceImp implements ConnectionService {
         return connectionMngService.save(connectionMng);
     }
 
+    /**
+     * creates new connection in mysql and mongodb.
+     * creates CREATE history
+     */
     @Override
     public Long createEmptyConnection() {
         Connection saved = connectionRepository.save(new Connection());
@@ -142,22 +152,183 @@ public class ConnectionServiceImp implements ConnectionService {
         return saved.getId();
     }
 
+    /**
+     * a wrapper method for {@link  #patchUpdate(Connection, JsonPatch) patchUpdate} method.
+     * USE ONLY IN CONTROLLER BECAUSE IT TRACKS THE UPDATE TO UNDO AND MAKES A HISTORY.
+     */
+    @Override
+    public void update(Long connectionId, JsonPatch patch) {
+        Connection connection = getById(connectionId);
+        Connection updated = patchUpdate(connection, patch);
+        updateTracker.pushAndMakeHistory(updated, connection);
+    }
+
+    @Override
+    public String updateMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch) {
+        return connectionMngService.updateMethod(connectionId, connectorId, methodId, patch);
+    }
+
+    @Override
+    public String updateOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch) {
+        return connectionMngService.updateOperator(connectionId, connectorId, operatorId, patch);
+    }
+
+    @Override
+    public String updateEnhancement(Long connectionId, String fieldBindingId, JsonPatch patch) {
+        Connection connection = getById(connectionId);
+        FieldBindingMng fieldBindingMng = fieldBindingMngService.findById(fieldBindingId).orElse(new FieldBindingMng());
+
+        FieldBindingMng updatedFieldBinding = connectionMngService.updateFieldBinding(connectionId, patch, fieldBindingMng);
+
+        if (isRemove(patch)) {
+            enhancementService.deleteById(updatedFieldBinding.getEnhancementId());
+        } else {
+            Enhancement enhancement = enhancementMapper.toEntity(fieldBindingMapper.toDTO(updatedFieldBinding).getEnhancement());
+            enhancement.setId(updatedFieldBinding.getEnhancementId());
+            enhancement.setConnection(connection);
+            Enhancement savedEnhancement = enhancementService.save(enhancement);
+
+            updatedFieldBinding.setEnhancementId(savedEnhancement.getId());
+            fieldBindingMngService.save(updatedFieldBinding);
+        }
+        return updatedFieldBinding.getFieldBindingId();
+    }
+
+    @Override
+    public void undo(Long connectionId) {
+        Command command = updateTracker.undo(connectionId);
+        if (command != null) {
+            try {
+                patchUpdate(getById(command.getConnectionId()), command.getJsonPatch());
+                connectionHistoryService.makeHistoryAndSave(getById(connectionId), command.getJsonPatch(), Action.UNDO);
+            } catch (Exception e) {
+                updateTracker.push(command);
+            }
+        }
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        Connection connection = getById(id);
+        List<Scheduler> schedulers = connection.getSchedulers();
+
+        if (schedulers != null && !schedulers.isEmpty()) {
+            schedulers.forEach(s -> {
+                schedulerService.deleteById(s.getId());
+            });
+        }
+        connectionRepository.deleteById(id);
+        connectionMngService.delete(id);
+        connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);
+    }
+
+    @Override
+    public Optional<Connection> findById(Long id) {
+        return connectionRepository.findById(id);
+    }
+
+    @Override
+    public List<Connection> findAll() {
+        return connectionRepository.findAll();
+    }
+
+    @Override
+    public List<Connection> findAllByNameContains(String name) {
+        return connectionRepository.findAllByTitleContains(name);
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return connectionRepository.existsByTitle(name);
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        return connectionRepository.existsById(id);
+    }
+
+    @Override
+    public List<Connection> findAllByConnectorId(int connectorId) {
+        return connectionRepository.findAllByConnectorId(connectorId);
+    }
+
+    @Override
+    public ConnectionMng update(Connection connection, ConnectionMng uConnectionMng) {
+        getById(connection.getId());
+        connectionMngService.getByConnectionId(connection.getId());
+        return save(connection, uConnectionMng);
+    }
+
+    @Override
+    public Connection getById(Long id) {
+        return connectionRepository.findById(id)
+                .orElseThrow(() -> new ConnectionNotFoundException(id));
+    }
+
+    @Override
+    public ConnectionDTO getFullConnection(Long connectionId) {
+        Connection connection = getById(connectionId);
+        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+
+        ConnectionDTO connectionDTOMng = connectionMngMapper.toDTO(connectionMng);
+        ConnectionDTO connectionDTO = connectionMapper.toDTO(connection);
+
+        connectionDTOMng.setDescription(connectionDTO.getDescription());
+        connectionDTOMng.setIcon(connectionDTO.getIcon());
+        connectionDTOMng.setBusinessLayout(connectionDTO.getBusinessLayout());
+
+        if (connectionDTOMng.getFromConnector() != null) {
+            ConnectorDTO temp = connectionDTOMng.getFromConnector();
+            connectionDTOMng.setFromConnector(connectorMapper.toDTO(connectorService.getById(connection.getFromConnector())));
+            connectionDTOMng.getFromConnector().setOperators(temp.getOperators());
+            connectionDTOMng.getFromConnector().setMethods(temp.getMethods());
+        }
+
+        if (connectionDTOMng.getToConnector() != null) {
+            ConnectorDTO temp = connectionDTOMng.getToConnector();
+            connectionDTOMng.setToConnector(connectorMapper.toDTO(connectorService.getById(connection.getToConnector())));
+            connectionDTOMng.getToConnector().setOperators(temp.getOperators());
+            connectionDTOMng.getToConnector().setMethods(temp.getMethods());
+        }
+        return connectionDTOMng;
+    }
+
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------
+    // private methods
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    /**
+     * this method can be used for :
+     * 1. updating basic fields of connection( in ConnectionController).
+     * In this case, {@param patch} CAN ONLY be replace|add|remove patch operations ONLY with the basic fields of connection. Otherwise, this operations will be ignored
+     * 2. Undoing ALL tracked updates.
+     * In this case, {@param patch} CAN ONLY be the patch operations in 1st case and additionally, it CAN be a patch we made 'by hand' while tracking update to undo:
+     * Here they are : "op" - "remove", "replace", "add", "path" - "from|toConnector/methods/{integer}", "from|toConnector/operators/{integer}", "fieldBindings/{integer}"
+     * @param connection is an object to patch and MUST be already saved.
+     * @return patched and saved connection
+     */
     private Connection patchUpdate(Connection connection, JsonPatch patch) {
+        //customize the patch for connection
+        JsonPatch forConnection = extractForConnection(patch);
+        //customize the patch for connectionMng
+        JsonPatch forConnectionMng = extractForConnectionMng(patch);
+
+        //applying patch with connectionMng
+        ConnectionMng updatedConnectionMng = connectionMngService.patchUpdate(connection.getId(), forConnectionMng);
+
+        //if the patch is removing added fieldBinding
         if (removeEnhancement(patch, connection)) {
-            JsonPatch forConnectionMng = extractForConnectionMng(patch);
-            connectionMngService.patchUpdate(connection.getId(), forConnectionMng);
             return connection;
         }
-        JsonPatch forConnection = extractForConnection(patch);
+
+        //if the patch is adding removed fieldBinding
         Integer[] ids = undoDeletedEnhancement(forConnection, connection);
         if (ids[0] != -1) {
-            JsonPatch forConnectionMng = extractForConnectionMng(patch);
-            connectionMngService.patchUpdate(connection.getId(), forConnectionMng);
             fieldBindingMngService.updateEnhancementId(ids[0], ids[1]);
             return connection;
         }
-        JsonPatch forConnectionMng = extractForConnectionMng(patch);
-        ConnectionMng updatedConnectionMng = connectionMngService.patchUpdate(connection.getId(), forConnectionMng);
 
         connection.getEnhancements().forEach(e -> e.setConnection(null));
         Connection updatedConnection = patchHelper.patch(forConnection, connection, Connection.class);
@@ -170,14 +341,6 @@ public class ConnectionServiceImp implements ConnectionService {
 
         connectionMngService.save(updatedConnectionMng);
         return connectionRepository.save(updatedConnection);
-    }
-
-
-    @Override
-    public void update(Long connectionId, JsonPatch patch) {
-        Connection connection = getById(connectionId);
-        Connection updated = patchUpdate(connection, patch);
-        historyManager.pushAndMakeHistory(updated, connection);
     }
 
     private boolean removeEnhancement(JsonPatch patch, Connection connection) {
@@ -283,37 +446,6 @@ public class ConnectionServiceImp implements ConnectionService {
         }
     }
 
-    @Override
-    public String updateOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch) {
-        return connectionMngService.updateOperator(connectionId, connectorId, operatorId, patch);
-    }
-
-    @Override
-    public String updateMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch) {
-        return connectionMngService.updateMethod(connectionId, connectorId, methodId, patch);
-    }
-
-    @Override
-    public String updateEnhancement(Long connectionId, String fieldBindingId, JsonPatch patch) {
-        Connection connection = getById(connectionId);
-        FieldBindingMng fieldBindingMng = fieldBindingMngService.findById(fieldBindingId).orElse(new FieldBindingMng());
-
-        FieldBindingMng updatedFieldBinding = connectionMngService.updateFieldBinding(connectionId, patch, fieldBindingMng);
-
-        if (isRemove(patch)) {
-            enhancementService.deleteById(updatedFieldBinding.getEnhancementId());
-        } else {
-            Enhancement enhancement = enhancementMapper.toEntity(fieldBindingMapper.toDTO(updatedFieldBinding).getEnhancement());
-            enhancement.setId(updatedFieldBinding.getEnhancementId());
-            enhancement.setConnection(connection);
-            Enhancement savedEnhancement = enhancementService.save(enhancement);
-
-            updatedFieldBinding.setEnhancementId(savedEnhancement.getId());
-            fieldBindingMngService.save(updatedFieldBinding);
-        }
-        return updatedFieldBinding.getFieldBindingId();
-    }
-
     private boolean isRemove(JsonPatch patch) {
         JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
         Iterator<JsonNode> nodes = jsonNode.elements();
@@ -326,110 +458,5 @@ public class ConnectionServiceImp implements ConnectionService {
             }
         }
         return false;
-    }
-
-    @Override
-    public void undo(Long connectionId) {
-        Command command = historyManager.undo(connectionId);
-        if (command != null) {
-            try {
-                patchUpdate(getById(command.getConnectionId()), command.getJsonPatch());
-                connectionHistoryService.makeHistoryAndSave(getById(connectionId), command.getJsonPatch(), Action.UNDO);
-            } catch (Exception e) {
-                historyManager.push(command);
-            }
-        }
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        Connection connection = getById(id);
-        List<Scheduler> schedulers = connection.getSchedulers();
-
-        if (schedulers != null && !schedulers.isEmpty()) {
-            schedulers.forEach(s -> {
-                schedulerService.deleteById(s.getId());
-            });
-        }
-        connectionRepository.deleteById(id);
-        connectionMngService.delete(id);
-        connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);
-    }
-
-    @Override
-    public void delete(Connection connection) {
-        connectionRepository.delete(connection);
-    }
-
-    @Override
-    public Optional<Connection> findById(Long id) {
-        return connectionRepository.findById(id);
-    }
-
-    @Override
-    public List<Connection> findAll() {
-        return connectionRepository.findAll();
-    }
-
-
-    @Override
-    public List<Connection> findAllByNameContains(String name) {
-        return connectionRepository.findAllByTitleContains(name);
-    }
-
-    @Override
-    public boolean existsByName(String name) {
-        return connectionRepository.existsByTitle(name);
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return connectionRepository.existsById(id);
-    }
-
-    @Override
-    public List<Connection> findAllByConnectorId(int connectorId) {
-        return connectionRepository.findAllByConnectorId(connectorId);
-    }
-
-    @Override
-    public ConnectionMng update(Connection connection, ConnectionMng uConnectionMng) {
-        getById(connection.getId());
-        connectionMngService.getByConnectionId(connection.getId());
-        return save(connection, uConnectionMng);
-    }
-
-    @Override
-    public Connection getById(Long id) {
-        return connectionRepository.findById(id)
-                .orElseThrow(() -> new ConnectionNotFoundException(id));
-    }
-
-    @Override
-    public ConnectionDTO getFullConnection(Long connectionId) {
-        Connection connection = getById(connectionId);
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
-
-        ConnectionDTO connectionDTOMng = connectionMngMapper.toDTO(connectionMng);
-        ConnectionDTO connectionDTO = connectionMapper.toDTO(connection);
-
-        connectionDTOMng.setDescription(connectionDTO.getDescription());
-        connectionDTOMng.setIcon(connectionDTO.getIcon());
-        connectionDTOMng.setBusinessLayout(connectionDTO.getBusinessLayout());
-
-        if (connectionDTOMng.getFromConnector() != null) {
-            ConnectorDTO temp = connectionDTOMng.getFromConnector();
-            connectionDTOMng.setFromConnector(connectorMapper.toDTO(connectorService.getById(connection.getFromConnector())));
-            connectionDTOMng.getFromConnector().setOperators(temp.getOperators());
-            connectionDTOMng.getFromConnector().setMethods(temp.getMethods());
-        }
-
-        if (connectionDTOMng.getToConnector() != null) {
-            ConnectorDTO temp = connectionDTOMng.getToConnector();
-            connectionDTOMng.setToConnector(connectorMapper.toDTO(connectorService.getById(connection.getToConnector())));
-            connectionDTOMng.getToConnector().setOperators(temp.getOperators());
-            connectionDTOMng.getToConnector().setMethods(temp.getMethods());
-        }
-        return connectionDTOMng;
     }
 }
