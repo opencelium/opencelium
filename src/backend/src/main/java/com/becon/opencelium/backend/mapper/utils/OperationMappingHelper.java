@@ -28,7 +28,16 @@ public abstract class OperationMappingHelper {
 
     @Named("toOperation")
     public OperationDTO toOperation(@NonNull MethodMng method) {
-        MediaType mediaType = MediaType.valueOf(method.getRequest().getHeader().get(HEADER_CONTENT_TYPE));
+        Map<String, String> header = method.getRequest().getHeader();
+        MediaType mediaType = null;
+        if (header != null) {
+            if(header.containsKey(HEADER_CONTENT_TYPE)){
+                mediaType = MediaType.valueOf(header.get(HEADER_CONTENT_TYPE));
+            }
+        }else {
+            method.getRequest().setHeader(new HashMap<>());
+        }
+
         OperationDTO operationDTO = new OperationDTO();
         operationDTO.setOperationId(method.getColor());
         operationDTO.setHttpMethod(HttpMethod.valueOf(method.getRequest().getMethod()));
@@ -74,6 +83,7 @@ public abstract class OperationMappingHelper {
      * - schemaDTO.type will be STRING, ARRAY or OBJECT
      * - explode will be true if schemaDTO.type is OBJECT, otherwise false
      * see also doc about parameter styles <a href="https://swagger.io/docs/specification/serialization/">link</a>
+     *
      * @return all header parameters, maybe empty but not null
      */
     private List<ParameterDTO> getHeaderParameters(@NonNull Map<String, String> header, MediaType mediaType) {
@@ -125,6 +135,7 @@ public abstract class OperationMappingHelper {
      * - schemaDTO.type always will be STRING
      * - explode always will be false
      * see also doc about parameter styles <a href="https://swagger.io/docs/specification/serialization/">link</a>
+     *
      * @return all path parameters, maybe empty but not null
      */
     private List<ParameterDTO> getPathParameters(String path, MediaType mediaType) {
@@ -156,6 +167,7 @@ public abstract class OperationMappingHelper {
      * - schemaDTO.type could be STRING, ARRAY and OBJECT
      * - explode could be false and true depending on style
      * see also doc about parameter styles <a href="https://swagger.io/docs/specification/serialization/">link</a>
+     *
      * @return all query parameters, maybe empty but not null
      */
     private List<ParameterDTO> getQueryParameters(String query, MediaType mediaType) {
@@ -189,8 +201,7 @@ public abstract class OperationMappingHelper {
             //It deals with that array and sets necessary fields to the parameterDTO
             else if (value.matches(REGEX_ARRAY_PARAMETER_IN_PATH)) {
                 dealWithArray(value, parameterDTO);
-            }
-            else {//then it is just string.
+            } else {//then it is just string.
                 parameterDTO.setStyle(ParamStyle.FORM);
                 parameterDTO.setExplode(true);
                 //if it is ref param, gets it's pure name

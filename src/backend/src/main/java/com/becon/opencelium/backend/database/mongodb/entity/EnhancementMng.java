@@ -20,6 +20,11 @@ public class EnhancementMng {
     private String title;
     private String description;
     private String script;
+    private String variables;
+    private String language;
+
+    public EnhancementMng() {
+    }
 
     public String getTitle() {
         return title;
@@ -35,12 +40,6 @@ public class EnhancementMng {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    private String variables;
-    private String language;
-
-    public EnhancementMng() {
     }
 
     public String getLanguage() {
