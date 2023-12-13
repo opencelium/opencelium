@@ -9,14 +9,9 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class ExecutionObjectServiceImp implements ExecutionObjectService {
@@ -42,10 +37,7 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
     }
 
     @Override
-    public ExecutionObj buildObj(JobExecutionContext context) {
-        JobDataMap dataMap = context.getMergedJobDataMap();
-        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
-
+    public ExecutionObj buildObj(QuartzJobScheduler.ScheduleData data) {
         int scheduleId = data.getScheduleId();
         Scheduler scheduler = schedulerService.getById(scheduleId);
         ConnectionMng connectionMng = connectionMngService.getByConnectionId(scheduler.getConnection().getId());
@@ -53,9 +45,7 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
         ExecutionObj executionObj = new ExecutionObj();
         executionObj.setConnection(connectionMapper.toEntity(connectionMng));
 
-        @SuppressWarnings("unchecked")
-        Map<String, String> queryParams = (Map<String, String>) dataMap.getOrDefault("queryParams", new HashMap<>());
-        executionObj.setQueryParams(queryParams);
+        executionObj.setQueryParams(data.getQueryParams());
 
         ProxyEx proxy = new ProxyEx(host, port, user, password);
         executionObj.setProxy(proxy);

@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
@@ -28,6 +29,7 @@ import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
+import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
@@ -238,7 +240,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connection has been successfully updated",
-                    content = @Content(schema = @Schema(implementation = EnhancementDTO.class))),
+                    content = @Content(schema = @Schema(implementation = FieldBindingDTO.class))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -258,10 +260,8 @@ public class ConnectionController {
             @PathVariable Optional<String> fieldBindingId,
             @RequestBody JsonPatch patch
     ) {
-        String id = connectionService.updateEnhancement(connectionId, fieldBindingId.orElse(""), patch);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", id);
-        return ResponseEntity.ok(jsonObject);
+        FieldBindingMng fB = connectionService.updateEnhancement(connectionId, fieldBindingId.orElse(""), patch);
+        return ResponseEntity.ok(fB);
     }
 
     @Operation(summary = "Undoes the last update and returns undid connection")

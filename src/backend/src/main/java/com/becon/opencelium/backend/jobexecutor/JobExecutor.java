@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.jobexecutor;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,6 +37,8 @@ public class JobExecutor extends QuartzJobBean {
 
     @Override
     public void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        ExecutionObj executionObj = executionObjectService.buildObj(context);
+        JobDataMap dataMap = context.getMergedJobDataMap();
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
+        ExecutionObj executionObj = executionObjectService.buildObj(data);
     }
 }
