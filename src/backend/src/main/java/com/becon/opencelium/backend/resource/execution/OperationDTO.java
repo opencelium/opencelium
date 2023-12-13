@@ -6,7 +6,7 @@ import org.springframework.http.HttpMethod;
 import java.util.List;
 
 @Resource
-public class OperationDTO {
+public class OperationDTO implements Executable {
     private String path;
     private HttpMethod httpMethod;
     private String name;
@@ -48,6 +48,7 @@ public class OperationDTO {
         this.operationId = operationId;
     }
 
+    @Override
     public String getExecOrder() {
         return execOrder;
     }

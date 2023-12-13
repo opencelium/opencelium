@@ -6,7 +6,7 @@ public class OperationCarrier {
     public OperationCarrier() {
     }
 
-    public OperationAndContainerSetter forOperation(OperationDTO operation) {
-        return new OperationAndContainerSetter(operation);
+    public OperationAndReferencesSetter forOperation(OperationDTO operation) {
+        return new OperationAndReferencesSetter(operation);
     }
 }
