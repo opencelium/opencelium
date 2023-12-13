@@ -25,6 +25,9 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.MethodDTO;
+import com.becon.opencelium.backend.resource.connection.OperatorDTO;
+import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +37,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.env.Environment;
@@ -127,8 +131,7 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionDTO);
     }
 
-    //TODO: description must be changed
-    @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
+    @Operation(summary = "Creates an empty connection and returns it's id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connection has been successfully created",
@@ -141,25 +144,46 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping
-    public ResponseEntity<?> createEmptyConnection() throws Exception {
+    public ResponseEntity<?> createEmptyConnection() {
         Long id = connectionService.createEmptyConnection();
-        ConnectionDTO connectionDTO = new ConnectionDTO();
-        connectionDTO.setConnectionId(id);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", id);
 
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .buildAndExpand().toUri();
-        return ResponseEntity.created(uri).body(connectionDTO);
+        return ResponseEntity.created(uri).body(jsonObject);
     }
 
-    //TODO: need to add description
+    @Operation(summary = "Updates connection's basic fields with a patch request")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully updated"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PatchMapping(path = "/{connectionId}", consumes = "application/json-patch+json")
     public ResponseEntity<?> patchUpdate(@PathVariable Long connectionId, @RequestBody JsonPatch patch) {
         connectionService.update(connectionId, patch);
         return ResponseEntity.ok().build();
     }
 
-    //TODO: need to add description
+    @Operation(summary = "Add/delete/updates an operator of connection with a patch request and returns current operator's id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully updated",
+                    content = @Content(schema = @Schema(implementation = OperatorDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PatchMapping(
             path = {
                     "/{connectionId}/connector/{connectorId}/operator/{operatorId}",
@@ -167,17 +191,30 @@ public class ConnectionController {
             },
             consumes = "application/json-patch+json"
     )
-    public ResponseEntity<?> addOperator(
+    public ResponseEntity<?> patchOperator(
             @PathVariable Long connectionId,
             @PathVariable Integer connectorId,
             @PathVariable Optional<String> operatorId,
             @RequestBody JsonPatch patch
     ) {
         String id = connectionService.updateOperator(connectionId, connectorId, operatorId.orElse(null), patch);
-        return ResponseEntity.ok(id);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", id);
+        return ResponseEntity.ok(jsonObject);
     }
 
-    //TODO: need to add description
+    @Operation(summary = "Add/delete/updates a method of connection with a patch request and returns current method's id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully updated",
+                    content = @Content(schema = @Schema(implementation = MethodDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PatchMapping(
             path = {
                     "/{connectionId}/connector/{connectorId}/method/{methodId}",
@@ -185,17 +222,30 @@ public class ConnectionController {
             },
             consumes = "application/json-patch+json"
     )
-    public ResponseEntity<?> addMethod(
+    public ResponseEntity<?> patchMethod(
             @PathVariable Long connectionId,
             @PathVariable Integer connectorId,
             @PathVariable Optional<String> methodId,
             @RequestBody JsonPatch patch
     ) {
         String id = connectionService.updateMethod(connectionId, connectorId, methodId.orElse(null), patch);
-        return ResponseEntity.ok(id);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", id);
+        return ResponseEntity.ok(jsonObject);
     }
 
-    //TODO: need to add description
+    @Operation(summary = "Add/delete/updates an enhancement of connection with a patch request and returns current enhancement's id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully updated",
+                    content = @Content(schema = @Schema(implementation = EnhancementDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PatchMapping(
             path = {
                     "/{connectionId}/fieldBinding",
@@ -203,16 +253,30 @@ public class ConnectionController {
             },
             consumes = "application/json-patch+json"
     )
-    public ResponseEntity<?> addEnhancement(
+    public ResponseEntity<?> patchEnhancement(
             @PathVariable Long connectionId,
             @PathVariable Optional<String> fieldBindingId,
             @RequestBody JsonPatch patch
     ) {
         String id = connectionService.updateEnhancement(connectionId, fieldBindingId.orElse(""), patch);
-        return ResponseEntity.ok(id);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", id);
+        return ResponseEntity.ok(jsonObject);
     }
 
-    @GetMapping(path = "/undo/{connectionId}")
+    @Operation(summary = "Undoes the last update and returns undid connection")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully undid",
+                    content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/{connectionId}/undo")
     public ResponseEntity<?> undo(@PathVariable Long connectionId) {
         connectionService.undo(connectionId);
         ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId);
