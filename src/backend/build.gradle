@@ -31,9 +31,6 @@ repositories {
 tasks.named('bootJar') {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
-test {
-	useJUnitPlatform()
-}
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
