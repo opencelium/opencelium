@@ -13,15 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {GraphQLLoginProps} from "@entity/connection/requests/interfaces/IGraphQL";
 import CConnectorItem from "@classes/content/connection/CConnectorItem";
 
 interface GraphiQLEditorProps{
     update: ({query}: {query: string}) => void,
     query: string,
     readOnly?: boolean,
-    credentials: GraphQLLoginProps,
-    connector: CConnectorItem,
+    connector: any,
 }
 
 export {
