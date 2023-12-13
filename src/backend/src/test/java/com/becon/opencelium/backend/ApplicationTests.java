@@ -40,5 +40,28 @@ public class ApplicationTests {
 
 	@Test
 	public void contextLoads() {
+//		String proxyHost = "38.154.227.167";
+//		int proxyPort = 5868;
+//		RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
+//		RestTemplate restTemplate = restTemplateBuilder.build();
+//		HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+//		BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+//		credsProvider.setCredentials(
+//				new AuthScope(proxyHost, proxyPort),
+//				new UsernamePasswordCredentials("bocffjov", "tgjzz8pvelfc".toCharArray())
+//		);
+//		HttpClient httpClient = HttpClientBuilder.create()
+//				.setRoutePlanner(new DefaultProxyRoutePlanner(proxy))
+//				.setDefaultCredentialsProvider(credsProvider)
+//				.build();
+//		restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+//
+//		String uri = "https://www.google.com";
+//		HttpMethod httpMethod = HttpMethod.GET;
+//		HttpHeaders httpHeaders = new HttpHeaders();
+//		HttpEntity<Object> httpEntity = new HttpEntity<Object>(httpHeaders);
+//		ResponseEntity<String> re = restTemplate.exchange(uri, httpMethod, httpEntity, String.class);
+//
+//		System.out.println(re.getBody());
 	}
 }

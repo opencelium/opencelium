@@ -253,7 +253,7 @@ public class ConnectorServiceImp implements ConnectorService{
         List<RequestData> requestData = connector.getRequestData();
         requiredData.forEach(rqd -> addFieldIfNotExists(requestData, rqd));
 
-        // looping through request data nad looking for values that contains references
+        // looping through request data and looking for values that contains references
         // rqsd - requestData object
         RequiredDataService requiredDataService = new RequiredDataServiceImp(requestData, invoker.getOperations());
         requestData.forEach(rqsd -> {

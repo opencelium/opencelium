@@ -139,7 +139,7 @@ public class AggregatorController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Checks whether an name of aggregator is unique or not.")
+    @Operation(summary = "Checks whether a name of aggregator is unique or not.")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Returns true if a name of aggregator is unique.",
@@ -158,7 +158,7 @@ public class AggregatorController {
         return ResponseEntity.ok(resultDTO);
     }
 
-    @Operation(summary = "Checks whether an name of aggregator is unique or not.")
+    @Operation(summary = "Checks whether an aggregator is active or not.")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Returns true if a name of aggregator is unique.",

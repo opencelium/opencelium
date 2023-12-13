@@ -26,20 +26,20 @@ public class NotContainsSubStr implements Operator {
                 }
             }
             return true;
-        } else {
-            arrayList = (ArrayList) val1;
-            for (Object s : arrayList) {
-                if (!(s instanceof String)) {
-                    System.err.println(s);
-                    throw new RuntimeException("Only String type allowed in NotContainsSubStr operator");
-                }
-
-                String str = (String) s;
-                if (str.contains(val2.toString())) {
-                    return false;
-                }
-            }
-            return true;
         }
+
+        arrayList = (ArrayList) val1;
+        for (Object s : arrayList) {
+            if (!(s instanceof String)) {
+                System.err.println(s);
+                throw new RuntimeException("Only String type allowed in NotContainsSubStr operator");
+            }
+
+            String str = (String) s;
+            if (str.contains(val2.toString())) {
+                return false;
+            }
+        }
+        return true;
     }
 }

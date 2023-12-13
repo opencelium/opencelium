@@ -149,7 +149,7 @@ public class JobExecutor extends QuartzJobBean {
 
         if (lastExecutionServiceImp.existsBySchedulerId(scheduler.getId())){
             lastExecution = lastExecutionServiceImp.findBySchedulerId(scheduler.getId());
-        }else {
+        } else {
             lastExecution.setScheduler(scheduler);
         }
         String proxyHost = environment.getProperty(YamlPropConst.PROXY_HOST);
