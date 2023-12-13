@@ -17,4 +17,6 @@ public interface ExecutionManager {
     Optional<Operation> findOperationByColor(String color);
 
     SchemaDTO getValueAsSchemaDTO(String ref);
+
+    void addOperation(Operation operation);
 }

@@ -6,10 +6,7 @@ import com.becon.opencelium.backend.execution.oc721.Extractor;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<String, Object> queryParams;
@@ -18,7 +15,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final LinkedHashMap<String, String> loops = new LinkedHashMap<>();
     private Connector connectorFrom;
     private Connector connectorTo;
-    private List<Operation> operations;
+    private List<Operation> operations = new ArrayList<>();
 
     public ExecutionManagerImpl(Map<String, Object> queryParams, Extractor refExtractor, EnhancementService enhancementService) {
         this.queryParams = queryParams;
@@ -49,5 +46,10 @@ public class ExecutionManagerImpl implements ExecutionManager {
     @Override
     public SchemaDTO getValueAsSchemaDTO(String ref) {
         return refExtractor.extractValue(ref);
+    }
+
+    @Override
+    public void addOperation(Operation operation) {
+        this.operations.add(operation);
     }
 }

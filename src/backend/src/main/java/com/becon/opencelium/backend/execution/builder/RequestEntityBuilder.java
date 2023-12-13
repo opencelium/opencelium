@@ -156,6 +156,7 @@ public class RequestEntityBuilder {
     }
 
     private void replaceRefs(SchemaDTO schema) {
+        // TODO we do not know type of reference
         String value = schema.getValue();
         SchemaDTO referencedSchema = null;
 

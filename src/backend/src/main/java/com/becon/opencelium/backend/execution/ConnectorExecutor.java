@@ -82,10 +82,13 @@ public class ConnectorExecutor {
 
         ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
 
-
-        // TODO if not exists then save newly created operation
         Operation operation = executionManager.findOperationByColor(operationDTO.getOperationId())
-                .orElseGet(() -> Operation.fromDTO(operationDTO));
+                .orElseGet(() -> {
+                    Operation newOperation = Operation.fromDTO(operationDTO);
+                    executionManager.addOperation(newOperation);
+
+                    return newOperation;
+                });
 
         LinkedHashMap<String, String> loops = executionManager.getLoops();
         String key = generateKey(loops);
