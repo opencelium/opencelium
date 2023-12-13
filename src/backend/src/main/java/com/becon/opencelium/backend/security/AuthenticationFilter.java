@@ -16,9 +16,8 @@
 
 package com.becon.opencelium.backend.security;
 
-import com.becon.opencelium.backend.configuration.SecurityConfiguration;
 import com.becon.opencelium.backend.constant.SecurityConstant;
-import com.becon.opencelium.backend.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,8 +26,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

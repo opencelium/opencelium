@@ -17,12 +17,12 @@
 package com.becon.opencelium.backend.aspect;
 
 
+import com.becon.opencelium.backend.database.mysql.entity.*;
+import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.SlackService;
 import com.becon.opencelium.backend.execution.notification.TeamsService;
-import com.becon.opencelium.backend.mysql.entity.*;
-import com.becon.opencelium.backend.mysql.service.*;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import org.aspectj.lang.annotation.*;
 import org.quartz.JobDataMap;
@@ -67,7 +67,6 @@ public class ExecutionAspect {
 
     @Value("${opencelium.notification.tools.slack.webhook}")
     private String slackWebhook;
-
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
     public void sendBefore(JobExecutionContext context){

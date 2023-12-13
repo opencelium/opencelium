@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.mysql.entity.DataAggregator;
-import com.becon.opencelium.backend.mysql.service.ArgumentService;
-import com.becon.opencelium.backend.mysql.service.DataAggregatorService;
+import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
+import com.becon.opencelium.backend.database.mysql.service.ArgumentService;
+import com.becon.opencelium.backend.database.mysql.service.DataAggregatorService;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
@@ -21,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/aggregator", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -33,11 +32,10 @@ public class AggregatorController {
 
     @Autowired
     public AggregatorController(@Qualifier("DataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
-                                @Qualifier("ArgumentServiceImp")ArgumentService argumentService) {
+                                @Qualifier("ArgumentServiceImp") ArgumentService argumentService) {
         this.dataAggregatorService = dataAggregatorService;
         this.argumentService = argumentService;
     }
-
 
     @Operation(summary = "Retrieves a Data Aggregator by provided ID")
     @ApiResponses(value = {
@@ -93,7 +91,6 @@ public class AggregatorController {
     public ResponseEntity<DataAggregatorDTO> save(@RequestBody DataAggregatorDTO dataAggregatorDTO){
         DataAggregator dataAggregator = dataAggregatorService.convertToEntity(dataAggregatorDTO);
         dataAggregatorService.save(dataAggregator);
-
         // added this field because after saving operation it didn't update id in dataAggregator object.
         dataAggregator = dataAggregatorService.getById(dataAggregator.getId());
         DataAggregatorDTO response = dataAggregatorService.convertToDto(dataAggregator);

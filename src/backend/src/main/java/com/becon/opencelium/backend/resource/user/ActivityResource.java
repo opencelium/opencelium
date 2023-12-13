@@ -16,9 +16,8 @@
 
 package com.becon.opencelium.backend.resource.user;
 
-import com.becon.opencelium.backend.mysql.entity.Activity;
+import com.becon.opencelium.backend.database.mysql.entity.Activity;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Date;
 

@@ -17,10 +17,10 @@
 package com.becon.opencelium.backend.controller;
 
 
-import com.becon.opencelium.backend.mysql.entity.User;
-import com.becon.opencelium.backend.mysql.entity.UserDetail;
-import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
-import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
+import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,7 +31,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

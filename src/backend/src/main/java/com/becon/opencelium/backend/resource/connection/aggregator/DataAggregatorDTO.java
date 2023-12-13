@@ -1,19 +1,20 @@
 package com.becon.opencelium.backend.resource.connection.aggregator;
 
 import java.util.List;
+import java.util.Set;
 
 public class DataAggregatorDTO {
-    private int id;
+    private Integer id;
     private String name;
     private List<ArgumentDTO> args;
     private String script;
     private boolean active;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

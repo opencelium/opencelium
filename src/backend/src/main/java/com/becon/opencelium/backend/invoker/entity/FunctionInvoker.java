@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.invoker.entity;
 
-import com.becon.opencelium.backend.resource.connector.FunctionResource;
+import com.becon.opencelium.backend.resource.connector.FunctionDTO;
 
 public class FunctionInvoker {
     private String name;
@@ -27,11 +27,11 @@ public class FunctionInvoker {
     public FunctionInvoker() {
     }
 
-    public FunctionInvoker(FunctionResource functionResource) {
-        this.name = functionResource.getName();
-        this.type = functionResource.getType();
-        this.request = new RequestInv(functionResource.getRequest());
-        this.response = new ResponseInv(functionResource.getResponse());
+    public FunctionInvoker(FunctionDTO functionDTO) {
+        this.name = functionDTO.getName();
+        this.type = functionDTO.getType();
+        this.request = new RequestInv(functionDTO.getRequest());
+        this.response = new ResponseInv(functionDTO.getResponse());
     }
 
     public String getName() {

@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.invoker.service;
 
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
-import com.becon.opencelium.backend.mysql.entity.RequestData;
+import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 
 import java.util.List;
 
