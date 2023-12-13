@@ -5,10 +5,10 @@ import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ParamLocation;
 import com.becon.opencelium.backend.resource.execution.ParamStyle;
 import com.becon.opencelium.backend.resource.execution.ParameterDTO;
-import com.becon.opencelium.backend.resource.execution.ParameterDTOUtils;
+import com.becon.opencelium.backend.resource.execution.ParameterDTOUtil;
 import com.becon.opencelium.backend.resource.execution.RequestBodyDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
-import com.becon.opencelium.backend.resource.execution.SchemaDTOUtils;
+import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -81,7 +81,7 @@ public class RequestEntityBuilder {
 
         // replace path parameters
         Map<String, String> paths = getParamsByLocation(ParamLocation.PATH).stream()
-                .map(parameter -> Map.entry(parameter.getName(), ParameterDTOUtils.toString(parameter)))
+                .map(parameter -> Map.entry(parameter.getName(), ParameterDTOUtil.toString(parameter)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         if (!CollectionUtils.isEmpty(paths)) {
@@ -97,10 +97,10 @@ public class RequestEntityBuilder {
                     ParamStyle style = parameter.getStyle();
 
                     if (style == ParamStyle.DEEP_OBJECT || style == ParamStyle.FORM) {
-                        return ParameterDTOUtils.toString(parameter);
+                        return ParameterDTOUtil.toString(parameter);
                     }
 
-                    return parameter.getName() + "=" + ParameterDTOUtils.toString(parameter);
+                    return parameter.getName() + "=" + ParameterDTOUtil.toString(parameter);
                 })
                 .collect(Collectors.joining("&"));
 
@@ -125,7 +125,7 @@ public class RequestEntityBuilder {
         }
 
         getParamsByLocation(ParamLocation.HEADER)
-                .forEach(p -> headers.put(p.getName(), List.of(ParameterDTOUtils.toString(p))));
+                .forEach(p -> headers.put(p.getName(), List.of(ParameterDTOUtil.toString(p))));
 
         return headers;
     }
@@ -139,15 +139,15 @@ public class RequestEntityBuilder {
 
         MediaType mediaType = body.getContent();
         if (mediaType == MediaType.APPLICATION_JSON) {
-            return SchemaDTOUtils.toJSON(body.getSchema());
+            return SchemaDTOUtil.toJSON(body.getSchema());
         }
 
         if (mediaType == MediaType.APPLICATION_XML) {
-            return SchemaDTOUtils.toXML(body.getSchema());
+            return SchemaDTOUtil.toXML(body.getSchema());
         }
 
         // for other types just return schemas' value as text
-        return SchemaDTOUtils.toText(body.getSchema());
+        return SchemaDTOUtil.toText(body.getSchema());
     }
 
     private static boolean referenced(String value) {

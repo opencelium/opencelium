@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
-import com.becon.opencelium.backend.execution.oc721.Extractor;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.resource.execution.Executable;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
@@ -23,13 +22,11 @@ public class ConnectorExecutor {
     // stores OperationDTO, and OperatorDTO in sorted order by execOrder;
     private final PriorityQueue<Executable> executables;
     private final ExecutionManager executionManager;
-    private final Extractor referenceExtractor;
     private RestTemplate restTemplate;
 
-    public ConnectorExecutor(PriorityQueue<Executable> executables, ExecutionManager executionManager, Extractor referenceExtractor) {
+    public ConnectorExecutor(PriorityQueue<Executable> executables, ExecutionManager executionManager) {
         this.executables = executables;
         this.executionManager = executionManager;
-        this.referenceExtractor = referenceExtractor;
     }
 
     private void start() {
@@ -80,16 +77,18 @@ public class ConnectorExecutor {
 
         RequestEntity<?> requestEntity = RequestEntityBuilder.start()
                 .forOperation(operationDTO)
-                .usingReferences(referenceExtractor::extractValue)
+                .usingReferences(executionManager::getValueAsSchemaDTO)
                 .createRequest();
 
         ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
 
+
+        // TODO if not exists then save newly created operation
         Operation operation = executionManager.findOperationByColor(operationDTO.getOperationId())
                 .orElseGet(() -> Operation.fromDTO(operationDTO));
 
         LinkedHashMap<String, String> loops = executionManager.getLoops();
-        String key = generateIndex(loops);
+        String key = generateKey(loops);
 
         operation.putRequest(key, requestEntity);
         operation.putResponse(key, responseEntity);
@@ -100,8 +99,8 @@ public class ConnectorExecutor {
     private void executeIfOperator(List<Executable> body, int index) {
         OperatorDTO operatorDTO = (OperatorDTO) body.get(index);
 
-        SchemaDTO leftValue = referenceExtractor.extractValue(operatorDTO.getLeftValueReference());
-        SchemaDTO rightValue = referenceExtractor.extractValue(operatorDTO.getRightValueReference());
+        SchemaDTO leftValue = executionManager.getValueAsSchemaDTO(operatorDTO.getLeftValueReference());
+        SchemaDTO rightValue = executionManager.getValueAsSchemaDTO(operatorDTO.getRightValueReference());
 
         boolean result = operatorDTO.getLogicalOperator().algorithm.apply(leftValue, rightValue);
 
@@ -120,7 +119,7 @@ public class ConnectorExecutor {
     private void executeForOperator(List<Executable> body, int index) {
         OperatorDTO operatorDTO = (OperatorDTO) body.get(index);
 
-        List<SchemaDTO> loopingList = referenceExtractor.extractValue(operatorDTO.getLeftValueReference()).getItems();
+        List<SchemaDTO> loopingList = executionManager.getValueAsSchemaDTO(operatorDTO.getLeftValueReference()).getItems();
 
         if (ObjectUtils.isEmpty(loopingList)) {
             return;
@@ -141,7 +140,7 @@ public class ConnectorExecutor {
         // TODO: need to implement
     }
 
-    private String generateIndex(LinkedHashMap<String, String> loops) {
+    private String generateKey(LinkedHashMap<String, String> loops) {
         if (loops.isEmpty()) {
             return "#";
         }

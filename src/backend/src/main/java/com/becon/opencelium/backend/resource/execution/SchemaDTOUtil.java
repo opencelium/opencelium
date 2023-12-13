@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-public class SchemaDTOUtils {
+public class SchemaDTOUtil {
 
     private static final String DEFAULT_STRING = "";
     private static final Integer DEFAULT_INTEGER = 0;
@@ -57,7 +57,7 @@ public class SchemaDTOUtils {
 
             // loop through each item and convert it to JSON recursively
             String array = items.stream()
-                    .map(SchemaDTOUtils::toJSON)
+                    .map(SchemaDTOUtil::toJSON)
                     .collect(Collectors.joining(", "));
 
             return "[" + array + "]";

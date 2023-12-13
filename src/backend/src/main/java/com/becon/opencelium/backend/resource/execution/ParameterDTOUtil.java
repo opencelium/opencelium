@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-public class ParameterDTOUtils {
+public class ParameterDTOUtil {
 
     private final static String EMPTY_STYLE_VALUE_ERROR = "PramStyle of %s should not be empty";
 

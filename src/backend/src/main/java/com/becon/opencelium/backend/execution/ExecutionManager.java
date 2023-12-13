@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,4 +15,6 @@ public interface ExecutionManager {
     Map<String, String> getRequiredData(String ctorId);
 
     Optional<Operation> findOperationByColor(String color);
+
+    SchemaDTO getValueAsSchemaDTO(String ref);
 }
