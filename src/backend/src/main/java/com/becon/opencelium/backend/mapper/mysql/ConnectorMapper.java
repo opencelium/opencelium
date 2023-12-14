@@ -38,7 +38,8 @@ public interface ConnectorMapper extends Mapper<Connector, ConnectorDTO> {
     @Mappings({
             @Mapping(target = "connectorId", source = "id"),
             @Mapping(target = "icon", expression = "java(StringUtility.resolveImagePath(entity.getIcon()))"),
-            @Mapping(target = "invoker", qualifiedByName = {"helperMapper", "getInvokerDTO"})
+            @Mapping(target = "invoker", qualifiedByName = {"helperMapper", "getInvokerDTO"}),
+            @Mapping(target = "id", ignore = true)
     })
     ConnectorDTO toDTO(Connector entity);
 }
