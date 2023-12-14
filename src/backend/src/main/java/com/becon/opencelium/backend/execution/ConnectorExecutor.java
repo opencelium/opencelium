@@ -1,7 +1,10 @@
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.execution.operator.Operator;
+import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.Executable;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
@@ -110,8 +113,9 @@ public class ConnectorExecutor {
         Object leftValue = executionManager.getValue(operatorDTO.getCondition().getLeft());
         Object rightValue = executionManager.getValue(operatorDTO.getCondition().getRight());
 
-        // TODO use Factory to get operator
-        boolean result = false;
+        Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(operatorDTO.getType());
+
+        boolean result = operator.apply(leftValue, rightValue);
 
         // when 'if' evaluates to false, then remove its body.
         // Body contains executables that has 'execOrder' starting with 'execOrder' of 'if'
