@@ -17,10 +17,9 @@
 package com.becon.opencelium.backend.resource.user;
 
 import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.mysql.entity.RoleHasPermission;
-import com.becon.opencelium.backend.mysql.entity.UserRole;
+import com.becon.opencelium.backend.database.mysql.entity.RoleHasPermission;
+import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;

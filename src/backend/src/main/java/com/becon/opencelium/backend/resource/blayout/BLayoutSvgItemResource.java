@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.resource.blayout;
 
-import com.becon.opencelium.backend.mysql.entity.BLsvgItem;
+import com.becon.opencelium.backend.database.mysql.entity.BLsvgItem;
 
 import java.util.Arrays;
 import java.util.List;

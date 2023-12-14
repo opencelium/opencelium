@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.template.service;
 
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 

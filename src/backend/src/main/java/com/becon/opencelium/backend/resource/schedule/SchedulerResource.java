@@ -17,7 +17,7 @@
 package com.becon.opencelium.backend.resource.schedule;
 
 import com.becon.opencelium.backend.constant.Constant;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.execution.LastExecutionResource;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
@@ -28,7 +28,7 @@ import java.util.List;
 public class SchedulerResource {
 
     private int schedulerId;
-    private ConnectionResource connection;
+    private ConnectionDTO connection;
     private String title;
     private boolean status;
     private boolean debugMode;
@@ -45,11 +45,11 @@ public class SchedulerResource {
         this.schedulerId = schedulerId;
     }
 
-    public ConnectionResource getConnection() {
+    public ConnectionDTO getConnection() {
         return connection;
     }
 
-    public void setConnection(ConnectionResource connection) {
+    public void setConnection(ConnectionDTO connection) {
         this.connection = connection;
     }
 

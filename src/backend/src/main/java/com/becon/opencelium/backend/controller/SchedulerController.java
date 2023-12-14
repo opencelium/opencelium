@@ -16,10 +16,10 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.mysql.entity.EventNotification;
-import com.becon.opencelium.backend.mysql.entity.Scheduler;
-import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
-import com.becon.opencelium.backend.mysql.service.WebhookServiceImp;
+import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.WebhookServiceImp;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
@@ -43,7 +43,7 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -135,21 +135,13 @@ public class SchedulerController {
     })
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> reschedule(@PathVariable("id") int id,
-                                        @RequestBody SchedulerRequestResource resource) throws Exception{
+                                        @RequestBody SchedulerRequestResource resource){
         if (id != resource.getSchedulerId()){
-            throw new RuntimeException("SCHEDULE_NOT_FOUND");
+            throw new RuntimeException("SCHEDULER_NOT_FOUND");
         }
-        resource.setSchedulerId(id);
         Scheduler scheduler = schedulerService.toEntity(resource);
-        Scheduler entity = schedulerService.findById(id).orElseThrow(() -> new RuntimeException("SCHEDULER_NOT_FOUND"));
-
-        boolean titleExists = !entity.getTitle().equals(scheduler.getTitle()) && schedulerService.existsByTitle(scheduler.getTitle());
-        if (titleExists){
-            throw new RuntimeException("TITLE_ALREADY_EXISTS");
-        }
-
-        schedulerService.save(scheduler);
-        SchedulerResource schedulerResource = schedulerService.toResource(scheduler);
+        Scheduler updated = schedulerService.update(scheduler);
+        SchedulerResource schedulerResource = schedulerService.toResource(updated);
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .path("/{id}")

@@ -19,20 +19,18 @@ package com.becon.opencelium.backend.invoker.service;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
-import com.becon.opencelium.backend.resource.connector.InvokerResource;
+import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import org.w3c.dom.Document;
 
-import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 
 public interface InvokerService {
 
-    Invoker toEntity(InvokerResource resource);
-    InvokerResource toResource(Invoker entity);
+    Invoker toEntity(InvokerDTO resource);
+    InvokerDTO toResource(Invoker entity);
     FunctionInvoker getTestFunction(String invokerName);
     FunctionInvoker getAuthFunction(String invokerName);
     File findFileByInvokerName(String invokerName);
@@ -40,7 +38,7 @@ public interface InvokerService {
     boolean existsByName(String name);
     List<Invoker> findAll();
     void delete(String name);
-    String findFieldType(String name, String methodName, String exchangeType, String result, String fieldName);
+    String findFieldType(String name, String path);
     String findFieldByPath(String invoker, String method, String path);
     Document getDocument(String name) throws Exception;
     void save(Document document);

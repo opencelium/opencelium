@@ -18,7 +18,8 @@ package com.becon.opencelium.backend.constant;
 
 public interface PathConstant {
     public static final String NEO4J = "com.becon.opencelium.backend.neo4j";
-    public static final String MYSQl = "com.becon.opencelium.backend.mysql";
+    public static final String MONGODB = "com.becon.opencelium.backend.database.mongodb";
+    public static final String MYSQl = "com.becon.opencelium.backend.database.mysql";
     public static final String ELASTICSEARCH = "com.becon.opencelium.backend.elasticsearch";
     public static final String INVOKER = "src/main/resources/invoker/";
     public static final String IMAGES = "/api/storage/files/";

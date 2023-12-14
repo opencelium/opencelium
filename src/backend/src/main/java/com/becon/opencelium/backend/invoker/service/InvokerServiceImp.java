@@ -20,28 +20,20 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.WrongEncode;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
-import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
-import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
-import com.becon.opencelium.backend.resource.connector.InvokerResource;
+import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.becon.opencelium.backend.utility.FileNameUtils;
-import com.becon.opencelium.backend.utility.PathUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -54,8 +46,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -71,14 +61,14 @@ public class InvokerServiceImp implements InvokerService {
     private final Path filePath = Paths.get(PathConstant.INVOKER);
 
     @Override
-    public Invoker toEntity(InvokerResource resource) {
+    public Invoker toEntity(InvokerDTO resource) {
 //        return new Invoker(resource);
         return null;
     }
 
     @Override
-    public InvokerResource toResource(Invoker entity) {
-        return new InvokerResource(entity);
+    public InvokerDTO toResource(Invoker entity) {
+        return new InvokerDTO(entity);
     }
 
     @Override
@@ -186,33 +176,9 @@ public class InvokerServiceImp implements InvokerService {
     }
 
     //TODO: need to add path of field
+    // path = response.success.val1.val2.val3;
     @Override
-    public String findFieldType(String invokerName, String methodName, String exchangeType, String result, String fieldName) {
-        Body body = null;
-
-        if (exchangeType.equals("response") && result.equals("success")){
-            body = invokerContainer.getByName(invokerName).getOperations().stream()
-                    .filter(o -> o.getName().equals(methodName))
-                    .map(o -> o.getResponse().getSuccess().getBody()).findFirst().get();
-        } else if (exchangeType.equals("response") && result.equals("fail")){
-            body = invokerContainer.getByName(invokerName).getOperations().stream()
-                    .filter(o -> o.getName().equals(methodName))
-                    .map(o -> o.getResponse().getFail().getBody()).findFirst().get();
-        } else if (exchangeType.equals("request")) {
-            Invoker invoker = invokerContainer.getByName(invokerName);
-            FunctionInvoker functionInvoker = invoker.getOperations().stream()
-                    .filter(o -> o.getName().equals(methodName)).findFirst()
-                    .orElseThrow(()->new RuntimeException(methodName + " not found in invoker file " + "'" + invokerName + "'"));
-            body = functionInvoker.getRequest().getBody();
-        }
-
-        Object type = findField(fieldName, body.getFields());
-
-        if(type instanceof HashMap){
-            return "object";
-        } else if (type instanceof ArrayList){
-            return "array";
-        }
+    public String findFieldType(String invokerName, String path) {
         return "string";
     }
 
@@ -445,14 +411,14 @@ public class InvokerServiceImp implements InvokerService {
         }
     }
 
-    public InvokerResource toMetaResource(Invoker invoker) {
+    public InvokerDTO toMetaResource(Invoker invoker) {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
-        InvokerResource invokerResource = new InvokerResource();
-        invokerResource.setName(invoker.getName());
-        invokerResource.setDescription(invoker.getDescription());
-        invokerResource.setIcon(imagePath + invoker.getIcon());
+        InvokerDTO invokerDTO = new InvokerDTO();
+        invokerDTO.setName(invoker.getName());
+        invokerDTO.setDescription(invoker.getDescription());
+        invokerDTO.setIcon(imagePath + invoker.getIcon());
 
-        return invokerResource;
+        return invokerDTO;
     }
 }

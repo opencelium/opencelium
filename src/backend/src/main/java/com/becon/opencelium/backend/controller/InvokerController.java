@@ -24,14 +24,14 @@ import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.invoker.resource.OperationResource;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
-import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.mysql.entity.Connector;
-import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
-import com.becon.opencelium.backend.resource.connector.FunctionResource;
-import com.becon.opencelium.backend.resource.connector.InvokerResource;
+import com.becon.opencelium.backend.resource.connector.FunctionDTO;
+import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.becon.opencelium.backend.resource.connector.InvokerXMLResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.utility.FileNameUtils;
@@ -100,7 +100,7 @@ public class InvokerController {
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
                 description = "Invoker has been successfully retrieved",
-                content = @Content(schema = @Schema(implementation = InvokerResource.class))),
+                content = @Content(schema = @Schema(implementation = InvokerDTO.class))),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -110,7 +110,7 @@ public class InvokerController {
     })
     @GetMapping("/{name}")
     public ResponseEntity<?> get(@PathVariable String name) throws Exception {
-        InvokerResource invokerResources = invokerService.toResource(invokerService.findByName(name));
+        InvokerDTO invokerResources = invokerService.toResource(invokerService.findByName(name));
         return ResponseEntity.ok(invokerResources);
     }
 
@@ -118,7 +118,7 @@ public class InvokerController {
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "List of Invokers have been successfully retrieved",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = InvokerResource.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = InvokerDTO.class)))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -127,12 +127,12 @@ public class InvokerController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<List<InvokerResource>> getAll() throws Exception {
+    public ResponseEntity<List<InvokerDTO>> getAll() throws Exception {
 
-        List<InvokerResource> invokerResources = invokerService.findAll()
+        List<InvokerDTO> invokerDTOS = invokerService.findAll()
                 .stream().map(inv -> invokerService.toResource(inv))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(invokerResources);
+        return ResponseEntity.ok(invokerDTOS);
     }
 
     @Operation(summary = "Checks by name whether an invoker exist or not")
@@ -177,7 +177,7 @@ public class InvokerController {
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
                 description = "Invoker has been successfully created",
-                content = @Content(schema = @Schema(implementation = InvokerResource.class))),
+                content = @Content(schema = @Schema(implementation = InvokerDTO.class))),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -230,9 +230,8 @@ public class InvokerController {
             delete(filename);
             throw new RuntimeException("Invoker should contain at least one Operation.");
         }
-        InvokerResource invokerResource = invokerService.toResource(invoker);
-        final EntityModel<InvokerResource> resource = EntityModel.of(invokerResource);
-        return ResponseEntity.ok().body(resource);
+        InvokerDTO invokerDTO = invokerService.toResource(invoker);
+        return ResponseEntity.ok().body(invokerDTO);
     }
 
     @Operation(summary = "Validates whether an invoker is used in connection or in connector")
@@ -327,7 +326,7 @@ public class InvokerController {
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
                 description = "Field in operation hase been successfully modified",
-                content = @Content(schema = @Schema(implementation = FunctionResource.class))),
+                content = @Content(schema = @Schema(implementation = FunctionDTO.class))),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -336,8 +335,8 @@ public class InvokerController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(value = "/{invokerName}/xml", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<FunctionResource> updateField(@PathVariable String invokerName,
-                                                        @RequestBody OperationResource operationResource) {
+    public ResponseEntity<FunctionDTO> updateField(@PathVariable String invokerName,
+                                                   @RequestBody OperationResource operationResource) {
         try {
             Document invoker = invokerService.getDocument(invokerName + ".xml");
             Xml xml = new Xml(invoker, invokerName + ".xml");
@@ -353,7 +352,7 @@ public class InvokerController {
             NodeList methodNode = xml.getNodeListByXpath(PathUtility.getXPathTillMethod(method));
             InvokerParserImp invokerParserImp = new InvokerParserImp(invoker);
             FunctionInvoker functionInvoker = invokerParserImp.getFunctions(methodNode).get(0);
-            FunctionResource resource = new FunctionResource(functionInvoker);
+            FunctionDTO resource = new FunctionDTO(functionInvoker);
             return ResponseEntity.ok(resource);
         } catch (Exception ex) {
             ex.printStackTrace();
