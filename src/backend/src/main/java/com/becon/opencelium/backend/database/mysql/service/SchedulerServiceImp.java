@@ -103,7 +103,6 @@ public class SchedulerServiceImp implements SchedulerService {
         return updated;
     }
 
-
     @Override
     public List<Scheduler> saveAll(List<Scheduler> schedulers) {
         return schedulerRepository.saveAll(schedulers);
@@ -292,7 +291,6 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void saveNotification(EventNotification eventNotification) {
-
         notificationRepository.save(eventNotification);
         eventNotification.getEventRecipients().forEach(recipientService::save);
         messageService.save(eventNotification.getEventMessage());
@@ -302,6 +300,4 @@ public class SchedulerServiceImp implements SchedulerService {
     public void deleteNotificationById(int id) {
         notificationRepository.deleteById(id);
     }
-
-
 }
