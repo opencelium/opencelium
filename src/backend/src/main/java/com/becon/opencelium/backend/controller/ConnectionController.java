@@ -28,7 +28,6 @@ import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
-import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -64,19 +63,22 @@ public class ConnectionController {
     private final ConnectionMngService connectionMngService;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
+    private final Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMapper;
 
     public ConnectionController(
             Environment environment,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
-            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService
+            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
+            Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMapper
     ) {
         this.environment = environment;
         this.connectionService = connectionService;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
         this.connectionMngService = connectionMngService;
+        this.fieldBindingMapper = fieldBindingMapper;
     }
 
     @Operation(summary = "Retrieves all connections from database")
@@ -261,7 +263,7 @@ public class ConnectionController {
             @RequestBody JsonPatch patch
     ) {
         FieldBindingMng fB = connectionService.updateEnhancement(connectionId, fieldBindingId.orElse(""), patch);
-        return ResponseEntity.ok(fB);
+        return ResponseEntity.ok(fieldBindingMapper.toDTO(fB));
     }
 
     @Operation(summary = "Undoes the last update and returns undid connection")
