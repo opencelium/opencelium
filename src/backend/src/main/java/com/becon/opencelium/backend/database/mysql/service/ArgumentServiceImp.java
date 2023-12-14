@@ -1,7 +1,7 @@
-package com.becon.opencelium.backend.mysql.service;
+package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.mysql.entity.Argument;
-import com.becon.opencelium.backend.mysql.repository.ArgumentRepository;
+import com.becon.opencelium.backend.database.mysql.entity.Argument;
+import com.becon.opencelium.backend.database.mysql.repository.ArgumentRepository;
 import com.becon.opencelium.backend.resource.connection.aggregator.ArgumentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +40,4 @@ public class ArgumentServiceImp implements ArgumentService {
     public Optional<Argument> findById(int argId) {
         return argumentRepository.findById(argId);
     }
-
-
 }

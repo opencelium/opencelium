@@ -1,6 +1,6 @@
-package com.becon.opencelium.backend.mysql.repository;
+package com.becon.opencelium.backend.database.mysql.repository;
 
-import com.becon.opencelium.backend.mysql.entity.ExecutionArgument;
+import com.becon.opencelium.backend.database.mysql.entity.ExecutionArgument;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

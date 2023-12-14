@@ -1,6 +1,5 @@
-package com.becon.opencelium.backend.mysql.entity;
+package com.becon.opencelium.backend.database.mysql.entity;
 
-import com.becon.opencelium.backend.enums.LangEnum;
 import jakarta.persistence.*;
 
 import java.io.Serializable;

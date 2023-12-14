@@ -14,7 +14,7 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.mysql.entity;
+package com.becon.opencelium.backend.database.mysql.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

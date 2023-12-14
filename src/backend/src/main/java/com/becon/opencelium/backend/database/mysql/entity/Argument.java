@@ -1,5 +1,6 @@
-package com.becon.opencelium.backend.mysql.entity;
+package com.becon.opencelium.backend.database.mysql.entity;
 
+import com.becon.opencelium.backend.database.mysql.entity.ExecutionArgument;
 import jakarta.persistence.*;
 
 import java.util.List;
