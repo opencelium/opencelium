@@ -5,7 +5,6 @@ import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
-import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -254,19 +253,19 @@ public abstract class OperationMappingHelper {
 
     private SchemaDTO getSchema(BodyMng body) {
         if (body == null || body.getFields() == null) return null;
-        Map<String, java.lang.Object> fields = body.getFields();
+        Map<String, Object> fields = body.getFields();
         SchemaDTO schemaDTO = new SchemaDTO();
         if (Objects.equals(body.getType(), "array")) {
             schemaDTO.setType(DataType.ARRAY);
             List<SchemaDTO> elements = new ArrayList<>();
-            for (java.lang.Object value : fields.values()) {
+            for (Object value : fields.values()) {
                 elements.add(getSchemaFromObject(value));
             }
             schemaDTO.setItems(elements);
         } else {
             schemaDTO.setType(DataType.OBJECT);
             Map<String, SchemaDTO> props = new HashMap<>();
-            for (Map.Entry<String, java.lang.Object> entry : fields.entrySet()) {
+            for (Map.Entry<String, Object> entry : fields.entrySet()) {
                 props.put(entry.getKey(), getSchemaFromObject(entry.getValue()));
             }
             schemaDTO.setProperties(props);
@@ -311,7 +310,7 @@ public abstract class OperationMappingHelper {
         return schemaDTO;
     }
 
-    private SchemaDTO getSchemaFromObject(java.lang.Object obj) {
+    private SchemaDTO getSchemaFromObject(Object obj) {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(obj);
         if (obj == null || type == null)
@@ -330,7 +329,7 @@ public abstract class OperationMappingHelper {
         } else if (obj instanceof List<?> items) {
             schemaDTO.setType(DataType.ARRAY);
             List<SchemaDTO> elements = new ArrayList<>();
-            for (java.lang.Object item : items) {
+            for (Object item : items) {
                 elements.add(getSchemaFromObject(item));
             }
             schemaDTO.setItems(elements);
@@ -381,7 +380,7 @@ public abstract class OperationMappingHelper {
         }
     }
 
-    private DataType getType(java.lang.Object obj) {
+    private DataType getType(Object obj) {
         if (obj instanceof Integer) {
             return DataType.INTEGER;
         } else if (obj instanceof Number) {
