@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
+import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
@@ -414,8 +415,8 @@ public class ConnectionController {
 
         HttpEntity<Object> requestEntity = new HttpEntity<>(apiDataResource.getBody(), headers);
 
-        String proxyHost = environment.getProperty("opencelium.rest_template.proxy.host");
-        String proxyPort = environment.getProperty("opencelium.rest_template.proxy.port");
+        String proxyHost = environment.getProperty(YamlPropConst.PROXY_HOST, "");
+        String proxyPort = environment.getProperty(YamlPropConst.PROXY_PORT, "");
         RestTemplateBuilder restTemplateBuilder =
                 new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, apiDataResource.isSslOn()));
         RestTemplate restTemplate = restTemplateBuilder.build();

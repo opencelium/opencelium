@@ -53,9 +53,6 @@ public class ExecutionAspect {
     private UserServiceImpl userService;
 
     @Autowired
-    private EmailServiceImpl emailService;
-
-    @Autowired
     private TeamsService teamsService;
 
     @Autowired
@@ -66,6 +63,9 @@ public class ExecutionAspect {
 
     @Autowired
     private ArgumentServiceImp argumentServiceImp;
+
+    @Autowired
+    private EmailServiceImpl emailService;
 
     @Value("${opencelium.notification.tools.slack.webhook}")
     private String slackWebhook;

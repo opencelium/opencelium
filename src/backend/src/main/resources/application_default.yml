@@ -190,6 +190,9 @@ opencelium:
         client_secret:
         refresh_token:
         tenant:
+  connector:
+    security:
+      key: it's secret key
 #  rest_template:
 #      proxy:
 #        host: 127.0.0.1
