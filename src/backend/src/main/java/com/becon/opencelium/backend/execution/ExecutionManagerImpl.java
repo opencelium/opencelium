@@ -4,12 +4,11 @@ import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.EnhancementService;
 import com.becon.opencelium.backend.execution.oc721.Extractor;
 import com.becon.opencelium.backend.execution.oc721.Operation;
-import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 
 import java.util.*;
 
 public class ExecutionManagerImpl implements ExecutionManager {
-    private final Map<String, Object> queryParams;
+    private final Map<String, java.lang.Object> queryParams;
     private final Extractor refExtractor;
     private final EnhancementService enhancementService;
     private final LinkedHashMap<String, String> loops = new LinkedHashMap<>();
@@ -17,14 +16,14 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private Connector connectorTo;
     private List<Operation> operations = new ArrayList<>();
 
-    public ExecutionManagerImpl(Map<String, Object> queryParams, Extractor refExtractor, EnhancementService enhancementService) {
+    public ExecutionManagerImpl(Map<String, java.lang.Object> queryParams, Extractor refExtractor, EnhancementService enhancementService) {
         this.queryParams = queryParams;
         this.refExtractor = refExtractor;
         this.enhancementService = enhancementService;
     }
 
     @Override
-    public Map<String, Object> getQueryParams() {
+    public Map<String, java.lang.Object> getQueryParams() {
         return queryParams;
     }
 
@@ -44,7 +43,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public SchemaDTO getValueAsSchemaDTO(String ref) {
+    public Object getValue(String ref) {
         return refExtractor.extractValue(ref);
     }
 

@@ -77,7 +77,7 @@ public class ConnectorExecutor {
 
         RequestEntity<?> requestEntity = RequestEntityBuilder.start()
                 .forOperation(operationDTO)
-                .usingReferences(executionManager::getValueAsSchemaDTO)
+                .usingReferences(executionManager::getValue)
                 .createRequest();
 
         ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
@@ -91,7 +91,7 @@ public class ConnectorExecutor {
                 });
 
         LinkedHashMap<String, String> loops = executionManager.getLoops();
-        String key = generateKey(loops);
+        String key = Operation.generateKey(loops);
 
         operation.putRequest(key, requestEntity);
         operation.putResponse(key, responseEntity);
@@ -102,8 +102,8 @@ public class ConnectorExecutor {
     private void executeIfOperator(List<Executable> body, int index) {
         OperatorDTO operatorDTO = (OperatorDTO) body.get(index);
 
-        SchemaDTO leftValue = executionManager.getValueAsSchemaDTO(operatorDTO.getLeftValueReference());
-        SchemaDTO rightValue = executionManager.getValueAsSchemaDTO(operatorDTO.getRightValueReference());
+        SchemaDTO leftValue = executionManager.getValue(operatorDTO.getLeftValueReference());
+        SchemaDTO rightValue = executionManager.getValue(operatorDTO.getRightValueReference());
 
         boolean result = operatorDTO.getLogicalOperator().algorithm.apply(leftValue, rightValue);
 
@@ -122,7 +122,7 @@ public class ConnectorExecutor {
     private void executeForOperator(List<Executable> body, int index) {
         OperatorDTO operatorDTO = (OperatorDTO) body.get(index);
 
-        List<SchemaDTO> loopingList = executionManager.getValueAsSchemaDTO(operatorDTO.getLeftValueReference()).getItems();
+        List<SchemaDTO> loopingList = executionManager.getValue(operatorDTO.getLeftValueReference()).getItems();
 
         if (ObjectUtils.isEmpty(loopingList)) {
             return;
@@ -141,13 +141,5 @@ public class ConnectorExecutor {
 
     private void executeForInOperator(List<Executable> body, int index) {
         // TODO: need to implement
-    }
-
-    private String generateKey(LinkedHashMap<String, String> loops) {
-        if (loops.isEmpty()) {
-            return "#";
-        }
-
-        return String.join(", ", loops.values());
     }
 }

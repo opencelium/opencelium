@@ -7,8 +7,6 @@ import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Arrays;
@@ -25,10 +23,11 @@ public class ReferenceExtractor implements Extractor {
     }
 
     @Override
-    public SchemaDTO extractValue(String ref) {
-        SchemaDTO result = null;
+    public Object extractValue(String ref) {
+        Object result = null;
 
         if (ref.matches(RegExpression.queryParams)) {
+            // TODO: rewrite for query param
             result = extractValueFromQueryParams(ref);
         }
 
@@ -44,42 +43,15 @@ public class ReferenceExtractor implements Extractor {
         return result;
     }
 
-    private SchemaDTO extractValueFromOperation(String ref) {
-        if (ObjectUtils.isEmpty(ref)) {
-            return new SchemaDTO(DataType.STRING, "");
-        }
-
+    private Object extractValueFromOperation(String ref) {
         String color = ref.substring(ref.indexOf('#'), ref.indexOf('.'));
-        String exchangeType = ref.substring(ref.indexOf('(') + 1, ref.indexOf(')'));
 
         Operation operation = executionManager.findOperationByColor(color).orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
-        if ("response".equalsIgnoreCase(exchangeType)) {
-            Map<String, ResponseEntity<?>> responses = operation.getResponses();
-            String key = constructKey(ref, exchangeType);
 
-            ResponseEntity<?> response = responses.get(key);
-
-
-
-        } else if ("request".equalsIgnoreCase(exchangeType)) {
-            Map<String, RequestEntity<?>> requests = operation.getRequests();
-            String key = constructKey(ref, exchangeType);
-
-            RequestEntity<?> request = requests.get(key);
-
-
-
-        }
-
-        return null;
+        return operation.getValue(ref, executionManager.getLoops());
     }
 
-    private String constructKey(String ref, String exchangeType) {
-        // TODO add implementation
-        return "#";
-    }
-
-    private SchemaDTO extractValueFromQueryParams(String ref) {
+    private Object extractValueFromQueryParams(String ref) {
         try {
             if (ObjectUtils.isEmpty(ref)) {
                 return new SchemaDTO(DataType.STRING, "");
