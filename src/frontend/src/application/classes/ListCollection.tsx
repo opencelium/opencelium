@@ -56,6 +56,8 @@ class ListCollection<EntityProps> implements IListCollection<EntityProps>{
 
     getListRawUrl?: (entity: any) => string;
 
+
+    AfterSearchComponents?: any = null;
     // props of grid view
     gridProps: ListCollectionCardProps;
 
@@ -184,7 +186,7 @@ class ListCollection<EntityProps> implements IListCollection<EntityProps>{
      * @param a
      * @param b
      */
-    asc(a: string | number, b: string | number): number{
+    asc(a: string | number | boolean, b: string | number | boolean): number{
         let result = 0
         if(a < b){
             result = -1;
@@ -200,7 +202,7 @@ class ListCollection<EntityProps> implements IListCollection<EntityProps>{
      * @param a
      * @param b
      */
-    desc(a: string | number, b: string | number): number{
+    desc(a: string | number | boolean, b: string | number | boolean): number{
         let result = 0
         if(a > b){
             result = -1;

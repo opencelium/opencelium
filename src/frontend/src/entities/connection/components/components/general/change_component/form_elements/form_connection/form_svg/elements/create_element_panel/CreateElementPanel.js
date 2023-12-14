@@ -15,7 +15,6 @@
 
 import React from 'react';
 import {setFocusById} from "@application/utils/utils";
-import {setArrows} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {connect} from "react-redux";
 import CreateProcess
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateProcess";
@@ -36,17 +35,18 @@ import ItemTypePanel
 import ItemPositionPanel
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/ItemPositionPanel";
 import ReactDOM from "react-dom";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-
-function mapStateToProps(state){
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {currentTechnicalItem} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
     };
 }
 
-@connect(mapStateToProps, {setArrows})
+@GetModalProp()
+@connect(mapStateToProps, {}, null, {forwardRef: true})
 class CreateElementPanel extends React.Component{
     constructor(props) {
         super(props);
@@ -56,6 +56,8 @@ class CreateElementPanel extends React.Component{
             localItemPosition: props.itemPosition,
         }
         document.body.appendChild(this.createElementPanel);
+        this.createProcessRef = React.createRef();
+        this.createOperatorRef = React.createRef();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -155,6 +157,7 @@ class CreateElementPanel extends React.Component{
                     }
                     {hasCreateProcess &&
                         <CreateProcess
+                            ref={this.createProcessRef}
                             {...this.props}
                             hasBeforeLine={hasLineBeforeCreateProcess}
                             itemPosition={itemPosition}
@@ -165,6 +168,7 @@ class CreateElementPanel extends React.Component{
                     }
                     {hasCreateOperator &&
                         <CreateOperator
+                            ref={this.createOperatorRef}
                             {...this.props}
                             itemType={type}
                             itemPosition={itemPosition}

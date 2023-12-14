@@ -1,14 +1,20 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.enums.LangEnum;
+
 import com.becon.opencelium.backend.database.mysql.entity.EventContent;
 import com.becon.opencelium.backend.database.mysql.entity.EventMessage;
 import com.becon.opencelium.backend.database.mysql.service.ContentServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.MessageServiceImpl;
+import com.becon.opencelium.backend.execution.notification.TeamsService;
+import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.LanguageDTO;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
+
+import com.becon.opencelium.backend.resource.notification.tool.teams.TeamsDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,6 +23,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.core.env.Environment;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,10 +40,16 @@ import java.util.stream.Stream;
 public class MessageController {
 
     @Autowired
-    MessageServiceImpl messageService;
+    private MessageServiceImpl messageService;
 
     @Autowired
-    ContentServiceImpl contentService;
+    private ContentServiceImpl contentService;
+
+    @Autowired
+    private TeamsService teamsService;
+
+    @Autowired
+    private Environment env;
 
     @Operation(summary = "Retrieves all event messages from database")
     @ApiResponses(value = {
@@ -214,4 +228,41 @@ public class MessageController {
         return ResponseEntity.ok().body(body);
     }
 
+    @Operation(summary = "Retrieves list of supported tools like email, teams, slack, etc...")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Returns array that contains string values like \"result\": [\"email\", \"slack\"]",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/tools/all")
+    public ResponseEntity<?> getTools() throws Exception {
+        List<String> notifyTools = Arrays.stream(NotifyTool.values()).map(Enum::toString).toList();
+        ResultDTO<List<String>> resultDTO = new ResultDTO<>(notifyTools);
+        return ResponseEntity.ok(resultDTO);
+    }
+
+    @GetMapping("/tools/teams/team/all")
+    public ResponseEntity<?> getAllTeamsTeam() throws Exception {
+        TeamsDto teams = teamsService.getAllTeams();
+        return ResponseEntity.ok(teams);
+    }
+
+    @GetMapping("/tools/teams/team/{teamId}/channel/all")
+    public ResponseEntity<?> getAllTeamChannels(@PathVariable String teamId) throws Exception {
+        TeamsDto channels = teamsService.getAllChannels(teamId);
+        return ResponseEntity.ok(channels);
+    }
+
+    @GetMapping("/tools/slack/webhook")
+    public ResponseEntity<?> getSlackWebhook() throws Exception {
+        String webhook = env.getProperty("opencelium.notification.tools.slack.webhook");
+        ResultDTO<String> webhookDto = new ResultDTO<>(webhook);
+        return ResponseEntity.ok(webhookDto);
+    }
 }

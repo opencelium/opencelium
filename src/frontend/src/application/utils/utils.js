@@ -20,6 +20,7 @@ import _ from "lodash";
 import {ResponseMessages} from "../requests/interfaces/IResponse";
 import {Application} from "../classes/Application";
 import crypto from "crypto";
+import {Range} from "ace-builds";
 
 //TODO rename utils.js into utils.tsx
 /**
@@ -895,7 +896,192 @@ export const generateSignature = (token, method, url, timestamp) => {
 
 export const sortAlphabeticallyByKey = (array, key) => {
     return array.sort(function(a, b) {
-        const x = a[key].toLowerCase(); const y = b[key].toLowerCase();
+        const x = a[key].toLowerCase();
+        const y = b[key].toLowerCase();
         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
     });
+}
+
+export const getMarker = (editor, value, searchString) => {
+    const matches = [...value?.matchAll(`\\${searchString}`)];
+    let result = [];
+    for(let i = 0; i < matches.length; i++){
+        if (matches[i]?.index) {
+            const start = editor.session.doc.indexToPosition(matches[i].index);
+            const end = editor.session.doc.indexToPosition(matches[i].index + searchString.length);
+            result.push({
+                startRow: start.row,
+                startCol: start.column,
+                endRow: end.row,
+                endCol: end.column,
+                className: "error-ace-marker",
+                type: "text",
+            });
+        }
+    }
+    return result;
+}
+export const positionElementOver = (targetElementIds, offset, hide) => {
+    if(!document.getElementById('wrapActiveElementId')){
+        let div = document.createElement('div');
+        div.setAttribute('id', 'wrapActiveElementId');
+        div.style = 'border: 2px solid #fd9843; border-radius: 4px; z-index: 10001; display: none; box-shadow: 0px 0px 5px 0px #fd9843 inset;';
+
+        document.body.appendChild(div);
+    }
+
+    let element = document.getElementById('wrapActiveElementId');
+    if(element){
+        let targetElements = targetElementIds.map(function(id) {
+            if(id){
+                return document.getElementById(id);
+            }
+        });
+
+        if(targetElements){
+            let targetRects = targetElements.map(function(targetElement) {
+                if(targetElement){
+                    return targetElement.getBoundingClientRect();
+                }
+            });
+
+            let parentRect = element.parentElement.getBoundingClientRect();
+
+            if(targetRects && parentRect){
+                let top = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.top - parentRect.top;
+                    }
+                }));
+
+                let left = Math.min.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.left - parentRect.left;
+                    }
+                }));
+
+                let width = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.left - parentRect.left + rect.width;
+                    }
+                })) - left;
+
+                let height = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.top - parentRect.top + rect.height;
+                    }
+                })) - top;
+
+                top -= offset / 2;
+                left -= offset / 2;
+
+                element.style.position = 'absolute';
+                element.style.display = 'block';
+                element.style.top = top + 'px';
+                element.style.left = left + 'px';
+                element.style.width = width + 10 + 'px';
+                element.style.height = height + 5 + 'px';
+                element.style.padding = offset + 'px';
+
+                if(hide){
+                    element.style.display = 'none'
+                }
+            }
+        }
+    }
+}
+
+export const positionElementOverByClassName = (targetElementsClasses, offset, hide) => {
+    if(!document.getElementById('wrapActiveElement')){
+        let div = document.createElement('div');
+        div.setAttribute('id', 'wrapActiveElement');
+        div.style = 'border: 2px solid #fd9843; border-radius: 4px; z-index: 10001; display: none; box-shadow: 0px 0px 5px 0px #fd9843 inset;';
+
+        document.body.appendChild(div);
+    }
+
+    let element = document.getElementById('wrapActiveElement');
+    if(element){
+        let targetElements = targetElementsClasses.map(function(className) {
+            const el = document.querySelectorAll(className);
+            if(el){
+                for(let i = 0; i < el.length; i++) {
+                    let computedStyle = window.getComputedStyle(el[i]);
+                    if(computedStyle.display !== 'none') {
+                        return el[i];
+                    }
+                }
+            }
+        });
+
+        if(targetElements){
+            let targetRects = targetElements.map(function(targetElement) {
+                if(targetElement){
+                    return targetElement.getBoundingClientRect();
+                }
+            });
+
+            let parentRect = element.parentElement.getBoundingClientRect();
+
+            if(targetRects && parentRect){
+                let top = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.top + Math.abs(parentRect.top);
+                    }
+                }));
+
+                let left = Math.min.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.left - parentRect.left;
+                    }
+                }));
+
+                let width = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.left - parentRect.left + rect.width;
+                    }
+                })) - left;
+
+                let height = Math.max.apply(null, targetRects.map(function(rect) {
+                    if(rect){
+                        return rect.top - parentRect.top + rect.height;
+                    }
+                })) - top;
+
+                top -= offset / 2;
+                left -= offset / 2;
+
+                element.style.position = 'absolute';
+                element.style.display = 'block';
+                element.style.top = top + 'px';
+                element.style.left = left + 'px';
+                element.style.width = width + 10 + 'px';
+                element.style.height = height + 8 + 'px';
+                element.style.padding = offset + 'px';
+
+                if(hide){
+                    element.style.display = 'none'
+                }
+            }
+        }
+    }
+}
+
+export function replaceVariables(code, variableMap) {
+    // Create a regular expression pattern to match variables
+    const variablePattern = /(\b[a-zA-Z_][a-zA-Z0-9_]*)\b/g;
+
+    // Use the replace method with a callback function
+    const replacedCode = code.replace(variablePattern, (match, variable) => {
+        // Check if the variable exists in the variableMap
+        if (variableMap.hasOwnProperty(variable)) {
+            // Replace the variable with its corresponding value
+            return variableMap[variable];
+        } else {
+            // If the variable is not found in the variableMap, leave it unchanged
+            return match;
+        }
+    });
+
+    return replacedCode;
 }

@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 public class MessageServiceImpl implements MessageService {
 
     @Autowired
-    MessageRepository messageRepository;
+    private MessageRepository messageRepository;
 
     @Autowired
-    ContentServiceImpl contentService;
+    private ContentServiceImpl contentService;
 
     @Override
     public void save(EventMessage eventMessage) {

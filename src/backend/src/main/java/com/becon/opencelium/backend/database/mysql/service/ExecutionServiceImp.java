@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ExecutionServiceImp implements ExecutionService{
@@ -42,6 +43,11 @@ public class ExecutionServiceImp implements ExecutionService{
     @Override
     public List<Execution> getExecutionsBySchedulerId(int schedulerId) {
         return executionRepository.findBySchedulerId(schedulerId);
+    }
+
+    @Override
+    public Optional<Execution> findById(long id) {
+        return executionRepository.findById(id);
     }
 
     public double getAvgDurationOfExecution(int schedulerId) {

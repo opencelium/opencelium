@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "execution")
@@ -50,8 +50,8 @@ public class Execution {
     @Column(name = "status")
     private String status;
 
-    @OneToMany(mappedBy = "execution")
-    private Set<ExecutionArgument> executionArguments;
+    @OneToMany(mappedBy = "execution", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<ExecutionArgument> executionArguments;
 
     public long getId() {
         return id;
@@ -101,11 +101,11 @@ public class Execution {
         this.status = status;
     }
 
-    public Set<ExecutionArgument> getExecutionArguments() {
+    public List<ExecutionArgument> getExecutionArguments() {
         return executionArguments;
     }
 
-    public void setExecutionArguments(Set<ExecutionArgument> executionArguments) {
+    public void setExecutionArguments(List<ExecutionArgument> executionArguments) {
         this.executionArguments = executionArguments;
     }
 }

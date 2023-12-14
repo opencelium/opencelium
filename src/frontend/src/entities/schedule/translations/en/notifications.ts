@@ -20,7 +20,7 @@ const {
     addSchedule, disableSchedules, enableSchedules, switchScheduleStatus, startSchedule, deleteScheduleById,
     updateSchedule, startSchedules, deleteSchedulesById, getCurrentSchedules, getSchedulesById,
     checkScheduleTitle, getScheduleById, getAllSchedules, deleteWebhook, getWebhook, addNotificationToSelectedSchedules,
-    startTestSchedule,
+    startTestSchedule, addNotification, updateNotification, switchScheduleLogsStatus
 } = ActionCreators;
 
 const {
@@ -30,10 +30,13 @@ const {
 export default {
     fulfilled: {
         [addNotificationToSelectedSchedules.fulfilled.type]: "The notification was successfully added to selected schedules",
+        [addNotification.fulfilled.type]: "The notification was successfully added",
+        [updateNotification.fulfilled.type]: "The notification was successfully updated",
         [addSchedule.fulfilled.type]: "The schedule <1><0>{{title}}</0></1> was successfully added",
         [deleteScheduleById.fulfilled.type]: "The schedule <1><0>{{title}}</0></1> was successfully removed",
         [updateSchedule.fulfilled.type]: "The schedule <1><0>{{title}}</0></1> was successfully updated",
         [switchScheduleStatus.fulfilled.type]: "The status of the job <1><0>{{title}}</0></1> was successfully updated",
+        [switchScheduleLogsStatus.fulfilled.type]: "The logs status of the schedule <1><0>{{title}}</0></1> was successfully updated",
         [enableSchedules.fulfilled.type]: "The selected schedules were successfully enabled",
         [disableSchedules.fulfilled.type]: "The selected schedules were successfully disabled",
         [startSchedules.fulfilled.type]: "The selected schedules were successfully started",
@@ -48,6 +51,12 @@ export default {
     rejected: {
         [addNotificationToSelectedSchedules.rejected.type]: {
             "__DEFAULT__": "The notification was not added",
+        },
+        [addNotification.rejected.type]: {
+            "__DEFAULT__": "The notification was not added"
+        },
+        [updateNotification.rejected.type]: {
+            "__DEFAULT__": "The notification was not updated"
         },
         [addSchedule.rejected.type]: {
             "__DEFAULT__": "The schedule was not added"

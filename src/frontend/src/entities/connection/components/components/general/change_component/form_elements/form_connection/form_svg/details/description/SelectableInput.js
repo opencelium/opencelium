@@ -26,6 +26,7 @@ import {
     EditIcon
 } from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
 import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 const IndicatorsContainer = props => {
     return (
@@ -156,12 +157,22 @@ class SelectableInput extends React.Component{
 
     render(){
         const {isMouseOver, isEditOn, isConfirmationShown} = this.state;
-        const {label, value, readOnly} = this.props;
+        const {label, value, readOnly, onTextValueClick} = this.props;
+        const hasOnTextValueClick = !!onTextValueClick;
         return(
             <React.Fragment>
-                <Col xs={4} className={styles.col}>{label}</Col>
-                <Col xs={8} className={isEditOn ? styles.col_select : styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
-                    {isEditOn ? this.renderOptions() : <span className={styles.value}>{value}</span>}
+                <Col id={label} xs={4} className={styles.col}>{label}</Col>
+                <Col id={`${label}_option`} xs={8} className={isEditOn ? styles.col_select : styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
+                    {isEditOn
+                        ?
+                        this.renderOptions()
+                        :
+                        <span
+                            className={styles.value}
+                            style={hasOnTextValueClick ? {cursor: 'pointer'} : {}}
+                            onClick={hasOnTextValueClick ? () => onTextValueClick() : () => {}}>
+                            {hasOnTextValueClick ? <TooltipFontIcon size={14} value={<span className={styles.open_aggregator}>{value}</span>} tooltip={'Show'}/> : value}
+                        </span>}
                     {isMouseOver && !isEditOn && !readOnly && <EditIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isEditOn && <ApplyIcon onClick={(a) => this.toggleConfirmation(a)}/>}
                     {isEditOn && <CancelIcon onClick={(a) => this.cancelEdit(a)}/>}
@@ -176,6 +187,10 @@ class SelectableInput extends React.Component{
             </React.Fragment>
         );
     }
+}
+
+SelectableInput.defaultProps = {
+    onTextValueClick: null,
 }
 
 export default SelectableInput;

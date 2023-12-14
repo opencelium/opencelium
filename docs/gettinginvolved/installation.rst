@@ -25,7 +25,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 	
 	root@shell> sudo apt install curl (if debian)
-	root@shell> curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+	root@shell> curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 	root@shell> apt-get install -y nodejs
 	root@shell> node -v // to check
 
@@ -75,11 +75,9 @@ Debian/Ubuntu (example for 22.04 LTS)
 	root@shell> wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
 	root@shell> echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
 	root@shell> apt update
-	root@shell> apt install neo4j
+	root@shell> apt install install neo4j=1:5.7.0
 	root@shell> /usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
 	root@shell> service neo4j status  // to check
-	root@shell> sed -i '/#dbms.connectors.default_listen_address=0.0.0.0/c\dbms.connectors.default_listen_address=0.0.0.0' /etc/neo4j/neo4j.conf
-	root@shell> sed -i '/#dbms.security.auth_enabled=false/c\dbms.security.auth_enabled=false' /etc/neo4j/neo4j.conf	
         root@shell> service neo4j restart
         root@shell> systemctl enable neo4j
 
@@ -101,7 +99,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone -b v3.1 https://github.com/opencelium/opencelium.git . // Get stable versions here https://github.com/opencelium/opencelium/tags
+	root@shell> git clone -b v3.2 https://github.com/opencelium/opencelium.git . // Get stable versions here https://github.com/opencelium/opencelium/tags
 
 2. Build frontend project
 

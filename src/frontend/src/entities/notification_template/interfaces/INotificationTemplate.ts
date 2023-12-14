@@ -17,6 +17,7 @@ import {IForm} from "@application/interfaces/core";
 import {OptionProps} from "@app_component/base/input/select/interfaces";
 import {NotificationTemplateState} from "../redux_toolkit/slices/NotificationTemplateSlice";
 import {Content} from "../classes/Content";
+import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
 
 export interface IContentTextarea{
     body: string;
@@ -50,14 +51,15 @@ export interface INotificationTemplateText{
 
 export interface INotificationTemplateForm extends INotificationTemplateText, INotificationTemplateTextarea, INotificationTemplateSelect, INotificationTemplateFile, IForm<INotificationTemplateText, INotificationTemplateSelect, {}, INotificationTemplateFile, INotificationTemplateTextarea, {}>{
     getById: () => boolean;
-    add: () => boolean;
-    update: () => boolean;
+    add: (aggregators: ModelDataAggregator[]) => boolean;
+    update: (aggregators: ModelDataAggregator[]) => boolean;
     deleteById: () => boolean;
     reduxState?: NotificationTemplateState;
 }
 
 export interface INotificationTemplate extends INotificationTemplateForm{
     id?: number;
+    aggregators: ModelDataAggregator[];
     templateId?: number;
     type: string;
     content: Partial<Content>;

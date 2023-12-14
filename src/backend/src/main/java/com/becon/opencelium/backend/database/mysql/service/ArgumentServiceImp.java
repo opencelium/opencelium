@@ -40,5 +40,4 @@ public class ArgumentServiceImp implements ArgumentService {
     public Optional<Argument> findById(int argId) {
         return argumentRepository.findById(argId);
     }
-
 }

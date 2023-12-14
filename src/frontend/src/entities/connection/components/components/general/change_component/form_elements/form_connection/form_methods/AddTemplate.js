@@ -26,6 +26,8 @@ import {setFocusById} from "@application/utils/utils";
 import {withTranslation} from "react-i18next";
 import InputText from "@app_component/base/input/text/InputText";
 import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
+import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
+import { ColorTheme } from "@style/Theme";
 
 
 function mapStateToProps(state){
@@ -109,15 +111,28 @@ class AddTemplate extends Component{
 
     render(){
         const {visibleAddTemplateDialog, addTemplateName, addTemplateDescription, validateMessageName} = this.state;
-        const {data, disabled, iconProps, buttonProps} = this.props;
+        const {data, disabled, iconProps, buttonProps, tooltipButtonProps} = this.props;
         const {templateLabels} = data;
+        
         if(!templateLabels){
             return null;
         }
         return (
             <React.Fragment>
                 {iconProps && <TooltipFontIcon {...iconProps} turquoiseTheme isButton onClick={(a) => this.toggleAddTemplateDialog(a)} disabled={disabled}/>}
-                {buttonProps && <Button {...buttonProps} onClick={(a) => this.toggleAddTemplateDialog(a)} disabled={disabled}/>}
+                {}
+                {buttonProps && !tooltipButtonProps && <Button {...buttonProps} onClick={(a) => this.toggleAddTemplateDialog(a)} disabled={disabled}/>}
+                {tooltipButtonProps && 
+                <TooltipButton 
+                    position={tooltipButtonProps.position} 
+                    icon={tooltipButtonProps.icon} 
+                    tooltip={tooltipButtonProps.tooltip} 
+                    target={tooltipButtonProps.target} 
+                    hasBackground={tooltipButtonProps.hasBackground} 
+                    background={!visibleAddTemplateDialog ? ColorTheme.White : ColorTheme.Blue} 
+                    color={!visibleAddTemplateDialog ? ColorTheme.Gray : ColorTheme.White} 
+                    padding={tooltipButtonProps.padding} 
+                    handleClick={(a) => this.toggleAddTemplateDialog(a)}/>}
                 <Dialog
                     actions={[{label: 'Ok', onClick: (a) => this.addTemplate(a), id: 'add_template_ok'}, {label: 'Cancel', onClick: (a) => this.toggleAddTemplateDialog(a), id: 'add_template_cancel'}]}
                     active={visibleAddTemplateDialog}

@@ -17,7 +17,7 @@ public class EventNotification {
     private String name;
 
     @Column(name = "event_type")
-    private String eventType;
+    private String eventType; //post, pre, alert
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scheduler_id")

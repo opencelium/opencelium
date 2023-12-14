@@ -19,8 +19,6 @@ import {ConnectionRequest} from "../../requests/classes/Connection";
 import { IConnection } from "../../interfaces/IConnection";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {ScheduleRequest} from "@entity/schedule/requests/classes/Schedule";
-import ModelWebhook from "@entity/schedule/requests/models/Webhook";
-
 
 export const testConnection = createAsyncThunk(
     'connection/test',
@@ -98,8 +96,8 @@ export const addTestConnection = createAsyncThunk(
     }
 )
 
-export const getAndUpdateConnection = createAsyncThunk(
-    'connection/getAndUpdate',
+export const getAndUpdateConnectionTitle = createAsyncThunk(
+    'connection/getAndUpdateName',
     async(connection: IConnection, thunkAPI) => {
         try {
             let title = connection.title.split('/').join('//');
@@ -109,6 +107,38 @@ export const getAndUpdateConnection = createAsyncThunk(
             if (response.data.message === ResponseMessages.EXISTS) {
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
             }
+            const GetConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
+            const GetConnectionResponse = await GetConnectionRequest.getConnectionById();
+            const getConnection = GetConnectionResponse.data;
+            getConnection.fromConnector.methods = sortByIndex([...getConnection.fromConnector.methods]);
+            getConnection.fromConnector.operators = sortByIndex([...getConnection.fromConnector.operators]);
+            getConnection.toConnector.methods = sortByIndex([...getConnection.toConnector.methods]);
+            getConnection.toConnector.operators = sortByIndex([...getConnection.toConnector.operators]);
+            let fieldBinding: any = [];
+            for(let i = 0; i < getConnection.fieldBinding.length; i++){
+                let fieldBindingItem = {...getConnection.fieldBinding[i]};
+                if(fieldBindingItem && fieldBindingItem.hasOwnProperty('enhancement') && fieldBindingItem.enhancement && fieldBindingItem.enhancement.hasOwnProperty('enhanceId')){
+                    let newEnhancement = {...fieldBindingItem.enhancement};
+                    if(newEnhancement){
+                        delete newEnhancement.enhanceId;
+                        fieldBindingItem.enhancement = newEnhancement;
+                    }
+                }
+                fieldBinding.push(fieldBindingItem);
+            }
+            getConnection.fieldBinding = fieldBinding;
+            const UpdateConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
+            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection, id: connection.id, title: connection.title, description: connection.description});
+            return UpdateConnectionResponse.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+export const getAndUpdateConnectionDescription = createAsyncThunk(
+    'connection/getAndUpdateDescription',
+    async(connection: IConnection, thunkAPI) => {
+        try {
             const GetConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
             const GetConnectionResponse = await GetConnectionRequest.getConnectionById();
             const getConnection = GetConnectionResponse.data;
@@ -190,9 +220,10 @@ export const getAllMetaConnections = createAsyncThunk(
     async(data: never, thunkAPI) => {
         try {
             const request = new ConnectionRequest();
-            const response = await request.getAllMetaConnections();
+            let response = await request.getAllMetaConnections();
+            let result = response.data;
             // @ts-ignore
-            return response.data.filter((connection) => {
+            result = result.filter((connection) => {
                 if(connection.title.indexOf('!*test_connection_') === 0){
                     if(connection.title.split('_').length >= 3){
                         return false;
@@ -200,6 +231,7 @@ export const getAllMetaConnections = createAsyncThunk(
                 }
                 return true;
             }) || [];
+            return result;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -250,7 +282,8 @@ export default {
     checkConnectionTitle,
     addConnection,
     addTestConnection,
-    getAndUpdateConnection,
+    getAndUpdateConnectionTitle,
+    getAndUpdateConnectionDescription,
     updateConnection,
     getConnectionById,
     getAllConnections,

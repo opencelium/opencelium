@@ -104,14 +104,12 @@ public class StorageConfiguration {
                     }
                     request.setVisibility(required.getVisibility());
                 });
-
             }
         });
 
         connectorService.saveAll(connectors);
         // creates storage for files
         userStorageService.init();
-
         // create defou
     }
 }

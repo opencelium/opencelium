@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
@@ -24,7 +25,7 @@ import com.becon.opencelium.backend.database.mysql.repository.NotificationReposi
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
 import com.becon.opencelium.backend.factory.SchedulerFactory;
-import com.becon.opencelium.backend.jobexecutor.SchedulingStrategy;
+import com.becon.opencelium.backend.quartz.SchedulingStrategy;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;

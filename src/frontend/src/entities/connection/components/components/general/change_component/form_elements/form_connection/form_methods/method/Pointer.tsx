@@ -5,6 +5,7 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
 import CConnection from "@classes/content/connection/CConnection";
 import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
+import {replaceVariables} from "@application/utils/utils";
 
 interface PointerProps{
     pointer: string,
@@ -31,9 +32,9 @@ const Pointer: FC<PointerProps> = ({connection, pointer, pointers, submitEdit, o
         if(filteredIndex !== -1 && updatedEnhancement){
             for(let i = filteredIndex; i < pointers.length; i++){
                 if(i === filteredIndex){
-                    updatedEnhancement.expertCode = updatedEnhancement.expertCode.split(`VAR_${i}`).join(CEnhancement.generateNotExistVar())
+                    updatedEnhancement.expertCode = replaceVariables(updatedEnhancement.expertCode, {[`VAR_${i}`]: CEnhancement.generateNotExistVar()});
                 } else{
-                    updatedEnhancement.expertCode = updatedEnhancement.expertCode.split(`VAR_${i}`).join(`VAR_${i - 1}`)
+                    updatedEnhancement.expertCode = replaceVariables(updatedEnhancement.expertCode, {[`VAR_${i}`]: `VAR_${i - 1}`});
                 }
             }
             connection.updateEnhancement(updatedEnhancement);

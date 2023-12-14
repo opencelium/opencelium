@@ -24,23 +24,25 @@ import ListButton from "@entity/connection/components/components/general/view_co
 import {ActionButton, SubFormSections} from "@change_component/FormComponents";
 import CancelButton from "@entity/connection/components/components/general/view_component/CancelButton";
 
-import {setConnectionData} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {setConnectionData, setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { setModalConnectionData, setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
-import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import Title from "@app_component/collection/collection_title/Title";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import CSvg from "@classes/content/connection_overview_2/CSvg";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-function mapStateToProps(state){
+function mapStateToProps(state, props){
     const authUser = state.authReducer.authUser;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+    const {currentTechnicalItem} = mapItemsToClasses(state, props.isModal);
     return {
         authUser,
         currentTechnicalItem,
     }
 }
 
-@connect(mapStateToProps, {setConnectionData, setCurrentTechnicalItem})
+@GetModalProp()
+@connect(mapStateToProps, {setConnectionData, setCurrentTechnicalItem, setModalConnectionData, setModalCurrentTechnicalItem})
 class Form extends React.Component{
     constructor(props) {
         super(props);
@@ -78,6 +80,8 @@ class Form extends React.Component{
             makingRequest: false,
             contentsLength: props.contents ? props.contents.length : 0,
         };
+        this.setData = props.isModal ? props.setModalConnectionData : props.setConnectionData;
+        this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -147,7 +151,7 @@ class Form extends React.Component{
             }
             if(hasErrors){
                 if(currentItem){
-                    setCurrentTechnicalItem(currentItem.getObject());
+                    this.setCurrentTechnicalItem(currentItem.getObject());
                     const elementWithError = document.getElementById(`${currentItem.connectorType}__${currentItem.connectorType}_${currentItem.entity.index}`)
                     if(elementWithError){
                         const firstElement = document.querySelector('[id^=fromConnector__fromConnector_0]');
@@ -162,7 +166,7 @@ class Form extends React.Component{
                     }
                 }
                 this.updateEntity(entity);
-                this.props.setConnectionData({connection: entity.getObjectForConnectionOverview()});
+                this.setData({connection: entity.getObjectForConnectionOverview()});
                 window.scrollTo({top: findTopLeft(`technical_layout_svg`).top - 4, behavior: "instant"});
             }
         }
@@ -183,7 +187,7 @@ class Form extends React.Component{
             entity,
         });
         let connection = entity instanceof CConnection ? entity.getObjectForConnectionOverview() : entity;
-        this.props.setConnectionData({connection});
+        this.setData({connection});
         this.props.clearValidationMessage(name);
     }
 
@@ -197,7 +201,7 @@ class Form extends React.Component{
 
     render(){
         const {entity} = this.state;
-        const {contents, translations, permissions, isActionInProcess, additionalButtons, clearValidationMessage, shouldScroll} = this.props;
+        const {contents, translations, permissions, isActionInProcess, additionalButtons, clearValidationMessage, shouldScroll, type} = this.props;
         const hasActionButton = translations && translations.action_button;
         const hasListButton = translations && translations.list_button;
         const hasCancelButton = translations && translations.cancel_button;
@@ -205,29 +209,33 @@ class Form extends React.Component{
             <div style={{margin: '20px 0', padding: 0, paddingBottom: '30px'}}>
                 <Title title={translations.header}/>
                 <div className={styles.buttons_panel}>
-                    {hasActionButton &&
-                        <ActionButton
-                            {...this.props}
-                            doAction={(a) => this.doAction(a)}
-                            isActionInProcess={isActionInProcess}
-                        />
-                    }
-                    {hasListButton &&
-                        <ListButton
-                            title={translations.list_button.title}
-                            link={translations.list_button.link}
-                            permission={permissions.READ}
-                        />
-                    }
-                    {
-                        additionalButtons(entity, (a, b) => this.updateEntity(a, b))
-                    }
-                    {hasCancelButton &&
-                        <CancelButton
-                            title={translations.cancel_button.title}
-                            link={translations.cancel_button.link}
-                            permission={permissions.READ}
-                        />
+                    {type !== 'update' &&
+                        <React.Fragment>
+                            {hasActionButton &&
+                                <ActionButton
+                                    {...this.props}
+                                    doAction={(a) => this.doAction(a)}
+                                    isActionInProcess={isActionInProcess}
+                                />
+                            }
+                            {hasListButton &&
+                                <ListButton
+                                    title={translations.list_button.title}
+                                    link={translations.list_button.link}
+                                    permission={permissions.READ}
+                                />
+                            }
+                            {
+                                additionalButtons(entity, (a, b) => this.updateEntity(a, b))
+                            }
+                            {hasCancelButton &&
+                                <CancelButton
+                                    title={translations.cancel_button.title}
+                                    link={translations.cancel_button.link}
+                                    permission={permissions.READ}
+                                />
+                            }
+                        </React.Fragment>
                     }
                 </div>
                 <div className={styles.form_component} style={{rowGap: contents.filter(c => c.visible).length > 1 ? '30px' : 0}}>

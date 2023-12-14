@@ -51,5 +51,15 @@ export const Global = createGlobalStyle`
     .hide_dialog_content{
         border: none;
     }
+    .error-ace-marker{
+        position: absolute; 
+        background: red;
+    }
+    #notificationTemplateContent>.ace_scroller.ace_scroll-left:after{
+        box-shadow: none !important;
+    }
+    .tooltip{
+        z-index: 1000000 !important;
+    }
     ${SlickCarousel}
 `;

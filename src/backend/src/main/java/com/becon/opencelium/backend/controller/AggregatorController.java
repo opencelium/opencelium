@@ -21,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/aggregator", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -33,11 +32,10 @@ public class AggregatorController {
 
     @Autowired
     public AggregatorController(@Qualifier("DataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
-                                @Qualifier("ArgumentServiceImp")ArgumentService argumentService) {
+                                @Qualifier("ArgumentServiceImp") ArgumentService argumentService) {
         this.dataAggregatorService = dataAggregatorService;
         this.argumentService = argumentService;
     }
-
 
     @Operation(summary = "Retrieves a Data Aggregator by provided ID")
     @ApiResponses(value = {

@@ -168,7 +168,6 @@ public class ConnectorServiceImp implements ConnectorService {
     // RequestData = from db; RequiredData = from invoker
     @Override
     public List<RequestData> buildRequestData(Connector connector) {
-
         return null;
     }
 

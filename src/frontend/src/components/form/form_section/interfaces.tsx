@@ -25,6 +25,7 @@ interface FormSectionProps{
     overflow?: string,
     position?: string,
     styles?: any,
+    inputsStyle?: any,
 }
 
 export {

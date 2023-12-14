@@ -33,11 +33,12 @@ import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
 import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {toggleConditionDialog} from "@root/redux_toolkit/slices/EditorSlice";
+import {setModalJustDeletedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 
-function mapStateToProps(state){
-    const connectionOverview = state.connectionReducer;
-    const {currentTechnicalItem} = mapItemsToClasses(state);
+function mapStateToProps(state, props){
+    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
     return{
         currentTechnicalItem,
         logPanelHeight: connectionOverview.logPanelHeight,
@@ -48,7 +49,8 @@ function mapStateToProps(state){
     }
 }
 
-@connect(mapStateToProps, {setJustDeletedItem, toggleConditionDialog})
+@GetModalProp()
+@connect(mapStateToProps, {setJustDeletedItem, toggleConditionDialog, setModalJustDeletedItem}, null, {forwardRef: true})
 class Operator extends React.Component{
     constructor(props) {
         super(props)
@@ -62,6 +64,8 @@ class Operator extends React.Component{
             isMouseOver: false,
             showCreatePanel: false,
         }
+        this.createPanelRef = React.createRef();
+        this.setJustDeletedItem = props.isModal ? props.setModalJustDeletedItem : props.setJustDeletedItem;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -235,14 +239,14 @@ class Operator extends React.Component{
     }
 
     deleteOperator(e){
-        const {connection, operator, updateConnection, setCurrentItem, setJustDeletedItem} = this.props;
+        const {connection, operator, updateConnection, setCurrentItem} = this.props;
         const connector = connection.getConnectorByType(operator.connectorType);
         this.setState({
             showCreatePanel: false,
         })
-        setJustDeletedItem({index: operator.entity.index, connectorType: operator.connectorType});
+        this.setJustDeletedItem({index: operator.entity.index, connectorType: operator.connectorType});
         setTimeout(() => {
-            setJustDeletedItem(null);
+            this.setJustDeletedItem(null);
             if(connector){
                 if(connector.getConnectorType() === CONNECTOR_FROM){
                     connection.removeFromConnectorOperator(operator.entity);
@@ -505,6 +509,7 @@ class Operator extends React.Component{
                 {this.renderOperator(type)}
                 {showCreatePanel &&
                     <CreatePanel
+                        ref={this.createPanelRef}
                         element={operator}
                         onMouseLeave={(a) => this.onMouseLeaveSvg(a)}
                         setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}

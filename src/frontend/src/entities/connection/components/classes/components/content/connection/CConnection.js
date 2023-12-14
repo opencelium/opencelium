@@ -22,6 +22,7 @@ import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../invoker/response/CResponse";
 import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
  import CMethodItem from "@classes/content/connection/method/CMethodItem";
  import COperatorItem from "@classes/content/connection/operator/COperatorItem";
+ import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
 
 const DEFAULT_COLOR = '#ffffff';
 
@@ -42,6 +43,22 @@ export const ALL_COLORS = [
     '#578998', '#687698', '#7543EA', '#8234C2',
     '#977DE0', '#5F3798', '#BF2A71', '#C723F6',
     '#D13298', '#B3CDE0', '#F512EA', '#4F3444',
+    '#1FCFB1', '#177EB1', '#1477B1', '#18BEB1',
+    '#1EC7B1', '#1FC7B1', '#16E6B1', '#14B6B1',
+    '#1412B1', '#10E4B1', '#1E8AB1', '#17EFB1',
+    '#1FC7B1', '#1F28B1', '#16E6B1', '#11C7B1',
+    '#1FCFB1', '#1346B1', '#1477B1', '#14BEB1',
+    '#1EC7B1', '#1127B1', '#16E6B1', '#14B6B1',
+    '#1173B1', '#10E4B1', '#1E8AB1', '#17EFB1',
+    '#1FC7B1', '#1F37B1', '#16E6B1', '#11C7B1',
+    '#112F11', '#112277', '#112231', '#112EF1',
+    '#1127B1', '#1FC7B1', '#1123B1', '#177EB1',
+    '#145DB1', '#1456B1', '#128AB1', '#11EFB1',
+    '#5127B1', '#2117B1', '#A321B1', '#4337B1',
+    '#1363B1', '#161EB1', '#13CDB1', '#156EB1',
+    '#1789B1', '#1876B1', '#1543B1', '#1234B1',
+    '#177DB1', '#1F37B1', '#1F2AB1', '#1723B1',
+    '#1132B1', '#13CDB1', '#1512B1', '#1F34B1',
 ];
 
 /**
@@ -138,13 +155,6 @@ export default class CConnection{
         return new CConnection(duplicate);
     }
 
-    convertBindingItem(bindingItem){
-        if(!(bindingItem instanceof CBindingItem)) {
-            return CBindingItem.createBindingItem(bindingItem);
-        }
-        return bindingItem;
-    }
-
     convertFieldBindingItem(fieldBindingItem){
         if(!(fieldBindingItem instanceof CFieldBinding)) {
             return CFieldBinding.createFieldBinding(fieldBindingItem);
@@ -165,6 +175,15 @@ export default class CConnection{
             return CTemplate.createTemplate(template);
         }
         return template;
+    }
+
+
+    getAllMethods(){
+        return [...this.fromConnector.methods, ...this.toConnector.methods];
+    }
+
+    getAllOperators(){
+        return [...this.fromConnector.operators, ...this.toConnector.operators];
     }
 
     moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete = true){
@@ -336,7 +355,23 @@ export default class CConnection{
             '#1363B0', '#561E7E', '#93CDE0', '#456EC7',
             '#578998', '#687698', '#7543EA', '#8234C2',
             '#977DE0', '#5F3798', '#BF2A71', '#C723F6',
-            '#D13298', '#B3CDE0', '#F512EA', '#4F3444',];
+            '#D13298', '#B3CDE0', '#F512EA', '#4F3444',
+            '#1FCFB1', '#177EB1', '#1477B1', '#18BEB1',
+            '#1EC7B1', '#1FC7B1', '#16E6B1', '#14B6B1',
+            '#1412B1', '#10E4B1', '#1E8AB1', '#17EFB1',
+            '#1FC7B1', '#1F28B1', '#16E6B1', '#11C7B1',
+            '#1FCFB1', '#1346B1', '#1477B1', '#14BEB1',
+            '#1EC7B1', '#1127B1', '#16E6B1', '#14B6B1',
+            '#1173B1', '#10E4B1', '#1E8AB1', '#17EFB1',
+            '#1FC7B1', '#1F37B1', '#16E6B1', '#11C7B1',
+            '#112F11', '#112277', '#112231', '#112EF1',
+            '#1127B1', '#1FC7B1', '#1123B1', '#177EB1',
+            '#145DB1', '#1456B1', '#128AB1', '#11EFB1',
+            '#5127B1', '#2117B1', '#A321B1', '#4337B1',
+            '#1363B1', '#161EB1', '#13CDB1', '#156EB1',
+            '#1789B1', '#1876B1', '#1543B1', '#1234B1',
+            '#177DB1', '#1F37B1', '#1F2AB1', '#1723B1',
+            '#1132B1', '#13CDB1', '#1512B1', '#1F34B1',];
         this._fieldBinding = [];
         this._allTemplates = [];
     }
@@ -462,6 +497,27 @@ export default class CConnection{
 
     set readOnly(readOnly){
         this._readOnly = readOnly;
+    }
+
+    refreshDataAggregator(aggregator){
+        const assignedItems = aggregator.assignedItems;
+        if(assignedItems) {
+            for(let i = 0; i < assignedItems.length; i++){
+                const method = this.getMethodByColor(assignedItems[i].color);
+                if(method){
+                    const {assignedItems, ...props} = aggregator;
+                    method.dataAggregator = props.id;
+                }
+            }
+        }
+    }
+
+    addDataAggregator(aggregator){
+        this.refreshDataAggregator(aggregator);
+    }
+
+    updateDataAggregator(aggregator){
+        this.refreshDataAggregator(aggregator);
     }
 
     getCurrentFieldBindingTo(){
@@ -858,6 +914,18 @@ export default class CConnection{
         return this.fromConnector.isEmpty() && this.toConnector.isEmpty();
     }
 
+    removeDataAggregatorEntries(){
+        this.removeDataAggregator(this.fromConnector.methods);
+        this.removeDataAggregator(this.fromConnector.operators);
+        this.removeDataAggregator(this.toConnector.methods);
+        this.removeDataAggregator(this.toConnector.operators);
+    }
+    removeDataAggregator(entries){
+        for(let i = 0; i < entries.length; i++){
+            delete entries.dataAggregator;
+        }
+    }
+
     getObject(){
         let fromConnector = this._fromConnector.getObject();
         let toConnector = this._toConnector.getObject();
@@ -870,14 +938,19 @@ export default class CConnection{
         let obj = {
             title: this._title,
             description: this._description,
-            fromConnector: fromConnector,
-            toConnector: toConnector,
-            fieldBinding: fieldBinding,
+            fromConnector,
+            toConnector,
+            fieldBinding,
         };
         if(this.hasOwnProperty('_id')){
             obj.id = this._id;
         }
         return obj;
+    }
+
+    getObjectWithoutDataAggregator(){
+        this.removeDataAggregatorEntries();
+        return this.getObject();
     }
 
     getObjectForBackend(){
