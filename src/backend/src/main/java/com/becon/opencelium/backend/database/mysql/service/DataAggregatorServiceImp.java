@@ -36,7 +36,6 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
 
         List<ArgumentDTO> argumentDtos = dataAggregator.getArgs().stream().map(argumentService::convertToDto).toList();
         dataAggregatorDTO.setArgs(argumentDtos);
-
         return dataAggregatorDTO;
     }
 

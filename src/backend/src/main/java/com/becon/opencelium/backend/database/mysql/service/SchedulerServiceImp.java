@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
@@ -103,7 +102,6 @@ public class SchedulerServiceImp implements SchedulerService {
         schedulingStrategy.rescheduleJob(updated);
         return updated;
     }
-
 
     @Override
     public List<Scheduler> saveAll(List<Scheduler> schedulers) {
@@ -293,7 +291,6 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void saveNotification(EventNotification eventNotification) {
-
         notificationRepository.save(eventNotification);
         eventNotification.getEventRecipients().forEach(recipientService::save);
         messageService.save(eventNotification.getEventMessage());
@@ -303,6 +300,4 @@ public class SchedulerServiceImp implements SchedulerService {
     public void deleteNotificationById(int id) {
         notificationRepository.deleteById(id);
     }
-
-
 }

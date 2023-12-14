@@ -306,7 +306,6 @@ public class ConnectionServiceImp implements ConnectionService {
      * 2. Undoing ALL tracked updates.
      * In this case, {@param patch} CAN ONLY be the patch operations in 1st case and additionally, it CAN be a patch we made 'by hand' while tracking update to undo:
      * Here they are : "op" - "remove", "replace", "add", "path" - "from|toConnector/methods/{integer}", "from|toConnector/operators/{integer}", "fieldBindings/{integer}"
-     *
      * @param connection is an object to patch and MUST be already saved.
      * @return patched and saved connection
      */
