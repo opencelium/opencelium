@@ -2,15 +2,11 @@ package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.execution.ExecutionManager;
-import com.becon.opencelium.backend.resource.execution.DataType;
-import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,7 +30,7 @@ public class ReferenceExtractor implements Extractor {
         // '${key.field[*]}'
         if (ref.matches(queryParams)) {
             // TODO: rewrite for query param
-            result = extractValueFromQueryParams(ref);
+            result = extractFromQueryParams(ref);
         }
 
         // '{key}'
@@ -46,7 +42,7 @@ public class ReferenceExtractor implements Extractor {
         // '#ababab.(response).success.field[*]
         // '#ababab.(request).field[*]
         if (ref.matches(directRef)) {
-            result = extractValueFromOperation(ref);
+            result = extractFromOperation(ref);
         }
 
         return result;
@@ -56,99 +52,98 @@ public class ReferenceExtractor implements Extractor {
         return ref != null && (ref.matches(directRef) || ref.matches(queryParams) || ref.matches(requiredData));
     }
 
-    private Object extractValueFromOperation(String ref) {
+    private Object extractFromOperation(String ref) {
         String color = ref.substring(ref.indexOf('#'), ref.indexOf('.'));
 
-        Operation operation = executionManager.findOperationByColor(color).orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
+        Operation operation = executionManager.findOperationByColor(color)
+                .orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
 
         return operation.getValue(ref, executionManager.getLoops());
     }
 
-    private Object extractValueFromQueryParams(String ref) {
+    private Object extractFromQueryParams(String ref) {
         try {
             if (ObjectUtils.isEmpty(ref)) {
-                return new SchemaDTO(DataType.STRING, "");
+                return "";
             }
 
             Map<String, Object> queryParams = executionManager.getQueryParams();
-
             if (queryParams.isEmpty()) {
                 return null;
             }
-            // if 'ref' also has type then extract this type
-            String type = "";
+
+            // 'queryParam' is in <'key': 'value'> pair,
+            // 'key' might contain desired type, and it might be in form of jsonPath
+            // 'value' might also be single value or jsonObject
+            String requiredType = "";
             if (ref.contains(":")) {
-                type = ref.split(":")[1].replace("}", "");
-                // correct 'ref' parameter to its' form
+                requiredType = ref.split(":")[1].replace("}", "");
                 ref = ref.split(":")[0].concat("}");
             }
 
-            SchemaDTO result = null;
+            // convert 'queryParams' to jsonString to work with both
+            // single value and jsonObject cases at the same time
+            String message = new ObjectMapper().writeValueAsString(queryParams);
+            Pattern r = Pattern.compile(RegExpression.queryParams);
+            Matcher m = r.matcher(ref);
 
-            // extract 'result' from query params
-            String jsonString = new ObjectMapper().writeValueAsString(queryParams);
-            Pattern pattern = Pattern.compile(RegExpression.queryParams);
-            Matcher matcher = pattern.matcher(ref);
+            Object extractedValue = null;
+            while (m.find()) {
+                // convert 'queryParams' reference to jsonPath
+                String jsonPath = "$." + m.group().replace("${", "").replace("}", "");
 
-            while (matcher.find()) {
-                String path = "$." + matcher.group().replace("${", "").replace("}", "");
-                Object val = JsonPath.read(jsonString, path);
-                result = convertToType(val, type);
+                extractedValue = JsonPath.read(message, jsonPath);
             }
 
-            return result;
+            return !requiredType.isBlank() ?
+                    mapToType(extractedValue, requiredType) :
+                    mapToNumberIfPossible(extractedValue);
         } catch (JsonProcessingException ex) {
-            throw new RuntimeException(ex);
+            throw new RuntimeException();
         }
     }
 
-    private SchemaDTO convertToType(Object val, String type) {
-        if (val == null) {
-            return null;
+    private Object mapToType(Object value, String requiredType) {
+        String stringValue = value.toString();
+
+        if ("string".equalsIgnoreCase(requiredType)) {
+            return stringValue.replace("[", "").replace("]", "").replace("'", "");
         }
 
-        String value = val.toString();
-        // default type = STRING, value = val.toString()
-        SchemaDTO result = new SchemaDTO(DataType.STRING, value);
-
-        if (type.isEmpty()) {
-            Pattern pattern = Pattern.compile(RegExpression.isNumber, Pattern.MULTILINE);
-            Matcher matcher = pattern.matcher(value);
-
-            boolean isNumber = false;
-            while (matcher.find()) {
-                isNumber = true;
-            }
-
-            if (isNumber && value.contains(".")) {
-                result = new SchemaDTO(DataType.NUMBER, value);
-            } else if (isNumber) {
-                result = new SchemaDTO(DataType.INTEGER, value);
-            }
-
-            return result;
+        if ("int".equalsIgnoreCase(requiredType)) {
+            return Long.parseLong(stringValue);
         }
 
-        if (type.equalsIgnoreCase("string")) {
-            String v = value.replace("[", "").replace("]", "").replace("'", "");
-            result = new SchemaDTO(DataType.STRING, v);
-        } else if (type.equalsIgnoreCase("int")) {
-            result = new SchemaDTO(DataType.INTEGER, value);
-        } else if (type.equalsIgnoreCase("double") || type.equalsIgnoreCase("float")) {
-            result = new SchemaDTO(DataType.NUMBER, value);
-        } else if (type.equalsIgnoreCase("array")) {
-            String[] arr = value.replace("[", "")
+        if ("double".equalsIgnoreCase(requiredType)) {
+            return Double.parseDouble(stringValue);
+        }
+
+        if ("array".equalsIgnoreCase(requiredType)) {
+            return stringValue.replace("[", "")
                     .replace("]", "")
                     .replace("\"", "")
                     .replace("\'", "").split(",");
-
-            List<SchemaDTO> items = Arrays.stream(arr).map(str -> convertToType(str, "")).toList();
-
-            result = new SchemaDTO();
-            result.setType(DataType.ARRAY);
-            result.setItems(items);
         }
 
-        return result;
+        return value;
+    }
+
+    private Object mapToNumberIfPossible(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        String stringValue = value.toString();
+        final Pattern pattern = Pattern.compile(RegExpression.isNumber, Pattern.MULTILINE);
+        final Matcher matcher = pattern.matcher(stringValue);
+
+        boolean isNumber = false;
+        while (matcher.find()) {
+            isNumber = true;
+        }
+
+        String optionalType = isNumber ? (stringValue.contains(".") ? "double" : "int") : "";
+
+        return mapToType(value, optionalType);
     }
 }
