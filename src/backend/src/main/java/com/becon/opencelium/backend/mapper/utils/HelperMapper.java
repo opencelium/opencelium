@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -150,5 +151,15 @@ public abstract class HelperMapper {
             data.setVisibility(visibility);
         });
         return requestData;
+    }
+
+    @Named("getRequiredData")
+    public Map<String, String> getRequiredData(Integer id){
+        List<RequestData> requestData = connectorService.getById(id).getRequestData();
+        Map<String, String> map = new HashMap<>();
+        requestData.forEach(r->{
+            map.put(r.getField(), r.getValue());
+        });
+        return map;
     }
 }

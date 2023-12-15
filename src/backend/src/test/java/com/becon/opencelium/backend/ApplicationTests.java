@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend;
 
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -24,11 +25,6 @@ public class ApplicationTests {
 
 	@Test
 	public void contextLoads() {
-//		try	{
-//			ConnectionNode connectionNode = connectionNodeServiceImp.findByConnectionId(48L).get();
-//			System.out.println(connectionNode);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+
 	}
 }

@@ -17,8 +17,9 @@ import {CTechnicalProcess} from "@entity/connection/components/classes/component
 import {CTechnicalOperator} from "@entity/connection/components/classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 
-export function mapItemsToClasses(state){
-    const connectionOverview = state.connectionReducer;
+export function mapItemsToClasses(state, isModal = false){
+    const connectionOverview = isModal ? state.modalConnectionReducer : state.connectionReducer;
+
     let connection = CConnection.createConnection(Object.assign({}, connectionOverview.connection));
     const updateConnection = connectionOverview.updateConnection;
     let currentTechnicalItem = connectionOverview.currentTechnicalItem;
@@ -36,7 +37,6 @@ export function mapItemsToClasses(state){
         updateConnection,
     }
 }
-
 export function putAsterixInEmptyBrackets(data){
     if(data){
         try {

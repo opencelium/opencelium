@@ -29,13 +29,16 @@ export interface INotificationRadios{
 }
 
 export interface INotificationSelect{
-    typeSelect: OptionProps;
+    typeSelect: OptionProps,
     templateSelect: OptionProps,
-    recipientsSelect: OptionProps[];
+    recipientsSelect: OptionProps[],
+    teamSelect: OptionProps,
+    channelSelect: OptionProps,
 }
 
 export interface INotificationText{
-    name: string;
+    name: string,
+    slackWebhook: string,
 }
 
 export interface INotificationForm extends INotificationText, INotificationSelect, INotificationRadios, IForm<INotificationText, INotificationSelect, INotificationRadios, {}, {}, {}>{
@@ -48,13 +51,16 @@ export interface INotificationForm extends INotificationText, INotificationSelec
 }
 
 export interface INotification extends INotificationForm{
-    id?: number;
     selectedScheduleIds?: number[];
     notificationId?: number;
     scheduleId?: number,
     schedulerId?: number,
+
+    id?: number;
     type: string,
     notificationType?: string,
     template: INotificationTemplate,
     recipients: string[],
+    team: string,
+    channel: string,
 }

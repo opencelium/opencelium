@@ -15,9 +15,15 @@
 
 import scheduleReducer from "./ScheduleSlice";
 import scheduleNotificationReducer from "./NotificationSlice";
+import teamsReducer from "./TeamsSlice";
+import slackReducer from "./SlackSlice";
+import toolReducer from "./ToolSlice";
 
 
 export default {
     scheduleReducer,
     scheduleNotificationReducer,
+    teamsReducer,
+    slackReducer,
+    toolReducer,
 }

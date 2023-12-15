@@ -33,8 +33,12 @@ const Label: FC<LabelProps> =
         onClick,
         background,
     }) => {
+    const labelProps: any = {};
+    if(id){
+        labelProps.id = `label_${id.toLowerCase()}`;
+    }
     return (
-        <LabelStyled id={id} background={background} onClick={onClick} top={top} left={left} position={position}>
+        <LabelStyled background={background} onClick={onClick} top={top} left={left} position={position} {...labelProps}>
             <Text value={value} size={TextSize.Size_14} color={ColorTheme.White}/>
         </LabelStyled>
     )

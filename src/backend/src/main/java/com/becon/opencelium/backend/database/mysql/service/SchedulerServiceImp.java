@@ -24,7 +24,7 @@ import com.becon.opencelium.backend.database.mysql.repository.NotificationReposi
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
 import com.becon.opencelium.backend.factory.SchedulerFactory;
-import com.becon.opencelium.backend.jobexecutor.SchedulingStrategy;
+import com.becon.opencelium.backend.quartz.SchedulingStrategy;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
@@ -102,7 +102,6 @@ public class SchedulerServiceImp implements SchedulerService {
         schedulingStrategy.rescheduleJob(updated);
         return updated;
     }
-
 
     @Override
     public List<Scheduler> saveAll(List<Scheduler> schedulers) {
@@ -292,7 +291,6 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void saveNotification(EventNotification eventNotification) {
-
         notificationRepository.save(eventNotification);
         eventNotification.getEventRecipients().forEach(recipientService::save);
         messageService.save(eventNotification.getEventMessage());
@@ -302,6 +300,4 @@ public class SchedulerServiceImp implements SchedulerService {
     public void deleteNotificationById(int id) {
         notificationRepository.deleteById(id);
     }
-
-
 }

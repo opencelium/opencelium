@@ -23,7 +23,8 @@ import {
     deleteScheduleById,
     startSchedule,
     switchScheduleStatus,
-    updateSchedule
+    updateSchedule,
+    switchScheduleLogsStatus
 } from "../../redux_toolkit/action_creators/ScheduleCreators";
 import Schedules from "@entity/schedule/collections/Schedules";
 
@@ -72,6 +73,15 @@ const SWITCH_SCHEDULE_STATUS = (responseType, dispatch, navigate, params) => {
         </InterpolateTranslation>
     );
 }
+const SWITCH_SCHEDULE_LOGS_STATUS = (responseType, dispatch, navigate, params) => {
+    const {title} = params;
+    const schedules = new Schedules([], null);
+    return (
+        <InterpolateTranslation i18nKey={`notifications.${responseType}.${switchScheduleLogsStatus[responseType].type}`}>
+            The status of the logs <LinkMessage collectionName={schedules.name} dispatch={dispatch} navigate={navigate} link={'schedules'} message={title}/> was successfully updated.
+        </InterpolateTranslation>
+    );
+}
 const START_SCHEDULE = (responseType, dispatch, navigate, params) => {
     const title = params ? params.title : '';
     const schedules = new Schedules([], null);
@@ -105,6 +115,7 @@ export default {
     [getActionWithoutType(updateSchedule.fulfilled.type)]: UPDATE_SCHEDULE,
     [getActionWithoutType(deleteScheduleById.fulfilled.type)]: DELETE_SCHEDULE,
     [getActionWithoutType(switchScheduleStatus.fulfilled.type)]: SWITCH_SCHEDULE_STATUS,
+    [getActionWithoutType(switchScheduleLogsStatus.fulfilled.type)]: SWITCH_SCHEDULE_LOGS_STATUS,
     [getActionWithoutType(startSchedule.fulfilled.type)]: START_SCHEDULE,
     [getActionWithoutType(addNotification.fulfilled.type)]: ADD_SCHEDULE_NOTIFICATION,
     [getActionWithoutType(updateNotification.fulfilled.type)]: UPDATE_SCHEDULE_NOTIFICATION,

@@ -10,7 +10,10 @@ src/main/resources/application.yml
 src/main/resources/upload-dir
 src/main/resources/invoker/i-doit.xml
 src/main/resources/invoker/baramundi.xml
+src/main/resources/invoker/lansweeper.xml
+src/main/resources/invoker/jdisc.xml
 src/test/
+src/test/java/com/becon/opencelium/backend/ApplicationTests.java
 
 ### STS ###
 .apt_generated

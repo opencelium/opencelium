@@ -20,15 +20,15 @@ import InputSelect from "@app_component/base/input/select/InputSelect";
 import { OptionProps } from "@app_component/base/input/select/interfaces";
 import { Connection } from "@entity/connection/classes/Connection";
 import {setPanelConfigurations} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {setModalPanelConfigurations} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
 const options: OptionProps[] = [];
 for(let i = 0; i < 10; i++){
     options.push({label: `${10 + i * 2}`, value: 10 + i * 2});
 }
 
-const LabelSize: FC = ({}) => {
-    const dispatch = useAppDispatch();
-    const {processTextSize} = Connection.getReduxState();
+const LabelSize: FC<{isModal?: boolean, value: number, onChange: (value: number) => void}> = ({isModal, value, onChange}) => {
     return (
         <InputSelect
             id={`input_label_size`}
@@ -36,10 +36,10 @@ const LabelSize: FC = ({}) => {
             label={'Label Size'}
             marginTop={'50px'}
             options={options}
-            onChange={(option: any) => dispatch(setPanelConfigurations({processTextSize: option.value}))}
-            value={options.find(o => o.value === processTextSize)}
+            onChange={(option: any) => onChange(option.value)}
+            value={options.find(o => o.value === value)}
         />
     )
 }
 
-export default LabelSize;
+export default GetModalProp()(LabelSize);

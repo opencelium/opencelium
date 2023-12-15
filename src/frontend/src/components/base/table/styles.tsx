@@ -35,6 +35,7 @@ const TableStyled = styled.table<TableStyledProps>`
         & tr{
             & th:first-child{
                 padding-left: 15px;
+                padding-right: 15px;
             }
             & th:last-child{
                 padding: 0 15px;
@@ -49,6 +50,7 @@ const TableStyled = styled.table<TableStyledProps>`
             }
             & td:first-child{
                 padding-left: 15px;
+                padding-right: 15px;
             }
             & td:last-child{
                 padding: 0 15px;

@@ -37,7 +37,7 @@ function mapStateToProps(state){
     };
 }
 
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {}, null, {forwardRef: true})
 class Endpoint extends Component{
 
     constructor(props){
@@ -52,6 +52,7 @@ class Endpoint extends Component{
             actionButtonValue: 'add',
             isCaretPositionFocusedOnReference: false,
         }
+        this.paramGeneratorRef = React.createRef();
     }
 
     onChangeEndpoint(e){
@@ -295,6 +296,9 @@ class Endpoint extends Component{
         const {connection, connector, method, readOnly, theme, isParamGeneratorArrowVisible, isParamGeneratorAlwaysVisible, updateEntity} = this.props;
         const {contentEditableValue, actionButtonTooltip, actionButtonValue, caretPosition} = this.state;
         let hasError = false;
+        if(!method){
+            return null;
+        }
         if(method.error.hasError){
             if(method.error.location === 'query'){
                 hasError = true;
@@ -336,6 +340,7 @@ class Endpoint extends Component{
                         theme={theme}
                         isArrowVisible={isParamGeneratorArrowVisible}
                         isAlwaysVisible={isParamGeneratorAlwaysVisible}
+                        ref={this.paramGeneratorRef}
                     />
                 </ToolboxThemeInput>
             </div>
@@ -344,7 +349,7 @@ class Endpoint extends Component{
 }
 
 Endpoint.propTypes = {
-    method: PropTypes.instanceOf(CMethodItem).isRequired,
+    method: PropTypes.instanceOf(CMethodItem),
     readOnly: PropTypes.bool,
 };
 

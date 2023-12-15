@@ -37,6 +37,7 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
             placeholder: 'E-Mail',
             paddingLeftInput: '5px',
             paddingRightInput: '5px',
+            errorBottom: '3px',
             overflow: isAuth ? 'hidden' : 'unset',
             onKeyPress: (e) => onEnter(e, () => LoginForm.login()),
         }
@@ -54,6 +55,7 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
             paddingRight: '5px',
             placeholder: 'Password',
             paddingLeftInput: '5px',
+            errorBottom: '3px',
             overflow: isAuth ? 'hidden' : 'unset',
             onKeyPress: (e) => onEnter(e, () => LoginForm.login()),
         }

@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -54,7 +55,7 @@ public interface ConnectionService {
 
     String updateMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch);
 
-    String updateEnhancement(Long connectionId, String fieldBindingId, JsonPatch patch);
+    FieldBindingMng updateEnhancement(Long connectionId, String fieldBindingId, JsonPatch patch);
 
     void undo(Long connectionId);
 

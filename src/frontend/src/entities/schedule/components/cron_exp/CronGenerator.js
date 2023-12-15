@@ -364,9 +364,9 @@ class CronGenerator extends Component{
         let allMinutes = [];
         for(let i = 0; i < 60; i++){
             if(i <= 23) {
-                allHours.push({label: i <= 9 ? `0${i}` : i, value: i});
+                allHours.push({label: i <= 9 ? `0${i}` : `${i}`, value: i});
             }
-            allMinutes.push({label: i <= 9 ? `0${i}` : i, value: i});
+            allMinutes.push({label: i <= 9 ? `0${i}` : `${i}`, value: i});
         }
         const isAt = atOrEach.value === 'at';
         const isForWeek = timeStamp.value === 'week';
@@ -385,6 +385,7 @@ class CronGenerator extends Component{
                                 <EachStyled value={'Each'} size={TextSize.Size_18}/>
                                 :
                                 <CronEverySelectStyled
+                                    isForWeek={isForWeek}
                                     dayShow={dayShow}
                                     value={atOrEach}
                                     onChange={(value) => this.setAtOrEach(value)}
@@ -394,6 +395,7 @@ class CronGenerator extends Component{
                             {dayShow &&
                             <React.Fragment>
                                 <CronDayForMonthStyled
+                                    isForWeek={isForWeek}
                                     value={dayForMonth}
                                     onChange={(value) => this.setDayForMonth(value)}
                                     options={this.getEveryOptions('day')}

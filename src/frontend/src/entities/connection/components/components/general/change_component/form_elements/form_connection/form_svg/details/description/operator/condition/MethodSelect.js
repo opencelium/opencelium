@@ -31,10 +31,11 @@ class MethodSelect extends React.Component{
     }
 
     render(){
-        const {method, style, source, hasValue, placeholder, isDisabled, isSearchable} = this.props;
+        const {method, style, source, hasValue, placeholder, isDisabled, isSearchable, fromStatement} = this.props;
         return (
             <div style={style}>
                 <Select
+                    className={`condition_method_select_${fromStatement}`}
                     name={'method'}
                     value={method}
                     onChange={(a) => this.update(a)}

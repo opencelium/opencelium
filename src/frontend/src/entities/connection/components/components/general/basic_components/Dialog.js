@@ -118,7 +118,7 @@ class Dialog extends Component{
 }
 
 Dialog.propTypes = {
-    title: PropTypes.string.isRequired,
+    title: PropTypes.any.isRequired,
     actions: PropTypes.array.isRequired,
     active: PropTypes.bool,
     toggle: PropTypes.func.isRequired,

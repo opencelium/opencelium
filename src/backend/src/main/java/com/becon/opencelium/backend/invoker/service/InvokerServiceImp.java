@@ -20,7 +20,6 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.WrongEncode;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
-import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
@@ -121,6 +120,19 @@ public class InvokerServiceImp implements InvokerService {
     public void delete(String name) {
         Objects.requireNonNull(name);
         deleteInvoker(name);
+    }
+
+    public void deleteInvokerFile(String name) {
+        try {
+            Path file = findFileByInvokerName(name).toPath();
+            if(exists(file)){
+                invokerContainer.remove(name);
+                Files.delete(file.toAbsolutePath());
+            }
+        }
+        catch (IOException e){
+            throw new StorageException("Failed to delete stored file", e);
+        }
     }
 
     // Deletes all entries from the database where the invoker is referenced.

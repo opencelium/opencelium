@@ -1,0 +1,2756 @@
+<invoker type="openapi">
+    <name>CheckMK 2</name>
+    <description># IntroductionWith the Checkmk REST-API you can transfer and execute the tasks you normally performmanually in Checkmk's GUI to the Checkmk server via command or script.REST stands for REpresentational State Transfer and describes an architecture for the exchange ofdata on distributed systems - especially for Web services. The implementation of this REST-API isdone via the HTTP/1.1 protocol, where resources are addressed via URIs and accessed with HTTPmethods (GET, POST, PUT, DELETE).The API is documented in a machine-readable schema and a human-readable format in English, with allresources, their input and output parameters and the associated value ranges. The API is createdwith the OpenAPI specification 3.x, an API description format especially for REST APIs.The API documentation created with this specification is displayed to you with ReDoc, a responsiveWeb design for OpenAPI documents.# Prerequisites* You are experienced in using an API, preferably a REST-API.* You are familiar with at least one of the applications for which sample code is available.* You know Checkmk and its principles of setup and configuration.# Using the API documentationThe API documentation's Web design provides 3 panes.The left navigation pane is used for orientation, search and quick jump to the exact description ofthe entries in the middle content pane. The table of contents contains one entry for each API endpoint.An endpoint uses a URL to refer to the resource that the API provides (e.g., to collect hosts),along with the method used to access the resource (e.g., GET to display a host).The endpoints are organized in several folders.The middle content pane contains all information about the definition of a request (with parameters,value ranges, default values and descriptions) and the corresponding answers (also with all details).The possible answers are displayed in different colors, depending on whether the returned HTTP statuscode signals success or an error.The right example pane shows the method and URL for the endpoint selected in the content pane,followed by several examples of requests: the payload in JSON format (if relevant to the endpoint) andcode examples, such as cURL, HTTPie, Python Requests, or Python Urllib. Then follow the responsesaccording to the HTTP status. All code examples can be copied to the clipboard with the Copy button.# ResponsesAs specified by the `Content-Type` of `application/json`, the response payload is serialized withJSON and encoded in UTF-8.All responses are well-formed according to the[Restful-Objects standard](https://en.wikipedia.org/wiki/Restful_Objects).There are a limited number of key concepts in the standard (e.g. object, action, collection, etc.)which enables the use of this API without having to understand the details of the implementation ofeach endpoint.Every response comes with a collection of `links` to inform the API client on possiblefollow-up actions. For example, a folder response can have links to resources for updating,deleting and moving the folder. The client does not have to know about the URL structure, itjust needs to follow the link. In this sense, the API is quasi self-documenting.This provision of additional information as a REST-API principle is also called[HATEOAS](https://en.wikipedia.org/wiki/HATEOAS).# AuthenticationTo use this API from a automated client, a user needs to be set up in Checkmk. Ideally thiswould be an automation-user, with which actions can be performed via the API. For a newlycreated site an automation user is already created. You can find it, like other users, inCheckmk at *Setup* &gt; *Users*.As an alternative, users who already logged into Checkmk can also access the API, although theseusers are not very suitable for automation, because their session will time out eventually.For scripting, please use the Bearer authentication format.&lt;SecurityDefinitions /&gt;# Client compatibility issues## Overriding request methodsIf you have a client which cannot do the HTTP PUT or DELETE methods, you can use the`X-HTTP-Method-Override` HTTP header to force the server into believing the client actually sentsuch a method. In these cases the HTTP method to use has to be POST. You cannot override from GET.## Backwards compatibilityFuture versions of this API may add additional fields in the responses. Clients must be writtenin a way to NOT expect the absence of a field, as we don't guarantee that.For backwards compatibility reasons we only keep the fields that have already been there in olderversions. You can consult the documentation to see what changed in each API revision.</description>
+    <hint>This interface provides the token auth. You can access the API documents via the checkmk overview.</hint>
+    <authType>token</authType>
+    <requiredData>
+        <item name="url" type="string" visibility="public">http://{HostnameOrIP}/{SiteName}/check_mk/api/v1/</item>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+    </requiredData>
+    <operations>
+        <operation name="acknowledgement.set_acknowledgement_related_to_host" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object"/>
+                <endpoint>{url}/domain-types/acknowledge/collections/host</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="acknowledgement.set_acknowledgement_on_service_related" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object"/>
+                <endpoint>{url}/domain-types/acknowledge/collections/service</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="activate_changes.activate_changes" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="redirect" type="boolean"/>
+                    <field name="sites" type="array"/>
+                </body>
+                <endpoint>{url}/domain-types/activation_run/actions/activate-changes/invoke</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="302"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="activate_changes.activate_changes_state" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/activation_run/{activation_id}/actions/wait-for-completion/invoke</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="302"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="activate_changes.show_activation" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/activation_run/{activation_id}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="activate_changes.list_activations" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/domain-types/activation_run/collections/running</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="bi.get_bi_rule" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/bi_rule/{rule_id}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="nodes" type="array">
+                            <field name="search" type=""/>
+                            <field name="action" type=""/></field>
+                        <field name="params" type=""/>
+                        <field name="node_visualization" type=""/>
+                        <field name="properties" type=""/>
+                        <field name="aggregation_function" type=""/>
+                        <field name="computation_options" type=""/>
+                        <field name="pack_id" type="string"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="bi.put_bi_rule" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="id" type="string"/>
+                    <field name="nodes" type="array">
+                        <field name="search" type=""/>
+                        <field name="action" type=""/></field>
+                    <field name="params" type=""/>
+                    <field name="node_visualization" type=""/>
+                    <field name="properties" type=""/>
+                    <field name="aggregation_function" type=""/>
+                    <field name="computation_options" type=""/>
+                    <field name="pack_id" type="string"/>
+                </body>
+                <endpoint>{url}/objects/bi_rule/{rule_id}</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="nodes" type="array">
+                            <field name="search" type=""/>
+                            <field name="action" type=""/></field>
+                        <field name="params" type=""/>
+                        <field name="node_visualization" type=""/>
+                        <field name="properties" type=""/>
+                        <field name="aggregation_function" type=""/>
+                        <field name="computation_options" type=""/>
+                        <field name="pack_id" type="string"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="bi.delete_bi_rule" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/bi_rule/{rule_id}</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="bi.get_bi_aggregation" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/bi_aggregation/{aggregation_id}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="customer" type="string"/>
+                        <field name="groups" type=""/>
+                        <field name="node" type=""/>
+                        <field name="aggregation_visualization" type=""/>
+                        <field name="computation_options" type=""/>
+                        <field name="pack_id" type="string"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="bi.put_bi_aggregation" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="id" type="string"/>
+                    <field name="customer" type="string"/>
+                    <field name="groups" type=""/>
+                    <field name="node" type=""/>
+                    <field name="aggregation_visualization" type=""/>
+                    <field name="computation_options" type=""/>
+                    <field name="pack_id" type="string"/>
+                </body>
+                <endpoint>{url}/objects/bi_aggregation/{aggregation_id}</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="customer" type="string"/>
+                        <field name="groups" type=""/>
+                        <field name="node" type=""/>
+                        <field name="aggregation_visualization" type=""/>
+                        <field name="computation_options" type=""/>
+                        <field name="pack_id" type="string"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="bi.delete_bi_aggregation" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/bi_aggregation/{aggregation_id}</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="bi.get_bi_packs" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/domain-types/bi_pack/collections/all</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="bi.get_bi_pack" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/bi_pack/{pack_id}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="contact_group_config.list_group" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/domain-types/contact_group_config/collections/all</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="contact_group_config.create" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="name" type="string"/>
+                    <field name="alias" type="string"/>
+                </body>
+                <endpoint>{url}/domain-types/contact_group_config/collections/all</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="contact_group_config.bulk_create" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array">
+                        <field name="name" type="string"/>
+                        <field name="alias" type="string"/></field>
+                </body>
+                <endpoint>{url}/domain-types/contact_group_config/actions/bulk-create/invoke</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="contact_group_config.show" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/contact_group_config/{name}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type=""/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="contact_group_config.update" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="name" type="string"/>
+                    <field name="alias" type="string"/>
+                </body>
+                <endpoint>{url}/objects/contact_group_config/{name}</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type=""/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="contact_group_config.delete" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/contact_group_config/{name}</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="contact_group_config.bulk_delete" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array"/>
+                </body>
+                <endpoint>{url}/domain-types/contact_group_config/actions/bulk-delete/invoke</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="contact_group_config.bulk_update" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array">
+                        <field name="name" type="string"/>
+                        <field name="attributes" type="object">
+                            <field name="name" type="string"/>
+                            <field name="alias" type="string"/></field>
+                    </field>
+                </body>
+                <endpoint>{url}/domain-types/contact_group_config/actions/bulk-update/invoke</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="downtime.create_host_related_downtime" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object"/>
+                <endpoint>{url}/domain-types/downtime/collections/host</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="downtime.create_service_related_downtime" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object"/>
+                <endpoint>{url}/domain-types/downtime/collections/service</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="downtime.show_downtimes" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/domain-types/downtime/collections/all</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="downtime.delete_downtime" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object"/>
+                <endpoint>{url}/domain-types/downtime/actions/delete/invoke</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="folder_config.list_folders" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/domain-types/folder_config/collections/all</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type=""/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="folder_config.create" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="name" type="string"/>
+                    <field name="title" type="string"/>
+                    <field name="parent" type="string"/>
+                    <field name="attributes" type="object"/>
+                </body>
+                <endpoint>{url}/domain-types/folder_config/collections/all</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object"/>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="folder_config.show_folder" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/folder_config/{folder}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object"/>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="folder_config.update" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="title" type="string"/>
+                    <field name="attributes" type="object"/>
+                    <field name="update_attributes" type="object"/>
+                </body>
+                <endpoint>{url}/objects/folder_config/{folder}</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object"/>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="folder_config.delete" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/folder_config/{folder}</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="folder_config.bulk_update" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array">
+                        <field name="title" type="string"/>
+                        <field name="attributes" type="object"/>
+                        <field name="update_attributes" type="object"/>
+                        <field name="folder" type="string"/></field>
+                </body>
+                <endpoint>{url}/domain-types/folder_config/actions/bulk-update/invoke</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type=""/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="folder_config.move" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="destination" type="string"/>
+                </body>
+                <endpoint>{url}/objects/folder_config/{folder}/actions/move/invoke</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object"/>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host.list_hosts" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/domain-types/host/collections/all</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.list_hosts" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/domain-types/host_config/collections/all</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.create_host" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="folder" type="string"/>
+                    <field name="host_name" type="string"/>
+                    <field name="attributes" type="object"/>
+                </body>
+                <endpoint>{url}/domain-types/host_config/collections/all</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.create_cluster_host" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="folder" type="string"/>
+                    <field name="host_name" type="string"/>
+                    <field name="attributes" type="object"/>
+                    <field name="nodes" type="array"/>
+                </body>
+                <endpoint>{url}/domain-types/host_config/collections/clusters</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.bulk_create_hosts" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array">
+                        <field name="folder" type="string"/>
+                        <field name="host_name" type="string"/>
+                        <field name="attributes" type="object"/></field>
+                </body>
+                <endpoint>{url}/domain-types/host_config/actions/bulk-create/invoke</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.update_nodes" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="nodes" type="array"/>
+                </body>
+                <endpoint>{url}/objects/host_config/{host_name}/properties/nodes</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.show_host" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/host_config/{host_name}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.update_host" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="attributes" type="object"/>
+                    <field name="update_attributes" type="object"/>
+                    <field name="remove_attributes" type="array"/>
+                </body>
+                <endpoint>{url}/objects/host_config/{host_name}</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.delete" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/host_config/{host_name}</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.bulk_update_hosts" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array">
+                        <field name="attributes" type="object"/>
+                        <field name="update_attributes" type="object"/>
+                        <field name="remove_attributes" type="array"/>
+                        <field name="host_name" type="string"/></field>
+                </body>
+                <endpoint>{url}/domain-types/host_config/actions/bulk-update/invoke</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.rename_host" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="new_name" type="string"/>
+                </body>
+                <endpoint>{url}/objects/host_config/{host_name}/actions/rename/invoke</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.move" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="target_folder" type="string"/>
+                </body>
+                <endpoint>{url}/objects/host_config/{host_name}/actions/move/invoke</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_config.bulk_delete" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array"/>
+                </body>
+                <endpoint>{url}/domain-types/host_config/actions/bulk-delete/invoke</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_group_config.list_groups" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/domain-types/host_group_config/collections/all</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_group_config.create" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="name" type="string"/>
+                    <field name="alias" type="string"/>
+                </body>
+                <endpoint>{url}/domain-types/host_group_config/collections/all</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type=""/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_group_config.bulk_create" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array">
+                        <field name="name" type="string"/>
+                        <field name="alias" type="string"/></field>
+                </body>
+                <endpoint>{url}/domain-types/host_group_config/actions/bulk-create/invoke</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_group_config.get" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/host_group_config/{name}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type=""/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_group_config.update" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="name" type="string"/>
+                    <field name="alias" type="string"/>
+                </body>
+                <endpoint>{url}/objects/host_group_config/{name}</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type=""/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_group_config.delete" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/host_group_config/{name}</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_group_config.bulk_delete" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array"/>
+                </body>
+                <endpoint>{url}/domain-types/host_group_config/actions/bulk-delete/invoke</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_group_config.bulk_update" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array">
+                        <field name="name" type="string"/>
+                        <field name="attributes" type="object">
+                            <field name="name" type="string"/>
+                            <field name="alias" type="string"/></field>
+                    </field>
+                </body>
+                <endpoint>{url}/domain-types/host_group_config/actions/bulk-update/invoke</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_tag.create_host_tag_group" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="ident" type="string"/>
+                    <field name="title" type="string"/>
+                    <field name="topic" type="string"/>
+                    <field name="help" type="string"/>
+                    <field name="tags" type="array">
+                        <field name="ident" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="aux_tags" type="array"/></field>
+                </body>
+                <endpoint>{url}/domain-types/host_tag_group/collections/all</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_tag.show_host_tag_group" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/host_tag_group/{name}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type=""/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_tag.update_host_tag_group" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="title" type="string"/>
+                    <field name="topic" type="string"/>
+                    <field name="help" type="string"/>
+                    <field name="tags" type="array">
+                        <field name="ident" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="aux_tags" type="array"/></field>
+                    <field name="repair" type="boolean"/>
+                </body>
+                <endpoint>{url}/objects/host_tag_group/{name}</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type=""/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host_tag.delete_host_tag_group" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="repair" type="boolean"/>
+                </body>
+                <endpoint>{url}/objects/host_tag_group/{name}</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="password.create_password" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="ident" type="string"/>
+                    <field name="title" type="string"/>
+                    <field name="comment" type="string"/>
+                    <field name="documentation_url" type="string"/>
+                    <field name="password" type="string"/>
+                    <field name="owner" type="string"/>
+                    <field name="shared" type="array"/>
+                </body>
+                <endpoint>{url}/domain-types/password/collections/all</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="password.show_password" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/password/{name}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="ident" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="comment" type="string"/>
+                        <field name="documentation_url" type="string"/>
+                        <field name="password" type="string"/>
+                        <field name="owner" type="string"/>
+                        <field name="shared" type="array"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="password.update_password" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="title" type="string"/>
+                    <field name="comment" type="string"/>
+                    <field name="documentation_url" type="string"/>
+                    <field name="password" type="string"/>
+                    <field name="owner" type="string"/>
+                    <field name="shared" type="array"/>
+                </body>
+                <endpoint>{url}/objects/password/{name}</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="password.delete_password" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/password/{name}</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service._list_host_services" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/host/{host_name}/collections/services</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service._list_all_services" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/domain-types/service/collections/all</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service_discovery.show_services" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/domain-types/service/collections/services</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service_discovery.move_service" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/host/{host_name}/service/{service_hash}/action/move/{target_state}</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service_discovery.execute" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/host/{host_name}/actions/discover-services/mode/{discover_mode}</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service_group_config.list_groups" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/domain-types/service_group_config/collections/all</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service_group_config.create" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="name" type="string"/>
+                    <field name="alias" type="string"/>
+                </body>
+                <endpoint>{url}/domain-types/service_group_config/collections/all</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service_group_config.bulk_create" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array">
+                        <field name="name" type="string"/>
+                        <field name="alias" type="string"/></field>
+                </body>
+                <endpoint>{url}/domain-types/service_group_config/actions/bulk-create/invoke</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service_group_config.show_group" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/service_group_config/{name}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type=""/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service_group_config.update" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="name" type="string"/>
+                    <field name="alias" type="string"/>
+                </body>
+                <endpoint>{url}/objects/service_group_config/{name}</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="domainType" type=""/>
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="members" type="object"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                    <header>
+                        <item name="ETag" type="string"/>
+                    </header>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service_group_config.delete" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/service_group_config/{name}</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service_group_config.bulk_delete" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array"/>
+                </body>
+                <endpoint>{url}/domain-types/service_group_config/actions/bulk-delete/invoke</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="service_group_config.bulk_update" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="entries" type="array">
+                        <field name="name" type="string"/>
+                        <field name="attributes" type="object">
+                            <field name="name" type="string"/>
+                            <field name="alias" type="string"/></field>
+                    </field>
+                </body>
+                <endpoint>{url}/domain-types/service_group_config/actions/bulk-update/invoke</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="links" type="array">
+                            <field name="domainType" type=""/>
+                            <field name="rel" type="string"/>
+                            <field name="href" type="string"/>
+                            <field name="method" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="arguments" type="object"/></field>
+                        <field name="id" type="string"/>
+                        <field name="domainType" type="string"/>
+                        <field name="value" type="array"/>
+                        <field name="extensions" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="time_period.create_timeperiod" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="name" type="string"/>
+                    <field name="alias" type="string"/>
+                    <field name="active_time_ranges" type="array">
+                        <field name="day" type="string"/>
+                        <field name="time_ranges" type="array">
+                            <field name="start" type="string"/>
+                            <field name="end" type="string"/></field>
+                    </field>
+                    <field name="exceptions" type="array">
+                        <field name="date" type="string"/>
+                        <field name="time_ranges" type="array">
+                            <field name="start" type="string"/>
+                            <field name="end" type="string"/></field>
+                    </field>
+                    <field name="exclude" type="array"/>
+                </body>
+                <endpoint>{url}/domain-types/time_period/collections/all</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="time_period.show_time_period" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/time_period/{name}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="alias" type="string"/>
+                        <field name="active_time_ranges" type="array">
+                            <field name="day" type="string"/>
+                            <field name="time_ranges" type="array">
+                                <field name="start" type="string"/>
+                                <field name="end" type="string"/></field>
+                        </field>
+                        <field name="exceptions" type="array">
+                            <field name="date" type="string"/>
+                            <field name="time_ranges" type="array">
+                                <field name="start" type="string"/>
+                                <field name="end" type="string"/></field>
+                        </field>
+                        <field name="exclude" type="array"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="time_period.update_timeperiod" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="application/json" format="json" type="object">
+                    <field name="alias" type="string"/>
+                    <field name="active_time_ranges" type="array">
+                        <field name="day" type="string"/>
+                        <field name="time_ranges" type="array">
+                            <field name="start" type="string"/>
+                            <field name="end" type="string"/></field>
+                    </field>
+                    <field name="exceptions" type="array">
+                        <field name="date" type="string"/>
+                        <field name="time_ranges" type="array">
+                            <field name="start" type="string"/>
+                            <field name="end" type="string"/></field>
+                    </field>
+                </body>
+                <endpoint>{url}/objects/time_period/{name}</endpoint>
+                <method>PUT</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="time_period.delete" type="">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/objects/time_period/{name}</endpoint>
+                <method>DELETE</method>
+            </request>
+            <response>
+                <success status="204"/>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="version.search" type="test">
+            <request>
+                <header>
+                    <item name="Authorization" type="string">Bearer {username} {password}</item>
+                </header>
+                <body data="raw" format="json" type="object"/>
+                <endpoint>{url}/version</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="application/json" format="json" type="object">
+                        <field name="site" type="string"/>
+                        <field name="group" type="string"/>
+                        <field name="rest_api" type="object"/>
+                        <field name="versions" type="object"/>
+                        <field name="edition" type="string"/>
+                        <field name="demo" type="boolean"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <body data="application/problem+json" format="json" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="errors" type="array"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

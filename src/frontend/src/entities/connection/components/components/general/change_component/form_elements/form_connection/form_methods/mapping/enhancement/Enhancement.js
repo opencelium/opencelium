@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
+import React, {ChangeEvent, Component} from 'react';
 import PropTypes from 'prop-types';
 import AceEditor from 'react-ace';
 
@@ -23,8 +23,11 @@ import 'ace-builds/src-noconflict/theme-tomorrow';
 
 import {Row, Col} from "react-grid-system";
 
-import Input from '@entity/connection/components/components/general/basic_components/inputs/Input';
-import {setFocusById} from "@application/utils/utils";
+import Input from "@app_component/base/input/Input";
+import {getMarker, setFocusById} from "@application/utils/utils";
+import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
+import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
+import {getReactXmlStyles} from "@app_component/base/input/xml_view/styles";
 
 
 /**
@@ -42,6 +45,7 @@ class Enhancement extends Component{
             expertCode,
             name: enhancement ? enhancement.name : '',
             description: enhancement ? enhancement.description : '',
+            markers: [],
         };
     }
 
@@ -50,6 +54,7 @@ class Enhancement extends Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        const {enhancementRef} = this.props;
         if(prevProps.enhancement && (prevProps.enhancement.expertVar !== this.props.enhancement.expertVar || prevProps.enhancement.expertCode !== this.props.enhancement.expertCode
         || prevProps.enhancement.name !== this.props.enhancement.name || prevProps.enhancement.description !== this.props.enhancement.description)){
             this.setState({
@@ -58,6 +63,10 @@ class Enhancement extends Component{
                 name: this.props.enhancement.name,
                 description: this.props.enhancement.description,
             })
+        }
+        if(this.state.expertCode !== prevState.expertCode){
+            const newMarkers = getMarker(enhancementRef.current.editor, this.state.expertCode, CEnhancement.generateNotExistVar());
+            this.setState({markers: newMarkers});
         }
     }
 
@@ -83,12 +92,22 @@ class Enhancement extends Component{
     }
 
     renderEnhancement(){
-        const {expertVar} = this.state;
+        const {expertVar, markers} = this.state;
         let {readOnly} = this.props;
         let {expertCode} = this.state;
+        const styleProps = {
+            marginTop: '25px',
+            display: 'inline-block',
+            width: 'calc(100% - 50px)',
+            marginLeft: '46px',
+            marginBottom: 0,
+            height: 'calc(100% - 37px)',
+            borderBottom: '1px solid #e9e9e9'
+        }
         return(
-            <div>
+            <Input readOnly={readOnly} value={'script'} label={'Script'} icon={'javascript'} marginBottom={'20px'} display={'grid'}>
                 <AceEditor
+                    style={{...getReactXmlStyles(styleProps), marginLeft: '50px', marginBottom: 0, width: styleProps.width}}
                     mode="javascript"
                     theme="tomorrow"
                     onChange={(a) => this.updateExpertCode(a)}
@@ -111,6 +130,9 @@ class Enhancement extends Component{
                     }}
                 />
                 <AceEditor
+                    ref={this.props.enhancementRef}
+                    style={{...getReactXmlStyles({...styleProps, marginTop: '0'}), marginLeft: '50px', marginBottom: 0, width: styleProps.width, height: '190px'}}
+                    markers={markers}
                     mode="javascript"
                     theme="tomorrow"
                     onChange={(a) => this.updateExpertCode(a)}
@@ -132,7 +154,7 @@ class Enhancement extends Component{
                         useWorker: false,
                     }}
                 />
-            </div>
+            </Input>
         );
     }
 
@@ -143,17 +165,14 @@ class Enhancement extends Component{
             <div>
                 <Row>
                     <Col md={12}>
-                        <Input
-                            onChange={(a) => this.updateDescription(a)}
+                        <InputTextarea
                             id={'enhancement_description'}
+                            readOnly={readOnly}
+                            icon={'notes'}
+                            onChange={(e) => this.updateDescription(e.target.value)}
                             name={'Description'}
                             label={'Description'}
-                            type={'text'}
-                            icon={'perm_identity'}
                             value={description}
-                            multiline={true}
-                            rows={6}
-                            readOnly={readOnly}
                         />
                     </Col>
                 </Row>
@@ -172,4 +191,4 @@ Enhancement.propTypes = {
 Enhancement.defaultProps = {
 };
 
-export default Enhancement;
+export default React.forwardRef((props, ref) => <Enhancement enhancementRef={ref} {...props}/>);

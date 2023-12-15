@@ -111,6 +111,7 @@ export class CNotification implements INotification{
             case NotificationType.SUCCESS:
                 tooltip = 'Info';
                 value = 'info';
+                iconColor = ColorTheme.Green;
                 break;
             case NotificationType.ERROR:
                 iconColor = ColorTheme.Red;

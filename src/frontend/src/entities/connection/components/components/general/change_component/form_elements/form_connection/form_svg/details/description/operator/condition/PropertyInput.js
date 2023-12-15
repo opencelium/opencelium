@@ -33,7 +33,7 @@ class PropertyInput extends React.Component{
                         selectedConnector={selectedConnector}
                         connection={connection}
                         updateConnection={updateConnection}
-                        className={styles.operator_right_field}
+                        className={`${styles.operator_right_field} condition_property_input`}
                         placeholder={'param'}
                         items={items}
                         readOnly={readOnly}

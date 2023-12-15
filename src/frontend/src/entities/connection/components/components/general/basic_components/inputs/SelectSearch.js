@@ -40,7 +40,7 @@ function mapStateToProps(state){
 /**
  * Select Search Component
  */
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {}, null, {forwardRef: true})
 class SelectSearch extends Component{
 
     constructor(props){
@@ -53,6 +53,7 @@ class SelectSearch extends Component{
             isOpenedParamDialog: false,
         };
         this.searchResultRef = React.createRef();
+        this.searchValueRef = React.createRef();
     }
 
     componentDidMount() {
@@ -232,6 +233,7 @@ class SelectSearch extends Component{
                 let {value, type} = field;
                 const labelText = field.hasOwnProperty('label') ? field.label : field.value;
                 let label = <SearchValue
+                    ref={this.searchValueRef}
                     id={id}
                     name={field.value}
                     value={value}

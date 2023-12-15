@@ -44,6 +44,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import liquibase.util.file.FilenameUtils;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
@@ -61,6 +63,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -181,13 +186,13 @@ public class InvokerController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> save(@RequestBody InvokerXMLResource invokerXMLResource)  {
+    public ResponseEntity<?> save(@RequestBody InvokerXMLResource invokerXMLResource) throws Exception  {
         Document doc = convertStringToXMLDocument(invokerXMLResource.getXml());
         Objects.requireNonNull(doc);
-        NodeList nodeList = doc.getChildNodes();
-        Node node = nodeList.item(0);
-        Node nameNode = node.getChildNodes().item(1);
-        String filename = nameNode.getTextContent();
+        XPathFactory xPathFactory = XPathFactory.newInstance();
+        XPath xpath = xPathFactory.newXPath();
+        XPathExpression expression = xpath.compile("/invoker/name");
+        String filename = expression.evaluate(doc);
         if (invokerService.existsByName(filename)){
             throw new RuntimeException("INVOKER_ALREADY_EXISTS");
         }
@@ -202,8 +207,14 @@ public class InvokerController {
             throw new RuntimeException(ex);
         }
 
-        List<Document> invokers = getAllInvokers();
+        List<Document> invokers;
         Map<String, Invoker> container = new HashMap<>();
+        try {
+            invokers = getAllInvokers();
+        } catch (Exception e) {
+            delete(filename);
+            throw new RuntimeException(e);
+        }
         invokers.forEach(document -> {
             InvokerParserImp parser = new InvokerParserImp(document);
             File f = new File(document.getDocumentURI());
@@ -211,12 +222,17 @@ public class InvokerController {
             invoker = invoker.replace("%20", " ");
             container.put(invoker, parser.parse());
         });
+
         invokerContainer.updateAll(container);
 
         Invoker invoker = invokerContainer.getByName(filename);
+
+        if (invoker.getOperations() == null) {
+            delete(filename);
+            throw new RuntimeException("Invoker should contain at least one Operation.");
+        }
         InvokerDTO invokerDTO = invokerService.toResource(invoker);
-        final EntityModel<InvokerDTO> resource = EntityModel.of(invokerDTO);
-        return ResponseEntity.ok().body(resource);
+        return ResponseEntity.ok().body(invokerDTO);
     }
 
     @Operation(summary = "Validates whether an invoker is used in connection or in connector")
@@ -284,7 +300,7 @@ public class InvokerController {
         if(connectorService.existByInvoker(name)) {
             throw new RuntimeException("Couldn't delete because invoker '" + name + "' has references to connector and connection. ");
         }
-        invokerService.delete(name);
+        invokerService.deleteInvokerFile(name);
         return ResponseEntity.noContent().build();
     }
 
@@ -376,6 +392,7 @@ public class InvokerController {
                     .map(location::relativize);
 
             return allInvokers.map(p -> new File(location.toString() + "/" + p.getFileName()))
+                    .filter(f -> f.getName().endsWith(".xml"))
                     .map(file -> {
                         try {
                             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();

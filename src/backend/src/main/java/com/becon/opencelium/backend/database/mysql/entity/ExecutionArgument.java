@@ -10,6 +10,9 @@ import java.util.Objects;
 @Table(name = "execution_argument")
 public class ExecutionArgument {
 
+//    @EmbeddedId
+//    private ExecutionArgument.PK id;
+
     @Id
     @ManyToOne
     @JoinColumn(name = "execution_id")

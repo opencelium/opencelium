@@ -35,6 +35,7 @@ import {setInitialTestScheduleState} from "@entity/schedule/redux_toolkit/slices
 import Counter from "@app_component/base/counter/Counter";
 import Text from "@app_component/base/text/Text";
 import SyncLogs from "./SyncLogs";
+import { ColorTheme } from '@style/Theme';
 
 
 function mapStateToProps(state){
@@ -214,13 +215,17 @@ class TestConnectionButton extends React.Component{
                     target={`test_connection_button`}
                     position={'bottom'}
                     tooltip={'Test'}
-                    hasBackground={false}
+                    hasBackground={true}
+                    background={isTestingConnection ? ColorTheme.Blue : ColorTheme.White}
+                    color={isTestingConnection ? ColorTheme.White : ColorTheme.Gray}
+                    padding="2px 10px"
                     handleClick={(e) => this.test(e)}
-                    icon={'terminal'}
-                    size={TextSize.Size_20}
+                    icon={"play_arrow"}
                     loadingSize={TextSize.Size_14}
                     isDisabled={isTestingConnection}
                     isLoading={isTestingConnection}
+                    label="Test run"
+                    size={TextSize.Size_12}
                 />
                 {isTestingConnection && <CoverButtonStyled/>}
                 <UncontrolledPopover

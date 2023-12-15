@@ -20,21 +20,23 @@ import SelectSearch from "@entity/connection/components/components/general/basic
 class ParamInput extends React.Component{
     constructor(props) {
         super(props);
+        this.selectSearchRef = React.createRef();
     }
 
     render(){
-        const {placeholder, readOnly, param, style, id, connector, items, updateParam, isMultiline, updateConnection, selectedMethod, selectedConnector, connection} = this.props;
+        const {placeholder, readOnly, param, style, id, connector, items, updateParam, isMultiline, updateConnection, selectedMethod, selectedConnector, connection, fromStatement} = this.props;
         let inputTheme = {};
         inputTheme.input = styles.input_pointer_param_if;
         return (
             <div style={style}>
                 <SelectSearch
+                    ref={this.selectSearchRef}
                     id={id}
                     selectedConnector={selectedConnector}
                     connection={connection}
                     selectedMethod={selectedMethod}
                     updateConnection={updateConnection}
-                    className={styles.operator_left_field}
+                    className={`${styles.operator_left_field} condition_param_select_${fromStatement}`}
                     placeholder={placeholder || 'param'}
                     items={items}
                     readOnly={readOnly}

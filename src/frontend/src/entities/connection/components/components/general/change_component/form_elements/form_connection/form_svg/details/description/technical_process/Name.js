@@ -18,18 +18,22 @@ import {connect} from 'react-redux';
 import {isString, setFocusById} from "@application/utils/utils";
 import SelectableInput from "../SelectableInput";
 import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {setModalCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ModalConnectionSlice";
 import {CONNECTOR_FROM} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
+import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-
-@connect(null, {setCurrentTechnicalItem})
+@GetModalProp()
+@connect(null, {setCurrentTechnicalItem, setModalCurrentTechnicalItem}, null, {forwardRef: true})
 class Name extends React.Component{
     constructor(props) {
         super(props);
+        this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
+        this.selectableInputRef = React.createRef();
     }
 
     changeName(optionValue){
         if(optionValue) {
-            const {details, connection, updateConnection, setCurrentTechnicalItem} = this.props;
+            const {details, connection, updateConnection} = this.props;
             let connector = connection.getConnectorByType(details.connectorType);
             let method = {index: details.entity.index};
             let operation = connector.invoker.operations.find(o => o.name === optionValue.value);
@@ -47,7 +51,7 @@ class Name extends React.Component{
                 currentTechnicalItem = connection.toConnector.getSvgElementByIndex(method.index);
             }
             updateConnection(connection);
-            setCurrentTechnicalItem(currentTechnicalItem.getObject());
+            this.setCurrentTechnicalItem(currentTechnicalItem.getObject());
         }
     }
 
@@ -64,6 +68,7 @@ class Name extends React.Component{
         const name = this.getName();
         return(
             <SelectableInput
+                ref={this.selectableInputRef}
                 id={`name_options`}
                 readOnly={readOnly}
                 options={invoker.getAllOperationsForSelect()}

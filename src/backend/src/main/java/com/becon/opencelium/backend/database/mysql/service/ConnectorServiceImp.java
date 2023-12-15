@@ -168,7 +168,6 @@ public class ConnectorServiceImp implements ConnectorService {
     // RequestData = from db; RequiredData = from invoker
     @Override
     public List<RequestData> buildRequestData(Connector connector) {
-
         return null;
     }
 
@@ -189,5 +188,4 @@ public class ConnectorServiceImp implements ConnectorService {
         List<RequestData> requestData = connector.getRequestData();
         requestData.forEach(e -> e.setValue(encoder.decrypt(e.getValue())));
     }
-
 }

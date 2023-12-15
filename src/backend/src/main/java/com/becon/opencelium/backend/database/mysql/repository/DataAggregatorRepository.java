@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.database.mysql.repository;
 
-
 import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
 import org.springframework.data.jpa.repository.JpaRepository;
 

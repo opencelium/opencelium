@@ -18,7 +18,7 @@ import {actions} from '../../redux_toolkit/slices/ApplicationSlice';
 
 const {
     login, getResources, getVersion, updateResources, getGlobalSearchData, getAllComponents,
-    addTicket, openExternalUrl, updateThemes, checkConnection
+    addTicket, openExternalUrl, updateThemes, checkConnection, requestRemoteApi
 } = ActionCreators;
 
 const {setThemes} = actions;
@@ -43,6 +43,9 @@ export default {
         },
         [getResources.rejected.type]: {
             "__DEFAULT__": "The request of getting resources was rejected."
+        },
+        [requestRemoteApi.rejected.type]: {
+            "__DEFAULT__": "The request was rejected."
         },
         [updateResources.rejected.type]: {
             "__DEFAULT__": ""

@@ -52,7 +52,10 @@ export class Notification extends HookStateClass implements INotification{
     name: string = '';
 
     @App.inputType
-    eventType: EVENT_TYPE = EVENT_TYPE.PRE;
+    slackWebhook: string = '';
+
+    @App.inputType
+    eventType: EVENT_TYPE = EVENT_TYPE.POST;
 
     @App.inputType
     typeSelect: OptionProps;
@@ -63,11 +66,21 @@ export class Notification extends HookStateClass implements INotification{
     @App.inputType
     recipientsSelect: OptionProps[];
 
+    @App.inputType
+    teamSelect: OptionProps;
+
+    @App.inputType
+    channelSelect: OptionProps;
+
     type: string = '';
 
     template: INotificationTemplate = null;
 
     recipients: string[] = [];
+
+    team: string = '';
+
+    channel: string = '';
 
     constructor(notification?: Partial<INotification> | null) {
         // @ts-ignore
@@ -75,12 +88,13 @@ export class Notification extends HookStateClass implements INotification{
         this.id = notification?.id || notification?.notificationId || 0;
         this.scheduleId = notification?.scheduleId || notification?.schedulerId || 0;
         this.name = notification?.name || '';
-        this.eventType = notification?.eventType || EVENT_TYPE.PRE;
+        this.eventType = notification?.eventType || EVENT_TYPE.POST;
         this.typeSelect = notification?.typeSelect || null;
         this.type = notification?.type || notification?.notificationType || '';
         if(!this.typeSelect && this.type !== ''){
             this.typeSelect = {label: capitalize(this.type), value: this.type};
         }
+        this.slackWebhook = notification && notification.slackWebhook ? notification.slackWebhook : this.type === 'slack' ? notification?.recipients && notification.recipients.length > 0 ? notification.recipients[0] : '' : '';
         this.templateSelect = notification?.templateSelect || null;
         this.template = notification?.template || null;
         if(!this.templateSelect && this.template){
@@ -91,6 +105,16 @@ export class Notification extends HookStateClass implements INotification{
         if(this.recipientsSelect.length === 0 && this.recipients.length > 0){
             this.recipientsSelect = this.recipients.map(recipient => {return {label: recipient, value: recipient};})
         }
+        this.teamSelect = notification?.teamSelect || null;
+        this.team = notification?.team || '';/*
+        if(!this.teamSelect && this.team !== ''){
+            this.teamSelect = {label: capitalize(this.team), value: this.team};
+        }*/
+        this.channelSelect = notification?.channelSelect || null;
+        this.channel = notification?.channel || '';/*
+        if(!this.channelSelect && this.channel !== ''){
+            this.channelSelect = {label: capitalize(this.channel), value: this.channel};
+        }*/
         // @ts-ignore
         this.dispatch = notification.dispatch ? notification.dispatch : useAppDispatch();
     }
@@ -196,13 +220,60 @@ export class Notification extends HookStateClass implements INotification{
         return true;
     }
 
+    validateTeam(): boolean{
+        let isNotValid = false;
+        if(this.teamSelect === null){
+            isNotValid = true;
+            this.validations['teamSelect'] = 'The team is a required field';
+        }
+        if(isNotValid){
+            // @ts-ignore
+            this.updateTeamSelect(this, this.teamSelect);
+            if(!this.isFocused){
+                document.getElementById('input_teamSelect').focus();
+                this.isFocused = true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    validateChannel(): boolean{
+        let isNotValid = false;
+        if(this.channelSelect === null){
+            isNotValid = true;
+            this.validations['channelSelect'] = 'The channel is a required field';
+        }
+        if(isNotValid){
+            // @ts-ignore
+            this.updateChannelSelect(this, this.channelSelect);
+            if(!this.isFocused){
+                document.getElementById('input_channelSelect').focus();
+                this.isFocused = true;
+            }
+            return false;
+        }
+        return true;
+    }
+
     validateAdd(): boolean{
         this.isFocused = false;
         const isValidName = this.validateName();
         const isValidType = this.validateType();
         const isValidTemplate = this.validateTemplate();
-        const isValidRecipients = this.validateRecipients();
-        return isValidName && isValidType && isValidTemplate && isValidRecipients;
+        let validateAdditionalData = false;
+        switch(this.typeSelect.value) {
+            case 'email':
+                validateAdditionalData = this.validateRecipients();
+                break;
+            case 'teams':
+                validateAdditionalData = this.validateTeam() && this.validateChannel();
+                break;
+            case 'slack':
+                validateAdditionalData = true;
+                break;
+        }
+        return isValidName && isValidType && isValidTemplate && validateAdditionalData;
     }
 
     @App.dispatch<INotification>(getNotificationByScheduleIdAndId, {mapping: (notification: INotification) => {return {id: notification.id, scheduleId: notification.scheduleId};}, hasNoValidation: true})

@@ -174,7 +174,7 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
-    public String updateEnhancement(Long connectionId, String fieldBindingId, JsonPatch patch) {
+    public FieldBindingMng updateEnhancement(Long connectionId, String fieldBindingId, JsonPatch patch) {
         Connection connection = getById(connectionId);
         FieldBindingMng fieldBindingMng = fieldBindingMngService.findById(fieldBindingId).orElse(new FieldBindingMng());
 
@@ -191,7 +191,7 @@ public class ConnectionServiceImp implements ConnectionService {
             updatedFieldBinding.setEnhancementId(savedEnhancement.getId());
             fieldBindingMngService.save(updatedFieldBinding);
         }
-        return updatedFieldBinding.getFieldBindingId();
+        return updatedFieldBinding;
     }
 
     @Override
@@ -424,7 +424,7 @@ public class ConnectionServiceImp implements ConnectionService {
         Iterator<JsonNode> nodes = jsonNode.elements();
         while (nodes.hasNext()) {
             String path = nodes.next().get("path").textValue();
-            if (path.equals("/fromConnector") || path.equals("/toConnector")) {
+            if (!path.equals("/title")) {
                 nodes.remove();
             }
         }
