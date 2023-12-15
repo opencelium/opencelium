@@ -5,10 +5,14 @@ import com.becon.opencelium.backend.execution.oc721.EnhancementService;
 import com.becon.opencelium.backend.execution.oc721.Extractor;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class ExecutionManagerImpl implements ExecutionManager {
-    private final Map<String, java.lang.Object> queryParams;
+    private final Map<String, Object> queryParams;
     private final Extractor refExtractor;
     private final EnhancementService enhancementService;
     private final LinkedHashMap<String, String> loops = new LinkedHashMap<>();
@@ -23,7 +27,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public Map<String, java.lang.Object> getQueryParams() {
+    public Map<String, Object> getQueryParams() {
         return queryParams;
     }
 

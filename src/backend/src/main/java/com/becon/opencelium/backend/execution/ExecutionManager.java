@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface ExecutionManager {
-    Map<String, java.lang.Object> getQueryParams();
+    Map<String, Object> getQueryParams();
 
     LinkedHashMap<String, String> getLoops();
 

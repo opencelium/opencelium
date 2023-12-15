@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.builder;
 
+import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.resource.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ParamLocation;
@@ -150,17 +151,12 @@ public class RequestEntityBuilder {
         return SchemaDTOUtil.toText(body.getSchema());
     }
 
-    private static boolean referenced(String value) {
-        // TODO check all 4 types of references
-        return Pattern.matches(hasEnh, value);
-    }
-
     private void replaceRefs(SchemaDTO schema) {
         // TODO we do not know type of reference
         String value = schema.getValue();
         SchemaDTO referencedSchema = null;
 
-        boolean isReferenced = referenced(value);
+        boolean isReferenced = ReferenceExtractor.isReference(value);
         if (isReferenced) {
             // if referenced get the actual schema
             referencedSchema = references.apply(value);

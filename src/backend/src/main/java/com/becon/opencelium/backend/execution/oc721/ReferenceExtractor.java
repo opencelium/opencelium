@@ -15,6 +15,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.becon.opencelium.backend.constant.RegExpression.directRef;
+import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
+import static com.becon.opencelium.backend.constant.RegExpression.requiredData;
+
 public class ReferenceExtractor implements Extractor {
     private final ExecutionManager executionManager;
 
@@ -26,21 +30,30 @@ public class ReferenceExtractor implements Extractor {
     public Object extractValue(String ref) {
         Object result = null;
 
-        if (ref.matches(RegExpression.queryParams)) {
+        // '${key}'
+        // '${key.field[*]}'
+        if (ref.matches(queryParams)) {
             // TODO: rewrite for query param
             result = extractValueFromQueryParams(ref);
         }
 
-        if (ref.matches(RegExpression.requiredData)) {
+        // '{key}'
+        if (ref.matches(requiredData)) {
             // TODO: implement required data
             result = null;
         }
 
-        if (ref.matches(RegExpression.hasEnh)) {
+        // '#ababab.(response).success.field[*]
+        // '#ababab.(request).field[*]
+        if (ref.matches(directRef)) {
             result = extractValueFromOperation(ref);
         }
 
         return result;
+    }
+
+    public static boolean isReference(String ref) {
+        return ref != null && (ref.matches(directRef) || ref.matches(queryParams) || ref.matches(requiredData));
     }
 
     private Object extractValueFromOperation(String ref) {
