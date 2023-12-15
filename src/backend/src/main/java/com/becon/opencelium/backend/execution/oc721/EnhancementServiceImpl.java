@@ -12,7 +12,7 @@ public class EnhancementServiceImpl implements EnhancementService {
     private ExecutionManager executionManager;
 
     @Override
-    public Object executeScript(String enhId) {
+    public Object executeScript(String bindId) {
 
         // TODO where to get the required script?
         EnhancementDTO enhancement = new EnhancementDTO();

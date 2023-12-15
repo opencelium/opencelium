@@ -6,29 +6,40 @@ import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
+import com.becon.opencelium.backend.resource.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.Executable;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
+import com.becon.opencelium.backend.resource.execution.SchemaDTO;
+import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.PriorityQueue;
 
+import static com.becon.opencelium.backend.constant.RegExpression.directRef;
+import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
+import static com.becon.opencelium.backend.constant.RegExpression.requiredData;
+
 public class ConnectorExecutor {
     private final ConnectorEx connector;
     private final ExecutionManager executionManager;
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    public ConnectorExecutor(ConnectorEx connector, ExecutionManager executionManager) {
+    public ConnectorExecutor(ConnectorEx connector, ExecutionManager executionManager, RestTemplate restTemplate) {
         this.connector = connector;
         this.executionManager = executionManager;
+        this.restTemplate = restTemplate;
     }
 
     private void start() {
@@ -84,8 +95,7 @@ public class ConnectorExecutor {
 
         RequestEntity<?> requestEntity = RequestEntityBuilder.start()
                 .forOperation(operationDTO)
-                // TODO implement Object -> SchemaDTO
-                .usingReferences(null)
+                .usingReferences(this::mapToSchemaDTO)
                 .createRequest();
 
         ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
@@ -152,5 +162,57 @@ public class ConnectorExecutor {
 
     private void executeForInOperator(List<Executable> body, int index) {
         // TODO: need to implement
+    }
+
+    private SchemaDTO mapToSchemaDTO(String ref) {
+        Object value = executionManager.getValue(ref);
+
+        if (value == null) {
+            return null;
+        }
+
+        // set default schema to result variable
+        SchemaDTO result = new SchemaDTO(DataType.STRING, String.valueOf(value));
+
+        if (ref.matches(queryParams)) {
+            if (value instanceof Boolean) {
+                result.setType(DataType.BOOLEAN);
+            }
+
+            if (value instanceof Long) {
+                result.setType(DataType.INTEGER);
+            }
+
+            if (value instanceof Double) {
+                result.setType(DataType.NUMBER);
+            }
+
+            if (value instanceof String[]) {
+                result.setType(DataType.ARRAY);
+
+                List<SchemaDTO> items = Arrays.stream((String[]) value)
+                        .map(e -> new SchemaDTO(DataType.STRING, String.valueOf(e)))
+                        .toList();
+
+                result.setValue(null);
+                result.setItems(items);
+            }
+        }
+
+        if (ref.matches(requiredData)) {
+            // TODO: get exact appearance of this type
+        }
+
+        if (ref.matches(directRef)) {
+            try {
+                String jsonString = new ObjectMapper().writeValueAsString(value);
+
+                return SchemaDTOUtil.fromJSON(jsonString);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return result;
     }
 }

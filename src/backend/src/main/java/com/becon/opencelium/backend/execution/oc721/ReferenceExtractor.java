@@ -29,7 +29,6 @@ public class ReferenceExtractor implements Extractor {
         // '${key}'
         // '${key.field[*]}'
         if (ref.matches(queryParams)) {
-            // TODO: rewrite for query param
             result = extractFromQueryParams(ref);
         }
 
@@ -116,6 +115,10 @@ public class ReferenceExtractor implements Extractor {
 
         if ("double".equalsIgnoreCase(requiredType)) {
             return Double.parseDouble(stringValue);
+        }
+
+        if ("boolean".equalsIgnoreCase(requiredType)) {
+            return Boolean.getBoolean(stringValue);
         }
 
         if ("array".equalsIgnoreCase(requiredType)) {
