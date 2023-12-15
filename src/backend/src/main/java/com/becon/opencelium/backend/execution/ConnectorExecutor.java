@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.PriorityQueue;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
+import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
 import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
 import static com.becon.opencelium.backend.constant.RegExpression.requiredData;
 
@@ -200,7 +201,11 @@ public class ConnectorExecutor {
         }
 
         if (ref.matches(requiredData)) {
-            // TODO: get exact appearance of this type
+            // required data is a string of single primitive value
+        }
+
+        if (ref.matches(enhancement)) {
+            // TODO what types can script result be?
         }
 
         if (ref.matches(directRef)) {

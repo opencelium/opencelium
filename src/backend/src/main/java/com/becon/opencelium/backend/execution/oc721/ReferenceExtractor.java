@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
+import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
 import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
 import static com.becon.opencelium.backend.constant.RegExpression.requiredData;
 
@@ -34,8 +35,7 @@ public class ReferenceExtractor implements Extractor {
 
         // '{key}'
         if (ref.matches(requiredData)) {
-            // TODO: implement required data
-            result = null;
+            result = extractFromRequiredData(ref);
         }
 
         // '#ababab.(response).success.field[*]
@@ -44,11 +44,16 @@ public class ReferenceExtractor implements Extractor {
             result = extractFromOperation(ref);
         }
 
+        // {%unique_id%}
+        if (ref.matches(enhancement)) {
+            result = extractFromEnhancement(ref);
+        }
+
         return result;
     }
 
     public static boolean isReference(String ref) {
-        return ref != null && (ref.matches(directRef) || ref.matches(queryParams) || ref.matches(requiredData));
+        return ref != null && (ref.matches(directRef) || ref.matches(queryParams) || ref.matches(requiredData) || ref.matches(enhancement));
     }
 
     private Object extractFromOperation(String ref) {
@@ -58,6 +63,18 @@ public class ReferenceExtractor implements Extractor {
                 .orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
 
         return operation.getValue(ref, executionManager.getLoops());
+    }
+
+    private Object extractFromEnhancement(String ref) {
+        String bindId = ref.replace("{%", "").replace("%}", "");
+        return executionManager.executeScript(bindId);
+    }
+
+    private Object extractFromRequiredData(String ref) {
+        //TODO how to get 'ctorId' and 'key' from reference?
+        Map<String, String> data = executionManager.getRequiredData(null);
+
+        return data.get(ref);
     }
 
     private Object extractFromQueryParams(String ref) {
@@ -94,9 +111,7 @@ public class ReferenceExtractor implements Extractor {
                 extractedValue = JsonPath.read(message, jsonPath);
             }
 
-            return !requiredType.isBlank() ?
-                    mapToType(extractedValue, requiredType) :
-                    mapToNumberIfPossible(extractedValue);
+            return requiredType.isBlank() ? mapToNumberIfPossible(extractedValue) : mapToType(extractedValue, requiredType);
         } catch (JsonProcessingException ex) {
             throw new RuntimeException();
         }

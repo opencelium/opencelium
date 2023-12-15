@@ -22,10 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static com.becon.opencelium.backend.constant.RegExpression.hasEnh;
 
 public class RequestEntityBuilder {
     private final OperationDTO operation;
@@ -152,51 +149,33 @@ public class RequestEntityBuilder {
     }
 
     private void replaceRefs(SchemaDTO schema) {
-        // TODO we do not know type of reference
         String value = schema.getValue();
-        SchemaDTO referencedSchema = null;
 
-        boolean isReferenced = ReferenceExtractor.isReference(value);
-        if (isReferenced) {
-            // if referenced get the actual schema
-            referencedSchema = references.apply(value);
-        }
+        if (ReferenceExtractor.isReference(value)) {
+            SchemaDTO referencedSchema = references.apply(value);
 
-        // for primitives just replace reference to actual value then stop recursion
-        if (schema.getType() != DataType.OBJECT && schema.getType() != DataType.ARRAY) {
-            value = isReferenced ? referencedSchema.getValue() : value;
+            // if schema is referenced then correct the type and fields
+            schema.setType(referencedSchema.getType());
+            schema.setValue(referencedSchema.getValue());
+            schema.setItems(referencedSchema.getItems());
+            schema.setProperties(referencedSchema.getProperties());
+            schema.setXml(referencedSchema.getXml());
 
-            schema.setValue(value);
+            // referenced schema does not contain other reference, end recursion
             return;
         }
 
-        if (schema.getType() == DataType.ARRAY) {
-            // get real items if referenced and set schemas' fields accordingly
-            List<SchemaDTO> items = isReferenced ? referencedSchema.getItems() : schema.getItems();
-
-            schema.setValue(null);
-            schema.setItems(items);
-
-            // if items is empty or null then stop recursion
-            if (CollectionUtils.isEmpty(items)) return;
-
-            // loop through all items to replace referenced ones
+        List<SchemaDTO> items = schema.getItems();
+        if (schema.getType() == DataType.ARRAY && !CollectionUtils.isEmpty(items)) {
+            // loop through all 'items' to replace referenced ones
             items.forEach(this::replaceRefs);
-            return;
         }
 
-        // At this point we only need to deal with DataType.OBJECT:
-        // get real properties if referenced and set schemas' fields accordingly
-        Map<String, SchemaDTO> properties = isReferenced ? referencedSchema.getProperties() : schema.getProperties();
-
-        schema.setValue(null);
-        schema.setProperties(properties);
-
-        // if properties is empty or null then stop recursion
-        if (CollectionUtils.isEmpty(properties)) return;
-
-        // loop through all properties to replace referenced ones
-        properties.forEach((name, schemaDTO) -> replaceRefs(schemaDTO));
+        Map<String, SchemaDTO> properties = schema.getProperties();
+        if (schema.getType() == DataType.OBJECT && !CollectionUtils.isEmpty(properties)) {
+            // loop through all 'properties' to replace referenced ones
+            properties.forEach((name, schemaDTO) -> replaceRefs(schemaDTO));
+        }
     }
 
     private List<ParameterDTO> getParamsByLocation(ParamLocation location) {
