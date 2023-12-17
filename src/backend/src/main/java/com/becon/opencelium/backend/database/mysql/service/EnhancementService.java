@@ -28,9 +28,9 @@ public interface EnhancementService {
     List<Enhancement> saveAll(List<Enhancement> enhancement);
     List<Enhancement> findAllByConnectionId(Long connectionId);
     void deleteAllByConnectionId(Long connectionId);
-    Enhancement findByFieldId(Long fieldId);
+    Enhancement getById(Integer id);
     Optional<Enhancement> findById(Integer enhId);
-    void deleteAll(List<Enhancement> enhancements);
+    void deleteAll(List<Integer> ids);
     FieldBindingDTO toFieldBindingResource(Enhancement enhancement);
 
     boolean existById(Integer id);

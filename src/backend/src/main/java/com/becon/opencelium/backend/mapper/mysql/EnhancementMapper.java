@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.mapper.mysql;
 
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import org.mapstruct.*;
 
@@ -11,7 +12,7 @@ import org.mapstruct.*;
         unmappedSourcePolicy = ReportingPolicy.IGNORE
 )
 @Named("enhancementMapper")
-public interface EnhancementMapper extends Mapper<Enhancement, EnhancementDTO> {
+public interface EnhancementMapper extends MapperUpdatable<Enhancement, EnhancementDTO> {
     @Named("toEntity")
     @Mappings({
             @Mapping(target = "simpleCode", expression = "java(\"\")"),
@@ -23,4 +24,8 @@ public interface EnhancementMapper extends Mapper<Enhancement, EnhancementDTO> {
             @Mapping(target = "simpleCode",ignore = true),
     })
     EnhancementDTO toDTO(Enhancement entity);
+
+    @Override
+    @Mapping(target = "simpleCode", ignore = true)
+    void updateEntityFromDto(@MappingTarget Enhancement entity, EnhancementDTO dto);
 }

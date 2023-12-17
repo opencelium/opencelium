@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface ConnectionMngService {
     ConnectionMng save(ConnectionMng connectionMng);
+    ConnectionMng saveDirectly(ConnectionMng connectionMng);
 
     ConnectionMng getByConnectionId(Long connectionId);
 
@@ -15,11 +16,7 @@ public interface ConnectionMngService {
 
     void delete(Long id);
 
-    String updateMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch);
+    String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch);
 
-    String updateOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch);
-
-    FieldBindingMng updateFieldBinding(Long connectionId, JsonPatch patch, FieldBindingMng fieldBindingMng);
-
-    ConnectionMng patchUpdate(Long connectionId, JsonPatch patch);
+    FieldBindingMng patchUpdate(Long id, JsonPatch patch);
 }

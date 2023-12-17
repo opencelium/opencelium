@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ConnectionHistoryServiceImp implements ConnectionHistoryService {
-    @Value(YamlPropConst.OC_VERSION)
+    @Value("${" + YamlPropConst.OC_VERSION + "}")
     private String ocVersion;
     private final ObjectMapper mapper;
     private final ConnectionHistoryRepository connectionHistoryRepository;

@@ -17,7 +17,7 @@ import java.util.List;
 @Named("fieldBindExMapper")
 public interface FieldBindExMapper extends Mapper<FieldBindEx, FieldBindingMng> {
     @Mappings({
-            @Mapping(target = "bindId", source = "fieldBindingId"),
+            @Mapping(target = "bindId", source = "id"),
             @Mapping(target = "enhance", source = "enhancement", qualifiedByName = {"enhancementExMapper", "toEntity"}),
     })
     @Named("toEntity")

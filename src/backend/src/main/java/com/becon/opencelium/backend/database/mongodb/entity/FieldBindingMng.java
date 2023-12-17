@@ -11,8 +11,7 @@ import java.util.List;
 @Document(collection = "field_binding")
 public class FieldBindingMng {
     @MongoId(targetType = FieldType.OBJECT_ID)
-    @Field(name = "field_binding_id")
-    private String fieldBindingId;
+    private String id;
     @Indexed
     @Field(name = "enhancement_id")
     private Integer enhancementId;
@@ -47,19 +46,19 @@ public class FieldBindingMng {
         this.to = to;
     }
 
-    public String getFieldBindingId() {
-        return fieldBindingId;
-    }
-
-    public void setFieldBindingId(String fieldBindingId) {
-        this.fieldBindingId = fieldBindingId;
-    }
-
     public Integer getEnhancementId() {
         return enhancementId;
     }
 
     public void setEnhancementId(Integer enhancementId) {
         this.enhancementId = enhancementId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

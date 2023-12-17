@@ -29,4 +29,9 @@ public class MethodMngServiceImp implements MethodMngService {
     public void deleteById(String id) {
         methodMngRepository.delete(methodMngRepository.findById(id).orElse(new MethodMng()));
     }
+
+    @Override
+    public void deleteAll(List<MethodMng> methods) {
+        methodMngRepository.deleteAllById(methods.stream().map(MethodMng::getId).toList());
+    }
 }

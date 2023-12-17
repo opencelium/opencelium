@@ -49,13 +49,9 @@ public interface ConnectionService {
 
     Long createEmptyConnection();
 
-    void update(Long connectionId, JsonPatch patch);
+    FieldBindingMng patchUpdate(Long connectionId, JsonPatch patch);
 
-    String updateOperator(Long connectionId, Integer connectorId, String operatorId, JsonPatch patch);
-
-    String updateMethod(Long connectionId, Integer connectorId, String methodId, JsonPatch patch);
-
-    FieldBindingMng updateEnhancement(Long connectionId, String fieldBindingId, JsonPatch patch);
+    String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch);
 
     void undo(Long connectionId);
 

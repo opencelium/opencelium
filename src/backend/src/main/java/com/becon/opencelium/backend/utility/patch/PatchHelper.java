@@ -3,7 +3,6 @@ package com.becon.opencelium.backend.utility.patch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -12,7 +11,10 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Function;
 
 @Component
 public class PatchHelper {
@@ -84,4 +86,34 @@ public class PatchHelper {
         }
     }
 
+    public JsonPatch changeEachPath(JsonPatch patch, Function<String, String> operation) {
+        JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        List<JsonNode> nodeList = new ArrayList<>();
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            String path = next.get("path").textValue();
+            next = ((ObjectNode) next).put("path", operation.apply(path));
+            nodeList.add(next);
+        }
+        return mapper.convertValue(nodeList, JsonPatch.class);
+    }
+
+    public JsonPatch extract(JsonPatch patch, Function<String, Boolean> operation) {
+        JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        List<JsonNode> nodeList = new ArrayList<>();
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            String path = next.get("path").textValue();
+            if (operation.apply(path))
+               nodeList.add(next);
+        }
+        return mapper.convertValue(nodeList, JsonPatch.class);
+    }
+
+    public boolean isEmpty(JsonPatch patch) {
+        JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
+        return jsonNode.isEmpty();
+    }
 }

@@ -1,8 +1,12 @@
 package com.becon.opencelium.backend.container;
 
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionHistoryService;
 import com.becon.opencelium.backend.enums.Action;
+import com.becon.opencelium.backend.utility.patch.PatchHelper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.diff.JsonDiff;
@@ -12,7 +16,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -25,14 +31,16 @@ public class ConnectionUpdateTracker {
     private static final Logger logger = LoggerFactory.getLogger(ConnectionUpdateTracker.class);
     private final ObjectMapper objectMapper;
     private final ConnectionHistoryService CHS;
+    private final PatchHelper patchHelper;
 
     public ConnectionUpdateTracker(
             ObjectMapper objectMapper,
-            @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService CHS
-    ) {
+            @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService CHS,
+            PatchHelper patchHelper) {
         this.CHS = CHS;
         this.queues = new ConcurrentHashMap<>();
         this.objectMapper = objectMapper;
+        this.patchHelper = patchHelper;
     }
 
     public Command undo(Long connectionId) {
@@ -60,22 +68,64 @@ public class ConnectionUpdateTracker {
         }
     }
 
-    public void pushAndMakeHistory(Connection target, Connection source){
-        target.setEnhancements(null);
-        source.setEnhancements(null);
-        target.setSchedulers(null);
-        source.setSchedulers(null);
-        target.setModifiedOn(null);
-        source.setModifiedOn(null);
+    public void pushAndMakeHistory(Connection updated, Connection before, ConnectionMng updatedMng, ConnectionMng beforeMng, JsonPatch patch) {
+        updated.setEnhancements(null);
+        before.setEnhancements(null);
+        updated.setSchedulers(null);
+        before.setSchedulers(null);
+        updated.setModifiedOn(null);
+        before.setModifiedOn(null);
 
-        JsonPatch forHistory = JsonDiff.asJsonPatch(objectMapper.valueToTree(source), objectMapper.valueToTree(target));
-        JsonPatch forUndo = JsonDiff.asJsonPatch(objectMapper.valueToTree(target), objectMapper.valueToTree(source));
+        JsonPatch forUndo = JsonDiff.asJsonPatch(objectMapper.valueToTree(updated), objectMapper.valueToTree(before));
+        JsonPatch forUndoMng = JsonDiff.asJsonPatch(objectMapper.valueToTree(updatedMng), objectMapper.valueToTree(beforeMng));
+        JsonPatch merged = merge(forUndo, forUndoMng);
 
-        push(new Command(target.getId(), forUndo));
+        if (patchHelper.isEmpty(merged)) {
+            return;
+        }
 
-        Connection connection = new Connection();
-        connection.setId(target.getId());
-        CHS.makeHistoryAndSave(connection, forHistory, Action.MODIFY);
+        push(new Command(updated.getId(), merged));
+
+        CHS.makeHistoryAndSave(updated, patch, Action.MODIFY);
+    }
+
+    private JsonPatch merge(JsonPatch patch, JsonPatch patchMng) {
+        JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        List<JsonNode> merged = new ArrayList<>();
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            String path = next.get("path").textValue();
+            if (!path.startsWith("/enhancements"))
+                merged.add(next);
+        }
+
+        jsonNode = objectMapper.convertValue(patchMng, JsonNode.class);
+        nodes = jsonNode.elements();
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            String path = next.get("path").textValue();
+            if (path.startsWith("/fieldBindings"))
+                merged.add(next);
+        }
+        return objectMapper.convertValue(merged, JsonPatch.class);
+    }
+
+    public void pushAndMakeHistory(ConnectionMng connection, ConnectorMng before, ConnectorMng after, JsonPatch patch) {
+
+        JsonPatch forUndo = JsonDiff.asJsonPatch(objectMapper.valueToTree(after), objectMapper.valueToTree(before));
+        if (patchHelper.isEmpty(forUndo)) {
+            return;
+        }
+
+        if (before.getConnectorId().equals(connection.getFromConnector().getConnectorId())) {
+            forUndo = patchHelper.changeEachPath(forUndo, s -> "/fromConnector" + s);
+        } else {
+            forUndo = patchHelper.changeEachPath(forUndo, s -> "/toConnector" + s);
+        }
+
+        push(new Command(connection.getConnectionId(), forUndo));
+        CHS.makeHistoryAndSave(connection.getConnectionId(), patch, Action.MODIFY);
     }
 
     @Scheduled(initialDelay = 840_000, fixedDelay = 60_000)
@@ -89,7 +139,7 @@ public class ConnectionUpdateTracker {
                 if (command.getTimestamp() + SAVING_DURATION < currentTimeMillis) {
                     iterator.remove();
                     logger.info("Connection(id = {}) history removed because time limit exceeded. This connection has {} chance(s) to undo", command.getConnectionId(), queue.size());
-                    if (queue.size() == 0) {
+                    if (queue.isEmpty()) {
                         queues.remove(entry.getKey());
                     }
                 } else {
@@ -98,6 +148,5 @@ public class ConnectionUpdateTracker {
             }
         }
     }
-
 
 }
