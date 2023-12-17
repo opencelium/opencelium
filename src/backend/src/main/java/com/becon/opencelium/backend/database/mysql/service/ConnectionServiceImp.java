@@ -159,6 +159,21 @@ public class ConnectionServiceImp implements ConnectionService {
         return FB;
     }
 
+    @Override
+    public String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch) {
+        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+
+        String id = connectionMngService.patchMethodOrOperator(connectionId, connectorId, patch);
+
+        ConnectionMng patched = connectionMngService.getByConnectionId(connectionId);
+
+        if (connectorId.equals(connectionMng.getFromConnector().getConnectorId())) {
+            updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getFromConnector(), patched.getFromConnector(), patch);
+        } else {
+            updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getToConnector(), patched.getToConnector(), patch);
+        }
+        return id;
+    }
 
     @Override
     public void undo(Long connectionId) {
@@ -173,21 +188,6 @@ public class ConnectionServiceImp implements ConnectionService {
                 }
             }
         }
-    }
-
-    private void rotate(Long connectionId, JsonPatch jsonPatch) {
-        Connection connection = getById(connectionId);
-        JsonNode jsonNode = objectMapper.convertValue(jsonPatch, JsonNode.class);
-        Iterator<JsonNode> nodes = jsonNode.elements();
-        JsonNode next = nodes.next();
-        String path = next.get("path").textValue();
-        if (path.startsWith("/fromConnector/") || path.startsWith("/toConnector/")) {
-            JsonPatch changed = patchHelper.changeEachPath(jsonPatch, p -> p.substring(p.indexOf("/", 1)));
-            connectionMngService.patchMethodOrOperator(connectionId, connection.getFromConnector(), changed);
-        } else {
-            patchUpdateInternal(connection, jsonPatch);
-        }
-
     }
 
     @Override
@@ -276,27 +276,11 @@ public class ConnectionServiceImp implements ConnectionService {
         return connectionDTOMng;
     }
 
-    @Override
-    public String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch) {
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
-
-        String id = connectionMngService.patchMethodOrOperator(connectionId, connectorId, patch);
-
-        ConnectionMng patched = connectionMngService.getByConnectionId(connectionId);
-
-        if (connectorId.equals(connectionMng.getFromConnector().getConnectorId())) {
-            updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getFromConnector(), patched.getFromConnector(), patch);
-        } else {
-            updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getToConnector(), patched.getToConnector(), patch);
-        }
-        return id;
-    }
 
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
-
 
     /**
      * this method can be used for :
@@ -347,5 +331,20 @@ public class ConnectionServiceImp implements ConnectionService {
         } else if (connection.getToConnector() == 0) {
             connectionMng.setToConnector(null);
         }
+    }
+
+    private void rotate(Long connectionId, JsonPatch jsonPatch) {
+        Connection connection = getById(connectionId);
+        JsonNode jsonNode = objectMapper.convertValue(jsonPatch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        JsonNode next = nodes.next();
+        String path = next.get("path").textValue();
+        if (path.startsWith("/fromConnector/") || path.startsWith("/toConnector/")) {
+            JsonPatch changed = patchHelper.changeEachPath(jsonPatch, p -> p.substring(p.indexOf("/", 1)));
+            connectionMngService.patchMethodOrOperator(connectionId, connection.getFromConnector(), changed);
+        } else {
+            patchUpdateInternal(connection, jsonPatch);
+        }
+
     }
 }

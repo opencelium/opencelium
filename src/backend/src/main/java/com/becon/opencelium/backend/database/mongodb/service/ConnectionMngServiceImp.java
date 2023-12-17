@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ConnectionMngServiceImp implements ConnectionMngService {
@@ -149,13 +150,14 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     private FieldBindingMng doAfterPatchBeforeSaveEnhancement(ConnectionMng connection, ConnectionMng patched, JsonPatch patch) {
         FieldBindingMng res = null;
+        FieldBindingMng lastModified = null;
         JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
         Iterator<JsonNode> nodes = jsonNode.elements();
         while (nodes.hasNext()) {
             JsonNode next = nodes.next();
             String path = next.get("path").textValue();
             String op = next.get("op").textValue();
-            if(path.startsWith("/fieldBindings")){
+            if (path.startsWith("/fieldBindings")) {
                 if (path.matches("/fieldBindings/\\d+/.+") || path.matches("/fieldBindings/-/.+")) {
                     String strIdx = path.split("/")[2];
                     int index = findIndexOf(patched.getFieldBindings(), strIdx);
@@ -164,7 +166,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                     enhancementMapper.updateEntityFromDto(enhancement, enhancementMngMapper.toDTO(toModify.getEnhancement()));
                     enhancementService.save(enhancement);
                     fieldBindingMngService.save(toModify);
-                    res = toModify;
+                    lastModified = toModify;
                 } else if (op.equals("remove")) {
                     String strIdx = path.split("/")[2];
                     int index = findIndexOf(connection.getFieldBindings(), strIdx);
@@ -193,11 +195,12 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 }
             }
         }
-        return res;
+        return res == null ? lastModified : res;
     }
 
     private String doAfterPatchBeforeSave(ConnectorMng connector, ConnectorMng patched, JsonPatch patch) {
         String res = null;
+        String lastModifiedId = null;
         JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
         Iterator<JsonNode> nodes = jsonNode.elements();
         while (nodes.hasNext()) {
@@ -211,7 +214,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                     int index = findIndexOf(connector.getMethods(), strIdx);
                     MethodMng toModify = patched.getMethods().get(index);
                     methodMngService.save(toModify);
-                    res = toModify.getId();
+                    lastModifiedId = toModify.getId();
                 } else if (op.equals("remove")) {
                     String strIdx = path.split("/")[2];
                     int index = findIndexOf(connector.getMethods(), strIdx);
@@ -231,7 +234,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                     int index = findIndexOf(connector.getOperators(), strIdx);
                     OperatorMng toModify = patched.getOperators().get(index);
                     operatorMngService.save(toModify);
-                    res = toModify.getId();
+                    lastModifiedId = toModify.getId();
                 } else if (op.equals("remove")) {
                     String strIdx = path.split("/")[2];
                     int index = findIndexOf(connector.getOperators(), strIdx);
@@ -259,7 +262,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 }
             }
         }
-        return res;
+        return res == null ? lastModifiedId : res;
     }
 
     private <T> int findIndexOf(List<T> list, String index) {

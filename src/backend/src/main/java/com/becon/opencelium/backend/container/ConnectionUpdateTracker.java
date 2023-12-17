@@ -25,8 +25,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 @Component
 public class ConnectionUpdateTracker {
-    private final Integer QUEUE_CAPACITY = 40;
-    private final long SAVING_DURATION = 15 * 60 * 1000;
+    private static final Integer QUEUE_CAPACITY = 40;
+    private static final long SAVING_DURATION = 15 * 60 * 1000;
     private final Map<Long, LinkedBlockingDeque<Command>> queues;
     private static final Logger logger = LoggerFactory.getLogger(ConnectionUpdateTracker.class);
     private final ObjectMapper objectMapper;
@@ -89,6 +89,23 @@ public class ConnectionUpdateTracker {
         CHS.makeHistoryAndSave(updated, patch, Action.MODIFY);
     }
 
+    public void pushAndMakeHistory(ConnectionMng connection, ConnectorMng before, ConnectorMng after, JsonPatch patch) {
+
+        JsonPatch forUndo = JsonDiff.asJsonPatch(objectMapper.valueToTree(after), objectMapper.valueToTree(before));
+        if (patchHelper.isEmpty(forUndo)) {
+            return;
+        }
+
+        if (before.getConnectorId().equals(connection.getFromConnector().getConnectorId())) {
+            forUndo = patchHelper.changeEachPath(forUndo, s -> "/fromConnector" + s);
+        } else {
+            forUndo = patchHelper.changeEachPath(forUndo, s -> "/toConnector" + s);
+        }
+
+        push(new Command(connection.getConnectionId(), forUndo));
+        CHS.makeHistoryAndSave(connection.getConnectionId(), patch, Action.MODIFY);
+    }
+
     private JsonPatch merge(JsonPatch patch, JsonPatch patchMng) {
         JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
         Iterator<JsonNode> nodes = jsonNode.elements();
@@ -109,23 +126,6 @@ public class ConnectionUpdateTracker {
                 merged.add(next);
         }
         return objectMapper.convertValue(merged, JsonPatch.class);
-    }
-
-    public void pushAndMakeHistory(ConnectionMng connection, ConnectorMng before, ConnectorMng after, JsonPatch patch) {
-
-        JsonPatch forUndo = JsonDiff.asJsonPatch(objectMapper.valueToTree(after), objectMapper.valueToTree(before));
-        if (patchHelper.isEmpty(forUndo)) {
-            return;
-        }
-
-        if (before.getConnectorId().equals(connection.getFromConnector().getConnectorId())) {
-            forUndo = patchHelper.changeEachPath(forUndo, s -> "/fromConnector" + s);
-        } else {
-            forUndo = patchHelper.changeEachPath(forUndo, s -> "/toConnector" + s);
-        }
-
-        push(new Command(connection.getConnectionId(), forUndo));
-        CHS.makeHistoryAndSave(connection.getConnectionId(), patch, Action.MODIFY);
     }
 
     @Scheduled(initialDelay = 840_000, fixedDelay = 60_000)
