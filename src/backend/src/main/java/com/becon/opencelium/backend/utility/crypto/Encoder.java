@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.utility.crypto;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.becon.opencelium.backend.constant.YamlPropConst;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -13,14 +14,19 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.util.Base64;
+
 @Component
 public class Encoder {
-    @Value("${opencelium.connector.security.key}")
-    private String secretKey;
+    private final String secretKey;
+    private static final String DEFAULT_SECRET_KEY = "It's a secret key";
     private static final String SALT = "opencelium-salt";
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final int KEY_LENGTH = 256;
     private static final int ITERATION_COUNT = 65536;
+
+    public Encoder(Environment environment) {
+        secretKey = environment.getProperty(YamlPropConst.CONNECTOR_SECRET_KEY, DEFAULT_SECRET_KEY);
+    }
 
     public String decrypt(String strToDecrypt) {
 
