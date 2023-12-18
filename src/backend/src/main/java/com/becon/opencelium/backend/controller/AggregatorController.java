@@ -1,19 +1,13 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.mysql.entity.DataAggregator;
-<<<<<<<<< Temporary merge branch 1
-import com.becon.opencelium.backend.mysql.service.DataAggregatorService;
-import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
-import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.resource.notification.ContentResource;
-=========
-import com.becon.opencelium.backend.mysql.service.ArgumentService;
-import com.becon.opencelium.backend.mysql.service.DataAggregatorService;
+import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
+import com.becon.opencelium.backend.database.mysql.service.ArgumentService;
+import com.becon.opencelium.backend.database.mysql.service.DataAggregatorService;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
->>>>>>>>> Temporary merge branch 2
+import com.becon.opencelium.backend.resource.notification.ContentResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,32 +21,20 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-<<<<<<<<< Temporary merge branch 1
-=========
 import java.util.List;
-import java.util.stream.Collectors;
-
->>>>>>>>> Temporary merge branch 2
 @RestController
 @RequestMapping(value = "/api/aggregator", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Aggregator", description = "Manages operation for collecting data from responses of executed methods")
 public class AggregatorController {
 
     private final DataAggregatorService dataAggregatorService;
-<<<<<<<<< Temporary merge branch 1
-
-    @Autowired
-    public AggregatorController(@Qualifier("DataAggregatorServiceImp") DataAggregatorService dataAggregatorService) {
-        this.dataAggregatorService = dataAggregatorService;
-=========
     private final ArgumentService argumentService;
 
     @Autowired
     public AggregatorController(@Qualifier("DataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
-                                @Qualifier("ArgumentServiceImp")ArgumentService argumentService) {
+                                @Qualifier("ArgumentServiceImp") ArgumentService argumentService) {
         this.dataAggregatorService = dataAggregatorService;
         this.argumentService = argumentService;
->>>>>>>>> Temporary merge branch 2
     }
 
 
@@ -75,8 +57,6 @@ public class AggregatorController {
         return ResponseEntity.ok(dataAggregatorDTO);
     }
 
-<<<<<<<<< Temporary merge branch 1
-=========
     @Operation(summary = "Retrieves all Data Aggregator and related arguments")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
@@ -96,7 +76,6 @@ public class AggregatorController {
         return ResponseEntity.ok(collection);
     }
 
->>>>>>>>> Temporary merge branch 2
     @Operation(summary = "Creates new Data Aggregator in the system by accepting data in the request body")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
@@ -137,7 +116,6 @@ public class AggregatorController {
         DataAggregator dataAggregator = dataAggregatorService.getById(dataAggregatorDTO.getId());
         dataAggregator.setActive(dataAggregatorDTO.isActive());
         dataAggregatorService.save(dataAggregator);
->>>>>>>>> Temporary merge branch 2
         DataAggregatorDTO response = dataAggregatorService.convertToDto(dataAggregator);
         return ResponseEntity.ok(response);
     }
@@ -160,8 +138,6 @@ public class AggregatorController {
         return ResponseEntity.noContent().build();
     }
 
-<<<<<<<<< Temporary merge branch 1
-=========
     @Operation(summary = "Checks whether a name of aggregator is unique or not.")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
@@ -221,5 +197,4 @@ public class AggregatorController {
         argumentService.deleteById(argId);
         return ResponseEntity.noContent().build();
     }
->>>>>>>>> Temporary merge branch 2
 }
