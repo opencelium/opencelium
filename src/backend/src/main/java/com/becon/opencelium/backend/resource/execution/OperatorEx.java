@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.resource.execution;
 
-public class OperatorEx {
+public class OperatorEx implements Executable{
     private String id;
     private String type;
     private String index;
@@ -48,5 +48,10 @@ public class OperatorEx {
 
     public void setCondition(ConditionEx condition) {
         this.condition = condition;
+    }
+
+    @Override
+    public String getExecOrder() {
+        return this.index;
     }
 }
