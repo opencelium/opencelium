@@ -37,7 +37,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     @Override
     public void deleteById(String id) {
         FieldBindingMng fieldBindingMng = new FieldBindingMng();
-        fieldBindingMng.setFieldBindingId(id);
+        fieldBindingMng.setId(id);
         fieldBindingRepository.delete(fieldBindingMng);
     }
 
@@ -46,6 +46,11 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         FieldBindingMng old = fieldBindingRepository.findByEnhancementId(oldId);
         old.setEnhancementId(newId);
         fieldBindingRepository.save(old);
+    }
+
+    @Override
+    public void deleteAll(List<FieldBindingMng> fieldBindings) {
+        fieldBindingRepository.deleteAll(fieldBindings);
     }
 
     @Override
@@ -68,18 +73,18 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
                 if (toField.getColor().equals(method.getColor())) {
                     if (toField.getType().equals("path")) {
                         String endpoint = method.getRequest().getEndpoint();
-                        endpoint = putId(endpoint, fb.getFieldBindingId());
+                        endpoint = putId(endpoint, fb.getId());
                         method.getRequest().setEndpoint(endpoint);
                     } else if (toField.getType().equals("header")) {
                         method.getRequest().getHeader().entrySet()
                                 .stream()
                                 .filter(entry -> entry.getValue().matches(".*\\{%.+%}.*"))
                                 .findFirst()
-                                .ifPresent(entry -> entry.setValue(putId(entry.getValue(), fb.getFieldBindingId())));
+                                .ifPresent(entry -> entry.setValue(putId(entry.getValue(), fb.getId())));
                     } else if (toField.getType().equals("request")) {
                         List<String> fieldPaths = new ArrayList<>(List.of(toField.getField().split("\\.")));
                         Map<String, Object> fields = method.getRequest().getBody().getFields();
-                        Map<String, Object> boundFields = (Map<String, Object>) findAndBindField(fields, fieldPaths, fb.getFieldBindingId());
+                        Map<String, Object> boundFields = (Map<String, Object>) findAndBindField(fields, fieldPaths, fb.getId());
                         method.getRequest().getBody().setFields(boundFields);
                     } else {
                         List<String> fieldPaths = new ArrayList<>(List.of(toField.getField().split("\\.")));
@@ -90,7 +95,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
                         } else {
                             bodyMngToChange = method.getResponse().getFail().getBody();
                         }
-                        Map<String, Object> boundFields = (Map<String, Object>) findAndBindField(bodyMngToChange.getFields(), fieldPaths, fb.getFieldBindingId());
+                        Map<String, Object> boundFields = (Map<String, Object>) findAndBindField(bodyMngToChange.getFields(), fieldPaths, fb.getId());
                         bodyMngToChange.setFields(boundFields);
                     }
                     break;

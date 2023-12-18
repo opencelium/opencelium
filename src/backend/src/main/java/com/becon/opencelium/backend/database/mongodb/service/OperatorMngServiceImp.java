@@ -28,4 +28,9 @@ public class OperatorMngServiceImp implements OperatorMngService{
     public void deleteById(String id) {
         operatorMngRepository.deleteById(id);
     }
+
+    @Override
+    public void deleteAll(List<OperatorMng> operators) {
+        operatorMngRepository.deleteAllById(operators.stream().map(OperatorMng::getId).toList());
+    }
 }

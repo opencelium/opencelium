@@ -54,8 +54,9 @@ public class EnhancementServiceImp implements EnhancementService {
     }
 
     @Override
-    public Enhancement findByFieldId(Long fieldId) {
-        return null;
+    public Enhancement getById(Integer id) {
+        return enhancementRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("ENHANCEMENT_NOT_FOUND"));
     }
 
 
@@ -66,9 +67,8 @@ public class EnhancementServiceImp implements EnhancementService {
     }
 
     @Override
-    public void deleteAll(List<Enhancement> enhancements) {
-
-        enhancements.forEach(e -> enhancementRepository.deleteById(e.getId()));
+    public void deleteAll(List<Integer> ids) {
+        enhancementRepository.deleteAllById(ids);
     }
 
     @Override

@@ -10,4 +10,6 @@ public interface MethodMngService {
     MethodMng save(MethodMng methodMng);
 
     void deleteById(String id);
+
+    void deleteAll(List<MethodMng> methods);
 }

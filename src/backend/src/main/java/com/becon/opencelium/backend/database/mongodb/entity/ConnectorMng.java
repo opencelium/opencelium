@@ -25,8 +25,8 @@ import java.util.List;
 
 public class ConnectorMng {
 
-    @MongoId(targetType = FieldType.OBJECT_ID)
-    private String id;
+//    @MongoId(targetType = FieldType.OBJECT_ID)
+//    private String id;
     @Field(name = "connector_id")
     private Integer connectorId;
     private String title;
@@ -38,13 +38,13 @@ public class ConnectorMng {
     public ConnectorMng() {
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
+//    public String getId() {
+//        return id;
+//    }
+//
+//    public void setId(String id) {
+//        this.id = id;
+//    }
 
     public Integer getConnectorId() {
         return connectorId;

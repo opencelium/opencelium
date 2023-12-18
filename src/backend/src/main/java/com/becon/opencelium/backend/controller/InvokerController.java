@@ -226,6 +226,7 @@ public class InvokerController {
         invokerContainer.updateAll(container);
 
         Invoker invoker = invokerContainer.getByName(filename);
+
         if (invoker.getOperations() == null) {
             delete(filename);
             throw new RuntimeException("Invoker should contain at least one Operation.");

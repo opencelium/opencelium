@@ -95,13 +95,13 @@ public abstract class HelperMapper {
     }
 
     @Named("getFieldBindings")
-    public List<FieldBindingDTO> getFieldBindings(List<Enhancement> enhancements){
+    public List<FieldBindingDTO> getFieldBindings(List<Enhancement> enhancements) {
         List<FieldBindingDTO> list = new ArrayList<>(enhancements.size());
         ArrayList<Integer> ids = new ArrayList<>();
         for (Enhancement enhancement : enhancements) {
-            if(enhancement.getId()!=null){
+            if (enhancement.getId() != null) {
                 ids.add(enhancement.getId());
-            }else {
+            } else {
                 FieldBindingDTO fieldBindingDTO = new FieldBindingDTO();
                 fieldBindingDTO.setEnhancement(enhancementMapper.toDTO(enhancement));
                 list.add(fieldBindingDTO);
@@ -127,11 +127,13 @@ public abstract class HelperMapper {
     }
 
     @Named("processRequestData")
-    public List<RequestData> processRequestData(ConnectorResource dto){
+    public List<RequestData> processRequestData(ConnectorResource dto) {
         List<RequestData> requestData = requestDataMapper.toEntity(dto.getRequestData());
+        if (requestData == null)
+            return new ArrayList<>();
         requestData.forEach(r -> {
             RequestData data = requestDataService.findByConnectorIdAndField(dto.getConnectorId(), r.getField()).orElse(null);
-            if (data != null){
+            if (data != null) {
                 r.setId(data.getId());
             }
             Connector connector = new Connector();
@@ -154,10 +156,10 @@ public abstract class HelperMapper {
     }
 
     @Named("getRequiredData")
-    public Map<String, String> getRequiredData(Integer id){
+    public Map<String, String> getRequiredData(Integer id) {
         List<RequestData> requestData = connectorService.getById(id).getRequestData();
         Map<String, String> map = new HashMap<>();
-        requestData.forEach(r->{
+        requestData.forEach(r -> {
             map.put(r.getField(), r.getValue());
         });
         return map;

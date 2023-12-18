@@ -113,8 +113,6 @@ public class AggregatorController {
     public ResponseEntity<DataAggregatorDTO> save(@RequestBody DataAggregatorDTO dataAggregatorDTO){
         DataAggregator dataAggregator = dataAggregatorService.convertToEntity(dataAggregatorDTO);
         dataAggregatorService.save(dataAggregator);
-<<<<<<<<< Temporary merge branch 1
-=========
 
         // added this field because after saving operation it didn't update id in dataAggregator object.
         dataAggregator = dataAggregatorService.getById(dataAggregator.getId());

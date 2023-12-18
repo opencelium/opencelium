@@ -4,11 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -130,16 +128,6 @@ public class SchemaDTOUtil {
         try {
             return fromJSONNode(new ObjectMapper().readTree(jsonString));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static SchemaDTO fromXML(String xmlString) {
-        try {
-            // first convert 'xmlString' to JsonNode by using XmlMapper.
-            // Drawback: it converts NUMBER and BOOLEAN to STRING
-            return fromJSONNode(new XmlMapper().readTree(xmlString.getBytes()));
-        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
