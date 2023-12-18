@@ -16,28 +16,28 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
-import com.becon.opencelium.backend.resource.connector.RequestResource;
-import com.becon.opencelium.backend.resource.connector.ResponseResource;
+import com.becon.opencelium.backend.resource.connector.RequestDTO;
+import com.becon.opencelium.backend.resource.connector.ResponseDTO;
 import jakarta.annotation.Resource;
 
 @Resource
 public class MethodDTO {
 
-    private Long nodeId;
+    private String id;
     private String index;
     private String name;
     private String color;
     private String label;
     private Integer dataAggregator;
-    private RequestResource request;
-    private ResponseResource response;
+    private RequestDTO request;
+    private ResponseDTO response;
 
-    public Long getNodeId() {
-        return nodeId;
+    public String getId() {
+        return id;
     }
 
-    public void setNodeId(Long nodeId) {
-        this.nodeId = nodeId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getIndex() {
@@ -72,19 +72,19 @@ public class MethodDTO {
         this.label = label;
     }
 
-    public RequestResource getRequest() {
+    public RequestDTO getRequest() {
         return request;
     }
 
-    public void setRequest(RequestResource request) {
+    public void setRequest(RequestDTO request) {
         this.request = request;
     }
 
-    public ResponseResource getResponse() {
+    public ResponseDTO getResponse() {
         return response;
     }
 
-    public void setResponse(ResponseResource response) {
+    public void setResponse(ResponseDTO response) {
         this.response = response;
     }
 

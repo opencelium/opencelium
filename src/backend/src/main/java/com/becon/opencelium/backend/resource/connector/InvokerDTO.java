@@ -91,7 +91,7 @@ public class InvokerDTO {
         this.icon = icon;
     }
 
-    public Map<String, String> getRequiredData() {
+    public LinkedHashMap<String, String> getRequiredData() {
         return requiredData;
     }
 

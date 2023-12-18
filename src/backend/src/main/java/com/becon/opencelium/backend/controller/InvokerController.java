@@ -226,10 +226,12 @@ public class InvokerController {
         invokerContainer.updateAll(container);
 
         Invoker invoker = invokerContainer.getByName(filename);
-
+        if (invoker.getOperations() == null) {
+            delete(filename);
+            throw new RuntimeException("Invoker should contain at least one Operation.");
+        }
         InvokerDTO invokerDTO = invokerService.toResource(invoker);
-        final EntityModel<InvokerDTO> resource = EntityModel.of(invokerDTO);
-        return ResponseEntity.ok().body(resource);
+        return ResponseEntity.ok().body(invokerDTO);
     }
 
     @Operation(summary = "Validates whether an invoker is used in connection or in connector")

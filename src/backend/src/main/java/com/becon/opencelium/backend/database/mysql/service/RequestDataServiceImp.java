@@ -18,19 +18,22 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.repository.RequestDataRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.becon.opencelium.backend.utility.crypto.Encoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-public class RequestDataServiceImp implements RequestDataService{
+public class RequestDataServiceImp implements RequestDataService {
 
-    @Autowired
-    private RequestDataRepository requestDataRepository;
+    private final RequestDataRepository requestDataRepository;
+    private final Encoder encoder;
+
+    public RequestDataServiceImp(RequestDataRepository requestDataRepository, Encoder encoder) {
+        this.requestDataRepository = requestDataRepository;
+        this.encoder = encoder;
+    }
 
     @Override
     public Optional<RequestData> findByConnectorIdAndField(int connectorId, String field) {
@@ -38,15 +41,32 @@ public class RequestDataServiceImp implements RequestDataService{
     }
 
     @Override
-    public List<RequestData> toEntity(Map<String, String> resource) {
-        return resource.entrySet().stream()
-                .map(k -> new RequestData(k.getKey(), k.getValue()))
-                .collect(Collectors.toList());
+    public List<RequestData> saveAll(List<RequestData> requestData) {
+        return requestDataRepository.saveAll(requestData);
+    }
+
+    private void encrypt(RequestData requestData) {
+        if (requestData != null) {
+            requestData.setValue(encoder.encrypt(requestData.getValue()));
+        }
+    }
+
+    private void decrypt(RequestData requestData) {
+        if (requestData != null) {
+            requestData.setValue(encoder.decrypt(requestData.getValue()));
+        }
     }
 
     @Override
-    public Map<String, String> toResource(List<RequestData> requestData) {
-        return requestData.stream().filter(field -> field.getVisibility().equals("public"))
-                .collect(Collectors.toMap(RequestData::getField, RequestData::getValue));
+    public void prepare() {
+        List<RequestData> all = requestDataRepository.findAll();
+        for (RequestData requestData : all) {
+            try {
+                decrypt(requestData);
+            } catch (Exception e) {
+                encrypt(requestData);
+                requestDataRepository.save(requestData);
+            }
+        }
     }
 }

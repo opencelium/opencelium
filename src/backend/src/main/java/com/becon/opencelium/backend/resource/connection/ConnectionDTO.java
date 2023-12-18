@@ -17,7 +17,6 @@
 package com.becon.opencelium.backend.resource.connection;
 
 import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
-import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
@@ -28,22 +27,22 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConnectionDTO {
 
-    private Long nodeId; // id generated in neo4j
+    private String id; // id generated in mongo
     private Long connectionId; // id generated in mariadb.
     private String title;
     private String description;
-    private ConnectorNodeDTO fromConnector;
-    private ConnectorNodeDTO toConnector;
-    private List<FieldBindingDTO> fieldBinding;
+    private String icon;
+    private ConnectorDTO fromConnector;
+    private ConnectorDTO toConnector;
+    private List<FieldBindingDTO> fieldBindings;
     private BusinessLayoutResource businessLayout;
-    private DataAggregatorDTO dataAggregator;
 
-    public Long getNodeId() {
-        return nodeId;
+    public String getId() {
+        return id;
     }
 
-    public void setNodeId(Long nodeId) {
-        this.nodeId = nodeId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Long getConnectionId() {
@@ -70,28 +69,28 @@ public class ConnectionDTO {
         this.description = description;
     }
 
-    public ConnectorNodeDTO getFromConnector() {
+    public ConnectorDTO getFromConnector() {
         return fromConnector;
     }
 
-    public void setFromConnector(ConnectorNodeDTO fromConnector) {
+    public void setFromConnector(ConnectorDTO fromConnector) {
         this.fromConnector = fromConnector;
     }
 
-    public ConnectorNodeDTO getToConnector() {
+    public ConnectorDTO getToConnector() {
         return toConnector;
     }
 
-    public void setToConnector(ConnectorNodeDTO toConnector) {
+    public void setToConnector(ConnectorDTO toConnector) {
         this.toConnector = toConnector;
     }
 
-    public List<FieldBindingDTO> getFieldBinding() {
-        return fieldBinding;
+    public List<FieldBindingDTO> getFieldBindings() {
+        return fieldBindings;
     }
 
-    public void setFieldBinding(List<FieldBindingDTO> fieldBinding) {
-        this.fieldBinding = fieldBinding;
+    public void setFieldBindings(List<FieldBindingDTO> fieldBinding) {
+        this.fieldBindings = fieldBinding;
     }
 
     public BusinessLayoutResource getBusinessLayout() {
@@ -102,11 +101,11 @@ public class ConnectionDTO {
         this.businessLayout = businessLayout;
     }
 
-    public DataAggregatorDTO getDataAggregator() {
-        return dataAggregator;
+    public String getIcon() {
+        return icon;
     }
 
-    public void setDataAggregator(DataAggregatorDTO dataAggregator) {
-        this.dataAggregator = dataAggregator;
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 }

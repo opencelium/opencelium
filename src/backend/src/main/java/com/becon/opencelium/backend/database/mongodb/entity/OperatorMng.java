@@ -16,20 +16,22 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 @Document(collection = "operator")
 public class OperatorMng {
 
-    @Id
+    @MongoId(targetType = FieldType.OBJECT_ID)
     private String id;
     private String type;
     private String index;
     private String iterator;
-    @DBRef
     private ConditionMng condition;
+
+    public OperatorMng() {
+    }
 
     public String getId() {
         return id;

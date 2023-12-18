@@ -16,33 +16,27 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.*;
 
 import java.util.List;
 
 @Document(collection = "connection")
 public class ConnectionMng {
-    @Id
+    @MongoId(targetType = FieldType.OBJECT_ID)
     private String id; // id generated in mongodb
+    @Indexed
     @Field(name = "connection_id")
     private Long connectionId; // id generated in mariadb.
     private String title;
-    private String description;
-    @DBRef
     @Field(name = "from_connector")
-    private ConnectorNodeMng fromConnector;
-    @DBRef
+    private ConnectorMng fromConnector;
     @Field(name = "to_connector")
-    private ConnectorNodeMng toConnector;
+    private ConnectorMng toConnector;
     @DBRef
-    @Field(name = "field_binding")
-    private List<FieldBindingMng> fieldBinding;
-    @DBRef
-    @Field(name = "data_aggregator")
-    private DataAggregatorMng dataAggregator;
+    private List<FieldBindingMng> fieldBindings;
+    public ConnectionMng() {
+    }
 
     public String getId() {
         return id;
@@ -68,43 +62,27 @@ public class ConnectionMng {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public ConnectorNodeMng getFromConnector() {
+    public ConnectorMng getFromConnector() {
         return fromConnector;
     }
 
-    public void setFromConnector(ConnectorNodeMng fromConnector) {
+    public void setFromConnector(ConnectorMng fromConnector) {
         this.fromConnector = fromConnector;
     }
 
-    public ConnectorNodeMng getToConnector() {
+    public ConnectorMng getToConnector() {
         return toConnector;
     }
 
-    public void setToConnector(ConnectorNodeMng toConnector) {
+    public void setToConnector(ConnectorMng toConnector) {
         this.toConnector = toConnector;
     }
 
-    public List<FieldBindingMng> getFieldBinding() {
-        return fieldBinding;
+    public List<FieldBindingMng> getFieldBindings() {
+        return fieldBindings;
     }
 
-    public void setFieldBinding(List<FieldBindingMng> fieldBinding) {
-        this.fieldBinding = fieldBinding;
-    }
-
-    public DataAggregatorMng getDataAggregator() {
-        return dataAggregator;
-    }
-
-    public void setDataAggregator(DataAggregatorMng dataAggregator) {
-        this.dataAggregator = dataAggregator;
+    public void setFieldBindings(List<FieldBindingMng> fieldBindings) {
+        this.fieldBindings = fieldBindings;
     }
 }

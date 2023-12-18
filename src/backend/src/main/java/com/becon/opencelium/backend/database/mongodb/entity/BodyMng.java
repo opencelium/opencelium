@@ -1,15 +1,10 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
 import com.becon.opencelium.backend.invoker.entity.Body;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
 
-@Document(collection = "body")
 public class BodyMng {
-    @Id
-    private String id;
     private String type;
     private String format;
     private String data;
@@ -54,13 +49,5 @@ public class BodyMng {
 
     public void setFields(Map<String, Object> fields) {
         this.fields = fields;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 }

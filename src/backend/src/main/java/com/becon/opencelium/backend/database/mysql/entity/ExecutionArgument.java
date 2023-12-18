@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.database.mysql.entity;
 
-import com.becon.opencelium.backend.enums.LangEnum;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -10,6 +9,9 @@ import java.util.Objects;
 @IdClass(ExecutionArgument.PK.class)
 @Table(name = "execution_argument")
 public class ExecutionArgument {
+
+//    @EmbeddedId
+//    private ExecutionArgument.PK id;
 
     @Id
     @ManyToOne

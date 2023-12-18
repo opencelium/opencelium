@@ -2,14 +2,15 @@ package com.becon.opencelium.backend.resource.blayout;
 
 import com.becon.opencelium.backend.database.mysql.entity.BusinessLayout;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class BusinessLayoutResource {
 
     private int id;
-    private List<BLayoutArrowResource> arrows;
-    private List<BLayoutSvgItemResource> svgItems;
+    private List<BLayoutArrowResource> arrows = new ArrayList<>();
+    private List<BLayoutSvgItemResource> svgItems = new ArrayList<>();
 
     public BusinessLayoutResource() {
     }

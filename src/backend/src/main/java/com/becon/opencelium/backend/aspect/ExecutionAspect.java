@@ -20,10 +20,12 @@ package com.becon.opencelium.backend.aspect;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.LangEnum;
-import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
-import com.becon.opencelium.backend.execution.notification.SlackService;
-import com.becon.opencelium.backend.execution.notification.TeamsService;
+import com.becon.opencelium.backend.execution.notification.*;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.quartz.JobExecutor;
+import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import org.aspectj.lang.annotation.*;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -51,9 +53,6 @@ public class ExecutionAspect {
     private UserServiceImpl userService;
 
     @Autowired
-    private EmailServiceImpl emailService;
-
-    @Autowired
     private TeamsService teamsService;
 
     @Autowired
@@ -65,6 +64,9 @@ public class ExecutionAspect {
     @Autowired
     private ArgumentServiceImp argumentServiceImp;
 
+    @Autowired
+    private EmailServiceImpl emailService;
+
     @Value("${opencelium.notification.tools.slack.webhook}")
     private String slackWebhook;
 
@@ -72,7 +74,8 @@ public class ExecutionAspect {
     public void sendBefore(JobExecutionContext context){
         logger.info("------------------- PRE --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        int schedulerId = jobDataMap.getIntValue("schedulerId");
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        int schedulerId = data.getScheduleId();
         List<EventNotification> eventNotifications = schedulerServiceImp.getAllNotifications(schedulerId);
         triggerNotifications(eventNotifications, "pre", null);
     }
@@ -81,7 +84,8 @@ public class ExecutionAspect {
     public void sendAfter(JobExecutionContext context){
         logger.info("------------------- POST --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        int schedulerId = jobDataMap.getIntValue("schedulerId");
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        int schedulerId = data.getScheduleId();
         List<EventNotification> en = schedulerServiceImp.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
     }
@@ -91,7 +95,8 @@ public class ExecutionAspect {
     public void sendAlert(JobExecutionContext context, Exception ex){
         logger.info("------------------- EXCEPTION --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        int schedulerId = jobDataMap.getIntValue("schedulerId");
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        int schedulerId = data.getScheduleId();
         List<EventNotification> en = schedulerServiceImp.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
     }
@@ -242,7 +247,7 @@ public class ExecutionAspect {
                     cValues.put(c, Long.toString(connection.getId()));
                     break;
                 case "CONNECTION_NAME":
-                    cValues.put(c, connection.getName());
+                    cValues.put(c, connection.getTitle());
                     break;
                 case "SCHEDULER_ID":
                     cValues.put(c, Integer.toString(scheduler.getId()));

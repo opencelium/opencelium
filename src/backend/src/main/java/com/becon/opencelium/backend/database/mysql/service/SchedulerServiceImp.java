@@ -16,21 +16,26 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
-import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
+import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
+import com.becon.opencelium.backend.factory.SchedulerFactory;
+import com.becon.opencelium.backend.quartz.SchedulingStrategy;
+import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
-import org.quartz.SchedulerException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.lang.NonNull;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,37 +43,64 @@ import java.util.stream.Collectors;
 @Service
 public class SchedulerServiceImp implements SchedulerService {
 
-    @Autowired
-    private ConnectionServiceImp connectionService;
+    private final ConnectionService connectionService;
+    private final WebhookService webhookService;
+    private final ExecutionService executionService;
+    private final LastExecutionService lastExecutionService;
+    private final RecipientService recipientService;
+    private final MessageService messageService;
+    private final SchedulingStrategy schedulingStrategy;
+    private final SchedulerRepository schedulerRepository;
+    private final NotificationRepository notificationRepository;
+    private final Mapper<Connection, ConnectionDTO> connectionMapper;
 
-    @Autowired
-    private SchedulerRepository schedulerRepository;
 
-
-    @Autowired
-    private WebhookServiceImp webhookService;
-
-    @Autowired
-    private ExecutionServiceImp executionServiceImp;
-
-    @Autowired
-    private LastExecutionServiceImp lastExecutionServiceImp;
-
-    @Autowired
-    private ConnectorServiceImp connectorService;
-
-    @Autowired
-    private NotificationRepository notificationRepository;
-
-    @Autowired
-    private RecipientServiceImpl recipientService;
-
-    @Autowired
-    private MessageServiceImpl messageService;
+    public SchedulerServiceImp(
+            @Qualifier("connectionServiceImp") ConnectionService connectionService,
+            @Qualifier("webhookServiceImp") WebhookService webhookService,
+            @Qualifier("executionServiceImp") ExecutionService executionService,
+            @Qualifier("lastExecutionServiceImp") LastExecutionService lastExecutionService,
+            @Qualifier("messageServiceImpl") MessageService messageService,
+            @Qualifier("recipientServiceImpl") RecipientService recipientService,
+            SchedulerRepository schedulerRepository,
+            NotificationRepository notificationRepository,
+            SchedulerFactoryBean schedulerFactoryBean,
+            Mapper<Connection, ConnectionDTO> connectionMapper
+    ) {
+        this.connectionService = connectionService;
+        this.webhookService = webhookService;
+        this.executionService = executionService;
+        this.lastExecutionService = lastExecutionService;
+        this.recipientService = recipientService;
+        this.messageService = messageService;
+        this.schedulingStrategy = SchedulerFactory.createQuartzScheduler(schedulerFactoryBean.getScheduler());
+        this.notificationRepository = notificationRepository;
+        this.schedulerRepository = schedulerRepository;
+        this.connectionMapper = connectionMapper;
+    }
 
     @Override
-    public void save(Scheduler scheduler) {
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public void save(@NonNull Scheduler scheduler) {
+        if (existsByTitle(scheduler.getTitle())){
+            throw new RuntimeException("TITLE_ALREADY_EXISTS");
+        }
+        Scheduler saved = schedulerRepository.save(scheduler);
+        schedulingStrategy.addJob(saved);
+    }
+    @Override
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public Scheduler update(@NonNull Scheduler scheduler){
 
+        Scheduler entity = getById(scheduler.getId());
+        if (!Objects.equals(entity.getTitle(), scheduler.getTitle()) && existsByTitle(scheduler.getTitle())){
+            throw new RuntimeException("TITLE_ALREADY_EXISTS");
+        }
+
+        getById(scheduler.getId());
+        Scheduler updated = schedulerRepository.save(scheduler);
+        schedulingStrategy.rescheduleJob(updated);
+        return updated;
     }
 
     @Override
@@ -77,13 +109,21 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    public void deleteById(int id) {
-
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public synchronized void deleteById(int id) {
+        Scheduler scheduler = getById(id);
+        schedulerRepository.deleteById(id);
+        schedulingStrategy.deleteJob(scheduler);
     }
 
     @Override
     public void deleteAllById(List<Integer> schedulerIds) {
-
+        for (Integer id : schedulerIds) {
+            try {
+                deleteById(id);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @Override
@@ -99,6 +139,12 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public Optional<Scheduler> findById(int id) {
         return schedulerRepository.findById(id);
+    }
+
+    @Override
+    public Scheduler getById(int id) {
+        return schedulerRepository.findById(id)
+                .orElseThrow(() -> new SchedulerNotFoundException(id));
     }
 
     @Override
@@ -119,7 +165,7 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public Scheduler toEntity(SchedulerRequestResource resource) {
         Connection connection = connectionService.findById(resource.getConnectionId())
-                .orElseThrow(()-> new RuntimeException("Connection with id=" + resource.getConnectionId() + " not found"));
+                .orElseThrow(() -> new RuntimeException("Connection with id=" + resource.getConnectionId() + " not found"));
         Scheduler scheduler = new Scheduler();
         scheduler.setId(resource.getSchedulerId());
         scheduler.setTitle(resource.getTitle());
@@ -131,7 +177,7 @@ public class SchedulerServiceImp implements SchedulerService {
         List<NotificationResource> notificationResources = resource.getNotificationResources();
         List<EventNotification> eventNotificationList = new ArrayList<>();
 
-        for (NotificationResource notificationResource:notificationResources) {
+        for (NotificationResource notificationResource : notificationResources) {
             eventNotificationList.add(toNotificationEntity(notificationResource));
         }
         scheduler.setEventNotifications(eventNotificationList);
@@ -146,12 +192,12 @@ public class SchedulerServiceImp implements SchedulerService {
         schedulerResource.setStatus(entity.getStatus());
         schedulerResource.setCronExp(entity.getCronExp());
         schedulerResource.setDebugMode(entity.getDebugMode());
-        schedulerResource.setConnection(connectionService.toResource(entity.getConnection()));
+        schedulerResource.setConnection(connectionMapper.toDTO(entity.getConnection()));
 
-        if (entity.getLastExecution() != null){
-            schedulerResource.setLastExecution(lastExecutionServiceImp.toResource(entity.getLastExecution()));
+        if (entity.getLastExecution() != null) {
+            schedulerResource.setLastExecution(lastExecutionService.toResource(entity.getLastExecution()));
         }
-        if (entity.getWebhook() != null){
+        if (entity.getWebhook() != null) {
             schedulerResource.setWebhook(webhookService.toResource(entity.getWebhook()));
         }
         List<EventNotification> eventNotificationList = entity.getEventNotifications();
@@ -168,13 +214,14 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    public void startNow(Scheduler scheduler) throws Exception{
-//        quartzUtility.runJob(scheduler);
+    public synchronized void startNow(Scheduler scheduler) {
+        schedulerRepository.save(scheduler);
+        schedulingStrategy.runJob(scheduler);
     }
 
     @Override
     public void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception{
-//        quartzUtility.runJob(scheduler, queryMap);
+        //TODO skip it
     }
 
     @Override
@@ -183,27 +230,39 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    public void disable(Scheduler scheduler) throws SchedulerException{
-//        quartzUtility.pauseTrigger(scheduler);
+    public void disable(Scheduler scheduler) {
+        schedulingStrategy.pauseJob(scheduler);
     }
 
     @Override
-    public void enable(Scheduler scheduler) throws SchedulerException {
-//        quartzUtility.resumeTrigger(scheduler);
+    public void enable(Scheduler scheduler) {
+        schedulingStrategy.resumeJob(scheduler);
     }
 
     @Override
-    public List<RunningJobsResource> getAllRunningJobs() throws Exception{
-        return null;
+    public List<RunningJobsResource> getAllRunningJobs() throws Exception {
+        Map<Integer, Long> runningJobs = schedulingStrategy.getRunningJobs();
+        List<RunningJobsResource> runningJobsResources = new ArrayList<>();
+        runningJobs.forEach((k, v) -> {
+            RunningJobsResource jobsResource = new RunningJobsResource();
+            Scheduler scheduler = getById(k);
+            jobsResource.setSchedulerId(scheduler.getId());
+            jobsResource.setTitle(scheduler.getTitle());
+            Connection connection = connectionService.getById(v);
+            jobsResource.setToConnector(String.valueOf(connection.getToConnector()));
+            jobsResource.setFromConnector(String.valueOf(connection.getFromConnector()));
+            runningJobsResources.add(jobsResource);
+        });
+        return runningJobsResources;
     }
 
     @Override
-    public List<EventNotification> getAllNotifications(int schedulerId){
+    public List<EventNotification> getAllNotifications(int schedulerId) {
         return notificationRepository.findBySchedulerId(schedulerId);
     }
 
     @Override
-    public Optional<EventNotification> getNotification(int notificationId){
+    public Optional<EventNotification> getNotification(int notificationId) {
         return notificationRepository.findById(notificationId);
     }
 
@@ -213,26 +272,14 @@ public class SchedulerServiceImp implements SchedulerService {
         eventNotification.setId(resource.getNotificationId());
         eventNotification.setName(resource.getName());
         eventNotification.setEventType(resource.getEventType());
-        eventNotification.setScheduler(schedulerRepository.findById(resource.getSchedulerId()).orElseThrow(()->
-                new RuntimeException("Scheduler "+resource.getSchedulerId()+" not found")));
+        eventNotification.setScheduler(schedulerRepository.findById(resource.getSchedulerId()).orElseThrow(() ->
+                new RuntimeException("Scheduler " + resource.getSchedulerId() + " not found")));
 
         Set<EventRecipient> notificationEventRecipients = resource.getRecipients().stream()
                 .map(EventRecipient::new).collect(Collectors.toSet());
 
-        // TODO: should be refactored
-        if (resource.getNotificationType().equals(NotifyTool.TEAMS.toString())) {
-            String teamChannel = resource.getTeam() + ";" + resource.getChannel();
-            EventRecipient er = new EventRecipient(teamChannel);
-            if (resource.getNotificationId() != 0) {
-                er = notificationRepository
-                        .findById(resource.getNotificationId()).get().getEventRecipients().stream().toList().get(0);
-                er.setDestination(teamChannel);
-            }
-            notificationEventRecipients.add(er);
-        }
-
         eventNotification.setEventRecipients(notificationEventRecipients);
-        eventNotification.setEventMessage(messageService.findById(resource.getTemplate().getTemplateId()).orElseThrow(()->
+        eventNotification.setEventMessage(messageService.findById(resource.getTemplate().getTemplateId()).orElseThrow(() ->
                 new RuntimeException("TEMPLATE_NOT_FOUND")));
         return eventNotification;
     }
@@ -244,9 +291,8 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void saveNotification(EventNotification eventNotification) {
-
         notificationRepository.save(eventNotification);
-        eventNotification.getEventRecipients().forEach(notificationRecipient -> recipientService.save(notificationRecipient));
+        eventNotification.getEventRecipients().forEach(recipientService::save);
         messageService.save(eventNotification.getEventMessage());
     }
 
@@ -254,6 +300,4 @@ public class SchedulerServiceImp implements SchedulerService {
     public void deleteNotificationById(int id) {
         notificationRepository.deleteById(id);
     }
-
-
 }

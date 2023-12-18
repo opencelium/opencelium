@@ -24,14 +24,17 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EnhancementService {
-    void save(Enhancement enhancement);
-    void saveAll(List<Enhancement> enhancement);
+    Enhancement save(Enhancement enhancement);
+    List<Enhancement> saveAll(List<Enhancement> enhancement);
     List<Enhancement> findAllByConnectionId(Long connectionId);
     void deleteAllByConnectionId(Long connectionId);
     Enhancement findByFieldId(Long fieldId);
     Optional<Enhancement> findById(Integer enhId);
     void deleteAll(List<Enhancement> enhancements);
-    Enhancement toEntity(EnhancementDTO resource);
-    EnhancementDTO toResource(Enhancement entity);
     FieldBindingDTO toFieldBindingResource(Enhancement enhancement);
+
+    boolean existById(Integer id);
+
+    void deleteById(Integer id);
+
 }

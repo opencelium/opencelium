@@ -18,28 +18,29 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.repository.EnhancementRepository;
-import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class EnhancementServiceImp implements EnhancementService{
+public class EnhancementServiceImp implements EnhancementService {
 
-    @Autowired
-    private EnhancementRepository enhancementRepository;
+    private final EnhancementRepository enhancementRepository;
 
-    @Override
-    public void save(Enhancement enhancement) {
-        enhancementRepository.save(enhancement);
+    public EnhancementServiceImp(EnhancementRepository enhancementRepository) {
+        this.enhancementRepository = enhancementRepository;
     }
 
     @Override
-    public void saveAll(List<Enhancement> enhancement) {
-        enhancementRepository.saveAll(enhancement);
+    public Enhancement save(Enhancement enhancement) {
+        return enhancementRepository.save(enhancement);
+    }
+
+    @Override
+    public List<Enhancement> saveAll(List<Enhancement> enhancement) {
+        return enhancementRepository.saveAll(enhancement);
     }
 
     @Override
@@ -60,6 +61,7 @@ public class EnhancementServiceImp implements EnhancementService{
 
     @Override
     public Optional<Enhancement> findById(Integer enhId) {
+        if (enhId == null) return Optional.empty();
         return enhancementRepository.findById(enhId);
     }
 
@@ -70,26 +72,18 @@ public class EnhancementServiceImp implements EnhancementService{
     }
 
     @Override
-    public Enhancement toEntity(EnhancementDTO resource) {
-        Enhancement enhancement = new Enhancement();
-        enhancement.setId(resource.getEnhanceId());
-        enhancement.setDescription(resource.getDescription());
-        enhancement.setName(resource.getName());
-        enhancement.setExpertCode(resource.getExpertCode());
-        enhancement.setExpertVar(resource.getExpertVar());
-        enhancement.setLanguage(resource.getLanguage());
-        enhancement.setSimpleCode("");
-        return enhancement;
-    }
-
-    @Override
-    public EnhancementDTO toResource(Enhancement entity) {
-        return new EnhancementDTO(entity);
-    }
-
-    @Override
     public FieldBindingDTO toFieldBindingResource(Enhancement enhancement) {
         return null;
+    }
+
+    @Override
+    public boolean existById(Integer id) {
+        return enhancementRepository.existsById(id);
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        enhancementRepository.deleteById(id);
     }
 
 }

@@ -16,60 +16,22 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-
-
-@Document(collection = "enhancement")
 public class EnhancementMng {
-    @Id
-    private String id;
-    @Field(name = "enhance_id")
-    private Integer enhanceId;
-    private String name;
+    private String title;
     private String description;
-    @Field(name = "expert_code")
-    private String expertCode;
-    @Field(name = "expert_var")
-    private String expertVar;
+    private String script;
+    private String variables;
     private String language;
 
     public EnhancementMng() {
     }
 
-    public EnhancementMng(Enhancement enhancement) {
-        this.enhanceId = enhancement.getId();
-        this.name = enhancement.getName();
-        this.description = enhancement.getDescription();
-        this.expertCode = enhancement.getExpertCode();
-        this.expertVar = enhancement.getExpertVar();
-        this.language = enhancement.getLanguage();
+    public String getTitle() {
+        return title;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Integer getEnhanceId() {
-        return enhanceId;
-    }
-
-    public void setEnhanceId(Integer enhanceId) {
-        this.enhanceId = enhanceId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDescription() {
@@ -80,27 +42,27 @@ public class EnhancementMng {
         this.description = description;
     }
 
-    public String getExpertCode() {
-        return expertCode;
-    }
-
-    public void setExpertCode(String expertCode) {
-        this.expertCode = expertCode;
-    }
-
-    public String getExpertVar() {
-        return expertVar;
-    }
-
-    public void setExpertVar(String expertVar) {
-        this.expertVar = expertVar;
-    }
-
     public String getLanguage() {
         return language;
     }
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public String getScript() {
+        return script;
+    }
+
+    public void setScript(String script) {
+        this.script = script;
+    }
+
+    public String getVariables() {
+        return variables;
+    }
+
+    public void setVariables(String variables) {
+        this.variables = variables;
     }
 }

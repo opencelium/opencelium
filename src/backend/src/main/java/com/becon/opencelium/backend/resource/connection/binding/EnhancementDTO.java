@@ -22,12 +22,10 @@ import jakarta.annotation.Resource;
 
 @Resource
 public class EnhancementDTO {
-
-    private Integer enhanceId;
-    private String name;
+    private String title;
     private String description;
-    private String expertCode;
-    private String expertVar;
+    private String script;
+    private String variables;
     private SimpleCodeDTO simpleCode;
     private String language;
 
@@ -35,29 +33,19 @@ public class EnhancementDTO {
     }
 
     public EnhancementDTO(Enhancement enhancement) {
-        this.enhanceId = enhancement.getId();
-        this.name = enhancement.getName();
+        this.title = enhancement.getTitle();
         this.description = enhancement.getDescription();
-        this.expertCode = enhancement.getExpertCode();
-        this.expertVar = enhancement.getExpertVar();
+        this.script = enhancement.getScript();
+        this.variables = enhancement.getVariables();
         this.simpleCode = null;
         this.language = enhancement.getLanguage();
     }
-
-    public Integer getEnhanceId() {
-        return enhanceId;
+    public String getTitle() {
+        return title;
     }
 
-    public void setEnhanceId(Integer enhanceId) {
-        this.enhanceId = enhanceId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDescription() {
@@ -68,20 +56,20 @@ public class EnhancementDTO {
         this.description = description;
     }
 
-    public String getExpertCode() {
-        return expertCode;
+    public String getScript() {
+        return script;
     }
 
-    public void setExpertCode(String expertCode) {
-        this.expertCode = expertCode;
+    public void setScript(String script) {
+        this.script = script;
     }
 
-    public String getExpertVar() {
-        return expertVar;
+    public String getVariables() {
+        return variables;
     }
 
-    public void setExpertVar(String expertVar) {
-        this.expertVar = expertVar;
+    public void setVariables(String variables) {
+        this.variables = variables;
     }
 
     public SimpleCodeDTO getSimpleCode() {

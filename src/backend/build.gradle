@@ -38,7 +38,6 @@ test {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-data-neo4j'
 	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
 	implementation 'org.springframework.boot:spring-boot-starter-quartz'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -58,6 +57,11 @@ dependencies {
 	implementation 'wsdl4j:wsdl4j:1.6.3'
 	implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	implementation 'com.github.java-json-tools:json-patch:1.13'
+	implementation 'javax.json:javax.json-api:1.1.4'
+	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.3'
+	compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	runtimeOnly 'mysql:mysql-connector-java'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

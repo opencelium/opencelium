@@ -30,9 +30,7 @@ import java.util.Map;
 public interface InvokerService {
 
     Invoker toEntity(InvokerDTO resource);
-
     InvokerDTO toResource(Invoker entity);
-
     FunctionInvoker getTestFunction(String invokerName);
     FunctionInvoker getAuthFunction(String invokerName);
     File findFileByInvokerName(String invokerName);
@@ -40,7 +38,7 @@ public interface InvokerService {
     boolean existsByName(String name);
     List<Invoker> findAll();
     void delete(String name);
-    String findFieldType(String name, String methodName, String exchangeType, String result, String fieldName);
+    String findFieldType(String name, String path);
     String findFieldByPath(String invoker, String method, String path);
     Document getDocument(String name) throws Exception;
     void save(Document document);

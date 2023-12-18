@@ -17,20 +17,11 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
 import com.becon.opencelium.backend.invoker.entity.ResponseInv;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "response")
 public class ResponseMng {
-
-    @Id
     private String id;
-
     private String name = "response";
-    @DBRef
     private ResultMng success;
-    @DBRef
     private ResultMng fail;
 
     public ResponseMng() {
@@ -44,16 +35,12 @@ public class ResponseMng {
         }
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public ResultMng getSuccess() {
@@ -70,5 +57,13 @@ public class ResponseMng {
 
     public void setFail(ResultMng fail) {
         this.fail = fail;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

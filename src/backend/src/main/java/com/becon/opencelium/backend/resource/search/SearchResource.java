@@ -14,7 +14,7 @@ public class SearchResource {
 
     public SearchResource(Connection connection) {
         this.id = connection.getId();
-        this.title = connection.getName();
+        this.title = connection.getTitle();
         this.components = "connection";
     }
 

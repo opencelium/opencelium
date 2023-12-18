@@ -389,4 +389,3 @@ create table connection_history(
     FOREIGN KEY (connection_id) REFERENCES connection(id),
     FOREIGN KEY (user_id) REFERENCES user(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-

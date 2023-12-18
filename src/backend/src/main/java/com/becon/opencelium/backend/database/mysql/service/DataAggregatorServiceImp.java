@@ -36,7 +36,6 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
 
         List<ArgumentDTO> argumentDtos = dataAggregator.getArgs().stream().map(argumentService::convertToDto).toList();
         dataAggregatorDTO.setArgs(argumentDtos);
-
         return dataAggregatorDTO;
     }
 
@@ -48,7 +47,6 @@ public class DataAggregatorServiceImp implements DataAggregatorService {
         dataAggregator.setActive(dataAggregatorDTO.isActive());
         dataAggregator.setScript(dataAggregatorDTO.getScript());
         dataAggregator.setActive(dataAggregatorDTO.isActive());
-
 
         Set<Argument> arguments = dataAggregatorDTO.getArgs().stream()
                 .map(argumentService::convertToEntity).collect(Collectors.toSet());

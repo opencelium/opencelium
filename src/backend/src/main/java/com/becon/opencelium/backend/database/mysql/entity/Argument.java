@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.database.mysql.entity;
 
+import com.becon.opencelium.backend.database.mysql.entity.ExecutionArgument;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class Argument {
     @OneToMany(mappedBy = "argument", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<ExecutionArgument> executionArguments;
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 

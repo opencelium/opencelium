@@ -17,13 +17,14 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
-@Document(collection = "method")
+@Document(collection ="method")
 public class MethodMng {
-    @Id
+    @MongoId(targetType = FieldType.OBJECT_ID)
     private String id;
     private String index;
     private String name;
@@ -31,10 +32,12 @@ public class MethodMng {
     private String label;
     @Field(name = "data_integrator")
     private Integer dataAggregator;
-    @DBRef
     private RequestMng request;
-    @DBRef
     private ResponseMng response;
+
+
+    public MethodMng() {
+    }
 
     public String getId() {
         return id;
