@@ -110,7 +110,6 @@ public class StorageConfiguration {
         connectorService.saveAll(connectors);
         // creates storage for files
         userStorageService.init();
-
         // create defou
     }
 }
