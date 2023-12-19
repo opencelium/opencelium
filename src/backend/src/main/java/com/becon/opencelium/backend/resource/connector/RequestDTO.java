@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.resource.connector;
 
-import com.becon.opencelium.backend.invoker.entity.RequestInv;
 import jakarta.annotation.Resource;
 
 import java.util.Map;
@@ -31,15 +30,6 @@ public class RequestDTO {
     private BodyDTO body;
 
     public RequestDTO() {
-    }
-
-    public RequestDTO(RequestInv requestInv) {
-        this.endpoint = requestInv.getEndpoint();
-        this.method = requestInv.getMethod();
-        this.header = requestInv.getHeader();
-        if (requestInv.getBody() != null) {
-            this.body = new BodyDTO(requestInv.getBody());
-        }
     }
 
     public String getId() {

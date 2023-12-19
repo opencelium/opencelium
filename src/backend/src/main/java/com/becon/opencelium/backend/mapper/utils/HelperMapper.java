@@ -14,12 +14,13 @@ import com.becon.opencelium.backend.mapper.mongo.MethodMngMapper;
 import com.becon.opencelium.backend.mapper.mongo.OperatorMngMapper;
 import com.becon.opencelium.backend.mapper.mysql.ConnectorMapper;
 import com.becon.opencelium.backend.mapper.mysql.EnhancementMapper;
-import com.becon.opencelium.backend.mapper.mysql.InvokerMapper;
+import com.becon.opencelium.backend.mapper.mysql.invoker.InvokerMapper;
 import com.becon.opencelium.backend.mapper.mysql.RequestDataMapper;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
+import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -155,13 +156,18 @@ public abstract class HelperMapper {
         return requestData;
     }
 
-    @Named("getRequiredData")
-    public Map<String, String> getRequiredData(Integer id) {
-        List<RequestData> requestData = connectorService.getById(id).getRequestData();
+    @Named("setAdditionalFields")
+    public ConnectorMng setAdditionalFields(ConnectorEx connectorEx) {
+        Connector connector = connectorService.getById(connectorEx.getId());
+
+        List<RequestData> requestData = connector.getRequestData();
         Map<String, String> map = new HashMap<>();
-        requestData.forEach(r -> {
-            map.put(r.getField(), r.getValue());
-        });
-        return map;
+        requestData.forEach(r -> map.put(r.getField(), r.getValue()));
+
+        connectorEx.setSslCert(connector.isSslCert());
+        connectorEx.setInvoker(connector.getInvoker());
+        connectorEx.setRequiredData(map);
+
+        return new ConnectorMng();
     }
 }

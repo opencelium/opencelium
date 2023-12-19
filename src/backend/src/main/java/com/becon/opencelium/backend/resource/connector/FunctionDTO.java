@@ -30,12 +30,6 @@ public class FunctionDTO {
     public FunctionDTO() {
     }
 
-    public FunctionDTO(FunctionInvoker functionInvoker) {
-        this.name = functionInvoker.getName();
-        this.type = functionInvoker.getType();
-        this.request =  new RequestDTO(functionInvoker.getRequest());
-        this.response = new ResponseDTO(functionInvoker.getResponse());
-    }
 
     public String getName() {
         return name;

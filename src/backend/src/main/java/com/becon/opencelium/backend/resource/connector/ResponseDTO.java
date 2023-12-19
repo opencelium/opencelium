@@ -31,14 +31,6 @@ public class ResponseDTO {
     public ResponseDTO() {
     }
 
-    public ResponseDTO(ResponseInv responseInv) {
-        this.success = new ResultDTO(responseInv.getSuccess());
-
-        if (responseInv.getFail() != null) {
-            this.fail = new ResultDTO(responseInv.getFail());
-        }
-    }
-
     public String getId() {
         return id;
     }

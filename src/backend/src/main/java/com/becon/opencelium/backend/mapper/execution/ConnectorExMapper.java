@@ -3,10 +3,9 @@ package com.becon.opencelium.backend.mapper.execution;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.utils.HelperMapper;
+import com.becon.opencelium.backend.mapper.utils.Wrapper;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 
 @org.mapstruct.Mapper(
         componentModel = "spring",
@@ -21,13 +20,25 @@ import org.mapstruct.ReportingPolicy;
 @Named("connectorExMapper")
 public interface ConnectorExMapper extends Mapper<ConnectorEx, ConnectorMng> {
 
-    @Mapping(target = "methods", qualifiedByName = {"operationMngMapper", "toEntityAll"})
-    @Mapping(target = "operators", qualifiedByName = {"operatorExMapper", "toEntityAll"})
-    @Mapping(target = "requiredData", source = "connectorId", qualifiedByName = {"helperMapper", "getRequiredData"})
     @Named("toEntity")
+    @Mappings({
+            @Mapping(target = "id", source = "connectorId"),
+            @Mapping(target = "methods", qualifiedByName = {"operationMngMapper", "toEntityAll"}),
+            @Mapping(target = "operators", qualifiedByName = {"operatorExMapper", "toEntityAll"})
+    })
     ConnectorEx toEntity(ConnectorMng dto);
+
+    @AfterMapping
+    default void afterMapping(@MappingTarget ConnectorEx entity, ConnectorMng dto) {
+        Wrapper<ConnectorMng, ConnectorEx> wrapper = new Wrapper<>(entity);
+        helperForAfterMapping(wrapper);
+    }
 
     default ConnectorMng toDTO(ConnectorEx entity) {
         return null;
     }
+
+    @Mapping(target = "to", source = "from", qualifiedByName = {"helperMapper", "setAdditionalFields"})
+    @Mapping(target = "from", ignore = true)
+    Wrapper<ConnectorMng, ConnectorEx> helperForAfterMapping(Wrapper<ConnectorMng, ConnectorEx> wrapper);
 }

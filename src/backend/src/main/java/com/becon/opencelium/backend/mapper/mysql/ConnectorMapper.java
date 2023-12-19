@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.mapper.mysql;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.mysql.invoker.InvokerMapper;
 import com.becon.opencelium.backend.mapper.utils.HelperMapper;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.utility.StringUtility;

@@ -16,8 +16,6 @@
 
 package com.becon.opencelium.backend.resource.connector;
 
-import com.becon.opencelium.backend.invoker.entity.ResultInv;
-
 import jakarta.annotation.Resource;
 
 import java.util.Map;
@@ -25,7 +23,7 @@ import java.util.Map;
 @Resource
 public class ResultDTO {
 
-    private String nodeId;
+    private String id;
     private String status;
     private Map<String, String> header;
     private BodyDTO body;
@@ -33,20 +31,12 @@ public class ResultDTO {
     public ResultDTO() {
     }
 
-    public ResultDTO(ResultInv resultInv) {
-        if (resultInv.getBody() != null) {
-            this.body = new BodyDTO(resultInv.getBody());
-        }
-        this.header = resultInv.getHeader();
-        this.status = resultInv.getStatus();
+    public String getId() {
+        return id;
     }
 
-    public String getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getStatus() {

@@ -29,8 +29,6 @@ import java.util.Map;
 
 public interface InvokerService {
 
-    Invoker toEntity(InvokerDTO resource);
-    InvokerDTO toResource(Invoker entity);
     FunctionInvoker getTestFunction(String invokerName);
     FunctionInvoker getAuthFunction(String invokerName);
     File findFileByInvokerName(String invokerName);
@@ -47,6 +45,6 @@ public interface InvokerService {
     Map<String, Invoker> findAllAsMap();
     List<FunctionInvoker> getAuthFunctions(String invoker);
     boolean existsByFileName(String fileName);
-
+    void deleteInvokerFile(String name);
 //    Object findField(String field, Map<String, Object> body);
 }
