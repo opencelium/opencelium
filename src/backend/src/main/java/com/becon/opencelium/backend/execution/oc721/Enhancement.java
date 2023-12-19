@@ -1,18 +1,18 @@
-package com.becon.opencelium.backend.resource.execution;
+package com.becon.opencelium.backend.execution.oc721;
 
 import java.util.Map;
 
-public class EnhancementDTO {
-    private String enhanceId;
+public class Enhancement {
+    private Integer enhanceId;
     private String script;
     private Map<String, String> args;
     private String lang;
 
-    public String getEnhanceId() {
+    public Integer getEnhanceId() {
         return enhanceId;
     }
 
-    public void setEnhanceId(String enhanceId) {
+    public void setEnhanceId(Integer enhanceId) {
         this.enhanceId = enhanceId;
     }
 
