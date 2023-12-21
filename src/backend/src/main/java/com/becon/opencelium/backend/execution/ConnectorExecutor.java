@@ -2,12 +2,12 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
+import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.DataType;
-import com.becon.opencelium.backend.resource.execution.Executable;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
@@ -33,31 +33,33 @@ import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
 import static com.becon.opencelium.backend.constant.RegExpression.requiredData;
 
 public class ConnectorExecutor {
-    private final ConnectorEx connector;
+    private final Connector connector;
     private final ExecutionManager executionManager;
     private final RestTemplate restTemplate;
+    // stores OperationDTO and OperatorEx in sorted order by their 'execOrder' and 'index' respectively;
+    private final PriorityQueue<Object> executables;
 
-    public ConnectorExecutor(ConnectorEx connector, ExecutionManager executionManager, RestTemplate restTemplate) {
-        this.connector = connector;
+    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate) {
         this.executionManager = executionManager;
         this.restTemplate = restTemplate;
+
+        this.executables = new PriorityQueue<>(getComparator());
+        this.executables.addAll(connectorEx.getMethods());
+        this.executables.addAll(connectorEx.getOperators());
+
+        this.connector = Connector.fromEx(connectorEx);
     }
 
     private void start() {
-        // stores OperationDTO, and OperatorDTO in sorted order by execOrder;
-        PriorityQueue<Executable> executables = new PriorityQueue<>(Comparator.comparing(Executable::getExecOrder));
-        executables.addAll(connector.getMethods());
-        executables.addAll(connector.getOperators());
-
-        List<Executable> body;
+        List<Object> body;
 
         while (!executables.isEmpty()) {
-            Executable current = executables.peek();
+            Object current = executables.peek();
 
-            String head = current.getExecOrder();
+            String head = getIndex(current);
             body = new ArrayList<>();
 
-            while (current != null && current.getExecOrder().startsWith(head)) {
+            while (current != null && getIndex(current).startsWith(head)) {
 
                 body.add(executables.poll());
 
@@ -69,7 +71,7 @@ public class ConnectorExecutor {
         }
     }
 
-    private void execute(List<Executable> body, int index) {
+    private void execute(List<Object> body, int index) {
         // if 'body' is empty, then no need to execute
         // If 'index' = 'body.size' then all are executed so stop the recursion
         if (body.isEmpty() || body.size() <= index) {
@@ -91,7 +93,7 @@ public class ConnectorExecutor {
         }
     }
 
-    private void executeOperation(List<Executable> body, int index) {
+    private void executeOperation(List<Object> body, int index) {
         OperationDTO operationDTO = (OperationDTO) body.get(index);
 
         RequestEntity<?> requestEntity = RequestEntityBuilder.start()
@@ -118,7 +120,7 @@ public class ConnectorExecutor {
         execute(body, ++index);
     }
 
-    private void executeIfOperator(List<Executable> body, int index) {
+    private void executeIfOperator(List<Object> body, int index) {
         OperatorEx operatorDTO = (OperatorEx) body.get(index);
 
         Object leftValue = executionManager.getValue(operatorDTO.getCondition().getLeft());
@@ -130,17 +132,17 @@ public class ConnectorExecutor {
 
         // when 'if' evaluates to false, then remove its body.
         // Body contains executables that has 'execOrder' starting with 'execOrder' of 'if'
-        String startingExecOrder = operatorDTO.getExecOrder();
-        String currentExecOrder = operatorDTO.getExecOrder();
+        String startingExecOrder = getIndex(operatorDTO);
+        String currentExecOrder = getIndex(operatorDTO);
 
         while (!result && currentExecOrder.startsWith(startingExecOrder) && index < body.size()) {
-            currentExecOrder = body.get(index++).getExecOrder();
+            currentExecOrder = getIndex(body.get(index++));
         }
 
         execute(body, ++index);
     }
 
-    private void executeForOperator(List<Executable> body, int index) {
+    private void executeForOperator(List<Object> body, int index) {
         OperatorEx operatorDTO = (OperatorEx) body.get(index);
         String leftValueReference = operatorDTO.getCondition().getLeft();
 
@@ -161,7 +163,7 @@ public class ConnectorExecutor {
         executionManager.getLoops().remove(operatorDTO.getIterator());
     }
 
-    private void executeForInOperator(List<Executable> body, int index) {
+    private void executeForInOperator(List<Object> body, int index) {
         // TODO: need to implement
     }
 
@@ -219,5 +221,34 @@ public class ConnectorExecutor {
         }
 
         return result;
+    }
+
+    private static Comparator<Object> getComparator() {
+        return (o1, o2) -> {
+            String[] arr1 = getIndex(o1).split("_");
+            String[] arr2 = getIndex(o2).split("_");
+
+            for (int i = 0; i < arr1.length && i < arr2.length; i++) {
+                // skip equal elements until there is a difference found
+                if (Objects.equals(arr1[i], arr2[i])) continue;
+
+                // if there is an unequal elements then return their difference
+                return arr1[i].compareTo(arr2[i]);
+            }
+
+            // at this point one array contains the other one
+            // so array with greater length is greater
+            return arr1.length - arr2.length;
+        };
+    }
+
+    private static String getIndex(Object o) {
+        if (o instanceof OperationDTO) {
+            return ((OperationDTO) o).getExecOrder();
+        } else if (o instanceof OperatorEx) {
+            return ((OperatorEx) o).getIndex();
+        } else {
+            throw new RuntimeException("getIndex() is only applicable to OperationDTO and OperatorEX");
+        }
     }
 }

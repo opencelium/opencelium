@@ -18,7 +18,14 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,8 +40,8 @@ public class Operation {
         Operation operation = new Operation();
 
         // TODO: correct DTO mapping
-        operation.setId(operationDTO.getName());
         operation.setColor(operationDTO.getOperationId());
+        operation.setAggregatorId(operationDTO.getAggregatorId());
 
         return operation;
     }

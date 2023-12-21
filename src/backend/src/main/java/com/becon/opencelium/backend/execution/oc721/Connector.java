@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.execution.oc721;
 
+import com.becon.opencelium.backend.resource.execution.ConnectorEx;
+
 import java.util.Map;
 
 public class Connector {
@@ -11,6 +13,17 @@ public class Connector {
 
     public Integer getId() {
         return id;
+    }
+
+    public static Connector fromEx(ConnectorEx connectorEx) {
+        Connector result = new Connector();
+        result.setId(connectorEx.getId());
+        result.setInvoker(connectorEx.getInvoker());
+        result.setSslCert(connectorEx.isSslCert());
+        result.setActive(connectorEx.isAction());
+        result.setRequiredData(connectorEx.getRequiredData());
+
+        return result;
     }
 
     public void setId(Integer id) {
