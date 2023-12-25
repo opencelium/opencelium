@@ -44,21 +44,6 @@ public class InvokerDTO {
     public InvokerDTO() {
     }
 
-    public InvokerDTO(Invoker invoker) {
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
-
-        this.name = invoker.getName();
-        this.description = invoker.getDescription();
-        this.hint = invoker.getHint();
-        this.icon =imagePath + invoker.getIcon();
-        this.authType = invoker.getAuthType();
-        this.requiredData = invoker.getRequiredData().stream().filter(d->!d.getVisibility().equals("private"))
-                .collect(Collectors.toMap(RequiredData::getName, RequiredData::getValue,
-                        (existingValue, newValue) -> existingValue, LinkedHashMap::new));
-        this.operations = invoker.getOperations().stream().map(FunctionDTO::new).collect(Collectors.toList());
-    }
-
     public String getName() {
         return name;
     }

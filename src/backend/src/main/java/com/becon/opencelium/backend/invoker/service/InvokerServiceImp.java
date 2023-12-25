@@ -61,17 +61,6 @@ public class InvokerServiceImp implements InvokerService {
     private final Path filePath = Paths.get(PathConstant.INVOKER);
 
     @Override
-    public Invoker toEntity(InvokerDTO resource) {
-//        return new Invoker(resource);
-        return null;
-    }
-
-    @Override
-    public InvokerDTO toResource(Invoker entity) {
-        return new InvokerDTO(entity);
-    }
-
-    @Override
     public FunctionInvoker getTestFunction(String invokerName) {
         return invokerContainer.getByName(invokerName).getOperations()
                 .stream().filter(f -> f.getType().equals("test"))
@@ -122,6 +111,7 @@ public class InvokerServiceImp implements InvokerService {
         deleteInvoker(name);
     }
 
+    @Override
     public void deleteInvokerFile(String name) {
         try {
             Path file = findFileByInvokerName(name).toPath();
@@ -409,16 +399,5 @@ public class InvokerServiceImp implements InvokerService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public InvokerDTO toMetaResource(Invoker invoker) {
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
-        InvokerDTO invokerDTO = new InvokerDTO();
-        invokerDTO.setName(invoker.getName());
-        invokerDTO.setDescription(invoker.getDescription());
-        invokerDTO.setIcon(imagePath + invoker.getIcon());
-
-        return invokerDTO;
     }
 }

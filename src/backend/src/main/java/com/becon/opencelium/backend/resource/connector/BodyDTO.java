@@ -1,7 +1,5 @@
 package com.becon.opencelium.backend.resource.connector;
 
-import com.becon.opencelium.backend.invoker.entity.Body;
-
 import java.util.Map;
 
 public class BodyDTO {
@@ -12,13 +10,6 @@ public class BodyDTO {
     private Map<String, Object> fields;
 
     public BodyDTO() {
-    }
-
-    public BodyDTO(Body body) {
-        this.type = body.getType();
-        this.format = body.getFormat();
-        this.data = body.getData();
-        this.fields = body.getFields();
     }
 
     public String getType() {
