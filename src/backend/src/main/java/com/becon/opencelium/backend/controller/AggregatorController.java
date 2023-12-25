@@ -7,7 +7,6 @@ import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.resource.notification.ContentResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @RestController
 @RequestMapping(value = "/api/aggregator", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Aggregator", description = "Manages operation for collecting data from responses of executed methods")
@@ -36,7 +36,6 @@ public class AggregatorController {
         this.dataAggregatorService = dataAggregatorService;
         this.argumentService = argumentService;
     }
-
 
     @Operation(summary = "Retrieves a Data Aggregator by provided ID")
     @ApiResponses(value = {
