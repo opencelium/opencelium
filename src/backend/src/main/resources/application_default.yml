@@ -155,7 +155,7 @@ management:
       show-details: always
 
 opencelium:
-  version: 3.2
+  version: 4.0
   reboot:
     path: src/backend/src/main/resources/bashfile/restart.sh
     assistant:
