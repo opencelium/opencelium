@@ -5,9 +5,9 @@ import com.becon.opencelium.backend.invoker.entity.Body;
 import java.util.Map;
 
 public class BodyMng {
-    private String type;
-    private String format;
-    private String data;
+    private String type; // Object, Array, String, Number
+    private String format; // json, xml, html, text
+    private String data; // raw, binary, form-data, x-www-form-urlencoded, GraphQL
     private Map<String, Object> fields;
 
     public BodyMng() {
