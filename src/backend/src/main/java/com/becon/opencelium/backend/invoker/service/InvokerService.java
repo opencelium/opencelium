@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
+import com.becon.opencelium.backend.resource.execution.DataType;
 import org.w3c.dom.Document;
 
 import javax.xml.xpath.XPathExpressionException;
@@ -36,7 +37,7 @@ public interface InvokerService {
     boolean existsByName(String name);
     List<Invoker> findAll();
     void delete(String name);
-    String findFieldType(String name, String path);
+    DataType findFieldType(String name, String methodName, String path);
     String findFieldByPath(String invoker, String method, String path);
     Document getDocument(String name) throws Exception;
     void save(Document document);
