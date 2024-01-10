@@ -13,6 +13,7 @@ import com.becon.opencelium.backend.mapper.mongo.FieldBindingMngMapper;
 import com.becon.opencelium.backend.mapper.mongo.MethodMngMapper;
 import com.becon.opencelium.backend.mapper.mongo.OperatorMngMapper;
 import com.becon.opencelium.backend.mapper.mysql.ConnectorMapper;
+import com.becon.opencelium.backend.mapper.mysql.ConnectorResourceMapper;
 import com.becon.opencelium.backend.mapper.mysql.EnhancementMapper;
 import com.becon.opencelium.backend.mapper.mysql.invoker.InvokerMapper;
 import com.becon.opencelium.backend.mapper.mysql.RequestDataMapper;
@@ -73,6 +74,10 @@ public abstract class HelperMapper {
     @Lazy
     private RequestDataMapper requestDataMapper;
 
+    @Autowired
+    @Lazy
+    private ConnectorResourceMapper connectorResourceMapper;
+
 
     @Named("toConnectorDTO")
     public ConnectorDTO toConnectorDTO(ConnectorMng connectorMng) {
@@ -93,6 +98,11 @@ public abstract class HelperMapper {
     @Named("getConnectorDTOById")
     public ConnectorDTO getConnectorDTOById(int id) {
         return connectorMapper.toDTO(connectorService.findById(id).orElse(null));
+    }
+
+    @Named("getConnectorResourceById")
+    public ConnectorResource getConnectorResourceById(int id) {
+        return connectorResourceMapper.toDTO(connectorService.findById(id).orElse(null));
     }
 
     @Named("getFieldBindings")

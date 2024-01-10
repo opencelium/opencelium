@@ -27,6 +27,7 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -63,24 +64,22 @@ public class ConnectionController {
     private final ConnectionMngService connectionMngService;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
-    private final Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMapper;
-    private final PatchHelper patchHelper;
+    private final Mapper<Connection, ConnectionResource> connectionResourceMapper;
 
     public ConnectionController(
             Environment environment,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
+            Mapper<Connection, ConnectionResource> connectionResourceMapper,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
-            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
-            Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMapper,
-            PatchHelper patchHelper) {
+            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService
+    ) {
         this.environment = environment;
         this.connectionService = connectionService;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
         this.connectionMngService = connectionMngService;
-        this.fieldBindingMapper = fieldBindingMapper;
-        this.patchHelper = patchHelper;
+        this.connectionResourceMapper = connectionResourceMapper;
     }
 
     @Operation(summary = "Retrieves all connections from database")
@@ -106,7 +105,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Metadata of connections have been successfully retrieved",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionDTO.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -116,7 +115,9 @@ public class ConnectionController {
     })
     @GetMapping(path = "/all/meta")
     public ResponseEntity<?> getAllMeta() {
-        return ResponseEntity.ok().build();
+        List<Connection> connections = connectionService.findAll();
+        List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
+        return ResponseEntity.ok(connectionResources);
     }
 
     @Operation(summary = "Retrieves a connection from database by provided connection ID")
