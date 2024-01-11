@@ -113,7 +113,7 @@ public class ConnectionUpdateTracker {
         while (nodes.hasNext()) {
             JsonNode next = nodes.next();
             String path = next.get("path").textValue();
-            if (!path.startsWith("/enhancements"))
+            if (!path.startsWith("/enhancements") && !path.equals("/fromConnector") && !path.equals("/toConnector"))
                 merged.add(next);
         }
 
@@ -122,7 +122,7 @@ public class ConnectionUpdateTracker {
         while (nodes.hasNext()) {
             JsonNode next = nodes.next();
             String path = next.get("path").textValue();
-            if (path.startsWith("/fieldBindings"))
+            if (path.startsWith("/fieldBindings") || path.startsWith("/fromConnector") || path.startsWith("/toConnector"))
                 merged.add(next);
         }
         return objectMapper.convertValue(merged, JsonPatch.class);

@@ -144,7 +144,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         ConnectionMng patched = patchHelper.patch(patch, connection, ConnectionMng.class);
 
         FieldBindingMng FB = doAfterPatchBeforeSaveEnhancement(connection, patched, patch);
-        connectionMngRepository.save(patched);
+        save(patched);
         return FB;
     }
 
