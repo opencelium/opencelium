@@ -25,10 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -108,9 +105,23 @@ public class InvokerRequestBuilder {
         if (body == null || body.equals("null")){
             httpEntity = new HttpEntity <Object> (header);
         }
+        ResponseEntity response;
         RestTemplate restTemplate = createRestTemplate();
-        ResponseEntity<Object> response = restTemplate.exchange(url, method ,httpEntity, Object.class);
+        if (getResponseContentType(header, functionInvoker).toString().contains("xml")) {
+            response = restTemplate.exchange(url, method ,httpEntity, String.class);
+        } else {
+            response = InvokerRequestBuilder
+                    .convertToStringResponse(restTemplate.exchange(url, method ,httpEntity, Object.class));
+        }
         return convertToStringResponse(response);
+    }
+
+    private MediaType getResponseContentType(HttpHeaders httpHeaders, FunctionInvoker functionInvoker) {
+        if (functionInvoker.getResponse() != null && functionInvoker.getResponse().getSuccess() != null
+                && functionInvoker.getResponse().getSuccess().getHeader() != null){
+            return MediaType.valueOf(functionInvoker.getResponse().getSuccess().getHeader().get("Content-Type"));
+        }
+        return httpHeaders.getContentType();
     }
 
     private RestTemplate createRestTemplate() {
