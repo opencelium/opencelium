@@ -25,6 +25,7 @@ import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
+import com.becon.opencelium.backend.resource.execution.DataType;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.becon.opencelium.backend.utility.FileNameUtils;
@@ -115,12 +116,11 @@ public class InvokerServiceImp implements InvokerService {
     public void deleteInvokerFile(String name) {
         try {
             Path file = findFileByInvokerName(name).toPath();
-            if(exists(file)){
+            if (exists(file)) {
                 invokerContainer.remove(name);
                 Files.delete(file.toAbsolutePath());
             }
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             throw new StorageException("Failed to delete stored file", e);
         }
     }
@@ -144,17 +144,16 @@ public class InvokerServiceImp implements InvokerService {
     private void deleteInvoker(String name) {
         Objects.requireNonNull(name);
         Invoker backup = invokerContainer.getByName(name);
-        if(name.isEmpty()) {
+        if (name.isEmpty()) {
             throw new RuntimeException("INVOKER_NOT_FOUND");
         }
         try {
             Path file = findFileByInvokerName(name).toPath();
-            if(exists(file)){
+            if (exists(file)) {
                 invokerContainer.remove(name);
                 Files.delete(file.toAbsolutePath());
             }
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             invokerContainer.add(backup.getName(), backup);
             throw new StorageException("Failed to delete stored file", e);
         }
@@ -165,15 +164,82 @@ public class InvokerServiceImp implements InvokerService {
         return tempFile.exists();
     }
 
-    //TODO: need to add path of field
-    // path = response.success.val1.val2.val3;
     @Override
-    public String findFieldType(String invokerName, String path) {
-        return "string";
+    public DataType findFieldType(String invokerName, String methodName, String path) {
+
+        String exchangeType = ConditionUtility.getExchangeType(path);
+        String result = ConditionUtility.getResult(path);
+
+        Invoker invoker = findByName(invokerName);
+
+        FunctionInvoker functionInvoker = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))
+                .findFirst().orElseThrow(() -> new RuntimeException("Method not found in invoker"));
+
+        Map<String, Object> fields;
+        if (exchangeType.equals("response") && result.equals("success")) {
+            fields = functionInvoker.getResponse().getSuccess().getBody().getFields();
+        } else if (exchangeType.equals("response") && result.equals("fail")) {
+            fields = functionInvoker.getResponse().getFail().getBody().getFields();
+        } else {
+            fields = functionInvoker.getRequest().getBody().getFields();
+        }
+
+        String[] parts = ConditionUtility.getRefValue(path).split("\\.");
+
+        return findFieldType(fields, Arrays.stream(parts).collect(Collectors.toList()));
+    }
+
+    private DataType findFieldType(Object field, List<String> pathParts) {
+
+        if (field == null) {
+            return null;
+        }
+        if (pathParts.size() == 1) {
+            if (field instanceof Map<?, ?>) {
+                return DataType.OBJECT;
+            }
+            if (field instanceof List<?>) {
+                return DataType.ARRAY;
+            }
+            if (field instanceof Boolean) {
+                return DataType.BOOLEAN;
+            }
+            if (field instanceof String) {
+                return DataType.STRING;
+            }
+            if (field instanceof Number) {
+                if (field instanceof Long | field instanceof Integer | field instanceof Short) {
+                    return DataType.INTEGER;
+                }
+                return DataType.NUMBER;
+            }
+        }
+
+        if (field instanceof Map<?, ?> map) {
+            if (!map.containsKey(pathParts.get(0))) {
+                throw new RuntimeException("Field path is incorrect");
+            }
+            Object obj = map.get(pathParts.get(0));
+            pathParts.remove(0);
+            return findFieldType(obj, pathParts);
+        }
+
+        if (field instanceof List<?> list) {
+            int index;
+            try {
+                index = Integer.parseInt(pathParts.get(0));
+            } catch (NumberFormatException e) {
+                index = 0;
+            }
+            Object obj = list.get(index);
+            pathParts.remove(0);
+            return findFieldType(obj, pathParts);
+        }
+        return DataType.OBJECT;
     }
 
     @Override
-    public String findFieldByPath(String invokerName, String methodName, String path)  {
+    public String findFieldByPath(String invokerName, String methodName, String path) {
 
         path = path.replace("@", "__oc__attributes.");
 
@@ -186,13 +252,13 @@ public class InvokerServiceImp implements InvokerService {
 
         String format = "";
         Map<String, Object> fields;
-        if (exchangeType.equals("response") && result.equals("success")){
+        if (exchangeType.equals("response") && result.equals("success")) {
             fields = functionInvoker.getResponse().getSuccess().getBody().getFields();
 
             if (functionInvoker.getResponse().getSuccess().getBody() != null) {
                 format = functionInvoker.getResponse().getSuccess().getBody().getFormat();
             }
-        } else if (exchangeType.equals("response") && result.equals("fail")){
+        } else if (exchangeType.equals("response") && result.equals("fail")) {
             fields = functionInvoker.getResponse().getFail().getBody().getFields();
             if (functionInvoker.getResponse().getFail().getBody() != null) {
                 format = functionInvoker.getResponse().getFail().getBody().getFormat();
@@ -206,7 +272,7 @@ public class InvokerServiceImp implements InvokerService {
 
         String[] valueParts = ConditionUtility.getRefValue(path).split("\\.");
         if (format.equals("xml")) {
-            String lastElem = valueParts[valueParts.length -1];
+            String lastElem = valueParts[valueParts.length - 1];
             if (!lastElem.contains("@")) {
                 path = path + ".__oc__value";
             }
@@ -214,13 +280,13 @@ public class InvokerServiceImp implements InvokerService {
 
         Object value = new Object();
         for (String part : valueParts) {
-             value = fields.get(part);
-             if (value instanceof Map){
-                 fields = ( Map<String, Object>) value;
-             }
+            value = fields.get(part);
+            if (value instanceof Map) {
+                fields = (Map<String, Object>) value;
+            }
 
-            if (value instanceof ArrayList){
-                fields = (( ArrayList<Map<String, Object>>) value).get(0);
+            if (value instanceof ArrayList) {
+                fields = ((ArrayList<Map<String, Object>>) value).get(0);
             }
         }
 
@@ -264,7 +330,7 @@ public class InvokerServiceImp implements InvokerService {
     public Document getDocument(String name) throws Exception {
         File file = new File(filePath.toString() + "/" + name);
 
-        if(!FileNameUtils.getExtension(file.getName()).equals("xml")){
+        if (!FileNameUtils.getExtension(file.getName()).equals("xml")) {
             return null;
         }
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -327,24 +393,20 @@ public class InvokerServiceImp implements InvokerService {
         return null;
     }
 
-    private static Document convertStringToXMLDocument(String xmlString)
-    {
+    private static Document convertStringToXMLDocument(String xmlString) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;
-        try
-        {
+        try {
             builder = factory.newDocumentBuilder();
             Document doc = builder.parse(new InputSource(new StringReader(xmlString)));
             return doc;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private Object findField(String field, Map<String, Object> body){
+    private Object findField(String field, Map<String, Object> body) {
 
         if (body == null) {
             return null;
@@ -356,15 +418,15 @@ public class InvokerServiceImp implements InvokerService {
             String k = entry.getKey();
             Object object = entry.getValue();
 
-            if (k.equals(field)){
+            if (k.equals(field)) {
                 return object;
             }
 
-            if((object instanceof HashMap)){
-               r = findField(field, (Map<String, Object>) object);
+            if ((object instanceof HashMap)) {
+                r = findField(field, (Map<String, Object>) object);
 
-            } else if (object instanceof ArrayList){
-               if(!((ArrayList) object).isEmpty() && ((ArrayList) object).get(0) instanceof HashMap){
+            } else if (object instanceof ArrayList) {
+                if (!((ArrayList) object).isEmpty() && ((ArrayList) object).get(0) instanceof HashMap) {
                     Map<String, Object> subFields = ((ArrayList<Map<String, Object>>) object).get(0);
                     r = findField(field, subFields);
 
