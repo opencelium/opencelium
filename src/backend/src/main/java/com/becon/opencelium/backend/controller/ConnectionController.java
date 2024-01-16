@@ -150,8 +150,8 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping
-    public ResponseEntity<?> createEmptyConnection() {
+    @GetMapping("/id")
+    public ResponseEntity<?> getNewConnectionId() {
         Long id = connectionService.createEmptyConnection();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", id);
