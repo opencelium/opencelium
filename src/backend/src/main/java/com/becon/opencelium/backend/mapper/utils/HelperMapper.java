@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
+import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -77,6 +78,9 @@ public abstract class HelperMapper {
     @Autowired
     @Lazy
     private ConnectorResourceMapper connectorResourceMapper;
+
+    @Autowired
+    private OperationMappingHelper operationMappingHelper;
 
 
     @Named("toConnectorDTO")
@@ -178,6 +182,16 @@ public abstract class HelperMapper {
         connectorEx.setInvoker(connector.getInvoker());
         connectorEx.setRequiredData(map);
 
-        return new ConnectorMng();
+        return null;
+    }
+
+    @Named("setAdditionalFields")
+    public ConnectorMng mapMethodsOfConnector(ConnectorEx connectorEx, ConnectorMng connectorMng) {
+        if(connectorMng.getMethods() == null || connectorMng.getMethods().isEmpty())
+            return null;
+
+        List<OperationDTO> operations = operationMappingHelper.toOperationAll(connectorMng.getMethods(), connectorEx.getInvoker());
+        connectorEx.setMethods(operations);
+        return null;
     }
 }

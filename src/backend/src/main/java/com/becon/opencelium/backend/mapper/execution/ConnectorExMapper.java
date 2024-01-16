@@ -13,7 +13,6 @@ import org.mapstruct.*;
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
         uses = {
                 OperatorExMapper.class,
-                OperationMngMapper.class,
                 HelperMapper.class
         }
 )
@@ -23,7 +22,7 @@ public interface ConnectorExMapper extends Mapper<ConnectorEx, ConnectorMng> {
     @Named("toEntity")
     @Mappings({
             @Mapping(target = "id", source = "connectorId"),
-            @Mapping(target = "methods", qualifiedByName = {"operationMngMapper", "toEntityAll"}),
+            @Mapping(target = "methods", ignore = true),
             @Mapping(target = "operators", qualifiedByName = {"operatorExMapper", "toEntityAll"})
     })
     ConnectorEx toEntity(ConnectorMng dto);
@@ -31,7 +30,9 @@ public interface ConnectorExMapper extends Mapper<ConnectorEx, ConnectorMng> {
     @AfterMapping
     default void afterMapping(@MappingTarget ConnectorEx entity, ConnectorMng dto) {
         Wrapper<ConnectorMng, ConnectorEx> wrapper = new Wrapper<>(entity);
-        helperForAfterMapping(wrapper);
+        wrapper.setTo(dto);
+        setAdditionalFields(wrapper);
+        mapMethodsOfConnector(wrapper);
     }
 
     default ConnectorMng toDTO(ConnectorEx entity) {
@@ -40,5 +41,9 @@ public interface ConnectorExMapper extends Mapper<ConnectorEx, ConnectorMng> {
 
     @Mapping(target = "to", source = "from", qualifiedByName = {"helperMapper", "setAdditionalFields"})
     @Mapping(target = "from", ignore = true)
-    Wrapper<ConnectorMng, ConnectorEx> helperForAfterMapping(Wrapper<ConnectorMng, ConnectorEx> wrapper);
+    Wrapper<ConnectorMng, ConnectorEx> setAdditionalFields(Wrapper<ConnectorMng, ConnectorEx> wrapper);
+
+    @Mapping(target = "to", expression ="java(helperMapper.mapMethodsOfConnector(wrapper.getFrom(), wrapper.getTo()))")
+    @Mapping(target = "from", ignore = true)
+    Wrapper<ConnectorMng, ConnectorEx> mapMethodsOfConnector(Wrapper<ConnectorMng, ConnectorEx> wrapper);
 }
