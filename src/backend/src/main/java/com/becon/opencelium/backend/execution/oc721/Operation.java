@@ -3,6 +3,8 @@ package com.becon.opencelium.backend.execution.oc721;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.utility.ConditionUtility;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -53,19 +55,19 @@ public class Operation {
         String exchangeType = getExchangeType(ref);
         String key = generateKey(loops);
 
-        String entityBody = "";
-        MediaType mediaType = MediaType.TEXT_PLAIN;
+        String entityBody;
+        MediaType mediaType;
 
         if (exchangeType.equals("response")) {
             ResponseEntity<?> responseEntity = responses.get(key);
 
             mediaType = responseEntity.getHeaders().getContentType();
-            entityBody = Objects.requireNonNull(responseEntity.getBody()).toString();
+            entityBody = bodyToString(responseEntity.getBody());
         } else {
             RequestEntity<?> requestEntity = requests.get(key);
 
             mediaType = requestEntity.getHeaders().getContentType();
-            entityBody = Objects.requireNonNull(requestEntity.getBody()).toString();
+            entityBody = bodyToString(requestEntity.getBody());
         }
 
         Object result;
@@ -79,6 +81,14 @@ public class Operation {
         }
 
         return result;
+    }
+
+    public static String bodyToString(Object body) {
+        try {
+            return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Object getFromXML(String xmlString, String ref, LinkedHashMap<String, String> loops) {

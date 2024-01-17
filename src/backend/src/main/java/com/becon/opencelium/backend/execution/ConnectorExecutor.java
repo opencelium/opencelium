@@ -101,7 +101,7 @@ public class ConnectorExecutor {
                 .usingReferences(this::mapToSchemaDTO)
                 .createRequest();
 
-        ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
+        ResponseEntity<?> responseEntity = this.restTemplate.exchange(requestEntity, Object.class);
 
         Operation operation = executionManager.findOperationByColor(operationDTO.getOperationId())
                 .orElseGet(() -> {
