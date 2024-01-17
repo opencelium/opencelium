@@ -304,7 +304,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP1)
 
 
 
-Red Hat Enterprise Linux
+Red Hat Enterprise Linux (example for Red Hat 9.2)
 """""""""""""""""
 **Prepare environment:**
 
@@ -321,7 +321,7 @@ Red Hat Enterprise Linux
 	:linenos:
 	
 	root@shell> yum install -y gcc-c++ make
-	root@shell> curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
+	root@shell> curl -sL https://rpm.nodesource.com/setup_20.x | sudo -E bash -
 	root@shell> yum install nodejs
 	root@shell> node -v // to check
 
@@ -347,8 +347,7 @@ Red Hat Enterprise Linux
 .. code-block:: sh
 	:linenos:
 
-	root@shell> yum install java-1.8.0-openjdk
-	root@shell> yum install java-1.8.0-openjdk-devel
+	root@shell> yum install java-17-openjdk.x86_64
 	root@shell> java -version // to check
 
 6. Install gradle:
@@ -357,10 +356,10 @@ Red Hat Enterprise Linux
 	:linenos:
 	
 	root@shell> cd /tmp
-	root@shell> wget https://services.gradle.org/distributions/gradle-5.6.2-all.zip
+	root@shell> wget https://services.gradle.org/distributions/gradle-7.4.2-all.zip
 	root@shell> mkdir /opt/gradle
-	root@shell> unzip -d /opt/gradle gradle-5.6.2-all.zip
-	root@shell> export PATH=$PATH:/opt/gradle/gradle-5.6.2/bin
+	root@shell> unzip -d /opt/gradle gradle-7.4.2-all.zip
+	root@shell> export PATH=$PATH:/opt/gradle/gradle-7.4.2/bin
 	root@shell> gradle -v // to check
 
 7. Install neo4j:
@@ -368,21 +367,19 @@ Red Hat Enterprise Linux
 .. code-block:: sh
 	:linenos:
 
-	root@shell> rpm --import https://debian.neo4j.org/neotechnology.gpg.key
+	root@shell> rpm --import https://debian.neo4j.com/neotechnology.gpg.key
 	root@shell> cat <<EOF>  /etc/yum.repos.d/neo4j.repo
 				[neo4j]
 				name=Neo4j RPM Repository
-				baseurl=https://yum.neo4j.org/stable
+				baseurl=https://yum.neo4j.com/stable/5
 				enabled=1
 				gpgcheck=1
 				EOF
-	root@shell> yum install neo4j-3.5.11
-	root@shell> /usr/bin/neo4j-admin set-initial-password secret // change password if you want
-	root@shell> service neo4j status  // to check
-	root@shell> sed -i '/#dbms.connectors.default_listen_address=0.0.0.0/c\dbms.connectors.default_listen_address=0.0.0.0' /etc/neo4j/neo4j.conf
-	root@shell> sed -i '/#dbms.security.auth_enabled=false/c\dbms.security.auth_enabled=false' /etc/neo4j/neo4j.conf	
-        root@shell> service neo4j restart
-        root@shell> systemctl enable neo4j
+	root@shell> yum install neo4j-5.7.0-1
+	root@shell> /usr/bin/neo4j-admin set-initial-password secret1234 // change password if you want
+	root@shell> systemctl start neo4j
+	root@shell> systemctl enable neo4j	
+	root@shell> systemctl status neo4j // to check
 
 8. Install MariaDB:
 
@@ -390,7 +387,8 @@ Red Hat Enterprise Linux
 	:linenos:
 
 	root@shell> yum install mariadb-server
-	root@shell>	service mariadb start
+	root@shell>	systemctl start mariadb
+	root@shell>	systemctl enable mariadb
 	root@shell> mysql_secure_installation // set password
 	root@shell> mysql --version // to check
 
@@ -416,7 +414,7 @@ Red Hat Enterprise Linux
 
 .. code-block:: sh
 
-        root@shell> cp -a /opt/scripts/oc_service.sh /usr/bin/oc
+        root@shell> ln -s /opt/scripts/oc_service.sh /usr/bin/oc
         root@shell> oc start_frontend
 
 
