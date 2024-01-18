@@ -1,11 +1,13 @@
 package com.becon.opencelium.backend.mapper.utils;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import com.becon.opencelium.backend.database.mysql.service.RequestDataService;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
@@ -18,20 +20,19 @@ import com.becon.opencelium.backend.mapper.mysql.EnhancementMapper;
 import com.becon.opencelium.backend.mapper.mysql.invoker.InvokerMapper;
 import com.becon.opencelium.backend.mapper.mysql.RequestDataMapper;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
+import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
+import com.becon.opencelium.backend.resource.execution.EnhancementEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Mapper(
         componentModel = "spring",
@@ -48,6 +49,11 @@ public abstract class HelperMapper {
     @Lazy
     @Qualifier("connectorServiceImp")
     private ConnectorService connectorService;
+
+    @Autowired
+    @Qualifier("enhancementServiceImp")
+    private EnhancementService enhancementService;
+
     @Autowired
     @Qualifier("invokerServiceImp")
     private InvokerService invokerService;
@@ -55,14 +61,18 @@ public abstract class HelperMapper {
     @Autowired
     @Qualifier("requestDataServiceImp")
     private RequestDataService requestDataService;
+
     @Autowired
     @Qualifier("fieldBindingMngServiceImp")
     private FieldBindingMngService fieldBindingMngService;
+
     @Autowired
     private InvokerMapper invokerMapper;
+
     @Autowired
     @Lazy
     private ConnectorMapper connectorMapper;
+
     @Autowired
     @Lazy
     private EnhancementMapper enhancementMapper;
@@ -193,5 +203,34 @@ public abstract class HelperMapper {
         List<OperationDTO> operations = operationMappingHelper.toOperationAll(connectorMng.getMethods(), connectorEx.getInvoker());
         connectorEx.setMethods(operations);
         return null;
+    }
+
+    @Named("getEnhancementDTOById")
+    public EnhancementDTO getEnhancementDTOById(Integer id){
+        Enhancement enhancement = enhancementService.getById(id);
+        return enhancementMapper.toDTO(enhancement);
+    }
+
+    @Named("getEnhancementExById")
+    public EnhancementEx getEnhancementExById(Integer id) {
+        Enhancement enhancement = enhancementService.getById(id);
+        EnhancementEx enhancementEx = new EnhancementEx();
+
+        enhancementEx.setEnhanceId(id);
+        enhancementEx.setScript(enhancement.getScript());
+        enhancementEx.setLang(enhancement.getLanguage());
+
+        String variables = enhancement.getArgs().replaceAll("[/|\\\\n]","");
+        String[] vars = variables.substring(0, variables.length()-1).split(";");
+
+        Map<String, String> args = new HashMap<>();
+        Arrays.stream(vars).forEach(v -> {
+            String[] split = v.split("=");
+            String key = split[0].trim().split("\\s")[1];
+            String value = split[1].trim();
+            args.put(key, value);
+        });
+        enhancementEx.setArgs(args);
+        return enhancementEx;
     }
 }

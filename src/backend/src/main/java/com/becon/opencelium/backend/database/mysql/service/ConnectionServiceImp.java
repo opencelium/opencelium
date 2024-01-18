@@ -163,9 +163,9 @@ public class ConnectionServiceImp implements ConnectionService {
 
         ConnectionMng patched = connectionMngService.getByConnectionId(connectionId);
 
-        if (connectorId.equals(connectionMng.getFromConnector().getConnectorId())) {
+        if (connectionMng.getFromConnector() != null && connectorId.equals(connectionMng.getFromConnector().getConnectorId())) {
             updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getFromConnector(), patched.getFromConnector(), patch);
-        } else {
+        } else if (id != null) {
             updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getToConnector(), patched.getToConnector(), patch);
         }
         return id;
@@ -274,7 +274,6 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
 
-
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -333,7 +332,7 @@ public class ConnectionServiceImp implements ConnectionService {
         if (path.startsWith("/fromConnector/")) {
             JsonPatch changed = patchHelper.changeEachPath(jsonPatch, p -> p.substring(p.indexOf("/", 1)));
             connectionMngService.patchMethodOrOperator(connectionId, connection.getFromConnector(), changed);
-        }else if (path.startsWith("/toConnector/")) {
+        } else if (path.startsWith("/toConnector/")) {
             JsonPatch changed = patchHelper.changeEachPath(jsonPatch, p -> p.substring(p.indexOf("/", 1)));
             connectionMngService.patchMethodOrOperator(connectionId, connection.getToConnector(), changed);
         } else {

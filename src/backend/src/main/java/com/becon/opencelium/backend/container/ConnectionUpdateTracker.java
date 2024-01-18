@@ -96,7 +96,7 @@ public class ConnectionUpdateTracker {
             return;
         }
 
-        if (before.getConnectorId().equals(connection.getFromConnector().getConnectorId())) {
+        if (connection.getFromConnector() != null && before.getConnectorId().equals(connection.getFromConnector().getConnectorId())) {
             forUndo = patchHelper.changeEachPath(forUndo, s -> "/fromConnector" + s);
         } else {
             forUndo = patchHelper.changeEachPath(forUndo, s -> "/toConnector" + s);

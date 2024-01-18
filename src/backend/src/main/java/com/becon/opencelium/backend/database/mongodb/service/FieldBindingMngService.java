@@ -8,17 +8,10 @@ import java.util.Optional;
 
 public interface FieldBindingMngService {
     void bind(ConnectionMng connectionMng);
-
     List<FieldBindingMng> saveAll(List<FieldBindingMng> fieldBindings);
-
     FieldBindingMng save(FieldBindingMng fieldBindingMng);
-
     Optional<FieldBindingMng> findById(String fieldBindingId);
     List<FieldBindingMng> findAllByEnhancementId(List<Integer> ids);
-
     void deleteById(String id);
-
-    void updateEnhancementId(Integer oldId, Integer newId);
-
     void deleteAll(List<FieldBindingMng> fieldBindings);
 }

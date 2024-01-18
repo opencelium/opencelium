@@ -20,7 +20,7 @@ public class EnhancementMng {
     private String title;
     private String description;
     private String script;
-    private String variables;
+    private String args;
     private String language;
 
     public EnhancementMng() {
@@ -58,11 +58,11 @@ public class EnhancementMng {
         this.script = script;
     }
 
-    public String getVariables() {
-        return variables;
+    public String getArgs() {
+        return args;
     }
 
-    public void setVariables(String variables) {
-        this.variables = variables;
+    public void setArgs(String args) {
+        this.args = args;
     }
 }

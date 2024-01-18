@@ -16,11 +16,13 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
 
     @Override
     public List<FieldBindingMng> saveAll(List<FieldBindingMng> fieldBindings) {
+        fieldBindings.forEach(e->e.setEnhancement(null));
         return fieldBindingRepository.saveAll(fieldBindings);
     }
 
     @Override
     public FieldBindingMng save(FieldBindingMng fieldBindingMng) {
+        fieldBindingMng.setEnhancement(null);
         return fieldBindingRepository.save(fieldBindingMng);
     }
 
@@ -42,13 +44,6 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     }
 
     @Override
-    public void updateEnhancementId(Integer oldId, Integer newId) {
-        FieldBindingMng old = fieldBindingRepository.findByEnhancementId(oldId);
-        old.setEnhancementId(newId);
-        fieldBindingRepository.save(old);
-    }
-
-    @Override
     public void deleteAll(List<FieldBindingMng> fieldBindings) {
         fieldBindingRepository.deleteAll(fieldBindings);
     }
@@ -61,7 +56,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         methods.addAll(connectionMng.getToConnector().getMethods());
 
         for (FieldBindingMng fb : fieldBindings) {
-            FieldBindingMng savedFB = fieldBindingRepository.save(fb);
+            FieldBindingMng savedFB = save(fb);
             bindIds(savedFB, methods);
         }
     }
