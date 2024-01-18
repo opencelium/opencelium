@@ -143,7 +143,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             connection.setFieldBindings(new ArrayList<>());
         }
 
-        setEnhancements(connection);
         ConnectionMng patched = patchHelper.patch(patch, connection, ConnectionMng.class);
 
         FieldBindingMng FB = doAfterPatchBeforeSaveEnhancement(connection, patched, patch);
