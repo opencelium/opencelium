@@ -160,7 +160,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 
 
-SUSE Linux Enterprise Server (example for SLES 15 SP1)
+SUSE Linux Enterprise Server (example for SLES 15 SP5)
 """""""""""""""""
 **Prepare environment:**
 
@@ -169,9 +169,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP1)
 .. code-block:: sh
 	:linenos:
 	
-	root@shell> zypper addrepo http://download.opensuse.org/repositories/devel:/languages:/nodejs/SLE_15_SP2 node14
-	root@shell> zypper refresh
-	root@shell> zypper install nodejs14
+	root@shell> zypper install nodejs20
 	root@shell> node -v
 
 2. Install yarn:
@@ -195,8 +193,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP1)
 .. code-block:: sh
 	:linenos:
 
-	root@shell> zypper install java-1_8_0-openjdk
-	root@shell> zypper install java-1_8_0-openjdk-devel
+	root@shell> zypper install java-17-openjdk
 	root@shell> java -version // to check
 
 6. Install gradle:
@@ -205,10 +202,10 @@ SUSE Linux Enterprise Server (example for SLES 15 SP1)
 	:linenos:
 	
 	root@shell> cd /tmp
-	root@shell> wget https://services.gradle.org/distributions/gradle-5.6.2-all.zip
+	root@shell> wget https://services.gradle.org/distributions/gradle-7.4.2-all.zip
 	root@shell> mkdir /opt/gradle
-	root@shell> unzip -d /opt/gradle gradle-5.6.2-all.zip
-	root@shell> export PATH=$PATH:/opt/gradle/gradle-5.6.2/bin
+	root@shell> unzip -d /opt/gradle gradle-7.4.2-all.zip
+	root@shell> export PATH=$PATH:/opt/gradle/gradle-7.4.2/bin
 	root@shell> gradle -v // to check
 
 7. Install neo4j:
@@ -216,17 +213,14 @@ SUSE Linux Enterprise Server (example for SLES 15 SP1)
 .. code-block:: sh
 	:linenos:
 
-	root@shell> zypper addrepo --refresh https://yum.neo4j.org/stable neo4j-repository
+	root@shell> zypper addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
 	root@shell> zypper refresh
-	root@shell> zypper install neo4j-3.5.11
-	root@shell> /usr/bin/neo4j-admin set-initial-password secret // change password if you want
+	root@shell> zypper install neo4j-5.7.0
+	root@shell> /usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
 	root@shell> neo4j start
 	root@shell> neo4j status  // to check
-	root@shell> sed -i '/#dbms.connectors.default_listen_address=0.0.0.0/c\dbms.connectors.default_listen_address=0.0.0.0' /etc/neo4j/neo4j.conf
-	root@shell> sed -i '/#dbms.security.auth_enabled=false/c\dbms.security.auth_enabled=false' /etc/neo4j/neo4j.conf	
-    	root@shell> neo4j restart
-    	root@shell> zypper install insserv
-        root@shell> systemctl enable neo4j
+  	root@shell> zypper install insserv
+    root@shell> systemctl enable neo4j
 
 8. Install MariaDB:
 
@@ -237,6 +231,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP1)
 	root@shell> rcmysql start
 	root@shell> mysql_secure_installation // set password	
 	root@shell> mysql --version // to check
+    root@shell> systemctl enable mariadb
 
 
 **Install Application:**
