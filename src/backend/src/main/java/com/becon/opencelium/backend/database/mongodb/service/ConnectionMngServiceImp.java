@@ -151,6 +151,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     private void setEnhancements(ConnectionMng connection) {
+        if(connection.getFieldBindings()==null || connection.getFieldBindings().isEmpty())
+            return;
         connection.getFieldBindings().forEach(f -> f.setEnhancement(enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancementService.getById(f.getEnhancementId())))));
     }
 
