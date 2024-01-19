@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.mapper.mongo;
 
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.utils.HelperMapper;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -14,6 +15,7 @@ import java.util.List;
         componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         uses = {
+                HelperMapper.class,
                 LinkedFieldMngMapper.class,
                 EnhancementMngMapper.class
         }
@@ -28,9 +30,9 @@ public interface FieldBindingMngMapper extends Mapper<FieldBindingMng, FieldBind
     FieldBindingMng toEntity(FieldBindingDTO dto);
 
     @Mappings({
-            @Mapping(target = "enhancement", qualifiedByName = {"enhancementMngMapper","toDTO"}),
             @Mapping(target = "to", qualifiedByName = {"linkedFieldMngMapper", "toDTOAll"}),
-            @Mapping(target = "from", qualifiedByName = {"linkedFieldMngMapper", "toDTOAll"})
+            @Mapping(target = "from", qualifiedByName = {"linkedFieldMngMapper", "toDTOAll"}),
+            @Mapping(target = "enhancement", source = "enhancementId", qualifiedByName = {"helperMapper", "getEnhancementDTOById"})
     })
     FieldBindingDTO toDTO(FieldBindingMng entity);
 

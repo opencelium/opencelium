@@ -163,9 +163,9 @@ public class ConnectionServiceImp implements ConnectionService {
 
         ConnectionMng patched = connectionMngService.getByConnectionId(connectionId);
 
-        if (connectorId.equals(connectionMng.getFromConnector().getConnectorId())) {
+        if (connectionMng.getFromConnector() != null && connectorId.equals(connectionMng.getFromConnector().getConnectorId())) {
             updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getFromConnector(), patched.getFromConnector(), patch);
-        } else {
+        } else if (id != null) {
             updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getToConnector(), patched.getToConnector(), patch);
         }
         return id;
@@ -252,6 +252,7 @@ public class ConnectionServiceImp implements ConnectionService {
         ConnectionDTO connectionDTOMng = connectionMngMapper.toDTO(connectionMng);
         ConnectionDTO connectionDTO = connectionMapper.toDTO(connection);
 
+        connectionDTOMng.setTitle(connection.getTitle());
         connectionDTOMng.setDescription(connectionDTO.getDescription());
         connectionDTOMng.setIcon(connectionDTO.getIcon());
         connectionDTOMng.setBusinessLayout(connectionDTO.getBusinessLayout());
@@ -273,18 +274,15 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
 
-
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * this method can be used for :
-     * 1. updating basic fields of connection( in ConnectionController).
+     * 1. updating basic fields of connection.
      * In this case, {@param patch} CAN ONLY be replace|add|remove patch operations ONLY with the basic fields of connection. Otherwise, this operations will be ignored
      * 2. Undoing ALL tracked updates.
-     * In this case, {@param patch} CAN ONLY be the patch operations in 1st case and additionally, it CAN be a patch we made 'by hand' while tracking update to undo:
-     * Here they are : "op" - "remove", "replace", "add", "path" - "from|toConnector/methods/{integer}", "from|toConnector/operators/{integer}", "fieldBindings/{integer}"
      *
      * @param connection is an object to patch and MUST be already saved.
      * @return patched and saved connection
@@ -295,7 +293,7 @@ public class ConnectionServiceImp implements ConnectionService {
         JsonPatch forConnection = patchHelper.extract(patch, p -> p.equals("/title") || p.equals("/description") || p.equals("/icon"));
 
         //customize the patch for connectionMng
-        JsonPatch forConnectionMng = patchHelper.extract(patch, p -> p.equals("/title") || p.startsWith("/fieldBindings") || p.equals("/fromConnector") || p.equals("/toConnector"));
+        JsonPatch forConnectionMng = patchHelper.extract(patch, p -> p.startsWith("/fieldBindings") || p.equals("/fromConnector") || p.equals("/toConnector"));
 
         FieldBindingMng FB = connectionMngService.patchUpdate(connection.getId(), forConnectionMng);
         ConnectionMng updatedConnectionMng = connectionMngService.getByConnectionId(connection.getId());
@@ -334,7 +332,7 @@ public class ConnectionServiceImp implements ConnectionService {
         if (path.startsWith("/fromConnector/")) {
             JsonPatch changed = patchHelper.changeEachPath(jsonPatch, p -> p.substring(p.indexOf("/", 1)));
             connectionMngService.patchMethodOrOperator(connectionId, connection.getFromConnector(), changed);
-        }else if (path.startsWith("/toConnector/")) {
+        } else if (path.startsWith("/toConnector/")) {
             JsonPatch changed = patchHelper.changeEachPath(jsonPatch, p -> p.substring(p.indexOf("/", 1)));
             connectionMngService.patchMethodOrOperator(connectionId, connection.getToConnector(), changed);
         } else {

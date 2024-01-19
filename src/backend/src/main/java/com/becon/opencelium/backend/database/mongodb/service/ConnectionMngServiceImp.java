@@ -87,8 +87,10 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public ConnectionMng getByConnectionId(Long connectionId) {
-        return connectionMngRepository.findByConnectionId(connectionId)
+        ConnectionMng connectionMng = connectionMngRepository.findByConnectionId(connectionId)
                 .orElseThrow(() -> new ConnectionNotFoundException(connectionId));
+        setEnhancements(connectionMng);
+        return connectionMng;
     }
 
     @Override
@@ -105,8 +107,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     public String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch) {
         ConnectionMng connection = getByConnectionId(connectionId);
 
-        String id;
-        if (connectorId.equals(connection.getFromConnector().getConnectorId())) {
+        String id = null;
+        if (connection.getFromConnector() != null && connectorId.equals(connection.getFromConnector().getConnectorId())) {
             if (connection.getFromConnector().getMethods() == null) {
                 connection.getFromConnector().setMethods(new ArrayList<>());
             }
@@ -117,7 +119,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             ConnectorMng patched = patchHelper.patch(patch, connection.getFromConnector(), ConnectorMng.class);
             connection.setFromConnector(patched);
             id = doAfterPatchBeforeSave(fromConnector, patched, patch);
-        } else {
+        } else if (connection.getToConnector() != null && connectorId.equals(connection.getToConnector().getConnectorId())) {
             if (connection.getToConnector().getMethods() == null) {
                 connection.getToConnector().setMethods(new ArrayList<>());
             }
@@ -146,6 +148,10 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         FieldBindingMng FB = doAfterPatchBeforeSaveEnhancement(connection, patched, patch);
         save(patched);
         return FB;
+    }
+
+    private void setEnhancements(ConnectionMng connection) {
+        connection.getFieldBindings().forEach(f -> f.setEnhancement(enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancementService.getById(f.getEnhancementId())))));
     }
 
     private FieldBindingMng doAfterPatchBeforeSaveEnhancement(ConnectionMng connection, ConnectionMng patched, JsonPatch patch) {

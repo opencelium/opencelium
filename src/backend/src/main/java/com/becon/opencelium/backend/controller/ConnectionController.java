@@ -29,7 +29,6 @@ import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -65,6 +64,7 @@ public class ConnectionController {
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final Mapper<Connection, ConnectionResource> connectionResourceMapper;
+    private final PatchHelper patchHelper;
 
     public ConnectionController(
             Environment environment,
@@ -72,7 +72,8 @@ public class ConnectionController {
             Mapper<Connection, ConnectionDTO> connectionMapper,
             Mapper<Connection, ConnectionResource> connectionResourceMapper,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
-            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService
+            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
+            PatchHelper patchHelper
     ) {
         this.environment = environment;
         this.connectionService = connectionService;
@@ -80,6 +81,7 @@ public class ConnectionController {
         this.connectionMapper = connectionMapper;
         this.connectionMngService = connectionMngService;
         this.connectionResourceMapper = connectionResourceMapper;
+        this.patchHelper = patchHelper;
     }
 
     @Operation(summary = "Retrieves all connections from database")
@@ -182,7 +184,9 @@ public class ConnectionController {
         if (FB == null) {
             return ResponseEntity.ok().build();
         } else {
-            return ResponseEntity.ok(FB);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", FB.getId());
+            return ResponseEntity.ok(jsonObject);
         }
     }
 
@@ -192,6 +196,8 @@ public class ConnectionController {
             @ApiResponse(responseCode = "200",
                     description = "Connection has been successfully updated",
                     content = @Content(schema = @Schema(implementation = MethodDTO.class))),
+            @ApiResponse(responseCode = "200",
+                    description = "Method and|or Operator has been successfully updated"),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -209,9 +215,13 @@ public class ConnectionController {
             @RequestBody JsonPatch patch
     ) {
         String id = connectionService.patchMethodOrOperator(connectionId, connectorId, patch);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", id);
-        return ResponseEntity.ok(jsonObject);
+        if (patchHelper.anyMatchesWithAny(patch, "/methods/\\d+", "/methods/-", "/operators/\\d+", "/operators/-")) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", id);
+            return ResponseEntity.ok(jsonObject);
+        }else {
+            return ResponseEntity.ok().build();
+        }
     }
 
 
