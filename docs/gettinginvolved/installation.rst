@@ -219,8 +219,8 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	root@shell> /usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
 	root@shell> neo4j start
 	root@shell> neo4j status  // to check
-  	root@shell> zypper install insserv
-    root@shell> systemctl enable neo4j
+        root@shell> zypper install insserv
+        root@shell> systemctl enable neo4j
 
 8. Install MariaDB:
 
@@ -231,7 +231,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	root@shell> rcmysql start
 	root@shell> mysql_secure_installation // set password	
 	root@shell> mysql --version // to check
-    root@shell> systemctl enable mariadb
+        root@shell> systemctl enable mariadb
 
 
 **Install Application:**
