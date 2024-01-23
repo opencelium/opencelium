@@ -21,14 +21,12 @@ import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConnectorDTO {
 
-    private String id;
     private Integer connectorId;
     private String title;
     private String icon;
@@ -38,14 +36,6 @@ public class ConnectorDTO {
     private BusinessLayout businessLayout;
     private List<MethodDTO> methods;
     private List<OperatorDTO> operators;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public Integer getConnectorId() {
         return connectorId;

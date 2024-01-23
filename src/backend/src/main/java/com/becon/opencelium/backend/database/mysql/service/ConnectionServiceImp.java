@@ -120,7 +120,9 @@ public class ConnectionServiceImp implements ConnectionService {
         //saving enhancements
         enhancements.forEach(enhancement -> enhancement.setConnection(savedConnection));
         enhancementService.saveAll(enhancements);
-
+        for (int i = 0; i < connectionMng.getFieldBindings().size(); i++) {
+            connectionMng.getFieldBindings().get(i).setEnhancementId(enhancements.get(i).getId());
+        }
         //saving connectionMng
         connectionMng.setConnectionId(savedConnection.getId());
         return connectionMngService.save(connectionMng);
