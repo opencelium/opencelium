@@ -27,8 +27,8 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -63,23 +63,24 @@ public class ConnectionController {
     private final ConnectionMngService connectionMngService;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
-    private final Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMapper;
+    private final Mapper<Connection, ConnectionResource> connectionResourceMapper;
     private final PatchHelper patchHelper;
 
     public ConnectionController(
             Environment environment,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
+            Mapper<Connection, ConnectionResource> connectionResourceMapper,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
-            Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMapper,
-            PatchHelper patchHelper) {
+            PatchHelper patchHelper
+    ) {
         this.environment = environment;
         this.connectionService = connectionService;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
         this.connectionMngService = connectionMngService;
-        this.fieldBindingMapper = fieldBindingMapper;
+        this.connectionResourceMapper = connectionResourceMapper;
         this.patchHelper = patchHelper;
     }
 
@@ -106,7 +107,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Metadata of connections have been successfully retrieved",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionDTO.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -116,7 +117,9 @@ public class ConnectionController {
     })
     @GetMapping(path = "/all/meta")
     public ResponseEntity<?> getAllMeta() {
-        return ResponseEntity.ok().build();
+        List<Connection> connections = connectionService.findAll();
+        List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
+        return ResponseEntity.ok(connectionResources);
     }
 
     @Operation(summary = "Retrieves a connection from database by provided connection ID")
@@ -149,8 +152,8 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping
-    public ResponseEntity<?> createEmptyConnection() {
+    @GetMapping("/id")
+    public ResponseEntity<?> getNewConnectionId() {
         Long id = connectionService.createEmptyConnection();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", id);
@@ -181,7 +184,9 @@ public class ConnectionController {
         if (FB == null) {
             return ResponseEntity.ok().build();
         } else {
-            return ResponseEntity.ok(FB);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", FB.getId());
+            return ResponseEntity.ok(jsonObject);
         }
     }
 
@@ -191,6 +196,8 @@ public class ConnectionController {
             @ApiResponse(responseCode = "200",
                     description = "Connection has been successfully updated",
                     content = @Content(schema = @Schema(implementation = MethodDTO.class))),
+            @ApiResponse(responseCode = "200",
+                    description = "Method and|or Operator has been successfully updated"),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -208,9 +215,13 @@ public class ConnectionController {
             @RequestBody JsonPatch patch
     ) {
         String id = connectionService.patchMethodOrOperator(connectionId, connectorId, patch);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", id);
-        return ResponseEntity.ok(jsonObject);
+        if (patchHelper.anyMatchesWithAny(patch, "/methods/\\d+", "/methods/-", "/operators/\\d+", "/operators/-")) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", id);
+            return ResponseEntity.ok(jsonObject);
+        }else {
+            return ResponseEntity.ok().build();
+        }
     }
 
 
@@ -251,7 +262,7 @@ public class ConnectionController {
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
         ConnectionMng savedConnection = connectionService.save(connection, connectionMng);
-        ConnectionDTO dto = connectionMngMapper.toDTO(savedConnection);
+        ConnectionDTO dto = connectionService.getFullConnection(savedConnection.getConnectionId());
 
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())

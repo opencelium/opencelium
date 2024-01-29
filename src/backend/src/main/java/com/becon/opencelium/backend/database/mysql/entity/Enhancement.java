@@ -34,8 +34,8 @@ public class Enhancement {
     @Column(name = "script")
     private String script;
 
-    @Column(name = "variables")
-    private String variables;
+    @Column(name = "args")
+    private String args;
 
     @Column(name = "simple_code")
     private String simpleCode;
@@ -74,7 +74,6 @@ public class Enhancement {
         this.description = description;
     }
 
-
     public String getSimpleCode() {
         return simpleCode;
     }
@@ -107,11 +106,11 @@ public class Enhancement {
         this.script = script;
     }
 
-    public String getVariables() {
-        return variables;
+    public String getArgs() {
+        return args;
     }
 
-    public void setVariables(String variables) {
-        this.variables = variables;
+    public void setArgs(String args) {
+        this.args = args;
     }
 }

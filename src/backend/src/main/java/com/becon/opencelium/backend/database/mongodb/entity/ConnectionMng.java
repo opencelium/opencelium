@@ -28,7 +28,6 @@ public class ConnectionMng {
     @Indexed
     @Field(name = "connection_id")
     private Long connectionId; // id generated in mariadb.
-    private String title;
     @Field(name = "from_connector")
     private ConnectorMng fromConnector;
     @Field(name = "to_connector")
@@ -52,14 +51,6 @@ public class ConnectionMng {
 
     public void setConnectionId(Long connectionId) {
         this.connectionId = connectionId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public ConnectorMng getFromConnector() {

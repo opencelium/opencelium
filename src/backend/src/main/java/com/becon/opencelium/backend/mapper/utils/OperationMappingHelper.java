@@ -1,23 +1,22 @@
 package com.becon.opencelium.backend.mapper.utils;
 
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
-import org.mapstruct.Mapper;
-import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-@Mapper(componentModel = "spring")
-@Named("OperationMappingHelper")
-public abstract class OperationMappingHelper {
+@Service
+public class OperationMappingHelper {
     @Autowired
     @Qualifier("invokerServiceImp")
     private InvokerService invokerService;
@@ -26,15 +25,22 @@ public abstract class OperationMappingHelper {
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
 
-    @Named("toOperation")
-    public OperationDTO toOperation(@NonNull MethodMng method) {
+    public List<OperationDTO> toOperationAll(List<MethodMng> methods, String invoker){
+        List<OperationDTO> operations = new ArrayList<>();
+        for (MethodMng method : methods) {
+            operations.add(toOperation(method, invoker));
+        }
+        return operations;
+    }
+
+    public OperationDTO toOperation(@NonNull MethodMng method, String invoker) {
         Map<String, String> header = method.getRequest().getHeader();
         MediaType mediaType = null;
         if (header != null) {
-            if(header.containsKey(HEADER_CONTENT_TYPE)){
+            if (header.containsKey(HEADER_CONTENT_TYPE)) {
                 mediaType = MediaType.valueOf(header.get(HEADER_CONTENT_TYPE));
             }
-        }else {
+        } else {
             method.getRequest().setHeader(new HashMap<>());
         }
 
@@ -44,7 +50,7 @@ public abstract class OperationMappingHelper {
         operationDTO.setName(method.getName());
         operationDTO.setPath(method.getRequest().getEndpoint());
         operationDTO.setExecOrder(method.getIndex());
-        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), mediaType));
+        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), mediaType, method.getName(), invoker));
         operationDTO.setParameters(getParameters(method.getRequest(), mediaType));
         return operationDTO;
     }
@@ -233,10 +239,10 @@ public abstract class OperationMappingHelper {
         return parameters;
     }
 
-    private RequestBodyDTO getRequestBody(@NonNull BodyMng body, MediaType mediaType) {
+    private RequestBodyDTO getRequestBody(@NonNull BodyMng body, MediaType mediaType, String methodName, String invoker) {
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
         requestBodyDTO.setContent(mediaType);
-        requestBodyDTO.setSchema(getSchema(body));
+        requestBodyDTO.setSchema(getSchema(body, methodName, invoker));
         return requestBodyDTO;
     }
 
@@ -251,7 +257,7 @@ public abstract class OperationMappingHelper {
         };
     }
 
-    private SchemaDTO getSchema(BodyMng body) {
+    private SchemaDTO getSchema(BodyMng body, String methodName, String invoker) {
         if (body == null || body.getFields() == null) return null;
         Map<String, Object> fields = body.getFields();
         SchemaDTO schemaDTO = new SchemaDTO();
@@ -259,14 +265,14 @@ public abstract class OperationMappingHelper {
             schemaDTO.setType(DataType.ARRAY);
             List<SchemaDTO> elements = new ArrayList<>();
             for (Object value : fields.values()) {
-                elements.add(getSchemaFromObject(value));
+                elements.add(getSchemaFromObject(value, methodName, invoker));
             }
             schemaDTO.setItems(elements);
         } else {
             schemaDTO.setType(DataType.OBJECT);
             Map<String, SchemaDTO> props = new HashMap<>();
             for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                props.put(entry.getKey(), getSchemaFromObject(entry.getValue()));
+                props.put(entry.getKey(), getSchemaFromObject(entry.getValue(), methodName, invoker));
             }
             schemaDTO.setProperties(props);
         }
@@ -310,15 +316,15 @@ public abstract class OperationMappingHelper {
         return schemaDTO;
     }
 
-    private SchemaDTO getSchemaFromObject(Object obj) {
+    private SchemaDTO getSchemaFromObject(Object obj, String methodName, String invoker) {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(obj);
         if (obj == null || type == null)
             return null;
         if (type == DataType.STRING) {
             String value = String.valueOf(obj);
-            if (value.startsWith("#")) {
-                schemaDTO.setType(DataType.valueOf(invokerService.findFieldType("", value).toUpperCase()));
+            if (value.matches(RegExpression.directRef) ){
+                schemaDTO.setType(invokerService.findFieldType(invoker, methodName, value));
             } else {
                 schemaDTO.setType(DataType.STRING);
             }
@@ -330,7 +336,7 @@ public abstract class OperationMappingHelper {
             schemaDTO.setType(DataType.ARRAY);
             List<SchemaDTO> elements = new ArrayList<>();
             for (Object item : items) {
-                elements.add(getSchemaFromObject(item));
+                elements.add(getSchemaFromObject(item, methodName, invoker));
             }
             schemaDTO.setItems(elements);
         } else {
@@ -338,7 +344,7 @@ public abstract class OperationMappingHelper {
             schemaDTO.setType(DataType.OBJECT);
             Map<String, SchemaDTO> fields = new HashMap<>();
             for (Map.Entry<String, ?> entry : map.entrySet()) {
-                fields.put(entry.getKey(), getSchemaFromObject(entry.getValue()));
+                fields.put(entry.getKey(), getSchemaFromObject(entry.getValue(), methodName, invoker));
             }
             schemaDTO.setProperties(fields);
         }

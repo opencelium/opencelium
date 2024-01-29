@@ -18,15 +18,10 @@ package com.becon.opencelium.backend.database.mongodb.entity;
 
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.util.List;
 
 public class ConnectorMng {
-
-//    @MongoId(targetType = FieldType.OBJECT_ID)
-//    private String id;
     @Field(name = "connector_id")
     private Integer connectorId;
     private String title;
@@ -37,14 +32,6 @@ public class ConnectorMng {
 
     public ConnectorMng() {
     }
-
-//    public String getId() {
-//        return id;
-//    }
-//
-//    public void setId(String id) {
-//        this.id = id;
-//    }
 
     public Integer getConnectorId() {
         return connectorId;

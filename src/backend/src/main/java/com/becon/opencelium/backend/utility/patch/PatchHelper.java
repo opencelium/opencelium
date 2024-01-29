@@ -9,6 +9,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
@@ -81,5 +82,18 @@ public class PatchHelper {
     public boolean isEmpty(JsonPatch patch) {
         JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
         return jsonNode.isEmpty();
+    }
+
+    public boolean anyMatchesWithAny(JsonPatch patch, String ...args) {
+        JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            String path = next.get("path").textValue();
+            if (Arrays.stream(args).anyMatch(a -> a.matches(path))) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -19,7 +19,6 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
@@ -59,7 +58,6 @@ public class ConnectionServiceImp implements ConnectionService {
     private final EnhancementService enhancementService;
     private final PatchHelper patchHelper;
     private final Mapper<Connector, ConnectorDTO> connectorMapper;
-    private final Mapper<ConnectorMng, ConnectorDTO> connectorMngMapper;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ObjectMapper objectMapper;
@@ -76,7 +74,6 @@ public class ConnectionServiceImp implements ConnectionService {
             @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService connectionHistoryService,
             PatchHelper patchHelper,
             Mapper<Connector, ConnectorDTO> connectorMapper,
-            Mapper<ConnectorMng, ConnectorDTO> connectorMngMapper,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             ObjectMapper objectMapper,
@@ -90,7 +87,6 @@ public class ConnectionServiceImp implements ConnectionService {
         this.enhancementService = enhancementService;
         this.patchHelper = patchHelper;
         this.connectorMapper = connectorMapper;
-        this.connectorMngMapper = connectorMngMapper;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
         this.objectMapper = objectMapper;
@@ -124,7 +120,9 @@ public class ConnectionServiceImp implements ConnectionService {
         //saving enhancements
         enhancements.forEach(enhancement -> enhancement.setConnection(savedConnection));
         enhancementService.saveAll(enhancements);
-
+        for (int i = 0; i < connectionMng.getFieldBindings().size(); i++) {
+            connectionMng.getFieldBindings().get(i).setEnhancementId(enhancements.get(i).getId());
+        }
         //saving connectionMng
         connectionMng.setConnectionId(savedConnection.getId());
         return connectionMngService.save(connectionMng);
@@ -167,9 +165,9 @@ public class ConnectionServiceImp implements ConnectionService {
 
         ConnectionMng patched = connectionMngService.getByConnectionId(connectionId);
 
-        if (connectorId.equals(connectionMng.getFromConnector().getConnectorId())) {
+        if (connectionMng.getFromConnector() != null && connectorId.equals(connectionMng.getFromConnector().getConnectorId())) {
             updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getFromConnector(), patched.getFromConnector(), patch);
-        } else {
+        } else if (id != null) {
             updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getToConnector(), patched.getToConnector(), patch);
         }
         return id;
@@ -256,6 +254,7 @@ public class ConnectionServiceImp implements ConnectionService {
         ConnectionDTO connectionDTOMng = connectionMngMapper.toDTO(connectionMng);
         ConnectionDTO connectionDTO = connectionMapper.toDTO(connection);
 
+        connectionDTOMng.setTitle(connection.getTitle());
         connectionDTOMng.setDescription(connectionDTO.getDescription());
         connectionDTOMng.setIcon(connectionDTO.getIcon());
         connectionDTOMng.setBusinessLayout(connectionDTO.getBusinessLayout());
@@ -277,18 +276,15 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
 
-
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * this method can be used for :
-     * 1. updating basic fields of connection( in ConnectionController).
+     * 1. updating basic fields of connection.
      * In this case, {@param patch} CAN ONLY be replace|add|remove patch operations ONLY with the basic fields of connection. Otherwise, this operations will be ignored
      * 2. Undoing ALL tracked updates.
-     * In this case, {@param patch} CAN ONLY be the patch operations in 1st case and additionally, it CAN be a patch we made 'by hand' while tracking update to undo:
-     * Here they are : "op" - "remove", "replace", "add", "path" - "from|toConnector/methods/{integer}", "from|toConnector/operators/{integer}", "fieldBindings/{integer}"
      *
      * @param connection is an object to patch and MUST be already saved.
      * @return patched and saved connection
@@ -296,10 +292,10 @@ public class ConnectionServiceImp implements ConnectionService {
     private FieldBindingMng patchUpdateInternal(Connection connection, JsonPatch patch) {
 
         //customize the patch for connection
-        JsonPatch forConnection = patchHelper.extract(patch, p -> p.equals("/title") || p.equals("/description") || p.equals("/icon") || p.equals("/fromConnector") || p.equals("/toConnector"));
+        JsonPatch forConnection = patchHelper.extract(patch, p -> p.equals("/title") || p.equals("/description") || p.equals("/icon"));
 
         //customize the patch for connectionMng
-        JsonPatch forConnectionMng = patchHelper.extract(patch, p -> p.equals("/title") || p.startsWith("/fieldBindings"));
+        JsonPatch forConnectionMng = patchHelper.extract(patch, p -> p.startsWith("/fieldBindings") || p.equals("/fromConnector") || p.equals("/toConnector"));
 
         FieldBindingMng FB = connectionMngService.patchUpdate(connection.getId(), forConnectionMng);
         ConnectionMng updatedConnectionMng = connectionMngService.getByConnectionId(connection.getId());
@@ -315,21 +311,17 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     private void addConnectors(Connection connection, ConnectionMng connectionMng) {
-        //if connection have fromConnector AND either connectionMng's fromConnector is null
-        //or it's id is not equal to connection's id
-        //then we must change/add fromConnector to connectionMng
-        if (connection.getFromConnector() != 0 && (connectionMng.getFromConnector() == null || connection.getFromConnector() != connectionMng.getFromConnector().getConnectorId())) {
-            Connector fromConnector = connectorService.getById(connection.getFromConnector());
-            connectionMng.setFromConnector(connectorMngMapper.toEntity(connectorMapper.toDTO(fromConnector)));
-        } else if (connection.getFromConnector() == 0) {
-            connectionMng.setFromConnector(null);
+
+        if (connectionMng.getFromConnector() != null && (connection.getFromConnector() == 0 || connection.getFromConnector() != connectionMng.getFromConnector().getConnectorId())) {
+            connection.setFromConnector(connectionMng.getFromConnector().getConnectorId());
+        } else if (connectionMng.getFromConnector() == null) {
+            connection.setFromConnector(0);
         }
-        //this is the same with fromConnector's
-        if (connection.getToConnector() != 0 && (connectionMng.getToConnector() == null || connection.getToConnector() != connectionMng.getToConnector().getConnectorId())) {
-            Connector toConnector = connectorService.getById(connection.getToConnector());
-            connectionMng.setToConnector(connectorMngMapper.toEntity(connectorMapper.toDTO(toConnector)));
-        } else if (connection.getToConnector() == 0) {
-            connectionMng.setToConnector(null);
+
+        if (connectionMng.getToConnector() != null && (connection.getToConnector() == 0 || connection.getToConnector() != connectionMng.getToConnector().getConnectorId())) {
+            connection.setToConnector(connectionMng.getToConnector().getConnectorId());
+        } else if (connectionMng.getToConnector() == null) {
+            connection.setToConnector(0);
         }
     }
 
@@ -339,9 +331,12 @@ public class ConnectionServiceImp implements ConnectionService {
         Iterator<JsonNode> nodes = jsonNode.elements();
         JsonNode next = nodes.next();
         String path = next.get("path").textValue();
-        if (path.startsWith("/fromConnector/") || path.startsWith("/toConnector/")) {
+        if (path.startsWith("/fromConnector/")) {
             JsonPatch changed = patchHelper.changeEachPath(jsonPatch, p -> p.substring(p.indexOf("/", 1)));
             connectionMngService.patchMethodOrOperator(connectionId, connection.getFromConnector(), changed);
+        } else if (path.startsWith("/toConnector/")) {
+            JsonPatch changed = patchHelper.changeEachPath(jsonPatch, p -> p.substring(p.indexOf("/", 1)));
+            connectionMngService.patchMethodOrOperator(connectionId, connection.getToConnector(), changed);
         } else {
             patchUpdateInternal(connection, jsonPatch);
         }

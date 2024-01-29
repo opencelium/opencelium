@@ -25,7 +25,7 @@ public class EnhancementDTO {
     private String title;
     private String description;
     private String script;
-    private String variables;
+    private String args;
     private SimpleCodeDTO simpleCode;
     private String language;
 
@@ -36,7 +36,7 @@ public class EnhancementDTO {
         this.title = enhancement.getTitle();
         this.description = enhancement.getDescription();
         this.script = enhancement.getScript();
-        this.variables = enhancement.getVariables();
+        this.args = enhancement.getArgs();
         this.simpleCode = null;
         this.language = enhancement.getLanguage();
     }
@@ -64,12 +64,12 @@ public class EnhancementDTO {
         this.script = script;
     }
 
-    public String getVariables() {
-        return variables;
+    public String getArgs() {
+        return args;
     }
 
-    public void setVariables(String variables) {
-        this.variables = variables;
+    public void setArgs(String args) {
+        this.args = args;
     }
 
     public SimpleCodeDTO getSimpleCode() {
