@@ -56,8 +56,13 @@ public class ConnectorServiceImp implements ConnectorService {
     @Override
     public Optional<Connector> findById(int id) {
         Optional<Connector> optional = connectorRepository.findById(id);
-        optional.ifPresent(this::decrypt);
-        return optional;
+        try {
+            optional.ifPresent(this::decrypt);
+            return optional;
+        } catch (RuntimeException e) {
+            Connector saved = save(optional.get());
+            return Optional.of(saved);
+        }
     }
 
     @Override
