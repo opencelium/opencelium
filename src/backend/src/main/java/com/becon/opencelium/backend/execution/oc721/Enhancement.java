@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.execution.oc721;
 
+import com.becon.opencelium.backend.resource.execution.EnhancementEx;
+
 import java.util.Map;
 
 public class Enhancement {
@@ -7,6 +9,17 @@ public class Enhancement {
     private String script;
     private Map<String, String> args;
     private String lang;
+
+    public static Enhancement fromEx(EnhancementEx enhancementEx) {
+        Enhancement result = new Enhancement();
+
+        result.setEnhanceId(enhancementEx.getEnhanceId());
+        result.setScript(enhancementEx.getScript());
+        result.setArgs(enhancementEx.getArgs());
+        result.setLang(enhancementEx.getLang());
+
+        return result;
+    }
 
     public Integer getEnhanceId() {
         return enhanceId;
