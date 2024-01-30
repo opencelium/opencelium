@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -27,7 +27,9 @@ public class MethodMng {
     @MongoId(targetType = FieldType.OBJECT_ID)
     private String id;
     private String index;
+    @Indexed(unique = true)
     private String name;
+    @Indexed(unique = true)
     private String color;
     private String label;
     @Field(name = "data_integrator")

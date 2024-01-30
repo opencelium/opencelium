@@ -24,7 +24,6 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
-import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.becon.opencelium.backend.resource.execution.DataType;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.ConditionUtility;
@@ -33,15 +32,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.*;
-import java.io.*;
-import java.net.URI;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -185,6 +186,7 @@ public class InvokerServiceImp implements InvokerService {
         }
 
         String[] parts = ConditionUtility.getRefValue(path).split("\\.");
+        ConditionUtility.eraseArrayBrackets(parts);
 
         return findFieldType(fields, Arrays.stream(parts).collect(Collectors.toList()));
     }

@@ -12,4 +12,5 @@ public interface MethodMngService {
     void deleteById(String id);
 
     void deleteAll(List<MethodMng> methods);
+    String getNameByCode(String methodKey);
 }

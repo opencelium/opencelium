@@ -173,4 +173,12 @@ public class ConditionUtility {
             throw  new RuntimeException("Operands '>, <, >=, <=' don't work with String");
         }
     }
+
+    public static void eraseArrayBrackets(String[] array) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].matches(".+\\[.+]")) {
+                array[i] = array[i].replaceAll("\\[.+]", "");
+            }
+        }
+    }
 }

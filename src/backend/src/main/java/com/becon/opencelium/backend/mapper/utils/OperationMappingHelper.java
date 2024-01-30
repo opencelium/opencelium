@@ -4,8 +4,11 @@ import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
+import com.becon.opencelium.backend.database.mongodb.service.MethodMngService;
+import com.becon.opencelium.backend.database.mongodb.service.MethodMngServiceImp;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
+import com.becon.opencelium.backend.utility.ConditionUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
@@ -20,12 +23,15 @@ public class OperationMappingHelper {
     @Autowired
     @Qualifier("invokerServiceImp")
     private InvokerService invokerService;
+    @Autowired
+    @Qualifier("methodMngServiceImp")
+    private MethodMngService methodMngService;
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String REGEX_REF_PARAMETER = "\\{#.+}";
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
 
-    public List<OperationDTO> toOperationAll(List<MethodMng> methods, String invoker){
+    public List<OperationDTO> toOperationAll(List<MethodMng> methods, String invoker) {
         List<OperationDTO> operations = new ArrayList<>();
         for (MethodMng method : methods) {
             operations.add(toOperation(method, invoker));
@@ -50,7 +56,7 @@ public class OperationMappingHelper {
         operationDTO.setName(method.getName());
         operationDTO.setPath(method.getRequest().getEndpoint());
         operationDTO.setExecOrder(method.getIndex());
-        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), mediaType, method.getName(), invoker));
+        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), mediaType, invoker));
         operationDTO.setParameters(getParameters(method.getRequest(), mediaType));
         return operationDTO;
     }
@@ -239,10 +245,10 @@ public class OperationMappingHelper {
         return parameters;
     }
 
-    private RequestBodyDTO getRequestBody(@NonNull BodyMng body, MediaType mediaType, String methodName, String invoker) {
+    private RequestBodyDTO getRequestBody(@NonNull BodyMng body, MediaType mediaType, String invoker) {
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
         requestBodyDTO.setContent(mediaType);
-        requestBodyDTO.setSchema(getSchema(body, methodName, invoker));
+        requestBodyDTO.setSchema(getSchema(body, invoker));
         return requestBodyDTO;
     }
 
@@ -257,7 +263,7 @@ public class OperationMappingHelper {
         };
     }
 
-    private SchemaDTO getSchema(BodyMng body, String methodName, String invoker) {
+    private SchemaDTO getSchema(BodyMng body, String invoker) {
         if (body == null || body.getFields() == null) return null;
         Map<String, Object> fields = body.getFields();
         SchemaDTO schemaDTO = new SchemaDTO();
@@ -265,14 +271,14 @@ public class OperationMappingHelper {
             schemaDTO.setType(DataType.ARRAY);
             List<SchemaDTO> elements = new ArrayList<>();
             for (Object value : fields.values()) {
-                elements.add(getSchemaFromObject(value, methodName, invoker));
+                elements.add(getSchemaFromObject(value, invoker));
             }
             schemaDTO.setItems(elements);
         } else {
             schemaDTO.setType(DataType.OBJECT);
             Map<String, SchemaDTO> props = new HashMap<>();
             for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                props.put(entry.getKey(), getSchemaFromObject(entry.getValue(), methodName, invoker));
+                props.put(entry.getKey(), getSchemaFromObject(entry.getValue(), invoker));
             }
             schemaDTO.setProperties(props);
         }
@@ -316,15 +322,16 @@ public class OperationMappingHelper {
         return schemaDTO;
     }
 
-    private SchemaDTO getSchemaFromObject(Object obj, String methodName, String invoker) {
+    private SchemaDTO getSchemaFromObject(Object obj, String invoker) {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(obj);
         if (obj == null || type == null)
             return null;
         if (type == DataType.STRING) {
             String value = String.valueOf(obj);
-            if (value.matches(RegExpression.directRef) ){
-                schemaDTO.setType(invokerService.findFieldType(invoker, methodName, value));
+            if (value.matches(RegExpression.directRef)) {
+                String methodNameOfRef = methodMngService.getNameByCode(ConditionUtility.getMethodKey(value));
+                schemaDTO.setType(invokerService.findFieldType(invoker, methodNameOfRef, value));
             } else {
                 schemaDTO.setType(DataType.STRING);
             }
@@ -336,7 +343,7 @@ public class OperationMappingHelper {
             schemaDTO.setType(DataType.ARRAY);
             List<SchemaDTO> elements = new ArrayList<>();
             for (Object item : items) {
-                elements.add(getSchemaFromObject(item, methodName, invoker));
+                elements.add(getSchemaFromObject(item, invoker));
             }
             schemaDTO.setItems(elements);
         } else {
@@ -344,7 +351,7 @@ public class OperationMappingHelper {
             schemaDTO.setType(DataType.OBJECT);
             Map<String, SchemaDTO> fields = new HashMap<>();
             for (Map.Entry<String, ?> entry : map.entrySet()) {
-                fields.put(entry.getKey(), getSchemaFromObject(entry.getValue(), methodName, invoker));
+                fields.put(entry.getKey(), getSchemaFromObject(entry.getValue(), invoker));
             }
             schemaDTO.setProperties(fields);
         }
