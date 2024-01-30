@@ -27,9 +27,7 @@ public class MethodMng {
     @MongoId(targetType = FieldType.OBJECT_ID)
     private String id;
     private String index;
-    @Indexed(unique = true)
     private String name;
-    @Indexed(unique = true)
     private String color;
     private String label;
     @Field(name = "data_integrator")
