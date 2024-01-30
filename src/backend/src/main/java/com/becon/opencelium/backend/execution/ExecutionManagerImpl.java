@@ -3,9 +3,11 @@ package com.becon.opencelium.backend.execution;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.Enhancement;
 import com.becon.opencelium.backend.execution.oc721.EnhancementService;
+import com.becon.opencelium.backend.execution.oc721.EnhancementServiceImpl;
 import com.becon.opencelium.backend.execution.oc721.Extractor;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -24,14 +26,14 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final List<FieldBind> fieldBind;
     private final List<Operation> operations = new ArrayList<>();
 
-    public ExecutionManagerImpl(Map<String, Object> queryParams, Extractor refExtractor, EnhancementService enhancementService,
-                                Connector connectorFrom, Connector connectorTo, List<FieldBind> fieldBind) {
+    public ExecutionManagerImpl(Map<String, Object> queryParams, Connector connectorFrom, Connector connectorTo, List<FieldBind> fieldBind) {
         this.queryParams = queryParams;
-        this.refExtractor = refExtractor;
-        this.enhancementService = enhancementService;
         this.connectorFrom = connectorFrom;
         this.connectorTo = connectorTo;
         this.fieldBind = fieldBind;
+
+        this.refExtractor = new ReferenceExtractor(this);
+        this.enhancementService = new EnhancementServiceImpl(this);
     }
 
     @Override

@@ -7,7 +7,11 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 public class EnhancementServiceImpl implements EnhancementService {
-    private ExecutionManager executionManager;
+    private final ExecutionManager executionManager;
+
+    public EnhancementServiceImpl(ExecutionManager executionManager) {
+        this.executionManager = executionManager;
+    }
 
     @Override
     public Object executeScript(String bindId) {

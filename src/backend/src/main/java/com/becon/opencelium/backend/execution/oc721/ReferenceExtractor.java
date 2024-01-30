@@ -33,7 +33,7 @@ public class ReferenceExtractor implements Extractor {
             result = extractFromQueryParams(ref);
         }
 
-        // '{key}'
+        // '{ctorId.key}'
         if (ref.matches(requiredData)) {
             result = extractFromRequiredData(ref);
         }
@@ -71,10 +71,11 @@ public class ReferenceExtractor implements Extractor {
     }
 
     private Object extractFromRequiredData(String ref) {
-        //TODO how to get 'ctorId' and 'key' from reference?
-        Map<String, String> data = executionManager.getRequiredData(null);
+        String refValue = ref.replace("{", "").replace("%}", "");
+        String ctorId = refValue.split("\\.")[0];
+        String key = refValue.split("\\.")[1];
 
-        return data.get(ref);
+        return executionManager.getRequiredData(ctorId).get(key);
     }
 
     private Object extractFromQueryParams(String ref) {

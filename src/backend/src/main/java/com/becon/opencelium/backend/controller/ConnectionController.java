@@ -262,7 +262,7 @@ public class ConnectionController {
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
         ConnectionMng savedConnection = connectionService.save(connection, connectionMng);
-        ConnectionDTO dto = connectionMngMapper.toDTO(savedConnection);
+        ConnectionDTO dto = connectionService.getFullConnection(savedConnection.getConnectionId());
 
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())

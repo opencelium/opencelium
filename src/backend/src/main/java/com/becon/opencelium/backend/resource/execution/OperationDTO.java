@@ -6,12 +6,13 @@ import org.springframework.http.HttpMethod;
 import java.util.List;
 
 @Resource
-public class OperationDTO implements Executable {
+public class OperationDTO {
     private String path;
     private HttpMethod httpMethod;
     private String name;
     private String operationId;
     private String execOrder;
+    private Integer aggregatorId;
     private List<ParameterDTO> parameters;
     private RequestBodyDTO requestBody;
     private List<ResponseDTO> responses;
@@ -48,13 +49,20 @@ public class OperationDTO implements Executable {
         this.operationId = operationId;
     }
 
-    @Override
     public String getExecOrder() {
         return execOrder;
     }
 
     public void setExecOrder(String execOrder) {
         this.execOrder = execOrder;
+    }
+
+    public Integer getAggregatorId() {
+        return aggregatorId;
+    }
+
+    public void setAggregatorId(Integer aggregatorId) {
+        this.aggregatorId = aggregatorId;
     }
 
     public List<ParameterDTO> getParameters() {
