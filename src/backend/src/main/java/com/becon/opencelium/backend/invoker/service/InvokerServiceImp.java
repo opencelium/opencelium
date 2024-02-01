@@ -173,8 +173,12 @@ public class InvokerServiceImp implements InvokerService {
 
         Invoker invoker = findByName(invokerName);
 
-        FunctionInvoker functionInvoker = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))
-                .findFirst().orElseThrow(() -> new RuntimeException("Method not found in invoker"));
+        Optional<FunctionInvoker> functionInvokerOp = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))
+                .findFirst();
+        if (functionInvokerOp.isEmpty()){
+            return null;
+        }
+        FunctionInvoker functionInvoker = functionInvokerOp.get();
 
         Map<String, Object> fields;
         if (exchangeType.equals("response") && result.equals("success")) {

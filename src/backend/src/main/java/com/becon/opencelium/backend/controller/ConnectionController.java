@@ -27,6 +27,7 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -64,6 +65,7 @@ public class ConnectionController {
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final Mapper<Connection, ConnectionResource> connectionResourceMapper;
+    private final Mapper<ConnectionDTO, ConnectionOldDTO> connectionOldDTOMapper;
     private final PatchHelper patchHelper;
 
     public ConnectionController(
@@ -71,6 +73,7 @@ public class ConnectionController {
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             Mapper<Connection, ConnectionResource> connectionResourceMapper,
+            Mapper<ConnectionDTO, ConnectionOldDTO> connectionOldDTOMapper,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
             PatchHelper patchHelper
@@ -81,6 +84,7 @@ public class ConnectionController {
         this.connectionMapper = connectionMapper;
         this.connectionMngService = connectionMngService;
         this.connectionResourceMapper = connectionResourceMapper;
+        this.connectionOldDTOMapper = connectionOldDTOMapper;
         this.patchHelper = patchHelper;
     }
 
@@ -258,7 +262,8 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> save(@RequestBody ConnectionDTO connectionDTO) throws Exception {
+    public ResponseEntity<?> save(@RequestBody ConnectionOldDTO connectionOldDTO) throws Exception {
+        ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
         ConnectionMng savedConnection = connectionService.save(connection, connectionMng);
@@ -267,7 +272,7 @@ public class ConnectionController {
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .buildAndExpand().toUri();
-        return ResponseEntity.created(uri).body(dto);
+        return ResponseEntity.created(uri).body(connectionOldDTOMapper.toDTO(dto));
     }
 
     @Operation(summary = "Modifies a connection by provided connection ID and accepting connection data in request body.")

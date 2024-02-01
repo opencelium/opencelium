@@ -1,40 +1,49 @@
-package com.becon.opencelium.backend.mapper.utils;
+package com.becon.opencelium.backend.mapper.execution;
 
-import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
+import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
-import com.becon.opencelium.backend.utility.ConditionUtility;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-@Service
-public class OperationMappingHelper {
-    @Autowired
-    @Qualifier("invokerServiceImp")
-    private InvokerService invokerService;
+@Component
+public class OperationExMapper {
+    private final InvokerService invokerService;
+    private final ConnectionMngService connectionMngService;
+    private final ConnectorService connectorService;
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String REGEX_REF_PARAMETER = "\\{#.+}";
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
 
-    public List<OperationDTO> toOperationAll(List<MethodMng> methods, String invoker) {
+    public OperationExMapper(
+            @Qualifier("invokerServiceImp") InvokerService invokerService,
+            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
+            @Qualifier("connectorServiceImp") ConnectorService connectorService
+    ) {
+        this.invokerService = invokerService;
+        this.connectionMngService = connectionMngService;
+        this.connectorService = connectorService;
+    }
+
+    public List<OperationDTO> toOperationAll(List<MethodMng> methods, String invoker, Long connectionId) {
         List<OperationDTO> operations = new ArrayList<>();
         for (MethodMng method : methods) {
-            operations.add(toOperation(method, invoker, methods));
+            operations.add(toOperation(method, invoker, connectionId));
         }
         return operations;
     }
 
-    public OperationDTO toOperation(@NonNull MethodMng method, String invoker, List<MethodMng> methods) {
+    public OperationDTO toOperation(@NonNull MethodMng method, String invoker, Long connectionId) {
         Map<String, String> header = method.getRequest().getHeader();
         MediaType mediaType = null;
         if (header != null) {
@@ -51,7 +60,7 @@ public class OperationMappingHelper {
         operationDTO.setName(method.getName());
         operationDTO.setPath(method.getRequest().getEndpoint());
         operationDTO.setExecOrder(method.getIndex());
-        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), mediaType, invoker, methods));
+        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), mediaType, invoker, connectionId));
         operationDTO.setParameters(getParameters(method.getRequest(), mediaType));
         return operationDTO;
     }
@@ -240,10 +249,10 @@ public class OperationMappingHelper {
         return parameters;
     }
 
-    private RequestBodyDTO getRequestBody(@NonNull BodyMng body, MediaType mediaType, String invoker, List<MethodMng> methods) {
+    private RequestBodyDTO getRequestBody(@NonNull BodyMng body, MediaType mediaType, String invoker, Long connectionId) {
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
         requestBodyDTO.setContent(mediaType);
-        requestBodyDTO.setSchema(getSchema(body, invoker, methods));
+        requestBodyDTO.setSchema(getSchema(body, invoker, connectionId));
         return requestBodyDTO;
     }
 
@@ -258,7 +267,7 @@ public class OperationMappingHelper {
         };
     }
 
-    private SchemaDTO getSchema(BodyMng body, String invoker, List<MethodMng> methods) {
+    private SchemaDTO getSchema(BodyMng body, String invoker, Long connectionId) {
         if (body == null || body.getFields() == null) return null;
         Map<String, Object> fields = body.getFields();
         SchemaDTO schemaDTO = new SchemaDTO();
@@ -266,14 +275,14 @@ public class OperationMappingHelper {
             schemaDTO.setType(DataType.ARRAY);
             List<SchemaDTO> elements = new ArrayList<>();
             for (Object value : fields.values()) {
-                elements.add(getSchemaFromObject(value, invoker, methods));
+                elements.add(getSchemaFromObject(value, invoker, connectionId));
             }
             schemaDTO.setItems(elements);
         } else {
             schemaDTO.setType(DataType.OBJECT);
             Map<String, SchemaDTO> props = new HashMap<>();
             for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                props.put(entry.getKey(), getSchemaFromObject(entry.getValue(), invoker, methods));
+                props.put(entry.getKey(), getSchemaFromObject(entry.getValue(), invoker, connectionId));
             }
             schemaDTO.setProperties(props);
         }
@@ -317,20 +326,36 @@ public class OperationMappingHelper {
         return schemaDTO;
     }
 
-    private SchemaDTO getSchemaFromObject(Object obj, String invoker, List<MethodMng> methods) {
+    private SchemaDTO getSchemaFromObject(Object obj, String invoker, Long connectionId) {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(obj);
         if (obj == null || type == null)
             return null;
         if (type == DataType.STRING) {
             String value = String.valueOf(obj);
-            if (value.matches(RegExpression.directRef)) {
-                String methodColor = ConditionUtility.getMethodKey(value);
-                String methodNameOfRef = methods.stream().filter(m -> m.getColor().equals(methodColor))
-                        .findFirst()
-                        .orElseThrow(() -> new RuntimeException("METHOD_NOT_FOUND"))
-                        .getName();
-                schemaDTO.setType(invokerService.findFieldType(invoker, methodNameOfRef, value));
+            if (value.matches("\\{[a-zA-Z0-9]+}")) {
+//                String methodColor = ConditionUtility.getMethodKey(value);
+//
+//                ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+//                Connector fromConnector = connectorService.getById(connectionMng.getFromConnector().getConnectorId());
+//                Connector toConnector = connectorService.getById(connectionMng.getToConnector().getConnectorId());
+//
+//                String methodNameOfRef = Stream.concat(
+//                                connectionMng.getFromConnector().getMethods().stream(),
+//                                connectionMng.getToConnector().getMethods().stream())
+//                        .filter(m -> m.getColor().equals(methodColor))
+//                        .findFirst()
+//                        .orElseThrow(() -> new RuntimeException("METHOD_NOT_FOUND"))
+//                        .getName();
+//
+//                DataType dataType = invokerService.findFieldType(fromConnector.getInvoker(), methodNameOfRef, value);
+//                if(dataType==null){
+//                    dataType = invokerService.findFieldType(toConnector.getInvoker(), methodNameOfRef, value);
+//                    if (dataType==null){
+//                        throw new RuntimeException("METHOD_NOT_FOUND_IN_INVOKER");
+//                    }
+//                }
+                schemaDTO.setType(DataType.STRING);
             } else {
                 schemaDTO.setType(DataType.STRING);
             }
@@ -342,7 +367,7 @@ public class OperationMappingHelper {
             schemaDTO.setType(DataType.ARRAY);
             List<SchemaDTO> elements = new ArrayList<>();
             for (Object item : items) {
-                elements.add(getSchemaFromObject(item, invoker, methods));
+                elements.add(getSchemaFromObject(item, invoker, connectionId));
             }
             schemaDTO.setItems(elements);
         } else {
@@ -350,7 +375,7 @@ public class OperationMappingHelper {
             schemaDTO.setType(DataType.OBJECT);
             Map<String, SchemaDTO> fields = new HashMap<>();
             for (Map.Entry<String, ?> entry : map.entrySet()) {
-                fields.put(entry.getKey(), getSchemaFromObject(entry.getValue(), invoker, methods));
+                fields.put(entry.getKey(), getSchemaFromObject(entry.getValue(), invoker, connectionId));
             }
             schemaDTO.setProperties(fields);
         }

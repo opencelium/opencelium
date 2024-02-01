@@ -1,49 +1,44 @@
 package com.becon.opencelium.backend.mapper.execution;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
-import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.mapper.utils.HelperMapper;
-import com.becon.opencelium.backend.mapper.utils.Wrapper;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.entity.RequestData;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
-import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
-@org.mapstruct.Mapper(
-        componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        unmappedSourcePolicy = ReportingPolicy.IGNORE,
-        uses = {
-                OperatorExMapper.class,
-                HelperMapper.class
-        }
-)
-@Named("connectorExMapper")
-public interface ConnectorExMapper extends Mapper<ConnectorEx, ConnectorMng> {
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-    @Named("toEntity")
-    @Mappings({
-            @Mapping(target = "id", source = "connectorId"),
-            @Mapping(target = "methods", ignore = true),
-            @Mapping(target = "operators", qualifiedByName = {"operatorExMapper", "toEntityAll"})
-    })
-    ConnectorEx toEntity(ConnectorMng dto);
+@Component
+public class ConnectorExMapper {
+    private final ConnectorService connectorService;
+    private final OperationExMapper operationExMapper;
+    private final OperatorExMapper operatorExMapper;
 
-    @AfterMapping
-    default void afterMapping(@MappingTarget ConnectorEx entity, ConnectorMng dto) {
-        Wrapper<ConnectorMng, ConnectorEx> wrapper = new Wrapper<>(entity);
-        wrapper.setTo(dto);
-        setAdditionalFields(wrapper);
-        mapMethodsOfConnector(wrapper);
+    public ConnectorExMapper(@Qualifier("connectorServiceImp") ConnectorService connectorService, OperationExMapper operationExMapper, OperatorExMapper operatorExMapper) {
+        this.connectorService = connectorService;
+        this.operationExMapper = operationExMapper;
+        this.operatorExMapper = operatorExMapper;
     }
 
-    default ConnectorMng toDTO(ConnectorEx entity) {
-        return null;
+    ConnectorEx toEntity(ConnectorMng dto, Long connectionId){
+        Connector connector = connectorService.getById(dto.getConnectorId());
+        ConnectorEx connectorEx = new ConnectorEx();
+
+        List<RequestData> requestData = connector.getRequestData();
+        Map<String, String> map = new HashMap<>();
+        requestData.forEach(r -> map.put(r.getField(), r.getValue()));
+
+        connectorEx.setSslCert(connector.isSslCert());
+        connectorEx.setInvoker(connector.getInvoker());
+        connectorEx.setRequiredData(map);
+
+        connectorEx.setId(dto.getConnectorId());
+        connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(),connector.getInvoker(), connectionId));
+        connectorEx.setOperators(operatorExMapper.toEntityAll(dto.getOperators()));
+        return connectorEx;
     }
-
-    @Mapping(target = "to", source = "from", qualifiedByName = {"helperMapper", "setAdditionalFields"})
-    @Mapping(target = "from", ignore = true)
-    Wrapper<ConnectorMng, ConnectorEx> setAdditionalFields(Wrapper<ConnectorMng, ConnectorEx> wrapper);
-
-    @Mapping(target = "to", expression ="java(helperMapper.mapMethodsOfConnector(wrapper.getFrom(), wrapper.getTo()))")
-    @Mapping(target = "from", ignore = true)
-    Wrapper<ConnectorMng, ConnectorEx> mapMethodsOfConnector(Wrapper<ConnectorMng, ConnectorEx> wrapper);
 }

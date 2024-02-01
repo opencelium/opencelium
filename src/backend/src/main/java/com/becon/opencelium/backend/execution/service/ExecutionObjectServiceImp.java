@@ -5,9 +5,8 @@ import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
+import com.becon.opencelium.backend.mapper.execution.ConnectionExMapper;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
-import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,13 +17,13 @@ import org.springframework.stereotype.Service;
 public class ExecutionObjectServiceImp implements ExecutionObjectService {
 
     private final Environment env;
-    private final Mapper<ConnectionEx, ConnectionMng> connectionMapper;
+    private final ConnectionExMapper connectionMapper;
     private final SchedulerService schedulerService;
     private final ConnectionMngService connectionMngService;
 
     public ExecutionObjectServiceImp(
             Environment environment,
-            Mapper<ConnectionEx, ConnectionMng> connectionMapper,
+            ConnectionExMapper connectionMapper,
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService) {
         this.connectionMapper = connectionMapper;

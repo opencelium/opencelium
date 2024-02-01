@@ -1,39 +1,37 @@
 package com.becon.opencelium.backend.mapper.execution;
 
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
-import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-import org.mapstruct.ReportingPolicy;
+import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@org.mapstruct.Mapper(
-        componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        unmappedSourcePolicy = ReportingPolicy.IGNORE,
-        uses = {
-                ConditionExMapper.class
-        }
-)
-@Named("operatorExMapper")
-public interface OperatorExMapper extends Mapper<OperatorEx, OperatorMng> {
+@Component
+public class OperatorExMapper {
+    private final ConditionExMapper conditionExMapper;
 
-    @Mapping(target = "condition", qualifiedByName = {"conditionExMapper","toEntity"})
-    @Named("toEntity")
-    OperatorEx toEntity(OperatorMng dto);
-
-    OperatorMng toDTO(OperatorEx entity);
-
-    @Named("toEntityAll")
-    @Override
-    default List<OperatorEx> toEntityAll(List<OperatorMng> dtos) {
-        return Mapper.super.toEntityAll(dtos);
+    public OperatorExMapper(ConditionExMapper conditionExMapper) {
+        this.conditionExMapper = conditionExMapper;
     }
 
-    @Override
-    default List<OperatorMng> toDTOAll(List<OperatorEx> entities) {
-        return Mapper.super.toDTOAll(entities);
+    public OperatorEx toEntity(OperatorMng dto){
+        OperatorEx operatorEx = new OperatorEx();
+        operatorEx.setId(dto.getId());
+        operatorEx.setIndex(dto.getIndex());
+        operatorEx.setType(dto.getType());
+        operatorEx.setIterator(dto.getIterator());
+        operatorEx.setCondition(conditionExMapper.toEntity(dto.getCondition()));
+        return operatorEx;
+    }
+    public List<OperatorEx> toEntityAll(List<OperatorMng> dtoList){
+        if(dtoList==null || dtoList.isEmpty()){
+            return null;
+        }
+        List<OperatorEx> operatorExes = new ArrayList<>();
+        for (OperatorMng operatorMng : dtoList) {
+            operatorExes.add(toEntity(operatorMng));
+        }
+        return operatorExes;
     }
 }

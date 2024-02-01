@@ -1,37 +1,62 @@
 package com.becon.opencelium.backend.mapper.execution;
 
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
-import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.mapper.utils.HelperMapper;
+import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
+import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
+import com.becon.opencelium.backend.resource.execution.EnhancementEx;
 import com.becon.opencelium.backend.resource.execution.FieldBindEx;
-import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.*;
 
-@org.mapstruct.Mapper(
-        componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        unmappedSourcePolicy = ReportingPolicy.IGNORE,
-        uses = {HelperMapper.class}
+@Component
+public class FieldBindExMapper {
+    private final EnhancementService enhancementService;
 
-)
-@Named("fieldBindExMapper")
-public interface FieldBindExMapper extends Mapper<FieldBindEx, FieldBindingMng> {
-    @Mappings({
-            @Mapping(target = "bindId", source = "id"),
-            @Mapping(target = "enhance", source = "enhancementId", qualifiedByName = {"helperMapper", "getEnhancementExById"}),
-    })
-    @Named("toEntity")
-    FieldBindEx toEntity(FieldBindingMng dto);
-
-    @Override
-    default FieldBindingMng toDTO(FieldBindEx entity){
-        return null;
+    public FieldBindExMapper(@Qualifier("enhancementServiceImp") EnhancementService enhancementService) {
+        this.enhancementService = enhancementService;
     }
 
-    @Named("toEntityAll")
-    @Override
-    default List<FieldBindEx> toEntityAll(List<FieldBindingMng> dtos) {
-        return Mapper.super.toEntityAll(dtos);
+    public FieldBindEx toEntity(FieldBindingMng dto) {
+        FieldBindEx fieldBindEx = new FieldBindEx();
+        fieldBindEx.setBindId(dto.getId());
+
+        Enhancement enhancement = enhancementService.getById(dto.getEnhancementId());
+        EnhancementEx enhancementEx = new EnhancementEx();
+
+        enhancementEx.setEnhanceId(dto.getEnhancementId());
+        enhancementEx.setScript(enhancement.getScript());
+        enhancementEx.setLang(enhancement.getLanguage());
+
+        if (enhancement.getArgs() == null) {
+            enhancementEx.setArgs(new HashMap<>());
+        }else {
+            String variables = enhancement.getArgs().replaceAll("[/|\\\\n]", "");
+            String[] vars = variables.substring(0, variables.length() - 1).split(";");
+
+            Map<String, String> args = new HashMap<>();
+            Arrays.stream(vars).forEach(v -> {
+                String[] split = v.split("=");
+                String key = split[0].trim().split("\\s")[1];
+                String value = split[1].trim();
+                args.put(key, value);
+            });
+            enhancementEx.setArgs(args);
+        }
+
+        fieldBindEx.setEnhance(enhancementEx);
+        return fieldBindEx;
+    }
+
+    public List<FieldBindEx> toEntityAll(List<FieldBindingMng> dtoList) {
+        if (dtoList == null || dtoList.isEmpty()) {
+            return null;
+        }
+        List<FieldBindEx> fieldBindExes = new ArrayList<>();
+        for (FieldBindingMng fieldBindMng : dtoList) {
+            fieldBindExes.add(toEntity(fieldBindMng));
+        }
+        return fieldBindExes;
     }
 }

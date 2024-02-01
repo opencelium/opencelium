@@ -1,31 +1,23 @@
 package com.becon.opencelium.backend.mapper.execution;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.ReportingPolicy;
+import org.springframework.stereotype.Component;
 
-@org.mapstruct.Mapper(
-        componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        unmappedSourcePolicy = ReportingPolicy.IGNORE,
-        uses = {
-                ConnectorExMapper.class,
-                FieldBindExMapper.class
-        }
-)
-public interface ConnectionExMapper extends Mapper<ConnectionEx, ConnectionMng> {
-    @Mappings({
-            @Mapping(target = "source", source = "fromConnector", qualifiedByName = {"connectorExMapper", "toEntity"}),
-            @Mapping(target = "target", source = "toConnector", qualifiedByName = {"connectorExMapper", "toEntity"}),
-            @Mapping(target = "fieldBind", source = "fieldBindings", qualifiedByName = {"fieldBindExMapper", "toEntityAll"}),
-    })
-    ConnectionEx toEntity(ConnectionMng dto);
-
-    default ConnectionMng toDTO(ConnectionEx entity) {
-        return null;
+@Component
+public class ConnectionExMapper {
+    private final ConnectorExMapper connectorExMapper;
+    private final FieldBindExMapper fieldBindExMapper;
+    public ConnectionExMapper(ConnectorExMapper connectorExMapper, FieldBindExMapper fieldBindExMapper) {
+        this.connectorExMapper = connectorExMapper;
+        this.fieldBindExMapper = fieldBindExMapper;
     }
 
+    public ConnectionEx toEntity(ConnectionMng dto){
+        ConnectionEx connectionEx = new ConnectionEx();
+        connectionEx.setSource(connectorExMapper.toEntity(dto.getFromConnector(), dto.getConnectionId()));
+        connectionEx.setTarget(connectorExMapper.toEntity(dto.getToConnector(), dto.getConnectionId()));
+        connectionEx.setFieldBind(fieldBindExMapper.toEntityAll(dto.getFieldBindings()));
+        return connectionEx;
+    }
 }
