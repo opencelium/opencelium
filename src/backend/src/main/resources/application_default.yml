@@ -113,6 +113,11 @@ spring:
     job-store-type: jdbc
   liquibase:
     change-log: classpath:/db/changelog/changelog-master.xml
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings=false:
 
 springdoc:
   swagger-ui:
