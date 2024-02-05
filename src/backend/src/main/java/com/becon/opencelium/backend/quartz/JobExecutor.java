@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.quartz;
 
+import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
@@ -40,5 +41,10 @@ public class JobExecutor extends QuartzJobBean {
         JobDataMap dataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
         ExecutionObj executionObj = executionObjectService.buildObj(data);
+//        ConnectionExecutor executor =
+//                new ConnectionExecutor(executionObj.getQueryParams(), executionObj.getConnection(),  executionObj.getProxy());
+//        executor.start();
+        System.out.println("End of execution!");
+
     }
 }

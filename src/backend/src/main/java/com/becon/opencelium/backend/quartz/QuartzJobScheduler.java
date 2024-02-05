@@ -196,13 +196,13 @@ public class QuartzJobScheduler implements SchedulingStrategy {
     public static class ScheduleData implements Serializable {
         private int scheduleId;
         private TriggerType execType;
-        private Map<String, String> queryParams;
+        private Map<String, Object> queryParams;
 
         public ScheduleData(int scheduleId, TriggerType execType) {
             this(scheduleId, execType, new HashMap<>());
         }
 
-        public ScheduleData(int scheduleId, TriggerType execType, Map<String, String> queryParams) {
+        public ScheduleData(int scheduleId, TriggerType execType, Map<String, Object> queryParams) {
             this.queryParams = queryParams;
             this.scheduleId = scheduleId;
             this.execType = execType;
@@ -224,11 +224,11 @@ public class QuartzJobScheduler implements SchedulingStrategy {
             this.execType = execType;
         }
 
-        public Map<String, String> getQueryParams() {
+        public Map<String, Object> getQueryParams() {
             return queryParams;
         }
 
-        public void setQueryParams(Map<String, String> queryParams) {
+        public void setQueryParams(Map<String, Object> queryParams) {
             this.queryParams = queryParams;
         }
     }

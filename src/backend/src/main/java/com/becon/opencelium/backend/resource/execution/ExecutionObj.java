@@ -3,18 +3,18 @@ package com.becon.opencelium.backend.resource.execution;
 import java.util.Map;
 
 public class ExecutionObj {
-    private Map<String, String> queryParams;
+    private Map<String, Object> queryParams;
     private ConnectionEx connection;
     private ProxyEx proxy;
 
     public ExecutionObj() {
     }
 
-    public Map<String, String> getQueryParams() {
+    public Map<String, Object> getQueryParams() {
         return queryParams;
     }
 
-    public void setQueryParams(Map<String, String> queryParams) {
+    public void setQueryParams(Map<String, Object> queryParams) {
         this.queryParams = queryParams;
     }
 

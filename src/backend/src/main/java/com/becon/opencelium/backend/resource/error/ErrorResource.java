@@ -39,6 +39,13 @@ public class ErrorResource {
         this.path = path;
     }
 
+    public ErrorResource(Exception e, HttpStatus status){
+        this.error = status.getReasonPhrase().toUpperCase().replace(" ", "_");
+        this.message = e.getMessage();
+        this.status = status.value();
+        this.timestamp = new Date();
+    }
+
     public ErrorResource(){
     }
 
