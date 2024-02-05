@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
+import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
@@ -31,8 +32,11 @@ public class ConnectionExecutor {
 
         ExecutionManager executionManager = new ExecutionManagerImpl(queryParams, source, target, fieldBind);
 
-        new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source));
-        new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target));
+        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source));
+        ConnectorExecutor toEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target));
+
+        sourceEx.start();
+        toEx.start();
     }
 
     private RestTemplate getRestTemplate(Connector connector) {

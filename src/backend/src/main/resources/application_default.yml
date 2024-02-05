@@ -114,7 +114,7 @@ spring:
   liquibase:
     change-log: classpath:/db/changelog/changelog-master.xml
   mvc:
-    throw-exception-if-no-handler-found: true
+    throw-exception-if-no-handler-found: true #enables exception handling for endpoints that is not defined in controllers
   web:
     resources:
       add-mappings=false:
