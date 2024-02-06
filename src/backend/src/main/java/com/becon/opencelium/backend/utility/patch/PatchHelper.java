@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.utility.patch;
 
+import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -90,10 +91,70 @@ public class PatchHelper {
         while (nodes.hasNext()) {
             JsonNode next = nodes.next();
             String path = next.get("path").textValue();
-            if (Arrays.stream(args).anyMatch(a -> a.matches(path))) {
+            if (Arrays.stream(args).anyMatch(path::matches)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public PatchConnectionDetails describe(JsonPatch patch){
+        JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        PatchConnectionDetails details = new PatchConnectionDetails();
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            String path = next.get("path").textValue();
+            String op = next.get("op").textValue();
+            if(path.matches("/fromConnector/methods/-")|| path.matches("/fromConnector/methods/\\d+")||path.matches("/toConnector/methods/-")|| path.matches("/toConnector/methods/\\d+")){
+                if(op.equals("add")){
+                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
+                    opDetail.setMethodAdded(true);
+                    opDetail.setIndexOfMethod(getIndexOfList(path));
+                    details.getOpDetails().add(opDetail);
+                }else if(op.equals("remove")){
+                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
+                    opDetail.setMethodDeleted(true);
+                    opDetail.setIndexOfMethod(getIndexOfList(path));
+                    details.getOpDetails().add(opDetail);
+                }
+            }else if(path.matches("/fromConnector/operators/-")|| path.matches("/fromConnector/operators/\\d+")||path.matches("/toConnector/operators/-")|| path.matches("/toConnector/operators/\\d+")){
+                if(op.equals("add")){
+                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
+                    opDetail.setOperatorAdded(true);
+                    opDetail.setIndexOfOperator(getIndexOfList(path));
+                    details.getOpDetails().add(opDetail);
+                }else if(op.equals("remove")){
+                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
+                    opDetail.setOperatorDeleted(true);
+                    opDetail.setIndexOfOperator(getIndexOfList(path));
+                    details.getOpDetails().add(opDetail);
+                }
+            }else if(path.matches("/fieldBindings/-")|| path.matches("/fieldBindings/\\d+")){
+                if(op.equals("add")){
+                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
+                    opDetail.setEnhancementAdded(true);
+                    opDetail.setIndexOfEnhancement(getIndexOfList(path));
+                    details.getOpDetails().add(opDetail);
+                }else if(op.equals("remove")){
+                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
+                    opDetail.setEnhancementDeleted(true);
+                    opDetail.setIndexOfEnhancement(getIndexOfList(path));
+                    details.getOpDetails().add(opDetail);
+                }
+            }
+        }
+        return details;
+    }
+
+    public Integer getIndexOfList(String path){
+        if(path.matches(".+/-")){
+            return -1;
+        }
+        if(path.matches(".+/\\d+")){
+            String[] split = path.split("/");
+            return Integer.parseInt(split[split.length-1]);
+        }
+        throw new RuntimeException("PATH_IS_VALID");
     }
 }

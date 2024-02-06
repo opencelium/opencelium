@@ -26,6 +26,7 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
+import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
@@ -184,6 +185,25 @@ public class ConnectionController {
     })
     @PatchMapping(path = "/{connectionId}", consumes = "application/json-patch+json")
     public ResponseEntity<?> patchUpdate(@PathVariable Long connectionId, @RequestBody JsonPatch patch) {
+        PatchConnectionDetails details = patchHelper.describe(patch);
+        if (details.methodListModified() || details.operatorListModified()) {
+            Connection connection = connectionService.getById(connectionId);
+            String id = null;
+            if (patchHelper.anyMatchesWithAny(patch, "/fromConnector/.+")) {
+                JsonPatch changed = patchHelper.changeEachPath(patch, p -> p.replaceAll("/fromConnector", ""));
+                id = connectionService.patchMethodOrOperator(connectionId, connection.getFromConnector(), changed);
+            } else if (patchHelper.anyMatchesWithAny(patch, "/toConnector/.+")) {
+                JsonPatch changed = patchHelper.changeEachPath(patch, p -> p.replaceAll("/toConnector", ""));
+                id = connectionService.patchMethodOrOperator(connectionId, connection.getToConnector(), changed);
+            }
+            if (details.isArray()) {
+                return ResponseEntity.ok().build();
+            } else {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("id", id);
+                return ResponseEntity.ok(jsonObject);
+            }
+        }
         FieldBindingMng FB = connectionService.patchUpdate(connectionId, patch);
         if (FB == null) {
             return ResponseEntity.ok().build();
@@ -223,7 +243,7 @@ public class ConnectionController {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", id);
             return ResponseEntity.ok(jsonObject);
-        }else {
+        } else {
             return ResponseEntity.ok().build();
         }
     }
