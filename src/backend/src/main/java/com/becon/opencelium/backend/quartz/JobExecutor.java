@@ -41,9 +41,9 @@ public class JobExecutor extends QuartzJobBean {
         JobDataMap dataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
         ExecutionObj executionObj = executionObjectService.buildObj(data);
-//        ConnectionExecutor executor =
-//                new ConnectionExecutor(executionObj.getQueryParams(), executionObj.getConnection(),  executionObj.getProxy());
-//        executor.start();
+        ConnectionExecutor executor =
+                new ConnectionExecutor(executionObj.getQueryParams(), executionObj.getConnection(),  executionObj.getProxy());
+        executor.start();
         System.out.println("End of execution!");
 
     }

@@ -50,7 +50,7 @@ public class ConnectorExecutor {
         this.connector = Connector.fromEx(connectorEx);
     }
 
-    private void start() {
+    public void start() {
         List<Object> body;
 
         while (!executables.isEmpty()) {
