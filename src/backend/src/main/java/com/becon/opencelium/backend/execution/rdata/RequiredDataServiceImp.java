@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.constant.DataRef;
 import com.becon.opencelium.backend.execution.rdata.extractor.Extractor;
 import com.becon.opencelium.backend.execution.rdata.extractor.ExtractorFactory;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
+import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 
 import java.util.List;
@@ -13,10 +14,12 @@ public class RequiredDataServiceImp implements RequiredDataService {
 
     private final List<RequestData> requestData;
     private final List<FunctionInvoker> functionInvokerList;
+    private Connector connector;
 
-    public RequiredDataServiceImp(List<RequestData> requestData, List<FunctionInvoker> functionInvokerList) {
-        this.requestData = requestData;
+    public RequiredDataServiceImp(Connector connector, List<FunctionInvoker> functionInvokerList) {
+        this.requestData = connector.getRequestData();
         this.functionInvokerList = functionInvokerList;
+        this.connector = connector;
     }
 
     @Override
@@ -26,7 +29,10 @@ public class RequiredDataServiceImp implements RequiredDataService {
             return Optional.of(rqsd.getValue());
         }
         Extractor extractor = ExtractorFactory.getInstance(refType);
-        return extractor.setRequestData(requestData).setFunctions(functionInvokerList).getValue(rqsd.getField());
+        return extractor.setRequestData(requestData)
+                .setFunctions(functionInvokerList)
+                .disableSslValidation(connector.isSslCert())
+                .getValue(rqsd.getField());
     }
 
     private DataRef getRefType(String expression) {
