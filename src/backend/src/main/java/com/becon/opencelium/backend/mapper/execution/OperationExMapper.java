@@ -22,8 +22,8 @@ public class OperationExMapper {
     private final ConnectorService connectorService;
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String REGEX_REF_FOR_REQUIRED_DATA_PARAMETER = "\\{.+}";
-    private static final String REGEX_REF_FOR_QUERY_PARAMETER = "\\#{.+}";
-    private static final String REGEX_REF_FOR_ENH_QUERY_PARAMETER = "\\#{%.+%}";
+    private static final String REGEX_REF_FOR_QUERY_PARAMETER = "#\\{.+}";
+    private static final String REGEX_REF_FOR_ENH_QUERY_PARAMETER = "#\\{%.+%}";
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
 
