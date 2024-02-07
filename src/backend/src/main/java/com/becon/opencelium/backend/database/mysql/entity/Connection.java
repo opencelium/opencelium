@@ -32,7 +32,7 @@ import java.util.List;
 @Entity
 @Table(name = "connection")
 @EntityListeners(AuditingEntityListener.class)
-public class Connection   {
+public class Connection {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -75,7 +75,7 @@ public class Connection   {
     private List<Enhancement> enhancements;
 
     @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(mappedBy = "connection")
+    @OneToMany(mappedBy = "connection", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Scheduler> schedulers;
 
     @JsonIgnore

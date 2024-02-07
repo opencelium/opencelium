@@ -392,3 +392,12 @@ create table connection_history(
 
 --changeset 4.0:10 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 alter table enhancement change variables args text;
+
+--changeset 4.0:11 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table connection_history
+    drop foreign key connection_history_ibfk_1;
+
+alter table connection_history
+    add constraint connection_history_ibfk_1
+        foreign key (connection_id) references connection (id)
+            on delete cascade;

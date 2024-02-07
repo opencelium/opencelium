@@ -100,6 +100,12 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public void delete(Long id) {
+        ConnectionMng connectionMng = getByConnectionId(id);
+        methodMngService.deleteAll(connectionMng.getFromConnector().getMethods());
+        methodMngService.deleteAll(connectionMng.getToConnector().getMethods());
+        operatorMngService.deleteAll(connectionMng.getFromConnector().getOperators());
+        operatorMngService.deleteAll(connectionMng.getToConnector().getOperators());
+        fieldBindingMngService.deleteAll(connectionMng.getFieldBindings());
         connectionMngRepository.delete(getByConnectionId(id));
     }
 

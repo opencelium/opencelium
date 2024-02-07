@@ -26,7 +26,6 @@ import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngServ
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
-import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
@@ -189,17 +188,11 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
         Connection connection = getById(id);
-        List<Scheduler> schedulers = connection.getSchedulers();
-
-        if (schedulers != null && !schedulers.isEmpty()) {
-            schedulers.forEach(s -> {
-                schedulerService.deleteById(s.getId());
-            });
-        }
-        connectionRepository.deleteById(id);
         connectionMngService.delete(id);
+        connectionRepository.deleteById(id);
         connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);
     }
 
