@@ -44,7 +44,7 @@ public class ReferenceExtractor implements Extractor {
             result = extractFromOperation(ref);
         }
 
-        // {%unique_id%}
+        // '#{%unique_id%}'
         if (ref.matches(enhancement)) {
             result = extractFromEnhancement(ref);
         }
@@ -66,7 +66,7 @@ public class ReferenceExtractor implements Extractor {
     }
 
     private Object extractFromEnhancement(String ref) {
-        String bindId = ref.replace("{%", "").replace("%}", "");
+        String bindId = ref.replace("#{%", "").replace("%}", "");
         return executionManager.executeScript(bindId);
     }
 
