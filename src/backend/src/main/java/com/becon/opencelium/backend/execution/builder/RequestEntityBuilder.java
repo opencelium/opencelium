@@ -181,7 +181,7 @@ public class RequestEntityBuilder {
     private List<ParameterDTO> getParamsByLocation(ParamLocation location) {
         // filters parameter by location and do replacement for references if necessary
         return operation.getParameters().stream()
-                .filter(p -> ParamLocation.HEADER == location)
+                .filter(p -> p.getIn() == location)
                 .peek(parameter -> replaceRefs(parameter.getSchema()))
                 .collect(Collectors.toList());
     }
