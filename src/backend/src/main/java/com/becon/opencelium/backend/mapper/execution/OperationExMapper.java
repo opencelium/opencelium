@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.mapper.execution;
 
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
@@ -21,9 +22,6 @@ public class OperationExMapper {
     private final ConnectionMngService connectionMngService;
     private final ConnectorService connectorService;
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
-    private static final String REGEX_REF_FOR_REQUIRED_DATA_PARAMETER = "\\{.+}";
-    private static final String REGEX_REF_FOR_QUERY_PARAMETER = "#\\{.+}";
-    private static final String REGEX_REF_FOR_ENH_QUERY_PARAMETER = "#\\{%.+%}";
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
 
@@ -163,21 +161,21 @@ public class OperationExMapper {
             List<ParameterDTO> list = new ArrayList<>();
             String[] split = path.split("/");
             for (String subPath : split) {
-                if (subPath.matches(REGEX_REF_FOR_REQUIRED_DATA_PARAMETER)) {
-                    String subPathName;
-                    if (subPath.matches(REGEX_REF_FOR_ENH_QUERY_PARAMETER)) {
-                        subPathName = subPath.substring(3, subPath.length() - 2);
-                    }else {
-                        subPathName = subPath.substring(1, subPath.length() - 1);
-                    }
-                    ParameterDTO parameterDTO = new ParameterDTO();
-                    parameterDTO.setIn(ParamLocation.PATH);
-                    parameterDTO.setName(subPathName);
-                    parameterDTO.setStyle(ParamStyle.SIMPLE);
-                    parameterDTO.setContent(mediaType);
-                    parameterDTO.setSchema(getSchema(subPath, DataType.STRING));
-                    list.add(parameterDTO);
+                String subPathName;
+                if (subPath.matches(RegExpression.enhancement)) {
+                    subPathName = subPath.substring(3, subPath.length() - 2);
+                } else if (subPath.matches(RegExpression.requiredData)) {
+                    subPathName = subPath.substring(1, subPath.length() - 1);
+                } else {
+                    continue;
                 }
+                ParameterDTO parameterDTO = new ParameterDTO();
+                parameterDTO.setIn(ParamLocation.PATH);
+                parameterDTO.setName(subPathName);
+                parameterDTO.setStyle(ParamStyle.SIMPLE);
+                parameterDTO.setContent(mediaType);
+                parameterDTO.setSchema(getSchema(subPath, DataType.STRING));
+                list.add(parameterDTO);
             }
             return list;
         }

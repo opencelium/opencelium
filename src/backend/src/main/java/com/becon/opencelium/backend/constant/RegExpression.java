@@ -15,5 +15,5 @@ public interface RegExpression {
     String hasEnh = "#(([a-zA-Z0-9]+).\\(response\\)|([a-zA-Z0-9]+).\\(request\\))";
 //    String directRef = "#(([a-zA-Z0-9]+).\\(response\\)|([a-zA-Z0-9]+).\\(request\\))";
     String directRef = "#[a-zA-Z0-9]{6}\\.(\\(response\\)|\\(request\\))\\..+";
-    String enhancement = "\\{%(.*?)%\\}";
+    String enhancement = "#\\{%(.*?)%\\}";
 }
