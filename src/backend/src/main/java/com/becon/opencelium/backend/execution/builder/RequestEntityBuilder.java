@@ -135,6 +135,9 @@ public class RequestEntityBuilder {
             return "";
         }
 
+        // replace all reference value before converting 'body' to String
+        replaceRefs(body.getSchema());
+
         MediaType mediaType = body.getContent();
         if (mediaType == MediaType.APPLICATION_JSON) {
             return SchemaDTOUtil.toJSON(body.getSchema());
