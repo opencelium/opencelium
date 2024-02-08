@@ -18,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,46 +71,32 @@ public class RequestEntityBuilder {
     }
 
     private URI defaultURLBuilder() {
-        // if no parameter just return the 'path'
-        if (CollectionUtils.isEmpty(operation.getParameters())) {
-            return URI.create(operation.getPath());
-        }
-
         String rawUrl = operation.getPath();
 
         // replace path parameters
-        Map<String, String> paths = getParamsByLocation(ParamLocation.PATH).stream()
-                .map(parameter -> Map.entry(parameter.getName(), ParameterDTOUtil.toString(parameter)))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        for (ParameterDTO parameter : getParamsByLocation(ParamLocation.PATH)) {
+            String ref = parameter.getSchema().getValue();
 
-        if (!CollectionUtils.isEmpty(paths)) {
-            for (Map.Entry<String, String> entry : paths.entrySet()) {
-                String pathName = "{" + entry.getKey() + "}";
-                rawUrl = rawUrl.replace(pathName, entry.getValue());
-            }
+            // now replace referenced schema
+            replaceRefs(parameter.getSchema());
+
+            // convert parameter to string, and replace this path variable with actual value
+            rawUrl = rawUrl.replace(ref, ParameterDTOUtil.toString(parameter));
         }
-
-        // replace query parameters
-        String queries = getParamsByLocation(ParamLocation.QUERY).stream()
-                .map(parameter -> {
-                    ParamStyle style = parameter.getStyle();
-
-                    if (style == ParamStyle.DEEP_OBJECT || style == ParamStyle.FORM) {
-                        return ParameterDTOUtil.toString(parameter);
-                    }
-
-                    return parameter.getName() + "=" + ParameterDTOUtil.toString(parameter);
-                })
-                .collect(Collectors.joining("&"));
 
         // remove old query params if exists
         if (rawUrl.indexOf('?') > 0) {
             rawUrl = rawUrl.substring(0, rawUrl.indexOf('?'));
         }
 
-        // add new query params if exists
-        if (!ObjectUtils.isEmpty(queries)) {
-            rawUrl = rawUrl + "?" + queries;
+        // add query parameters if exists
+        String query = getParamsByLocation(ParamLocation.QUERY).stream()
+                .peek(parameter -> replaceRefs(parameter.getSchema()))
+                .map(parameter -> parameter.getName() + "=" + ParameterDTOUtil.toString(parameter))
+                .collect(Collectors.joining("&"));
+
+        if (!ObjectUtils.isEmpty(query)) {
+            rawUrl = rawUrl + "?" + query;
         }
 
         return URI.create(rawUrl);
@@ -118,12 +105,9 @@ public class RequestEntityBuilder {
     private HttpHeaders defaultHeadersBuilder() {
         HttpHeaders headers = new HttpHeaders();
 
-        if (CollectionUtils.isEmpty(operation.getParameters())) {
-            return headers;
-        }
-
-        getParamsByLocation(ParamLocation.HEADER)
-                .forEach(p -> headers.put(p.getName(), List.of(ParameterDTOUtil.toString(p))));
+        getParamsByLocation(ParamLocation.HEADER).stream()
+                .peek(parameter -> replaceRefs(parameter.getSchema()))
+                .forEach(parameter -> headers.put(parameter.getName(), List.of(ParameterDTOUtil.toString(parameter))));
 
         return headers;
     }
@@ -182,10 +166,14 @@ public class RequestEntityBuilder {
     }
 
     private List<ParameterDTO> getParamsByLocation(ParamLocation location) {
-        // filters parameter by location and do replacement for references if necessary
+        // if operation does not have parameters, then just return empty list
+        if (CollectionUtils.isEmpty(operation.getParameters())) {
+            return new ArrayList<>();
+        }
+
+        // filters parameter by location
         return operation.getParameters().stream()
                 .filter(p -> p.getIn() == location)
-                .peek(parameter -> replaceRefs(parameter.getSchema()))
                 .collect(Collectors.toList());
     }
 }
