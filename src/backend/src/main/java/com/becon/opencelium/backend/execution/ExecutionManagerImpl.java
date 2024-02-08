@@ -25,6 +25,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final Connector connectorTo;
     private final List<FieldBind> fieldBind;
     private final List<Operation> operations = new ArrayList<>();
+    private Integer currentCtorId;
 
     public ExecutionManagerImpl(Map<String, Object> queryParams, Connector connectorFrom, Connector connectorTo, List<FieldBind> fieldBind) {
         this.queryParams = queryParams;
@@ -47,12 +48,12 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public Map<String, String> getRequiredData(String ctorId) {
-        if (Objects.equals(ctorId, String.valueOf(connectorFrom.getId()))) {
+    public Map<String, String> getRequiredData(Integer ctorId) {
+        if (Objects.equals(ctorId, connectorFrom.getId())) {
             return connectorFrom.getRequiredData();
         }
 
-        if (Objects.equals(ctorId, String.valueOf(connectorTo.getId()))) {
+        if (Objects.equals(ctorId, connectorTo.getId())) {
             return connectorTo.getRequiredData();
         }
 
@@ -87,5 +88,15 @@ public class ExecutionManagerImpl implements ExecutionManager {
                 .filter(fb -> Objects.equals(bindId, fb.getBindId()))
                 .map(FieldBind::getEnhance).findFirst()
                 .orElseThrow(() -> new RuntimeException("Non existing fieldBind id 'bindId' = " + bindId));
+    }
+
+    @Override
+    public void setCurrentCtorId(Integer ctorId) {
+        this.currentCtorId = ctorId;
+    }
+
+    @Override
+    public Integer getCurrentCtorId() {
+        return this.currentCtorId;
     }
 }

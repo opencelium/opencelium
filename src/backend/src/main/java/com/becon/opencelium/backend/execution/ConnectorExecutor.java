@@ -51,6 +51,10 @@ public class ConnectorExecutor {
     }
 
     public void start() {
+        // set id of currently executing connector
+        executionManager.setCurrentCtorId(connector.getId());
+
+        // start connector execution
         List<Object> body;
 
         while (!executables.isEmpty()) {

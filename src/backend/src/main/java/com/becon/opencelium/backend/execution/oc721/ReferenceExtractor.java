@@ -33,7 +33,8 @@ public class ReferenceExtractor implements Extractor {
             result = extractFromQueryParams(ref);
         }
 
-        // '{ctorId.key}'
+        // '{key}' - if we get data from currently executing connector
+        // '{#ctorId.key}' - if we get data from another connector
         if (ref.matches(requiredData)) {
             result = extractFromRequiredData(ref);
         }
@@ -71,11 +72,19 @@ public class ReferenceExtractor implements Extractor {
     }
 
     private Object extractFromRequiredData(String ref) {
-        String refValue = ref.replace("{", "").replace("%}", "");
-        String ctorId = refValue.split("\\.")[0];
-        String key = refValue.split("\\.")[1];
+        // remove curly braces
+        String refValue = ref.replace("{", "").replace("}", "");
 
-        return executionManager.getRequiredData(ctorId).get(key);
+        // get id of required connector
+        Integer ctorId;
+        if (refValue.startsWith("#")) {
+            ctorId = Integer.valueOf(refValue.substring(1, refValue.indexOf(".")));
+            refValue = refValue.substring(refValue.indexOf(".") + 1);
+        } else {
+            ctorId = executionManager.getCurrentCtorId();
+        }
+
+        return executionManager.getRequiredData(ctorId).get(refValue);
     }
 
     private Object extractFromQueryParams(String ref) {
