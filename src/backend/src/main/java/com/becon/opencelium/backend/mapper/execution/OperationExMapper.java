@@ -86,8 +86,9 @@ public class OperationExMapper {
         if (indexOfQuestionSign != -1) {
             String path = request.getEndpoint().substring(0, indexOfQuestionSign);
             parameters.addAll(getPathParameters(path, mediaType));
+        }else{
+            parameters.addAll(getPathParameters(request.getEndpoint(), mediaType));
         }
-        parameters.addAll(getPathParameters(request.getEndpoint(), mediaType));
 
         return parameters;
     }
@@ -236,13 +237,12 @@ public class OperationExMapper {
         }
 
         //adding DEEP_OBJECT parameters
-        ParameterDTO parameterDTO = new ParameterDTO();
-        parameterDTO.setContent(mediaType);
-        parameterDTO.setIn(ParamLocation.QUERY);
-        parameterDTO.setStyle(ParamStyle.DEEP_OBJECT);
-        parameterDTO.setExplode(true);
-        //loop for adding each object in Tree to parameters
         for (Node node : objectParametersTree.getNodes()) {
+            ParameterDTO parameterDTO = new ParameterDTO();
+            parameterDTO.setContent(mediaType);
+            parameterDTO.setIn(ParamLocation.QUERY);
+            parameterDTO.setStyle(ParamStyle.DEEP_OBJECT);
+            parameterDTO.setExplode(true);
             parameterDTO.setName(node.getKey());
             parameterDTO.setSchema(getSchema(node));
             parameters.add(parameterDTO);
