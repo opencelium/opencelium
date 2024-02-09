@@ -58,7 +58,7 @@ public class ConnectionGC implements GarbageCollector<ConnectionForGC> {
     }
 
     private void startInnerTasks() {
-        taskScheduler.schedule(this::locateNewConnections,DEFAULT_THREAD_POOL_RUNNING_DELAY, TimeUnit.MILLISECONDS);
+        taskScheduler.scheduleWithFixedDelay(this::locateNewConnections, DEFAULT_THREAD_POOL_RUNNING_DELAY, DEFAULT_THREAD_POOL_RUNNING_DELAY, TimeUnit.MILLISECONDS);
         taskScheduler.scheduleWithFixedDelay(this::newGC, RUNNING_DELAY_FOR_NEW_POOL, RUNNING_DELAY_FOR_NEW_POOL, TimeUnit.MILLISECONDS);
         taskScheduler.scheduleWithFixedDelay(this::youngGC, RUNNING_DELAY_FOR_YOUNG_POOL, RUNNING_DELAY_FOR_YOUNG_POOL, TimeUnit.MILLISECONDS);
         taskScheduler.scheduleWithFixedDelay(this::oldGC, RUNNING_DELAY_FOR_OLD_POOL, RUNNING_DELAY_FOR_OLD_POOL, TimeUnit.MILLISECONDS);
@@ -67,96 +67,85 @@ public class ConnectionGC implements GarbageCollector<ConnectionForGC> {
 
     // searches new connections(not exist in pool) from db and locate them proper pool
     private void locateNewConnections() {
-        synchronized (pool) {
-            List<Long> allConnectionIds = pool.getAllInPool();
-            List<ConnectionForGC> connections;
-            if (allConnectionIds.isEmpty()) {
-                connections = connectionGCService.getAllConnections();
-            } else {
-                connections = connectionGCService.getAllConnectionsNotContains(allConnectionIds);
-            }
-            if (connections == null || connections.isEmpty()) {
-                logger.log(Level.INFO, "locateNewConnections() : No new connections to add. New count: %d, Young count: %d, Old count: %d, ToDeleted count: %d".formatted(pool.getNewElements().size(), pool.getYoungElements().size(), pool.getOldElements().size(), pool.getElementsToBeDeleted().size()));
-                return;
-            }
-            int count = 0;
-            for (ConnectionForGC connection : connections) {
-                if (!criteria.test(connection)) {
-                    count++;
-                    pool.allocate(connection.getConnection().getId());
-                    logger.log(Level.INFO, "locateNewConnections(): New count: %d, Young count: %d, Old count: %d, ToDeleted count: %d".formatted(pool.getNewElements().size(), pool.getYoungElements().size(), pool.getOldElements().size(), pool.getElementsToBeDeleted().size()));
-                }
-            }
-            if (count == 0) {
+        List<Long> allConnectionIds = pool.getAllInPool();
+        List<ConnectionForGC> connections;
+        if (allConnectionIds.isEmpty()) {
+            connections = connectionGCService.getAllConnections();
+        } else {
+            connections = connectionGCService.getAllConnectionsNotContains(allConnectionIds);
+        }
+        if (connections == null || connections.isEmpty()) {
+            logger.log(Level.INFO, "locateNewConnections() : No new connections to add. New count: %d, Young count: %d, Old count: %d, ToDeleted count: %d".formatted(pool.getNewElements().size(), pool.getYoungElements().size(), pool.getOldElements().size(), pool.getElementsToBeDeleted().size()));
+            return;
+        }
+        ;
+        for (ConnectionForGC connection : connections) {
+            if (!criteria.test(connection)) {
+                pool.allocate(connection.getConnection().getId());
                 logger.log(Level.INFO, "locateNewConnections(): New count: %d, Young count: %d, Old count: %d, ToDeleted count: %d".formatted(pool.getNewElements().size(), pool.getYoungElements().size(), pool.getOldElements().size(), pool.getElementsToBeDeleted().size()));
             }
         }
+        logger.log(Level.INFO, "after locateNewConnections(): New count: %d, Young count: %d, Old count: %d, ToDeleted count: %d".formatted(pool.getNewElements().size(), pool.getYoungElements().size(), pool.getOldElements().size(), pool.getElementsToBeDeleted().size()));
     }
 
     // works with new pool
     private void newGC() {
-        synchronized (pool) {
-            List<Long> newElements = pool.getNewElements();
-            for (Long id : newElements) {
-                if (connectionGCService.exists(id)) {
-                    ConnectionForGC connection = connectionGCService.getById(id);
-                    if (criteria.test(connection)) {
-                        logger.log(Level.INFO, "newGC(): evicted from pool. Because it matches the criteria. id = " + id);
-                        pool.evictFromNewPool(id);
-                    } else {
-                        pool.reconsiderNewPool(id);
-                    }
-                } else {
-                    logger.log(Level.INFO, "newGC(): evicted from pool. Because it is not exist in db. id = " + id);
+        List<Long> newElements = pool.getNewElements();
+        for (Long id : newElements) {
+            if (connectionGCService.exists(id)) {
+                ConnectionForGC connection = connectionGCService.getById(id);
+                if (criteria.test(connection)) {
+                    logger.log(Level.INFO, "newGC(): evicted from pool. Because it matches the criteria. id = " + id);
                     pool.evictFromNewPool(id);
+                } else {
+                    pool.reconsiderNewPool(id);
                 }
+            } else {
+                logger.log(Level.INFO, "newGC(): evicted from pool. Because it is not exist in db. id = " + id);
+                pool.evictFromNewPool(id);
             }
-            logger.log(Level.INFO, "newGC(): run");
         }
+        logger.log(Level.INFO, "newGC(): run");
     }
 
     // works with young pool
     private void youngGC() {
-        synchronized (pool) {
-            List<Long> youngElements = pool.getYoungElements();
-            for (Long id : youngElements) {
-                if (connectionGCService.exists(id)) {
-                    ConnectionForGC connection = connectionGCService.getById(id);
-                    if (criteria.test(connection)) {
-                        logger.log(Level.INFO, "youngGC(): evicted from pool. Because it matches the criteria. id = " + id);
-                        pool.evictFromYoungPool(id);
-                    } else {
-                        pool.reconsiderYoungPool(id);
-                    }
-                } else {
-                    logger.log(Level.INFO, "youngGC(): evicted from pool. Because it is not exist in db. id = " + id);
+        List<Long> youngElements = pool.getYoungElements();
+        for (Long id : youngElements) {
+            if (connectionGCService.exists(id)) {
+                ConnectionForGC connection = connectionGCService.getById(id);
+                if (criteria.test(connection)) {
+                    logger.log(Level.INFO, "youngGC(): evicted from pool. Because it matches the criteria. id = " + id);
                     pool.evictFromYoungPool(id);
+                } else {
+                    pool.reconsiderYoungPool(id);
                 }
+            } else {
+                logger.log(Level.INFO, "youngGC(): evicted from pool. Because it is not exist in db. id = " + id);
+                pool.evictFromYoungPool(id);
             }
-            logger.log(Level.INFO, "youngGC(): run");
         }
+        logger.log(Level.INFO, "youngGC(): run");
     }
 
     // works with old pool
     private void oldGC() {
-        synchronized (pool) {
-            List<Long> oldElements = pool.getOldElements();
-            for (Long id : oldElements) {
-                if (connectionGCService.exists(id)) {
-                    ConnectionForGC connection = connectionGCService.getById(id);
-                    if (criteria.test(connection)) {
-                        logger.log(Level.INFO, "oldGC(): evicted from pool. Because it matches the criteria. id = " + id);
-                        pool.evictFromOldPool(id);
-                    } else {
-                        pool.reconsiderOldPool(id);
-                    }
-                } else {
-                    logger.log(Level.INFO, "oldGC(): evicted from pool. Because it is not exist in db. id = " + id);
+        List<Long> oldElements = pool.getOldElements();
+        for (Long id : oldElements) {
+            if (connectionGCService.exists(id)) {
+                ConnectionForGC connection = connectionGCService.getById(id);
+                if (criteria.test(connection)) {
+                    logger.log(Level.INFO, "oldGC(): evicted from pool. Because it matches the criteria. id = " + id);
                     pool.evictFromOldPool(id);
+                } else {
+                    pool.reconsiderOldPool(id);
                 }
+            } else {
+                logger.log(Level.INFO, "oldGC(): evicted from pool. Because it is not exist in db. id = " + id);
+                pool.evictFromOldPool(id);
             }
-            logger.log(Level.INFO, "oldGC(): run");
         }
+        logger.log(Level.INFO, "oldGC(): run");
     }
 
     @Override

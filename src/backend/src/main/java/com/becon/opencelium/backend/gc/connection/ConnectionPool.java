@@ -65,7 +65,7 @@ public class ConnectionPool extends Pool<Long> {
                             );
                 }
             }
-            logger.log(Level.INFO, "after initialize(): \nNew count: %d, Young count: %d, Old count: %d, ToDeleted count: %d".formatted(newPool.size(), youngPool.size(), oldPool.size(), toDeletePool.size()));
+            logger.log(Level.INFO, "after initialize(): New count: %d, Young count: %d, Old count: %d, ToDeleted count: %d".formatted(newPool.size(), youngPool.size(), oldPool.size(), toDeletePool.size()));
         }
     }
 
@@ -132,7 +132,6 @@ public class ConnectionPool extends Pool<Long> {
     @Override
     public void reconsiderOldPool(Long element) {
         synchronized (this) {
-            System.out.println((System.currentTimeMillis() - oldPool.get(element).getTimestamp()) / 1000);
             List<ConnectionHistory> histories = connectionHistoryService.findAllWithInterval(element, (System.currentTimeMillis() - oldPool.get(element).getTimestamp()) / 1000);
             if (histories == null || histories.isEmpty() || histories.size() == 1 && histories.get(0).getAction() == Action.CREATE) {
                 if (oldPool.get(element).getTimestamp() + OLD_POOL_LIFE_TIME < System.currentTimeMillis()) {
@@ -218,5 +217,6 @@ public class ConnectionPool extends Pool<Long> {
                 }
             }
         }
+        logger.log(Level.INFO, "after rotate(): New count: %d, Young count: %d, Old count: %d, ToDeleted count: %d".formatted(newPool.size(), youngPool.size(), oldPool.size(), toDeletePool.size()));
     }
 }
