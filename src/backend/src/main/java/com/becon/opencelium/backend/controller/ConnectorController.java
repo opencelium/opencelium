@@ -183,7 +183,7 @@ public class ConnectorController {
     public ResponseEntity<?> delete(@PathVariable int id) {
         List<Connection> connections = connectionService.findAllByConnectorId(id);
         connections.forEach(c -> {
-            connectionService.deleteById(c.getId());
+            connectionService.deleteAndTrackIt(c.getId());
 //            connectionNodeService.deleteById(c.getId());
         });
         connectorService.deleteById(id);
@@ -207,7 +207,7 @@ public class ConnectorController {
         ids.getIdentifiers().forEach(id -> {
             List<Connection> connections = connectionService.findAllByConnectorId(id);
             connections.forEach(c -> {
-                connectionService.deleteById(c.getId());
+                connectionService.deleteAndTrackIt(c.getId());
 //                connectionNodeService.deleteById(c.getId());
             });
             connectorService.deleteById(id);

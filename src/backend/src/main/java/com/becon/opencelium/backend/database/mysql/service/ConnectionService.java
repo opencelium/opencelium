@@ -31,6 +31,7 @@ public interface ConnectionService {
     ConnectionMng save(Connection connection, ConnectionMng connectionMng);
 
     void deleteById(Long id);
+    void deleteAndTrackIt(Long id);
 
     Optional<Connection> findById(Long id);
 
@@ -56,4 +57,6 @@ public interface ConnectionService {
     void undo(Long connectionId);
 
     ConnectionDTO getFullConnection(Long connectionId);
+
+    List<Connection> getAllConnectionsNotContains(List<Long> ids);
 }

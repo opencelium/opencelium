@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class ConnectionMngServiceImp implements ConnectionMngService {
@@ -101,11 +100,21 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public void delete(Long id) {
         ConnectionMng connectionMng = getByConnectionId(id);
-        methodMngService.deleteAll(connectionMng.getFromConnector().getMethods());
-        methodMngService.deleteAll(connectionMng.getToConnector().getMethods());
-        operatorMngService.deleteAll(connectionMng.getFromConnector().getOperators());
-        operatorMngService.deleteAll(connectionMng.getToConnector().getOperators());
-        fieldBindingMngService.deleteAll(connectionMng.getFieldBindings());
+        if(connectionMng.getFromConnector()!=null){
+            if(connectionMng.getFromConnector().getMethods()!=null)
+                methodMngService.deleteAll(connectionMng.getFromConnector().getMethods());
+            if(connectionMng.getFromConnector().getOperators()!=null)
+                operatorMngService.deleteAll(connectionMng.getFromConnector().getOperators());
+        }
+        if(connectionMng.getToConnector()!=null){
+            if(connectionMng.getToConnector().getMethods()!=null)
+                methodMngService.deleteAll(connectionMng.getToConnector().getMethods());
+
+            if(connectionMng.getToConnector().getOperators()!=null)
+                operatorMngService.deleteAll(connectionMng.getToConnector().getOperators());
+        }
+        if(connectionMng.getFieldBindings()!=null)
+            fieldBindingMngService.deleteAll(connectionMng.getFieldBindings());
         connectionMngRepository.delete(getByConnectionId(id));
     }
 
@@ -154,6 +163,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         FieldBindingMng FB = doAfterPatchBeforeSaveEnhancement(connection, patched, patch);
         save(patched);
         return FB;
+    }
+
+    @Override
+    public List<ConnectionMng> getAllById(List<Long> ids) {
+        return connectionMngRepository.findAllByConnectionIdIn(ids);
     }
 
     private void setEnhancements(ConnectionMng connection) {

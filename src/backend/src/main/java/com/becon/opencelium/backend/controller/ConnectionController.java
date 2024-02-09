@@ -346,7 +346,7 @@ public class ConnectionController {
     })
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-        connectionService.deleteById(id);
+        connectionService.deleteAndTrackIt(id);
         return ResponseEntity.ok().build();
     }
 
@@ -430,7 +430,7 @@ public class ConnectionController {
     public ResponseEntity<?> deleteCtionByIdIn(@RequestBody IdentifiersDTO<Long> ids) throws Exception {
 
         ids.getIdentifiers().forEach(id -> {
-            connectionService.deleteById(id);
+            connectionService.deleteAndTrackIt(id);
 //            connectionNodeService.deleteById(id);
         });
         return ResponseEntity.noContent().build();

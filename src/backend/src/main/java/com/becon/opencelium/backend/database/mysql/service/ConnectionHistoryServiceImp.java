@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ConnectionHistoryServiceImp implements ConnectionHistoryService {
     @Value("${" + YamlPropConst.OC_VERSION + "}")
@@ -23,6 +25,16 @@ public class ConnectionHistoryServiceImp implements ConnectionHistoryService {
     public ConnectionHistoryServiceImp(ObjectMapper mapper, ConnectionHistoryRepository connectionHistoryRepository) {
         this.mapper = mapper;
         this.connectionHistoryRepository = connectionHistoryRepository;
+    }
+
+    @Override
+    public List<ConnectionHistory> findAllWithInterval(long connectionId, long second) {
+        return connectionHistoryRepository.findConnectionHistoriesInInterval(connectionId, second);
+    }
+
+    @Override
+    public List<ConnectionHistory> findAllWithConnectionId(Long connectionId) {
+        return connectionHistoryRepository.findAllByConnectionId(connectionId);
     }
 
     @Override

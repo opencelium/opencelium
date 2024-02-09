@@ -32,4 +32,5 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     LinkedList<Connection> findAllByConnectorId(int connectorId);
 
     List<Connection> findAllByTitleContains(String title);
+    List<Connection> findAllByIdNotIn(List<Long> ids);
 }

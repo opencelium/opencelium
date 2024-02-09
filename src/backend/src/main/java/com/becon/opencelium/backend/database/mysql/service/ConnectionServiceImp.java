@@ -190,6 +190,14 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
+        getById(id);
+        connectionMngService.delete(id);
+        connectionRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteAndTrackIt(Long id) {
         Connection connection = getById(id);
         connectionMngService.delete(id);
         connectionRepository.deleteById(id);
@@ -268,6 +276,11 @@ public class ConnectionServiceImp implements ConnectionService {
         return connectionDTOMng;
     }
 
+    @Override
+    public List<Connection> getAllConnectionsNotContains(List<Long> ids) {
+        return connectionRepository.findAllByIdNotIn(ids);
+    }
+
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
@@ -333,6 +346,5 @@ public class ConnectionServiceImp implements ConnectionService {
         } else {
             patchUpdateInternal(connection, jsonPatch);
         }
-
     }
 }
