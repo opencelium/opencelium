@@ -50,6 +50,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -252,8 +253,9 @@ public class ConnectorController {
             failBody = functionInvoker.getResponse().getFail().getBody().getFields();
         }
 
-        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response = new LinkedHashMap<>();
         if (formatType.equals("json")) {
+            System.out.println(responseEntity.getBody());
             response = mapper.readValue(responseEntity.getBody().toString(), Map.class);
         }
 

@@ -109,11 +109,12 @@ public class InvokerRequestBuilder {
         RestTemplate restTemplate = createRestTemplate();
         if (getResponseContentType(header, functionInvoker).toString().contains("xml")) {
             response = restTemplate.exchange(url, method ,httpEntity, String.class);
+            response = convertToStringResponse(response);
         } else {
             response = InvokerRequestBuilder
                     .convertToStringResponse(restTemplate.exchange(url, method ,httpEntity, Object.class));
         }
-        return convertToStringResponse(response);
+        return response;
     }
 
     private MediaType getResponseContentType(HttpHeaders httpHeaders, FunctionInvoker functionInvoker) {

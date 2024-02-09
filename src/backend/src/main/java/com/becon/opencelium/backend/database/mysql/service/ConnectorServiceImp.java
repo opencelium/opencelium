@@ -20,8 +20,11 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
+import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
+import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
+import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
@@ -173,7 +176,19 @@ public class ConnectorServiceImp implements ConnectorService {
     // RequestData = from db; RequiredData = from invoker
     @Override
     public List<RequestData> buildRequestData(Connector connector) {
-        return null;
+        Invoker invoker = invokerService.findByName(connector.getInvoker());
+        List<RequiredData> requiredData = invoker.getRequiredData();
+        List<RequestData> requestData = connector.getRequestData();
+        requiredData.forEach(rqd -> addFieldIfNotExists(requestData, rqd));
+
+        // looping through request data nad looking for values that contains references
+        // rqsd - requestData object
+        RequiredDataService requiredDataService = new RequiredDataServiceImp(requestData, invoker.getOperations());
+        requestData.forEach(rqsd -> {
+            String value = requiredDataService.getValue(rqsd).orElse(null);
+            rqsd.setValue(value);
+        });
+        return requestData;
     }
 
     private void addFieldIfNotExists(List<RequestData> requestData, RequiredData rqd) {
