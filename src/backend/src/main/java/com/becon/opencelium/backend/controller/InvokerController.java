@@ -282,7 +282,7 @@ public class InvokerController {
                 return;
             }
             ctions.forEach(ction -> {
-                connectionService.deleteById(ction.getId());
+                connectionService.deleteAndTrackIt(ction.getId());
             });
         });
         invokerService.delete(invokerName);

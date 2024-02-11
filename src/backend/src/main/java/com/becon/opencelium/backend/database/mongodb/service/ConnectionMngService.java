@@ -19,4 +19,6 @@ public interface ConnectionMngService {
     String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch);
 
     FieldBindingMng patchUpdate(Long id, JsonPatch patch);
+
+    List<ConnectionMng> getAllById(List<Long> ids);
 }
