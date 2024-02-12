@@ -22,6 +22,65 @@ public class SchemaDTOUtil {
     private static final Double DEFAULT_NUMBER = 0.0;
     private static final Boolean DEFAULT_BOOLEAN = false;
 
+    public static SchemaDTO copy(SchemaDTO schema) {
+        if (schema == null) {
+            return null;
+        }
+
+        SchemaDTO result = new SchemaDTO();
+        result.setType(schema.getType());
+
+        String value = schema.getValue() == null ? null : new String(schema.getValue());
+        result.setValue(value);
+
+        Map<String, SchemaDTO> properties = schema.getProperties();
+        if (properties != null) {
+            Map<String, SchemaDTO> temp = new HashMap<>();
+
+            properties.forEach((s, schemaDTO) -> {
+                temp.put(s, SchemaDTOUtil.copy(schemaDTO));
+            });
+
+            result.setProperties(temp);
+        } else {
+            result.setProperties(null);
+        }
+
+        List<SchemaDTO> items = schema.getItems();
+        if (items != null) {
+            List<SchemaDTO> temp = items.stream()
+                    .map(SchemaDTOUtil::copy)
+                    .collect(Collectors.toList());
+
+            result.setItems(temp);
+        } else {
+            result.setItems(null);
+        }
+
+        XmlObjectDTO xml = schema.getXml();
+        if (xml != null) {
+            XmlObjectDTO temp = new XmlObjectDTO();
+
+            String name = xml.getName() == null ? null : new String(xml.getName());
+            temp.setName(name);
+
+            String namespace = xml.getNamespace() == null ? null : new String(xml.getNamespace());
+            temp.setNamespace(namespace);
+
+            String prefix = xml.getPrefix() == null ? null : new String(xml.getPrefix());
+            temp.setPrefix(prefix);
+
+            temp.setAttribute(xml.isAttribute());
+            temp.setWrapped(xml.isWrapped());
+
+            result.setXml(temp);
+        } else {
+            result.setXml(null);
+        }
+
+        return result;
+    }
+
     public static String toJSON(SchemaDTO schema) {
         if (schema == null || schema.getType() == null) {
             throw new IllegalStateException("schema and data type must not be null");

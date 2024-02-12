@@ -12,6 +12,20 @@ public class ParameterDTOUtil {
 
     private final static String EMPTY_STYLE_VALUE_ERROR = "PramStyle of %s should not be empty";
 
+    public static ParameterDTO copy(ParameterDTO parameter) {
+        ParameterDTO result = new ParameterDTO();
+        String name = parameter.getName() == null ? null : new String(parameter.getName());
+        result.setName(name);
+
+        result.setIn(parameter.getIn());
+        result.setStyle(parameter.getStyle());
+        result.setExplode(parameter.isExplode());
+        result.setContent(parameter.getContent());
+        result.setSchema(SchemaDTOUtil.copy(parameter.getSchema()));
+
+        return result;
+    }
+
     // conversions comply with oas v3.1.0
     public static String toString(ParameterDTO parameter) {
         if (parameter == null || parameter.getStyle() == null) {
