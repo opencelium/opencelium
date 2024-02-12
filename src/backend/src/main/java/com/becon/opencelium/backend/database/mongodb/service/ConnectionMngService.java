@@ -21,4 +21,5 @@ public interface ConnectionMngService {
     FieldBindingMng patchUpdate(Long id, JsonPatch patch);
 
     List<ConnectionMng> getAllById(List<Long> ids);
+    long count();
 }

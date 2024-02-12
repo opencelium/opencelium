@@ -197,6 +197,13 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void deleteOnlyConnection(Long id) {
+        getById(id);
+        connectionRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteAndTrackIt(Long id) {
         Connection connection = getById(id);
         connectionMngService.delete(id);

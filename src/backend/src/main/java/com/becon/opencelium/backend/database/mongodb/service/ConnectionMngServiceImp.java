@@ -170,6 +170,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         return connectionMngRepository.findAllByConnectionIdIn(ids);
     }
 
+    @Override
+    public long count() {
+        return connectionMngRepository.count();
+    }
+
     private void setEnhancements(ConnectionMng connection) {
         if(connection.getFieldBindings()==null || connection.getFieldBindings().isEmpty())
             return;

@@ -204,3 +204,6 @@ opencelium:
 #        port: 8082
 #        username: ####
 #        password: ####
+  gc:
+    connection:
+      isOn: true
