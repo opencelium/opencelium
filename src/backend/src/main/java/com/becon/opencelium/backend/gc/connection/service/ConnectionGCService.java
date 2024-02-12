@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class ConnectionGCService {
@@ -30,15 +29,7 @@ public class ConnectionGCService {
     public List<ConnectionForGC> getAllConnections() {
         List<Connection> connections = connectionService.findAll();
 
-        List<ConnectionForGC> list = new ArrayList<>();
-        connections.forEach(c -> {
-            try {
-                ConnectionMng connectionMng = connectionMngService.getByConnectionId(c.getId());
-                list.add(new ConnectionForGC(c, connectionMng));
-            } catch (ConnectionNotFoundException e) {
-                connectionService.deleteOnlyConnection(c.getId());
-            }
-        });
+        List<ConnectionForGC> list = merge(connections);
 
         long count = connectionMngService.count();
         if (count != list.size()) {
@@ -65,17 +56,12 @@ public class ConnectionGCService {
     public List<ConnectionForGC> getAllConnectionsNotContains(List<Long> allConnectionIds) {
         List<Connection> connections = connectionService.getAllConnectionsNotContains(allConnectionIds);
         if (connections.isEmpty()) {
+            if (connectionMngService.count() != 0) {
+                connectionMngService.getAll().forEach(c -> connectionMngService.delete(c.getConnectionId()));
+            }
             return null;
         }
-        List<ConnectionMng> connectionMngs = connectionMngService.getAllById(connections.stream().map(Connection::getId).toList());
-
-        return connections.stream().map(c -> {
-            for (ConnectionMng connectionMng : connectionMngs) {
-                if (Objects.equals(connectionMng.getConnectionId(), c.getId()))
-                    return new ConnectionForGC(c, connectionMng);
-            }
-            throw new RuntimeException("CONNECTION_NOT_FOUND");
-        }).collect(Collectors.toList());
+        return merge(connections);
     }
 
     public boolean exists(Long id) {
@@ -90,5 +76,21 @@ public class ConnectionGCService {
         Connection connection = connectionService.getById(id);
         ConnectionMng connectionMng = connectionMngService.getByConnectionId(id);
         return new ConnectionForGC(connection, connectionMng);
+    }
+
+    private List<ConnectionForGC> merge(List<Connection> connections) {
+        List<ConnectionForGC> list = new ArrayList<>();
+        if (connections == null) {
+            return list;
+        }
+        connections.forEach(c -> {
+            try {
+                ConnectionMng connectionMng = connectionMngService.getByConnectionId(c.getId());
+                list.add(new ConnectionForGC(c, connectionMng));
+            } catch (ConnectionNotFoundException e) {
+                connectionService.deleteOnlyConnection(c.getId());
+            }
+        });
+        return list;
     }
 }
