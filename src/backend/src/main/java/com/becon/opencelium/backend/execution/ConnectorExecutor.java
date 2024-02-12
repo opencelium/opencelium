@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
+import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
@@ -105,7 +106,8 @@ public class ConnectorExecutor {
                 .usingReferences(this::mapToSchemaDTO)
                 .createRequest();
 
-        ResponseEntity<?> responseEntity = this.restTemplate.exchange(requestEntity, Object.class);
+//        ResponseEntity<?> responseEntity = this.restTemplate.exchange(requestEntity, Object.class);
+        ResponseEntity<?> responseEntity = new RestTemplate().exchange(requestEntity, Object.class);
 
         Operation operation = executionManager.findOperationByColor(operationDTO.getOperationId())
                 .orElseGet(() -> {
@@ -127,10 +129,11 @@ public class ConnectorExecutor {
     private void executeIfOperator(List<Object> body, int index) {
         OperatorEx operatorDTO = (OperatorEx) body.get(index);
 
-        Object leftValue = executionManager.getValue(operatorDTO.getCondition().getLeft());
-        Object rightValue = executionManager.getValue(operatorDTO.getCondition().getRight());
+        ConditionEx condition = operatorDTO.getCondition();
+        Object leftValue = executionManager.getValue(condition.getLeft());
+        Object rightValue = executionManager.getValue(condition.getRight());
 
-        Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(operatorDTO.getType());
+        Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(condition.getRelationalOperator());
 
         boolean result = operator.apply(leftValue, rightValue);
 

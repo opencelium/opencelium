@@ -72,9 +72,9 @@ public class Operation {
 
         Object result;
 
-        if (mediaType == MediaType.APPLICATION_JSON) {
+        if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
             result = getFromJSON(entityBody, ref, loops);
-        } else if (mediaType == MediaType.APPLICATION_XML) {
+        } else if (MediaType.APPLICATION_XML.isCompatibleWith(mediaType)) {
             result = getFromXML(entityBody, ref, loops);
         } else {
             result = entityBody;
