@@ -16,7 +16,7 @@ public class ConnectionGCRunner extends GCRunner<ConnectionForGC> {
     private final Criteria<ConnectionForGC> criteria;
     private final boolean on;
     private static final String DEFAULT_STRATEGY_STRING = "periodic";
-    private static final String DEFAULT_GC_IS_ON_STRING = "true";
+    private static final String DEFAULT_GC_IS_ON_STRING = "false";
 
     public ConnectionGCRunner(ConnectionGC connectionGC, Environment env) {
         super(connectionGC, null);

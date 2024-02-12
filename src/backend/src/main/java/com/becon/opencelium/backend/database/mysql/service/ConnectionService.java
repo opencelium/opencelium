@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.github.fge.jsonpatch.JsonPatch;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
@@ -31,6 +32,9 @@ public interface ConnectionService {
     ConnectionMng save(Connection connection, ConnectionMng connectionMng);
 
     void deleteById(Long id);
+
+    void deleteOnlyConnection(Long id);
+
     void deleteAndTrackIt(Long id);
 
     Optional<Connection> findById(Long id);
