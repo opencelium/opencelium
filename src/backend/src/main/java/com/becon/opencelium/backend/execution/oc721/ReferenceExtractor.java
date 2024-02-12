@@ -25,6 +25,10 @@ public class ReferenceExtractor implements Extractor {
 
     @Override
     public Object extractValue(String ref) {
+        if (ref == null) {
+            return null;
+        }
+
         Object result = null;
 
         // '${key}'
