@@ -29,10 +29,10 @@ public class ComparisonOperatorFactory implements OperatorFactory {
             case ISNOTEMPTY -> new IsNotEmpty();
             case ISNOTNULL -> new IsNotNull();
             case ISNULL -> new IsNull();
-//            case NOTEQUALTO -> new NotEqualTo();
-//            case CONTAINSSUBSTR -> new ContainsSubStr();
-//            case NOTCONTAINSSUBSTR -> new NotContainsSubStr();
-            case DEFAULT -> throw new RuntimeException("Operator '" + relationalOperator + "' is not supported");
+            case NOTEQUALTO -> new NotEqualTo();
+            case CONTAINSSUBSTR -> new ContainsSubStr();
+            case NOTCONTAINSSUBSTR -> new NotContainsSubStr();
+            case DENYLIST, DEFAULT -> throw new RuntimeException("Operator '" + relationalOperator + "' is not supported");
         };
     }
 }
