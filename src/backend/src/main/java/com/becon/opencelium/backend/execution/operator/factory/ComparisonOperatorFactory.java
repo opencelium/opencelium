@@ -11,23 +11,23 @@ public class ComparisonOperatorFactory implements OperatorFactory {
 
         return switch (operator) {
             case CONTAINS -> new Contains();
-            case NOTCONTAINS -> new NotContains();
-            case EQUALTO -> new EqualTo();
-            case GREATERTHAN -> new GreaterThan();
-            case GREATERTHANOREQUALTO -> new GreaterThanOrEqualTo();
-            case LESSTHAN -> new LessThan();
-            case LESSTHANOREQUALTO -> new LessThanOrEqualTo();
+            case NOT_CONTAINS -> new NotContains();
+            case EQUAL_TO -> new EqualTo();
+            case GREATER_THAN -> new GreaterThan();
+            case GREATER_THAN_OR_EQUAL_TO -> new GreaterThanOrEqualTo();
+            case LESS_THAN -> new LessThan();
+            case LESS_THAN_OR_EQUAL_TO -> new LessThanOrEqualTo();
             case LIKE -> new Like();
             case MATCHES -> new Matches();
-            case MATCHESINLIST -> new MatchesInList();
-            case NOTLIKE -> new NotLike();
+            case MATCHES_IN_LIST -> new MatchesInList();
+            case NOT_LIKE -> new NotLike();
             case REGEX -> new RegEx();
-            case PROPERTYNOTEXISTS -> new PropertyNotExists();
-            case PROPERTYEXISTS -> new PropertyExists();
-            case ISTYPEOF -> new IsTypeOf();
-            case ISEMPTY -> new IsEmpty();
-            case ISNOTEMPTY -> new IsNotEmpty();
-            case ISNOTNULL -> new IsNotNull();
+            case PROPERTY_NOT_EXISTS -> new PropertyNotExists();
+            case PROPERTY_EXISTS -> new PropertyExists();
+            case IS_TYPE_OF -> new IsTypeOf();
+            case IS_EMPTY -> new IsEmpty();
+            case IS_NOT_EMPTY -> new IsNotEmpty();
+            case IS_NOT_NULL -> new IsNotNull();
             case ISNULL -> new IsNull();
 //            case NOTEQUALTO -> new NotEqualTo();
 //            case CONTAINSSUBSTR -> new ContainsSubStr();
