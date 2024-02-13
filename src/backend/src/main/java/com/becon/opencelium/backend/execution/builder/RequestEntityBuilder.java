@@ -149,12 +149,16 @@ public class RequestEntityBuilder {
         if (ReferenceExtractor.isReference(value)) {
             SchemaDTO referencedSchema = references.apply(value);
 
-            // if schema is referenced then correct the type and fields
-            schema.setType(referencedSchema.getType());
-            schema.setValue(referencedSchema.getValue());
-            schema.setItems(referencedSchema.getItems());
-            schema.setProperties(referencedSchema.getProperties());
-            schema.setXml(referencedSchema.getXml());
+            if (referencedSchema == null) {
+                schema.setValue(null);
+            } else {
+                // if schema is referenced then correct the type and fields
+                schema.setType(referencedSchema.getType());
+                schema.setValue(referencedSchema.getValue());
+                schema.setItems(referencedSchema.getItems());
+                schema.setProperties(referencedSchema.getProperties());
+                schema.setXml(referencedSchema.getXml());
+            }
 
             // referenced schema does not contain other reference, end recursion
             return;
