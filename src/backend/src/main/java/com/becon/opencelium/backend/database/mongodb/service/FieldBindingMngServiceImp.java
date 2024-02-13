@@ -161,6 +161,6 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     }
 
     private String putId(String ref, String id){
-        return "{%" + id + "%}";
+        return "#{%" + id + "%}";
     }
 }
