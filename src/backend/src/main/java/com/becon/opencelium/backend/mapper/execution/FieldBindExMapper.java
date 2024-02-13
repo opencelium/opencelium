@@ -18,6 +18,7 @@ public class FieldBindExMapper {
         this.enhancementService = enhancementService;
     }
 
+
     public FieldBindEx toEntity(FieldBindingMng dto) {
         FieldBindEx fieldBindEx = new FieldBindEx();
         fieldBindEx.setBindId(dto.getId());
@@ -26,13 +27,12 @@ public class FieldBindExMapper {
         EnhancementEx enhancementEx = new EnhancementEx();
 
         enhancementEx.setEnhanceId(dto.getEnhancementId());
-        enhancementEx.setScript(enhancement.getScript());
         enhancementEx.setLang(enhancement.getLanguage());
 
         if (enhancement.getArgs() == null) {
             enhancementEx.setArgs(new HashMap<>());
-        }else {
-            String variables = enhancement.getArgs().replaceAll("[/|\\\\n]", "");
+        } else {
+            String variables = enhancement.getArgs().replaceAll("[/|\\n]", "");
             String[] vars = variables.substring(0, variables.length() - 1).split(";");
 
             Map<String, String> args = new HashMap<>();
@@ -40,8 +40,16 @@ public class FieldBindExMapper {
                 String[] split = v.split("=");
                 String key = split[0].trim().split("\\s")[1];
                 String value = split[1].trim();
-                args.put(key, value);
+                if (!key.equals("RESULT_VAR")) {
+                    args.put(key, value);
+                }
             });
+
+            String script = "(function() {\n" +
+                    enhancement.getScript() +
+                    "\nreturn RESULT_VAR;\n})";
+
+            enhancementEx.setScript(script);
             enhancementEx.setArgs(args);
         }
 

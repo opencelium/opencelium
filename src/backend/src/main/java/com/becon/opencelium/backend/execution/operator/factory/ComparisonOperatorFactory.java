@@ -1,8 +1,29 @@
 package com.becon.opencelium.backend.execution.operator.factory;
 
 import com.becon.opencelium.backend.enums.RelationalOperator;
+import com.becon.opencelium.backend.execution.operator.Contains;
+import com.becon.opencelium.backend.execution.operator.ContainsSubStr;
+import com.becon.opencelium.backend.execution.operator.EqualTo;
+import com.becon.opencelium.backend.execution.operator.GreaterThan;
+import com.becon.opencelium.backend.execution.operator.GreaterThanOrEqualTo;
+import com.becon.opencelium.backend.execution.operator.IsEmpty;
+import com.becon.opencelium.backend.execution.operator.IsNotEmpty;
+import com.becon.opencelium.backend.execution.operator.IsNotNull;
+import com.becon.opencelium.backend.execution.operator.IsNull;
+import com.becon.opencelium.backend.execution.operator.IsTypeOf;
+import com.becon.opencelium.backend.execution.operator.LessThan;
+import com.becon.opencelium.backend.execution.operator.LessThanOrEqualTo;
+import com.becon.opencelium.backend.execution.operator.Like;
+import com.becon.opencelium.backend.execution.operator.Matches;
+import com.becon.opencelium.backend.execution.operator.MatchesInList;
+import com.becon.opencelium.backend.execution.operator.NotContains;
+import com.becon.opencelium.backend.execution.operator.NotContainsSubStr;
+import com.becon.opencelium.backend.execution.operator.NotEqualTo;
+import com.becon.opencelium.backend.execution.operator.NotLike;
 import com.becon.opencelium.backend.execution.operator.Operator;
-import com.becon.opencelium.backend.execution.operator.*;
+import com.becon.opencelium.backend.execution.operator.PropertyExists;
+import com.becon.opencelium.backend.execution.operator.PropertyNotExists;
+import com.becon.opencelium.backend.execution.operator.RegEx;
 
 public class ComparisonOperatorFactory implements OperatorFactory {
 
@@ -11,27 +32,27 @@ public class ComparisonOperatorFactory implements OperatorFactory {
 
         return switch (operator) {
             case CONTAINS -> new Contains();
-            case NOTCONTAINS -> new NotContains();
-            case EQUALTO -> new EqualTo();
-            case GREATERTHAN -> new GreaterThan();
-            case GREATERTHANOREQUALTO -> new GreaterThanOrEqualTo();
-            case LESSTHAN -> new LessThan();
-            case LESSTHANOREQUALTO -> new LessThanOrEqualTo();
+            case NOT_CONTAINS -> new NotContains();
+            case EQUAL_TO -> new EqualTo();
+            case GREATER_THAN -> new GreaterThan();
+            case GREATER_THAN_OR_EQUAL_TO -> new GreaterThanOrEqualTo();
+            case LESS_THAN -> new LessThan();
+            case LESS_THAN_OR_EQUAL_TO -> new LessThanOrEqualTo();
             case LIKE -> new Like();
             case MATCHES -> new Matches();
-            case MATCHESINLIST -> new MatchesInList();
-            case NOTLIKE -> new NotLike();
+            case MATCHES_IN_LIST -> new MatchesInList();
+            case NOT_LIKE -> new NotLike();
             case REGEX -> new RegEx();
-            case PROPERTYNOTEXISTS -> new PropertyNotExists();
-            case PROPERTYEXISTS -> new PropertyExists();
-            case ISTYPEOF -> new IsTypeOf();
-            case ISEMPTY -> new IsEmpty();
-            case ISNOTEMPTY -> new IsNotEmpty();
-            case ISNOTNULL -> new IsNotNull();
-            case ISNULL -> new IsNull();
-            case NOTEQUALTO -> new NotEqualTo();
-            case CONTAINSSUBSTR -> new ContainsSubStr();
-            case NOTCONTAINSSUBSTR -> new NotContainsSubStr();
+            case PROPERTY_NOT_EXISTS -> new PropertyNotExists();
+            case PROPERTY_EXISTS -> new PropertyExists();
+            case IS_TYPE_OF -> new IsTypeOf();
+            case IS_EMPTY -> new IsEmpty();
+            case IS_NOT_EMPTY -> new IsNotEmpty();
+            case IS_NOT_NULL -> new IsNotNull();
+            case IS_NULL -> new IsNull();
+            case NOT_EQUAL_TO -> new NotEqualTo();
+            case CONTAINS_SUB_STR -> new ContainsSubStr();
+            case NOT_CONTAINS_SUB_STR -> new NotContainsSubStr();
             case DENYLIST, DEFAULT -> throw new RuntimeException("Operator '" + relationalOperator + "' is not supported");
         };
     }
