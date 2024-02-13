@@ -187,17 +187,11 @@ public class ConnectorExecutor {
         if (ref.matches(queryParams)) {
             if (value instanceof Boolean) {
                 result.setType(DataType.BOOLEAN);
-            }
-
-            if (value instanceof Long) {
+            } else if (value instanceof Long) {
                 result.setType(DataType.INTEGER);
-            }
-
-            if (value instanceof Double) {
+            } else if (value instanceof Double) {
                 result.setType(DataType.NUMBER);
-            }
-
-            if (value instanceof String[]) {
+            } else if (value instanceof String[]) {
                 result.setType(DataType.ARRAY);
 
                 List<SchemaDTO> items = Arrays.stream((String[]) value)
@@ -207,17 +201,11 @@ public class ConnectorExecutor {
                 result.setValue(null);
                 result.setItems(items);
             }
-        }
-
-        if (ref.matches(requiredData)) {
+        } else if (ref.matches(requiredData)) {
             // required data is a string of single primitive value
-        }
-
-        if (ref.matches(enhancement)) {
+        } else if (ref.matches(enhancement)) {
             // TODO what types can script result be?
-        }
-
-        if (ref.matches(directRef)) {
+        } else if (ref.matches(directRef)) {
             try {
                 String jsonString = new ObjectMapper().writeValueAsString(value);
 

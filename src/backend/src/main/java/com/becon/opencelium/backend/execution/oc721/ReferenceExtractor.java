@@ -25,32 +25,24 @@ public class ReferenceExtractor implements Extractor {
 
     @Override
     public Object extractValue(String ref) {
-        if (ref == null) {
-            return null;
-        }
-
         Object result = null;
 
-        // '${key}'
-        // '${key.field[*]}'
-        if (ref.matches(queryParams)) {
+        if (ref == null) {
+            // we get this null value from statements of a Condition
+        } else if (ref.matches(queryParams)) {
+            // '${key}'
+            // '${key.field[*]}'
             result = extractFromQueryParams(ref);
-        }
-
-        // '{key}' - if we get data from currently executing connector
-        // '{#ctorId.key}' - if we get data from another connector
-        if (ref.matches(requiredData)) {
+        } else if (ref.matches(requiredData)) {
+            // '{key}' - if we get data from currently executing connector
+            // '{#ctorId.key}' - if we get data from another connector
             result = extractFromRequiredData(ref);
-        }
-
-        // '#ababab.(response).success.field[*]
-        // '#ababab.(request).field[*]
-        if (ref.matches(directRef)) {
+        } else if (ref.matches(directRef)) {
+            // '#ababab.(response).success.field[*]
+            // '#ababab.(request).field[*]
             result = extractFromOperation(ref);
-        }
-
-        // '#{%unique_id%}'
-        if (ref.matches(enhancement)) {
+        } else if (ref.matches(enhancement)) {
+            // '#{%unique_id%}'
             result = extractFromEnhancement(ref);
         }
 
