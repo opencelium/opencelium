@@ -14,18 +14,21 @@ public class ConditionExMapper {
         StatementMng ls = dto.getLeftStatement();
         StatementMng rs = dto.getRightStatement();
         switch (ro) {
-            case CONTAINS, NOTCONTAINS: {
+            case CONTAINS, NOT_CONTAINS: {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField() + "." + rs.getRightPropertyValue());
                 condition.setRight(rs.getColor() + ".(" + rs.getType() + ")." + rs.getField());
             }
-            case EQUALTO, GREATERTHAN, GREATERTHANOREQUALTO, LESSTHAN, LESSTHANOREQUALTO, LIKE, MATCHES, MATCHESINLIST, NOTLIKE, REGEX:{
+            case EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO, LIKE, MATCHES, MATCHES_IN_LIST, NOT_LIKE, REGEX: {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
                 condition.setRight(rs.getColor() + ".(" + rs.getType() + ")." + rs.getField());
             }
-            case PROPERTYNOTEXISTS, PROPERTYEXISTS, ISTYPEOF:{
+            case PROPERTY_NOT_EXISTS, PROPERTY_EXISTS, IS_TYPE_OF: {
                 //TODO: ???
             }
-            case ISEMPTY, ISNOTEMPTY, ISNOTNULL, ISNULL:{
+            case IS_EMPTY, IS_NOT_EMPTY, IS_NOT_NULL, ISNULL: {
+                condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
+            }
+            case DEFAULT: {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
             }
         }
