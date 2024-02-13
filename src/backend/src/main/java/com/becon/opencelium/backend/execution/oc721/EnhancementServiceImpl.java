@@ -28,9 +28,7 @@ public class EnhancementServiceImpl implements EnhancementService {
         });
 
         try {
-            String function = "(function() {" + enhancement.getScript() + "})";
-
-            return engine.eval(function);
+            return engine.eval(enhancement.getScript());
         } catch (ScriptException e) {
             throw new RuntimeException(e);
         }
