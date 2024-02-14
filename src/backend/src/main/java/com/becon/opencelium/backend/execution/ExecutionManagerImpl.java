@@ -48,6 +48,15 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
+    public String generateKey() {
+        if (loops.isEmpty()) {
+            return "#";
+        }
+
+        return String.join(", ", loops.values());
+    }
+
+    @Override
     public Map<String, String> getRequestData(Integer ctorId) {
         // if 'connectorId' is null then use current connectors' id:
         ctorId = ctorId == null ? this.currentCtorId : ctorId;

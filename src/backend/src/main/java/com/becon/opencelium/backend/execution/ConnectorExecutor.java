@@ -19,7 +19,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.PriorityQueue;
@@ -108,11 +107,10 @@ public class ConnectorExecutor {
                     return newOperation;
                 });
 
-        LinkedHashMap<String, String> loops = executionManager.getLoops();
-        String key = Operation.generateKey(loops);
+        String key = executionManager.generateKey();
 
-        operation.putRequest(key, requestEntity);
-        operation.putResponse(key, responseEntity);
+        operation.addRequest(key, requestEntity);
+        operation.addResponse(key, responseEntity);
 
         execute(body, ++index);
     }
