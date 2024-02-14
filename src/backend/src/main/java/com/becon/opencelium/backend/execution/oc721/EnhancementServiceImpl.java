@@ -14,9 +14,7 @@ public class EnhancementServiceImpl implements EnhancementService {
     }
 
     @Override
-    public Object executeScript(String bindId) {
-        Enhancement enhancement = executionManager.getEnhanceByBindId(bindId);
-
+    public Object execute(Enhancement enhancement) {
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("nashorn");
 

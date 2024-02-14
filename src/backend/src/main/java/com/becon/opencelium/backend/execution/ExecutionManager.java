@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.execution;
 
-import com.becon.opencelium.backend.execution.oc721.Enhancement;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 
 import java.util.LinkedHashMap;
@@ -15,6 +14,5 @@ public interface ExecutionManager {
     Object executeScript(String bindId);
     Object getValue(String ref);
     void addOperation(Operation operation);
-    Enhancement getEnhanceByBindId(String bindId);
     void setCurrentCtorId(Integer ctorId);
 }

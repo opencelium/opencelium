@@ -72,7 +72,12 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
     @Override
     public Object executeScript(String bindId) {
-        return enhancementService.executeScript(bindId);
+        Enhancement enhancement = fieldBind.stream()
+                .filter(fb -> Objects.equals(bindId, fb.getBindId()))
+                .map(FieldBind::getEnhance).findFirst()
+                .orElseThrow(() -> new RuntimeException("Non existing fieldBind id 'bindId' = " + bindId));
+
+        return enhancementService.execute(enhancement);
     }
 
     @Override
@@ -83,14 +88,6 @@ public class ExecutionManagerImpl implements ExecutionManager {
     @Override
     public void addOperation(Operation operation) {
         this.operations.add(operation);
-    }
-
-    @Override
-    public Enhancement getEnhanceByBindId(String bindId) {
-        return fieldBind.stream()
-                .filter(fb -> Objects.equals(bindId, fb.getBindId()))
-                .map(FieldBind::getEnhance).findFirst()
-                .orElseThrow(() -> new RuntimeException("Non existing fieldBind id 'bindId' = " + bindId));
     }
 
     @Override
