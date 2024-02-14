@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
@@ -39,9 +38,9 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
             @Qualifier("methodMngServiceImp") MethodMngService methodMngService,
             @Qualifier("operatorMngServiceImp") OperatorMngService operatorMngService,
+            @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             PatchHelper patchHelper,
             ObjectMapper objectMapper,
-            @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
             Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper
     ) {
@@ -117,7 +116,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         }
         if (connectionMng.getFieldBindings() != null)
             fieldBindingMngService.deleteAll(connectionMng.getFieldBindings());
-        connectionMngRepository.delete(getByConnectionId(id));
+        connectionMngRepository.delete(connectionMng);
     }
 
     @Override
