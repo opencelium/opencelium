@@ -8,30 +8,21 @@ import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
-import com.becon.opencelium.backend.resource.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.PriorityQueue;
-
-import static com.becon.opencelium.backend.constant.RegExpression.directRef;
-import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
-import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
-import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 
 public class ConnectorExecutor {
     private final Connector connector;
@@ -103,7 +94,7 @@ public class ConnectorExecutor {
 
         RequestEntity<?> requestEntity = RequestEntityBuilder.start()
                 .forOperation(operationDTO)
-                .usingReferences(this::mapToSchemaDTO)
+                .usingReferences(this::resolveReferences)
                 .createRequest();
 
 //        ResponseEntity<?> responseEntity = this.restTemplate.exchange(requestEntity, Object.class);
@@ -174,48 +165,10 @@ public class ConnectorExecutor {
         // TODO: need to implement
     }
 
-    private SchemaDTO mapToSchemaDTO(String ref) {
+    private SchemaDTO resolveReferences(String ref) {
         Object value = executionManager.getValue(ref);
 
-        if (value == null) {
-            return null;
-        }
-
-        // set default schema to result variable
-        SchemaDTO result = new SchemaDTO(DataType.STRING, String.valueOf(value));
-
-        if (ref.matches(queryParams)) {
-            if (value instanceof Boolean) {
-                result.setType(DataType.BOOLEAN);
-            } else if (value instanceof Long) {
-                result.setType(DataType.INTEGER);
-            } else if (value instanceof Double) {
-                result.setType(DataType.NUMBER);
-            } else if (value instanceof String[]) {
-                result.setType(DataType.ARRAY);
-
-                List<SchemaDTO> items = Arrays.stream((String[]) value)
-                        .map(e -> new SchemaDTO(DataType.STRING, String.valueOf(e)))
-                        .toList();
-
-                result.setValue(null);
-                result.setItems(items);
-            }
-        } else if (ref.matches(requestData)) {
-            // required data is a string of single primitive value
-        } else if (ref.matches(enhancement)) {
-            // TODO what types can script result be?
-        } else if (ref.matches(directRef)) {
-            try {
-                String jsonString = new ObjectMapper().writeValueAsString(value);
-
-                return SchemaDTOUtil.fromJSON(jsonString);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return result;
+        return SchemaDTOUtil.fromObject(value);
     }
 
     private static Comparator<Object> getComparator() {

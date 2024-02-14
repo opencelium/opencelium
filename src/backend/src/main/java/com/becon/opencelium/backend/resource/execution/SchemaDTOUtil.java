@@ -183,9 +183,16 @@ public class SchemaDTOUtil {
         return ObjectUtils.isEmpty(schema) ? "" : schema.getValue();
     }
 
-    public static SchemaDTO fromJSON(String jsonString) {
+    public static SchemaDTO fromObject(Object value) {
+        if (value == null) {
+            return null;
+        }
+
         try {
-            return fromJSONNode(new ObjectMapper().readTree(jsonString));
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonString = mapper.writeValueAsString(value);
+
+            return fromJSONNode(mapper.readTree(jsonString));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
