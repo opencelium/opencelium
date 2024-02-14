@@ -31,7 +31,7 @@ import java.util.PriorityQueue;
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
 import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
-import static com.becon.opencelium.backend.constant.RegExpression.requiredData;
+import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 
 public class ConnectorExecutor {
     private final Connector connector;
@@ -201,7 +201,7 @@ public class ConnectorExecutor {
                 result.setValue(null);
                 result.setItems(items);
             }
-        } else if (ref.matches(requiredData)) {
+        } else if (ref.matches(requestData)) {
             // required data is a string of single primitive value
         } else if (ref.matches(enhancement)) {
             // TODO what types can script result be?

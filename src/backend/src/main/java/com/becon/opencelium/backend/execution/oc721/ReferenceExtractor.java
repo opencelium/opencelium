@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
 import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
-import static com.becon.opencelium.backend.constant.RegExpression.requiredData;
+import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 
 public class ReferenceExtractor implements Extractor {
     private final ExecutionManager executionManager;
@@ -33,7 +33,7 @@ public class ReferenceExtractor implements Extractor {
             // '${key}'
             // '${key.field[*]}'
             result = extractFromQueryParams(ref);
-        } else if (ref.matches(requiredData)) {
+        } else if (ref.matches(requestData)) {
             // '{key}' - if we get data from currently executing connector
             // '{#ctorId.key}' - if we get data from another connector
             result = extractFromRequiredData(ref);
@@ -50,7 +50,7 @@ public class ReferenceExtractor implements Extractor {
     }
 
     public static boolean isReference(String ref) {
-        return ref != null && (ref.matches(directRef) || ref.matches(queryParams) || ref.matches(requiredData) || ref.matches(enhancement));
+        return ref != null && (ref.matches(directRef) || ref.matches(queryParams) || ref.matches(requestData) || ref.matches(enhancement));
     }
 
     private Object extractFromOperation(String ref) {
