@@ -2,6 +2,17 @@ package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.FieldBindingRepository;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
+import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
+import com.becon.opencelium.backend.database.mysql.service.EnhancementServiceImp;
+import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
+import com.becon.opencelium.backend.resource.PatchConnectionDetails;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
+import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
+import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -9,14 +20,27 @@ import java.util.*;
 @Service
 public class FieldBindingMngServiceImp implements FieldBindingMngService {
     private final FieldBindingRepository fieldBindingRepository;
+    private final MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper;
+    private final Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMngMapper;
+    private final EnhancementService enhancementService;
+    private final PatchHelper patchHelper;
 
-    public FieldBindingMngServiceImp(FieldBindingRepository fieldBindingRepository) {
+    public FieldBindingMngServiceImp(
+            FieldBindingRepository fieldBindingRepository,
+            EnhancementServiceImp enhancementService,
+            MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
+            Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMngMapper,
+            PatchHelper patchHelper) {
         this.fieldBindingRepository = fieldBindingRepository;
+        this.enhancementMapper = enhancementMapper;
+        this.fieldBindingMngMapper = fieldBindingMngMapper;
+        this.enhancementService = enhancementService;
+        this.patchHelper = patchHelper;
     }
 
     @Override
     public List<FieldBindingMng> saveAll(List<FieldBindingMng> fieldBindings) {
-        fieldBindings.forEach(e->e.setEnhancement(null));
+        fieldBindings.forEach(e -> e.setEnhancement(null));
         return fieldBindingRepository.saveAll(fieldBindings);
     }
 
@@ -32,20 +56,109 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     }
 
     @Override
+    public FieldBindingMng getById(String id) {
+        return fieldBindingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("ENHANCEMENT_NOT_FOUND"));
+    }
+
+    @Override
     public List<FieldBindingMng> findAllByEnhancementId(List<Integer> ids) {
         return fieldBindingRepository.findAllByEnhancementIdIn(ids);
     }
 
     @Override
     public void deleteById(String id) {
-        FieldBindingMng fieldBindingMng = new FieldBindingMng();
-        fieldBindingMng.setId(id);
-        fieldBindingRepository.delete(fieldBindingMng);
+        delete(getById(id));
+    }
+
+    @Override
+    public void delete(FieldBindingMng fb) {
+        fieldBindingRepository.delete(fb);
     }
 
     @Override
     public void deleteAll(List<FieldBindingMng> fieldBindings) {
         fieldBindingRepository.deleteAll(fieldBindings);
+    }
+
+    @Override
+    public void doWithPatchedEnhancement(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails.PatchOperationDetail opDetail) {
+        if (opDetail.isEnhancementAdded()) {
+            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), patched.getFieldBindings().size());
+            List<FieldBindingDTO> fieldBindings = patched.getFieldBindings();
+            FieldBindingDTO toSave = fieldBindings.get(idx);
+            Enhancement enhancement = enhancementMapper.toEntity(toSave.getEnhancement());
+            if (enhancement == null) {
+                enhancement = new Enhancement();
+            }
+            enhancement.setConnection(new Connection(connectionDTO.getConnectionId()));
+            enhancementService.save(enhancement);
+            toSave.setEnhancementId(enhancement.getId());
+            toSave.setId(null);
+            FieldBindingMng saved = save(fieldBindingMngMapper.toEntity(toSave));
+            patched.getFieldBindings().get(idx).setId(saved.getId());
+            patched.getFieldBindings().get(idx).setEnhancementId(saved.getEnhancementId());
+        } else if (opDetail.isEnhancementDeleted()) {
+            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), connectionDTO.getFieldBindings().size());
+            FieldBindingDTO fieldBindingDTO = connectionDTO.getFieldBindings().get(idx);
+            enhancementService.deleteById(fieldBindingDTO.getEnhancementId());
+            deleteById(fieldBindingDTO.getId());
+        } else if (opDetail.isEnhancementModified()) {
+            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), patched.getFieldBindings().size());
+            List<FieldBindingDTO> fieldBindings = patched.getFieldBindings();
+            FieldBindingDTO toModify = fieldBindings.get(idx);
+            Enhancement enhancement;
+            try {
+                enhancement = enhancementService.getById(toModify.getEnhancementId());
+            } catch (RuntimeException e) {
+                enhancement = enhancementService.getById(connectionDTO.getFieldBindings().get(idx).getEnhancementId());
+                toModify.setEnhancementId(enhancement.getId());
+            }
+            try {
+                getById(toModify.getId());
+            } catch (RuntimeException e) {
+                toModify.setId(connectionDTO.getFieldBindings().get(idx).getId());
+            }
+            enhancementMapper.updateEntityFromDto(enhancement, toModify.getEnhancement());
+            enhancementService.save(enhancement);
+            save(fieldBindingMngMapper.toEntity(toModify));
+        } else if (opDetail.isEnhancementReplaced()) {
+            //deleting old enhancement
+            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), patched.getFieldBindings().size());
+            FieldBindingDTO fb = connectionDTO.getFieldBindings().get(idx);
+            enhancementService.deleteById(fb.getEnhancementId());
+            deleteById(fb.getId());
+
+            //saving new enhancement
+            FieldBindingDTO toSave = patched.getFieldBindings().get(idx);
+            Enhancement enhancement = enhancementMapper.toEntity(toSave.getEnhancement());
+            enhancement.setConnection(new Connection(connectionDTO.getConnectionId()));
+            enhancementService.save(enhancement);
+            toSave.setEnhancementId(enhancement.getId());
+            FieldBindingMng saved = save(fieldBindingMngMapper.toEntity(toSave));
+            patched.getFieldBindings().get(idx).setId(saved.getId());
+            patched.getFieldBindings().get(idx).setEnhancementId(saved.getEnhancementId());
+        } else {
+            //deleting old enhancements
+            if (connectionDTO.getFieldBindings() != null) {
+                connectionDTO.getFieldBindings().forEach(fb -> {
+                    enhancementService.deleteById(fb.getEnhancementId());
+                    deleteById(fb.getId());
+                });
+            }
+
+            //saving new enhancements
+            if (patched.getFieldBindings() != null) {
+                patched.getFieldBindings().forEach(fb -> {
+                    Enhancement enhancement = enhancementMapper.toEntity(fb.getEnhancement());
+                    enhancement.setConnection(new Connection(patched.getConnectionId()));
+                    enhancementService.save(enhancement);
+                    fb.setEnhancementId(enhancement.getId());
+                    FieldBindingMng saved = save(fieldBindingMngMapper.toEntity(fb));
+                    fb.setId(saved.getId());
+                });
+            }
+        }
     }
 
     @Override
@@ -121,8 +234,8 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
             return putId(stringVal, id);
         }
         String name = fieldPaths.get(0);
-        if(name.endsWith("[*]"))
-            name = name.replace("[*]","");
+        if (name.endsWith("[*]"))
+            name = name.replace("[*]", "");
 
         if (name.matches(".+\\[\\w+]")) {
             if (fieldPaths.size() == 1) {
@@ -160,7 +273,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         return resultMap;
     }
 
-    private String putId(String ref, String id){
+    private String putId(String ref, String id) {
         return "{%" + id + "%}";
     }
 }

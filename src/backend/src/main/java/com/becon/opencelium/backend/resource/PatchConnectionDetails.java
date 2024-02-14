@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.resource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class PatchConnectionDetails {
     private List<PatchOperationDetail> opDetails;
@@ -19,69 +18,51 @@ public class PatchConnectionDetails {
         this.opDetails = opDetails;
     }
 
-    public boolean methodListModified() {
-        return someListModified(p -> p.isMethodAdded() || p.isMethodDeleted());
-    }
-
-    public boolean operatorListModified() {
-        return someListModified(p -> p.isOperatorAdded() || p.isOperatorDeleted());
-    }
-
-    public boolean enhancementListModified() {
-        return someListModified(p -> p.isEnhancementAdded() || p.isEnhancementDeleted());
-    }
-
-    public boolean isArray() {
-        return opDetails.size() > 1;
-    }
-
-    private boolean someListModified(Predicate<PatchOperationDetail> condition) {
-        for (PatchOperationDetail opDetail : opDetails) {
-            if (condition.test(opDetail)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
     public static class PatchOperationDetail {
         private boolean methodDeleted;
-        private boolean operatorDeleted;
-        private boolean enhancementDeleted;
+        private boolean methodModified;
         private boolean methodAdded;
+        private boolean methodReplaced;
+        private boolean replacedMethodList;
+        private int indexOfMethod;
+        private boolean operatorDeleted;
+        private boolean operatorModified;
         private boolean operatorAdded;
+        private boolean operatorReplaced;
+        private boolean replacedOperatorList;
+        private int indexOfOperator;
+        private boolean enhancementDeleted;
+        private boolean enhancementModified;
         private boolean enhancementAdded;
-        private Integer indexOfMethod;
-        private Integer indexOfOperator;
-        private Integer indexOfEnhancement;
-        private boolean setNullToMethods;
-        private boolean setNullToOperators;
-        private boolean setNullToEnhancements;
+        private boolean enhancementReplaced;
+        private boolean replacedEnhancementList;
+        private int indexOfEnhancement;
+        private boolean from;
 
-        public boolean isSetNullToMethods() {
-            return setNullToMethods;
+        public boolean isItEnh() {
+            return enhancementAdded
+                    || enhancementModified
+                    || enhancementReplaced
+                    || enhancementDeleted
+                    || replacedEnhancementList;
         }
 
-        public void setSetNullToMethods(boolean setNullToMethods) {
-            this.setNullToMethods = setNullToMethods;
+        public boolean isItMethod() {
+            return methodAdded
+                    || methodModified
+                    || methodReplaced
+                    || methodDeleted
+                    || replacedMethodList;
         }
 
-        public boolean isSetNullToOperators() {
-            return setNullToOperators;
+        public boolean isItOperator() {
+            return operatorAdded
+                    || operatorModified
+                    || operatorReplaced
+                    || operatorDeleted
+                    || replacedOperatorList;
         }
 
-        public void setSetNullToOperators(boolean setNullToOperators) {
-            this.setNullToOperators = setNullToOperators;
-        }
-
-        public boolean isSetNullToEnhancements() {
-            return setNullToEnhancements;
-        }
-
-        public void setSetNullToEnhancements(boolean setNullToEnhancements) {
-            this.setNullToEnhancements = setNullToEnhancements;
-        }
 
         public boolean isMethodDeleted() {
             return methodDeleted;
@@ -153,6 +134,86 @@ public class PatchConnectionDetails {
 
         public void setIndexOfEnhancement(Integer indexOfEnhancement) {
             this.indexOfEnhancement = indexOfEnhancement;
+        }
+
+        public boolean isMethodModified() {
+            return methodModified;
+        }
+
+        public void setMethodModified(boolean methodModified) {
+            this.methodModified = methodModified;
+        }
+
+        public boolean isOperatorModified() {
+            return operatorModified;
+        }
+
+        public void setOperatorModified(boolean operatorModified) {
+            this.operatorModified = operatorModified;
+        }
+
+        public boolean isEnhancementModified() {
+            return enhancementModified;
+        }
+
+        public void setEnhancementModified(boolean enhancementModified) {
+            this.enhancementModified = enhancementModified;
+        }
+
+        public boolean isMethodReplaced() {
+            return methodReplaced;
+        }
+
+        public void setMethodReplaced(boolean methodReplaced) {
+            this.methodReplaced = methodReplaced;
+        }
+
+        public boolean isReplacedMethodList() {
+            return replacedMethodList;
+        }
+
+        public void setReplacedMethodList(boolean replacedMethodList) {
+            this.replacedMethodList = replacedMethodList;
+        }
+
+        public boolean isOperatorReplaced() {
+            return operatorReplaced;
+        }
+
+        public void setOperatorReplaced(boolean operatorReplaced) {
+            this.operatorReplaced = operatorReplaced;
+        }
+
+        public boolean isReplacedOperatorList() {
+            return replacedOperatorList;
+        }
+
+        public void setReplacedOperatorList(boolean replacedOperatorList) {
+            this.replacedOperatorList = replacedOperatorList;
+        }
+
+        public boolean isEnhancementReplaced() {
+            return enhancementReplaced;
+        }
+
+        public void setEnhancementReplaced(boolean enhancementReplaced) {
+            this.enhancementReplaced = enhancementReplaced;
+        }
+
+        public boolean isReplacedEnhancementList() {
+            return replacedEnhancementList;
+        }
+
+        public void setReplacedEnhancementList(boolean replacedEnhancementList) {
+            this.replacedEnhancementList = replacedEnhancementList;
+        }
+
+        public boolean isFrom() {
+            return from;
+        }
+
+        public void setFrom(boolean from) {
+            this.from = from;
         }
     }
 

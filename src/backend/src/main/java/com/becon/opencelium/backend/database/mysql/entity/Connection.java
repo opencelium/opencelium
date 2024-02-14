@@ -75,7 +75,7 @@ public class Connection {
     private List<Enhancement> enhancements;
 
     @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(mappedBy = "connection", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "connection", cascade = CascadeType.ALL)
     private List<Scheduler> schedulers;
 
     @JsonIgnore
@@ -83,6 +83,10 @@ public class Connection {
     private BusinessLayout businessLayout;
 
     public Connection() {
+    }
+
+    public Connection(long id) {
+        this.id = id;
     }
 
     public Long getId() {

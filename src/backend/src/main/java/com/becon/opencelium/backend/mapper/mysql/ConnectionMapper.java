@@ -23,7 +23,8 @@ import java.util.List;
         },
         imports = {
                 BusinessLayout.class,
-                StringUtility.class
+                StringUtility.class,
+                Enhancement.class
         }
 )
 public interface ConnectionMapper extends Mapper<Connection, ConnectionDTO> {
@@ -34,7 +35,7 @@ public interface ConnectionMapper extends Mapper<Connection, ConnectionDTO> {
             @Mapping(target = "toConnector", source = "toConnector.connectorId"),
             @Mapping(target = "icon", expression = "java(StringUtility.findImageFromUrl(dto.getIcon()))"),
             @Mapping(target = "enhancements",
-                    expression = "java((dto.getFieldBindings() != null) ? dto.getFieldBindings().stream().map(e -> enhancementMapper.toEntity(e.getEnhancement())).toList() : null)"),
+                    expression = "java((dto.getFieldBindings() != null) ? dto.getFieldBindings().stream().map(e -> {Enhancement enh = enhancementMapper.toEntity(e.getEnhancement()); if(enh == null) enh = new Enhancement(); enh.setId(e.getEnhancementId()); return enh;}).toList() : null)"),
             @Mapping(target = "businessLayout",
                     expression = "java((dto.getBusinessLayout() != null) ? new BusinessLayout(dto.getBusinessLayout(), connection) : null)")
     })

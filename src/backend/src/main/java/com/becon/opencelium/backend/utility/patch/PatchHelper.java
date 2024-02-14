@@ -85,7 +85,7 @@ public class PatchHelper {
         return jsonNode.isEmpty();
     }
 
-    public boolean anyMatchesWithAny(JsonPatch patch, String ...args) {
+    public boolean anyMatchesWithAny(JsonPatch patch, String... args) {
         JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
         Iterator<JsonNode> nodes = jsonNode.elements();
         while (nodes.hasNext()) {
@@ -98,7 +98,7 @@ public class PatchHelper {
         return false;
     }
 
-    public PatchConnectionDetails describe(JsonPatch patch){
+    public PatchConnectionDetails describe(JsonPatch patch) {
         JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
         Iterator<JsonNode> nodes = jsonNode.elements();
         PatchConnectionDetails details = new PatchConnectionDetails();
@@ -106,55 +106,100 @@ public class PatchHelper {
             JsonNode next = nodes.next();
             String path = next.get("path").textValue();
             String op = next.get("op").textValue();
-            if(path.matches("/fromConnector/methods/-")|| path.matches("/fromConnector/methods/\\d+")||path.matches("/toConnector/methods/-")|| path.matches("/toConnector/methods/\\d+")){
-                if(op.equals("add")){
-                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
-                    opDetail.setMethodAdded(true);
-                    opDetail.setIndexOfMethod(getIndexOfList(path));
-                    details.getOpDetails().add(opDetail);
-                }else if(op.equals("remove")){
-                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
-                    opDetail.setMethodDeleted(true);
-                    opDetail.setIndexOfMethod(getIndexOfList(path));
-                    details.getOpDetails().add(opDetail);
+            PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
+
+            if (path.matches("/fromConnector/methods/-")
+                    || path.matches("/fromConnector/methods/\\d+")
+                    || path.matches("/toConnector/methods/-")
+                    || path.matches("/toConnector/methods/\\d+")) {
+                switch (op) {
+                    case "add" -> opDetail.setMethodAdded(true);
+                    case "replace" -> opDetail.setMethodReplaced(true);
+                    case "remove" -> opDetail.setMethodDeleted(true);
                 }
-            }else if(path.matches("/fromConnector/operators/-")|| path.matches("/fromConnector/operators/\\d+")||path.matches("/toConnector/operators/-")|| path.matches("/toConnector/operators/\\d+")){
-                if(op.equals("add")){
-                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
-                    opDetail.setOperatorAdded(true);
-                    opDetail.setIndexOfOperator(getIndexOfList(path));
-                    details.getOpDetails().add(opDetail);
-                }else if(op.equals("remove")){
-                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
-                    opDetail.setOperatorDeleted(true);
-                    opDetail.setIndexOfOperator(getIndexOfList(path));
-                    details.getOpDetails().add(opDetail);
+                opDetail.setIndexOfMethod(getIndexOfList(path));
+            } else if (path.matches("/fromConnector/methods/-/.+")
+                    || path.matches("/fromConnector/methods/\\d+/.+")
+                    || path.matches("/toConnector/methods/-/.+")
+                    || path.matches("/toConnector/methods/\\d+/.+")) {
+                opDetail.setMethodModified(true);
+                opDetail.setIndexOfMethod(getIndexOfList(path, 3));
+            } else if (path.equals("/fromConnector/methods") || path.equals("/toConnector/methods")) {
+                opDetail.setReplacedMethodList(true);
+            } else if (path.matches("/fromConnector/operators/-")
+                    || path.matches("/fromConnector/operators/\\d+")
+                    || path.matches("/toConnector/operators/-")
+                    || path.matches("/toConnector/operators/\\d+")) {
+                switch (op) {
+                    case "add" -> opDetail.setOperatorAdded(true);
+                    case "replace" -> opDetail.setOperatorReplaced(true);
+                    case "remove" -> opDetail.setOperatorDeleted(true);
                 }
-            }else if(path.matches("/fieldBindings/-")|| path.matches("/fieldBindings/\\d+")){
-                if(op.equals("add")){
-                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
-                    opDetail.setEnhancementAdded(true);
-                    opDetail.setIndexOfEnhancement(getIndexOfList(path));
-                    details.getOpDetails().add(opDetail);
-                }else if(op.equals("remove")){
-                    PatchConnectionDetails.PatchOperationDetail opDetail = new PatchConnectionDetails.PatchOperationDetail();
-                    opDetail.setEnhancementDeleted(true);
-                    opDetail.setIndexOfEnhancement(getIndexOfList(path));
-                    details.getOpDetails().add(opDetail);
+                opDetail.setIndexOfOperator(getIndexOfList(path));
+            } else if (path.matches("/fromConnector/operators/-/.+")
+                    || path.matches("/fromConnector/operators/\\d+/.+")
+                    || path.matches("/toConnector/operators/-/.+")
+                    || path.matches("/toConnector/operators/\\d+/.+")) {
+                opDetail.setOperatorModified(true);
+                opDetail.setIndexOfOperator(getIndexOfList(path, 3));
+            } else if (path.equals("/fromConnector/operators") || path.equals("/toConnector/operators")) {
+                opDetail.setReplacedOperatorList(true);
+            } else if (path.matches("/fieldBindings/-") || path.matches("/fieldBindings/\\d+")) {
+                switch (op) {
+                    case "add" -> opDetail.setEnhancementAdded(true);
+                    case "replace" -> opDetail.setEnhancementReplaced(true);
+                    case "remove" -> opDetail.setEnhancementDeleted(true);
                 }
+                opDetail.setIndexOfEnhancement(getIndexOfList(path));
+            } else if (path.matches("/fieldBindings/-/.+") || path.matches("/fieldBindings/\\d+/.+")) {
+                opDetail.setEnhancementModified(true);
+                opDetail.setIndexOfEnhancement(getIndexOfList(path, 2));
+            } else if (path.equals("/fieldBindings")) {
+                opDetail.setReplacedEnhancementList(true);
+            }
+            details.getOpDetails().add(opDetail);
+
+            if (path.startsWith("/fromConnector")) {
+                opDetail.setFrom(true);
+            } else if (path.startsWith("/toConnector")) {
+                opDetail.setFrom(false);
+            }
+
+            if (path.equals("/fromConnector")
+                    || path.equals("/toConnector")
+                    || path.equals("/fromConnector/methods")
+                    || path.equals("/toConnector/methods")) {
+                opDetail.setReplacedMethodList(true);
+            }
+
+
+            if (path.equals("/fromConnector")
+                    || path.equals("/toConnector")
+                    || path.equals("/fromConnector/operators")
+                    || path.equals("/toConnector/operators")) {
+                opDetail.setReplacedOperatorList(true);
             }
         }
         return details;
     }
 
-    public Integer getIndexOfList(String path){
-        if(path.matches(".+/-")){
+    public int getIndexOfList(String path) {
+        if (path.matches(".+/-")) {
             return -1;
         }
-        if(path.matches(".+/\\d+")){
+        if (path.matches(".+/\\d+")) {
             String[] split = path.split("/");
-            return Integer.parseInt(split[split.length-1]);
+            return Integer.parseInt(split[split.length - 1]);
         }
-        throw new RuntimeException("PATH_IS_VALID");
+        throw new RuntimeException("PATH_IS_INVALID");
+    }
+
+    public int getIndexOfList(String path, int order) {
+        String[] split = path.split("/");
+        return getIndexOfList(String.join("/", Arrays.stream(split).limit(order + 1).toList()));
+    }
+
+    public int getIndexOfList(int idx, int size) {
+        return idx == -1 ? size - 1 : idx;
     }
 }
