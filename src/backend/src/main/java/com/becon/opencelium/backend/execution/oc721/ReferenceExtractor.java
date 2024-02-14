@@ -28,21 +28,23 @@ public class ReferenceExtractor implements Extractor {
         Object result = null;
 
         if (ref == null) {
-            // we get this null value from statements of a Condition
+            // this happens if statement(s) is null in a Condition
         } else if (ref.matches(queryParams)) {
             // '${key}'
+            // '${key:type}'
             // '${key.field[*]}'
+            // '${key.field[*]:type}'
             result = extractFromQueryParams(ref);
         } else if (ref.matches(requestData)) {
-            // '{key}' - if we get data from currently executing connector
-            // '{#ctorId.key}' - if we get data from another connector
+            // '{key}'
+            // '{#ctorId.key}'
             result = extractFromRequestData(ref);
         } else if (ref.matches(directRef)) {
             // '#ababab.(response).success.field[*]
             // '#ababab.(request).field[*]
             result = extractFromOperation(ref);
         } else if (ref.matches(enhancement)) {
-            // '#{%unique_id%}'
+            // '#{%bindId%}'
             result = extractFromEnhancement(ref);
         }
 
@@ -51,15 +53,6 @@ public class ReferenceExtractor implements Extractor {
 
     public static boolean isReference(String ref) {
         return ref != null && (ref.matches(directRef) || ref.matches(queryParams) || ref.matches(requestData) || ref.matches(enhancement));
-    }
-
-    private Object extractFromOperation(String ref) {
-        String color = ref.substring(ref.indexOf('#'), ref.indexOf('.'));
-
-        Operation operation = executionManager.findOperationByColor(color)
-                .orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
-
-        return operation.getValue(ref, executionManager.getLoops());
     }
 
     private Object extractFromEnhancement(String ref) {
@@ -81,23 +74,30 @@ public class ReferenceExtractor implements Extractor {
         return executionManager.getRequestData(ctorId).get(refValue);
     }
 
+    private Object extractFromOperation(String ref) {
+        String color = ref.substring(ref.indexOf('#'), ref.indexOf('.'));
+
+        Operation operation = executionManager.findOperationByColor(color)
+                .orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
+
+        return operation.getValue(ref, executionManager.getLoops());
+    }
+
     private Object extractFromQueryParams(String ref) {
+        if (ObjectUtils.isEmpty(ref)) {
+            return "";
+        }
+
+        Map<String, Object> queryParams = executionManager.getQueryParams();
+        if (queryParams.isEmpty()) {
+            return null;
+        }
+
         try {
-            if (ObjectUtils.isEmpty(ref)) {
-                return "";
-            }
-
-            Map<String, Object> queryParams = executionManager.getQueryParams();
-            if (queryParams.isEmpty()) {
-                return null;
-            }
-
-            // 'queryParam' is in <'key': 'value'> pair,
-            // 'key' might contain desired type, and it might be in form of jsonPath
-            // 'value' might also be single value or jsonObject
-            String requiredType = "";
+            // get requiredType if specified, then update reference
+            String type = "";
             if (ref.contains(":")) {
-                requiredType = ref.split(":")[1].replace("}", "");
+                type = ref.split(":")[1].replace("}", "");
                 ref = ref.split(":")[0].concat("}");
             }
 
@@ -107,65 +107,58 @@ public class ReferenceExtractor implements Extractor {
             Pattern r = Pattern.compile(RegExpression.queryParams);
             Matcher m = r.matcher(ref);
 
-            Object extractedValue = null;
+            Object value = null;
             while (m.find()) {
                 // convert 'queryParams' reference to jsonPath
                 String jsonPath = "$." + m.group().replace("${", "").replace("}", "");
 
-                extractedValue = JsonPath.read(message, jsonPath);
+                value = JsonPath.read(message, jsonPath);
             }
 
-            return requiredType.isBlank() ? mapToNumberIfPossible(extractedValue) : mapToType(extractedValue, requiredType);
+            if (value == null) {
+                return null;
+            }
+
+            return mapToType(value, type);
         } catch (JsonProcessingException ex) {
             throw new RuntimeException();
         }
     }
 
-    private Object mapToType(Object value, String requiredType) {
+    private Object mapToType(Object value, String type) {
+        Object result;
         String stringValue = value.toString();
 
-        if ("string".equalsIgnoreCase(requiredType)) {
-            return stringValue.replace("[", "").replace("]", "").replace("'", "");
-        }
+        if (type.isBlank()) {
+            // map to number [int, double] if possible
+            final Pattern pattern = Pattern.compile(RegExpression.isNumber, Pattern.MULTILINE);
+            final Matcher matcher = pattern.matcher(stringValue);
 
-        if ("int".equalsIgnoreCase(requiredType)) {
-            return Long.parseLong(stringValue);
-        }
+            boolean isNumber = false;
+            while (matcher.find()) {
+                isNumber = true;
+            }
 
-        if ("double".equalsIgnoreCase(requiredType)) {
-            return Double.parseDouble(stringValue);
-        }
+            String optionalType = isNumber ? (stringValue.contains(".") ? "double" : "int") : "none";
 
-        if ("boolean".equalsIgnoreCase(requiredType)) {
-            return Boolean.getBoolean(stringValue);
-        }
-
-        if ("array".equalsIgnoreCase(requiredType)) {
-            return stringValue.replace("[", "")
+            result = mapToType(value, optionalType);
+        } else if ("string".equalsIgnoreCase(type)) {
+            result = stringValue.replace("[", "").replace("]", "").replace("'", "");
+        } else if ("int".equalsIgnoreCase(type)) {
+            result = Long.parseLong(stringValue);
+        } else if ("double".equalsIgnoreCase(type)) {
+            result = Double.parseDouble(stringValue);
+        } else if ("boolean".equalsIgnoreCase(type)) {
+            result = Boolean.getBoolean(stringValue);
+        } else if ("array".equalsIgnoreCase(type)) {
+            result = stringValue.replace("[", "")
                     .replace("]", "")
                     .replace("\"", "")
                     .replace("\'", "").split(",");
+        } else {
+            result = value;
         }
 
-        return value;
-    }
-
-    private Object mapToNumberIfPossible(Object value) {
-        if (value == null) {
-            return null;
-        }
-
-        String stringValue = value.toString();
-        final Pattern pattern = Pattern.compile(RegExpression.isNumber, Pattern.MULTILINE);
-        final Matcher matcher = pattern.matcher(stringValue);
-
-        boolean isNumber = false;
-        while (matcher.find()) {
-            isNumber = true;
-        }
-
-        String optionalType = isNumber ? (stringValue.contains(".") ? "double" : "int") : "";
-
-        return mapToType(value, optionalType);
+        return result;
     }
 }
