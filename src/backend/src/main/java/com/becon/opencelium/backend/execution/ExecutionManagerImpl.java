@@ -48,7 +48,10 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public Map<String, String> getRequiredData(Integer ctorId) {
+    public Map<String, String> getRequestData(Integer ctorId) {
+        // if 'connectorId' is null then use current connectors' id:
+        ctorId = ctorId == null ? this.currentCtorId : ctorId;
+
         if (Objects.equals(ctorId, connectorFrom.getId())) {
             return connectorFrom.getRequiredData();
         }
@@ -93,10 +96,5 @@ public class ExecutionManagerImpl implements ExecutionManager {
     @Override
     public void setCurrentCtorId(Integer ctorId) {
         this.currentCtorId = ctorId;
-    }
-
-    @Override
-    public Integer getCurrentCtorId() {
-        return this.currentCtorId;
     }
 }

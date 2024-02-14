@@ -36,7 +36,7 @@ public class ReferenceExtractor implements Extractor {
         } else if (ref.matches(requestData)) {
             // '{key}' - if we get data from currently executing connector
             // '{#ctorId.key}' - if we get data from another connector
-            result = extractFromRequiredData(ref);
+            result = extractFromRequestData(ref);
         } else if (ref.matches(directRef)) {
             // '#ababab.(response).success.field[*]
             // '#ababab.(request).field[*]
@@ -67,20 +67,18 @@ public class ReferenceExtractor implements Extractor {
         return executionManager.executeScript(bindId);
     }
 
-    private Object extractFromRequiredData(String ref) {
+    private Object extractFromRequestData(String ref) {
         // remove curly braces
         String refValue = ref.replace("{", "").replace("}", "");
 
-        // get id of required connector
-        Integer ctorId;
+        // set id of required connector if exists
+        Integer ctorId = null;
         if (refValue.startsWith("#")) {
             ctorId = Integer.valueOf(refValue.substring(1, refValue.indexOf(".")));
             refValue = refValue.substring(refValue.indexOf(".") + 1);
-        } else {
-            ctorId = executionManager.getCurrentCtorId();
         }
 
-        return executionManager.getRequiredData(ctorId).get(refValue);
+        return executionManager.getRequestData(ctorId).get(refValue);
     }
 
     private Object extractFromQueryParams(String ref) {
