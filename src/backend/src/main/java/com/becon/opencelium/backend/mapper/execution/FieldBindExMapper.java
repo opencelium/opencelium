@@ -47,7 +47,7 @@ public class FieldBindExMapper {
 
             String script = "(function() {\n" +
                     enhancement.getScript() +
-                    "\nreturn RESULT_VAR;\n})";
+                    "\nreturn RESULT_VAR;\n})()";
 
             enhancementEx.setScript(script);
             enhancementEx.setArgs(args);
