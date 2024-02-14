@@ -27,10 +27,8 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectionOldDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import com.becon.opencelium.backend.resource.connection.MethodDTO;
+import com.becon.opencelium.backend.resource.connection.*;
+import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -169,7 +167,7 @@ public class ConnectionController {
         return ResponseEntity.created(uri).body(jsonObject);
     }
 
-    @Operation(summary = "Updates connection's basic fields and|or enhancements with a patch request")
+    @Operation(summary = "Updates connection with a patch request")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connection has been successfully updated"),
@@ -183,43 +181,42 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-//    @PatchMapping(path = "/{connectionId}", consumes = "application/json-patch+json")
-    public ResponseEntity<?> patchUpdate(@PathVariable Long connectionId, @RequestBody JsonPatch patch) {
-//        PatchConnectionDetails details = patchHelper.describe(patch);
-//        if (details.methodListModified() || details.operatorListModified()) {
-//            Connection connection = connectionService.getById(connectionId);
-//            String id = null;
-//            if (patchHelper.anyMatchesWithAny(patch, "/fromConnector/.+")) {
-//                JsonPatch changed = patchHelper.changeEachPath(patch, p -> p.replaceAll("/fromConnector", ""));
-//                id = connectionService.patchMethodOrOperator(connectionId, connection.getFromConnector(), changed);
-//            } else if (patchHelper.anyMatchesWithAny(patch, "/toConnector/.+")) {
-//                JsonPatch changed = patchHelper.changeEachPath(patch, p -> p.replaceAll("/toConnector", ""));
-//                id = connectionService.patchMethodOrOperator(connectionId, connection.getToConnector(), changed);
-//            }
-//            if (details.isArray()) {
-//                return ResponseEntity.ok().build();
-//            } else {
-//                JSONObject jsonObject = new JSONObject();
-//                jsonObject.put("id", id);
-//                return ResponseEntity.ok(jsonObject);
-//            }
-//        }
-//        FieldBindingMng FB = connectionService.patchUpdate(connectionId, patch);
-//        if (FB == null) {
-//            return ResponseEntity.ok().build();
-//        } else {
-//            JSONObject jsonObject = new JSONObject();
-//            jsonObject.put("id", FB.getId());
-//            return ResponseEntity.ok(jsonObject);
-//        }
-        return null;
-    }
-
     @PatchMapping(path = "/{connectionId}", consumes = "application/json-patch+json")
-    public ResponseEntity<?> patchUpdate2(@PathVariable Long connectionId, @RequestBody JsonPatch patch) {
+    public ResponseEntity<?> patchUpdate(@PathVariable Long connectionId, @RequestBody JsonPatch patch) {
         PatchConnectionDetails details = patchHelper.describe(patch);
-        long id = connectionService.patchUpdate(connectionId, patch, details);
-        return ResponseEntity.ok(connectionService.getFullConnection(id));
+        connectionService.patchUpdate(connectionId, patch, details);
+        ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId);
+        JSONObject jsonObject = new JSONObject();
+
+        for (PatchConnectionDetails.PatchOperationDetail opDetail : details.getOpDetails()) {
+            if (opDetail.isMethodAdded()) {
+                List<MethodDTO> methods;
+                if (opDetail.isFrom()) {
+                    methods = connectionDTO.getFromConnector().getMethods();
+                } else {
+                    methods = connectionDTO.getToConnector().getMethods();
+                }
+                String id = methods.get(patchHelper.getIndexOfList(opDetail.getIndexOfMethod(), methods.size())).getId();
+                jsonObject.put("id", id);
+                return ResponseEntity.ok(jsonObject);
+            } else if (opDetail.isOperatorAdded()) {
+                List<OperatorDTO> operators;
+                if (opDetail.isFrom()) {
+                    operators = connectionDTO.getFromConnector().getOperators();
+                } else {
+                    operators = connectionDTO.getToConnector().getOperators();
+                }
+                String id = operators.get(patchHelper.getIndexOfList(opDetail.getIndexOfOperator(), operators.size())).getId();
+                jsonObject.put("id", id);
+                return ResponseEntity.ok(jsonObject);
+            } else if (opDetail.isEnhancementAdded()) {
+                List<FieldBindingDTO> fieldBindings = connectionDTO.getFieldBindings();
+                String id = fieldBindings.get(patchHelper.getIndexOfList(opDetail.getIndexOfOperator(), fieldBindings.size())).getId();
+                jsonObject.put("id", id);
+                return ResponseEntity.ok(jsonObject);
+            }
+        }
+        return ResponseEntity.ok().build();
     }
 
 

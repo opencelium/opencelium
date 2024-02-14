@@ -54,15 +54,13 @@ public interface ConnectionService {
 
     Long createEmptyConnection();
 
-    FieldBindingMng patchUpdate(Long connectionId, JsonPatch patch);
-
-    String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch);
-
     void undo(Long connectionId);
 
     ConnectionDTO getFullConnection(Long connectionId);
 
     List<Connection> getAllConnectionsNotContains(List<Long> ids);
 
-    Long patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details);
+    void patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details);
+
+    String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch);
 }

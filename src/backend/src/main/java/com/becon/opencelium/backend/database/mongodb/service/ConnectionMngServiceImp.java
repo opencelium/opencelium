@@ -154,20 +154,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public FieldBindingMng patchUpdate(Long connectionId, JsonPatch patch) {
-        ConnectionMng connection = getByConnectionId(connectionId);
-        if (connection.getFieldBindings() == null) {
-            connection.setFieldBindings(new ArrayList<>());
-        }
-
-        ConnectionMng patched = patchHelper.patch(patch, connection, ConnectionMng.class);
-
-        FieldBindingMng FB = doAfterPatchBeforeSaveEnhancement(connection, patched, patch);
-        save(patched);
-        return FB;
-    }
-
-    @Override
     public List<ConnectionMng> getAllById(List<Long> ids) {
         return connectionMngRepository.findAllByConnectionIdIn(ids);
     }
@@ -202,56 +188,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         if (connection.getFieldBindings() == null || connection.getFieldBindings().isEmpty())
             return;
         connection.getFieldBindings().forEach(f -> f.setEnhancement(enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancementService.getById(f.getEnhancementId())))));
-    }
-
-    private FieldBindingMng doAfterPatchBeforeSaveEnhancement(ConnectionMng connection, ConnectionMng patched, JsonPatch patch) {
-        FieldBindingMng res = null;
-        FieldBindingMng lastModified = null;
-        JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
-        Iterator<JsonNode> nodes = jsonNode.elements();
-        while (nodes.hasNext()) {
-            JsonNode next = nodes.next();
-            String path = next.get("path").textValue();
-            String op = next.get("op").textValue();
-            if (path.startsWith("/fieldBindings")) {
-                if (path.matches("/fieldBindings/\\d+/.+") || path.matches("/fieldBindings/-/.+")) {
-                    String strIdx = path.split("/")[2];
-                    int index = findIndexOf(patched.getFieldBindings(), strIdx);
-                    FieldBindingMng toModify = patched.getFieldBindings().get(index);
-                    Enhancement enhancement = enhancementService.getById(toModify.getEnhancementId());
-                    enhancementMapper.updateEntityFromDto(enhancement, enhancementMngMapper.toDTO(toModify.getEnhancement()));
-                    enhancementService.save(enhancement);
-                    fieldBindingMngService.save(toModify);
-                    lastModified = toModify;
-                } else if (op.equals("remove")) {
-                    String strIdx = path.split("/")[2];
-                    int index = findIndexOf(connection.getFieldBindings(), strIdx);
-                    FieldBindingMng toRemove = connection.getFieldBindings().get(index);
-                    fieldBindingMngService.deleteById(toRemove.getId());
-                    enhancementService.deleteById(toRemove.getEnhancementId());
-                    res = toRemove;
-                } else if (path.matches("/fieldBindings") && op.equals("replace")) {
-                    JsonNode value = next.get("value");
-                    if (value.isNull()) {
-                        List<FieldBindingMng> fieldBindings = connection.getFieldBindings();
-                        fieldBindingMngService.deleteAll(fieldBindings);
-                        enhancementService.deleteAll(fieldBindings.stream().map(FieldBindingMng::getEnhancementId).toList());
-                    }
-                } else if (op.equals("add") || op.equals("replace")) {
-                    String strIdx = path.split("/")[2];
-                    int index = findIndexOf(patched.getFieldBindings(), strIdx);
-                    FieldBindingMng toAdd = patched.getFieldBindings().get(index);
-                    Enhancement enhancement = enhancementMapper.toEntity(enhancementMngMapper.toDTO(toAdd.getEnhancement()));
-                    Connection forEnhancement = new Connection();
-                    forEnhancement.setId(connection.getConnectionId());
-                    enhancement.setConnection(forEnhancement);
-                    enhancementService.save(enhancement);
-                    toAdd.setEnhancementId(enhancement.getId());
-                    res = fieldBindingMngService.save(toAdd);
-                }
-            }
-        }
-        return res == null ? lastModified : res;
     }
 
     private String doAfterPatchBeforeSave(ConnectorMng connector, ConnectorMng patched, JsonPatch patch) {

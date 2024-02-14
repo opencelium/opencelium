@@ -161,11 +161,22 @@ public class PatchHelper {
 
             if (path.startsWith("/fromConnector")) {
                 opDetail.setFrom(true);
-                opDetail.setReplacedMethodList(true);
-                opDetail.setReplacedOperatorList(true);
-            }else if (path.startsWith("/toConnector")) {
+            } else if (path.startsWith("/toConnector")) {
                 opDetail.setFrom(false);
+            }
+
+            if (path.equals("/fromConnector")
+                    || path.equals("/toConnector")
+                    || path.equals("/fromConnector/methods")
+                    || path.equals("/toConnector/methods")) {
                 opDetail.setReplacedMethodList(true);
+            }
+
+
+            if (path.equals("/fromConnector")
+                    || path.equals("/toConnector")
+                    || path.equals("/fromConnector/operators")
+                    || path.equals("/toConnector/operators")) {
                 opDetail.setReplacedOperatorList(true);
             }
         }
