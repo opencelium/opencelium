@@ -24,6 +24,7 @@ public class Invoker {
     private String hint;
     private String icon;
     private String authType;
+    private Pagination pagination;
     private List<RequiredData> requiredData;
     private List<FunctionInvoker> operations;
 
@@ -68,6 +69,14 @@ public class Invoker {
 
     public void setAuthType(String authType) {
         this.authType = authType;
+    }
+
+    public Pagination getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Pagination pagination) {
+        this.pagination = pagination;
     }
 
     public List<RequiredData> getRequiredData() {
