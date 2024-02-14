@@ -8,6 +8,8 @@ import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
+import com.becon.opencelium.backend.resource.PatchConnectionDetails;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -100,20 +102,20 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public void delete(Long id) {
         ConnectionMng connectionMng = getByConnectionId(id);
-        if(connectionMng.getFromConnector()!=null){
-            if(connectionMng.getFromConnector().getMethods()!=null)
+        if (connectionMng.getFromConnector() != null) {
+            if (connectionMng.getFromConnector().getMethods() != null)
                 methodMngService.deleteAll(connectionMng.getFromConnector().getMethods());
-            if(connectionMng.getFromConnector().getOperators()!=null)
+            if (connectionMng.getFromConnector().getOperators() != null)
                 operatorMngService.deleteAll(connectionMng.getFromConnector().getOperators());
         }
-        if(connectionMng.getToConnector()!=null){
-            if(connectionMng.getToConnector().getMethods()!=null)
+        if (connectionMng.getToConnector() != null) {
+            if (connectionMng.getToConnector().getMethods() != null)
                 methodMngService.deleteAll(connectionMng.getToConnector().getMethods());
 
-            if(connectionMng.getToConnector().getOperators()!=null)
+            if (connectionMng.getToConnector().getOperators() != null)
                 operatorMngService.deleteAll(connectionMng.getToConnector().getOperators());
         }
-        if(connectionMng.getFieldBindings()!=null)
+        if (connectionMng.getFieldBindings() != null)
             fieldBindingMngService.deleteAll(connectionMng.getFieldBindings());
         connectionMngRepository.delete(getByConnectionId(id));
     }
@@ -175,8 +177,29 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         return connectionMngRepository.count();
     }
 
+    @Override
+    public void doWithPatchedConnection(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails details) {
+        for (PatchConnectionDetails.PatchOperationDetail opDetail : details.getOpDetails()) {
+            if (opDetail.isItEnh()) {
+                fieldBindingMngService.doWithPatchedEnhancement(connectionDTO, patched, opDetail);
+            } else if (opDetail.isItMethod()) {
+                if (opDetail.isFrom()) {
+                    methodMngService.doWithPatchedMethod(connectionDTO.getFromConnector(), patched.getFromConnector(), opDetail);
+                } else {
+                    methodMngService.doWithPatchedMethod(connectionDTO.getToConnector(), patched.getToConnector(), opDetail);
+                }
+            } else if (opDetail.isItOperator()) {
+                if (opDetail.isFrom()) {
+                    operatorMngService.doWithPatchedOperator(connectionDTO.getFromConnector(), patched.getFromConnector(), opDetail);
+                } else {
+                    operatorMngService.doWithPatchedOperator(connectionDTO.getToConnector(), patched.getToConnector(), opDetail);
+                }
+            }
+        }
+    }
+
     private void setEnhancements(ConnectionMng connection) {
-        if(connection.getFieldBindings()==null || connection.getFieldBindings().isEmpty())
+        if (connection.getFieldBindings() == null || connection.getFieldBindings().isEmpty())
             return;
         connection.getFieldBindings().forEach(f -> f.setEnhancement(enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancementService.getById(f.getEnhancementId())))));
     }

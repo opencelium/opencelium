@@ -19,10 +19,9 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
-import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
-import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
-import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
+import com.becon.opencelium.backend.database.mongodb.service.*;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
@@ -30,6 +29,7 @@ import com.becon.opencelium.backend.database.mysql.repository.ConnectionReposito
 import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
@@ -38,11 +38,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.mongodb.MongoException;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -53,10 +53,10 @@ public class ConnectionServiceImp implements ConnectionService {
     private final ConnectorService connectorService;
     private final ConnectionMngService connectionMngService;
     private final FieldBindingMngService fieldBindingMngService;
-    private final SchedulerService schedulerService;
     private final EnhancementService enhancementService;
     private final PatchHelper patchHelper;
     private final Mapper<Connector, ConnectorDTO> connectorMapper;
+    private final Mapper<ConnectorMng, ConnectorDTO> connectorMngMapper;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ObjectMapper objectMapper;
@@ -68,11 +68,10 @@ public class ConnectionServiceImp implements ConnectionService {
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("connectionMngServiceImp") ConnectionMngServiceImp connectionMngService,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
-            @Lazy @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService connectionHistoryService,
             PatchHelper patchHelper,
-            Mapper<Connector, ConnectorDTO> connectorMapper,
+            Mapper<Connector, ConnectorDTO> connectorMapper, Mapper<ConnectorMng, ConnectorDTO> connectorMngMapper,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             ObjectMapper objectMapper,
@@ -81,11 +80,11 @@ public class ConnectionServiceImp implements ConnectionService {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
         this.fieldBindingMngService = fieldBindingMngService;
-        this.schedulerService = schedulerService;
         this.connectionMngService = connectionMngService;
         this.enhancementService = enhancementService;
         this.patchHelper = patchHelper;
         this.connectorMapper = connectorMapper;
+        this.connectorMngMapper = connectorMngMapper;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
         this.objectMapper = objectMapper;
@@ -270,15 +269,19 @@ public class ConnectionServiceImp implements ConnectionService {
         if (connectionDTOMng.getFromConnector() != null) {
             ConnectorDTO temp = connectionDTOMng.getFromConnector();
             connectionDTOMng.setFromConnector(connectorMapper.toDTO(connectorService.getById(connection.getFromConnector())));
-            connectionDTOMng.getFromConnector().setOperators(temp.getOperators());
-            connectionDTOMng.getFromConnector().setMethods(temp.getMethods());
+            connectionDTOMng.getFromConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
+            connectionDTOMng.getFromConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
         }
 
         if (connectionDTOMng.getToConnector() != null) {
             ConnectorDTO temp = connectionDTOMng.getToConnector();
             connectionDTOMng.setToConnector(connectorMapper.toDTO(connectorService.getById(connection.getToConnector())));
-            connectionDTOMng.getToConnector().setOperators(temp.getOperators());
-            connectionDTOMng.getToConnector().setMethods(temp.getMethods());
+            connectionDTOMng.getToConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
+            connectionDTOMng.getToConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
+        }
+
+        if (connectionDTOMng.getFieldBindings() == null) {
+            connectionDTOMng.setFieldBindings(new ArrayList<>());
         }
         return connectionDTOMng;
     }
@@ -288,10 +291,58 @@ public class ConnectionServiceImp implements ConnectionService {
         return connectionRepository.findAllByIdNotIn(ids);
     }
 
+    @Override
+    public Long patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details) {
+        ConnectionDTO connectionDTO = getFullConnection(connectionId);
+        ConnectionDTO patched = patchHelper.patch(patch, connectionDTO, ConnectionDTO.class);
+
+        doWithConnectorsAfterPatch(connectionDTO);
+        doWithConnectorsAfterPatch(patched);
+
+        connectionMngService.doWithPatchedConnection(connectionDTO, patched, details);
+
+        Connection connection = connectionMapper.toEntity(patched);
+        connection.setEnhancements(null);
+        connectionRepository.save(connection);
+
+        ConnectionMng connectionMng = connectionMngMapper.toEntity(patched);
+        connectionMngService.saveDirectly(connectionMng);
+
+        updateTracker.pushAndMakeHistory(connectionDTO, patched, patch);
+        return connectionId;
+    }
+
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
+    private void doWithConnectorsAfterPatch(ConnectionDTO connectionDTO) {
+        if (connectionDTO.getFromConnector() != null) {
+            ConnectorDTO fromConnector = connectionDTO.getFromConnector();
+            if (fromConnector.getConnectorId() == null || !connectorService.existById(fromConnector.getConnectorId())) {
+                connectionDTO.setFromConnector(null);
+            } else {
+                setDefaultValues(fromConnector);
+            }
+        }
+        if (connectionDTO.getToConnector() != null) {
+            ConnectorDTO toConnector = connectionDTO.getToConnector();
+            if (toConnector.getConnectorId() == null || !connectorService.existById(toConnector.getConnectorId())) {
+                connectionDTO.setFromConnector(null);
+            } else {
+                setDefaultValues(toConnector);
+            }
+        }
+    }
+
+    private void setDefaultValues(ConnectorDTO connectorDTO) {
+        connectorDTO.setTitle(null);
+        connectorDTO.setSslCert(false);
+        connectorDTO.setIcon(null);
+        connectorDTO.setInvoker(null);
+        connectorDTO.setTimeout(0);
+        connectorDTO.setBusinessLayout(null);
+    }
 
     /**
      * this method can be used for :
@@ -316,14 +367,14 @@ public class ConnectionServiceImp implements ConnectionService {
         connection.setEnhancements(null);
         Connection patched = patchHelper.patch(forConnection, connection, Connection.class);
 
-        addConnectors(patched, updatedConnectionMng);
+        doWithPatchedConnector(patched, updatedConnectionMng);
 
         connectionMngService.saveDirectly(updatedConnectionMng);
         connectionRepository.save(patched);
         return FB;
     }
 
-    private void addConnectors(Connection connection, ConnectionMng connectionMng) {
+    private void doWithPatchedConnector(Connection connection, ConnectionMng connectionMng) {
 
         if (connectionMng.getFromConnector() != null && (connection.getFromConnector() == 0 || connection.getFromConnector() != connectionMng.getFromConnector().getConnectorId())) {
             connection.setFromConnector(connectionMng.getFromConnector().getConnectorId());

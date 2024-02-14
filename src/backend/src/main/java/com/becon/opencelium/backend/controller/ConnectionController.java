@@ -183,35 +183,43 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PatchMapping(path = "/{connectionId}", consumes = "application/json-patch+json")
+//    @PatchMapping(path = "/{connectionId}", consumes = "application/json-patch+json")
     public ResponseEntity<?> patchUpdate(@PathVariable Long connectionId, @RequestBody JsonPatch patch) {
+//        PatchConnectionDetails details = patchHelper.describe(patch);
+//        if (details.methodListModified() || details.operatorListModified()) {
+//            Connection connection = connectionService.getById(connectionId);
+//            String id = null;
+//            if (patchHelper.anyMatchesWithAny(patch, "/fromConnector/.+")) {
+//                JsonPatch changed = patchHelper.changeEachPath(patch, p -> p.replaceAll("/fromConnector", ""));
+//                id = connectionService.patchMethodOrOperator(connectionId, connection.getFromConnector(), changed);
+//            } else if (patchHelper.anyMatchesWithAny(patch, "/toConnector/.+")) {
+//                JsonPatch changed = patchHelper.changeEachPath(patch, p -> p.replaceAll("/toConnector", ""));
+//                id = connectionService.patchMethodOrOperator(connectionId, connection.getToConnector(), changed);
+//            }
+//            if (details.isArray()) {
+//                return ResponseEntity.ok().build();
+//            } else {
+//                JSONObject jsonObject = new JSONObject();
+//                jsonObject.put("id", id);
+//                return ResponseEntity.ok(jsonObject);
+//            }
+//        }
+//        FieldBindingMng FB = connectionService.patchUpdate(connectionId, patch);
+//        if (FB == null) {
+//            return ResponseEntity.ok().build();
+//        } else {
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.put("id", FB.getId());
+//            return ResponseEntity.ok(jsonObject);
+//        }
+        return null;
+    }
+
+    @PatchMapping(path = "/{connectionId}", consumes = "application/json-patch+json")
+    public ResponseEntity<?> patchUpdate2(@PathVariable Long connectionId, @RequestBody JsonPatch patch) {
         PatchConnectionDetails details = patchHelper.describe(patch);
-        if (details.methodListModified() || details.operatorListModified()) {
-            Connection connection = connectionService.getById(connectionId);
-            String id = null;
-            if (patchHelper.anyMatchesWithAny(patch, "/fromConnector/.+")) {
-                JsonPatch changed = patchHelper.changeEachPath(patch, p -> p.replaceAll("/fromConnector", ""));
-                id = connectionService.patchMethodOrOperator(connectionId, connection.getFromConnector(), changed);
-            } else if (patchHelper.anyMatchesWithAny(patch, "/toConnector/.+")) {
-                JsonPatch changed = patchHelper.changeEachPath(patch, p -> p.replaceAll("/toConnector", ""));
-                id = connectionService.patchMethodOrOperator(connectionId, connection.getToConnector(), changed);
-            }
-            if (details.isArray()) {
-                return ResponseEntity.ok().build();
-            } else {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("id", id);
-                return ResponseEntity.ok(jsonObject);
-            }
-        }
-        FieldBindingMng FB = connectionService.patchUpdate(connectionId, patch);
-        if (FB == null) {
-            return ResponseEntity.ok().build();
-        } else {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("id", FB.getId());
-            return ResponseEntity.ok(jsonObject);
-        }
+        long id = connectionService.patchUpdate(connectionId, patch, details);
+        return ResponseEntity.ok(connectionService.getFullConnection(id));
     }
 
 
