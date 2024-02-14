@@ -61,6 +61,7 @@ public abstract class HelperMapper {
 
     @Autowired
     @Qualifier("fieldBindingMngServiceImp")
+    @Lazy
     private FieldBindingMngService fieldBindingMngService;
 
     @Autowired

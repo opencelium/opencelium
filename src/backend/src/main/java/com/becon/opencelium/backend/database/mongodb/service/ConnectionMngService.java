@@ -1,7 +1,8 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.becon.opencelium.backend.resource.PatchConnectionDetails;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.github.fge.jsonpatch.JsonPatch;
 
 import java.util.List;
@@ -18,8 +19,7 @@ public interface ConnectionMngService {
 
     String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch);
 
-    FieldBindingMng patchUpdate(Long id, JsonPatch patch);
-
     List<ConnectionMng> getAllById(List<Long> ids);
     long count();
+    void doWithPatchedConnection(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails details);
 }

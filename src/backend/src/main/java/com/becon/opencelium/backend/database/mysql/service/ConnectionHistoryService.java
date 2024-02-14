@@ -10,7 +10,6 @@ import java.util.List;
 public interface ConnectionHistoryService {
     List<ConnectionHistory> findAllWithInterval(long connectionId, long second);
     List<ConnectionHistory> findAllWithConnectionId(Long element);
-
     ConnectionHistory makeHistoryAndSave(Connection connection, JsonPatch jsonPatch, Action action);
     ConnectionHistory makeHistoryAndSave(Long connectionId, JsonPatch jsonPatch, Action action);
 }

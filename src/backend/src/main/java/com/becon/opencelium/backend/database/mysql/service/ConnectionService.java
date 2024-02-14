@@ -19,9 +19,9 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.github.fge.jsonpatch.JsonPatch;
-import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
@@ -54,13 +54,13 @@ public interface ConnectionService {
 
     Long createEmptyConnection();
 
-    FieldBindingMng patchUpdate(Long connectionId, JsonPatch patch);
-
-    String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch);
-
     void undo(Long connectionId);
 
     ConnectionDTO getFullConnection(Long connectionId);
 
     List<Connection> getAllConnectionsNotContains(List<Long> ids);
+
+    void patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details);
+
+    String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch);
 }

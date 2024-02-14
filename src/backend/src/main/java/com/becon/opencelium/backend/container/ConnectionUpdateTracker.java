@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionHistoryService;
 import com.becon.opencelium.backend.enums.Action;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -128,7 +129,7 @@ public class ConnectionUpdateTracker {
         return objectMapper.convertValue(merged, JsonPatch.class);
     }
 
-    @Scheduled(initialDelay = 840_000, fixedDelay = 60_000)
+    @Scheduled(initialDelay = 0, fixedDelay = 60_000)
     private void clear() {
         for (Map.Entry<Long, LinkedBlockingDeque<Command>> entry : queues.entrySet()) {
             long currentTimeMillis = System.currentTimeMillis();
@@ -149,4 +150,40 @@ public class ConnectionUpdateTracker {
         }
     }
 
+    public void pushAndMakeHistory(ConnectionDTO before, ConnectionDTO after, JsonPatch patch) {
+        if (after.getFieldBindings() == null && before.getFieldBindings().isEmpty()) {
+            before.setFieldBindings(null);
+        }
+        if (after.getFromConnector() != null
+                && after.getFromConnector().getMethods() == null
+                && before.getFromConnector() != null
+                && before.getFromConnector().getMethods().isEmpty()) {
+            before.getFromConnector().setMethods(null);
+        }
+        if (after.getToConnector() != null
+                && after.getToConnector().getMethods() == null
+                && before.getToConnector() != null
+                && before.getToConnector().getMethods().isEmpty()) {
+            before.getToConnector().setMethods(null);
+        }
+        if (after.getFromConnector() != null
+                && after.getFromConnector().getOperators() == null
+                && before.getFromConnector() != null
+                && before.getFromConnector().getOperators().isEmpty()) {
+            before.getFromConnector().setOperators(null);
+        }
+        if (after.getToConnector() != null
+                && after.getToConnector().getOperators() == null
+                && before.getToConnector() != null
+                && before.getToConnector().getOperators().isEmpty()) {
+            before.getToConnector().setOperators(null);
+        }
+
+        JsonPatch forUndo = JsonDiff.asJsonPatch(objectMapper.valueToTree(after), objectMapper.valueToTree(before));
+        if (patchHelper.isEmpty(forUndo)) {
+            return;
+        }
+        push(new Command(before.getConnectionId(), forUndo));
+        CHS.makeHistoryAndSave(before.getConnectionId(), patch, Action.MODIFY);
+    }
 }
