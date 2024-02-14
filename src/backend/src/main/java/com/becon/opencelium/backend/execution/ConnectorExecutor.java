@@ -96,8 +96,7 @@ public class ConnectorExecutor {
                 .usingReferences(this::resolveReferences)
                 .createRequest();
 
-//        ResponseEntity<?> responseEntity = this.restTemplate.exchange(requestEntity, Object.class);
-        ResponseEntity<?> responseEntity = new RestTemplate().exchange(requestEntity, Object.class);
+        ResponseEntity<?> responseEntity = this.restTemplate.exchange(requestEntity, Object.class);
 
         Operation operation = executionManager.findOperationByColor(operationDTO.getOperationId())
                 .orElseGet(() -> {
