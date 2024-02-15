@@ -25,7 +25,7 @@ public class ConditionExMapper {
             case PROPERTY_NOT_EXISTS, PROPERTY_EXISTS, IS_TYPE_OF: {
                 //TODO: ???
             }
-            case IS_EMPTY, IS_NOT_EMPTY, IS_NOT_NULL, ISNULL: {
+            case IS_EMPTY, IS_NOT_EMPTY, IS_NOT_NULL, IS_NULL: {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
             }
             case DEFAULT: {

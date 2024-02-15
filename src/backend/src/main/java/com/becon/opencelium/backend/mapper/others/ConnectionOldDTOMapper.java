@@ -16,10 +16,10 @@ import org.mapstruct.ReportingPolicy;
 @Named("connectionOldDTOMapper")
 public interface ConnectionOldDTOMapper extends Mapper<ConnectionDTO, ConnectionOldDTO> {
     @Named("toDTO")
-    @Mapping(target = "fieldBindings", source = "fieldBinding",qualifiedByName = {"fieldBindingOldDTOMapper", "toDTOAll"})
+    @Mapping(target = "fieldBinding", source = "fieldBinding",qualifiedByName = {"fieldBindingOldDTOMapper", "toDTOAll"})
     ConnectionDTO toEntity(ConnectionOldDTO dto);
 
     @Named("toOldDTO")
-    @Mapping(target = "fieldBinding", source = "fieldBindings",qualifiedByName = {"fieldBindingOldDTOMapper", "toOldDTOAll"})
+    @Mapping(target = "fieldBinding", source = "fieldBinding",qualifiedByName = {"fieldBindingOldDTOMapper", "toOldDTOAll"})
     ConnectionOldDTO toDTO(ConnectionDTO entity);
 }

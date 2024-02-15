@@ -16,9 +16,9 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
 import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
@@ -33,11 +33,8 @@ import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
-import com.mongodb.MongoException;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,7 +89,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
 
     @Override
-    @Transactional(rollbackFor = {MongoException.class, DataAccessException.class})
+    @Transactional(rollbackFor = Exception.class)
     public ConnectionMng save(Connection connection, ConnectionMng connectionMng) {
 
         //checking existence of connectors
@@ -119,10 +116,13 @@ public class ConnectionServiceImp implements ConnectionService {
         return connectionMngService.save(connectionMng);
     }
 
-    /**
-     * creates new connection in mysql and mongodb.
-     * creates CREATE history
-     */
+    @Override
+    public ConnectionMng update(Connection connection, ConnectionMng uConnectionMng) {
+        getById(connection.getId());
+        connectionMngService.getByConnectionId(connection.getId());
+        return save(connection, uConnectionMng);
+    }
+
     @Override
     public Long createEmptyConnection() {
         Connection saved = connectionRepository.save(new Connection());
@@ -134,34 +134,28 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
-    public String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch) {
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
-
-        String id = connectionMngService.patchMethodOrOperator(connectionId, connectorId, patch);
-
-        ConnectionMng patched = connectionMngService.getByConnectionId(connectionId);
-
-        if (connectionMng.getFromConnector() != null && connectorId.equals(connectionMng.getFromConnector().getConnectorId())) {
-            updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getFromConnector(), patched.getFromConnector(), patch);
-        } else if (id != null) {
-            updateTracker.pushAndMakeHistory(connectionMng, connectionMng.getToConnector(), patched.getToConnector(), patch);
-        }
-        return id;
+    @Transactional(rollbackFor = Exception.class)
+    public void patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details) {
+        ConnectionDTO connectionDTO = getFullConnection(connectionId);
+        ConnectionDTO patched = patchUpdateInternal(connectionDTO, patch, details);
+        updateTracker.pushAndMakeHistory(connectionDTO, patched, patch);
     }
 
     @Override
     public void undo(Long connectionId) {
-//        synchronized (ConnectionUpdateTracker.class) {
-//            Command command = updateTracker.undo(connectionId);
-//            if (command != null) {
-//                try {
-//                    rotate(connectionId, command.getJsonPatch());
-//                    connectionHistoryService.makeHistoryAndSave(getById(connectionId), command.getJsonPatch(), Action.UNDO);
-//                } catch (Exception e) {
-//                    updateTracker.push(command);
-//                }
-//            }
-//        }
+        synchronized (ConnectionUpdateTracker.class) {
+            Command command = updateTracker.undo(connectionId);
+            if (command != null) {
+                try {
+                    PatchConnectionDetails details = patchHelper.describe(command.getJsonPatch());
+                    ConnectionDTO connectionDTO = getFullConnection(connectionId);
+                    patchUpdateInternal(connectionDTO, command.getJsonPatch(), details);
+                    connectionHistoryService.makeHistoryAndSave(new Connection(connectionId), command.getJsonPatch(), Action.UNDO);
+                } catch (Exception e) {
+                    updateTracker.push(command);
+                }
+            }
+        }
     }
 
     @Override
@@ -169,13 +163,6 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteById(Long id) {
         getById(id);
         connectionMngService.delete(id);
-        connectionRepository.deleteById(id);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteOnlyConnection(Long id) {
-        getById(id);
         connectionRepository.deleteById(id);
     }
 
@@ -189,8 +176,21 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteOnlyConnection(Long id) {
+        getById(id);
+        connectionRepository.deleteById(id);
+    }
+
+    @Override
     public Optional<Connection> findById(Long id) {
         return connectionRepository.findById(id);
+    }
+
+    @Override
+    public Connection getById(Long id) {
+        return connectionRepository.findById(id)
+                .orElseThrow(() -> new ConnectionNotFoundException(id));
     }
 
     @Override
@@ -199,8 +199,18 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    public List<Connection> findAllByConnectorId(int connectorId) {
+        return connectionRepository.findAllByConnectorId(connectorId);
+    }
+
+    @Override
     public List<Connection> findAllByNameContains(String name) {
         return connectionRepository.findAllByTitleContains(name);
+    }
+
+    @Override
+    public List<Connection> getAllConnectionsNotContains(List<Long> ids) {
+        return connectionRepository.findAllByIdNotIn(ids);
     }
 
     @Override
@@ -211,24 +221,6 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public boolean existsById(Long id) {
         return connectionRepository.existsById(id);
-    }
-
-    @Override
-    public List<Connection> findAllByConnectorId(int connectorId) {
-        return connectionRepository.findAllByConnectorId(connectorId);
-    }
-
-    @Override
-    public ConnectionMng update(Connection connection, ConnectionMng uConnectionMng) {
-        getById(connection.getId());
-        connectionMngService.getByConnectionId(connection.getId());
-        return save(connection, uConnectionMng);
-    }
-
-    @Override
-    public Connection getById(Long id) {
-        return connectionRepository.findById(id)
-                .orElseThrow(() -> new ConnectionNotFoundException(id));
     }
 
     @Override
@@ -258,20 +250,19 @@ public class ConnectionServiceImp implements ConnectionService {
             connectionDTOMng.getToConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
         }
 
-        if (connectionDTOMng.getFieldBindings() == null) {
-            connectionDTOMng.setFieldBindings(new ArrayList<>());
+        if (connectionDTOMng.getFieldBinding() == null) {
+            connectionDTOMng.setFieldBinding(new ArrayList<>());
         }
         return connectionDTOMng;
     }
 
-    @Override
-    public List<Connection> getAllConnectionsNotContains(List<Long> ids) {
-        return connectionRepository.findAllByIdNotIn(ids);
-    }
 
-    @Override
-    public void patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details) {
-        ConnectionDTO connectionDTO = getFullConnection(connectionId);
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------
+    // private methods
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    private ConnectionDTO patchUpdateInternal(ConnectionDTO connectionDTO, JsonPatch patch, PatchConnectionDetails details) {
         ConnectionDTO patched = patchHelper.patch(patch, connectionDTO, ConnectionDTO.class);
 
         doWithConnectorsAfterPatch(connectionDTO);
@@ -285,18 +276,13 @@ public class ConnectionServiceImp implements ConnectionService {
 
         ConnectionMng connectionMng = connectionMngMapper.toEntity(patched);
         connectionMngService.saveDirectly(connectionMng);
-
-        updateTracker.pushAndMakeHistory(connectionDTO, patched, patch);
+        return patched;
     }
 
-
-    // --------------------------------------------------------------------------------------------------------------------------------------------------------
-    // private methods
-    // --------------------------------------------------------------------------------------------------------------------------------------------------------
     private void doWithConnectorsAfterPatch(ConnectionDTO connectionDTO) {
         if (connectionDTO.getFromConnector() != null) {
             ConnectorDTO fromConnector = connectionDTO.getFromConnector();
-            if (fromConnector.getConnectorId() == null || !connectorService.existById(fromConnector.getConnectorId())) {
+            if (fromConnector.getConnectorId() == null || !connectorService.existsById(fromConnector.getConnectorId())) {
                 connectionDTO.setFromConnector(null);
             } else {
                 setDefaultValues(fromConnector);
@@ -304,7 +290,7 @@ public class ConnectionServiceImp implements ConnectionService {
         }
         if (connectionDTO.getToConnector() != null) {
             ConnectorDTO toConnector = connectionDTO.getToConnector();
-            if (toConnector.getConnectorId() == null || !connectorService.existById(toConnector.getConnectorId())) {
+            if (toConnector.getConnectorId() == null || !connectorService.existsById(toConnector.getConnectorId())) {
                 connectionDTO.setFromConnector(null);
             } else {
                 setDefaultValues(toConnector);

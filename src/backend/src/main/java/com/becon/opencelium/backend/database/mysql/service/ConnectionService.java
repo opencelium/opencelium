@@ -17,12 +17,10 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.github.fge.jsonpatch.JsonPatch;
-
 
 import java.util.List;
 import java.util.Optional;
@@ -62,5 +60,4 @@ public interface ConnectionService {
 
     void patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details);
 
-    String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch);
 }

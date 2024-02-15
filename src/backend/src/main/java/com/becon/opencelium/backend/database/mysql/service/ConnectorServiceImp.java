@@ -109,7 +109,7 @@ public class ConnectorServiceImp implements ConnectorService {
     }
 
     @Override
-    public boolean existById(int id) {
+    public boolean existsById(int id) {
         return connectorRepository.existsById(id);
     }
 

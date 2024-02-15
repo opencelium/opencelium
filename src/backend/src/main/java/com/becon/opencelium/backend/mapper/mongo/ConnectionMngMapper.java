@@ -18,12 +18,12 @@ import org.mapstruct.ReportingPolicy;
         }
 )
 @Named("connectionMngMapper")
-public interface ConnectionMngMapper extends Mapper<ConnectionMng,ConnectionDTO> {
+public interface ConnectionMngMapper extends Mapper<ConnectionMng, ConnectionDTO> {
     @Named("toEntity")
     @Mappings({
             @Mapping(target = "toConnector", qualifiedByName = {"connectorMngMapper", "toEntity"}),
             @Mapping(target = "fromConnector", qualifiedByName = {"connectorMngMapper", "toEntity"}),
-            @Mapping(target = "fieldBindings", qualifiedByName = {"fieldBindingMngMapper", "toEntityAll"})
+            @Mapping(target = "fieldBindings", source = "fieldBinding", qualifiedByName = {"fieldBindingMngMapper", "toEntityAll"})
 
     })
     ConnectionMng toEntity(ConnectionDTO connectorDTO);
@@ -32,7 +32,7 @@ public interface ConnectionMngMapper extends Mapper<ConnectionMng,ConnectionDTO>
     @Mappings({
             @Mapping(target = "toConnector", qualifiedByName = {"connectorMngMapper", "toDTO"}),
             @Mapping(target = "fromConnector", qualifiedByName = {"connectorMngMapper", "toDTO"}),
-            @Mapping(target = "fieldBindings", qualifiedByName = {"fieldBindingMngMapper", "toDTOAll"})
+            @Mapping(target = "fieldBinding", source = "fieldBindings", qualifiedByName = {"fieldBindingMngMapper", "toDTOAll"})
     })
     ConnectionDTO toDTO(ConnectionMng connectorMng);
 }

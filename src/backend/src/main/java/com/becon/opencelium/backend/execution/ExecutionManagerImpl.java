@@ -48,7 +48,19 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public Map<String, String> getRequiredData(Integer ctorId) {
+    public String generateKey() {
+        if (loops.isEmpty()) {
+            return "#";
+        }
+
+        return String.join(", ", loops.values());
+    }
+
+    @Override
+    public Map<String, String> getRequestData(Integer ctorId) {
+        // if 'connectorId' is null then use current connectors' id:
+        ctorId = ctorId == null ? this.currentCtorId : ctorId;
+
         if (Objects.equals(ctorId, connectorFrom.getId())) {
             return connectorFrom.getRequiredData();
         }
@@ -69,7 +81,12 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
     @Override
     public Object executeScript(String bindId) {
-        return enhancementService.executeScript(bindId);
+        Enhancement enhancement = fieldBind.stream()
+                .filter(fb -> Objects.equals(bindId, fb.getBindId()))
+                .map(FieldBind::getEnhance).findFirst()
+                .orElseThrow(() -> new RuntimeException("Non existing fieldBind id 'bindId' = " + bindId));
+
+        return enhancementService.execute(enhancement);
     }
 
     @Override
@@ -83,20 +100,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public Enhancement getEnhanceByBindId(String bindId) {
-        return fieldBind.stream()
-                .filter(fb -> Objects.equals(bindId, fb.getBindId()))
-                .map(FieldBind::getEnhance).findFirst()
-                .orElseThrow(() -> new RuntimeException("Non existing fieldBind id 'bindId' = " + bindId));
-    }
-
-    @Override
     public void setCurrentCtorId(Integer ctorId) {
         this.currentCtorId = ctorId;
-    }
-
-    @Override
-    public Integer getCurrentCtorId() {
-        return this.currentCtorId;
     }
 }

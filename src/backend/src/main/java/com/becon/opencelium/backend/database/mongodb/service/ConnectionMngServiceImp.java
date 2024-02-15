@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
-import com.becon.opencelium.backend.database.mongodb.entity.*;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
@@ -10,15 +11,9 @@ import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
-import com.becon.opencelium.backend.utility.patch.PatchHelper;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jsonpatch.JsonPatch;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -27,8 +22,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final FieldBindingMngService fieldBindingMngService;
     private final MethodMngService methodMngService;
     private final OperatorMngService operatorMngService;
-    private final PatchHelper patchHelper;
-    private final ObjectMapper objectMapper;
     private final EnhancementService enhancementService;
     private final MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper;
     private final Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper;
@@ -39,8 +32,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             @Qualifier("methodMngServiceImp") MethodMngService methodMngService,
             @Qualifier("operatorMngServiceImp") OperatorMngService operatorMngService,
             @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
-            PatchHelper patchHelper,
-            ObjectMapper objectMapper,
             MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
             Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper
     ) {
@@ -48,8 +39,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         this.fieldBindingMngService = fieldBindingMngService;
         this.methodMngService = methodMngService;
         this.operatorMngService = operatorMngService;
-        this.patchHelper = patchHelper;
-        this.objectMapper = objectMapper;
         this.enhancementService = enhancementService;
         this.enhancementMapper = enhancementMapper;
         this.enhancementMngMapper = enhancementMngMapper;
@@ -99,6 +88,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
+    public List<ConnectionMng> getAllById(List<Long> ids) {
+        return connectionMngRepository.findAllByConnectionIdIn(ids);
+    }
+
+    @Override
     public void delete(Long id) {
         ConnectionMng connectionMng = getByConnectionId(id);
         if (connectionMng.getFromConnector() != null) {
@@ -117,44 +111,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         if (connectionMng.getFieldBindings() != null)
             fieldBindingMngService.deleteAll(connectionMng.getFieldBindings());
         connectionMngRepository.delete(connectionMng);
-    }
-
-    @Override
-    public String patchMethodOrOperator(Long connectionId, Integer connectorId, JsonPatch patch) {
-        ConnectionMng connection = getByConnectionId(connectionId);
-
-        String id = null;
-        if (connection.getFromConnector() != null && connectorId.equals(connection.getFromConnector().getConnectorId())) {
-            if (connection.getFromConnector().getMethods() == null) {
-                connection.getFromConnector().setMethods(new ArrayList<>());
-            }
-            if (connection.getFromConnector().getOperators() == null) {
-                connection.getFromConnector().setOperators(new ArrayList<>());
-            }
-            ConnectorMng fromConnector = connection.getFromConnector();
-            ConnectorMng patched = patchHelper.patch(patch, connection.getFromConnector(), ConnectorMng.class);
-            connection.setFromConnector(patched);
-            id = doAfterPatchBeforeSave(fromConnector, patched, patch);
-        } else if (connection.getToConnector() != null && connectorId.equals(connection.getToConnector().getConnectorId())) {
-            if (connection.getToConnector().getMethods() == null) {
-                connection.getToConnector().setMethods(new ArrayList<>());
-            }
-            if (connection.getToConnector().getOperators() == null) {
-                connection.getToConnector().setOperators(new ArrayList<>());
-            }
-            ConnectorMng toConnector = connection.getToConnector();
-            ConnectorMng patched = patchHelper.patch(patch, connection.getToConnector(), ConnectorMng.class);
-            connection.setToConnector(patched);
-            id = doAfterPatchBeforeSave(toConnector, patched, patch);
-        }
-
-        connectionMngRepository.save(connection);
-        return id;
-    }
-
-    @Override
-    public List<ConnectionMng> getAllById(List<Long> ids) {
-        return connectionMngRepository.findAllByConnectionIdIn(ids);
     }
 
     @Override
@@ -187,79 +143,5 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         if (connection.getFieldBindings() == null || connection.getFieldBindings().isEmpty())
             return;
         connection.getFieldBindings().forEach(f -> f.setEnhancement(enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancementService.getById(f.getEnhancementId())))));
-    }
-
-    private String doAfterPatchBeforeSave(ConnectorMng connector, ConnectorMng patched, JsonPatch patch) {
-        String res = null;
-        String lastModifiedId = null;
-        JsonNode jsonNode = objectMapper.convertValue(patch, JsonNode.class);
-        Iterator<JsonNode> nodes = jsonNode.elements();
-        while (nodes.hasNext()) {
-            JsonNode next = nodes.next();
-            String path = next.get("path").textValue();
-            String op = next.get("op").textValue();
-
-            if (path.matches("/methods/\\d+.*") || path.matches("/methods/-.*")) {
-                if (path.matches("/methods/\\d+/.+") || path.matches("/methods/-/.+")) {
-                    String strIdx = path.split("/")[2];
-                    int index = findIndexOf(connector.getMethods(), strIdx);
-                    MethodMng toModify = patched.getMethods().get(index);
-                    methodMngService.save(toModify);
-                    lastModifiedId = toModify.getId();
-                } else if (op.equals("remove")) {
-                    String strIdx = path.split("/")[2];
-                    int index = findIndexOf(connector.getMethods(), strIdx);
-                    MethodMng toRemove = connector.getMethods().get(index);
-                    methodMngService.deleteById(toRemove.getId());
-                    res = toRemove.getId();
-                } else if (op.equals("add") || op.equals("replace")) {
-                    String strIdx = path.split("/")[2];
-                    int index = findIndexOf(patched.getMethods(), strIdx);
-                    MethodMng toAdd = patched.getMethods().get(index);
-                    MethodMng saved = methodMngService.save(toAdd);
-                    res = saved.getId();
-                }
-            } else if (path.matches("/operators/\\d+.*") || path.matches("/operators/-.*")) {
-                if (path.matches("/operators/\\d+/.+") || path.matches("/operators/-/.+")) {
-                    String strIdx = path.split("/")[2];
-                    int index = findIndexOf(connector.getOperators(), strIdx);
-                    OperatorMng toModify = patched.getOperators().get(index);
-                    operatorMngService.save(toModify);
-                    lastModifiedId = toModify.getId();
-                } else if (op.equals("remove")) {
-                    String strIdx = path.split("/")[2];
-                    int index = findIndexOf(connector.getOperators(), strIdx);
-                    OperatorMng toRemove = connector.getOperators().get(index);
-                    operatorMngService.deleteById(toRemove.getId());
-                    res = toRemove.getId();
-                } else if (op.equals("add") || op.equals("replace")) {
-                    String strIdx = path.split("/")[2];
-                    int index = findIndexOf(patched.getOperators(), strIdx);
-                    OperatorMng toAdd = patched.getOperators().get(index);
-                    OperatorMng saved = operatorMngService.save(toAdd);
-                    res = saved.getId();
-                }
-            } else if (path.matches("/methods") && op.equals("replace")) {
-                JsonNode value = next.get("value");
-                if (value.isNull()) {
-                    List<MethodMng> methods = connector.getMethods();
-                    methodMngService.deleteAll(methods);
-                }
-            } else if (path.matches("/operators") && op.equals("replace")) {
-                JsonNode value = next.get("value");
-                if (value.isNull()) {
-                    List<OperatorMng> operators = connector.getOperators();
-                    operatorMngService.deleteAll(operators);
-                }
-            }
-        }
-        return res == null ? lastModifiedId : res;
-    }
-
-    private <T> int findIndexOf(List<T> list, String index) {
-        if (index.equals("-"))
-            return list.size() - 1;
-
-        return Integer.parseInt(index);
     }
 }

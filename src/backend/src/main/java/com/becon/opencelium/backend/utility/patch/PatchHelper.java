@@ -45,8 +45,8 @@ public class PatchHelper {
     private <T> JsonNode applyPatch(JsonPatch patch, T target) {
         try {
             return patch.apply(mapper.valueToTree(target));
-        } catch (JsonPatchException ignored) {
-            return mapper.valueToTree(target);
+        } catch (JsonPatchException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -67,35 +67,9 @@ public class PatchHelper {
         return mapper.convertValue(nodeList, JsonPatch.class);
     }
 
-    public JsonPatch extract(JsonPatch patch, Function<String, Boolean> operation) {
-        JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
-        Iterator<JsonNode> nodes = jsonNode.elements();
-        List<JsonNode> nodeList = new ArrayList<>();
-        while (nodes.hasNext()) {
-            JsonNode next = nodes.next();
-            String path = next.get("path").textValue();
-            if (operation.apply(path))
-                nodeList.add(next);
-        }
-        return mapper.convertValue(nodeList, JsonPatch.class);
-    }
-
     public boolean isEmpty(JsonPatch patch) {
         JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
         return jsonNode.isEmpty();
-    }
-
-    public boolean anyMatchesWithAny(JsonPatch patch, String... args) {
-        JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
-        Iterator<JsonNode> nodes = jsonNode.elements();
-        while (nodes.hasNext()) {
-            JsonNode next = nodes.next();
-            String path = next.get("path").textValue();
-            if (Arrays.stream(args).anyMatch(path::matches)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public PatchConnectionDetails describe(JsonPatch patch) {
@@ -144,17 +118,17 @@ public class PatchHelper {
                 opDetail.setIndexOfOperator(getIndexOfList(path, 3));
             } else if (path.equals("/fromConnector/operators") || path.equals("/toConnector/operators")) {
                 opDetail.setReplacedOperatorList(true);
-            } else if (path.matches("/fieldBindings/-") || path.matches("/fieldBindings/\\d+")) {
+            } else if (path.matches("/fieldBinding/-") || path.matches("/fieldBinding/\\d+")) {
                 switch (op) {
                     case "add" -> opDetail.setEnhancementAdded(true);
                     case "replace" -> opDetail.setEnhancementReplaced(true);
                     case "remove" -> opDetail.setEnhancementDeleted(true);
                 }
                 opDetail.setIndexOfEnhancement(getIndexOfList(path));
-            } else if (path.matches("/fieldBindings/-/.+") || path.matches("/fieldBindings/\\d+/.+")) {
+            } else if (path.matches("/fieldBinding/-/.+") || path.matches("/fieldBinding/\\d+/.+")) {
                 opDetail.setEnhancementModified(true);
                 opDetail.setIndexOfEnhancement(getIndexOfList(path, 2));
-            } else if (path.equals("/fieldBindings")) {
+            } else if (path.equals("/fieldBinding")) {
                 opDetail.setReplacedEnhancementList(true);
             }
             details.getOpDetails().add(opDetail);

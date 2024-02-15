@@ -165,7 +165,7 @@ public class OperationExMapper {
                 String subPathName;
                 if (subPath.matches(RegExpression.enhancement)) {
                     subPathName = subPath.substring(3, subPath.length() - 2);
-                } else if (subPath.matches(RegExpression.requiredData)) {
+                } else if (subPath.matches(RegExpression.requestData)) {
                     subPathName = subPath.substring(1, subPath.length() - 1);
                 } else {
                     continue;

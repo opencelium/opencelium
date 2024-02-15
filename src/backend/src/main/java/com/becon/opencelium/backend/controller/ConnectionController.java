@@ -19,10 +19,10 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
@@ -171,9 +171,6 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connection has been successfully updated"),
-            @ApiResponse(responseCode = "200",
-                    description = "Connection has been successfully updated",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -210,8 +207,8 @@ public class ConnectionController {
                 jsonObject.put("id", id);
                 return ResponseEntity.ok(jsonObject);
             } else if (opDetail.isEnhancementAdded()) {
-                List<FieldBindingDTO> fieldBindings = connectionDTO.getFieldBindings();
-                String id = fieldBindings.get(patchHelper.getIndexOfList(opDetail.getIndexOfOperator(), fieldBindings.size())).getId();
+                List<FieldBindingDTO> fieldBindings = connectionDTO.getFieldBinding();
+                String id = fieldBindings.get(patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), fieldBindings.size())).getId();
                 jsonObject.put("id", id);
                 return ResponseEntity.ok(jsonObject);
             }
@@ -222,9 +219,6 @@ public class ConnectionController {
 
     @Operation(summary = "Add|delete|updates a method and|or an operator of connection with a patch request and returns current its id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Connection has been successfully updated",
-                    content = @Content(schema = @Schema(implementation = MethodDTO.class))),
             @ApiResponse(responseCode = "200",
                     description = "Method and|or Operator has been successfully updated"),
             @ApiResponse(responseCode = "401",
@@ -243,16 +237,20 @@ public class ConnectionController {
             @PathVariable Integer connectorId,
             @RequestBody JsonPatch patch
     ) {
-        String id = connectionService.patchMethodOrOperator(connectionId, connectorId, patch);
-        if (patchHelper.anyMatchesWithAny(patch, "/methods/\\d+", "/methods/-", "/operators/\\d+", "/operators/-")) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("id", id);
-            return ResponseEntity.ok(jsonObject);
-        } else {
-            return ResponseEntity.ok().build();
+        if (connectorId == null || connectorId == 0) {
+            throw new ConnectorNotFoundException(0);
         }
-    }
 
+        Connection connection = connectionService.getById(connectionId);
+
+        JsonPatch changed;
+        if (connection.getFromConnector() == connectorId) {
+            changed = patchHelper.changeEachPath(patch, p -> "/fromConnector" + p);
+        } else {
+            changed = patchHelper.changeEachPath(patch, p -> "/toConnector" + p);
+        }
+        return patchUpdate(connectionId, changed);
+    }
 
     @Operation(summary = "Undoes the last update and returns undid connection")
     @ApiResponses(value = {
