@@ -4,7 +4,6 @@ import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.resource.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ParamLocation;
-import com.becon.opencelium.backend.resource.execution.ParamStyle;
 import com.becon.opencelium.backend.resource.execution.ParameterDTO;
 import com.becon.opencelium.backend.resource.execution.ParameterDTOUtil;
 import com.becon.opencelium.backend.resource.execution.RequestBodyDTO;
@@ -75,13 +74,17 @@ public class RequestEntityBuilder {
 
         // replace path parameters
         for (ParameterDTO parameter : getParamsByLocation(ParamLocation.PATH)) {
-            String ref = parameter.getSchema().getValue();
+            // create the copy of current 'parameter'
+            ParameterDTO copiedParameter = ParameterDTOUtil.copy(parameter);
 
-            // now replace referenced schema
-            replaceRefs(parameter.getSchema());
+            // get 'reference' to replace it later with actual value
+            String ref = copiedParameter.getSchema().getValue();
+
+            // replace referenced schema
+            replaceRefs(copiedParameter.getSchema());
 
             // convert parameter to string, and replace this path variable with actual value
-            rawUrl = rawUrl.replace(ref, ParameterDTOUtil.toString(parameter));
+            rawUrl = rawUrl.replace(ref, ParameterDTOUtil.toString(copiedParameter));
         }
 
         // remove old query params if exists
@@ -91,6 +94,7 @@ public class RequestEntityBuilder {
 
         // add query parameters if exists
         String query = getParamsByLocation(ParamLocation.QUERY).stream()
+                .map(ParameterDTOUtil::copy)
                 .peek(parameter -> replaceRefs(parameter.getSchema()))
                 .map(parameter -> parameter.getName() + "=" + ParameterDTOUtil.toString(parameter))
                 .collect(Collectors.joining("&"));
@@ -106,6 +110,7 @@ public class RequestEntityBuilder {
         HttpHeaders headers = new HttpHeaders();
 
         getParamsByLocation(ParamLocation.HEADER).stream()
+                .map(ParameterDTOUtil::copy)
                 .peek(parameter -> replaceRefs(parameter.getSchema()))
                 .forEach(parameter -> headers.put(parameter.getName(), List.of(ParameterDTOUtil.toString(parameter))));
 
@@ -119,20 +124,23 @@ public class RequestEntityBuilder {
             return "";
         }
 
+        // create the copy of current 'schema'
+        SchemaDTO copiedSchema = SchemaDTOUtil.copy(body.getSchema());
+
         // replace all reference value before converting 'body' to String
-        replaceRefs(body.getSchema());
+        replaceRefs(copiedSchema);
 
         MediaType mediaType = body.getContent();
-        if (mediaType == MediaType.APPLICATION_JSON) {
-            return SchemaDTOUtil.toJSON(body.getSchema());
+        if (MediaType.APPLICATION_JSON.equals(mediaType)) {
+            return SchemaDTOUtil.toJSON(copiedSchema);
         }
 
-        if (mediaType == MediaType.APPLICATION_XML) {
-            return SchemaDTOUtil.toXML(body.getSchema());
+        if (MediaType.APPLICATION_XML.equals(mediaType)) {
+            return SchemaDTOUtil.toXML(copiedSchema);
         }
 
         // for other types just return schemas' value as text
-        return SchemaDTOUtil.toText(body.getSchema());
+        return SchemaDTOUtil.toText(copiedSchema);
     }
 
     private void replaceRefs(SchemaDTO schema) {
@@ -141,12 +149,16 @@ public class RequestEntityBuilder {
         if (ReferenceExtractor.isReference(value)) {
             SchemaDTO referencedSchema = references.apply(value);
 
-            // if schema is referenced then correct the type and fields
-            schema.setType(referencedSchema.getType());
-            schema.setValue(referencedSchema.getValue());
-            schema.setItems(referencedSchema.getItems());
-            schema.setProperties(referencedSchema.getProperties());
-            schema.setXml(referencedSchema.getXml());
+            if (referencedSchema == null) {
+                schema.setValue(null);
+            } else {
+                // if schema is referenced then correct the type and fields
+                schema.setType(referencedSchema.getType());
+                schema.setValue(referencedSchema.getValue());
+                schema.setItems(referencedSchema.getItems());
+                schema.setProperties(referencedSchema.getProperties());
+                schema.setXml(referencedSchema.getXml());
+            }
 
             // referenced schema does not contain other reference, end recursion
             return;

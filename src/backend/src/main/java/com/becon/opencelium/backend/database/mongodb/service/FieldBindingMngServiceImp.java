@@ -273,7 +273,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         return resultMap;
     }
 
-    private String putId(String ref, String id) {
-        return "{%" + id + "%}";
+    private String putId(String ref, String id){
+        return "#{%" + id + "%}";
     }
 }
