@@ -18,8 +18,6 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
-import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
-import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.ResponseEntity;
 
@@ -39,7 +37,7 @@ public interface ConnectorService {
 
     void deleteByInvoker(String invokerName);
 
-    boolean existById(int id);
+    boolean existsById(int id);
 
     boolean existByTitle(String title);
 

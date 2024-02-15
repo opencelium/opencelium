@@ -23,11 +23,8 @@ import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
-import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
@@ -52,7 +49,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Connector", description = "Manages operations related to Connector management")
@@ -151,7 +147,7 @@ public class ConnectorController {
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable int id, @RequestBody ConnectorResource connectorResource) {
 
-        if (!connectorService.existById(id)) {
+        if (!connectorService.existsById(id)) {
             throw new ConnectorNotFoundException(id);
         }
 

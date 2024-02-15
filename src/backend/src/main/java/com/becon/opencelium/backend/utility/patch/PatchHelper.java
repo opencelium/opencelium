@@ -45,8 +45,8 @@ public class PatchHelper {
     private <T> JsonNode applyPatch(JsonPatch patch, T target) {
         try {
             return patch.apply(mapper.valueToTree(target));
-        } catch (JsonPatchException ignored) {
-            return mapper.valueToTree(target);
+        } catch (JsonPatchException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -67,35 +67,9 @@ public class PatchHelper {
         return mapper.convertValue(nodeList, JsonPatch.class);
     }
 
-    public JsonPatch extract(JsonPatch patch, Function<String, Boolean> operation) {
-        JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
-        Iterator<JsonNode> nodes = jsonNode.elements();
-        List<JsonNode> nodeList = new ArrayList<>();
-        while (nodes.hasNext()) {
-            JsonNode next = nodes.next();
-            String path = next.get("path").textValue();
-            if (operation.apply(path))
-                nodeList.add(next);
-        }
-        return mapper.convertValue(nodeList, JsonPatch.class);
-    }
-
     public boolean isEmpty(JsonPatch patch) {
         JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
         return jsonNode.isEmpty();
-    }
-
-    public boolean anyMatchesWithAny(JsonPatch patch, String... args) {
-        JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
-        Iterator<JsonNode> nodes = jsonNode.elements();
-        while (nodes.hasNext()) {
-            JsonNode next = nodes.next();
-            String path = next.get("path").textValue();
-            if (Arrays.stream(args).anyMatch(path::matches)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public PatchConnectionDetails describe(JsonPatch patch) {
