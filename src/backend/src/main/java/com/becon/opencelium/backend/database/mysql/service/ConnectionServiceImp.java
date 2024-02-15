@@ -250,8 +250,8 @@ public class ConnectionServiceImp implements ConnectionService {
             connectionDTOMng.getToConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
         }
 
-        if (connectionDTOMng.getFieldBindings() == null) {
-            connectionDTOMng.setFieldBindings(new ArrayList<>());
+        if (connectionDTOMng.getFieldBinding() == null) {
+            connectionDTOMng.setFieldBinding(new ArrayList<>());
         }
         return connectionDTOMng;
     }

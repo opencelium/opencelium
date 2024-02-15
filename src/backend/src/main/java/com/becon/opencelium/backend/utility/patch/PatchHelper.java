@@ -118,17 +118,17 @@ public class PatchHelper {
                 opDetail.setIndexOfOperator(getIndexOfList(path, 3));
             } else if (path.equals("/fromConnector/operators") || path.equals("/toConnector/operators")) {
                 opDetail.setReplacedOperatorList(true);
-            } else if (path.matches("/fieldBindings/-") || path.matches("/fieldBindings/\\d+")) {
+            } else if (path.matches("/fieldBinding/-") || path.matches("/fieldBinding/\\d+")) {
                 switch (op) {
                     case "add" -> opDetail.setEnhancementAdded(true);
                     case "replace" -> opDetail.setEnhancementReplaced(true);
                     case "remove" -> opDetail.setEnhancementDeleted(true);
                 }
                 opDetail.setIndexOfEnhancement(getIndexOfList(path));
-            } else if (path.matches("/fieldBindings/-/.+") || path.matches("/fieldBindings/\\d+/.+")) {
+            } else if (path.matches("/fieldBinding/-/.+") || path.matches("/fieldBinding/\\d+/.+")) {
                 opDetail.setEnhancementModified(true);
                 opDetail.setIndexOfEnhancement(getIndexOfList(path, 2));
-            } else if (path.equals("/fieldBindings")) {
+            } else if (path.equals("/fieldBinding")) {
                 opDetail.setReplacedEnhancementList(true);
             }
             details.getOpDetails().add(opDetail);

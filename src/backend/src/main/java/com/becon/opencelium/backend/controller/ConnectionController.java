@@ -207,7 +207,7 @@ public class ConnectionController {
                 jsonObject.put("id", id);
                 return ResponseEntity.ok(jsonObject);
             } else if (opDetail.isEnhancementAdded()) {
-                List<FieldBindingDTO> fieldBindings = connectionDTO.getFieldBindings();
+                List<FieldBindingDTO> fieldBindings = connectionDTO.getFieldBinding();
                 String id = fieldBindings.get(patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), fieldBindings.size())).getId();
                 jsonObject.put("id", id);
                 return ResponseEntity.ok(jsonObject);

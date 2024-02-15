@@ -65,8 +65,8 @@ public class ConnectionUpdateTracker {
     }
 
     public void pushAndMakeHistory(ConnectionDTO before, ConnectionDTO after, JsonPatch patch) {
-        if (after.getFieldBindings() == null && before.getFieldBindings().isEmpty()) {
-            before.setFieldBindings(null);
+        if (after.getFieldBinding() == null && before.getFieldBinding().isEmpty()) {
+            before.setFieldBinding(null);
         }
         if (after.getFromConnector() != null
                 && after.getFromConnector().getMethods() == null

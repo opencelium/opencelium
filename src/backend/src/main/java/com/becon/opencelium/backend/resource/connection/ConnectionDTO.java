@@ -34,7 +34,7 @@ public class ConnectionDTO {
     private String icon;
     private ConnectorDTO fromConnector;
     private ConnectorDTO toConnector;
-    private List<FieldBindingDTO> fieldBindings;
+    private List<FieldBindingDTO> fieldBinding;
     private BusinessLayoutResource businessLayout;
 
     public String getId() {
@@ -85,12 +85,12 @@ public class ConnectionDTO {
         this.toConnector = toConnector;
     }
 
-    public List<FieldBindingDTO> getFieldBindings() {
-        return fieldBindings;
+    public List<FieldBindingDTO> getFieldBinding() {
+        return fieldBinding;
     }
 
-    public void setFieldBindings(List<FieldBindingDTO> fieldBinding) {
-        this.fieldBindings = fieldBinding;
+    public void setFieldBinding(List<FieldBindingDTO> fieldBinding) {
+        this.fieldBinding = fieldBinding;
     }
 
     public BusinessLayoutResource getBusinessLayout() {

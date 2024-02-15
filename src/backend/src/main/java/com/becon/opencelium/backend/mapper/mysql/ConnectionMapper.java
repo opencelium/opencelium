@@ -35,7 +35,7 @@ public interface ConnectionMapper extends Mapper<Connection, ConnectionDTO> {
             @Mapping(target = "toConnector", source = "toConnector.connectorId"),
             @Mapping(target = "icon", expression = "java(StringUtility.findImageFromUrl(dto.getIcon()))"),
             @Mapping(target = "enhancements",
-                    expression = "java((dto.getFieldBindings() != null) ? dto.getFieldBindings().stream().map(e -> {Enhancement enh = enhancementMapper.toEntity(e.getEnhancement()); if(enh == null) enh = new Enhancement(); enh.setId(e.getEnhancementId()); return enh;}).toList() : null)"),
+                    expression = "java((dto.getFieldBinding() != null) ? dto.getFieldBinding().stream().map(e -> {Enhancement enh = enhancementMapper.toEntity(e.getEnhancement()); if(enh == null) enh = new Enhancement(); enh.setId(e.getEnhancementId()); return enh;}).toList() : null)"),
             @Mapping(target = "businessLayout",
                     expression = "java((dto.getBusinessLayout() != null) ? new BusinessLayout(dto.getBusinessLayout(), connection) : null)")
     })
@@ -47,7 +47,7 @@ public interface ConnectionMapper extends Mapper<Connection, ConnectionDTO> {
             @Mapping(target = "fromConnector", qualifiedByName = {"helperMapper","getConnectorDTOById"}),
             @Mapping(target = "toConnector", qualifiedByName = {"helperMapper","getConnectorDTOById"}),
             @Mapping(target = "icon", expression = "java(StringUtility.resolveImagePath(entity.getIcon()))"),
-            @Mapping(target = "fieldBindings", source = "enhancements", qualifiedByName = {"helperMapper", "getFieldBindings"}),
+            @Mapping(target = "fieldBinding", source = "enhancements", qualifiedByName = {"helperMapper", "getFieldBindings"}),
             @Mapping(target = "businessLayout", ignore = true)
     })
     ConnectionDTO toDTO(Connection entity);

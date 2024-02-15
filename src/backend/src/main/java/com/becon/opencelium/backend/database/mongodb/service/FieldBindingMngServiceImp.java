@@ -84,8 +84,8 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     @Override
     public void doWithPatchedEnhancement(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails.PatchOperationDetail opDetail) {
         if (opDetail.isEnhancementAdded()) {
-            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), patched.getFieldBindings().size());
-            List<FieldBindingDTO> fieldBindings = patched.getFieldBindings();
+            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), patched.getFieldBinding().size());
+            List<FieldBindingDTO> fieldBindings = patched.getFieldBinding();
             FieldBindingDTO toSave = fieldBindings.get(idx);
             Enhancement enhancement = enhancementMapper.toEntity(toSave.getEnhancement());
             if (enhancement == null) {
@@ -96,60 +96,60 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
             toSave.setEnhancementId(enhancement.getId());
             toSave.setId(null);
             FieldBindingMng saved = save(fieldBindingMngMapper.toEntity(toSave));
-            patched.getFieldBindings().get(idx).setId(saved.getId());
-            patched.getFieldBindings().get(idx).setEnhancementId(saved.getEnhancementId());
+            patched.getFieldBinding().get(idx).setId(saved.getId());
+            patched.getFieldBinding().get(idx).setEnhancementId(saved.getEnhancementId());
         } else if (opDetail.isEnhancementDeleted()) {
-            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), connectionDTO.getFieldBindings().size());
-            FieldBindingDTO fieldBindingDTO = connectionDTO.getFieldBindings().get(idx);
+            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), connectionDTO.getFieldBinding().size());
+            FieldBindingDTO fieldBindingDTO = connectionDTO.getFieldBinding().get(idx);
             enhancementService.deleteById(fieldBindingDTO.getEnhancementId());
             deleteById(fieldBindingDTO.getId());
         } else if (opDetail.isEnhancementModified()) {
-            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), patched.getFieldBindings().size());
-            List<FieldBindingDTO> fieldBindings = patched.getFieldBindings();
+            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), patched.getFieldBinding().size());
+            List<FieldBindingDTO> fieldBindings = patched.getFieldBinding();
             FieldBindingDTO toModify = fieldBindings.get(idx);
             Enhancement enhancement;
             try {
                 enhancement = enhancementService.getById(toModify.getEnhancementId());
             } catch (RuntimeException e) {
-                enhancement = enhancementService.getById(connectionDTO.getFieldBindings().get(idx).getEnhancementId());
+                enhancement = enhancementService.getById(connectionDTO.getFieldBinding().get(idx).getEnhancementId());
                 toModify.setEnhancementId(enhancement.getId());
             }
             try {
                 getById(toModify.getId());
             } catch (RuntimeException e) {
-                toModify.setId(connectionDTO.getFieldBindings().get(idx).getId());
+                toModify.setId(connectionDTO.getFieldBinding().get(idx).getId());
             }
             enhancementMapper.updateEntityFromDto(enhancement, toModify.getEnhancement());
             enhancementService.save(enhancement);
             save(fieldBindingMngMapper.toEntity(toModify));
         } else if (opDetail.isEnhancementReplaced()) {
             //deleting old enhancement
-            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), patched.getFieldBindings().size());
-            FieldBindingDTO fb = connectionDTO.getFieldBindings().get(idx);
+            int idx = patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), patched.getFieldBinding().size());
+            FieldBindingDTO fb = connectionDTO.getFieldBinding().get(idx);
             enhancementService.deleteById(fb.getEnhancementId());
             deleteById(fb.getId());
 
             //saving new enhancement
-            FieldBindingDTO toSave = patched.getFieldBindings().get(idx);
+            FieldBindingDTO toSave = patched.getFieldBinding().get(idx);
             Enhancement enhancement = enhancementMapper.toEntity(toSave.getEnhancement());
             enhancement.setConnection(new Connection(connectionDTO.getConnectionId()));
             enhancementService.save(enhancement);
             toSave.setEnhancementId(enhancement.getId());
             FieldBindingMng saved = save(fieldBindingMngMapper.toEntity(toSave));
-            patched.getFieldBindings().get(idx).setId(saved.getId());
-            patched.getFieldBindings().get(idx).setEnhancementId(saved.getEnhancementId());
+            patched.getFieldBinding().get(idx).setId(saved.getId());
+            patched.getFieldBinding().get(idx).setEnhancementId(saved.getEnhancementId());
         } else {
             //deleting old enhancements
-            if (connectionDTO.getFieldBindings() != null) {
-                connectionDTO.getFieldBindings().forEach(fb -> {
+            if (connectionDTO.getFieldBinding() != null) {
+                connectionDTO.getFieldBinding().forEach(fb -> {
                     enhancementService.deleteById(fb.getEnhancementId());
                     deleteById(fb.getId());
                 });
             }
 
             //saving new enhancements
-            if (patched.getFieldBindings() != null) {
-                patched.getFieldBindings().forEach(fb -> {
+            if (patched.getFieldBinding() != null) {
+                patched.getFieldBinding().forEach(fb -> {
                     Enhancement enhancement = enhancementMapper.toEntity(fb.getEnhancement());
                     enhancement.setConnection(new Connection(patched.getConnectionId()));
                     enhancementService.save(enhancement);
