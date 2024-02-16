@@ -100,13 +100,15 @@ public class ConnectorExecutor {
 
         Operation operation = executionManager.findOperationByColor(operationDTO.getOperationId())
                 .orElseGet(() -> {
-                    Operation newOperation = Operation.fromDTO(operationDTO);
+                    int loopDepth = executionManager.getLoops().size(); // in which depth the operation is executed
+
+                    Operation newOperation = Operation.fromDTO(operationDTO, loopDepth);
                     executionManager.addOperation(newOperation);
 
                     return newOperation;
                 });
 
-        String key = executionManager.generateKey();
+        String key = executionManager.generateKey(operation.getLoopDepth());
 
         operation.addRequest(key, requestEntity);
         operation.addResponse(key, responseEntity);
