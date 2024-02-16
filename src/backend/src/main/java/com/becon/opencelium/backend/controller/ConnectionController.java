@@ -252,6 +252,49 @@ public class ConnectionController {
         return patchUpdate(connectionId, changed);
     }
 
+    @Operation(summary = "Updates a fieldBinding of connection with a patch request")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "FieldBinding has been successfully updated"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PatchMapping(
+            path = {"/{connectionId}/fieldBinding/{id}"},
+            consumes = "application/json-patch+json"
+    )
+    public ResponseEntity<?> patchEnhancement(
+            @PathVariable Long connectionId,
+            @PathVariable String id,
+            @RequestBody JsonPatch patch
+    ) {
+        if (id == null) {
+            throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
+        }
+        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+        if (connectionMng.getFieldBindings() == null) {
+            throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
+        }
+        int index = -1;
+        for (int i = 0; i < connectionMng.getFieldBindings().size(); i++) {
+            if (connectionMng.getFieldBindings().get(i).getId().equals(id)) {
+                index = i;
+                break;
+            }
+        }
+        if (index == -1) {
+            throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
+        } else {
+            String pre = "/fieldBinding/" + index;
+            JsonPatch changed = patchHelper.changeEachPath(patch, p -> pre + p);
+            return patchUpdate(connectionId, changed);
+        }
+    }
+
     @Operation(summary = "Undoes the last update and returns undid connection")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
