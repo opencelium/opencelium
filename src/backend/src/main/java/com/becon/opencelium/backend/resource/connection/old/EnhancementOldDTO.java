@@ -14,14 +14,15 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.resource.connection.binding;
+package com.becon.opencelium.backend.resource.connection.old;
 
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
+import com.becon.opencelium.backend.resource.connection.binding.SimpleCodeDTO;
 import jakarta.annotation.Resource;
 
 
 @Resource
 public class EnhancementOldDTO {
+    private Integer enhanceId;
     private String name;
     private String description;
     private String expertCode;
@@ -87,5 +88,13 @@ public class EnhancementOldDTO {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public Integer getEnhanceId() {
+        return enhanceId;
+    }
+
+    public void setEnhanceId(Integer enhanceId) {
+        this.enhanceId = enhanceId;
     }
 }

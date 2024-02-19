@@ -46,7 +46,7 @@ public interface ConnectionService {
 
     List<Connection> findAllByNameContains(String name);
 
-    ConnectionMng update(Connection connection, ConnectionMng connectionMng);
+    void update(Connection connection, ConnectionMng connectionMng);
 
     Connection getById(Long connectionId);
 
@@ -60,4 +60,5 @@ public interface ConnectionService {
 
     void patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details);
 
+    List<ConnectionDTO> getAllFullConnection();
 }

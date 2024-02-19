@@ -14,17 +14,17 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.resource.connection.binding;
+package com.becon.opencelium.backend.resource.connection.old;
 
 
+import com.becon.opencelium.backend.resource.connection.binding.LinkedFieldDTO;
 import jakarta.annotation.Resource;
 
 import java.util.List;
 
 @Resource
 public class FieldBindingOldDTO {
-    private String id;
-    private Integer enhancementId;
+    private String nodeId;
     private List<LinkedFieldDTO> from;
     private EnhancementOldDTO enhancement;
     private List<LinkedFieldDTO> to;
@@ -53,20 +53,11 @@ public class FieldBindingOldDTO {
         this.to = to;
     }
 
-
-    public Integer getEnhancementId() {
-        return enhancementId;
+    public String getNodeId() {
+        return nodeId;
     }
 
-    public void setEnhancementId(Integer enhancementId) {
-        this.enhancementId = enhancementId;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 }

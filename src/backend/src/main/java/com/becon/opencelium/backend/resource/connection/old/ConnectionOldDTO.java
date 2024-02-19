@@ -14,10 +14,10 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.resource.connection;
+package com.becon.opencelium.backend.resource.connection.old;
 
 import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingOldDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
 
@@ -27,22 +27,22 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConnectionOldDTO {
 
-    private String id; // id generated in mongo
+    private String nodeId; // id generated in mongo
     private Long connectionId; // id generated in mariadb.
     private String title;
     private String description;
     private String icon;
-    private ConnectorDTO fromConnector;
-    private ConnectorDTO toConnector;
+    private ConnectorOldDTO fromConnector;
+    private ConnectorOldDTO toConnector;
     private List<FieldBindingOldDTO> fieldBinding;
     private BusinessLayoutResource businessLayout;
 
-    public String getId() {
-        return id;
+    public String getNodeId() {
+        return nodeId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 
     public Long getConnectionId() {
@@ -69,19 +69,19 @@ public class ConnectionOldDTO {
         this.description = description;
     }
 
-    public ConnectorDTO getFromConnector() {
+    public ConnectorOldDTO getFromConnector() {
         return fromConnector;
     }
 
-    public void setFromConnector(ConnectorDTO fromConnector) {
+    public void setFromConnector(ConnectorOldDTO fromConnector) {
         this.fromConnector = fromConnector;
     }
 
-    public ConnectorDTO getToConnector() {
+    public ConnectorOldDTO getToConnector() {
         return toConnector;
     }
 
-    public void setToConnector(ConnectorDTO toConnector) {
+    public void setToConnector(ConnectorOldDTO toConnector) {
         this.toConnector = toConnector;
     }
 

@@ -164,10 +164,28 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     @Override
     public void bind(ConnectionMng connectionMng) {
         List<FieldBindingMng> fieldBindings = connectionMng.getFieldBindings();
+        if(fieldBindings == null || fieldBindings.isEmpty()){
+            return;
+        }
         ArrayList<MethodMng> methods = new ArrayList<>();
-        methods.addAll(connectionMng.getFromConnector().getMethods());
-        methods.addAll(connectionMng.getToConnector().getMethods());
+        if (connectionMng.getFromConnector() != null && connectionMng.getFromConnector().getMethods() != null) {
+            methods.addAll(connectionMng.getFromConnector().getMethods());
+        }
+        if (connectionMng.getToConnector() != null && connectionMng.getToConnector().getMethods() != null) {
+            methods.addAll(connectionMng.getToConnector().getMethods());
+        }
 
+        for (FieldBindingMng fb : fieldBindings) {
+            FieldBindingMng savedFB = save(fb);
+            bindIds(savedFB, methods);
+        }
+    }
+
+    @Override
+    public void bind(List<FieldBindingMng> fieldBindings, List<MethodMng> methods) {
+        if(fieldBindings == null || fieldBindings.isEmpty()){
+            return;
+        }
         for (FieldBindingMng fb : fieldBindings) {
             FieldBindingMng savedFB = save(fb);
             bindIds(savedFB, methods);
@@ -273,7 +291,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         return resultMap;
     }
 
-    private String putId(String ref, String id){
+    private String putId(String ref, String id) {
         return "#{%" + id + "%}";
     }
 }
