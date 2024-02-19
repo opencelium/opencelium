@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.FieldBindingRepository;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
@@ -10,6 +11,7 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
@@ -22,6 +24,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     private final FieldBindingRepository fieldBindingRepository;
     private final MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper;
     private final Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMngMapper;
+    private final MapperUpdatable<MethodMng, MethodDTO> methodMngMapper;
     private final EnhancementService enhancementService;
     private final PatchHelper patchHelper;
 
@@ -30,11 +33,13 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
             EnhancementServiceImp enhancementService,
             MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
             Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMngMapper,
+            MapperUpdatable<MethodMng, MethodDTO> methodMngMapper,
             PatchHelper patchHelper) {
         this.fieldBindingRepository = fieldBindingRepository;
         this.enhancementMapper = enhancementMapper;
         this.fieldBindingMngMapper = fieldBindingMngMapper;
         this.enhancementService = enhancementService;
+        this.methodMngMapper = methodMngMapper;
         this.patchHelper = patchHelper;
     }
 
@@ -164,7 +169,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     @Override
     public void bind(ConnectionMng connectionMng) {
         List<FieldBindingMng> fieldBindings = connectionMng.getFieldBindings();
-        if(fieldBindings == null || fieldBindings.isEmpty()){
+        if (fieldBindings == null || fieldBindings.isEmpty()) {
             return;
         }
         ArrayList<MethodMng> methods = new ArrayList<>();
@@ -183,13 +188,101 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
 
     @Override
     public void bind(List<FieldBindingMng> fieldBindings, List<MethodMng> methods) {
-        if(fieldBindings == null || fieldBindings.isEmpty()){
+        if (fieldBindings == null || fieldBindings.isEmpty()) {
             return;
         }
         for (FieldBindingMng fb : fieldBindings) {
             FieldBindingMng savedFB = save(fb);
             bindIds(savedFB, methods);
         }
+    }
+
+    @Override
+    public void detach(ConnectionDTO connectionDTO) {
+        List<MethodDTO> methods = new ArrayList<>();
+        if (connectionDTO.getFromConnector() != null && connectionDTO.getFromConnector().getMethods() != null) {
+            methods.addAll(connectionDTO.getFromConnector().getMethods());
+        }
+        if (connectionDTO.getToConnector() != null && connectionDTO.getToConnector().getMethods() != null) {
+            methods.addAll(connectionDTO.getToConnector().getMethods());
+        }
+        List<FieldBindingMng> fbMngs = fieldBindingMngMapper.toEntityAll(connectionDTO.getFieldBinding());
+        List<MethodMng> methodMngs = methodMngMapper.toEntityAll(methods);
+        detach(methodMngs, fbMngs);
+        for (int i = 0; i < methods.size(); i++) {
+            methodMngMapper.updateDtoFromEntity(methods.get(i), methodMngs.get(i));
+        }
+    }
+
+    @Override
+    public void detach(List<MethodMng> methods, List<FieldBindingMng> fbs) {
+        for (MethodMng method : methods) {
+            if (method != null) {
+                if (method.getRequest() != null && method.getRequest().getBody() != null) {
+                    Map<String, Object> fields = method.getRequest().getBody().getFields();
+                    for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                        entry.setValue(findRefAndReplace(entry.getValue(), fbs));
+                    }
+                }
+                if (method.getResponse() != null && method.getResponse() != null) {
+                    if (method.getResponse().getFail() != null && method.getResponse().getFail().getBody() != null) {
+                        Map<String, Object> fields = method.getResponse().getFail().getBody().getFields();
+                        for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                            entry.setValue(findRefAndReplace(entry.getValue(), fbs));
+                        }
+                    }
+                    if (method.getResponse().getSuccess() != null && method.getResponse().getSuccess().getBody() != null) {
+                        Map<String, Object> fields = method.getResponse().getSuccess().getBody().getFields();
+                        for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                            entry.setValue(findRefAndReplace(entry.getValue(), fbs));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private Object findRefAndReplace(Object obj, List<FieldBindingMng> fieldBinding) {
+        if (obj instanceof String str) {
+            if (str.matches(RegExpression.enhancement)) {
+                String id = str.replace("#{%", "")
+                        .replace("%}", "");
+
+                obj = getRefOfFB(id, fieldBinding);
+            }
+        } else if (obj instanceof List<?> list) {
+            List<Object> objects = new ArrayList<>();
+            for (Object o : list) {
+                objects.add(findRefAndReplace(o, fieldBinding));
+            }
+            obj = objects;
+        } else if (obj instanceof Map<?, ?> map) {
+            Map<String, Object> res = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                res.put((String) entry.getKey(), findRefAndReplace(entry.getValue(), fieldBinding));
+            }
+            obj = res;
+        }
+        return obj;
+    }
+
+    private String getRefOfFB(String id, List<FieldBindingMng> fieldBinding) {
+        for (FieldBindingMng fb : fieldBinding) {
+            if (fb.getId().equals(id)) {
+                StringBuilder sb = new StringBuilder();
+                for (LinkedFieldMng from : fb.getFrom()) {
+                    sb.append(from.getColor())
+                            .append(".(")
+                            .append(from.getType())
+                            .append(").")
+                            .append(from.getField())
+                            .append(" ");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                return sb.toString();
+            }
+        }
+        throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
     }
 
     @SuppressWarnings("unchecked")
@@ -247,7 +340,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
 
     @SuppressWarnings("unchecked")
     private Object process(Object value, List<String> fieldPaths, String id) {
-        if (fieldPaths.size() == 0) {
+        if (fieldPaths.isEmpty()) {
             String stringVal = (String) value;
             return putId(stringVal, id);
         }

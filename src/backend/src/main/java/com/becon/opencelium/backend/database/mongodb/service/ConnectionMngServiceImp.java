@@ -79,25 +79,52 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             if (connectionMng.getFromConnector().getMethods() != null) {
                 methodMngService.saveAll(connectionMng.getFromConnector().getMethods());
                 compareMethodsAndDeleteOlds(old.getFromConnector().getMethods(), connectionMng.getFromConnector().getMethods());
+            } else if (old.getFromConnector() != null && old.getFromConnector().getMethods() != null) {
+                methodMngService.deleteAll(old.getFromConnector().getMethods());
             }
+
             if (connectionMng.getFromConnector().getOperators() != null) {
                 operatorMngService.saveAll(connectionMng.getFromConnector().getOperators());
                 compareOperatorsAndDeleteOlds(old.getFromConnector().getOperators(), connectionMng.getFromConnector().getOperators());
+            } else if (old.getFromConnector() != null && old.getFromConnector().getOperators() != null) {
+                operatorMngService.deleteAll(old.getFromConnector().getOperators());
+            }
+        } else if (old.getFromConnector() != null) {
+            if (old.getFromConnector().getMethods() != null) {
+                methodMngService.deleteAll(old.getFromConnector().getMethods());
+            }
+            if(old.getFromConnector().getOperators()!=null){
+                operatorMngService.deleteAll(old.getFromConnector().getOperators());
             }
         }
+
         if (connectionMng.getToConnector() != null) {
             if (connectionMng.getToConnector().getMethods() != null) {
                 methodMngService.saveAll(connectionMng.getToConnector().getMethods());
                 compareMethodsAndDeleteOlds(old.getToConnector().getMethods(), connectionMng.getToConnector().getMethods());
+            } else if (old.getToConnector() != null && old.getToConnector().getMethods() != null) {
+                methodMngService.deleteAll(old.getToConnector().getMethods());
             }
             if (connectionMng.getToConnector().getOperators() != null) {
                 operatorMngService.saveAll(connectionMng.getToConnector().getOperators());
                 compareOperatorsAndDeleteOlds(old.getToConnector().getOperators(), connectionMng.getToConnector().getOperators());
+            } else if (old.getToConnector() != null && old.getToConnector().getOperators() != null) {
+                operatorMngService.deleteAll(old.getToConnector().getOperators());
+            }
+        }else if (old.getToConnector() != null) {
+            if (old.getToConnector().getMethods() != null) {
+                methodMngService.deleteAll(old.getToConnector().getMethods());
+            }
+            if(old.getToConnector().getOperators()!=null){
+                operatorMngService.deleteAll(old.getToConnector().getOperators());
             }
         }
+
         if (connectionMng.getFieldBindings() != null && !connectionMng.getFieldBindings().isEmpty()) {
             fieldBindingMngService.saveAll(connectionMng.getFieldBindings());
             compareFieldBindingsAndDeleteOlds(old.getFieldBindings(), connectionMng.getFieldBindings());
+        } else if (old.getFieldBindings() != null) {
+            fieldBindingMngService.deleteAll(old.getFieldBindings());
         }
         connectionMngRepository.save(connectionMng);
     }
@@ -188,7 +215,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         if (olds != null) {
             for (MethodMng method : olds) {
                 news.stream()
-                        .filter((m) -> (m.getId().equals(method.getId())))
+                        .filter((m) -> m.getId().equals(method.getId()))
                         .findAny()
                         .ifPresentOrElse((m) -> {
                         }, () -> methodMngService.delete(method));

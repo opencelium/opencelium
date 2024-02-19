@@ -124,14 +124,25 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(Connection connection, ConnectionMng connectionMng) {
+        getById(connection.getId());
+
+        ConnectionMng oldMng = connectionMngService.getByConnectionId(connection.getId());
+        if (connectionMng.getId() == null || !oldMng.getId().equals(connectionMng.getId())) {
+            connectionMng.setId(oldMng.getId());
+        }
+
         //checking existence of connectors
         connectorService.getById(connection.getToConnector());
         connectorService.getById(connection.getFromConnector());
 
-        List<FieldBindingMng> newFieldBindings = extractNewEnhancements(connectionMng);
+        List<FieldBindingMng> newFieldBindings = getNewEnhancements(oldMng, connectionMng);
+        List<FieldBindingMng> fieldBindingsToDelete = getEnhancementsToDelete(oldMng, connectionMng);
         List<MethodMng> allMethods = mergeAllMethods(connectionMng);
 
-        //bind fields
+        //detach ids from fields
+        fieldBindingMngService.detach(allMethods, fieldBindingsToDelete);
+
+        //bind ids to fields
         fieldBindingMngService.bind(newFieldBindings, allMethods);
 
         List<Enhancement> enhancements = connection.getEnhancements();
@@ -283,6 +294,7 @@ public class ConnectionServiceImp implements ConnectionService {
         if (connectionDTOMng.getFieldBinding() == null) {
             connectionDTOMng.setFieldBinding(new ArrayList<>());
         }
+        fieldBindingMngService.detach(connectionDTO);
         return connectionDTOMng;
     }
 
@@ -297,11 +309,10 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
 
-
-
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
+
     private ConnectionDTO patchUpdateInternal(ConnectionDTO connectionDTO, JsonPatch patch, PatchConnectionDetails details) {
         ConnectionDTO patched = patchHelper.patch(patch, connectionDTO, ConnectionDTO.class);
 
@@ -358,12 +369,14 @@ public class ConnectionServiceImp implements ConnectionService {
         return methods;
     }
 
-    private List<FieldBindingMng> extractNewEnhancements(ConnectionMng connectionMng) {
-        ConnectionMng old = connectionMngService.getByConnectionId(connectionMng.getConnectionId());
+    private List<FieldBindingMng> getNewEnhancements(ConnectionMng old, ConnectionMng connectionMng) {
 
         ArrayList<FieldBindingMng> list = new ArrayList<>();
 
         if (connectionMng.getFieldBindings() != null) {
+            if(old.getFieldBindings() == null){
+                return connectionMng.getFieldBindings();
+            }
             for (FieldBindingMng fieldBinding : connectionMng.getFieldBindings()) {
                 if (fieldBinding.getId() == null) {
                     list.add(fieldBinding);
@@ -373,8 +386,25 @@ public class ConnectionServiceImp implements ConnectionService {
                             .findAny()
                             .ifPresentOrElse((f) -> {
                             }, () -> {
+                                fieldBinding.setId(null);
                                 list.add(fieldBinding);
                             });
+                }
+            }
+        }
+        return list;
+    }
+
+    private List<FieldBindingMng> getEnhancementsToDelete(ConnectionMng old, ConnectionMng connectionMng) {
+        List<FieldBindingMng> list = new ArrayList<>();
+        if (old.getFieldBindings() != null) {
+            for (FieldBindingMng fb : old.getFieldBindings()) {
+                if (connectionMng.getFieldBindings() != null) {
+                    connectionMng.getFieldBindings().stream()
+                            .filter((f) -> (f.getId().equals(fb.getId())))
+                            .findAny()
+                            .ifPresentOrElse((f) -> {
+                            }, () -> list.add(fb));
                 }
             }
         }
