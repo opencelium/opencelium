@@ -11,4 +11,8 @@ public interface Extractor {
     Extractor setRequestData(List<RequestData> requestData);
     Extractor setFunctions(List<FunctionInvoker> functionInvokerList);
     Optional<String> getValue(String fieldName);
+
+    default Extractor disableSslValidation(boolean isDisabled) {
+        return this;
+    }
 }
