@@ -22,6 +22,7 @@ import {permission} from "@entity/application/utils/permission";
 import {ConnectionForm} from "@entity/connection/components/components/content/connections/ConnectionForm";
 import {useNavigate, useParams} from "react-router";
 import {ConnectionPermissions} from "@entity/connection/constants";
+import {setCurrentConnection} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 
 const connectionPrefixURL = '/connections';
@@ -41,7 +42,7 @@ function mapStateToProps(state){
 /**
  * Component to View Connection
  */
-@connect(mapStateToProps, {fetchConnection, })
+@connect(mapStateToProps, {fetchConnection, setCurrentConnection})
 @permission(ConnectionPermissions.READ, true)
 @withTranslation(['connections', 'app'])
 @ConnectionForm('view')
