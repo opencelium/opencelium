@@ -23,13 +23,11 @@ import {graphQLLogin} from "../action_creators/GraphQLCreators";
 export interface GraphQLState extends ICommonState{
     authStatus: string,
     accessToken: string,
-    refreshToken: string,
     logining: API_REQUEST_STATE,
 }
 const initialState: GraphQLState = {
     authStatus: '',
     accessToken: '',
-    refreshToken: '',
     logining: API_REQUEST_STATE.INITIAL,
     ...CommonState,
 }
@@ -42,12 +40,11 @@ export const graphQLSlice = createSlice({
         [graphQLLogin.pending.type]: (state, action: PayloadAction<any>) => {
             state.logining = API_REQUEST_STATE.START;
         },
-        [graphQLLogin.fulfilled.type]: (state, action: PayloadAction<any>) => {
+        [graphQLLogin.fulfilled.type]: (state, action: PayloadAction<string>) => {
+            console.log(action.payload);
             state.logining = API_REQUEST_STATE.FINISH;
             state.error = null;
-            state.accessToken = action.payload.data.authentication.login.accessToken;
-            state.refreshToken = action.payload.data.authentication.login.refreshToken;
-            state.authStatus = action.payload.data.authentication.login.status;
+            state.accessToken = action.payload;
         },
         [graphQLLogin.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.logining = API_REQUEST_STATE.ERROR;

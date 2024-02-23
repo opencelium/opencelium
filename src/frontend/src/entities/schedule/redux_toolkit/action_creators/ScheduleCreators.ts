@@ -50,6 +50,19 @@ export const switchScheduleStatus = createAsyncThunk(
     }
 )
 
+export const switchScheduleLogsStatus = createAsyncThunk(
+    'schedule/update',
+    async(schedule: ModelSchedule, thunkAPI) => {
+        try {
+            const updateScheduleRequest = new ScheduleRequest({endpoint: `/${schedule.schedulerId}`});
+            await updateScheduleRequest.updateSchedule(schedule);
+            return schedule;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const startSchedule = createAsyncThunk(
     'schedule/start',
     async(schedule: ModelSchedule, thunkAPI) => {
@@ -294,6 +307,7 @@ export const deleteSchedulesById = createAsyncThunk(
 export default {
     checkScheduleTitle,
     switchScheduleStatus,
+    switchScheduleLogsStatus,
     startSchedule,
     startTestSchedule,
     startSchedules,

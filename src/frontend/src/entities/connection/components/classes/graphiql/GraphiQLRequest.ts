@@ -13,21 +13,20 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {FetcherParams} from "@graphiql/toolkit/src/create-fetcher/types";
+
+import {AxiosResponse} from "axios";
+import {RemoteApiResponseProps} from "@application/requests/interfaces/IApplication";
+import { GraphQLRequestProps } from "@entity/connection/requests/interfaces/IGraphQL";
 
 
+export default class GraphiQLRequest{
 
-export interface GraphQLLoginProps{
-    requestData: any,
-    authType: 'basic' | 'token',
-    sslOn: boolean,
-}
+    async login(connector: any): Promise<string>{
+        throw new Error('login method must be implemented');
+    }
 
-export interface GraphQLRequestProps extends FetcherParams{
-    url: string,
-    accessToken: string,
-    sslOn: boolean,
-}
-export interface GraphQLLoginResponseProps{
+    async query(data: GraphQLRequestProps): Promise<AxiosResponse<RemoteApiResponseProps>>{
+        throw new Error('query method must be implemented');
+    }
 
 }
