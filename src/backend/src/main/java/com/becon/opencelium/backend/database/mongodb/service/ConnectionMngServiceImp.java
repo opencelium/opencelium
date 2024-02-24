@@ -93,7 +93,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             if (old.getFromConnector().getMethods() != null) {
                 methodMngService.deleteAll(old.getFromConnector().getMethods());
             }
-            if(old.getFromConnector().getOperators()!=null){
+            if (old.getFromConnector().getOperators() != null) {
                 operatorMngService.deleteAll(old.getFromConnector().getOperators());
             }
         }
@@ -111,11 +111,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             } else if (old.getToConnector() != null && old.getToConnector().getOperators() != null) {
                 operatorMngService.deleteAll(old.getToConnector().getOperators());
             }
-        }else if (old.getToConnector() != null) {
+        } else if (old.getToConnector() != null) {
             if (old.getToConnector().getMethods() != null) {
                 methodMngService.deleteAll(old.getToConnector().getMethods());
             }
-            if(old.getToConnector().getOperators()!=null){
+            if (old.getToConnector().getOperators() != null) {
                 operatorMngService.deleteAll(old.getToConnector().getOperators());
             }
         }

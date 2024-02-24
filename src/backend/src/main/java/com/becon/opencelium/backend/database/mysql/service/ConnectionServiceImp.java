@@ -374,7 +374,7 @@ public class ConnectionServiceImp implements ConnectionService {
         ArrayList<FieldBindingMng> list = new ArrayList<>();
 
         if (connectionMng.getFieldBindings() != null) {
-            if(old.getFieldBindings() == null){
+            if (old.getFieldBindings() == null) {
                 return connectionMng.getFieldBindings();
             }
             for (FieldBindingMng fieldBinding : connectionMng.getFieldBindings()) {

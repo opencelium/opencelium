@@ -166,41 +166,32 @@ public class InvokerServiceImp implements InvokerService {
     }
 
     @Override
-    public DataType findFieldType(String invokerName, String methodName, String path) {
-
-        String exchangeType = ConditionUtility.getExchangeType(path);
-        String result = ConditionUtility.getResult(path);
+    public DataType findFieldType(String invokerName, String methodName, LinkedList<String> hierarchy) {
 
         Invoker invoker = findByName(invokerName);
 
-        Optional<FunctionInvoker> functionInvokerOp = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))
+        Optional<FunctionInvoker> functionInvokerOp = invoker
+                .getOperations()
+                .stream()
+                .filter(o -> o.getName().equals(methodName))
                 .findFirst();
-        if (functionInvokerOp.isEmpty()){
+
+        if (functionInvokerOp.isEmpty()) {
             return null;
         }
         FunctionInvoker functionInvoker = functionInvokerOp.get();
 
-        Map<String, Object> fields;
-        if (exchangeType.equals("response") && result.equals("success")) {
-            fields = functionInvoker.getResponse().getSuccess().getBody().getFields();
-        } else if (exchangeType.equals("response") && result.equals("fail")) {
-            fields = functionInvoker.getResponse().getFail().getBody().getFields();
-        } else {
-            fields = functionInvoker.getRequest().getBody().getFields();
-        }
+        Map<String, Object> fields = functionInvoker.getRequest().getBody().getFields();
 
-        String[] parts = ConditionUtility.getRefValue(path).split("\\.");
-        ConditionUtility.eraseArrayBrackets(parts);
-
-        return findFieldType(fields, Arrays.stream(parts).collect(Collectors.toList()));
+        return findFieldType(fields, hierarchy);
     }
 
-    private DataType findFieldType(Object field, List<String> pathParts) {
+    private DataType findFieldType(Object field, LinkedList<String> hierarchy) {
 
         if (field == null) {
             return null;
         }
-        if (pathParts.size() == 1) {
+        if (hierarchy.isEmpty()) {
             if (field instanceof Map<?, ?>) {
                 return DataType.OBJECT;
             }
@@ -222,24 +213,20 @@ public class InvokerServiceImp implements InvokerService {
         }
 
         if (field instanceof Map<?, ?> map) {
-            if (!map.containsKey(pathParts.get(0))) {
-                throw new RuntimeException("Field path is incorrect");
+            if (!map.containsKey(hierarchy.getFirst())) {
+                throw new RuntimeException("Field path is incorrect : " + hierarchy.getFirst());
             }
-            Object obj = map.get(pathParts.get(0));
-            pathParts.remove(0);
-            return findFieldType(obj, pathParts);
+            Object obj = map.get(hierarchy.pollFirst());
+            return findFieldType(obj, hierarchy);
         }
 
         if (field instanceof List<?> list) {
             int index;
-            try {
-                index = Integer.parseInt(pathParts.get(0));
-            } catch (NumberFormatException e) {
-                index = 0;
-            }
+            String idx = hierarchy.pollFirst();
+            idx = idx.replaceAll("[\\[|\\]]", "");
+            index = Integer.parseInt(idx);
             Object obj = list.get(index);
-            pathParts.remove(0);
-            return findFieldType(obj, pathParts);
+            return findFieldType(obj, hierarchy);
         }
         return DataType.OBJECT;
     }
