@@ -2,8 +2,10 @@ package com.becon.opencelium.backend.mapper.mongo;
 
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 
@@ -18,7 +20,7 @@ import java.util.List;
         }
 )
 @Named("methodMngMapper")
-public interface MethodMngMapper extends Mapper<MethodMng, MethodDTO> {
+public interface MethodMngMapper extends MapperUpdatable<MethodMng, MethodDTO> {
 
     @Named("toEntity")
     @Mappings({
@@ -33,13 +35,24 @@ public interface MethodMngMapper extends Mapper<MethodMng, MethodDTO> {
     })
     MethodDTO toDTO(MethodMng methodMng);
 
+    @Override
+    default void updateEntityFromDto(MethodMng entity, MethodDTO dto){
+    }
+
+    @Override
+    @Mappings({
+            @Mapping(target = "request", qualifiedByName = {"requestMngMapper", "toDTO"}),
+            @Mapping(target = "response", qualifiedByName = {"responseMngMapper", "toDTO"})
+    })
+    void updateDtoFromEntity(@MappingTarget MethodDTO dto, MethodMng entity);
+
     @Named("toEntityAll")
     default List<MethodMng> toEntityAll(List<MethodDTO> dtos) {
-        return Mapper.super.toEntityAll(dtos);
+        return MapperUpdatable.super.toEntityAll(dtos);
     }
 
     @Named("toDTOAll")
     default List<MethodDTO> toDTOAll(List<MethodMng> entities) {
-        return Mapper.super.toDTOAll(entities);
+        return MapperUpdatable.super.toDTOAll(entities);
     }
 }

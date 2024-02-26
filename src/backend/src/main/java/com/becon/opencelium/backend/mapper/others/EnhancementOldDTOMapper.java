@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.mapper.others;
 
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
-import com.becon.opencelium.backend.resource.connection.binding.EnhancementOldDTO;
+import com.becon.opencelium.backend.resource.connection.old.EnhancementOldDTO;
 import org.mapstruct.*;
 
 @org.mapstruct.Mapper(

@@ -19,6 +19,8 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
 import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
@@ -106,21 +108,60 @@ public class ConnectionServiceImp implements ConnectionService {
         Connection savedConnection = connectionRepository.save(connection);
 
         //saving enhancements
-        enhancements.forEach(enhancement -> enhancement.setConnection(savedConnection));
-        enhancementService.saveAll(enhancements);
-        for (int i = 0; i < connectionMng.getFieldBindings().size(); i++) {
-            connectionMng.getFieldBindings().get(i).setEnhancementId(enhancements.get(i).getId());
+        if (enhancements != null && !enhancements.isEmpty()) {
+            enhancements.forEach(enhancement -> enhancement.setConnection(savedConnection));
+            enhancementService.saveAll(enhancements);
+            for (int i = 0; i < connectionMng.getFieldBindings().size(); i++) {
+                connectionMng.getFieldBindings().get(i).setEnhancementId(enhancements.get(i).getId());
+            }
         }
+
         //saving connectionMng
         connectionMng.setConnectionId(savedConnection.getId());
         return connectionMngService.save(connectionMng);
     }
 
     @Override
-    public ConnectionMng update(Connection connection, ConnectionMng uConnectionMng) {
+    @Transactional(rollbackFor = Exception.class)
+    public void update(Connection connection, ConnectionMng connectionMng) {
         getById(connection.getId());
-        connectionMngService.getByConnectionId(connection.getId());
-        return save(connection, uConnectionMng);
+
+        ConnectionMng oldMng = connectionMngService.getByConnectionId(connection.getId());
+        if (connectionMng.getId() == null || !oldMng.getId().equals(connectionMng.getId())) {
+            connectionMng.setId(oldMng.getId());
+        }
+
+        //checking existence of connectors
+        connectorService.getById(connection.getToConnector());
+        connectorService.getById(connection.getFromConnector());
+
+        List<FieldBindingMng> newFieldBindings = getNewEnhancements(oldMng, connectionMng);
+        List<FieldBindingMng> fieldBindingsToDelete = getEnhancementsToDelete(oldMng, connectionMng);
+        List<MethodMng> allMethods = mergeAllMethods(connectionMng);
+
+        //detach ids from fields
+        fieldBindingMngService.detach(allMethods, fieldBindingsToDelete);
+
+        //bind ids to fields
+        fieldBindingMngService.bind(newFieldBindings, allMethods);
+
+        List<Enhancement> enhancements = connection.getEnhancements();
+        connection.setEnhancements(null);
+
+        //saving connection
+        Connection savedConnection = connectionRepository.save(connection);
+
+        //saving enhancements
+        if (enhancements != null && !enhancements.isEmpty()) {
+            enhancements.forEach(enhancement -> enhancement.setConnection(savedConnection));
+            enhancementService.saveAll(enhancements);
+            for (int i = 0; i < connectionMng.getFieldBindings().size(); i++) {
+                connectionMng.getFieldBindings().get(i).setEnhancementId(enhancements.get(i).getId());
+            }
+        }
+
+        connectionMng.setConnectionId(savedConnection.getId());
+        connectionMngService.update(connectionMng);
     }
 
     @Override
@@ -253,14 +294,24 @@ public class ConnectionServiceImp implements ConnectionService {
         if (connectionDTOMng.getFieldBinding() == null) {
             connectionDTOMng.setFieldBinding(new ArrayList<>());
         }
+        fieldBindingMngService.detach(connectionDTO);
         return connectionDTOMng;
+    }
+
+    @Override
+    public List<ConnectionDTO> getAllFullConnection() {
+        List<Connection> all = connectionRepository.findAll();
+        List<ConnectionDTO> res = new ArrayList<>();
+        for (Connection connection : all) {
+            res.add(getFullConnection(connection.getId()));
+        }
+        return res;
     }
 
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
-
 
     private ConnectionDTO patchUpdateInternal(ConnectionDTO connectionDTO, JsonPatch patch, PatchConnectionDetails details) {
         ConnectionDTO patched = patchHelper.patch(patch, connectionDTO, ConnectionDTO.class);
@@ -305,5 +356,58 @@ public class ConnectionServiceImp implements ConnectionService {
         connectorDTO.setInvoker(null);
         connectorDTO.setTimeout(0);
         connectorDTO.setBusinessLayout(null);
+    }
+
+    private List<MethodMng> mergeAllMethods(ConnectionMng connectionMng) {
+        List<MethodMng> methods = new ArrayList<>();
+        if (connectionMng.getFromConnector() != null && connectionMng.getFromConnector().getMethods() != null) {
+            methods.addAll(connectionMng.getFromConnector().getMethods());
+        }
+        if (connectionMng.getToConnector() != null && connectionMng.getToConnector().getMethods() != null) {
+            methods.addAll(connectionMng.getToConnector().getMethods());
+        }
+        return methods;
+    }
+
+    private List<FieldBindingMng> getNewEnhancements(ConnectionMng old, ConnectionMng connectionMng) {
+
+        ArrayList<FieldBindingMng> list = new ArrayList<>();
+
+        if (connectionMng.getFieldBindings() != null) {
+            if (old.getFieldBindings() == null) {
+                return connectionMng.getFieldBindings();
+            }
+            for (FieldBindingMng fieldBinding : connectionMng.getFieldBindings()) {
+                if (fieldBinding.getId() == null) {
+                    list.add(fieldBinding);
+                } else {
+                    old.getFieldBindings().stream()
+                            .filter(fb -> fb.getId().equals(fieldBinding.getId()))
+                            .findAny()
+                            .ifPresentOrElse((f) -> {
+                            }, () -> {
+                                fieldBinding.setId(null);
+                                list.add(fieldBinding);
+                            });
+                }
+            }
+        }
+        return list;
+    }
+
+    private List<FieldBindingMng> getEnhancementsToDelete(ConnectionMng old, ConnectionMng connectionMng) {
+        List<FieldBindingMng> list = new ArrayList<>();
+        if (old.getFieldBindings() != null) {
+            for (FieldBindingMng fb : old.getFieldBindings()) {
+                if (connectionMng.getFieldBindings() != null) {
+                    connectionMng.getFieldBindings().stream()
+                            .filter((f) -> (f.getId().equals(fb.getId())))
+                            .findAny()
+                            .ifPresentOrElse((f) -> {
+                            }, () -> list.add(fb));
+                }
+            }
+        }
+        return list;
     }
 }

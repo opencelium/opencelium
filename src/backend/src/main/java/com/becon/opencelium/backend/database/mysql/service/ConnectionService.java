@@ -42,11 +42,12 @@ public interface ConnectionService {
     boolean existsByName(String name);
 
     boolean existsById(Long id);
+
     List<Connection> findAllByConnectorId(int connectorId);
 
     List<Connection> findAllByNameContains(String name);
 
-    ConnectionMng update(Connection connection, ConnectionMng connectionMng);
+    void update(Connection connection, ConnectionMng connectionMng);
 
     Connection getById(Long connectionId);
 
@@ -54,10 +55,11 @@ public interface ConnectionService {
 
     void undo(Long connectionId);
 
-    ConnectionDTO getFullConnection(Long connectionId);
-
     List<Connection> getAllConnectionsNotContains(List<Long> ids);
 
     void patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details);
 
+    ConnectionDTO getFullConnection(Long connectionId);
+
+    List<ConnectionDTO> getAllFullConnection();
 }

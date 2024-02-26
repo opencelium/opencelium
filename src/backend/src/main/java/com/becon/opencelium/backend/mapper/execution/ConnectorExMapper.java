@@ -24,7 +24,7 @@ public class ConnectorExMapper {
         this.operatorExMapper = operatorExMapper;
     }
 
-    ConnectorEx toEntity(ConnectorMng dto, Long connectionId){
+    ConnectorEx toEntity(ConnectorMng dto, Long connectionId) {
         Connector connector = connectorService.getById(dto.getConnectorId());
         ConnectorEx connectorEx = new ConnectorEx();
 
@@ -37,7 +37,7 @@ public class ConnectorExMapper {
         connectorEx.setRequiredData(map);
 
         connectorEx.setId(dto.getConnectorId());
-        connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(),connector.getInvoker(), connectionId));
+        connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(), connectionId));
         connectorEx.setOperators(operatorExMapper.toEntityAll(dto.getOperators()));
         return connectorEx;
     }

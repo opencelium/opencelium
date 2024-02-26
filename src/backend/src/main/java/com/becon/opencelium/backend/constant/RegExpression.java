@@ -13,6 +13,6 @@ public interface RegExpression {
     String webhook = "\\$\\{(.*?)\\}";
     String queryParams = "\\$\\{(.*?)\\}";
     String directRef = "#[a-zA-Z0-9]{6}\\.(\\(response\\)|\\(request\\))\\..+";
-    String enhancement = "#\\{%(.*?)%\\}";
+    String enhancement = "#\\{%[0-9a-fA-F]{24}%\\}";
     String requestData = "\\{(.*?)\\}";
 }
