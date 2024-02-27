@@ -359,6 +359,7 @@ public class ConnectionController {
         ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
+        connection.setId(connectionId);
 
         connectionService.update(connection, connectionMng);
         return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionService.getFullConnection(connectionId)));
