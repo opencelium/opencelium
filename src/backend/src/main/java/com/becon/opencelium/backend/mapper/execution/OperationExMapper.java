@@ -266,7 +266,7 @@ public class OperationExMapper {
             case STRING -> new SchemaDTO(DataType.STRING, source);
             case BOOLEAN -> new SchemaDTO(DataType.BOOLEAN, source);
             case ARRAY -> getSchemaFromArray(source);
-            case OBJECT -> null;
+            default -> null;
         };
     }
 

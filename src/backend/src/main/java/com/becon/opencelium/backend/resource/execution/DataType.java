@@ -8,7 +8,8 @@ public enum DataType {
     INTEGER("integer"),
     BOOLEAN("boolean"),
     ARRAY("array"),
-    OBJECT("object");
+    OBJECT("object"),
+    UNDEFINED("undefined");
 
     private final String type;
 
