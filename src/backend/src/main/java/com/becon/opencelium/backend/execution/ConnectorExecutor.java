@@ -28,6 +28,8 @@ import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
+import com.becon.opencelium.backend.invoker.paginator.entity.Pagination;
+import com.becon.opencelium.backend.invoker.paginator.enums.PageParam;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.logger.OcLogger;
 import com.becon.opencelium.backend.mysql.entity.Connector;
@@ -189,60 +191,82 @@ public class ConnectorExecutor {
 
         FunctionInvoker functionInvoker = invoker.getOperations().stream()
                 .filter(m -> m.getName().equals(methodNode.getName())).findFirst()
-                .orElseThrow(() -> new RuntimeException("Method not found in Invoker"));
+                .orElseThrow(() -> new RuntimeException("Method \"" + methodNode.getName() + "\" not found in Invoker"));
 
-        HttpMethod method = getMethod(methodNode); // done
-        URI uri = buildUrl(methodNode); // done
-        HttpHeaders header = buildHeader(functionInvoker); // done
-        String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
-
-        logger.logAndSend("============================================================");
-
-        // TODO: added application/x-www-form-urlencoded support: need to refactor.
-        Object data;
-        MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
-        String contentType = header.get("Content-Type") != null ? header.get("Content-Type").get(0) : null;
-        if (contentType != null && header.containsKey("Content-Type")
-                    && contentType.equals("application/x-www-form-urlencoded")
-                    && !invoker.getName().equals("CheckMK")){
-            try {
-                HashMap<String, Object> mapData = new ObjectMapper().readValue(body, HashMap.class);
-                mapData.forEach(formData::add);
-                data = formData;
-            } catch (Exception e){
-                throw new RuntimeException(e);
-            }
-        } else {
-            data = body;
+        Pagination pagination = invoker.getPagination();
+        if (functionInvoker.getPagination() != null) {
+            pagination = functionInvoker.getPagination();
         }
 
-        // TODO: works only for CheckMk. Should be deleted in future.
-        if (invoker.getName().equals("CheckMK") && body != null && !body.isEmpty()){
-            if (contentType.equals("application/x-www-form-urlencoded")) {
-                formData.add("request", body);
-                data = formData;
+        if (pagination != null) {
+            executionContainer.setPagination(pagination.clone());
+        }
+
+        int size = 0;
+        int currentSize = 0;
+        ResponseEntity<String> responseEntity;
+        do {
+            HttpMethod method = getMethod(methodNode); // done
+            URI uri = buildUrl(methodNode); // done
+            HttpHeaders header = buildHeader(functionInvoker); // done
+            String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
+
+            logger.logAndSend("============================================================");
+
+            // TODO: added application/x-www-form-urlencoded support: need to refactor.
+            Object data;
+            MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
+            String contentType = header.get("Content-Type") != null ? header.get("Content-Type").get(0) : null;
+            if (contentType != null && header.containsKey("Content-Type")
+                    && contentType.equals("application/x-www-form-urlencoded")
+                    && !invoker.getName().equals("CheckMK")){
+                try {
+                    HashMap<String, Object> mapData = new ObjectMapper().readValue(body, HashMap.class);
+                    mapData.forEach(formData::add);
+                    data = formData;
+                } catch (Exception e){
+                    throw new RuntimeException(e);
+                }
             } else {
                 data = body;
             }
 
-            logger.logAndSend("Inside CheckMK body: " + data);
-        }
+            // TODO: works only for CheckMk. Should be deleted in future.
+            if (invoker.getName().equals("CheckMK") && body != null && !body.isEmpty()){
+                if (contentType.equals("application/x-www-form-urlencoded")) {
+                    formData.add("request", body);
+                    data = formData;
+                } else {
+                    data = body;
+                }
 
-        // TODO: Changed string to object in httpEntity;
-        HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
-        if (body.equals("null")){
-            httpEntity = new HttpEntity <Object> (header);
-        }
+                logger.logAndSend("Inside CheckMK body: " + data);
+            }
 
-//        f (invoker.getName().equalsIgnoreCase("igel")){
-//            restTemplate = getRestTemplate();
-//        }
-        ResponseEntity responseEntity;
-        if (header.getContentType() == (getResponseContentType(header, functionInvoker))) {
-            responseEntity = this.restTemplate.exchange(uri, method ,httpEntity, String.class);
-        } else {
-            responseEntity = InvokerRequestBuilder
-                .convertToStringResponse(this.restTemplate.exchange(uri, method ,httpEntity, Object.class));
+            // TODO: Changed string to object in httpEntity;
+            HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
+            if (body.equals("null")){
+                httpEntity = new HttpEntity <Object> (header);
+            }
+
+            if (header.getContentType() == (getResponseContentType(header, functionInvoker))) {
+                responseEntity = this.restTemplate.exchange(uri, method ,httpEntity, String.class);
+            } else {
+                responseEntity = InvokerRequestBuilder
+                        .convertToStringResponse(this.restTemplate.exchange(uri, method ,httpEntity, Object.class));
+            }
+            if (pagination != null) {
+                pagination.updateParamValues(responseEntity);
+                size = Integer.parseInt(pagination.getParamValue(PageParam.SIZE));
+                currentSize = pagination.getCurrentSize();
+            }
+        } while (currentSize < size);
+
+        if (pagination != null) {
+            String paginatedBody = pagination.findParam(PageParam.RESULT).getValue();
+            responseEntity = new ResponseEntity<>(paginatedBody,
+                    responseEntity.getHeaders(),
+                    responseEntity.getStatusCode());
         }
         logger.logAndSend("Response : " + responseEntity.getBody());
         return responseEntity;
@@ -305,6 +329,10 @@ public class ConnectorExecutor {
         URI uri = new URI(endpoint);
         String strictlyEscapedQuery = StringUtils.replace(uri.getRawQuery(), "+", "%2B");
         uri = UriComponentsBuilder.fromUri(uri).replaceQuery(strictlyEscapedQuery).build(true).toUri();
+
+        if (executionContainer.getPagination() != null) {
+            executionContainer.getPagination().insertPageValue(uri);
+        }
         logger.logAndSend("URL: " + uri);
         return uri;
     }
@@ -338,6 +366,10 @@ public class ConnectorExecutor {
             }
         } catch (JsonProcessingException e){
             throw new RuntimeException(e);
+        }
+
+        if (executionContainer.getPagination() != null) {
+            executionContainer.getPagination().insertPageValue(result);
         }
         logger.logAndSend("Body: " + result);
         return result;
@@ -375,7 +407,10 @@ public class ConnectorExecutor {
             headerItem.put(k, v);
         });
         httpHeaders.setAll(headerItem);
-        logger.logAndSend("Header: " + httpHeaders.toString());
+        if (executionContainer.getPagination() != null) {
+            executionContainer.getPagination().insertPageValue(httpHeaders);
+        }
+        logger.logAndSend("Header: " + httpHeaders);
         return httpHeaders;
     }
 
@@ -435,6 +470,9 @@ public class ConnectorExecutor {
             } else if(pointer.matches("\\$\\{(.*?)\\}")) {
                 String value = executionContainer.getValueWebhookParams(pointer).toString();
                 result = result.replace(pointer, value);
+            } else if(pointer.matches("\\@\\{(.*?)\\}")) { //gets value from pagination object
+                String value = executionContainer.getValueFromPagination(pointer);
+                result = result.replace(pointer, value);
             } else {
                 // replace from request data
                 String v = executionContainer.getValueFromRequestData(pointer);
@@ -458,6 +496,12 @@ public class ConnectorExecutor {
 
             if ((f.getValue() == null || f.getValue().equals("")) && (!isObject && !isArray)) {
 //                item.put(f.getName(), f.getValue()); // uncomment if you want to add empty and null values to request
+                return;
+            }
+
+            // replace value from pagination
+            if ((f.getValue() != null) && !f.getValue().contains("@{") && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
+                item.put (f.getName(), executionContainer.getValueFromPagination(f.getValue()));
                 return;
             }
             // replace from request_data
@@ -701,7 +745,7 @@ public class ConnectorExecutor {
     public RestTemplate createRestTemplate(Connector connector) {
         int timeout = connector.getTimeout();
         RestTemplateBuilder restTemplateBuilder =
-                new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, proxyUser, proxyPass, connector.isSslCert(), timeout));
+                new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, proxyUser, proxyPass, connector.isSslValidation(), timeout));
         if (timeout > 0) {
             restTemplateBuilder.setReadTimeout(Duration.ofMillis(timeout));
         }

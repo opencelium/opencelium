@@ -18,6 +18,8 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
+import com.becon.opencelium.backend.invoker.paginator.entity.Pagination;
+import com.becon.opencelium.backend.invoker.paginator.enums.PageParam;
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
@@ -56,6 +58,7 @@ public class ExecutionContainer {
     private String conn;
     private int order;
     private Map<String, Object> queryParams = new HashMap<>();
+    private Pagination pagination;
 
     private final EnhancementServiceImp enhancementService;
     private final FieldNodeServiceImp fieldNodeService;
@@ -313,6 +316,12 @@ public class ExecutionContainer {
         return result;
     }
 
+    // accepting reference.
+    public String getValueFromPagination(String ref) {
+        String param = ref.replace("@{", "").replace("}","");
+        return pagination.getParamValue(PageParam.fromString(param));
+    }
+
     public Invoker getInvoker() {
         return invoker;
     }
@@ -383,6 +392,14 @@ public class ExecutionContainer {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public Pagination getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Pagination pagination) {
+        this.pagination = pagination;
     }
 
     // ==================================== private zone ====================================================== //

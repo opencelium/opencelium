@@ -39,13 +39,10 @@ import com.becon.opencelium.backend.utility.StringUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Repository
@@ -138,7 +135,7 @@ public class ConnectorServiceImp implements ConnectorService{
         connector.setIcon(icon);
         connector.setDescription(resource.getDescription());
         connector.setInvoker(resource.getInvoker().getName());
-        connector.setSslCert(resource.isSslCert());
+        connector.setSslValidation(resource.isSslCert());
         connector.setTimeout(resource.getTimeout());
 
         List<RequestData> requestData = requestDataService.toEntity(resource.getRequestData());
@@ -175,7 +172,7 @@ public class ConnectorServiceImp implements ConnectorService{
         connectorResource.setTitle(entity.getTitle());
         connectorResource.setDescription(entity.getDescription());
         connectorResource.setIcon(path + entity.getIcon());
-        connectorResource.setSslCert(entity.isSslCert());
+        connectorResource.setSslCert(entity.isSslValidation());
         connectorResource.setTimeout(entity.getTimeout());
 
         Invoker invoker = invokerService.findByName(entity.getInvoker());
@@ -194,7 +191,7 @@ public class ConnectorServiceImp implements ConnectorService{
          connectorNodeResource.setInvoker(invokerResource);
          connectorNodeResource.setTitle(entity.getTitle());
          connectorNodeResource.setIcon(imagePath + entity.getIcon());
-         connectorNodeResource.setSslCert(entity.isSslCert());
+         connectorNodeResource.setSslCert(entity.isSslValidation());
          List<MethodResource> methodResources = methodNodeService
                 .findMethodsByConnectionIdAndConnectorId(connectionId, direction, entity.getId()).stream()
                 .map(m -> {
@@ -219,7 +216,7 @@ public class ConnectorServiceImp implements ConnectorService{
         connectorNodeResource.setInvoker(invokerResource);
         connectorNodeResource.setTitle(entity.getTitle());
         connectorNodeResource.setIcon(imagePath + entity.getIcon());
-        connectorNodeResource.setSslCert(entity.isSslCert());
+        connectorNodeResource.setSslCert(entity.isSslValidation());
         connectorNodeResource.setTimeout(entity.getTimeout());
         return connectorNodeResource;
     }
@@ -233,7 +230,7 @@ public class ConnectorServiceImp implements ConnectorService{
         return invokerRequestBuilder
                 .setFunction(function)
                 .setRequestData(requestData)
-                .setSslCert(connector.isSslCert())
+                .setSslCert(connector.isSslValidation())
                 .sendRequest();
     }
 

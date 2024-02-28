@@ -177,12 +177,12 @@ public class MethodResponse {
                 hasIndex = true;
                 condIndexArr = m.group(1);
             }
-            int xmlIndex = loopIterator.get(condIndexArr) + 1;
             if ((part.contains("[]") || hasIndex) && hasLoop){
                 part = part.replace("[]", ""); // removed [index] and put []
                 if (hasIndex) {
                     part = part.replace("[" + condIndexArr + "]", "");
                 }
+                int xmlIndex = loopIterator.get(condIndexArr) + 1;
                 part = part + "[" + xmlIndex + "]";
             } else if((part.contains("[]") || part.contains("[*]")) && !hasLoop){
                 part = part.contains("[*]") ? part : part.replace("[]", "") + "[*]";

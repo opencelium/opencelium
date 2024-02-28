@@ -31,7 +31,7 @@ public class RequiredDataServiceImp implements RequiredDataService {
         Extractor extractor = ExtractorFactory.getInstance(refType);
         return extractor.setRequestData(requestData)
                 .setFunctions(functionInvokerList)
-                .disableSslValidation(connector.isSslCert())
+                .disableSslValidation(connector.isSslValidation())
                 .getValue(rqsd.getField());
     }
 
