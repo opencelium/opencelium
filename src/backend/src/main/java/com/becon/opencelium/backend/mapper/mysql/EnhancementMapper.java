@@ -32,6 +32,10 @@ public interface EnhancementMapper extends MapperUpdatable<Enhancement, Enhancem
     void updateEntityFromDto(@MappingTarget Enhancement entity, EnhancementDTO dto);
 
     @Override
+    @Mapping(target = "simpleCode", ignore = true)
+    void updateDtoFromEntity(@MappingTarget EnhancementDTO dto, Enhancement entity);
+
+    @Override
     @Named("toEntityAll")
     default List<Enhancement> toEntityAll(List<EnhancementDTO> dtos) {
         return MapperUpdatable.super.toEntityAll(dtos);

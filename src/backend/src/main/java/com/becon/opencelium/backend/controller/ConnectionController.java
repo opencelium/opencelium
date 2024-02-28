@@ -29,6 +29,7 @@ import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
+import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -91,7 +92,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connections have been successfully retrieved",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionDTO.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionOldDTO.class)))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -101,8 +102,8 @@ public class ConnectionController {
     })
     @GetMapping(path = "/all")
     public ResponseEntity<?> getAll() {
-        List<ConnectionMng> connections = connectionMngService.getAll();
-        return ResponseEntity.ok(connectionMngMapper.toDTOAll(connections));
+        List<ConnectionDTO> all = connectionService.getAllFullConnection();
+        return ResponseEntity.ok(connectionOldDTOMapper.toDTOAll(all));
     }
 
 
@@ -129,7 +130,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connection has been successfully retrieved",
-                    content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -140,7 +141,7 @@ public class ConnectionController {
     @GetMapping(path = "/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId) {
         ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId);
-        return ResponseEntity.ok(connectionDTO);
+        return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionDTO));
     }
 
     @Operation(summary = "Creates an empty connection and returns it's id")
@@ -319,7 +320,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connection has been successfully created",
-                    content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -345,7 +346,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connection has been successfully modified",
-                    content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -354,12 +355,14 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "/{connectionId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> update(@PathVariable Long connectionId, @RequestBody ConnectionDTO connectionDTO) throws Exception {
+    public ResponseEntity<?> update(@PathVariable Long connectionId, @RequestBody ConnectionOldDTO connectionOldDTO) throws Exception {
+        ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
         connection.setId(connectionId);
-        ConnectionMng updatedConnection = connectionService.update(connection, connectionMng);
-        return ResponseEntity.ok(connectionMngMapper.toDTO(updatedConnection));
+
+        connectionService.update(connection, connectionMng);
+        return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionService.getFullConnection(connectionId)));
     }
 
     @Operation(summary = "Validates a connection for correctly constructed structure")

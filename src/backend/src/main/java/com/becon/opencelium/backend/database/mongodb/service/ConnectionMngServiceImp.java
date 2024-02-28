@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
+import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
@@ -70,6 +69,67 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
+    public void update(ConnectionMng connectionMng) {
+        if (connectionMng == null)
+            return;
+
+        ConnectionMng old = getByConnectionId(connectionMng.getConnectionId());
+
+        if (connectionMng.getFromConnector() != null) {
+            if (connectionMng.getFromConnector().getMethods() != null) {
+                methodMngService.saveAll(connectionMng.getFromConnector().getMethods());
+                compareMethodsAndDeleteOlds(old.getFromConnector().getMethods(), connectionMng.getFromConnector().getMethods());
+            } else if (old.getFromConnector() != null && old.getFromConnector().getMethods() != null) {
+                methodMngService.deleteAll(old.getFromConnector().getMethods());
+            }
+
+            if (connectionMng.getFromConnector().getOperators() != null) {
+                operatorMngService.saveAll(connectionMng.getFromConnector().getOperators());
+                compareOperatorsAndDeleteOlds(old.getFromConnector().getOperators(), connectionMng.getFromConnector().getOperators());
+            } else if (old.getFromConnector() != null && old.getFromConnector().getOperators() != null) {
+                operatorMngService.deleteAll(old.getFromConnector().getOperators());
+            }
+        } else if (old.getFromConnector() != null) {
+            if (old.getFromConnector().getMethods() != null) {
+                methodMngService.deleteAll(old.getFromConnector().getMethods());
+            }
+            if (old.getFromConnector().getOperators() != null) {
+                operatorMngService.deleteAll(old.getFromConnector().getOperators());
+            }
+        }
+
+        if (connectionMng.getToConnector() != null) {
+            if (connectionMng.getToConnector().getMethods() != null) {
+                methodMngService.saveAll(connectionMng.getToConnector().getMethods());
+                compareMethodsAndDeleteOlds(old.getToConnector().getMethods(), connectionMng.getToConnector().getMethods());
+            } else if (old.getToConnector() != null && old.getToConnector().getMethods() != null) {
+                methodMngService.deleteAll(old.getToConnector().getMethods());
+            }
+            if (connectionMng.getToConnector().getOperators() != null) {
+                operatorMngService.saveAll(connectionMng.getToConnector().getOperators());
+                compareOperatorsAndDeleteOlds(old.getToConnector().getOperators(), connectionMng.getToConnector().getOperators());
+            } else if (old.getToConnector() != null && old.getToConnector().getOperators() != null) {
+                operatorMngService.deleteAll(old.getToConnector().getOperators());
+            }
+        } else if (old.getToConnector() != null) {
+            if (old.getToConnector().getMethods() != null) {
+                methodMngService.deleteAll(old.getToConnector().getMethods());
+            }
+            if (old.getToConnector().getOperators() != null) {
+                operatorMngService.deleteAll(old.getToConnector().getOperators());
+            }
+        }
+
+        if (connectionMng.getFieldBindings() != null && !connectionMng.getFieldBindings().isEmpty()) {
+            fieldBindingMngService.saveAll(connectionMng.getFieldBindings());
+            compareFieldBindingsAndDeleteOlds(old.getFieldBindings(), connectionMng.getFieldBindings());
+        } else if (old.getFieldBindings() != null) {
+            fieldBindingMngService.deleteAll(old.getFieldBindings());
+        }
+        connectionMngRepository.save(connectionMng);
+    }
+
+    @Override
     public ConnectionMng saveDirectly(ConnectionMng connectionMng) {
         return connectionMngRepository.save(connectionMng);
     }
@@ -135,6 +195,42 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 } else {
                     operatorMngService.doWithPatchedOperator(connectionDTO.getToConnector(), patched.getToConnector(), opDetail);
                 }
+            }
+        }
+    }
+
+    private void compareOperatorsAndDeleteOlds(List<OperatorMng> olds, List<OperatorMng> news) {
+        if (olds != null) {
+            for (OperatorMng operator : olds) {
+                news.stream()
+                        .filter((o) -> (o.getId().equals(operator.getId())))
+                        .findAny()
+                        .ifPresentOrElse((o) -> {
+                        }, () -> operatorMngService.delete(operator));
+            }
+        }
+    }
+
+    private void compareMethodsAndDeleteOlds(List<MethodMng> olds, List<MethodMng> news) {
+        if (olds != null) {
+            for (MethodMng method : olds) {
+                news.stream()
+                        .filter((m) -> m.getId().equals(method.getId()))
+                        .findAny()
+                        .ifPresentOrElse((m) -> {
+                        }, () -> methodMngService.delete(method));
+            }
+        }
+    }
+
+    private void compareFieldBindingsAndDeleteOlds(List<FieldBindingMng> olds, List<FieldBindingMng> news) {
+        if (olds != null) {
+            for (FieldBindingMng fb : olds) {
+                news.stream()
+                        .filter((f) -> (f.getId().equals(fb.getId())))
+                        .findAny()
+                        .ifPresentOrElse((f) -> {
+                        }, () -> fieldBindingMngService.delete(fb));
             }
         }
     }
