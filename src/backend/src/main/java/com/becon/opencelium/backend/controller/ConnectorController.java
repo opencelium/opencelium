@@ -180,8 +180,7 @@ public class ConnectorController {
     public ResponseEntity<?> delete(@PathVariable int id) {
         List<Connection> connections = connectionService.findAllByConnectorId(id);
         connections.forEach(c -> {
-            connectionService.deleteAndTrackIt(c.getId());
-//            connectionNodeService.deleteById(c.getId());
+            connectionService.deleteById(c.getId());
         });
         connectorService.deleteById(id);
         return ResponseEntity.noContent().build();

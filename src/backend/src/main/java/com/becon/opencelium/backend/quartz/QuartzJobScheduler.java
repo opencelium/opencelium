@@ -15,6 +15,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 public class QuartzJobScheduler implements SchedulingStrategy {
     private final org.quartz.Scheduler quartzScheduler;
+    private static final String DEFAULT_CRON_EXP = "0 0 0 1 1 ? 2100";
 
     public QuartzJobScheduler(org.quartz.Scheduler quartzScheduler) {
         this.quartzScheduler = quartzScheduler;
@@ -25,7 +26,11 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         try {
             final String jobName = getJobName(scheduler);
             final JobKey jobKey = new JobKey(jobName, "connection");
-            validateCron(scheduler.getCronExp());
+            if (scheduler.getCronExp() == null || scheduler.getCronExp().isBlank()) {
+                scheduler.setCronExp(DEFAULT_CRON_EXP);
+            }else {
+                validateCron(scheduler.getCronExp());
+            }
 
             if (quartzScheduler.checkExists(jobKey)) {
                 throw new RuntimeException("JOB_ALREADY_EXISTS");
@@ -77,7 +82,11 @@ public class QuartzJobScheduler implements SchedulingStrategy {
     public void rescheduleJob(Scheduler scheduler) {
         final String jobName = getJobName(scheduler);
         final JobKey jobKey = new JobKey(jobName, "connection");
-        validateCron(scheduler.getCronExp());
+        if (scheduler.getCronExp() == null || scheduler.getCronExp().isBlank()) {
+            scheduler.setCronExp(DEFAULT_CRON_EXP);
+        }else {
+            validateCron(scheduler.getCronExp());
+        }
 
         try {
             Trigger currTrigger = quartzScheduler.getTrigger(new TriggerKey(String.valueOf(scheduler.getId()), String.valueOf(scheduler.getConnection().getId())));
