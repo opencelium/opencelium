@@ -214,7 +214,8 @@ public class InvokerServiceImp implements InvokerService {
 
         if (field instanceof Map<?, ?> map) {
             if (!map.containsKey(hierarchy.getFirst())) {
-                throw new RuntimeException("Field path is incorrect : " + hierarchy.getFirst());
+                return DataType.UNDEFINED;
+//                throw new RuntimeException("Field path is incorrect : " + hierarchy.getFirst());
             }
             Object obj = map.get(hierarchy.pollFirst());
             return findFieldType(obj, hierarchy);

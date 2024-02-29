@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -93,6 +94,9 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ConnectionMng save(Connection connection, ConnectionMng connectionMng) {
+        if (existsByName(connection.getTitle())) {
+            throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
+        }
 
         //checking existence of connectors
         connectorService.getById(connection.getToConnector());
@@ -124,7 +128,12 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(Connection connection, ConnectionMng connectionMng) {
-        getById(connection.getId());
+        Connection sCon = getById(connection.getId());
+        if (!Objects.equals(sCon.getTitle(), connection.getTitle())) {
+            if (existsByName(connection.getTitle())) {
+                throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
+            }
+        }
 
         ConnectionMng oldMng = connectionMngService.getByConnectionId(connection.getId());
         if (connectionMng.getId() == null || !oldMng.getId().equals(connectionMng.getId())) {

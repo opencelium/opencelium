@@ -92,7 +92,7 @@ public class ConnectionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connections have been successfully retrieved",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionDTO.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionOldDTO.class)))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -359,6 +359,7 @@ public class ConnectionController {
         ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
+        connection.setId(connectionId);
 
         connectionService.update(connection, connectionMng);
         return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionService.getFullConnection(connectionId)));
