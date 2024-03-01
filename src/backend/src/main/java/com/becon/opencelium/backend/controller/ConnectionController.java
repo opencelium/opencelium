@@ -395,7 +395,7 @@ public class ConnectionController {
     })
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-        connectionService.deleteAndTrackIt(id);
+        connectionService.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
@@ -477,11 +477,7 @@ public class ConnectionController {
     })
     @PutMapping(path = "/list/delete")
     public ResponseEntity<?> deleteCtionByIdIn(@RequestBody IdentifiersDTO<Long> ids) throws Exception {
-
-        ids.getIdentifiers().forEach(id -> {
-            connectionService.deleteAndTrackIt(id);
-//            connectionNodeService.deleteById(id);
-        });
+        ids.getIdentifiers().forEach(connectionService::deleteById);
         return ResponseEntity.noContent().build();
     }
 }

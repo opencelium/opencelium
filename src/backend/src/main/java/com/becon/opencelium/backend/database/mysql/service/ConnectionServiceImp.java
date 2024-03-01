@@ -58,6 +58,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ConnectionUpdateTracker updateTracker;
     private final ConnectionHistoryService connectionHistoryService;
+    private final SchedulerService schedulerService;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -66,12 +67,12 @@ public class ConnectionServiceImp implements ConnectionService {
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
             @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService connectionHistoryService,
+            @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             PatchHelper patchHelper,
             Mapper<Connector, ConnectorDTO> connectorMapper,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
-            ConnectionUpdateTracker updateTracker
-    ) {
+            ConnectionUpdateTracker updateTracker) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -83,6 +84,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.connectionMapper = connectionMapper;
         this.updateTracker = updateTracker;
         this.connectionHistoryService = connectionHistoryService;
+        this.schedulerService = schedulerService;
     }
 
 
@@ -211,8 +213,9 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        getById(id);
+        Connection connection = getById(id);
         connectionMngService.delete(id);
+        deleteSchedules(connection);
         connectionRepository.deleteById(id);
     }
 
@@ -221,6 +224,7 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteAndTrackIt(Long id) {
         Connection connection = getById(id);
         connectionMngService.delete(id);
+        deleteSchedules(connection);
         connectionRepository.deleteById(id);
         connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);
     }
@@ -228,7 +232,8 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteOnlyConnection(Long id) {
-        getById(id);
+        Connection connection = getById(id);
+        deleteSchedules(connection);
         connectionRepository.deleteById(id);
     }
 
@@ -321,7 +326,6 @@ public class ConnectionServiceImp implements ConnectionService {
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
-
     private ConnectionDTO patchUpdateInternal(ConnectionDTO connectionDTO, JsonPatch patch, PatchConnectionDetails details) {
         ConnectionDTO patched = patchHelper.patch(patch, connectionDTO, ConnectionDTO.class);
 
@@ -418,5 +422,12 @@ public class ConnectionServiceImp implements ConnectionService {
             }
         }
         return list;
+    }
+
+    private void deleteSchedules(Connection connection) {
+        if (connection == null || connection.getSchedulers() == null) {
+            return;
+        }
+        connection.getSchedulers().forEach(s -> schedulerService.deleteById(s.getId()));
     }
 }
