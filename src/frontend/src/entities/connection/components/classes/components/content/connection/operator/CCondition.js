@@ -129,18 +129,6 @@ export default class CCondition{
                 rightStatementText = this.rightStatement.field;
             }
             const isLikeOperator = CCondition.isLikeOperator(this.relationalOperator);
-            if(isLikeOperator){
-                if(rightStatementText[rightStatementText.length - 1] === '}'){
-                    rightStatementText = rightStatementText.slice(0, rightStatementText.length - 1);
-                } else{
-                    rightStatementText = `${rightStatementText.slice(0, rightStatementText.length - 2)}${rightStatementText[rightStatementText.length - 1]}`;
-                }
-                if(rightStatementText[0] === '{'){
-                    rightStatementText = rightStatementText.slice(1);
-                } else{
-                    rightStatementText = `${rightStatementText[0]}${rightStatementText.slice(2)}`;
-                }
-            }
             if(leftStatementText !== '') {
                 statement = !isOnlyText ? (
                     <span>
@@ -196,7 +184,7 @@ export default class CCondition{
     }
 
     static embraceFieldForLikeOperator(fieldValue){
-        return `{${fieldValue}}`;
+        return `${fieldValue}`;
     }
 
     static isLikeOperator(relationalOperator){
