@@ -66,8 +66,8 @@ public class Connector {
     @Column(name = "icon")
     private String icon;
 
-    @Column(name = "ssl_cert")
-    private boolean sslCert;
+    @Column(name = "ssl_validation")
+    private boolean sslValidation;
 
     // millisecond
     @Column(name = "timeout")
@@ -148,12 +148,12 @@ public class Connector {
         this.icon = icon;
     }
 
-    public boolean isSslCert() {
-        return sslCert;
+    public boolean isSslValidation() {
+        return sslValidation;
     }
 
-    public void setSslCert(boolean sslCert) {
-        this.sslCert = sslCert;
+    public void setSslValidation(boolean sslValidation) {
+        this.sslValidation = sslValidation;
     }
 
     public int getTimeout() {

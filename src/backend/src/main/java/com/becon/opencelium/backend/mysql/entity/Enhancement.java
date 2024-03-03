@@ -32,10 +32,10 @@ public class Enhancement {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "expert_code")
+    @Column(name = "script")
     private String expertCode;
 
-    @Column(name = "expert_var")
+    @Column(name = "args")
     private String expertVar;
 
     @Column(name = "simple_code")
