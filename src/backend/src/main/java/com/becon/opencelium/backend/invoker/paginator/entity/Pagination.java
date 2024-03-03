@@ -2,6 +2,9 @@ package com.becon.opencelium.backend.invoker.paginator.entity;
 
 import com.becon.opencelium.backend.invoker.paginator.enums.PageParam;
 import com.becon.opencelium.backend.invoker.paginator.enums.PageParamAction;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,12 +49,49 @@ public class Pagination implements Cloneable {
                 .orElseThrow(() -> new RuntimeException("\"Parameter \\\"" + param + "\\\" not found in pagination\""));
     }
 
-    public void setCurrentSize(int current) {
-        this.currentSize = current;
+    public boolean existsParam(PageParam param) {
+        return pageParamRules.stream().filter(p -> p.getParam() == param).findFirst()
+                .orElse(null) != null;
+    }
+
+    public boolean hasMore() {
+        this.currentSize = getCurrentSize();
+        if (existsParam(PageParam.HAS_MORE)) {
+            String result = findParam(PageParam.HAS_MORE).getValue();
+            if (result != null && !result.isEmpty()) {
+                return Boolean.parseBoolean(result);
+            }
+        }
+        if (existsParam(PageParam.SIZE)) {
+            int size = Integer.parseInt(getParamValue(PageParam.SIZE));
+            return currentSize < size;
+        }
+        if (existsParam(PageParam.CURSOR)) {
+            String result = findParam(PageParam.CURSOR).getValue();
+            if (result == null || result.isEmpty()) {
+                return false;
+            }
+        }
+        if (existsParam(PageParam.LINK)) {
+            String url = getParamValue(PageParam.LINK);
+            if (!url.isEmpty()) {
+                try {
+                    URI uri = new URI(url);
+                    return !uri.getRawQuery().contains("null");
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return false;
     }
 
     public int getCurrentSize() {
-        return currentSize;
+        PageParamRule paramRule = findParam(PageParam.RESULT);
+        String payload = paramRule.getValue();
+        String jsonPath = paramRule.getRefPath();
+        this.currentSize = JsonPath.parse(payload).read( jsonPath + ".length()");
+        return this.currentSize;
     }
 
     // example:  http://localhost:9090/api/@{var1}/path?offset=@{var2}
@@ -59,6 +100,9 @@ public class Pagination implements Cloneable {
         String url = uri.toString();
         for (PageParamRule paramRule : pageParamRules) {
             String ref = paramRule.getRef();
+            if (ref == null) {
+                continue;
+            }
             PageParamAction action = paramRule.getAction();
             if (ref.contains("request.url.$")) {
                 String param = paramRule.getRefSuffix();
@@ -74,7 +118,8 @@ public class Pagination implements Cloneable {
 
     // Works only with references. If reference is not null or empty then it inserts or reads.
     public void insertPageValue(HttpHeaders headers) {
-        pageParamRules.stream().filter(paramRule -> paramRule.getRef().contains("request.header.$"))
+        pageParamRules.stream().filter(paramRule -> paramRule.getRef() != null)
+                .filter(paramRule -> paramRule.getRef().contains("request.header.$"))
                 .filter(paramRule -> paramRule.getAction().equals(PageParamAction.WRITE))
                 .forEach(paramRule -> {
                     String key = paramRule.getRefSuffix();
@@ -98,25 +143,48 @@ public class Pagination implements Cloneable {
     // TODO test for x-www-form-urlencoded
     public void updateParamValues(ResponseEntity<String> response) {
         HttpRepository httpRepository = new HttpRepository(response);
-        pageParamRules.stream().filter(paramRule -> paramRule.getRef().split("\\.",2)[0].equals("response"))
+        pageParamRules.stream()
+                .filter(paramRule -> paramRule.getRef() != null)
+                .filter(paramRule -> paramRule.getRef().split("\\.",2)[0].equals("response"))
                 .forEach(paramRule -> {
                     String value = httpRepository.findValueByPath(paramRule.getRef());
                     if (paramRule.getParam().equals(PageParam.RESULT)) {
                         if (paramRule.getValue() == null || paramRule.getValue().isEmpty()) {
                             paramRule.setValue(response.getBody());
-                            this.currentSize = JsonPath.parse(response.getBody()).read(paramRule.getRefPath() + ".length()");
                             return;
                         }
                         String path = paramRule.getRefPath();
-                        String result = JsonPath.parse(paramRule.getValue()).set(path, paramRule.getValue()).json();
+                        String result = mergeArrayIntoObject(paramRule.getValue(), value, path);
                         paramRule.setValue(result);
-                        this.currentSize = this.currentSize + (Integer) JsonPath.parse(result).read(path + ".length()");
                         return;
+                    }
+                    if (paramRule.getParam().equals(PageParam.PAGE)) {
+                        if (paramRule.getAction().equals(PageParamAction.INCREMENT)) {
+                            value = Integer.parseInt(value) + 1 + "";
+                        }
                     }
                     if (paramRule.getParam().equals(PageParam.OFFSET)) {
                         if (paramRule.getAction().equals(PageParamAction.INCREMENT)) {
-                            int offset = Integer.parseInt(findParam(PageParam.LIMIT).getValue());
-                            value = Integer.parseInt(value) + offset + "";
+                            int limit = Integer.parseInt(findParam(PageParam.LIMIT).getValue());
+                            value = Integer.parseInt(value) + limit + "";
+                        }
+                    }
+                    paramRule.setValue(value);
+                });
+
+        // if ref is null
+        pageParamRules.stream().filter(paramRule -> paramRule.getRef() == null)
+                .forEach(paramRule -> {
+                    String value = paramRule.getValue();
+                    if (paramRule.getParam().equals(PageParam.PAGE)) {
+                        if (paramRule.getAction().equals(PageParamAction.INCREMENT)) {
+                            value = Integer.parseInt(value) + 1 + "";
+                        }
+                    }
+                    if (paramRule.getParam().equals(PageParam.OFFSET)) {
+                        if (paramRule.getAction().equals(PageParamAction.INCREMENT)) {
+                            int limit = Integer.parseInt(findParam(PageParam.LIMIT).getValue());
+                            value = Integer.parseInt(value) + limit + "";
                         }
                     }
                     paramRule.setValue(value);
@@ -163,12 +231,16 @@ public class Pagination implements Cloneable {
                     return queries.get(param);
                 case "header":
                     return headers.getFirst(param);
-                case "payload":
+                case "body":
                     // TODO: Add xml support
                     ReadContext ctx = JsonPath.parse(payload);
-                    return ctx.read(getRefPath(path));
+                    Object res = ctx.read(getRefPath(path));
+                    if (res == null) {
+                        return "";
+                    }
+                    return res.toString();
                 default:
-                    throw new RuntimeException(location + " not found in path " + path + ". Should be one of [header, url, payload]");
+                    throw new RuntimeException(location + " not found in path " + path + ". Should be one of [header, url, body]");
             }
             return "";
         }
@@ -197,7 +269,7 @@ public class Pagination implements Cloneable {
             }
         }
 
-        private static Map<String, String> splitQuery(String query) {
+        public static Map<String, String> splitQuery(String query) {
             try {
                 Map<String, String> queryPairs = new HashMap<>();
                 String[] pairs = query.split("&");
@@ -213,5 +285,39 @@ public class Pagination implements Cloneable {
             }
 
         }
+    }
+
+    public static String mergeArrayIntoObject(String obj, String arr, String jsonPath) {
+        try {
+            String jsonPointer = convertJSONPathToPointer(jsonPath);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(obj);
+            ArrayNode arrNode = (ArrayNode) mapper.readTree(arr);
+            JsonNode dataNode = rootNode.at(jsonPointer);
+
+            if (dataNode instanceof ArrayNode) {
+                ((ArrayNode) dataNode).addAll(arrNode);
+            } else {
+                throw new IllegalArgumentException("Path does not point to an array node");
+            }
+            return rootNode.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String convertJSONPathToPointer(String jsonPath) {
+        if(jsonPath == null || jsonPath.isEmpty()) {
+            return "";
+        }
+
+        // Remove the '$' prefix and replace '.' with '/'
+        // Assumes a simple path without array indices or query filters
+        String jsonPointer = jsonPath.trim().substring(1).replaceAll("\\.", "/");
+
+        // Handle array indices by converting them to JSON Pointer format
+        jsonPointer = jsonPointer.replaceAll("\\[(\\d+)\\]", "/$1");
+
+        return jsonPointer;
     }
 }

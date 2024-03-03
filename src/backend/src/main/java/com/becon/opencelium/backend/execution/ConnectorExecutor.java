@@ -151,8 +151,7 @@ public class ConnectorExecutor {
                 responseIndex = null;
             }
             // adding new response message into existing data.
-            methodResponse.getData()
-                    .put(responseIndex, responseEntity.getBody());
+            methodResponse.getData().put(responseIndex, responseEntity.getBody());
             methodResponse.getResponseEntities().add(responseEntity);
         }
         else {
@@ -199,18 +198,17 @@ public class ConnectorExecutor {
         }
 
         if (pagination != null) {
-            executionContainer.setPagination(pagination.clone());
+            pagination = pagination.clone();
+            executionContainer.setPagination(pagination);
         }
 
-        int size = 0;
-        int currentSize = 0;
+        boolean has_more = false;
         ResponseEntity<String> responseEntity;
         do {
             HttpMethod method = getMethod(methodNode); // done
             URI uri = buildUrl(methodNode); // done
             HttpHeaders header = buildHeader(functionInvoker); // done
             String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
-
             logger.logAndSend("============================================================");
 
             // TODO: added application/x-www-form-urlencoded support: need to refactor.
@@ -249,18 +247,24 @@ public class ConnectorExecutor {
                 httpEntity = new HttpEntity <Object> (header);
             }
 
+            if (pagination != null && pagination.existsParam(PageParam.LINK)) {
+                String nextElemLink = pagination.findParam(PageParam.LINK).getValue();
+                if (nextElemLink != null && !nextElemLink.isEmpty()){
+                    uri = new URI(nextElemLink);
+                }
+            }
             if (header.getContentType() == (getResponseContentType(header, functionInvoker))) {
                 responseEntity = this.restTemplate.exchange(uri, method ,httpEntity, String.class);
             } else {
+                ResponseEntity o = this.restTemplate.exchange(uri, method ,httpEntity, Object.class);
                 responseEntity = InvokerRequestBuilder
-                        .convertToStringResponse(this.restTemplate.exchange(uri, method ,httpEntity, Object.class));
+                        .convertToStringResponse(o);
             }
             if (pagination != null) {
                 pagination.updateParamValues(responseEntity);
-                size = Integer.parseInt(pagination.getParamValue(PageParam.SIZE));
-                currentSize = pagination.getCurrentSize();
+                has_more = pagination.hasMore();
             }
-        } while (currentSize < size);
+        } while (has_more);
 
         if (pagination != null) {
             String paginatedBody = pagination.findParam(PageParam.RESULT).getValue();
@@ -440,7 +444,7 @@ public class ConnectorExecutor {
 
     private String replaceRefValue(String url, String format) {
         String result = url;
-        String refRegex = "(\\{(.*?)\\}|\\$\\{(.*?)\\})";
+        String refRegex = "(\\{(.*?)\\}|\\$\\{(.*?)\\}|@\\{(.*?)\\})";
         String refResRegex = RegExpression.responsePointer;
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(url);
@@ -470,7 +474,7 @@ public class ConnectorExecutor {
             } else if(pointer.matches("\\$\\{(.*?)\\}")) {
                 String value = executionContainer.getValueWebhookParams(pointer).toString();
                 result = result.replace(pointer, value);
-            } else if(pointer.matches("\\@\\{(.*?)\\}")) { //gets value from pagination object
+            } else if(pointer.matches("@\\{([^}]+)\\}")) { //gets value from pagination object
                 String value = executionContainer.getValueFromPagination(pointer);
                 result = result.replace(pointer, value);
             } else {
@@ -500,7 +504,7 @@ public class ConnectorExecutor {
             }
 
             // replace value from pagination
-            if ((f.getValue() != null) && !f.getValue().contains("@{") && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
+            if ((f.getValue() != null) && f.getValue().contains("@{") && f.getValue().contains("}") && !isObject){
                 item.put (f.getName(), executionContainer.getValueFromPagination(f.getValue()));
                 return;
             }
@@ -719,8 +723,13 @@ public class ConnectorExecutor {
                 .filter(m -> m.getMethodKey().equals(methodKey))
                 .findFirst()
                 .orElse(null);
-        List<Object> array =
-                (List<Object>) message.getValue(condition, loopIterators);
+        List<Object> array;
+        if (statementNode.getOperand().equals("SplitString")) {
+            Object leftVariable = getValue(statementNode.getLeftStatementVariable(), "");
+            array = Arrays.asList(leftVariable.toString().split(statementNode.getRightStatementVariable().getFiled()));
+        } else {
+            array = (List<Object>) message.getValue(condition, loopIterators);
+        }
 
         logger.logAndSend("============================= LOOP ======================== ");
         logger.logAndSend(createLoopMsgForLog(array.isEmpty(), statementNode.getIndex()));

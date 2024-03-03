@@ -57,6 +57,7 @@ public class InvokerParserImp {
             invoker.setIcon(getIcon(childNode));
             invoker.setAuthType(getAuthType(childNode));
             invoker.setRequiredData(getRequired(childNode));
+            invoker.setPagination(getPagination(childNode));
             invoker.setOperations(getOperation(childNode));
             return invoker;
         });
@@ -89,10 +90,7 @@ public class InvokerParserImp {
     private Pagination getPagination(NodeList nodeList){
         InvokerParserFactory<Pagination> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, Pagination> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
-        return xmlDomParser.doAction("pagination", node -> {
-            Pagination pagination = new Pagination(getPageRules(node.getChildNodes()));
-            return pagination;
-        });
+        return xmlDomParser.doAction("pagination", node -> new Pagination(getPageRules(node.getChildNodes())));
     }
 
     private List<RequiredData> getRequired(NodeList nodeList){
@@ -124,6 +122,7 @@ public class InvokerParserImp {
             String type = node.getAttributes().getNamedItem("type").getNodeValue();
             function.setName(name);
             function.setType(type);
+            function.setPagination(getPagination(node.getChildNodes()));
             function.setRequest(getRequest(node.getChildNodes()));
             function.setResponse(getResponse(node.getChildNodes()));
             functions.add(function);
@@ -309,10 +308,15 @@ public class InvokerParserImp {
             PageParamRule pageParamRule = null;
             pageParamRule = xmlDomParser.doAction(param.toString(), node -> {
                 PageParamRule rule = new PageParamRule();
-                rule.setValue(node.getTextContent());
                 rule.setParam(param);
-                rule.setAction(PageParamAction.fromString(node.getAttributes().getNamedItem("action").getNodeValue()));
-                rule.setRef(node.getAttributes().getNamedItem("ref").getNodeValue());
+                rule.setValue(getValueOrDefault(param, node));
+
+                if (node.getAttributes().getNamedItem("action") != null) {
+                    rule.setAction(PageParamAction.fromString(node.getAttributes().getNamedItem("action").getNodeValue()));
+                }
+                if (node.getAttributes().getNamedItem("ref") != null) {
+                    rule.setRef(node.getAttributes().getNamedItem("ref").getNodeValue());
+                }
                 return rule;
             });
             if (pageParamRule == null) {
@@ -322,5 +326,18 @@ public class InvokerParserImp {
         }
         logger.info("Following parameters from pagination was fetched: " + rules);
         return rules;
+    }
+
+    private String getValueOrDefault(PageParam pageParam, Node node) {
+        if (node.getTextContent().isEmpty()) {
+            switch (pageParam) {
+                case LIMIT:
+                case OFFSET:
+                case PAGE:
+                    return "0";
+            }
+        }
+        return node.getTextContent();
+
     }
 }

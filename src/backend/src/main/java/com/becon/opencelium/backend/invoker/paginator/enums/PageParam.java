@@ -5,8 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum PageParam {
-    SIZE("size"), OFFSET("offset"), LIMIT("limit"), RESULT("result"), ORDER("order"),
-    SORT("sort"), CATEGORY("category"), NEXT("next"), PREV("prev"), LINK("link");
+    SIZE("size"), OFFSET("offset"), LIMIT("limit"), RESULT("result"), ORDER("order"), PAGE("page"),
+    SORT("sort"), CATEGORY("category"), NEXT("next"), PREV("prev"), LINK("link"), HAS_MORE("has_more"),
+    CURSOR("cursor");
     private final String param;
     private static final Map<String, PageParam> STRING_TO_ENUM = new HashMap<>();
     PageParam(String param) {
