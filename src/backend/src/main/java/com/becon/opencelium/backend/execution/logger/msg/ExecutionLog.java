@@ -1,6 +1,7 @@
-package com.becon.opencelium.backend.execution.log.msg;
+package com.becon.opencelium.backend.execution.logger.msg;
 
 import com.becon.opencelium.backend.enums.LogType;
+import com.becon.opencelium.backend.execution.logger.LogMessage;
 
 import java.util.List;
 import java.util.stream.Stream;

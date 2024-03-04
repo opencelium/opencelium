@@ -1,7 +1,6 @@
-package com.becon.opencelium.backend.logger;
+package com.becon.opencelium.backend.execution.logger;
 
 import com.becon.opencelium.backend.enums.LogType;
-import com.becon.opencelium.backend.execution.log.msg.LogMessage;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

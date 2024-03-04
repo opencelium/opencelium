@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution.log.msg;
+package com.becon.opencelium.backend.execution.logger.msg;
 
 public class OperatorData {
     private boolean isNextMethodOutside;

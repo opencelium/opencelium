@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution.log.msg;
+package com.becon.opencelium.backend.execution.logger;
 
 import com.becon.opencelium.backend.enums.LogType;
 
