@@ -24,14 +24,15 @@ import com.becon.opencelium.backend.database.mysql.repository.NotificationReposi
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
 import com.becon.opencelium.backend.factory.SchedulerFactory;
-import com.becon.opencelium.backend.quartz.SchedulingStrategy;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.quartz.SchedulingStrategy;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public class SchedulerServiceImp implements SchedulerService {
 
 
     public SchedulerServiceImp(
-            @Qualifier("connectionServiceImp") ConnectionService connectionService,
+            @Lazy @Qualifier("connectionServiceImp") ConnectionService connectionService,
             @Qualifier("webhookServiceImp") WebhookService webhookService,
             @Qualifier("executionServiceImp") ExecutionService executionService,
             @Qualifier("lastExecutionServiceImp") LastExecutionService lastExecutionService,
@@ -82,18 +83,19 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     @Transactional(rollbackFor = {RuntimeException.class})
     public void save(@NonNull Scheduler scheduler) {
-        if (existsByTitle(scheduler.getTitle())){
+        if (existsByTitle(scheduler.getTitle())) {
             throw new RuntimeException("TITLE_ALREADY_EXISTS");
         }
         Scheduler saved = schedulerRepository.save(scheduler);
         schedulingStrategy.addJob(saved);
     }
+
     @Override
     @Transactional(rollbackFor = {RuntimeException.class})
-    public Scheduler update(@NonNull Scheduler scheduler){
+    public Scheduler update(@NonNull Scheduler scheduler) {
 
         Scheduler entity = getById(scheduler.getId());
-        if (!Objects.equals(entity.getTitle(), scheduler.getTitle()) && existsByTitle(scheduler.getTitle())){
+        if (!Objects.equals(entity.getTitle(), scheduler.getTitle()) && existsByTitle(scheduler.getTitle())) {
             throw new RuntimeException("TITLE_ALREADY_EXISTS");
         }
 
@@ -109,11 +111,10 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    @Transactional(rollbackFor = {RuntimeException.class})
-    public synchronized void deleteById(int id) {
+    public void deleteById(int id) {
         Scheduler scheduler = getById(id);
-        schedulerRepository.deleteById(id);
         schedulingStrategy.deleteJob(scheduler);
+        schedulerRepository.deleteById(id);
     }
 
     @Override
@@ -220,7 +221,7 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    public void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception{
+    public void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception {
         //TODO skip it
     }
 
