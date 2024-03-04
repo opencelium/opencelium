@@ -19,8 +19,6 @@ package com.becon.opencelium.backend.database.mysql.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -74,8 +72,7 @@ public class Connection {
     @OneToMany(mappedBy = "connection", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Enhancement> enhancements;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(mappedBy = "connection", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "connection", fetch = FetchType.LAZY)
     private List<Scheduler> schedulers;
 
     @JsonIgnore
