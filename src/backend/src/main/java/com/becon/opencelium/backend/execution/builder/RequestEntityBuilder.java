@@ -152,6 +152,7 @@ public class RequestEntityBuilder {
             if (referencedSchema == null) {
                 schema.setValue(null);
             } else {
+                // TODO: if schema.type == UNDEFINED then use following code otherwise do mapping to required type
                 // if schema is referenced then correct the type and fields
                 schema.setType(referencedSchema.getType());
                 schema.setValue(referencedSchema.getValue());

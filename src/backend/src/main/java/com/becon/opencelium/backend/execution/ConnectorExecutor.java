@@ -100,13 +100,15 @@ public class ConnectorExecutor {
 
         Operation operation = executionManager.findOperationByColor(operationDTO.getOperationId())
                 .orElseGet(() -> {
-                    Operation newOperation = Operation.fromDTO(operationDTO);
+                    int loopDepth = executionManager.getLoops().size(); // in which depth the operation is executed
+
+                    Operation newOperation = Operation.fromDTO(operationDTO, loopDepth);
                     executionManager.addOperation(newOperation);
 
                     return newOperation;
                 });
 
-        String key = executionManager.generateKey();
+        String key = executionManager.generateKey(operation.getLoopDepth());
 
         operation.addRequest(key, requestEntity);
         operation.addResponse(key, responseEntity);
@@ -125,16 +127,20 @@ public class ConnectorExecutor {
 
         boolean result = operator.apply(leftValue, rightValue);
 
-        // when 'if' evaluates to false, then remove its body.
-        // Body contains executables that has 'execOrder' starting with 'execOrder' of 'if'
-        String startingExecOrder = getIndex(operatorDTO);
-        String currentExecOrder = getIndex(operatorDTO);
+        String currentExecOrder = getIndex(operatorDTO); // 'execOrder'('index') of 'IfOperator'
 
-        while (!result && currentExecOrder.startsWith(startingExecOrder) && index < body.size()) {
-            currentExecOrder = getIndex(body.get(index++));
+        // 'IfOperator' is executed already so start from 'index+1'
+        for (index++; index < body.size(); index++) {
+            String nextExecOrder = getIndex(body.get(index));
+
+            // when 'result' == true, then increase 'index' and continue executing body of 'IfOperator';
+            // when 'result' == false, then increase 'index' to skip 'body' of 'IfOperator'.
+            if (result || !nextExecOrder.startsWith(currentExecOrder)) {
+                break;
+            }
         }
 
-        execute(body, ++index);
+        execute(body, index);
     }
 
     private void executeForOperator(List<Object> body, int index) {
@@ -150,7 +156,7 @@ public class ConnectorExecutor {
         // move index to execute body of 'for' operator
         index++;
         for (int i = 0; i < loopingList.size(); i++) {
-            // add current loops' 'iterator' and 'value'
+            // add/update current loops' 'iterator' and 'value'
             executionManager.getLoops().put(operatorDTO.getIterator(), String.valueOf(i));
             execute(body, index);
         }

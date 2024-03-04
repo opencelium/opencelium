@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<String, Object> queryParams;
@@ -48,12 +49,14 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public String generateKey() {
-        if (loops.isEmpty()) {
+    public String generateKey(int loopDepth) {
+        if (loopDepth == 0 || loops.isEmpty()) {
             return "#";
         }
 
-        return String.join(", ", loops.values());
+        return loops.values().stream()
+                .limit(loopDepth)
+                .collect(Collectors.joining(", "));
     }
 
     @Override

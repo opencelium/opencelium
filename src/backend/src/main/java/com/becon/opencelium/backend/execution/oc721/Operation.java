@@ -10,15 +10,17 @@ public class Operation {
     private String id;
     private String color;
     private Integer aggregatorId;
+    private int loopDepth;
     private final Map<String, RequestEntity<?>> requests = new HashMap<>();
     private final Map<String, ResponseEntity<?>> responses = new HashMap<>();
 
-    public static Operation fromDTO(OperationDTO operationDTO) {
+    public static Operation fromDTO(OperationDTO operationDTO, int loopDepth) {
         Operation operation = new Operation();
 
         // TODO: correct DTO mapping
         operation.setColor(operationDTO.getOperationId());
         operation.setAggregatorId(operationDTO.getAggregatorId());
+        operation.setLoopDepth(loopDepth);
 
         return operation;
     }
@@ -61,5 +63,13 @@ public class Operation {
 
     public Map<String, ResponseEntity<?>> getResponses() {
         return responses;
+    }
+
+    public int getLoopDepth() {
+        return loopDepth;
+    }
+
+    public void setLoopDepth(int loopDepth) {
+        this.loopDepth = loopDepth;
     }
 }
