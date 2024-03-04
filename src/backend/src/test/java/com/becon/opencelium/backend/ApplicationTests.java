@@ -44,26 +44,14 @@ public class ApplicationTests {
 
 	@Test
 	public void contextLoads() {
-		String json = "{\n" +
-				"\t\"array\": [\n" +
-				"\t\t{\n" +
-				"\t\t\t\"name\": \"n1\",\n" +
-				"\t\t\t\"city\": \"c1\"\n" +
-				"\t\t},\n" +
-				"\t\t{\n" +
-				"\t\t\t\"name\": \"n1\",\n" +
-				"\t\t\t\"city\": \"c1\"\n" +
-				"\t\t},\n" +
-				"\t\t{\n" +
-				"\t\t\t\"name\": \"n1\",\n" +
-				"\t\t\t\"city\": \"c1\"\n" +
-				"\t\t}\n" +
-				"\t]\n" +
-				"}";
-		String jsonPath = "$.array.length()";
-		ReadContext ctx = JsonPath.parse(json);
-		int size = ctx.read(jsonPath);
-
-		System.out.println(size);
+		String uri = "http://localhost:8081/api/page/example?size=5&page=";
+		HttpMethod method = HttpMethod.GET;
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization", "Basic YWRtaW46MTIzNA==");
+		headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+		HttpEntity<String> httpEntity = new HttpEntity<>(headers);
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<Object> r = restTemplate.exchange(uri, method ,httpEntity, Object.class);
+		System.out.println(r);
 	}
 }
