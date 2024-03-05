@@ -6,8 +6,8 @@ import com.becon.opencelium.backend.resource.schedule.CategoryDTO;
 import java.util.List;
 
 public interface CategoryService {
-    Category add(CategoryDTO categoryDTO);
-    Category update(CategoryDTO categoryDTO);
+    Integer add(CategoryDTO categoryDTO);
+    void update(CategoryDTO categoryDTO);
     Category get(Integer id);
     List<Category> getAll();
     List<Category> getAllByIds(Iterable<Integer> ids);

@@ -18,7 +18,8 @@ public class CategoryServiceImp implements CategoryService {
     }
 
     @Override
-    public Category add(CategoryDTO categoryDTO) {
+    @Transactional
+    public Integer add(CategoryDTO categoryDTO) {
         if (categoryDTO == null) {
             throw new RuntimeException("CATEGORY_IS_NULL");
         }
@@ -35,7 +36,7 @@ public class CategoryServiceImp implements CategoryService {
             curr.setParentCategory(new Category(categoryDTO.getParentCategory()));
         }
 
-        Category saved = repository.save(curr);
+        Category saved = repository.save(curr); //savepoint 1
 
         if (categoryDTO.getSubCategories() != null) {
             categoryDTO.getSubCategories().forEach(id -> {
@@ -44,26 +45,16 @@ public class CategoryServiceImp implements CategoryService {
                 } else {
                     Category child = get(id);
                     child.setParentCategory(saved);
-                    repository.save(child);
+                    repository.save(child); //savepoint 2
                 }
             });
         }
-        return get(saved.getId());
-    }
-
-    private void checkTitle(String name) {
-        if (name == null || name.isBlank()) {
-            throw new RuntimeException("INVALID_CATEGORY_NAME");
-        }
-
-        if (repository.existsByNameEqualsIgnoreCase(name)) {
-            throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
-        }
+        return saved.getId();
     }
 
     @Override
     @Transactional
-    public Category update(CategoryDTO categoryDTO) {
+    public void update(CategoryDTO categoryDTO) {
         if (categoryDTO == null) {
             throw new RuntimeException("CATEGORY_IS_NULL");
         }
@@ -80,6 +71,7 @@ public class CategoryServiceImp implements CategoryService {
         Category category = new Category(categoryDTO.getId());
         category.setName(categoryDTO.getName());
         category.setParentCategory(old.getParentCategory());
+
         if (categoryDTO.getParentCategory() != null) {
             if (old.getParentCategory() == null || !categoryDTO.getParentCategory().equals(old.getParentCategory().getId())) {
                 if (!repository.existsById(categoryDTO.getId())) {
@@ -101,7 +93,7 @@ public class CategoryServiceImp implements CategoryService {
                     if (old.getSubCategories().stream().noneMatch(s -> s.getId().equals(id))) {
                         Category child = get(id);
                         child.setParentCategory(old);
-                        repository.save(child);
+                        repository.save(child); //savepoint 1
                     }
                 }
             });
@@ -109,18 +101,18 @@ public class CategoryServiceImp implements CategoryService {
             old.getSubCategories().forEach(c -> {
                 if (categoryDTO.getSubCategories().stream().noneMatch(s -> s.equals(c.getId()))) {
                     c.setParentCategory(null);
-                    repository.save(c);
+                    repository.save(c); //savepoint 2
                 }
             });
         } else {
             if (old.getSubCategories() != null) {
                 old.getSubCategories().forEach(c -> {
                     c.setParentCategory(null);
-                    repository.save(c);
+                    repository.save(c); //savepoint 3
                 });
             }
         }
-        return repository.save(category);
+        repository.save(category); //savepoint 4
     }
 
     @Override
@@ -140,10 +132,11 @@ public class CategoryServiceImp implements CategoryService {
     }
 
     @Override
+    @Transactional
     public void delete(Integer id) {
         Category category = get(id);
         category.getSubCategories().forEach(c -> delete(c.getId()));
-        repository.deleteById(id);
+        repository.deleteById(id); //savepoint n_th
     }
 
     @Override
@@ -152,5 +145,15 @@ public class CategoryServiceImp implements CategoryService {
             return;
         }
         ids.forEach(this::delete);
+    }
+
+    private void checkTitle(String name) {
+        if (name == null || name.isBlank()) {
+            throw new RuntimeException("INVALID_CATEGORY_NAME");
+        }
+
+        if (repository.existsByNameEqualsIgnoreCase(name)) {
+            throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
+        }
     }
 }

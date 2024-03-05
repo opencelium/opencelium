@@ -28,7 +28,10 @@ public class CategoryController {
     private final CategoryService categoryService;
     private final Mapper<Category, CategoryDTO> categoryMapper;
 
-    public CategoryController(@Qualifier("categoryServiceImp") CategoryService categoryService, Mapper<Category, CategoryDTO> categoryMapper) {
+    public CategoryController(
+            @Qualifier("categoryServiceImp") CategoryService categoryService,
+            Mapper<Category, CategoryDTO> categoryMapper
+    ) {
         this.categoryService = categoryService;
         this.categoryMapper = categoryMapper;
     }
@@ -83,12 +86,12 @@ public class CategoryController {
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> add(@RequestBody CategoryDTO dto) {
-        Category add = categoryService.add(dto);
+        Integer id = categoryService.add(dto);
 
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .buildAndExpand().toUri();
-        return ResponseEntity.created(uri).body(categoryMapper.toDTO(add));
+        return ResponseEntity.created(uri).body(categoryMapper.toDTO(categoryService.get(id)));
     }
 
     @Operation(summary = "Modifies a category by provided connection ID and accepting category data in request body.")
@@ -106,8 +109,8 @@ public class CategoryController {
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody CategoryDTO dto) {
         dto.setId(id);
-        Category updated = categoryService.update(dto);
-        return ResponseEntity.ok(categoryMapper.toDTO(updated));
+        categoryService.update(dto);
+        return ResponseEntity.ok(categoryMapper.toDTO(categoryService.get(id)));
     }
 
     @Operation(summary = "Deletes a category by provided connection ID")
