@@ -201,6 +201,9 @@ public class ConnectorExecutor {
             pagination = pagination.clone();
             executionContainer.setPagination(pagination);
         }
+        if (!functionInvoker.getType().equals("page")) {
+            pagination = null;
+        }
 
         boolean has_more = false;
         ResponseEntity<String> responseEntity;
