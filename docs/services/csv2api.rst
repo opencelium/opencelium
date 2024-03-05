@@ -11,11 +11,63 @@ Installation
 
 .. code-block:: sh
         :linenos:
+	
+	root@shell> mkdir /opt/services
+	root@shell> cd /opt/services/
+	root@shell> git clone https://github.com/opencelium/csv2api.git
+	root@shell> cd csv2api/
+	root@shell> gradle build
+	root@shell> cd build/libs/
+	root@shell> java -jar csvtoapi-0.0.1-SNAPSHOT.jar
 
-        root@shell> cd /opt/services
-        root@shell> git clone https://github.com/opencelium/csv2api.git
+Additional Information are available at github (https://github.com/opencelium/csv2api)
 
-Please read default documentation here https://github.com/opencelium/csv2api#how-to-start
+Afterwords please download the CSV2api Invoker file from the service portal (https://service.opencelium.io) an import it into you OpenCelium instance.
+
+Serv file through HTTP
+"""""""""""""""""
+
+To load the csv file its has to be available through http / https.
+
+**Adhoc**
+
+This can for example be achieved with a simple HTTP Server.
+Copy the csv file to a folder you like on a linux server and afterwords execute
+
+.. code-block:: sh
+        :linenos:
+	
+	root@shell> python3 -m http.server 8123
+
+Afterwords you can see  all files at the following address: 
+http://[MyLinuxServer]:8123/
+
+The URL for the Connector would be:
+http://[Csv2APIServer]:8080?source=http://[MyLinuxServer]:8123/my-test.csv
+
+**Permanent**
+
+.. code-block:: sh
+        :linenos:
+
+	root@shell> mkdir /opt/csv2api/
+
+Copy your csv file into this folder.
+Change Nginx config an add the following Code:
+
+.. code-block:: JSON
+
+	location /csv2api {
+		autoindex on;
+		alias /opt/csv2api;
+	}
+
+Afterwords you can see  all files at the following address:
+http://[MyLinuxServer]/csv2api/
+
+The URL for the Connector would be:
+http://[Csv2APIServer]:8080?source=http://[MyLinuxServer]/csv2api//my-test.csv
+
 
 Usage
 """""""""""""""""
