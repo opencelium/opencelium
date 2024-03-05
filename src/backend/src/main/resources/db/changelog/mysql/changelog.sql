@@ -363,10 +363,10 @@ SELECT VERSION();
 ALTER TABLE connector CHANGE ssl_cert ssl_validation tinyint(4);
 
 --changeset 3.2.1:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-ALTER TABLE connection CHANGE name title varchar(45);
+ALTER TABLE connection CHANGE IF EXname title varchar(45);
 ALTER TABLE enhancement CHANGE name title varchar(255);
 ALTER TABLE enhancement CHANGE expert_code script text;
-ALTER TABLE enhancement CHANGE expert_var args text(45);
+ALTER TABLE enhancement CHANGE expert_var args text(1000);
 
 
 
