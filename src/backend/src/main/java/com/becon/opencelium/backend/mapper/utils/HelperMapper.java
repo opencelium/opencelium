@@ -2,12 +2,11 @@ package com.becon.opencelium.backend.mapper.utils;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
+import com.becon.opencelium.backend.database.mysql.entity.Category;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
-import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
-import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
-import com.becon.opencelium.backend.database.mysql.service.RequestDataService;
+import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.mongo.FieldBindingMngMapper;
@@ -23,13 +22,17 @@ import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
+import com.becon.opencelium.backend.resource.schedule.CategoryDTO;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Mapper(
         componentModel = "spring",
@@ -86,6 +89,11 @@ public abstract class HelperMapper {
     @Autowired
     @Lazy
     private ConnectorResourceMapper connectorResourceMapper;
+
+    @Autowired
+    @Qualifier("categoryServiceImp")
+    @Lazy
+    private CategoryService categoryService;
 
 
     @Named("toConnectorDTO")
@@ -176,8 +184,33 @@ public abstract class HelperMapper {
     }
 
     @Named("getEnhancementDTOById")
-    public EnhancementDTO getEnhancementDTOById(Integer id){
+    public EnhancementDTO getEnhancementDTOById(Integer id) {
         Enhancement enhancement = enhancementService.getById(id);
         return enhancementMapper.toDTO(enhancement);
     }
+
+    @Named("mapCategoriesToIds")
+    public Set<Integer> mapCategoriesToIds(Set<Category> categories) {
+        if (categories == null) {
+            return null;
+        }
+        return categories.stream().map(Category::getId).collect(Collectors.toSet());
+    }
+
+    @Named("getCategoryById")
+    public Category getCategoryById(Integer id) {
+        if (id == null) {
+            return new Category();
+        }
+        return categoryService.get(id);
+    }
+
+    @Named("getCategoriesByIds")
+    public Set<Category> getCategoriesByIds(Set<Integer> ids) {
+        if (ids == null) {
+            return new HashSet<>();
+        }
+        return new HashSet<>(categoryService.getAllByIds(ids));
+    }
+
 }

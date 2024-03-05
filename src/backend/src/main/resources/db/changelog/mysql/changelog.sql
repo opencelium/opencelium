@@ -401,3 +401,11 @@ alter table connection_history
     add constraint connection_history_ibfk_1
         foreign key (connection_id) references connection (id)
             on delete cascade;
+
+--changeset 4.0:12 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE category (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    parent_category INT,
+    FOREIGN KEY (parent_category) REFERENCES category(id)
+);
