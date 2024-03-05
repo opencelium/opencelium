@@ -26,16 +26,16 @@ public class Enhancement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "title")
+    @Column(name = "name")
     private String name;
 
     @Column(name = "description")
     private String description;
 
-    @Column(name = "script")
+    @Column(name = "expert_code")
     private String expertCode;
 
-    @Column(name = "args")
+    @Column(name = "expert_var")
     private String expertVar;
 
     @Column(name = "simple_code")
