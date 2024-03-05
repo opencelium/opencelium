@@ -38,7 +38,7 @@ public class Connection   {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "title")
     private String name;
 
     @Column(name = "description")
