@@ -26,7 +26,7 @@ public class Enhancement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "title")
+    @Column(name = "name")
     private String name;
 
     @Column(name = "description")
