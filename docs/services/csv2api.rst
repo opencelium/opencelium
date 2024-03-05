@@ -6,79 +6,61 @@ csv2api
 	csv2api is a subscription connector. Make sure that you have already got your subscription. If in doubt, contact our support support@opencelium.io.
 
 
-# Installation
-```
-mkdir /opt/services
-cd /opt/services/
-git clone https://github.com/opencelium/csv2api.git
-cd csv2api/
-gradle build
-cd build/libs/
-java -jar csvtoapi-0.0.1-SNAPSHOT.jar
-```
+Installation
+"""""""""""""""""
 
-additional Information are available at github (https://github.com/opencelium/csv2api)
+.. code-block:: sh
+        :linenos:
 
-Afterwords please download the CSV2api Invoker file from the service portal (https://service.opencelium.io) an import it into you OpenCelium instance.
-# Serv file through HTTP
+        root@shell> cd /opt/services
+        root@shell> git clone https://github.com/opencelium/csv2api.git
 
- To load the csv file its has to be available through http / https.
-## Adhoc
+Please read default documentation here https://github.com/opencelium/csv2api#how-to-start
 
-This can for example be achieved with a simple HTTP Server.
-Copy the csv file to a folder you like on a linux server and afterwords execute
-``python3 -m http.server 8123``
+Usage
+"""""""""""""""""
 
-Afterwords you can see  all files at the following address:
-http://[MyLinuxServer]:8123/
+First of all add a connector to your db.
 
-The URL for the Connector would be:
-http://[Csv2APIServer]:8080?source=http://[MyLinuxServer]:8123/my-test.csv
+|image0|
 
-## Permanent
+After that you can use it in a connection. Add a GetDataSources process to make a request to retrieve data from csv.
 
-```
-mkdir /opt/csv2api/
-```
-
-Copy your csv file into this folder.
-Change Nginx config an add the following Code:
-
-```
-location /csv2api {
-		autoindex on;
-		alias /opt/csv2api;
-    }
-```
-
-Afterwords you can see  all files at the following address:
-http://[MyLinuxServer]/csv2api/
-
-The URL for the Connector would be:
-http://[Csv2APIServer]:8080?source=http://[MyLinuxServer]/csv2api//my-test.csv
-
-# Usage
- 
-First of all add a Conenctor to your csv file. Be sure your csv file does not have empty columns at the end.
-![Image0](../img/services/csv2api/0.png)
-
-Within the connector username and password could not be empty but this don't need to be valid user. Just enter something random to be able to save the connector.
-Next step would be to create a connection and within this connection you are able to use the GetDataSource function to read yourt csv as a json.
-
-![Image1](../img/services/csv2api/1.png)
-
-# Addtional Service
-
-With the standard invoker file above you just have a basic connection to your csv file. User with a subscription will have access to the "CSV Connector Generator". 
-
-![Image2](../img/services/csv2api/2.png)
-
-With this generator you have a easy possibility, to create a specific invoker matching your csv file.
-With this you will have all the column headers from your csv file available as fields within the connection.
-
-Just provide a name and choose your csv file.
-![Image3](../img/services/csv2api/3.png)
+|image1|
 
 
-There is also a list of already converted files.
-![Image4](../img/services/csv2api/4.png)
+Additional Service
+"""""""""""""""""
+
+User **with subscription** has an access to Service Portal. There is a tool for easy conversion
+a csv file into an invoker file.
+
+|image2|
+
+In general data section you need to provide a name, an authentication type and a csv file.
+
+|image3|
+
+There is also a list of already converted files as a history. You can make such manipulations there, like:
+download, edit or delete.
+
+|image4|
+
+
+.. |image0| image:: ../img/services/csv2api/0.png
+   :align: middle
+
+.. |image1| image:: ../img/services/csv2api/1.png
+   :align: middle
+
+.. |image2| image:: ../img/services/csv2api/2.png
+   :align: middle
+   :width: 300
+
+.. |image3| image:: ../img/services/csv2api/3.png
+   :align: middle
+
+.. |image4| image:: ../img/services/csv2api/4.png
+   :align: middle
+
+
