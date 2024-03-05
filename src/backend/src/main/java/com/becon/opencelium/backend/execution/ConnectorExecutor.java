@@ -726,7 +726,8 @@ public class ConnectorExecutor {
         List<Object> array;
         if (statementNode.getOperand().equals("SplitString")) {
             Object leftVariable = getValue(statementNode.getLeftStatementVariable(), "");
-            array = Arrays.asList(leftVariable.toString().split(statementNode.getRightStatementVariable().getFiled()));
+            String[] s = leftVariable.toString().split(statementNode.getRightStatementVariable().getFiled());
+            array = Arrays.asList(s);
         } else {
             array = (List<Object>) message.getValue(condition, loopIterators);
         }
