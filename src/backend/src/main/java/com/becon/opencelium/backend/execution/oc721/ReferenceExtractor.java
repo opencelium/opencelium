@@ -181,7 +181,7 @@ public class ReferenceExtractor implements Extractor {
 
         // extract value
         String exchangeType = getExchangeType(ref);
-        String key = executionManager.generateKey();
+        String key = executionManager.generateKey(operation.getLoopDepth());
 
         String entityBody;
         MediaType mediaType;

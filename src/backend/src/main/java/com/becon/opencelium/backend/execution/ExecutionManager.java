@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface ExecutionManager {
     Map<String, Object> getQueryParams();
     LinkedHashMap<String, String> getLoops();
-    String generateKey();
+    String generateKey(int loopDepth);
     Map<String, String> getRequestData(Integer ctorId);
     Optional<Operation> findOperationByColor(String color);
     Object executeScript(String bindId);

@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.resource.execution;
 
-import com.becon.opencelium.backend.enums.DataTypeEnum;
 
 public enum DataType {
     STRING("string"),
@@ -19,17 +18,5 @@ public enum DataType {
 
     public String getType() {
         return type;
-    }
-
-    public static DataType getEnumType(String type) {
-        return switch (type.toUpperCase()) {
-            case "NUM" -> NUMBER;
-            case "INT" -> INTEGER;
-            case "ARR" -> ARRAY;
-            case "OBJ" -> OBJECT;
-            case "STR" -> STRING;
-            case "BOOL" -> BOOLEAN;
-            default -> throw new RuntimeException("Dara type " + type + " not found");
-        };
     }
 }
