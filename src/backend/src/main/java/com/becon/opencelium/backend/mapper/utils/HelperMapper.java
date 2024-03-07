@@ -22,7 +22,6 @@ import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
-import com.becon.opencelium.backend.resource.schedule.CategoryDTO;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -106,7 +105,7 @@ public abstract class HelperMapper {
         if (connector != null) {
             connectorDTO.setIcon(connector.getIcon());
             connectorDTO.setTimeout(connector.getTimeout());
-            connectorDTO.setSslCert(connector.isSslCert());
+            connectorDTO.setSslCert(connector.isSslValidation());
             connectorDTO.setInvoker(getInvokerDTO(connector.getInvoker()));
         }
         return connectorDTO;
