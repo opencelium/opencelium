@@ -18,25 +18,25 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.PriorityQueue;
 
 public class ConnectorExecutor {
     private final Connector connector;
     private final ExecutionManager executionManager;
     private final RestTemplate restTemplate;
-    // stores OperationDTO and OperatorEx in sorted order by their 'execOrder' and 'index' respectively;
-    private final PriorityQueue<Object> executables;
+    private final List<Object> executables;
 
     public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate) {
         this.executionManager = executionManager;
         this.restTemplate = restTemplate;
 
-        this.executables = new PriorityQueue<>(getComparator());
+        this.executables = new ArrayList<>();
         this.executables.addAll(connectorEx.getMethods());
         this.executables.addAll(connectorEx.getOperators());
+        this.executables.sort(getComparator());
 
         this.connector = Connector.fromEx(connectorEx);
     }
@@ -45,52 +45,60 @@ public class ConnectorExecutor {
         // set id of currently executing connector
         executionManager.setCurrentCtorId(connector.getId());
 
-        // start connector execution
-        List<Object> body;
+        int headPointer = 0;
 
-        while (!executables.isEmpty()) {
-            Object current = executables.peek();
+        while (headPointer < executables.size()) {
+            int tailPointer = getTailPointer(headPointer);
 
-            String head = getIndex(current);
-            body = new ArrayList<>();
+            execute(headPointer, tailPointer, false, -1, -1);
 
-            while (current != null && getIndex(current).startsWith(head)) {
-
-                body.add(executables.poll());
-
-                // 'current' evaluates to null if queue become empty
-                current = executables.peek();
-            }
-
-            execute(body, 0);
+            headPointer = tailPointer + 1;
         }
     }
 
-    private void execute(List<Object> body, int index) {
-        // if 'body' is empty, then no need to execute
-        // If 'index' = 'body.size' then all are executed so stop the recursion
-        if (body.isEmpty() || body.size() <= index) {
+    private void execute(int headPointer, int tailPointer, boolean hasCircle, int loopHead, int loopTail) {
+        if (headPointer > tailPointer) {
             return;
         }
 
-        if (body.get(index) instanceof OperationDTO) {
-            executeOperation(body, index);
-        } else {
-            OperatorEx current = (OperatorEx) body.get(index);
+        int tail = getTailPointer(headPointer);
 
-            if (Objects.equals(current.getType(), "if")) {
-                executeIfOperator(body, index);
-            } else if (current.getIterator() != null) {
-                executeForOperator(body, index);
-            } else {
-                executeForInOperator(body, index);
+        if (executables.get(headPointer) instanceof OperationDTO operation) {
+            if (headPointer != tail) {
+                throw new RuntimeException("Methods cannot have body");
             }
+
+            System.out.println("Function before: -- index: " + operation.getExecOrder() + " " + Arrays.toString(getNextIndex(headPointer, hasCircle, loopHead, loopTail)));
+            executeOperation(operation);
+        } else if (executables.get(headPointer) instanceof OperatorEx operator) {
+            if (Objects.equals(operator.getType(), "if")) {
+                System.out.println("IF before: -- index: " + operator.getIndex() + " " + Arrays.toString(getNextIndex(headPointer, hasCircle, loopHead, loopTail)));
+                boolean result = executeIfOperator(operator);
+
+                if (result) {
+                    System.out.println("IF after: -- index: " + operator.getIndex() + " " + Arrays.toString(getNextIndex(headPointer, hasCircle, loopHead, loopTail)));
+                    execute(headPointer + 1, tail, hasCircle, loopHead, loopTail);
+                } else {
+                    System.out.println("IF after: -- index: " + operator.getIndex() + " " + Arrays.toString(getNextIndex(tail, hasCircle, loopHead, loopTail)));
+                }
+            } else {
+                int length = executeForOperator(operator);
+
+                for (int i = 0; i < length; i++) {
+                    executionManager.getLoops().put(operator.getIterator(), String.valueOf(i));
+                    execute(headPointer + 1, tail, i < length - 1, headPointer, tail);
+                }
+                System.out.println("LOOP after: -- index: " + operator.getIndex() + " " + Arrays.toString(getNextIndex(tail, hasCircle, loopHead, loopTail)));
+                executionManager.getLoops().remove(operator.getIterator());
+            }
+        } else {
+            throw new RuntimeException("Wrong type is supplied");
         }
+
+        execute(tail + 1, tailPointer, hasCircle, loopHead, loopTail);
     }
 
-    private void executeOperation(List<Object> body, int index) {
-        OperationDTO operationDTO = (OperationDTO) body.get(index);
-
+    private void executeOperation(OperationDTO operationDTO) {
         RequestEntity<?> requestEntity = RequestEntityBuilder.start()
                 .forOperation(operationDTO)
                 .usingReferences(this::resolveReferences)
@@ -112,66 +120,64 @@ public class ConnectorExecutor {
 
         operation.addRequest(key, requestEntity);
         operation.addResponse(key, responseEntity);
-
-        execute(body, ++index);
     }
 
-    private void executeIfOperator(List<Object> body, int index) {
-        OperatorEx operatorDTO = (OperatorEx) body.get(index);
-
+    private boolean executeIfOperator(OperatorEx operatorDTO) {
         ConditionEx condition = operatorDTO.getCondition();
         Object leftValue = executionManager.getValue(condition.getLeft());
         Object rightValue = executionManager.getValue(condition.getRight());
 
         Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(condition.getRelationalOperator());
 
-        boolean result = operator.apply(leftValue, rightValue);
-
-        String currentExecOrder = getIndex(operatorDTO); // 'execOrder'('index') of 'IfOperator'
-
-        // 'IfOperator' is executed already so start from 'index+1'
-        for (index++; index < body.size(); index++) {
-            String nextExecOrder = getIndex(body.get(index));
-
-            // when 'result' == true, then increase 'index' and continue executing body of 'IfOperator';
-            // when 'result' == false, then increase 'index' to skip 'body' of 'IfOperator'.
-            if (result || !nextExecOrder.startsWith(currentExecOrder)) {
-                break;
-            }
-        }
-
-        execute(body, index);
+        return operator.apply(leftValue, rightValue);
     }
 
-    private void executeForOperator(List<Object> body, int index) {
-        OperatorEx operatorDTO = (OperatorEx) body.get(index);
+    private int executeForOperator(OperatorEx operatorDTO) {
         String leftValueReference = operatorDTO.getCondition().getLeft();
 
         List<Object> loopingList = (List<Object>) executionManager.getValue(leftValueReference);
 
-        if (ObjectUtils.isEmpty(loopingList)) {
-            return;
-        }
-
-        // move index to execute body of 'for' operator
-        index++;
-        for (int i = 0; i < loopingList.size(); i++) {
-            // add/update current loops' 'iterator' and 'value'
-            executionManager.getLoops().put(operatorDTO.getIterator(), String.valueOf(i));
-            execute(body, index);
-        }
-        // remove executed loop from ExecutionManager
-        executionManager.getLoops().remove(operatorDTO.getIterator());
-    }
-
-    private void executeForInOperator(List<Object> body, int index) {
-        // TODO: need to implement
+        return ObjectUtils.isEmpty(loopingList) ? 0 : loopingList.size();
     }
 
     private SchemaDTO resolveReferences(String ref) {
         Object value = executionManager.getValue(ref);
 
         return SchemaDTOUtil.fromObject(value);
+    }
+
+    private int getTailPointer(int headPointer) {
+        String index = getIndex(executables.get(headPointer));
+
+        for (headPointer++; headPointer < executables.size(); headPointer++) {
+            if (!getIndex(executables.get(headPointer)).startsWith(index)) {
+                break;
+            }
+        }
+
+        return headPointer - 1;
+    }
+
+    private String[] getNextIndex(int lastExecuted, boolean hasCircle, int loopHead, int loopTail) {
+        String[] result = new String[2];
+        Object next;
+        if (hasCircle && lastExecuted == loopTail) {
+            next = executables.get(loopHead + 1);
+        } else if (lastExecuted + 1 < executables.size()){
+            next = executables.get(lastExecuted + 1);
+        } else {
+            return result;
+        }
+
+        String index = getIndex(next);
+
+        if (next instanceof OperationDTO) {
+            result[0] = index;
+        } else {
+            result[1] = index;
+        }
+
+        return result;
     }
 
     private static Comparator<Object> getComparator() {
