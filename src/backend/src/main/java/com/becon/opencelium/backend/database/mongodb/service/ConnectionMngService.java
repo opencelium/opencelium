@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ConnectionMngService {
     ConnectionMng save(ConnectionMng connectionMng);
-    void update(ConnectionMng connectionMng);
+    void updateAndBind(ConnectionMng old, ConnectionMng connectionMng);
     ConnectionMng saveDirectly(ConnectionMng connectionMng);
     ConnectionMng getByConnectionId(Long connectionId);
     List<ConnectionMng> getAll();

@@ -144,6 +144,73 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionDTO));
     }
 
+    @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully created",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> save(@RequestBody ConnectionOldDTO connectionOldDTO) throws Exception {
+        ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
+        Connection connection = connectionMapper.toEntity(connectionDTO);
+        ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
+        ConnectionMng savedConnection = connectionService.save(connection, connectionMng);
+        ConnectionDTO dto = connectionService.getFullConnection(savedConnection.getConnectionId());
+
+        final URI uri = MvcUriComponentsBuilder
+                .fromController(getClass())
+                .buildAndExpand().toUri();
+        return ResponseEntity.created(uri).body(connectionOldDTOMapper.toDTO(dto));
+    }
+
+    @Operation(summary = "Modifies a connection by provided connection ID and accepting connection data in request body.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully modified",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping(path = "/{connectionId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> update(@PathVariable Long connectionId, @RequestBody ConnectionOldDTO connectionOldDTO) throws Exception {
+        ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
+        Connection connection = connectionMapper.toEntity(connectionDTO);
+        ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
+        connection.setId(connectionId);
+
+        connectionService.update(connection, connectionMng);
+        return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionService.getFullConnection(connectionId)));
+    }
+
+    @Operation(summary = "Deletes a connection by provided connection ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Connection has been successfully deleted.",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+        connectionService.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "Creates an empty connection and returns it's id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -315,56 +382,6 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionDTO);
     }
 
-
-    @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Connection has been successfully created",
-                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> save(@RequestBody ConnectionOldDTO connectionOldDTO) throws Exception {
-        ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
-        Connection connection = connectionMapper.toEntity(connectionDTO);
-        ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
-        ConnectionMng savedConnection = connectionService.save(connection, connectionMng);
-        ConnectionDTO dto = connectionService.getFullConnection(savedConnection.getConnectionId());
-
-        final URI uri = MvcUriComponentsBuilder
-                .fromController(getClass())
-                .buildAndExpand().toUri();
-        return ResponseEntity.created(uri).body(connectionOldDTOMapper.toDTO(dto));
-    }
-
-    @Operation(summary = "Modifies a connection by provided connection ID and accepting connection data in request body.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Connection has been successfully modified",
-                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @PutMapping(path = "/{connectionId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> update(@PathVariable Long connectionId, @RequestBody ConnectionOldDTO connectionOldDTO) throws Exception {
-        ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
-        Connection connection = connectionMapper.toEntity(connectionDTO);
-        ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
-        connection.setId(connectionId);
-
-        connectionService.update(connection, connectionMng);
-        return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionService.getFullConnection(connectionId)));
-    }
-
     @Operation(summary = "Validates a connection for correctly constructed structure")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -379,24 +396,6 @@ public class ConnectionController {
     @PostMapping(path = "/validate", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> validate(@RequestBody ConnectionDTO connectionDTO) throws Exception {
         return ResponseEntity.badRequest().build();
-    }
-
-    @Operation(summary = "Deletes a connection by provided connection ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204",
-                    description = "Connection has been successfully deleted.",
-                    content = @Content),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @DeleteMapping(path = "/{id}")
-    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-        connectionService.deleteById(id);
-        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Validates name of connection for uniqueness")
