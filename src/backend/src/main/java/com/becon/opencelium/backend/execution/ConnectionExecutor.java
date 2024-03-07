@@ -4,7 +4,7 @@ import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
-import com.becon.opencelium.backend.resource.execution.ConnectorEx;
+import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
@@ -19,10 +19,10 @@ public class ConnectionExecutor {
     private final ConnectionEx connection;
     private final ProxyEx proxy;
 
-    public ConnectionExecutor(Map<String, Object> queryParams, ConnectionEx connection, ProxyEx proxy) {
-        this.queryParams = queryParams;
-        this.connection = connection;
-        this.proxy = proxy;
+    public ConnectionExecutor(ExecutionObj executionObj) {
+        this.queryParams = executionObj.getQueryParams();
+        this.connection = executionObj.getConnection();
+        this.proxy = executionObj.getProxy();
     }
 
     public void start() {
