@@ -1,7 +1,11 @@
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.enums.LogType;
 import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
+import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.operator.Operator;
@@ -28,10 +32,14 @@ public class ConnectorExecutor {
     private final ExecutionManager executionManager;
     private final RestTemplate restTemplate;
     private final List<Object> executables;
+    private final OcLogger<ExecutionLog> logger;
+    private final String direction;
 
-    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate) {
+    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, String direction) {
         this.executionManager = executionManager;
         this.restTemplate = restTemplate;
+        this.logger = logger;
+        this.direction = direction;
 
         this.executables = new ArrayList<>();
         this.executables.addAll(connectorEx.getMethods());
@@ -42,6 +50,9 @@ public class ConnectorExecutor {
     }
 
     public void start() {
+        logger.getLogEntity().setType(LogType.INFO);
+        logger.getLogEntity().setConnector( new ConnectorLog(null, direction));
+
         // set id of currently executing connector
         executionManager.setCurrentCtorId(connector.getId());
 
