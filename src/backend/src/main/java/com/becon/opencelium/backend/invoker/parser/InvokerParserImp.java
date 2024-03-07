@@ -285,8 +285,12 @@ public class InvokerParserImp {
                 PageParamRule rule = new PageParamRule();
                 rule.setValue(node.getTextContent());
                 rule.setParam(param);
-                rule.setAction(PageParamAction.fromString(node.getAttributes().getNamedItem("action").getNodeValue()));
-                rule.setRef(node.getAttributes().getNamedItem("ref").getNodeValue());
+                if (node.getAttributes().getNamedItem("action") != null) {
+                    rule.setAction(PageParamAction.fromString(node.getAttributes().getNamedItem("action").getNodeValue()));
+                }
+                if (node.getAttributes().getNamedItem("ref") != null) {
+                    rule.setRef(node.getAttributes().getNamedItem("ref").getNodeValue());
+                }
                 return rule;
             });
             if (pageParamRule == null) {
