@@ -116,7 +116,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 
 	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
-    
+
 4. Start frontend
 
 .. code-block:: sh
@@ -257,23 +257,23 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 .. code-block:: sh
 	:linenos:
 
-    cd src/frontend
-    yarn
-    echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p // increasing the amount of inotify watchers
+	cd src/frontend
+	yarn
+	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p // increasing the amount of inotify watchers
 
 3. Enable OC service
 
 .. code-block:: sh
 	:linenos:
 
-    ln -s /opt/scripts/oc_service.sh /usr/bin/oc
+	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
 
 4. Start frontend
 
 .. code-block:: sh
 	:linenos:
 
-    oc start_frontend
+	oc start_frontend
 
 5. Create application.yml file for backend
 
@@ -305,7 +305,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 .. code-block:: sh
 	:linenos:
 
-    oc start_backend
+	oc start_backend
 
 9. Welcome to OC
 
@@ -420,7 +420,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 .. code-block:: sh
 	:linenos:
 
-    cd src/frontend
+	cd src/frontend
 	yarn
 	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p // increasing the amount of inotify watchers
 
@@ -429,8 +429,8 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 .. code-block:: sh
 	:linenos:
 
-    ln -s /opt/scripts/oc_service.sh /usr/bin/oc
-    oc start_frontend
+	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
+	oc start_frontend
 
 
 4. Create application.yml file for backend
@@ -463,7 +463,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 .. code-block:: sh
 	:linenos:
 
-    oc start_backend
+	oc start_backend
 
 8. Welcome to OC
 
@@ -605,7 +605,7 @@ DEB package for Ubuntu 22.04 LTS
 .. code-block:: sh
 	:linenos:
 
-    mysql_secure_installation
+	mysql_secure_installation
 
 2. Modify application.yml file for backend:
 
@@ -620,7 +620,7 @@ DEB package for Ubuntu 22.04 LTS
 .. code-block:: sh
 	:linenos:
 
-    oc restart_backend
+	oc restart_backend
 
 4. Welcome to OC:
 
@@ -667,8 +667,8 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 .. code-block:: sh
 	:linenos:
 
-    curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
-    yum install OpenCelium
+	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
+	yum install OpenCelium
 
 **Configure environment:**
 
@@ -677,7 +677,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 .. code-block:: sh
 	:linenos:
 
-    mysql_secure_installation
+	mysql_secure_installation
 
 2. Modify application.yml file for backend:
 
@@ -692,7 +692,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 .. code-block:: sh
 	:linenos:
 
-    oc restart_backend
+	oc restart_backend
 
 4. Welcome to OC:
 
