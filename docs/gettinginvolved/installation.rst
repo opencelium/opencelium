@@ -91,13 +91,12 @@ Debian/Ubuntu (example for 22.04 LTS)
 	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"  // change password if you want
 	mysql --version // to check
 
-
-"""""""""""""""""
 **Install Application:**
 
 1. Get frontend repository
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt
 	git clone -b v3.2 https://github.com/opencelium/opencelium.git . // Get stable versions here https://github.com/opencelium/opencelium/tags
@@ -105,6 +104,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 2. Build frontend project
 
 .. code-block:: sh
+	:linenos:
 
 	cd src/frontend
 	yarn
@@ -113,18 +113,21 @@ Debian/Ubuntu (example for 22.04 LTS)
 3. Enable OC service
 
 .. code-block:: sh
+	:linenos:
 
     ln -s /opt/scripts/oc_service.sh /usr/bin/oc
 
 4. Start frontend
 
 .. code-block:: sh
+	:linenos:
 
     oc start_frontend
 
 5. Create application.yml file for backend
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt/src/backend
 	cp src/main/resources/application_default.yml src/main/resources/application.yml
@@ -133,6 +136,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 6. Install database 
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt/src/backend/database
 	mysql -u root -p -e "source oc_data.sql"
@@ -140,6 +144,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 7. Build backend project
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt/src/backend/
 	gradle build
@@ -147,12 +152,14 @@ Debian/Ubuntu (example for 22.04 LTS)
 8. Start backend
 
 .. code-block:: sh
+	:linenos:
 
     oc start_backend
 
 9. Welcome to OC
 
 .. code-block:: sh
+	:linenos:
 	
 	Visit opencelium http://SERVERIP:8888
 
