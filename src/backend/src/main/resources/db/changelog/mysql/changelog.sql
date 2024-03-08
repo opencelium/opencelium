@@ -409,3 +409,6 @@ CREATE TABLE category (
     parent_category INT,
     FOREIGN KEY (parent_category) REFERENCES category(id)
 );
+
+--changeset 4.0:13 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connector CHANGE ssl_cert ssl_validation tinyint(4);
