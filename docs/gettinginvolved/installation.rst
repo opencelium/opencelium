@@ -547,7 +547,7 @@ DEB package for Ubuntu 22.04 LTS
 .. code-block:: sh
 	:linenos:
 
-    apt install -y openjdk-17-jdk
+	apt install -y java-17-openjdk
 
 3. Install neo4j:
 
@@ -562,7 +562,7 @@ DEB package for Ubuntu 22.04 LTS
 
 **Install Application:**
 
-1. Install deb package for OpenCelium
+1. Install deb package for OpenCelium:
 
 .. code-block:: sh
 
@@ -571,26 +571,26 @@ DEB package for Ubuntu 22.04 LTS
 
 **Configure environment:**
 
-1. Secure MySql and set root password (strongly recommended for new MySql installations)
+1. Secure MySql and set root password (strongly recommended for new MySql installations):
 
 .. code-block:: sh
 
     mysql_secure_installation
 
-2. Modify application.yml file for backend
+2. Modify application.yml file for backend:
 
 .. code-block:: sh
 
 	cd /opt/src/backend/main/resources
     // make changes inside of application.yml. Change neo4j and mysql database password.
 
-3. Restart backend
+3. Restart backend:
 
 .. code-block:: sh
 
     oc restart_backend
 
-4. Welcome to OC
+4. Welcome to OC:
 
 .. code-block:: sh
 	
@@ -614,7 +614,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 .. code-block:: sh
 	:linenos:
 
-    zypper install java-17-openjdk
+	zypper install java-17-openjdk
 
 3. Install neo4j:
 
@@ -629,7 +629,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 
 **Install Application:**
 
-1. Install rpm package for OpenCelium
+1. Install rpm package for OpenCelium:
 
 .. code-block:: sh
 
@@ -638,26 +638,26 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 
 **Configure environment:**
 
-1. Secure MySql and set root password (strongly recommended for new MySql installations)
+1. Secure MySql and set root password (strongly recommended for new MySql installations):
 
 .. code-block:: sh
 
     mysql_secure_installation
 
-2. Modify application.yml file for backend
+2. Modify application.yml file for backend:
 
 .. code-block:: sh
 
 	cd /opt/src/backend/main/resources
     // make changes inside of application.yml. Change neo4j and mysql database password.
 
-3. Restart backend
+3. Restart backend:
 
 .. code-block:: sh
 
     oc restart_backend
 
-4. Welcome to OC
+4. Welcome to OC:
 
 .. code-block:: sh
 	
