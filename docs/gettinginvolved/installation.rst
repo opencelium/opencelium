@@ -534,7 +534,7 @@ DEB package for Ubuntu 22.04 LTS
 """""""""""""""""
 **Prepare environment:**
 
-1. Update Debian/Ubuntu system:
+1. Update Ubuntu system:
 
 .. code-block:: sh
 	:linenos:
@@ -601,6 +601,13 @@ DEB package for Ubuntu 22.04 LTS
 RPM package for SUSE Linux Enterprise Server 15 SP5
 """""""""""""""""
 **Prepare environment:**
+
+1. Update SUSE system:
+
+.. code-block:: sh
+	:linenos:
+
+	root@shell> zypper update
 
 1. Install java:
 
