@@ -381,12 +381,12 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 
 	rpm --import https://debian.neo4j.com/neotechnology.gpg.key
 	cat <<EOF>  /etc/yum.repos.d/neo4j.repo
-				[neo4j]
-				name=Neo4j RPM Repository
-				baseurl=https://yum.neo4j.com/stable/5
-				enabled=1
-				gpgcheck=1
-				EOF
+	[neo4j]
+	name=Neo4j RPM Repository
+	baseurl=https://yum.neo4j.com/stable/5
+	enabled=1
+	gpgcheck=1
+	EOF
 	yum install neo4j-5.7.0-1
 	/usr/bin/neo4j-admin set-initial-password secret1234 // change password if you want
 	systemctl start neo4j
@@ -586,7 +586,10 @@ DEB package for Ubuntu 22.04 LTS
 	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
 	apt update
 	apt install install neo4j=1:5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
+	
+	.. note::
+	Change password (secret1234) if you want.
 
 **Install Application:**
 
@@ -613,7 +616,9 @@ DEB package for Ubuntu 22.04 LTS
 	:linenos:
 
 	cd /opt/src/backend/main/resources
-	// make changes inside of application.yml. Change neo4j and mysql database password.
+
+.. note::	
+	Make changes inside of application.yml. Change neo4j and mysql database password.
 
 3. Restart backend:
 
@@ -657,8 +662,11 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	zypper addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
 	zypper refresh
 	zypper install neo4j-5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234 
 	zypper install insserv
+
+.. note::
+	Change password (secret1234) if you want.
 
 **Install Application:**
 
@@ -668,6 +676,90 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	:linenos:
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
+	zypper install OpenCelium
+
+**Configure environment:**
+
+1. Secure MySql and set root password (strongly recommended for new MySql installations):
+
+.. code-block:: sh
+	:linenos:
+
+	mysql_secure_installation
+
+2. Modify application.yml file for backend:
+
+.. code-block:: sh
+	:linenos:
+
+	cd /opt/src/backend/main/resources
+	
+.. note::	
+	Make changes inside of application.yml. Change neo4j and mysql database password.
+
+
+3. Restart backend:
+
+.. code-block:: sh
+	:linenos:
+
+	oc restart_backend
+
+4. Welcome to OC:
+
+.. code-block:: sh
+	:linenos:
+	
+	Visit opencelium http://SERVERIP
+
+
+RPM package for RedHat 9.2
+"""""""""""""""""
+**Prepare environment:**
+
+1. Update RedHat system:
+
+.. code-block:: sh
+	:linenos:
+
+	yum update
+	yum install pygpgme yum-utils
+	
+.. note::
+	You may need to install the EPEL repository for your system to install these packages. If you do not install pygpgme, GPG verification will not work.
+
+2. Install java:
+
+.. code-block:: sh
+	:linenos:
+
+	yum install java-17-openjdk
+
+3. Install neo4j:
+
+.. code-block:: sh
+	:linenos:
+
+	yum addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
+	yum refresh
+	yum install neo4j-5.7.0
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
+	yum install insserv
+	
+.. note::
+	Change password (secret1234) if you want.
+
+
+**Install Application:**
+
+1. Install rpm package for OpenCelium:
+
+.. code-block:: sh
+	:linenos:
+
+	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
+	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/fedora/40/
+x86_64!' /etc/yum.repos.d/becon_opencelium.repo
 	yum install OpenCelium
 
 **Configure environment:**
@@ -685,7 +777,9 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	:linenos:
 
 	cd /opt/src/backend/main/resources
-	// make changes inside of application.yml. Change neo4j and mysql database password.
+	
+.. note::	
+	Make changes inside of application.yml. Change neo4j and mysql database password.
 
 3. Restart backend:
 
@@ -700,4 +794,3 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	:linenos:
 	
 	Visit opencelium http://SERVERIP
-
