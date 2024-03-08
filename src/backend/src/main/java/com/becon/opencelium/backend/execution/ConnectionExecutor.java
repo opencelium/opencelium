@@ -5,10 +5,13 @@ import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
+import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
@@ -21,6 +24,8 @@ public class ConnectionExecutor {
     private final ConnectionEx connection;
     private final OcLogger<ExecutionLog> logger;
     private final ProxyEx proxy;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     public ConnectionExecutor(ExecutionObj executionObj) {
         this.queryParams = executionObj.getQueryParams();
@@ -28,7 +33,7 @@ public class ConnectionExecutor {
         this.proxy = executionObj.getProxy();
 
         // TODO: logger will be initialized after all necessary fields added to execution object
-        this.logger = null;
+        this.logger = new OcLogger<>(false, simpMessagingTemplate, new ExecutionLog(), JobExecutor.class);
     }
 
     public void start() {
