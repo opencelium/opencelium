@@ -609,14 +609,14 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 
 	root@shell> zypper update
 
-1. Install java:
+2. Install java:
 
 .. code-block:: sh
 	:linenos:
 
     root@shell> zypper install java-17-openjdk
 
-2. Install neo4j:
+3. Install neo4j:
 
 .. code-block:: sh
 	:linenos:
