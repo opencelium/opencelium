@@ -52,7 +52,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 .. code-block:: sh
 	:linenos:
 
-	root@shell> apt install openjdk-17-jdk
+    root@shell> apt install openjdk-17-jdk
 	root@shell> apt install openjdk-17-jre (can be optional)
 	root@shell> java -version // to check
 
@@ -78,8 +78,8 @@ Debian/Ubuntu (example for 22.04 LTS)
 	root@shell> apt install install neo4j=1:5.7.0
 	root@shell> /usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
 	root@shell> service neo4j status  // to check
-        root@shell> service neo4j restart
-        root@shell> systemctl enable neo4j
+    root@shell> service neo4j restart
+    root@shell> systemctl enable neo4j
 
 8. Install MariaDB:
 
@@ -113,13 +113,13 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 .. code-block:: sh
 
-        root@shell> ln -s /opt/scripts/oc_service.sh /usr/bin/oc
+    root@shell> ln -s /opt/scripts/oc_service.sh /usr/bin/oc
 
 4. Start frontend
 
 .. code-block:: sh
 
-        root@shell> oc start_frontend
+    root@shell> oc start_frontend
 
 5. Create application.yml file for backend
 
@@ -147,7 +147,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 .. code-block:: sh
 
-        root@shell> oc start_backend
+    root@shell> oc start_backend
 
 9. Welcome to OC
 
@@ -247,21 +247,21 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 
 .. code-block:: sh
 
-        root@shell> cd src/frontend
-        root@shell> yarn
-        root@shell> echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p // increasing the amount of inotify watchers
+    root@shell> cd src/frontend
+    root@shell> yarn
+    root@shell> echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p // increasing the amount of inotify watchers
 
 3. Enable OC service
 
 .. code-block:: sh
 
-        root@shell> ln -s /opt/scripts/oc_service.sh /usr/bin/oc
+    root@shell> ln -s /opt/scripts/oc_service.sh /usr/bin/oc
 
 4. Start frontend
 
 .. code-block:: sh
 
-        root@shell> oc start_frontend
+    root@shell> oc start_frontend
 
 5. Create application.yml file for backend
 
@@ -289,7 +289,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 
 .. code-block:: sh
 
-        root@shell> oc start_backend
+    root@shell> oc start_backend
 
 9. Welcome to OC
 
@@ -401,7 +401,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 
 .. code-block:: sh
 
-	root@shell> cd src/frontend
+    root@shell> cd src/frontend
 	root@shell> yarn
 	root@shell> echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p // increasing the amount of inotify watchers
 
@@ -409,8 +409,8 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 
 .. code-block:: sh
 
-        root@shell> ln -s /opt/scripts/oc_service.sh /usr/bin/oc
-        root@shell> oc start_frontend
+    root@shell> ln -s /opt/scripts/oc_service.sh /usr/bin/oc
+    root@shell> oc start_frontend
 
 
 4. Create application.yml file for backend
@@ -439,7 +439,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 
 .. code-block:: sh
 
-        root@shell> oc start_backend
+    root@shell> oc start_backend
 
 8. Welcome to OC
 
@@ -528,3 +528,131 @@ Use default Docker installation guide.
 .. code-block:: sh
 
 	root@shell> docker-compose up -d
+
+
+DEB package for Ubuntu 22.04 LTS
+"""""""""""""""""
+**Prepare environment:**
+
+1. Update Debian/Ubuntu system:
+
+.. code-block:: sh
+	:linenos:
+
+	root@shell> apt update
+	root@shell> apt install -y curl gnupg
+
+2. Install java:
+
+.. code-block:: sh
+	:linenos:
+
+    root@shell> apt install -y openjdk-17-jdk
+
+3. Install neo4j:
+
+.. code-block:: sh
+	:linenos:
+
+	root@shell> wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
+	root@shell> echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
+	root@shell> apt update
+	root@shell> apt install install neo4j=1:5.7.0
+	root@shell> /usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
+
+**Install Application:**
+
+1. Install deb package for OpenCelium
+
+.. code-block:: sh
+
+	root@shell> curl -fsSL https://packagecloud.io/becon/opencelium/gpgkey | gpg --dearmor > /usr/share/keyrings/becon_opencelium.gpg
+	root@shell> apt install -y opencelium
+
+**Configure environment:**
+
+1. Secure MySql and set root password (strongly recommended for new MySql installations)
+
+.. code-block:: sh
+
+    root@shell> mysql_secure_installation
+
+2. Modify application.yml file for backend
+
+.. code-block:: sh
+
+	root@shell> cd /opt/src/backend/main/resources
+    root@shell> // make changes inside of application.yml. Change neo4j and mysql database password.
+
+3. Restart backend
+
+.. code-block:: sh
+
+    root@shell> oc restart_backend
+
+4. Welcome to OC
+
+.. code-block:: sh
+	
+	Visit opencelium http://SERVERIP
+
+
+
+RPM package for SUSE Linux Enterprise Server 15 SP5
+"""""""""""""""""
+**Prepare environment:**
+
+1. Install java:
+
+.. code-block:: sh
+	:linenos:
+
+    root@shell> zypper install java-17-openjdk
+
+2. Install neo4j:
+
+.. code-block:: sh
+	:linenos:
+
+	root@shell> zypper addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
+	root@shell> zypper refresh
+	root@shell> zypper install neo4j-5.7.0
+	root@shell> /usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
+	root@shell> zypper install insserv
+
+**Install Application:**
+
+1. Install rpm package for OpenCelium
+
+.. code-block:: sh
+
+    curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
+    yum install OpenCelium
+
+**Configure environment:**
+
+1. Secure MySql and set root password (strongly recommended for new MySql installations)
+
+.. code-block:: sh
+
+    root@shell> mysql_secure_installation
+
+2. Modify application.yml file for backend
+
+.. code-block:: sh
+
+	root@shell> cd /opt/src/backend/main/resources
+    root@shell> // make changes inside of application.yml. Change neo4j and mysql database password.
+
+3. Restart backend
+
+.. code-block:: sh
+
+    root@shell> oc restart_backend
+
+4. Welcome to OC
+
+.. code-block:: sh
+	
+	Visit opencelium http://SERVERIP
+
