@@ -135,6 +135,7 @@ public class ConnectorExecutor {
 
             // log after executing operator
             next = getNextIndex(tail, hasCircle, loopHead, loopTail);
+            logger.logAndSend("============================================================================");
             logger.logAndSend(String.format(
                     "Operator: -- next function: %s -- next operator: %s -- type: %s -- index: %s",
                     next[0], next[1], operator.getType(), index)
