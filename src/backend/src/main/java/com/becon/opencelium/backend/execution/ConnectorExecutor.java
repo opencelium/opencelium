@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
+import com.becon.opencelium.backend.execution.logger.msg.MethodData;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.operator.Operator;
@@ -72,40 +73,77 @@ public class ConnectorExecutor {
             return;
         }
 
+        // points to the end of the operator body
         int tail = getTailPointer(headPointer);
+        // holds index of current executable
+        String index = getIndex(executables.get(headPointer));
+        // holds [next function index, next operator index] for current executable
+        String[] next = getNextIndex(headPointer, hasCircle, loopHead, loopTail);
 
         if (executables.get(headPointer) instanceof OperationDTO operation) {
             if (headPointer != tail) {
                 throw new RuntimeException("Methods cannot have body");
             }
 
-            System.out.println("Function before: -- index: " + operation.getExecOrder() + " " + Arrays.toString(getNextIndex(headPointer, hasCircle, loopHead, loopTail)));
+            // set up logger for the current operation
+            logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
+            logger.logAndSend("============================================================================");
+            logger.logAndSend(String.format(
+                    "Function: %s -- next function: %s -- next operator: %s -- index: %s",
+                    operation.getName(), next[0], next[1], index
+            ));
+
             executeOperation(operation);
+
+            // clean up after operation execution
+            logger.getLogEntity().setMethodData(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
-                System.out.println("IF before: -- index: " + operator.getIndex() + " " + Arrays.toString(getNextIndex(headPointer, hasCircle, loopHead, loopTail)));
+                logger.logAndSend("============================================================================");
+                logger.logAndSend(String.format(
+                        "=============== %s =============== -- next function: %s -- next operator: %s -- index: %s",
+                        operator.getCondition().getRelationalOperator(), next[0], next[1], index
+                ));
+
                 boolean result = executeIfOperator(operator);
+                logger.logAndSend("OPERATOR_RESULT: " + (result ? "TRUE" : "FALSE") + " -- index: " + index);
 
                 if (result) {
-                    System.out.println("IF after: -- index: " + operator.getIndex() + " " + Arrays.toString(getNextIndex(headPointer, hasCircle, loopHead, loopTail)));
+                    // if result is true, then execute if operators' body
                     execute(headPointer + 1, tail, hasCircle, loopHead, loopTail);
-                } else {
-                    System.out.println("IF after: -- index: " + operator.getIndex() + " " + Arrays.toString(getNextIndex(tail, hasCircle, loopHead, loopTail)));
                 }
             } else {
                 int length = executeForOperator(operator);
+                logger.logAndSend("=================================== LOOP ===================================");
+                logger.logAndSend("LOOP_OPERATOR_RESULT: " + (length == 0 ? "EMPTY" : "NOT_EMPTY") + " -- index: " + index);
 
                 for (int i = 0; i < length; i++) {
+                    logger.logAndSend("Loop: " + operator.getCondition().getLeft() + " -------- index: " + i);
+
+                    // add/update currently executing loops' data
                     executionManager.getLoops().put(operator.getIterator(), String.valueOf(i));
+
+                    // if length !=0, then execute loop operators' body,
+                    // there will be a circle if current run is not last one
                     execute(headPointer + 1, tail, i < length - 1, headPointer, tail);
                 }
-                System.out.println("LOOP after: -- index: " + operator.getIndex() + " " + Arrays.toString(getNextIndex(tail, hasCircle, loopHead, loopTail)));
+
+                // remove executed loops' data
                 executionManager.getLoops().remove(operator.getIterator());
+
             }
+
+            // log after executing operator
+            next = getNextIndex(tail, hasCircle, loopHead, loopTail);
+            logger.logAndSend(String.format(
+                    "Operator: -- next function: %s -- next operator: %s -- type: %s -- index: %s",
+                    next[0], next[1], operator.getType(), index)
+            );
         } else {
             throw new RuntimeException("Wrong type is supplied");
         }
 
+        // we already executed operations'/operators' body, now start executing next body'
         execute(tail + 1, tailPointer, hasCircle, loopHead, loopTail);
     }
 
@@ -115,7 +153,14 @@ public class ConnectorExecutor {
                 .usingReferences(this::resolveReferences)
                 .createRequest();
 
+        logger.logAndSend("Http Method: " + requestEntity.getMethod());
+        logger.logAndSend("URL: " + requestEntity.getUrl());
+        logger.logAndSend("Header: " + requestEntity.getHeaders());
+        logger.logAndSend("Body: " + requestEntity.getBody());
+
         ResponseEntity<?> responseEntity = this.restTemplate.exchange(requestEntity, Object.class);
+        logger.logAndSend("============================================================================");
+        logger.logAndSend("Response: " + responseEntity.getBody());
 
         Operation operation = executionManager.findOperationByColor(operationDTO.getOperationId())
                 .orElseGet(() -> {
@@ -136,7 +181,18 @@ public class ConnectorExecutor {
     private boolean executeIfOperator(OperatorEx operatorDTO) {
         ConditionEx condition = operatorDTO.getCondition();
         Object leftValue = executionManager.getValue(condition.getLeft());
+        if (leftValue != null) {
+            logger.logAndSend("Left Statement: " + leftValue);
+        }
+
         Object rightValue = executionManager.getValue(condition.getRight());
+        if (rightValue != null) {
+            if (rightValue.getClass().isArray()) {
+                logger.logAndSend("Right Statement: " + Arrays.toString((String[]) rightValue));
+            } else {
+                logger.logAndSend("Right Statement: " + rightValue);
+            }
+        }
 
         Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(condition.getRelationalOperator());
 
