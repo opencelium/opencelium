@@ -52,9 +52,9 @@ Debian/Ubuntu (example for 22.04 LTS)
 .. code-block:: sh
 	:linenos:
 
-    apt install openjdk-17-jdk
-    apt install openjdk-17-jre (can be optional)
-    java -version // to check
+	apt install openjdk-17-jdk
+	apt install openjdk-17-jre (can be optional)
+	java -version // to check
 
 6. Install gradle:
 
@@ -76,10 +76,10 @@ Debian/Ubuntu (example for 22.04 LTS)
 	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
 	apt update
 	apt install install neo4j=1:5.7.0
-    /usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
-    service neo4j status  // to check
-    service neo4j restart
-    systemctl enable neo4j
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
+	service neo4j status  // to check
+	service neo4j restart
+	systemctl enable neo4j
 
 8. Install MariaDB:
 
@@ -115,14 +115,14 @@ Debian/Ubuntu (example for 22.04 LTS)
 .. code-block:: sh
 	:linenos:
 
-    ln -s /opt/scripts/oc_service.sh /usr/bin/oc
-
+	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
+    
 4. Start frontend
 
 .. code-block:: sh
 	:linenos:
 
-    oc start_frontend
+	oc start_frontend
 
 5. Create application.yml file for backend
 
@@ -154,7 +154,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 .. code-block:: sh
 	:linenos:
 
-    oc start_backend
+	oc start_backend
 
 9. Welcome to OC
 
