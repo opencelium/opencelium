@@ -52,7 +52,7 @@ public class ConnectorExecutor {
 
     public void start() {
         logger.getLogEntity().setType(LogType.INFO);
-        logger.getLogEntity().setConnector( new ConnectorLog(null, direction));
+        logger.getLogEntity().setConnector( new ConnectorLog(connector.getName(), direction));
 
         // set id of currently executing connector
         executionManager.setCurrentCtorId(connector.getId());

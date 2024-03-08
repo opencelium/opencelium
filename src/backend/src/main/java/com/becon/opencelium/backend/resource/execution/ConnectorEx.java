@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class ConnectorEx {
     private int id;
+    private String name;
     private boolean sslCert;
     private boolean action;
     private String invoker;
@@ -45,6 +46,14 @@ public class ConnectorEx {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public boolean isSslCert() {
