@@ -75,7 +75,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
 	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
 	apt update
-	apt install install neo4j=1:5.7.0
+	apt install neo4j=1:5.7.0
 	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	service neo4j status  // to check
 	service neo4j restart
