@@ -247,6 +247,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 1. Get frontend repository
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt
 	git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
@@ -254,6 +255,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 2. Run frontend with yarn
 
 .. code-block:: sh
+	:linenos:
 
     cd src/frontend
     yarn
@@ -262,18 +264,21 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 3. Enable OC service
 
 .. code-block:: sh
+	:linenos:
 
     ln -s /opt/scripts/oc_service.sh /usr/bin/oc
 
 4. Start frontend
 
 .. code-block:: sh
+	:linenos:
 
     oc start_frontend
 
 5. Create application.yml file for backend
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt/src/backend
 	cp src/main/resources/application_default.yml src/main/resources/application.yml
@@ -282,6 +287,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 6. Install database 
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt/src/backend/database
 	mysql -u root -p -e "source oc_data.sql"
@@ -289,6 +295,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 7. Build backend project
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt/src/backend/
 	gradle build
@@ -296,12 +303,14 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 8. Start backend
 
 .. code-block:: sh
+	:linenos:
 
     oc start_backend
 
 9. Welcome to OC
 
 .. code-block:: sh
+	:linenos:
 	
 	Visit opencelium http://SERVERIP:8888
 
@@ -401,6 +410,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 1. Get frontend repository
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt
 	git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
@@ -408,6 +418,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 2. Run frontend with yarn
 
 .. code-block:: sh
+	:linenos:
 
     cd src/frontend
 	yarn
@@ -416,6 +427,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 3. Enable OC service
 
 .. code-block:: sh
+	:linenos:
 
     ln -s /opt/scripts/oc_service.sh /usr/bin/oc
     oc start_frontend
@@ -424,6 +436,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 4. Create application.yml file for backend
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt/src/backend
 	cp src/main/resources/application_default.yml src/main/resources/application.yml
@@ -432,6 +445,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 5. Install database 
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt/src/backend/database
 	mysql -u root -p -e "source oc_data.sql"
@@ -439,6 +453,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 6. Build backend project
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt/src/backend/
 	gradle build
@@ -446,12 +461,14 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 7. Start backend
 
 .. code-block:: sh
+	:linenos:
 
     oc start_backend
 
 8. Welcome to OC
 
 .. code-block:: sh
+	:linenos:
 	
 	Visit opencelium http://SERVERIP:8888
 
@@ -483,12 +500,14 @@ Ansible
 3. Add localhost in ansible
 
 .. code-block:: sh
+	:linenos:
 
 	printf "[local]\nlocalhost ansible_connection=local" >> hosts
 
 4. Run playbook
 
 .. code-block:: sh
+	:linenos:
 
 	ansible-playbook --connection=local -e 'host_key_checking=False' playbooks/install_oc.yml
 
@@ -534,6 +553,7 @@ Use default Docker installation guide.
 3. Start OpenCelium using DockerHub images
 
 .. code-block:: sh
+	:linenos:
 
 	docker-compose up -d
 
@@ -573,6 +593,7 @@ DEB package for Ubuntu 22.04 LTS
 1. Install deb package for OpenCelium:
 
 .. code-block:: sh
+	:linenos:
 
 	curl -fsSL https://packagecloud.io/becon/opencelium/gpgkey | gpg --dearmor > /usr/share/keyrings/becon_opencelium.gpg
 	apt install -y opencelium
@@ -582,25 +603,29 @@ DEB package for Ubuntu 22.04 LTS
 1. Secure MySql and set root password (strongly recommended for new MySql installations):
 
 .. code-block:: sh
+	:linenos:
 
     mysql_secure_installation
 
 2. Modify application.yml file for backend:
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt/src/backend/main/resources
-    // make changes inside of application.yml. Change neo4j and mysql database password.
+	// make changes inside of application.yml. Change neo4j and mysql database password.
 
 3. Restart backend:
 
 .. code-block:: sh
+	:linenos:
 
     oc restart_backend
 
 4. Welcome to OC:
 
 .. code-block:: sh
+	:linenos:
 	
 	Visit opencelium http://SERVERIP
 
@@ -640,6 +665,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 1. Install rpm package for OpenCelium:
 
 .. code-block:: sh
+	:linenos:
 
     curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
     yum install OpenCelium
@@ -649,25 +675,29 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 1. Secure MySql and set root password (strongly recommended for new MySql installations):
 
 .. code-block:: sh
+	:linenos:
 
     mysql_secure_installation
 
 2. Modify application.yml file for backend:
 
 .. code-block:: sh
+	:linenos:
 
 	cd /opt/src/backend/main/resources
-    // make changes inside of application.yml. Change neo4j and mysql database password.
+	// make changes inside of application.yml. Change neo4j and mysql database password.
 
 3. Restart backend:
 
 .. code-block:: sh
+	:linenos:
 
     oc restart_backend
 
 4. Welcome to OC:
 
 .. code-block:: sh
+	:linenos:
 	
 	Visit opencelium http://SERVERIP
 
