@@ -53,8 +53,8 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 
     apt install openjdk-17-jdk
-	apt install openjdk-17-jre (can be optional)
-	java -version // to check
+    apt install openjdk-17-jre (can be optional)
+    java -version // to check
 
 6. Install gradle:
 
@@ -76,8 +76,8 @@ Debian/Ubuntu (example for 22.04 LTS)
 	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
 	apt update
 	apt install install neo4j=1:5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
-	service neo4j status  // to check
+    /usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
+    service neo4j status  // to check
     service neo4j restart
     systemctl enable neo4j
 
@@ -92,6 +92,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	mysql --version // to check
 
 
+"""""""""""""""""
 **Install Application:**
 
 1. Get frontend repository
