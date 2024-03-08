@@ -76,10 +76,13 @@ Debian/Ubuntu (example for 22.04 LTS)
 	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
 	apt update
 	apt install install neo4j=1:5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	service neo4j status  // to check
 	service neo4j restart
 	systemctl enable neo4j
+
+.. note::
+	Change password (secret1234) if you want.
 
 8. Install MariaDB:
 
@@ -88,8 +91,11 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 	apt install mariadb-server mariadb-client
 	mysql_secure_installation // set password
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"  // change password if you want
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 	mysql --version // to check
+	
+.. note::
+	Change password (secret1234) if you want.
 
 **Install Application:**
 
@@ -224,11 +230,14 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	zypper addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
 	zypper refresh
 	zypper install neo4j-5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234 // change password if you want
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	neo4j start
 	neo4j status  // to check
 	zypper install insserv
 	systemctl enable neo4j
+	
+.. note::
+	Change password (secret1234) if you want.
 
 8. Install MariaDB:
 
@@ -388,10 +397,13 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	gpgcheck=1
 	EOF
 	yum install neo4j-5.7.0-1
-	/usr/bin/neo4j-admin set-initial-password secret1234 // change password if you want
+	/usr/bin/neo4j-admin set-initial-password secret1234
 	systemctl start neo4j
 	systemctl enable neo4j	
-	systemctl status neo4j // to check
+	systemctl status neo4j
+	
+.. note::
+	Change password (secret1234) if you want.
 
 8. Install MariaDB:
 
@@ -588,7 +600,7 @@ DEB package for Ubuntu 22.04 LTS
 	apt install install neo4j=1:5.7.0
 	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	
-	.. note::
+.. note::
 	Change password (secret1234) if you want.
 
 **Install Application:**
@@ -603,7 +615,7 @@ DEB package for Ubuntu 22.04 LTS
 
 **Configure environment:**
 
-1. Secure MySql and set root password (strongly recommended for new MySql installations):
+1. Secure MySql and set root password (required for new MySql installations):
 
 .. code-block:: sh
 	:linenos:
@@ -680,7 +692,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 
 **Configure environment:**
 
-1. Secure MySql and set root password (strongly recommended for new MySql installations):
+1. Secure MySql and set root password (required for new MySql installations):
 
 .. code-block:: sh
 	:linenos:
@@ -758,13 +770,100 @@ RPM package for RedHat 9.2
 	:linenos:
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
-	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/fedora/40/
-x86_64!' /etc/yum.repos.d/becon_opencelium.repo
+	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/fedora/40/x86_64!' /etc/yum.repos.d/becon_opencelium.repo
 	yum install OpenCelium
 
 **Configure environment:**
 
-1. Secure MySql and set root password (strongly recommended for new MySql installations):
+1. Secure MySql and set root password (required for new MySql installations):
+
+.. code-block:: sh
+	:linenos:
+
+	mysql_secure_installation
+
+2. Modify application.yml file for backend:
+
+.. code-block:: sh
+	:linenos:
+
+	cd /opt/src/backend/main/resources
+	
+.. note::	
+	Make changes inside of application.yml. Change neo4j and mysql database password.
+
+3. Restart backend:
+
+.. code-block:: sh
+	:linenos:
+
+	oc restart_backend
+
+4. Welcome to OC:
+
+.. code-block:: sh
+	:linenos:
+	
+	Visit opencelium http://SERVERIP
+	
+	
+RPM package for RedHat 9.2 without GPG
+"""""""""""""""""
+**Prepare environment:**
+
+1. Update RedHat system:
+
+.. code-block:: sh
+	:linenos:
+
+	yum update
+
+2. Install java:
+
+.. code-block:: sh
+	:linenos:
+
+	yum install java-17-openjdk
+
+3. Install neo4j:
+
+.. code-block:: sh
+	:linenos:
+
+	yum addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
+	yum refresh
+	yum install neo4j-5.7.0
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
+	yum install insserv
+	
+.. note::
+	Change password (secret1234) if you want.
+
+
+**Install Application:**
+
+1. Install rpm package for OpenCelium:
+
+.. code-block:: sh
+	:linenos:
+	
+	cat << EOF >  /etc/yum.repos.d/becon_opencelium.repo
+	[becon_opencelium]
+	name=becon_opencelium
+	baseurl=https://packagecloud.io/becon/opencelium/fedora/40/x86_64
+	repo_gpgcheck=0
+	gpgcheck=0
+	enabled=1
+	sslverify=1
+	sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+	metadata_expire=300
+	EOF
+	yum -q makecache -y --disablerepo='*' --enablerepo='becon_opencelium'
+	yum install OpenCelium
+
+**Configure environment:**
+
+1. Secure MySql and set root password (required for new MySql installations):
 
 .. code-block:: sh
 	:linenos:
