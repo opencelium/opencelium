@@ -580,14 +580,14 @@ DEB package for Ubuntu 22.04 LTS
 	:linenos:
 
 	apt update
-	apt install -y curl gnupg
+	apt install curl gnupg
 
 2. Install java:
 
 .. code-block:: sh
 	:linenos:
 
-	apt install -y java-17-openjdk
+	apt install java-17-openjdk
 
 3. Install neo4j:
 
@@ -611,7 +611,7 @@ DEB package for Ubuntu 22.04 LTS
 	:linenos:
 
 	curl -fsSL https://packagecloud.io/becon/opencelium/gpgkey | gpg --dearmor > /usr/share/keyrings/becon_opencelium.gpg
-	apt install -y opencelium
+	apt install opencelium
 
 **Configure environment:**
 
@@ -751,12 +751,18 @@ RPM package for RedHat 9.2
 
 .. code-block:: sh
 	:linenos:
-
+	rpm --import https://debian.neo4j.com/neotechnology.gpg.key
+	cat << EOF >  /etc/yum.repos.d/neo4j.repo
+	[neo4j]
+	name=Neo4j RPM Repository
+	baseurl=https://yum.neo4j.com/stable/5
+	enabled=1
+	gpgcheck=1
+	EOF
 	yum addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
 	yum refresh
 	yum install neo4j-5.7.0
 	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	yum install insserv
 	
 .. note::
 	Change password (secret1234) if you want.
@@ -829,12 +835,18 @@ RPM package for RedHat 9.2 without GPG
 
 .. code-block:: sh
 	:linenos:
-
+	rpm --import https://debian.neo4j.com/neotechnology.gpg.key
+	cat << EOF >  /etc/yum.repos.d/neo4j.repo
+	[neo4j]
+	name=Neo4j RPM Repository
+	baseurl=https://yum.neo4j.com/stable/5
+	enabled=1
+	gpgcheck=1
+	EOF
 	yum addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
 	yum refresh
 	yum install neo4j-5.7.0
 	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	yum install insserv
 	
 .. note::
 	Change password (secret1234) if you want.
@@ -858,7 +870,6 @@ RPM package for RedHat 9.2 without GPG
 	sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 	metadata_expire=300
 	EOF
-	yum -q makecache -y --disablerepo='*' --enablerepo='becon_opencelium'
 	yum install OpenCelium
 
 **Configure environment:**
