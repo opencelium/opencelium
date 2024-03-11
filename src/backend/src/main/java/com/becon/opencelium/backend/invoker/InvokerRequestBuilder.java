@@ -107,12 +107,11 @@ public class InvokerRequestBuilder {
         }
         ResponseEntity response;
         RestTemplate restTemplate = createRestTemplate();
-        if (getResponseContentType(header, functionInvoker).toString().contains("xml")) {
-            response = restTemplate.exchange(url, method ,httpEntity, String.class);
-            response = convertToStringResponse(response);
-        } else {
+        if (getResponseContentType(header, functionInvoker).toString().contains("json")) {
             response = InvokerRequestBuilder
                     .convertToStringResponse(restTemplate.exchange(url, method ,httpEntity, Object.class));
+        } else {
+            response = restTemplate.exchange(url, method ,httpEntity, String.class);
         }
         return response;
     }
