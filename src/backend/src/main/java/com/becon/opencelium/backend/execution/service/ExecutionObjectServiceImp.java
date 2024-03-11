@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.service;
 
+import com.becon.opencelium.backend.configuration.WebSocketConfig;
 import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
@@ -8,6 +9,7 @@ import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.mapper.execution.ConnectionExMapper;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
+import com.becon.opencelium.backend.resource.execution.Logger;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
@@ -43,12 +45,21 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
 
         executionObj.setQueryParams(data.getQueryParams());
 
-        String host = env.getProperty(YamlPropConst.PROXY_HOST,"");
-        String port = env.getProperty(YamlPropConst.PROXY_PORT,"");
-        String user = env.getProperty(YamlPropConst.PROXY_USER,"");
-        String password = env.getProperty(YamlPropConst.PROXY_PASS,"");
+        String host = env.getProperty(YamlPropConst.PROXY_HOST, "");
+        String port = env.getProperty(YamlPropConst.PROXY_PORT, "");
+        String user = env.getProperty(YamlPropConst.PROXY_USER, "");
+        String password = env.getProperty(YamlPropConst.PROXY_PASS, "");
         ProxyEx proxy = new ProxyEx(host, port, user, password);
         executionObj.setProxy(proxy);
+
+        Logger logger = new Logger();
+        logger.setDebugMode(scheduler.getDebugMode());
+        if (WebSocketConfig.schedulerId != null) {
+            logger.setWSocketOpen(scheduler.getId() == WebSocketConfig.schedulerId);
+        }
+        executionObj.setLogger(logger);
+
         return executionObj;
+
     }
 }

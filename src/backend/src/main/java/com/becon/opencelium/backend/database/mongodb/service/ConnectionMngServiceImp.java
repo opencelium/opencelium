@@ -119,10 +119,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public void delete(Long id) {
+    public ConnectionMng delete(Long id) {
         ConnectionMng connectionMng = getByConnectionId(id);
         deleteChildren(connectionMng);
         connectionMngRepository.delete(connectionMng);
+        return connectionMng;
     }
 
     @Override

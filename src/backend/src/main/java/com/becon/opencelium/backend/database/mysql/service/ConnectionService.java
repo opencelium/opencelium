@@ -31,6 +31,8 @@ public interface ConnectionService {
 
     void deleteById(Long id);
 
+    void deleteAll(List<Connection> connections);
+
     void deleteOnlyConnection(Long id);
 
     void deleteAndTrackIt(Long id);
@@ -60,6 +62,8 @@ public interface ConnectionService {
     void patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details);
 
     ConnectionDTO getFullConnection(Long connectionId);
+
+    List<Connection> getAllByCategoryId(Integer categoryId);
 
     List<ConnectionDTO> getAllFullConnection();
 }
