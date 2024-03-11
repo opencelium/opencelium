@@ -113,7 +113,7 @@ public class CategoryController {
         return ResponseEntity.ok(categoryMapper.toDTO(categoryService.get(id)));
     }
 
-    @Operation(summary = "Deletes a category by provided connection ID")
+    @Operation(summary = "Deletes a category by provided category ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204",
                     description = "Category has been successfully deleted.",

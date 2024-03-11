@@ -79,6 +79,9 @@ public class Connection {
     @OneToOne(mappedBy = "connection", cascade = CascadeType.ALL, orphanRemoval = true)
     private BusinessLayout businessLayout;
 
+    @Column(name = "category_id")
+    private Integer categoryId;
+
     public Connection() {
     }
 
@@ -188,6 +191,14 @@ public class Connection {
 
     public void setBusinessLayout(BusinessLayout businessLayout) {
         this.businessLayout = businessLayout;
+    }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 
     @Override

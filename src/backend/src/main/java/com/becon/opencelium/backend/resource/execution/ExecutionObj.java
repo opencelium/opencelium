@@ -6,6 +6,7 @@ public class ExecutionObj {
     private Map<String, Object> queryParams;
     private ConnectionEx connection;
     private ProxyEx proxy;
+    private Logger logger;
 
     public ExecutionObj() {
     }
@@ -32,5 +33,13 @@ public class ExecutionObj {
 
     public void setConnection(ConnectionEx connection) {
         this.connection = connection;
+    }
+
+    public Logger getLogger() {
+        return logger;
+    }
+
+    public void setLogger(Logger logger) {
+        this.logger = logger;
     }
 }

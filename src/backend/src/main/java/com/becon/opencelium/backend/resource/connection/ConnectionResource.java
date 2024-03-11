@@ -33,6 +33,7 @@ public class ConnectionResource {
     private ConnectorResource fromConnector;
     private ConnectorResource toConnector;
     private List<EnhancementDTO> enhancements;
+    private Integer categoryId;
 
     public Long getId() {
         return id;
@@ -88,5 +89,13 @@ public class ConnectionResource {
 
     public void setEnhancements(List<EnhancementDTO> enhancements) {
         this.enhancements = enhancements;
+    }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 }

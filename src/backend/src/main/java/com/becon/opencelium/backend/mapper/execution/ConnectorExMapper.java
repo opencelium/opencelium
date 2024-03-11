@@ -32,6 +32,7 @@ public class ConnectorExMapper {
         Map<String, String> map = new HashMap<>();
         requestData.forEach(r -> map.put(r.getField(), r.getValue()));
 
+        connectorEx.setName(connector.getTitle());
         connectorEx.setSslCert(connector.isSslValidation());
         connectorEx.setInvoker(connector.getInvoker());
         connectorEx.setRequiredData(map);
