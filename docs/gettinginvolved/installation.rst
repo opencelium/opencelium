@@ -91,9 +91,9 @@ Debian/Ubuntu (example for 22.04 LTS)
 	.. code-block:: sh
 		:linenos:	
 	
-		mysql -u root -p
+		mysql -u root
 		
-	If this dosn't work, please set your password with this command:
+	If you can login without a password, please set your password additionally with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -110,7 +110,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 
 	cd /opt
-	git clone -b v3.2.1 https://github.com/opencelium/opencelium.git . 
+	git clone -b <StableVersion> https://github.com/opencelium/opencelium.git . 
 	
 .. note::
 	Get stable versions here https://github.com/opencelium/opencelium/tags
@@ -266,9 +266,9 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	.. code-block:: sh
 		:linenos:	
 	
-		mysql -u root -p
+		mysql -u root
 		
-	If this dosn't work, please set your password with this command:
+	If you can login without a password, please set your password additionally with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -404,7 +404,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 .. code-block:: sh
 	:linenos:
 
-	yum install java-17-openjdk.x86_64
+	yum install java-17-openjdk
 
 6. Install gradle:
 
@@ -431,7 +431,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	gpgcheck=1
 	EOF
 	yum install neo4j-5.7.0-1
-	/usr/bin/neo4j-admin set-initial-password secret1234
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	systemctl start neo4j
 	systemctl enable neo4j	
 	
@@ -444,8 +444,8 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	:linenos:
 
 	yum install mariadb-server
-	root@shell>	systemctl start mariadb
-	root@shell>	systemctl enable mariadb
+	systemctl start mariadb
+	systemctl enable mariadb
 	mysql_secure_installation
 
 .. note::
@@ -454,9 +454,9 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	.. code-block:: sh
 		:linenos:	
 	
-		mysql -u root -p
+		mysql -u root
 		
-	If this dosn't work, please set your password with this command:
+	If you can login without a password, please set your password additionally with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -806,7 +806,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 .. code-block:: sh
 	:linenos:
 
-	cd /opt/src/backend/main/resources
+	cd /opt/opencelium/src/backend/main/resources
 	
 .. note::
 	Make changes inside the file application.yml! 
@@ -865,10 +865,8 @@ RPM package for RedHat 9.2
 	enabled=1
 	gpgcheck=1
 	EOF
-	yum addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
-	yum refresh
 	yum install neo4j-5.7.0-1
-	/usr/bin/neo4j-admin set-initial-password secret1234
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	
 .. note::
 	Change password (secret1234) if you want.
@@ -937,7 +935,7 @@ RPM package for RedHat 9.2
 .. code-block:: sh
 	:linenos:
 
-	cd /opt/src/backend/main/resources
+	cd /opt/opencelium/src/backend/main/resources
 	
 .. note::
 	Make changes inside the file application.yml! 
