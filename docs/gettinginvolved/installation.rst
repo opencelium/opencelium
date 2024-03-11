@@ -90,9 +90,9 @@ Debian/Ubuntu (example for 22.04 LTS)
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
 	
 	.. code-block:: sh
-	:linenos:	
+		:linenos:	
 	
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
@@ -122,9 +122,9 @@ Debian/Ubuntu (example for 22.04 LTS)
 	If yarn doesn't run, use this command to increase the amount of inotify watchers:
 
 	.. code-block:: sh
-	:linenos:	
+		:linenos:	
 
-	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 3. Enable OC service
 
@@ -259,9 +259,9 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
 	
 	.. code-block:: sh
-	:linenos:	
+		:linenos:	
 	
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
@@ -291,9 +291,9 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	If yarn doesn't run, use this command to increase the amount of inotify watchers:
 
 	.. code-block:: sh
-	:linenos:	
+		:linenos:	
 
-	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 3. Enable OC service
 
@@ -441,9 +441,9 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
 	
 	.. code-block:: sh
-	:linenos:	
+		:linenos:	
 	
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
@@ -472,9 +472,9 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	If yarn doesn't run, use this command to increase the amount of inotify watchers:
 
 	.. code-block:: sh
-	:linenos:	
+		:linenos:	
 
-	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 3. Enable OC service
 
@@ -673,9 +673,9 @@ DEB package for Ubuntu 22.04 LTS
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
 	
 	.. code-block:: sh
-	:linenos:	
+		:linenos:	
 	
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
@@ -762,9 +762,9 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
 	
 	.. code-block:: sh
-	:linenos:	
+		:linenos:	
 	
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
@@ -886,9 +886,9 @@ RPM package for RedHat 9.2
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
 	
 	.. code-block:: sh
-	:linenos:	
+		:linenos:	
 	
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
