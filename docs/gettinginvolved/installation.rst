@@ -676,6 +676,7 @@ DEB package for Ubuntu 22.04 LTS
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.deb.sh | sudo bash
 	sed -i 's!deb .*!deb [signed-by=/etc/apt/keyrings/becon_opencelium-archive-keyring.gpg] https://packagecloud.io/becon/opencelium/ubuntu jammy main!' /etc/apt/sources.list.d/becon_opencelium.list
+	apt update
 	apt install opencelium
 
 **Configure environment:**
