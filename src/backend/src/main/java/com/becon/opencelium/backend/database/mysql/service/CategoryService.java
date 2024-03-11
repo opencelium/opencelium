@@ -13,4 +13,5 @@ public interface CategoryService {
     List<Category> getAllByIds(Iterable<Integer> ids);
     void delete(Integer id);
     void deleteAll(List<Integer> ids);
+    boolean exists(Integer id);
 }

@@ -36,6 +36,7 @@ public class ConnectionOldDTO {
     private ConnectorOldDTO toConnector;
     private List<FieldBindingOldDTO> fieldBinding;
     private BusinessLayoutResource businessLayout;
+    private Integer categoryId;
 
     public String getNodeId() {
         return nodeId;
@@ -107,5 +108,13 @@ public class ConnectionOldDTO {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 }

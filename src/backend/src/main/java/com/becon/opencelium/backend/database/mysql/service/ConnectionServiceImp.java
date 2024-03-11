@@ -52,13 +52,14 @@ public class ConnectionServiceImp implements ConnectionService {
     private final ConnectionMngService connectionMngService;
     private final FieldBindingMngService fieldBindingMngService;
     private final EnhancementService enhancementService;
-    private final PatchHelper patchHelper;
+    private final CategoryService categoryService;
+    private final ConnectionHistoryService connectionHistoryService;
+    private final SchedulerService schedulerService;
     private final Mapper<Connector, ConnectorDTO> connectorMapper;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ConnectionUpdateTracker updateTracker;
-    private final ConnectionHistoryService connectionHistoryService;
-    private final SchedulerService schedulerService;
+    private final PatchHelper patchHelper;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -66,6 +67,7 @@ public class ConnectionServiceImp implements ConnectionService {
             @Qualifier("connectionMngServiceImp") ConnectionMngServiceImp connectionMngService,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
             @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
+            @Qualifier("categoryServiceImp") CategoryService categoryService,
             @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService connectionHistoryService,
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             PatchHelper patchHelper,
@@ -78,6 +80,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.fieldBindingMngService = fieldBindingMngService;
         this.connectionMngService = connectionMngService;
         this.enhancementService = enhancementService;
+        this.categoryService = categoryService;
         this.patchHelper = patchHelper;
         this.connectorMapper = connectorMapper;
         this.connectionMngMapper = connectionMngMapper;
@@ -103,6 +106,12 @@ public class ConnectionServiceImp implements ConnectionService {
         //checking existence of connectors
         connectorService.getById(connection.getToConnector());
         connectorService.getById(connection.getFromConnector());
+
+        //checking existence of category
+        if (connection.getCategoryId() != null) {
+            categoryService.get(connection.getCategoryId());
+        }
+
 
         List<Enhancement> enhancements = connection.getEnhancements();
         connection.setEnhancements(null);
@@ -141,6 +150,11 @@ public class ConnectionServiceImp implements ConnectionService {
         //checking existence of connectors
         connectorService.getById(connection.getToConnector());
         connectorService.getById(connection.getFromConnector());
+
+        //checking existence of category
+        if (connection.getCategoryId() != null && !connection.getCategoryId().equals(sCon.getCategoryId())) {
+            categoryService.get(connection.getCategoryId());
+        }
 
         List<Enhancement> enhancements = connection.getEnhancements();
         connection.setEnhancements(null);
@@ -207,8 +221,22 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteById(Long id) {
         Connection connection = getById(id);
         deleteSchedules(connection);
-        connectionRepository.deleteById(id);
-        connectionMngService.delete(id);
+        ConnectionMng deleted = connectionMngService.delete(id);
+        try {
+            connectionRepository.deleteById(id);
+        } catch (Exception e) {
+            connectionMngService.save(deleted);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteAll(List<Connection> connections) {
+        if (connections == null) {
+            return;
+        }
+        connections.forEach(c -> deleteById(c.getId()));
     }
 
     @Override
@@ -216,9 +244,14 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteAndTrackIt(Long id) {
         Connection connection = getById(id);
         deleteSchedules(connection);
-        connectionRepository.deleteById(id);
-        connectionMngService.delete(id);
-        connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);
+        ConnectionMng deleted = connectionMngService.delete(id);
+        try {
+            connectionRepository.deleteById(id);
+            connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);
+        } catch (Exception e) {
+            connectionMngService.save(deleted);
+            throw e;
+        }
     }
 
     @Override
@@ -278,10 +311,11 @@ public class ConnectionServiceImp implements ConnectionService {
         ConnectionDTO connectionDTOMng = connectionMngMapper.toDTO(connectionMng);
         ConnectionDTO connectionDTO = connectionMapper.toDTO(connection);
 
-        connectionDTOMng.setTitle(connection.getTitle());
+        connectionDTOMng.setTitle(connectionDTO.getTitle());
         connectionDTOMng.setDescription(connectionDTO.getDescription());
         connectionDTOMng.setIcon(connectionDTO.getIcon());
         connectionDTOMng.setBusinessLayout(connectionDTO.getBusinessLayout());
+        connectionDTOMng.setCategoryId(connectionDTO.getCategoryId());
 
         if (connectionDTOMng.getFromConnector() != null) {
             ConnectorDTO temp = connectionDTOMng.getFromConnector();
@@ -302,6 +336,11 @@ public class ConnectionServiceImp implements ConnectionService {
         }
         fieldBindingMngService.detach(connectionDTOMng);
         return connectionDTOMng;
+    }
+
+    @Override
+    public List<Connection> getAllByCategoryId(Integer categoryId) {
+        return connectionRepository.findAllByCategoryId(categoryId);
     }
 
     @Override

@@ -412,3 +412,6 @@ CREATE TABLE category (
 
 --changeset 4.0:13 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE connector CHANGE ssl_cert ssl_validation tinyint(4);
+
+--changeset 4.0:14 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connection ADD COLUMN category_id INT NULL;

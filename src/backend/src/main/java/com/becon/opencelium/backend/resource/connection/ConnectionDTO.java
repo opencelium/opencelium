@@ -36,6 +36,7 @@ public class ConnectionDTO {
     private ConnectorDTO toConnector;
     private List<FieldBindingDTO> fieldBinding;
     private BusinessLayoutResource businessLayout;
+    private Integer categoryId;
 
     public String getId() {
         return id;
@@ -107,5 +108,13 @@ public class ConnectionDTO {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 }
