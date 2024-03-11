@@ -161,7 +161,7 @@ public class ConnectorServiceImp implements ConnectorService {
         return invokerRequestBuilder
                 .setFunction(function)
                 .setRequestData(requestData)
-                .setSslCert(connector.isSslCert())
+                .setSslCert(connector.isSslValidation())
                 .sendRequest();
     }
 

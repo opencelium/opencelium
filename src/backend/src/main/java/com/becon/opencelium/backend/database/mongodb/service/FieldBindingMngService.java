@@ -12,11 +12,9 @@ import java.util.Optional;
 public interface FieldBindingMngService {
     void bind(ConnectionMng connectionMng);
 
-    void bind(List<FieldBindingMng> fieldBindings, List<MethodMng> methods);
+    void bindAfterUpdate(ConnectionMng connectionMng);
 
     void detach(ConnectionDTO connectionDTO);
-
-    void detach(List<MethodMng> methods, List<FieldBindingMng> fbs);
 
     List<FieldBindingMng> saveAll(List<FieldBindingMng> fieldBindings);
 
