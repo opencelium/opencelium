@@ -13,7 +13,7 @@ We recommend the use the follow setup:
 **Software:**
 
 - git 2.x https://github.com/git/git/tags (only for source installations)
-- node.js 18 (lts) https://nodejs.dev/en/about/releases/ (only for source installations)
+- node.js 20 (lts) https://nodejs.dev/en/about/releases/ (only for source installations)
 - yarn 1.22.x https://github.com/yarnpkg/yarn/tags (only for source installations)
 - gradle 7.4.2 https://gradle.org/releases/ (only for source installations)
 - java 17 (jdk, jre) https://www.oracle.com/technetwork/java/javase/downloads/index.html

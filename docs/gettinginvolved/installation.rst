@@ -24,7 +24,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 .. code-block:: sh
 	:linenos:
 	
-	sudo apt install curl (if debian)
+	apt install curl
 	curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 	apt-get install -y nodejs
 	
@@ -50,14 +50,13 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 
 	apt install openjdk-17-jdk
-	apt install openjdk-17-jre (can be optional)
 
 6. Install gradle:
 
 .. code-block:: sh
 	:linenos:
 	
-	apt-get install software-properties-common (if debian)
+	apt-get install software-properties-common
 	add-apt-repository ppa:cwchien/gradle
 	apt-get update
 	apt upgrade gradle
@@ -111,7 +110,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 
 	cd /opt
-	git clone -b v3.2 https://github.com/opencelium/opencelium.git . 
+	git clone -b v3.2.1 https://github.com/opencelium/opencelium.git . 
 	
 .. note::
 	Get stable versions here https://github.com/opencelium/opencelium/tags
@@ -652,7 +651,7 @@ DEB package for Ubuntu 22.04 LTS
 .. code-block:: sh
 	:linenos:
 
-	apt install java-17-openjdk
+	apt install openjdk-17-jdk
 
 3. Install neo4j:
 
@@ -662,7 +661,7 @@ DEB package for Ubuntu 22.04 LTS
 	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
 	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
 	apt update
-	apt install install neo4j=1:5.7.0
+	apt install neo4j=1:5.7.0
 	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	
 .. note::
@@ -676,7 +675,7 @@ DEB package for Ubuntu 22.04 LTS
 	:linenos:
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.deb.sh | sudo bash
-	sed -i 's!deb .*!deb [signed-by=/etc/apt/keyrings/becon_opencelium-archive-keyring.gpg] https://packagecloud.io/becon/opencelium/ubuntu jammy main' /etc/apt/sources.list.d/becon_opencelium.list
+	sed -i 's!deb .*!deb [signed-by=/etc/apt/keyrings/becon_opencelium-archive-keyring.gpg] https://packagecloud.io/becon/opencelium/ubuntu jammy main!' /etc/apt/sources.list.d/becon_opencelium.list
 	apt install opencelium
 
 **Configure environment:**
@@ -710,7 +709,7 @@ DEB package for Ubuntu 22.04 LTS
 .. code-block:: sh
 	:linenos:
 
-	cd /opt/src/backend/main/resources
+	cd /opt/opencelium/src/backend/main/resources
 
 .. note::
 	Make changes inside the file application.yml! 
