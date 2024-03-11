@@ -256,12 +256,12 @@ public class ConnectorExecutor {
                     uri = new URI(nextElemLink);
                 }
             }
-            if (header.getContentType() == (getResponseContentType(header, functionInvoker))) {
-                responseEntity = this.restTemplate.exchange(uri, method ,httpEntity, String.class);
-            } else {
+            if (header.getContentType() != null || header.getContentType().toString().contains("json")) {
                 ResponseEntity o = this.restTemplate.exchange(uri, method ,httpEntity, Object.class);
                 responseEntity = InvokerRequestBuilder
                         .convertToStringResponse(o);
+            } else {
+                responseEntity = this.restTemplate.exchange(uri, method ,httpEntity, String.class);
             }
             if (pagination != null) {
                 pagination.updateParamValues(responseEntity);

@@ -32,10 +32,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
@@ -124,8 +121,15 @@ public class InvokerRequestBuilder {
             httpEntity = new HttpEntity <Object> (header);
         }
         RestTemplate restTemplate = createRestTemplate();
-        ResponseEntity<Object> response = restTemplate.exchange(url, method ,httpEntity, Object.class);
-        return convertToStringResponse(response);
+        ResponseEntity response;
+        if (header.getContentType().toString().contains("json")) {
+            ResponseEntity o = restTemplate.exchange(url, method ,httpEntity, Object.class);
+            response = InvokerRequestBuilder
+                    .convertToStringResponse(o);
+        } else {
+            response = restTemplate.exchange(url, method ,httpEntity, String.class);
+        }
+        return response;
     }
 
     private RestTemplate createRestTemplate() {
