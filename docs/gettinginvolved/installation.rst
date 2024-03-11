@@ -87,7 +87,14 @@ Debian/Ubuntu (example for 22.04 LTS)
 	mysql_secure_installation
 	
 .. note::
-	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	
+	.. code-block:: sh
+		:linenos:	
+	
+		mysql -u root -p
+		
+	If this dosn't work, please set your password with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -95,7 +102,6 @@ Debian/Ubuntu (example for 22.04 LTS)
 		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
-
 
 **Install Application:**
 
@@ -254,9 +260,16 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	rcmysql start
 	mysql_secure_installation
 	systemctl enable mariadb
-	
+
 .. note::
-	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	
+	.. code-block:: sh
+		:linenos:	
+	
+		mysql -u root -p
+		
+	If this dosn't work, please set your password with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -264,7 +277,6 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
-
 
 **Install Application:**
 
@@ -438,7 +450,14 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	mysql_secure_installation
 
 .. note::
-	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	
+	.. code-block:: sh
+		:linenos:	
+	
+		mysql -u root -p
+		
+	If this dosn't work, please set your password with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -670,7 +689,14 @@ DEB package for Ubuntu 22.04 LTS
 	mysql_secure_installation
 	
 .. note::
-	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	
+	.. code-block:: sh
+		:linenos:	
+	
+		mysql -u root -p
+		
+	If this dosn't work, please set your password with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -678,7 +704,7 @@ DEB package for Ubuntu 22.04 LTS
 		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
-
+	
 2. Modify application.yml file for backend:
 
 .. code-block:: sh
@@ -759,7 +785,14 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	mysql_secure_installation
 	
 .. note::
-	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	
+	.. code-block:: sh
+		:linenos:	
+	
+		mysql -u root -p
+		
+	If this dosn't work, please set your password with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -883,7 +916,14 @@ RPM package for RedHat 9.2
 	mysql_secure_installation
 	
 .. note::
-	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	
+	.. code-block:: sh
+		:linenos:	
+	
+		mysql -u root -p
+		
+	If this dosn't work, please set your password with this command:
 	
 	.. code-block:: sh
 		:linenos:	
