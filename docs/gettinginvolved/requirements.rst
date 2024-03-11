@@ -30,5 +30,6 @@ We recommend the use the follow setup:
 
 **Network config:**
 
-- open frontend 8888 (for source installations) / open frontend 80 (for deb/rpm package installations)
+- open frontend 8888 (for source installations) 
+- open frontend 80   (for deb/rpm package installations)
 - open backend 9090

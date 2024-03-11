@@ -72,7 +72,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	apt update
 	apt install neo4j=1:5.7.0
 	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	service neo4j restart
+	service neo4j start
 	systemctl enable neo4j
 
 .. note::
@@ -88,7 +88,12 @@ Debian/Ubuntu (example for 22.04 LTS)
 	
 .. note::
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	
+	.. code-block:: sh
+	:linenos:	
+	
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		
 	Change password (root) if you want.
 
 
@@ -114,9 +119,12 @@ Debian/Ubuntu (example for 22.04 LTS)
 	yarn
 
 .. note::
-	If yarn doesn't run, use this command to increase the amount of inotify watchers:	
-	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+	If yarn doesn't run, use this command to increase the amount of inotify watchers:
 
+	.. code-block:: sh
+	:linenos:	
+
+		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 3. Enable OC service
 
 .. code-block:: sh
@@ -248,7 +256,12 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	
 .. note::
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	
+	.. code-block:: sh
+	:linenos:	
+	
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		
 	Change password (root) if you want.
 
 
@@ -274,8 +287,12 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	yarn
 	
 .. note::
-	If yarn doesn't run, use this command to increase the amount of inotify watchers:	
-	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+	If yarn doesn't run, use this command to increase the amount of inotify watchers:
+
+	.. code-block:: sh
+	:linenos:	
+
+		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 3. Enable OC service
 
@@ -421,7 +438,12 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 
 .. note::
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	
+	.. code-block:: sh
+	:linenos:	
+	
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		
 	Change password (root) if you want.
 
 **Install Application:**
@@ -446,8 +468,12 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	yarn
 	
 .. note::
-	If yarn doesn't run, use this command to increase the amount of inotify watchers:	
-	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+	If yarn doesn't run, use this command to increase the amount of inotify watchers:
+
+	.. code-block:: sh
+	:linenos:	
+
+		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 3. Enable OC service
 
@@ -575,8 +601,11 @@ Use default Docker installation guide.
 .. code-block:: sh
 	:linenos:
 
-	git clone https://github.com/opencelium/opencelium-docker.git  // we recommend to use always the latest tag version 
+	git clone https://github.com/opencelium/opencelium-docker.git 
 	cd opencelium-docker
+
+.. note::
+	We recommend to use always the latest tag version.
 
 3. Start OpenCelium using DockerHub images
 
@@ -626,7 +655,8 @@ DEB package for Ubuntu 22.04 LTS
 .. code-block:: sh
 	:linenos:
 
-	curl -fsSL https://packagecloud.io/becon/opencelium/gpgkey | gpg --dearmor > /usr/share/keyrings/becon_opencelium.gpg
+	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.deb.sh | sudo bash
+	sed -i 's!deb .*!deb [signed-by=/etc/apt/keyrings/becon_opencelium-archive-keyring.gpg] https://packagecloud.io/becon/opencelium/ubuntu jammy main' /etc/apt/sources.list.d/becon_opencelium.list
 	apt install opencelium
 
 **Configure environment:**
@@ -640,7 +670,12 @@ DEB package for Ubuntu 22.04 LTS
 	
 .. note::
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	
+	.. code-block:: sh
+	:linenos:	
+	
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		
 	Change password (root) if you want.
 
 2. Modify application.yml file for backend:
@@ -724,7 +759,12 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	
 .. note::
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	
+	.. code-block:: sh
+	:linenos:	
+	
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		
 	Change password (root) if you want.
 
 2. Modify application.yml file for backend:
@@ -843,7 +883,12 @@ RPM package for RedHat 9.2
 	
 .. note::
 	If setting password doesn't work by mysql_secure_installation, use this additional command: 
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	
+	.. code-block:: sh
+	:linenos:	
+	
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		
 	Change password (root) if you want.
 
 2. Modify application.yml file for backend:
