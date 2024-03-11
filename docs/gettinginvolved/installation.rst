@@ -27,8 +27,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	sudo apt install curl (if debian)
 	curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 	apt-get install -y nodejs
-	node -v // to check
-
+	
 3. Install yarn:
 
 .. code-block:: sh
@@ -37,16 +36,14 @@ Debian/Ubuntu (example for 22.04 LTS)
 	curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 	echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 	apt-get update && apt-get install yarn
-	yarn -v // to check
-
+	
 4. Install git:
 
 .. code-block:: sh
 	:linenos:
 
 	apt-get install git
-	git --version // to check
-
+	
 5. Install java:
 
 .. code-block:: sh
@@ -54,7 +51,6 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 	apt install openjdk-17-jdk
 	apt install openjdk-17-jre (can be optional)
-	java -version // to check
 
 6. Install gradle:
 
@@ -65,8 +61,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	add-apt-repository ppa:cwchien/gradle
 	apt-get update
 	apt upgrade gradle
-	gradle -v // to check
-
+	
 7. Install neo4j:
 
 .. code-block:: sh
@@ -77,7 +72,6 @@ Debian/Ubuntu (example for 22.04 LTS)
 	apt update
 	apt install neo4j=1:5.7.0
 	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	service neo4j status  // to check
 	service neo4j restart
 	systemctl enable neo4j
 
@@ -90,12 +84,13 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 
 	apt install mariadb-server mariadb-client
-	mysql_secure_installation // set password
-	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
-	mysql --version // to check
+	mysql_secure_installation
 	
 .. note::
-	Change password (secret1234) if you want.
+	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	Change password (root) if you want.
+
 
 **Install Application:**
 
@@ -105,7 +100,10 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 
 	cd /opt
-	git clone -b v3.2 https://github.com/opencelium/opencelium.git . // Get stable versions here https://github.com/opencelium/opencelium/tags
+	git clone -b v3.2 https://github.com/opencelium/opencelium.git . 
+	
+.. note::
+	Get stable versions here https://github.com/opencelium/opencelium/tags
 
 2. Build frontend project
 
@@ -114,7 +112,10 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 	cd src/frontend
 	yarn
-	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p // increasing the amount of inotify watchers	
+
+.. note::
+	If yarn doesn't run, use this command to increase the amount of inotify watchers:	
+	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 3. Enable OC service
 
@@ -137,7 +138,10 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 	cd /opt/src/backend
 	cp src/main/resources/application_default.yml src/main/resources/application.yml
-	// make changes inside of application.yml. change neo4j and mysql database password
+	
+.. note::
+	Make changes inside the file application.yml! 
+	Change neo4j and mysql database password.
 
 6. Install database 
 
@@ -169,8 +173,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	
 	Visit opencelium http://SERVERIP:8888
 
-.. note::
-        If yarn is not run use this command: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
 
 
 
@@ -184,7 +187,6 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	:linenos:
 	
 	zypper install nodejs20
-	node -v
 
 2. Install yarn:
 
@@ -192,7 +194,6 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	:linenos:
 
 	sudo npm install yarn -g
-	yarn -v // to check
 
 3. Install git:
 
@@ -200,7 +201,6 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	:linenos:
 
 	zypper install git
-	git --version // to check
 
 4. Install java:
 
@@ -208,7 +208,6 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	:linenos:
 
 	zypper install java-17-openjdk
-	java -version // to check
 
 6. Install gradle:
 
@@ -220,7 +219,6 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	mkdir /opt/gradle
 	unzip -d /opt/gradle gradle-7.4.2-all.zip
 	export PATH=$PATH:/opt/gradle/gradle-7.4.2/bin
-	gradle -v // to check
 
 7. Install neo4j:
 
@@ -232,7 +230,6 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	zypper install neo4j-5.7.0
 	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	neo4j start
-	neo4j status  // to check
 	zypper install insserv
 	systemctl enable neo4j
 	
@@ -246,9 +243,13 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 
 	zypper install mariadb mariadb-client
 	rcmysql start
-	mysql_secure_installation // set password	
-	mysql --version // to check
+	mysql_secure_installation
 	systemctl enable mariadb
+	
+.. note::
+	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	Change password (root) if you want.
 
 
 **Install Application:**
@@ -259,7 +260,10 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	:linenos:
 
 	cd /opt
-	git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
+	git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . 
+	
+.. note::
+	Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 
 2. Run frontend with yarn
 
@@ -268,7 +272,10 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 
 	cd src/frontend
 	yarn
-	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p // increasing the amount of inotify watchers
+	
+.. note::
+	If yarn doesn't run, use this command to increase the amount of inotify watchers:	
+	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 3. Enable OC service
 
@@ -291,7 +298,10 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 
 	cd /opt/src/backend
 	cp src/main/resources/application_default.yml src/main/resources/application.yml
-	// make changes inside of application.yml. change neo4j and mysql database password
+	
+.. note::
+	Make changes inside the file application.yml! 
+	Change neo4j and mysql database password.
 
 6. Install database 
 
@@ -344,7 +354,6 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	yum install -y gcc-c++ make
 	curl -sL https://rpm.nodesource.com/setup_20.x | sudo -E bash -
 	yum install nodejs
-	node -v // to check
 
 3. Install yarn:
 
@@ -353,7 +362,6 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 
 	curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
 	yum install yarn
-	yarn -v // to check
 
 4. Install git:
 
@@ -361,7 +369,6 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	:linenos:
 
 	yum install git
-	git --version // to check
 
 5. Install java:
 
@@ -369,7 +376,6 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	:linenos:
 
 	yum install java-17-openjdk.x86_64
-	java -version // to check
 
 6. Install gradle:
 
@@ -381,7 +387,6 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	mkdir /opt/gradle
 	unzip -d /opt/gradle gradle-7.4.2-all.zip
 	export PATH=$PATH:/opt/gradle/gradle-7.4.2/bin
-	gradle -v // to check
 
 7. Install neo4j:
 
@@ -400,7 +405,6 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	/usr/bin/neo4j-admin set-initial-password secret1234
 	systemctl start neo4j
 	systemctl enable neo4j	
-	systemctl status neo4j
 	
 .. note::
 	Change password (secret1234) if you want.
@@ -413,9 +417,12 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	yum install mariadb-server
 	root@shell>	systemctl start mariadb
 	root@shell>	systemctl enable mariadb
-	mysql_secure_installation // set password
-	mysql --version // to check
+	mysql_secure_installation
 
+.. note::
+	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	Change password (root) if you want.
 
 **Install Application:**
 
@@ -425,7 +432,10 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	:linenos:
 
 	cd /opt
-	git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
+	git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . 
+	
+.. note::	
+	Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 
 2. Run frontend with yarn
 
@@ -434,7 +444,10 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 
 	cd src/frontend
 	yarn
-	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p // increasing the amount of inotify watchers
+	
+.. note::
+	If yarn doesn't run, use this command to increase the amount of inotify watchers:	
+	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 3. Enable OC service
 
@@ -452,7 +465,10 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 
 	cd /opt/src/backend
 	cp src/main/resources/application_default.yml src/main/resources/application.yml
-	// make changes inside of application.yml. change neo4j and mysql database password
+
+.. note::
+	Make changes inside the file application.yml! 
+	Change neo4j and mysql database password.
 
 5. Install database 
 
@@ -621,6 +637,11 @@ DEB package for Ubuntu 22.04 LTS
 	:linenos:
 
 	mysql_secure_installation
+	
+.. note::
+	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	Change password (root) if you want.
 
 2. Modify application.yml file for backend:
 
@@ -629,8 +650,9 @@ DEB package for Ubuntu 22.04 LTS
 
 	cd /opt/src/backend/main/resources
 
-.. note::	
-	Make changes inside of application.yml. Change neo4j and mysql database password.
+.. note::
+	Make changes inside the file application.yml! 
+	Change neo4j and mysql database password.
 
 3. Restart backend:
 
@@ -688,6 +710,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	:linenos:
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
+	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/sles/15.5/x86_64!' /etc/yum.repos.d/becon_opencelium.repo
 	zypper install OpenCelium
 
 **Configure environment:**
@@ -698,6 +721,11 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	:linenos:
 
 	mysql_secure_installation
+	
+.. note::
+	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	Change password (root) if you want.
 
 2. Modify application.yml file for backend:
 
@@ -706,8 +734,9 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 
 	cd /opt/src/backend/main/resources
 	
-.. note::	
-	Make changes inside of application.yml. Change neo4j and mysql database password.
+.. note::
+	Make changes inside the file application.yml! 
+	Change neo4j and mysql database password.
 
 
 3. Restart backend:
@@ -738,7 +767,9 @@ RPM package for RedHat 9.2
 	yum install pygpgme yum-utils
 	
 .. note::
-	You may need to install the EPEL repository for your system to install these packages. If you do not install pygpgme, GPG verification will not work.
+	You may need to install the EPEL repository for your system to install these packages. 
+	If you do not install pygpgme, GPG verification will not work.
+	In this case, you can install OpenCelium without GPG verification (see instllation note).
 
 2. Install java:
 
@@ -769,7 +800,7 @@ RPM package for RedHat 9.2
 	Change password (secret1234) if you want.
 
 
-**Install Application:**
+**Install Application (pygpgme required):**
 
 1. Install rpm package for OpenCelium:
 
@@ -780,99 +811,26 @@ RPM package for RedHat 9.2
 	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/fedora/40/x86_64!' /etc/yum.repos.d/becon_opencelium.repo
 	yum install OpenCelium
 
-**Configure environment:**
-
-1. Secure MySql and set root password (required for new MySql installations):
-
-.. code-block:: sh
-	:linenos:
-
-	mysql_secure_installation
-
-2. Modify application.yml file for backend:
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend/main/resources
-	
-.. note::	
-	Make changes inside of application.yml. Change neo4j and mysql database password.
-
-3. Restart backend:
-
-.. code-block:: sh
-	:linenos:
-
-	oc restart_backend
-
-4. Welcome to OC:
-
-.. code-block:: sh
-	:linenos:
-	
-	Visit opencelium http://SERVERIP
-	
-	
-RPM package for RedHat 9.2 without GPG
-"""""""""""""""""
-**Prepare environment:**
-
-1. Update RedHat system:
-
-.. code-block:: sh
-	:linenos:
-
-	yum update
-
-2. Install java:
-
-.. code-block:: sh
-	:linenos:
-
-	yum install java-17-openjdk
-
-3. Install neo4j:
-
-.. code-block:: sh
-	:linenos:
-
-	rpm --import https://debian.neo4j.com/neotechnology.gpg.key
-	cat <<EOF>  /etc/yum.repos.d/neo4j.repo
-	[neo4j]
-	name=Neo4j RPM Repository
-	baseurl=https://yum.neo4j.com/stable/5
-	enabled=1
-	gpgcheck=1
-	EOF
-	yum addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
-	yum refresh
-	yum install neo4j-5.7.0-1
-	/usr/bin/neo4j-admin set-initial-password secret1234
-
 .. note::
-	Change password (secret1234) if you want.
+	**Install Application without pygpgme:**
 
+	1. Install rpm package for OpenCelium:
 
-**Install Application:**
-
-1. Install rpm package for OpenCelium:
-
-.. code-block:: sh
-	:linenos:
+	.. code-block:: sh
+		:linenos:
 	
-	cat << EOF >  /etc/yum.repos.d/becon_opencelium.repo
-	[becon_opencelium]
-	name=becon_opencelium
-	baseurl=https://packagecloud.io/becon/opencelium/fedora/40/x86_64
-	repo_gpgcheck=0
-	gpgcheck=0
-	enabled=1
-	sslverify=1
-	sslcacert=/etc/pki/tls/certs/ca-bundle.crt
-	metadata_expire=300
-	EOF
-	yum install OpenCelium
+		cat << EOF >  /etc/yum.repos.d/becon_opencelium.repo
+		[becon_opencelium]
+		name=becon_opencelium
+		baseurl=https://packagecloud.io/becon/opencelium/fedora/40/x86_64
+		repo_gpgcheck=0
+		gpgcheck=0
+		enabled=1
+		sslverify=1
+		sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+		metadata_expire=300
+		EOF
+		yum install OpenCelium
 
 **Configure environment:**
 
@@ -882,6 +840,11 @@ RPM package for RedHat 9.2 without GPG
 	:linenos:
 
 	mysql_secure_installation
+	
+.. note::
+	If setting password doesn't work by mysql_secure_installation, use this additional command: 
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	Change password (root) if you want.
 
 2. Modify application.yml file for backend:
 
@@ -890,8 +853,9 @@ RPM package for RedHat 9.2 without GPG
 
 	cd /opt/src/backend/main/resources
 	
-.. note::	
-	Make changes inside of application.yml. Change neo4j and mysql database password.
+.. note::
+	Make changes inside the file application.yml! 
+	Change neo4j and mysql database password.
 
 3. Restart backend:
 
@@ -906,3 +870,5 @@ RPM package for RedHat 9.2 without GPG
 	:linenos:
 	
 	Visit opencelium http://SERVERIP
+	
+
