@@ -92,7 +92,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	.. code-block:: sh
 	:linenos:	
 	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
@@ -124,7 +124,8 @@ Debian/Ubuntu (example for 22.04 LTS)
 	.. code-block:: sh
 	:linenos:	
 
-		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
 3. Enable OC service
 
 .. code-block:: sh
@@ -260,7 +261,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	.. code-block:: sh
 	:linenos:	
 	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
@@ -292,7 +293,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	.. code-block:: sh
 	:linenos:	
 
-		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 3. Enable OC service
 
@@ -442,7 +443,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	.. code-block:: sh
 	:linenos:	
 	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
@@ -473,7 +474,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	.. code-block:: sh
 	:linenos:	
 
-		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 3. Enable OC service
 
@@ -674,7 +675,7 @@ DEB package for Ubuntu 22.04 LTS
 	.. code-block:: sh
 	:linenos:	
 	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
@@ -763,7 +764,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	.. code-block:: sh
 	:linenos:	
 	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
@@ -809,7 +810,7 @@ RPM package for RedHat 9.2
 .. note::
 	You may need to install the EPEL repository for your system to install these packages. 
 	If you do not install pygpgme, GPG verification will not work.
-	In this case, you can install OpenCelium without GPG verification (see instllation note).
+	In this case, you can install OpenCelium without GPG verification (see note at installation section).
 
 2. Install java:
 
@@ -887,7 +888,7 @@ RPM package for RedHat 9.2
 	.. code-block:: sh
 	:linenos:	
 	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+	mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
 		
 	Change password (root) if you want.
 
