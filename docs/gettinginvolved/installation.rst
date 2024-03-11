@@ -87,7 +87,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	mysql_secure_installation
 	
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
 	
 	.. code-block:: sh
 		:linenos:	
@@ -262,7 +262,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	systemctl enable mariadb
 
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
 	
 	.. code-block:: sh
 		:linenos:	
@@ -450,7 +450,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	mysql_secure_installation
 
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
 	
 	.. code-block:: sh
 		:linenos:	
@@ -689,7 +689,7 @@ DEB package for Ubuntu 22.04 LTS
 	mysql_secure_installation
 	
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
 	
 	.. code-block:: sh
 		:linenos:	
@@ -785,7 +785,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	mysql_secure_installation
 	
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
 	
 	.. code-block:: sh
 		:linenos:	
@@ -916,7 +916,7 @@ RPM package for RedHat 9.2
 	mysql_secure_installation
 	
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
 	
 	.. code-block:: sh
 		:linenos:	
