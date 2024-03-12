@@ -736,21 +736,14 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 """""""""""""""""
 **Prepare environment:**
 
-1. Update SUSE system:
-
-.. code-block:: sh
-	:linenos:
-
-	zypper update
-
-2. Install java:
+1. Install java:
 
 .. code-block:: sh
 	:linenos:
 
 	zypper install java-17-openjdk
 
-3. Install neo4j:
+2. Install neo4j:
 
 .. code-block:: sh
 	:linenos:
