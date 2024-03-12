@@ -256,7 +256,7 @@ public class ConnectorExecutor {
                     uri = new URI(nextElemLink);
                 }
             }
-            if (header.getContentType() != null || header.getContentType().toString().contains("json")) {
+            if (getResponseContentType(header, functionInvoker).toString().contains("json")) {
                 ResponseEntity o = this.restTemplate.exchange(uri, method ,httpEntity, Object.class);
                 responseEntity = InvokerRequestBuilder
                         .convertToStringResponse(o);
