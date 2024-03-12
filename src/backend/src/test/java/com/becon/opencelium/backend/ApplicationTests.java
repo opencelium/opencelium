@@ -44,14 +44,5 @@ public class ApplicationTests {
 
 	@Test
 	public void contextLoads() {
-		String uri = "http://localhost:8081/api/page/example?size=5&page=";
-		HttpMethod method = HttpMethod.GET;
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Basic YWRtaW46MTIzNA==");
-		headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
-		HttpEntity<String> httpEntity = new HttpEntity<>(headers);
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<Object> r = restTemplate.exchange(uri, method ,httpEntity, Object.class);
-		System.out.println(r);
 	}
 }

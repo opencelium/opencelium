@@ -201,6 +201,9 @@ public class ConnectorExecutor {
             pagination = pagination.clone();
             executionContainer.setPagination(pagination);
         }
+        if (!functionInvoker.getType().equals("page")) {
+            pagination = null;
+        }
 
         boolean has_more = false;
         ResponseEntity<String> responseEntity;
@@ -253,12 +256,12 @@ public class ConnectorExecutor {
                     uri = new URI(nextElemLink);
                 }
             }
-            if (header.getContentType() == (getResponseContentType(header, functionInvoker))) {
-                responseEntity = this.restTemplate.exchange(uri, method ,httpEntity, String.class);
-            } else {
+            if (header.getContentType() != null || header.getContentType().toString().contains("json")) {
                 ResponseEntity o = this.restTemplate.exchange(uri, method ,httpEntity, Object.class);
                 responseEntity = InvokerRequestBuilder
                         .convertToStringResponse(o);
+            } else {
+                responseEntity = this.restTemplate.exchange(uri, method ,httpEntity, String.class);
             }
             if (pagination != null) {
                 pagination.updateParamValues(responseEntity);
@@ -726,7 +729,8 @@ public class ConnectorExecutor {
         List<Object> array;
         if (statementNode.getOperand().equals("SplitString")) {
             Object leftVariable = getValue(statementNode.getLeftStatementVariable(), "");
-            array = Arrays.asList(leftVariable.toString().split(statementNode.getRightStatementVariable().getFiled()));
+            String[] stringParts = leftVariable.toString().split(statementNode.getRightStatementVariable().getFiled());
+            array = new ArrayList<>(Arrays.asList(stringParts));
         } else {
             array = (List<Object>) message.getValue(condition, loopIterators);
         }
