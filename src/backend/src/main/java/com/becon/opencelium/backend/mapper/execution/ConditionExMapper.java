@@ -8,9 +8,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ConditionExMapper {
-    public ConditionEx toEntity(ConditionMng dto) {
+    public ConditionEx toEntity(ConditionMng dto, String type) {
         ConditionEx condition = new ConditionEx();
-        RelationalOperator ro = RelationalOperator.fromName(dto.getRelationalOperator());
+        RelationalOperator ro;
+        if (type.equals("loop") && (dto.getRelationalOperator() == null || dto.getRelationalOperator().isBlank())) {
+            ro = RelationalOperator.FOR;
+        } else {
+            ro = RelationalOperator.fromName(dto.getRelationalOperator());
+        }
         StatementMng ls = dto.getLeftStatement();
         StatementMng rs = dto.getRightStatement();
         switch (ro) {
@@ -25,14 +30,15 @@ public class ConditionExMapper {
             case PROPERTY_NOT_EXISTS, PROPERTY_EXISTS, IS_TYPE_OF -> {
                 //TODO: ???
             }
-            case IS_EMPTY, IS_NOT_EMPTY, IS_NOT_NULL, IS_NULL -> {
+            case SPLIT_STRING -> {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
+                condition.setRight(",");
             }
-            case DEFAULT -> {
+            case IS_EMPTY, IS_NOT_EMPTY, IS_NOT_NULL, IS_NULL, FOR, FOR_IN, DEFAULT -> {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
             }
         }
-        condition.setRelationalOperator(dto.getRelationalOperator());
+        condition.setRelationalOperator(ro.name());
         return condition;
     }
 }

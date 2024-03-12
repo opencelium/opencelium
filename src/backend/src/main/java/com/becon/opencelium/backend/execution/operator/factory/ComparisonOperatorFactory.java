@@ -54,6 +54,7 @@ public class ComparisonOperatorFactory implements OperatorFactory {
             case CONTAINS_SUB_STR -> new ContainsSubStr();
             case NOT_CONTAINS_SUB_STR -> new NotContainsSubStr();
             case DENYLIST, DEFAULT -> throw new RuntimeException("Operator '" + relationalOperator + "' is not supported");
+            default -> null;
         };
     }
 }
