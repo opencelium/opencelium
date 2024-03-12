@@ -93,7 +93,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	
 		mysql -u root
 		
-	If you can login (without your password), please set your password again with this command:
+	If this works (without your password), please set your password again with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -124,7 +124,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	yarn
 
 .. note::
-	If yarn doesn't run, use this command to increase the amount of inotify watchers:
+	If yarn doesn't run properly, use this command to increase the amount of inotify watchers:
 
 	.. code-block:: sh
 		:linenos:	
@@ -268,7 +268,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	
 		mysql -u root
 		
-	If you can login (without your password), please set your password again with this command:
+	If this works (without your password), please set your password again with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -299,7 +299,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	yarn
 	
 .. note::
-	If yarn doesn't run, use this command to increase the amount of inotify watchers:
+	If yarn doesn't run properly, use this command to increase the amount of inotify watchers:
 
 	.. code-block:: sh
 		:linenos:	
@@ -456,7 +456,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	
 		mysql -u root
 		
-	If you can login (without your password), please set your password again with this command:
+	If this works (without your password), please set your password again with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -487,7 +487,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	yarn
 	
 .. note::
-	If yarn doesn't run, use this command to increase the amount of inotify watchers:
+	If yarn doesn't run properly, use this command to increase the amount of inotify watchers:
 
 	.. code-block:: sh
 		:linenos:	
@@ -710,7 +710,7 @@ DEB package for Ubuntu 22.04 LTS
 .. code-block:: sh
 	:linenos:
 
-	cd /opt/opencelium/src/backend/main/resources
+	cd /opt/opencelium/src/backend/src/main/resources
 
 .. note::
 	Make changes inside the file application.yml! 
@@ -806,7 +806,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 .. code-block:: sh
 	:linenos:
 
-	cd /opt/opencelium/src/backend/main/resources
+	cd /opt/opencelium/src/backend/src/main/resources
 	
 .. note::
 	Make changes inside the file application.yml! 
@@ -935,7 +935,7 @@ RPM package for RedHat 9.2
 .. code-block:: sh
 	:linenos:
 
-	cd /opt/opencelium/src/backend/main/resources
+	cd /opt/opencelium/src/backend/src/main/resources
 	
 .. note::
 	Make changes inside the file application.yml! 
