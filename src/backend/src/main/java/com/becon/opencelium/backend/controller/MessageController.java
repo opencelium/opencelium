@@ -252,7 +252,7 @@ public class MessageController {
 //        return ResponseEntity.ok(channels);
 //    }
 
-    @GetMapping("/tools/income_webhook")
+    @GetMapping("/tools/incoming_webhook")
     public ResponseEntity<?> getIncomeWebhook() throws Exception {
         String webhook = env.getProperty(YamlPropConst.INCOMING_WEBHOOK);
         ResultDTO<String> webhookDto = new ResultDTO<>(webhook);
