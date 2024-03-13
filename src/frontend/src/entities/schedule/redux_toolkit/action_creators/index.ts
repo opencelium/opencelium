@@ -18,6 +18,7 @@ import ScheduleCreators from "./ScheduleCreators";
 import WebhookCreators from "./WebhookCreators";
 import TeamsCreators from "./TeamsCreators";
 import SlackCreators from "./SlackCreator";
+import IncomingWebhookCreator from "./IncomingWebhookCreator";
 import ToolCreators from './ToolCreators';
 
 export default {
@@ -26,5 +27,6 @@ export default {
     ...WebhookCreators,
     ...TeamsCreators,
     ...SlackCreators,
+    ...IncomingWebhookCreator,
     ...ToolCreators,
 }

@@ -25,8 +25,12 @@ export default class Tool {
     }
 
     static getToolsOptionsForSelect(tools: ToolModel[]): OptionProps[]{
-        return tools.map(team => {
-            return {label: capitalize(team), value: team}
+        const labels: any = {
+            email: 'E-Mail',
+            incoming_webhook: 'Incoming Webhook',
+        }
+        return tools.map(tool => {
+            return {label: labels[tool], value: tool}
         });
     }
 

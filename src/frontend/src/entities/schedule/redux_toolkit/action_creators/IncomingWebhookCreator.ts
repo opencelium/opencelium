@@ -14,14 +14,14 @@
  */
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
+import {IncomingWebhookRequest} from "@entity/schedule/requests/classes/IncomingWebhook";
 import {errorHandler} from "@application/utils/utils";
-import { TeamsRequest } from "@entity/schedule/requests/classes/Teams";
 
-export const getTeamsWebhook = createAsyncThunk(
-    'schedule/notification/get/teams/webhook',
+export const getIncomingWebhook = createAsyncThunk(
+    'schedule/notification/get/incoming_webhook',
     async(data: never, thunkAPI) => {
         try {
-            const request = new TeamsRequest();
+            const request = new IncomingWebhookRequest();
             const response = await request.getWebhook();
             return response.data.result;
         } catch(e){
@@ -31,5 +31,5 @@ export const getTeamsWebhook = createAsyncThunk(
 )
 
 export default {
-    getTeamsWebhook,
+    getIncomingWebhook,
 }

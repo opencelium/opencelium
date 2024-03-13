@@ -13,23 +13,21 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {createAsyncThunk} from "@reduxjs/toolkit";
-import {errorHandler} from "@application/utils/utils";
-import { TeamsRequest } from "@entity/schedule/requests/classes/Teams";
+import {AxiosResponse} from "axios";
+import Request from "@entity/application/requests/classes/Request";
+import {IRequestSettings} from "@application/requests/interfaces/IRequest";
+import {GetWebhookResponse, IIncomingWebhook} from "@entity/schedule/requests/interfaces/IIncomingWebhook";
 
-export const getTeamsWebhook = createAsyncThunk(
-    'schedule/notification/get/teams/webhook',
-    async(data: never, thunkAPI) => {
-        try {
-            const request = new TeamsRequest();
-            const response = await request.getWebhook();
-            return response.data.result;
-        } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
-        }
+
+export class IncomingWebhookRequest extends Request implements IIncomingWebhook {
+
+    constructor(settings?: Partial<IRequestSettings>) {
+        super({url: 'message/tools', ...settings});
     }
-)
 
-export default {
-    getTeamsWebhook,
+    async getWebhook(): Promise<AxiosResponse<GetWebhookResponse>>{
+        this.endpoint = "/incoming_webhook";
+        return super.get<GetWebhookResponse>();
+    }
+
 }
