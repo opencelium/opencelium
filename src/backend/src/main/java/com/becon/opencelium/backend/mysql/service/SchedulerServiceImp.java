@@ -289,18 +289,6 @@ public class SchedulerServiceImp implements SchedulerService {
         Set<EventRecipient> notificationEventRecipients = resource.getRecipients().stream()
                 .map(EventRecipient::new).collect(Collectors.toSet());
 
-        // TODO: should be refactored
-        if (resource.getNotificationType().equals(NotifyTool.TEAMS.toString())) {
-            String teamChannel = resource.getTeam() + ";" + resource.getChannel();
-            EventRecipient er = new EventRecipient(teamChannel);
-            if (resource.getNotificationId() != 0) {
-                er = notificationRepository
-                        .findById(resource.getNotificationId()).get().getEventRecipients().stream().toList().get(0);
-                er.setDestination(teamChannel);
-            }
-            notificationEventRecipients.add(er);
-        }
-
         eventNotification.setEventRecipients(notificationEventRecipients);
         eventNotification.setEventMessage(messageService.findById(resource.getTemplate().getTemplateId()).orElseThrow(()->
                 new RuntimeException("TEMPLATE_NOT_FOUND")));
