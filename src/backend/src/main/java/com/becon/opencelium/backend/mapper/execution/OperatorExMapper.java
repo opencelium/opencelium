@@ -15,17 +15,18 @@ public class OperatorExMapper {
         this.conditionExMapper = conditionExMapper;
     }
 
-    public OperatorEx toEntity(OperatorMng dto){
+    public OperatorEx toEntity(OperatorMng dto) {
         OperatorEx operatorEx = new OperatorEx();
         operatorEx.setId(dto.getId());
         operatorEx.setIndex(dto.getIndex());
         operatorEx.setType(dto.getType());
         operatorEx.setIterator(dto.getIterator());
-        operatorEx.setCondition(conditionExMapper.toEntity(dto.getCondition()));
+        operatorEx.setCondition(conditionExMapper.toEntity(dto.getCondition(), dto.getType()));
         return operatorEx;
     }
-    public List<OperatorEx> toEntityAll(List<OperatorMng> dtoList){
-        if(dtoList==null || dtoList.isEmpty()){
+
+    public List<OperatorEx> toEntityAll(List<OperatorMng> dtoList) {
+        if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }
         List<OperatorEx> operatorExes = new ArrayList<>();

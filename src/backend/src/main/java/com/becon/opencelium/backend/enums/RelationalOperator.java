@@ -24,6 +24,9 @@ public enum RelationalOperator {
     MATCHES_IN_LIST("AllowList"),
     REGEX("RegEx"),
     DENYLIST("DenyList"),
+    FOR("for"),
+    FOR_IN("forin"),
+    SPLIT_STRING("SplitString"),
     DEFAULT(null);
 
     private final String name;
