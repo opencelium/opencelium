@@ -696,7 +696,6 @@ public class ConnectorExecutor {
                     result.add(statementVariable.getFiled());
                 }
             }
-
             value = executionContainer.getValueFromResponseData(rightPropertyValueRef);
             result.add(value);
             return result;

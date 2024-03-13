@@ -6,4 +6,5 @@ public interface YamlPropConst {
     String PROXY_PORT = "opencelium.rest_template.proxy.port";
     String PROXY_USER = "opencelium.rest_template.proxy.username";
     String PROXY_PASS = "opencelium.rest_template.proxy.password";
+    String INCOMING_WEBHOOK = "opencelium.notification.tools.incoming_webhook.url";
 }

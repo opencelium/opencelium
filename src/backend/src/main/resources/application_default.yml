@@ -173,20 +173,19 @@ opencelium:
 #                                                                         #
 #   Configuration for Notification                                        #
 #                                                                         #
-#   Teams: https://learn.microsoft.com/en-us/graph/auth/auth-concepts     #
-#   Slack: https://api.slack.com/messaging/webhooks                       #
+#   for handling several webhooks separate value by ","                   #
+#   notification:                                                         #
+#    tools:                                                               #
+#      incoming_webhook:                                                  #
+#        url:                                                             #
+#         first webhook slack,                                            #
+#         second webhook teams                                            #
 #                                                                         #
 ###########################################################################
   notification:
     tools:
-      slack:
-        webhook:
-      teams:
-        grant_type: refresh_token
-        client_id:
-        client_secret:
-        refresh_token:
-        tenant:
+      incoming_webhook:
+        url: {put a webhook here}, {put another webhook here}
 #  rest_template:
 #      proxy:
 #        host: 127.0.0.1

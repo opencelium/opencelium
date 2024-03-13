@@ -21,7 +21,7 @@ public class MessageResource {
         this.type = eventMessage.getType();
         this.content = eventMessage.getEventContents()
                 .stream()
-                .map(c->new ContentResource(c))
+                .map(ContentResource::new)
                 .collect(Collectors.toList());
     }
 
