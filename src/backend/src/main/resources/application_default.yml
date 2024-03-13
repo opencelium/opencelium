@@ -177,18 +177,22 @@ opencelium:
     secret: becon.opencelium
     activity-time: 18000
     experation-time: 86400
-###########################################################################
-#                                                                         #
-#   Configuration for Notification                                        #
-#                                                                         #
-#   Teams: https://learn.microsoft.com/en-us/graph/auth/auth-concepts     #
-#   Slack: https://api.slack.com/messaging/webhooks                       #
-#                                                                         #
-###########################################################################
+  ###########################################################################
+  #                                                                         #
+  #   Configuration for Notification                                        #
+  #                                                                         #
+  #   for handling several webhooks separate url "," and then webhook       #
+  #   notification:                                                         #
+  #    tools:                                                               #
+  #      income_webhook:                                                    #
+  #        url:  first webhook,                                             #
+  #              second webhook                                             #
+  #                                                                         #
+  ###########################################################################
   notification:
     tools:
-      slack:
-        webhook:
+      incoming_webhook:
+        url: {insert you webhook url here}
       teams:
         grant_type: refresh_token
         client_id:

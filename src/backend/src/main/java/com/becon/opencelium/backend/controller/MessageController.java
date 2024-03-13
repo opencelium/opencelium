@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.enums.LangEnum;
-import com.becon.opencelium.backend.execution.notification.TeamsService;
 import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.service.*;
@@ -10,7 +10,6 @@ import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.LanguageDTO;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
-import com.becon.opencelium.backend.resource.notification.tool.teams.TeamsDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,9 +38,6 @@ public class MessageController {
 
     @Autowired
     private ContentServiceImpl contentService;
-
-    @Autowired
-    private TeamsService teamsService;
 
     @Autowired
     private Environment env;
@@ -242,21 +238,21 @@ public class MessageController {
         return ResponseEntity.ok(resultDTO);
     }
 
-    @GetMapping("/tools/teams/team/all")
-    public ResponseEntity<?> getAllTeamsTeam() throws Exception {
-        TeamsDto teams = teamsService.getAllTeams();
-        return ResponseEntity.ok(teams);
-    }
+//    @GetMapping("/tools/teams/team/all")
+//    public ResponseEntity<?> getAllTeamsTeam() throws Exception {
+//        TeamsDto teams = teamsService.getAllTeams();
+//        return ResponseEntity.ok(teams);
+//    }
+//
+//    @GetMapping("/tools/teams/team/{teamId}/channel/all")
+//    public ResponseEntity<?> getAllTeamChannels(@PathVariable String teamId) throws Exception {
+//        TeamsDto channels = teamsService.getAllChannels(teamId);
+//        return ResponseEntity.ok(channels);
+//    }
 
-    @GetMapping("/tools/teams/team/{teamId}/channel/all")
-    public ResponseEntity<?> getAllTeamChannels(@PathVariable String teamId) throws Exception {
-        TeamsDto channels = teamsService.getAllChannels(teamId);
-        return ResponseEntity.ok(channels);
-    }
-
-    @GetMapping("/tools/slack/webhook")
+    @GetMapping("/tools/incoming_webhook")
     public ResponseEntity<?> getSlackWebhook() throws Exception {
-        String webhook = env.getProperty("opencelium.notification.tools.slack.webhook");
+        String webhook = env.getProperty(YamlPropConst.INCOMING_WEBHOOK);
         ResultDTO<String> webhookDto = new ResultDTO<>(webhook);
         return ResponseEntity.ok(webhookDto);
     }
