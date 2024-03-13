@@ -215,6 +215,9 @@ public class MethodResponse {
             if(result.size() == 1) {
                 return result.get(0);
             } else {
+                if (result instanceof List && ((List) result).isEmpty()) {
+                    return "";
+                }
                 return result;
             }
         } catch (Exception e) {
