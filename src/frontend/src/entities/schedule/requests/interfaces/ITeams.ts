@@ -14,23 +14,14 @@
  */
 
 import {AxiosResponse} from "axios";
-import {TeamChannelModel, TeamModel} from "@entity/schedule/requests/models/Teams";
 
-export interface GetAllResponse<T, V> {
-    type: T,
-    value: V[]
+export interface GetWebhookResponse {
+    result: string,
 }
-
-export type GetAllTeamsResponse = GetAllResponse<"CHANNEL", TeamModel>;
-
-export type GetAllChannelsResponse = GetAllResponse<"TEAM", TeamChannelModel>;
 
 export interface ITeams{
 
-    //to get all teams
-    getAllTeams(): Promise<AxiosResponse<GetAllTeamsResponse>>,
-
-    //to get all channels by team
-    getAllChannelsByTeam(): Promise<AxiosResponse<GetAllChannelsResponse>>,
+    //to get webhook
+    getWebhook(): Promise<AxiosResponse<GetWebhookResponse>>,
 
 }

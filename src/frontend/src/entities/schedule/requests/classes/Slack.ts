@@ -22,11 +22,11 @@ import {ISlack, GetWebhookResponse} from "../interfaces/ISlack";
 export class SlackRequest extends Request implements ISlack{
 
     constructor(settings?: Partial<IRequestSettings>) {
-        super({url: 'message/tools/slack', ...settings});
+        super({url: 'message/tools', ...settings});
     }
 
     async getWebhook(): Promise<AxiosResponse<GetWebhookResponse>>{
-        this.endpoint = "/webhook";
+        this.endpoint = "/incoming_webhook";
         return super.get<GetWebhookResponse>();
     }
 
