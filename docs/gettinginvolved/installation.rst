@@ -86,14 +86,14 @@ Debian/Ubuntu (example for 22.04 LTS)
 	mysql_secure_installation
 	
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command:
 	
 	.. code-block:: sh
 		:linenos:	
 	
-		mysql -u root -p
+		mysql -u root
 		
-	If this dosn't work, please set your password with this command:
+	If this works (without your password), please set your password again with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -110,7 +110,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 
 	cd /opt
-	git clone -b v3.2.1 https://github.com/opencelium/opencelium.git . 
+	git clone -b <StableVersion> https://github.com/opencelium/opencelium.git . 
 	
 .. note::
 	Get stable versions here https://github.com/opencelium/opencelium/tags
@@ -124,7 +124,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	yarn
 
 .. note::
-	If yarn doesn't run, use this command to increase the amount of inotify watchers:
+	If yarn doesn't run properly, use this command to increase the amount of inotify watchers:
 
 	.. code-block:: sh
 		:linenos:	
@@ -261,14 +261,14 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	systemctl enable mariadb
 
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
 	
 	.. code-block:: sh
 		:linenos:	
 	
-		mysql -u root -p
+		mysql -u root
 		
-	If this dosn't work, please set your password with this command:
+	If this works (without your password), please set your password again with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -299,7 +299,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 	yarn
 	
 .. note::
-	If yarn doesn't run, use this command to increase the amount of inotify watchers:
+	If yarn doesn't run properly, use this command to increase the amount of inotify watchers:
 
 	.. code-block:: sh
 		:linenos:	
@@ -404,7 +404,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 .. code-block:: sh
 	:linenos:
 
-	yum install java-17-openjdk.x86_64
+	yum install java-17-openjdk
 
 6. Install gradle:
 
@@ -431,7 +431,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	gpgcheck=1
 	EOF
 	yum install neo4j-5.7.0-1
-	/usr/bin/neo4j-admin set-initial-password secret1234
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	systemctl start neo4j
 	systemctl enable neo4j	
 	
@@ -444,19 +444,19 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	:linenos:
 
 	yum install mariadb-server
-	root@shell>	systemctl start mariadb
-	root@shell>	systemctl enable mariadb
+	systemctl start mariadb
+	systemctl enable mariadb
 	mysql_secure_installation
 
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
 	
 	.. code-block:: sh
 		:linenos:	
 	
-		mysql -u root -p
+		mysql -u root
 		
-	If this dosn't work, please set your password with this command:
+	If this works (without your password), please set your password again with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -487,7 +487,7 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	yarn
 	
 .. note::
-	If yarn doesn't run, use this command to increase the amount of inotify watchers:
+	If yarn doesn't run properly, use this command to increase the amount of inotify watchers:
 
 	.. code-block:: sh
 		:linenos:	
@@ -676,6 +676,7 @@ DEB package for Ubuntu 22.04 LTS
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.deb.sh | sudo bash
 	sed -i 's!deb .*!deb [signed-by=/etc/apt/keyrings/becon_opencelium-archive-keyring.gpg] https://packagecloud.io/becon/opencelium/ubuntu jammy main!' /etc/apt/sources.list.d/becon_opencelium.list
+	apt update
 	apt install opencelium
 
 **Configure environment:**
@@ -688,14 +689,14 @@ DEB package for Ubuntu 22.04 LTS
 	mysql_secure_installation
 	
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
 	
 	.. code-block:: sh
 		:linenos:	
 	
-		mysql -u root -p
+		mysql -u root
 		
-	If this dosn't work, please set your password with this command:
+	If this works (without your password), please set your password again with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -709,7 +710,7 @@ DEB package for Ubuntu 22.04 LTS
 .. code-block:: sh
 	:linenos:
 
-	cd /opt/opencelium/src/backend/main/resources
+	cd /opt/opencelium/src/backend/src/main/resources
 
 .. note::
 	Make changes inside the file application.yml! 
@@ -735,21 +736,14 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 """""""""""""""""
 **Prepare environment:**
 
-1. Update SUSE system:
-
-.. code-block:: sh
-	:linenos:
-
-	zypper update
-
-2. Install java:
+1. Install java:
 
 .. code-block:: sh
 	:linenos:
 
 	zypper install java-17-openjdk
 
-3. Install neo4j:
+2. Install neo4j:
 
 .. code-block:: sh
 	:linenos:
@@ -784,14 +778,14 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 	mysql_secure_installation
 	
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
 	
 	.. code-block:: sh
 		:linenos:	
 	
-		mysql -u root -p
+		mysql -u root
 		
-	If this dosn't work, please set your password with this command:
+	If this works (without your password), please set your password again with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -805,7 +799,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 .. code-block:: sh
 	:linenos:
 
-	cd /opt/src/backend/main/resources
+	cd /opt/opencelium/src/backend/src/main/resources
 	
 .. note::
 	Make changes inside the file application.yml! 
@@ -864,10 +858,8 @@ RPM package for RedHat 9.2
 	enabled=1
 	gpgcheck=1
 	EOF
-	yum addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
-	yum refresh
 	yum install neo4j-5.7.0-1
-	/usr/bin/neo4j-admin set-initial-password secret1234
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	
 .. note::
 	Change password (secret1234) if you want.
@@ -915,14 +907,14 @@ RPM package for RedHat 9.2
 	mysql_secure_installation
 	
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Use this command to test your password: 
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
 	
 	.. code-block:: sh
 		:linenos:	
 	
-		mysql -u root -p
+		mysql -u root
 		
-	If this dosn't work, please set your password with this command:
+	If this works (without your password), please set your password again with this command:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -936,7 +928,7 @@ RPM package for RedHat 9.2
 .. code-block:: sh
 	:linenos:
 
-	cd /opt/src/backend/main/resources
+	cd /opt/opencelium/src/backend/src/main/resources
 	
 .. note::
 	Make changes inside the file application.yml! 
