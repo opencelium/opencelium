@@ -14,7 +14,7 @@ public interface ConnectionMngService {
     ConnectionMng saveDirectly(ConnectionMng connectionMng);
     ConnectionMng getByConnectionId(Long connectionId);
     List<ConnectionMng> getAll();
-    void delete(Long id);
+    ConnectionMng delete(Long id);
     List<ConnectionMng> getAllById(List<Long> ids);
     long count();
     void doWithPatchedConnection(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails details);

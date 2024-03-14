@@ -372,18 +372,19 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
                     res.add(putId(s, id));
                 }
                 return res;
-            } else {
+            } else if (value instanceof List<?>) {
                 List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
-                List<Map<String, Object>> res = new ArrayList<>();
-                for (Map<String, Object> map : mapList) {
-                    res.add(dealWithMapOfFields(map, fieldPaths, id));
-                }
-                return res;
+//                List<Map<String, Object>> res = new ArrayList<>();
+//                for (Map<String, Object> map : mapList) {
+//                    res.add(dealWithMapOfFields(map, fieldPaths, id));
+//                }
+//                return res;
+                return dealWithArrayOfFields(mapList, fieldPaths, id);
             }
-        } else {
-            Map<String, Object> map = (Map<String, Object>) value;
-            return dealWithMapOfFields(map, fieldPaths, id);
         }
+        Map<String, Object> map = (Map<String, Object>) value;
+        return dealWithMapOfFields(map, fieldPaths, id);
+
     }
 
     private Map<String, Object> dealWithMapOfFields(Map<String, Object> src, List<String> fieldPaths, String id) {
@@ -391,13 +392,32 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         Map<String, Object> resultMap = new HashMap<>();
         for (Map.Entry<String, Object> entry : src.entrySet()) {
             if (name.startsWith(entry.getKey())) {
-                fieldPaths.remove(0);
-                resultMap.put(entry.getKey(), process(entry.getValue(), fieldPaths, id));
+                if(name.matches(".+\\[\\w*]")){
+                    resultMap.put(entry.getKey(), process(entry.getValue(), fieldPaths, id));
+                }else {
+                    fieldPaths.remove(0);
+                    resultMap.put(entry.getKey(), process(entry.getValue(), fieldPaths, id));
+                }
             } else {
                 resultMap.put(entry.getKey(), entry.getValue());
             }
         }
         return resultMap;
+    }
+
+    private List<Map<String, Object>> dealWithArrayOfFields(List<Map<String, Object>> list, List<String> fieldPaths, String id) {
+        String name = fieldPaths.get(0);
+        int index = Integer.parseInt(name.substring(name.indexOf('[') + 1, name.indexOf(']')));
+        List<Map<String, Object>> res = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (index == i) {
+                fieldPaths.remove(0);
+                res.add(dealWithMapOfFields(list.get(i), fieldPaths, id));
+            } else {
+                res.add(list.get(i));
+            }
+        }
+        return res;
     }
 
     private String putId(String ref, String id) {

@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.execution.notification.enums;
 
 public enum NotifyTool {
-    TEAMS("teams"), EMAIL("email"), SLACK("slack");
+    EMAIL("email"), INCOMING_WEBHOOK("incoming_webhook");
 
     private final String name;
 

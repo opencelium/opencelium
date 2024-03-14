@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.aspect;
 
 
+import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.LangEnum;
@@ -27,12 +28,15 @@ import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import org.aspectj.lang.annotation.*;
+import org.checkerframework.checker.units.qual.A;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -53,10 +57,7 @@ public class ExecutionAspect {
     private UserServiceImpl userService;
 
     @Autowired
-    private TeamsService teamsService;
-
-    @Autowired
-    private SlackService slackService;
+    private IncomingWebhookService incomingWebhookService;
 
     @Autowired
     private ExecutionServiceImp executionServiceImp;
@@ -67,8 +68,8 @@ public class ExecutionAspect {
     @Autowired
     private EmailServiceImpl emailService;
 
-    @Value("${opencelium.notification.tools.slack.webhook}")
-    private String slackWebhook;
+    @Autowired
+    private Environment env;
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
     public void sendBefore(JobExecutionContext context){
@@ -107,8 +108,8 @@ public class ExecutionAspect {
             if (!en.getEventType().equals(eventType)){
                 continue;
             }
-            if (en.getEventRecipients() == null | en.getEventRecipients().isEmpty()) {
-                en.getEventRecipients().add(new EventRecipient(slackWebhook));
+            if (en.getEventRecipients().isEmpty()) {
+                fillDefaultRecipients(en.getEventRecipients(), en.getEventMessage().getType());
             }
             for (EventRecipient er : en.getEventRecipients()) {
                 User user = userService.findByEmail(er.getDestination()).orElse(null);
@@ -125,19 +126,37 @@ public class ExecutionAspect {
                 message = replaceConstants(content.getBody(), user, ex, en);
                 subject = replaceConstants(content.getSubject(), user, ex, en);
                 to = er.getDestination();
-                String type = en.getEventMessage().getType();// email, slack, jira, etc
+                String type = en.getEventMessage().getType();// email, incoming_webhook
                 try {
-                    if (type.equals("email")) {
-                        emailService.sendMessage(to, subject, message);
-                    } else if (type.equals("slack")) {
-                        slackService.sendMessage(to, subject, message);
-                    } else if (type.equals("teams")) {
-                        teamsService.sendMessage(to, subject, message);
+                    switch (type) {
+                        case "incoming_webhook" -> incomingWebhookService.sendMessage(to, subject, message);
+                        case "email" -> emailService.sendMessage(to, subject, message);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    // type: email, incoming_webhook
+    private void fillDefaultRecipients(Set<EventRecipient> recipients, String type) {
+        String destination;
+        switch (type) {
+            case "email" -> {
+                destination = SecurityContextHolder.getContext().getAuthentication().getName();
+                recipients.add(new EventRecipient(destination));
+            }
+            case "incoming_webhook" -> {
+                String[] webhooks = env.getProperty(YamlPropConst.INCOMING_WEBHOOK, String[].class);
+                if (webhooks == null) {
+                    return;
+                }
+                for (String url : webhooks) {
+                    recipients.add(new EventRecipient(url));
+                }
+            }
+            default -> throw new RuntimeException("Couldn't find tool type: " + type + ". Check application.yaml file;");
         }
     }
 
