@@ -227,7 +227,7 @@ public class ConnectorExecutor {
     }
 
     private String[] getNextIndex(int lastExecuted, boolean hasCircle, int loopHead, int loopTail) {
-        String[] result = new String[2];
+        String[] result = {"null", "null"};
         Object next;
         if (hasCircle && lastExecuted == loopTail) {
             next = executables.get(loopHead + 1);

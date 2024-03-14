@@ -32,8 +32,11 @@ public class ConnectionExecutor {
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
 
-        // TODO: logger will be initialized after all necessary fields added to execution object
-        this.logger = new OcLogger<>(false, simpMessagingTemplate, new ExecutionLog(), JobExecutor.class);
+        this.logger = new OcLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), JobExecutor.class);
+
+        if (!executionObj.getLogger().isDebugMode()) {
+            logger.disable();
+        }
     }
 
     public void start() {
