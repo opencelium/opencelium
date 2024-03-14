@@ -27,9 +27,7 @@ import com.becon.opencelium.backend.execution.operator.RegEx;
 
 public class ComparisonOperatorFactory implements OperatorFactory {
 
-    public Operator getOperator(String relationalOperator) {
-        RelationalOperator operator = RelationalOperator.fromName(relationalOperator);
-
+    public Operator getOperator(RelationalOperator operator) {
         return switch (operator) {
             case CONTAINS -> new Contains();
             case NOT_CONTAINS -> new NotContains();
@@ -53,7 +51,7 @@ public class ComparisonOperatorFactory implements OperatorFactory {
             case NOT_EQUAL_TO -> new NotEqualTo();
             case CONTAINS_SUB_STR -> new ContainsSubStr();
             case NOT_CONTAINS_SUB_STR -> new NotContainsSubStr();
-            case DENYLIST, DEFAULT -> throw new RuntimeException("Operator '" + relationalOperator + "' is not supported");
+            case DENYLIST, DEFAULT -> throw new RuntimeException("Operator '" + operator.name() + "' is not supported");
             default -> null;
         };
     }

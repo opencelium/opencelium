@@ -20,14 +20,19 @@ import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 public class ConnectorExecutor {
     private final Connector connector;

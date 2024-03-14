@@ -17,7 +17,7 @@ public class Loop {
 
         result.setListRef(operatorEx.getCondition().getLeft());
         result.setCounterName(operatorEx.getIterator());
-        result.setOperator(RelationalOperator.fromName(operatorEx.getCondition().getRelationalOperator()));
+        result.setOperator(operatorEx.getCondition().getRelationalOperator());
 
         return result;
     }
