@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
-import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.FieldBindingRepository;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
@@ -13,6 +12,7 @@ import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
+import com.becon.opencelium.backend.utility.BindingUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -227,200 +227,49 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         }
         List<FieldBindingMng> fbMngs = fieldBindingMngMapper.toEntityAll(connectionDTO.getFieldBinding());
         List<MethodMng> methodMngs = methodMngMapper.toEntityAll(methods);
-        detach(methodMngs, fbMngs);
+        BindingUtility.detach(methodMngs, fbMngs);
         for (int i = 0; i < methods.size(); i++) {
             methodMngMapper.updateDtoFromEntity(methods.get(i), methodMngs.get(i));
         }
     }
 
-    public void detach(List<MethodMng> methods, List<FieldBindingMng> fbs) {
-        for (MethodMng method : methods) {
-            if (method != null) {
-                if (method.getRequest() != null && method.getRequest().getBody() != null) {
-                    Map<String, Object> fields = method.getRequest().getBody().getFields();
-                    for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                        entry.setValue(findRefAndReplace(entry.getValue(), fbs));
-                    }
-                }
-                if (method.getResponse() != null && method.getResponse() != null) {
-                    if (method.getResponse().getFail() != null && method.getResponse().getFail().getBody() != null) {
-                        Map<String, Object> fields = method.getResponse().getFail().getBody().getFields();
-                        for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                            entry.setValue(findRefAndReplace(entry.getValue(), fbs));
-                        }
-                    }
-                    if (method.getResponse().getSuccess() != null && method.getResponse().getSuccess().getBody() != null) {
-                        Map<String, Object> fields = method.getResponse().getSuccess().getBody().getFields();
-                        for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                            entry.setValue(findRefAndReplace(entry.getValue(), fbs));
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private Object findRefAndReplace(Object obj, List<FieldBindingMng> fieldBinding) {
-        if (obj instanceof String str) {
-            if (str.matches(RegExpression.enhancement)) {
-                String id = str.replace("#{%", "")
-                        .replace("%}", "");
-
-                obj = getRefOfFB(id, fieldBinding);
-            }
-        } else if (obj instanceof List<?> list) {
-            List<Object> objects = new ArrayList<>();
-            for (Object o : list) {
-                objects.add(findRefAndReplace(o, fieldBinding));
-            }
-            obj = objects;
-        } else if (obj instanceof Map<?, ?> map) {
-            Map<String, Object> res = new LinkedHashMap<>();
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
-                res.put((String) entry.getKey(), findRefAndReplace(entry.getValue(), fieldBinding));
-            }
-            obj = res;
-        }
-        return obj;
-    }
-
-    private String getRefOfFB(String id, List<FieldBindingMng> fieldBinding) {
-        for (FieldBindingMng fb : fieldBinding) {
-            if (fb.getId().equals(id)) {
-                StringBuilder sb = new StringBuilder();
-                for (LinkedFieldMng from : fb.getFrom()) {
-                    sb.append(from.getColor())
-                            .append(".(")
-                            .append(from.getType())
-                            .append(").")
-                            .append(from.getField())
-                            .append(" ");
-                }
-                sb.deleteCharAt(sb.length() - 1);
-                return sb.toString();
-            }
-        }
-        throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<MethodMng> bindIds(FieldBindingMng fb, List<MethodMng> methods) {
+    private void bindIds(FieldBindingMng fb, List<MethodMng> methods) {
         for (LinkedFieldMng toField : fb.getTo()) {
             for (MethodMng method : methods) {
                 if (toField.getColor().equals(method.getColor())) {
-                    if (toField.getType().equals("path")) {
-                        String endpoint = method.getRequest().getEndpoint();
-                        endpoint = putId(endpoint, fb.getId());
-                        method.getRequest().setEndpoint(endpoint);
-                    } else if (toField.getType().equals("header")) {
-                        method.getRequest().getHeader().entrySet()
-                                .stream()
-                                .filter(entry -> entry.getValue().matches(".*\\{%.+%}.*"))
-                                .findFirst()
-                                .ifPresent(entry -> entry.setValue(putId(entry.getValue(), fb.getId())));
-                    } else if (toField.getType().equals("request")) {
-                        List<String> fieldPaths = new ArrayList<>(List.of(toField.getField().split("\\.")));
-                        Map<String, Object> fields = method.getRequest().getBody().getFields();
-                        Map<String, Object> boundFields = (Map<String, Object>) findAndBindField(fields, fieldPaths, fb.getId());
-                        method.getRequest().getBody().setFields(boundFields);
-                    } else {
-                        List<String> fieldPaths = new ArrayList<>(List.of(toField.getField().split("\\.")));
-                        fieldPaths.remove(0);
-                        BodyMng bodyMngToChange;
-                        if (toField.getField().startsWith("success")) {
-                            bodyMngToChange = method.getResponse().getSuccess().getBody();
-                        } else {
-                            bodyMngToChange = method.getResponse().getFail().getBody();
+                    switch (toField.getType()) {
+                        case "path" -> {
+                            String endpoint = method.getRequest().getEndpoint();
+                            endpoint = BindingUtility.doWithPath(endpoint, fb.getId(), fb.getFrom());
+                            method.getRequest().setEndpoint(endpoint);
                         }
-                        Map<String, Object> boundFields = (Map<String, Object>) findAndBindField(bodyMngToChange.getFields(), fieldPaths, fb.getId());
-                        bodyMngToChange.setFields(boundFields);
+                        case "header" -> BindingUtility.doWithHeader(method.getRequest().getHeader(), toField.getField(), fb.getId());
+                        case "request" -> {
+                            List<String> fieldPaths = new ArrayList<>(List.of(toField.getField().split("\\.")));
+                            Map<String, Object> fields = method.getRequest().getBody().getFields();
+                            Map<String, Object> boundFields = BindingUtility.doWithBody(fields, fieldPaths, fb.getId(), method.getRequest().getBody().getFormat());
+                            method.getRequest().getBody().setFields(boundFields);
+                        }
+                        case "response" -> {
+                            List<String> fieldPaths = new ArrayList<>(List.of(toField.getField().split("\\.")));
+                            fieldPaths.remove(0);
+                            BodyMng bodyMngToChange;
+                            String format;
+                            if (toField.getField().startsWith("success")) {
+                                bodyMngToChange = method.getResponse().getSuccess().getBody();
+                                format = method.getResponse().getSuccess().getBody().getFormat();
+                            } else {
+                                bodyMngToChange = method.getResponse().getFail().getBody();
+                                format = method.getResponse().getFail().getBody().getFormat();
+                            }
+                            Map<String, Object> boundFields = BindingUtility.doWithBody(bodyMngToChange.getFields(), fieldPaths, fb.getId(), format);
+                            bodyMngToChange.setFields(boundFields);
+                        }
+                        default -> throw new RuntimeException("UNSUPPORTED_TYPE: " + toField.getType());
                     }
                     break;
                 }
             }
         }
-        return methods;
-    }
-
-    private Object findAndBindField(Map<String, Object> fields, List<String> fieldPaths, String id) {
-        Map<String, Object> resultMap = new HashMap<>();
-        String name = fieldPaths.get(0);
-        for (Map.Entry<String, Object> entry : fields.entrySet()) {
-            if (name.equals(entry.getKey()) || name.endsWith("[]") && name.startsWith(entry.getKey())) {
-                fieldPaths.remove(0);
-                resultMap.put(entry.getKey(), process(entry.getValue(), fieldPaths, id));
-            } else {
-                resultMap.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return resultMap;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Object process(Object value, List<String> fieldPaths, String id) {
-        if (fieldPaths.isEmpty()) {
-            String stringVal = (String) value;
-            return putId(stringVal, id);
-        }
-        String name = fieldPaths.get(0);
-
-        if (name.matches(".+\\[\\w*]")) {
-            if (fieldPaths.size() == 1) {
-                List<String> stringList = (List<String>) value;
-                List<String> res = new ArrayList<>();
-                for (String s : stringList) {
-                    res.add(putId(s, id));
-                }
-                return res;
-            } else if (value instanceof List<?>) {
-                List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
-//                List<Map<String, Object>> res = new ArrayList<>();
-//                for (Map<String, Object> map : mapList) {
-//                    res.add(dealWithMapOfFields(map, fieldPaths, id));
-//                }
-//                return res;
-                return dealWithArrayOfFields(mapList, fieldPaths, id);
-            }
-        }
-        Map<String, Object> map = (Map<String, Object>) value;
-        return dealWithMapOfFields(map, fieldPaths, id);
-
-    }
-
-    private Map<String, Object> dealWithMapOfFields(Map<String, Object> src, List<String> fieldPaths, String id) {
-        String name = fieldPaths.get(0);
-        Map<String, Object> resultMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : src.entrySet()) {
-            if (name.startsWith(entry.getKey())) {
-                if(name.matches(".+\\[\\w*]")){
-                    resultMap.put(entry.getKey(), process(entry.getValue(), fieldPaths, id));
-                }else {
-                    fieldPaths.remove(0);
-                    resultMap.put(entry.getKey(), process(entry.getValue(), fieldPaths, id));
-                }
-            } else {
-                resultMap.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return resultMap;
-    }
-
-    private List<Map<String, Object>> dealWithArrayOfFields(List<Map<String, Object>> list, List<String> fieldPaths, String id) {
-        String name = fieldPaths.get(0);
-        int index = Integer.parseInt(name.substring(name.indexOf('[') + 1, name.indexOf(']')));
-        List<Map<String, Object>> res = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            if (index == i) {
-                fieldPaths.remove(0);
-                res.add(dealWithMapOfFields(list.get(i), fieldPaths, id));
-            } else {
-                res.add(list.get(i));
-            }
-        }
-        return res;
-    }
-
-    private String putId(String ref, String id) {
-        return "#{%" + id + "%}";
     }
 }
