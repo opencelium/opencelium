@@ -6,11 +6,11 @@ import com.becon.opencelium.backend.execution.oc721.EnhancementService;
 import com.becon.opencelium.backend.execution.oc721.EnhancementServiceImpl;
 import com.becon.opencelium.backend.execution.oc721.Extractor;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
+import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,7 +21,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<String, Object> queryParams;
     private final Extractor refExtractor;
     private final EnhancementService enhancementService;
-    private final LinkedHashMap<String, String> loops = new LinkedHashMap<>();
+    private final List<Loop> loops = new ArrayList<>();
     private final Connector connectorFrom;
     private final Connector connectorTo;
     private final List<FieldBind> fieldBind;
@@ -44,7 +44,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public LinkedHashMap<String, String> getLoops() {
+    public List<Loop> getLoops() {
         return loops;
     }
 
@@ -54,8 +54,9 @@ public class ExecutionManagerImpl implements ExecutionManager {
             return "#";
         }
 
-        return loops.values().stream()
+        return loops.stream()
                 .limit(loopDepth)
+                .map(Loop::getCounterValue)
                 .collect(Collectors.joining(", "));
     }
 

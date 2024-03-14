@@ -23,9 +23,9 @@ import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -219,7 +219,7 @@ public class ReferenceExtractor implements Extractor {
         }
     }
 
-    private Object getFromJSON(String jsonString, String ref, LinkedHashMap<String, String> loops) {
+    private Object getFromJSON(String jsonString, String ref, List<Loop> loops) {
         String jsonPath = "$";
         String refValue = getRefValue(ref);
         String[] conditionParts = refValue.split("\\.");
@@ -248,10 +248,10 @@ public class ReferenceExtractor implements Extractor {
             if ((part.contains("[]") || hasIndex) && hasLoop && !part.contains("[*]")) {
                 part = part.replace("[]", ""); // remove [index] and put []
                 if (hasIndex) {
-                    part = part.replace("[" + iterator + "]", "");
+                    part = part.replace("[" + getLoopByIterator(iterator).getCounterName() + "]", "");
                 }
 
-                part = part + "[" + loops.get(iterator) + "]";
+                part = part + "[" + getLoopByIterator(iterator).getCounterValue() + "]";
             } else if ((part.contains("[]") || part.contains("[*]")) && !hasLoop) {
                 if (part.contains("[]")) {
                     part = part.replace("[]", "");
@@ -265,7 +265,7 @@ public class ReferenceExtractor implements Extractor {
         return JsonPath.read(jsonString, jsonPath);
     }
 
-    private Object getFromXML(String xmlString, String ref, LinkedHashMap<String, String> loops) {
+    private Object getFromXML(String xmlString, String ref, List<Loop> loops) {
         ref = ref.replaceFirst("\\$", "");
 
         String xpathQuery = "//";
@@ -292,7 +292,7 @@ public class ReferenceExtractor implements Extractor {
                 iterator = m.group(1);
             }
 
-            int xmlIndex = Integer.parseInt(loops.get(iterator)) + 1;
+            int xmlIndex = Integer.parseInt(getLoopByIterator(iterator).getCounterValue()) + 1;
             if ((part.contains("[]") || hasIndex) && hasLoop) {
                 part = part.replace("[]", ""); // removed [index] and put []
                 if (hasIndex) {
@@ -371,5 +371,11 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return result;
+    }
+
+    private Loop getLoopByIterator(String iterator) {
+        return executionManager.getLoops().stream()
+                .filter(loop -> Objects.equals(loop.getCounterName(), iterator))
+                .findFirst().orElseThrow(() -> new RuntimeException("Wrong 'iterator' value is supplied"));
     }
 }
