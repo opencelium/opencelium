@@ -6,6 +6,7 @@ import java.util.Map;
 
 public class Connector {
     private Integer id;
+    private String name;
     private String invoker;
     private boolean sslCert;
     private boolean isActive;
@@ -18,6 +19,7 @@ public class Connector {
     public static Connector fromEx(ConnectorEx connectorEx) {
         Connector result = new Connector();
         result.setId(connectorEx.getId());
+        result.setName(connectorEx.getName());
         result.setInvoker(connectorEx.getInvoker());
         result.setSslCert(connectorEx.isSslCert());
         result.setActive(connectorEx.isAction());
@@ -28,6 +30,14 @@ public class Connector {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getInvoker() {

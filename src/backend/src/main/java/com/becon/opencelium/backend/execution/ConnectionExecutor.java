@@ -1,12 +1,17 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
+import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
-import com.becon.opencelium.backend.resource.execution.ConnectorEx;
+import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
@@ -17,12 +22,18 @@ import java.util.stream.Collectors;
 public class ConnectionExecutor {
     private final Map<String, Object> queryParams;
     private final ConnectionEx connection;
+    private final OcLogger<ExecutionLog> logger;
     private final ProxyEx proxy;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
-    public ConnectionExecutor(Map<String, Object> queryParams, ConnectionEx connection, ProxyEx proxy) {
-        this.queryParams = queryParams;
-        this.connection = connection;
-        this.proxy = proxy;
+    public ConnectionExecutor(ExecutionObj executionObj) {
+        this.queryParams = executionObj.getQueryParams();
+        this.connection = executionObj.getConnection();
+        this.proxy = executionObj.getProxy();
+
+        // TODO: logger will be initialized after all necessary fields added to execution object
+        this.logger = new OcLogger<>(false, simpMessagingTemplate, new ExecutionLog(), JobExecutor.class);
     }
 
     public void start() {
@@ -32,8 +43,8 @@ public class ConnectionExecutor {
 
         ExecutionManager executionManager = new ExecutionManagerImpl(queryParams, source, target, fieldBind);
 
-        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source));
-        ConnectorExecutor toEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target));
+        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), logger, "from");
+        ConnectorExecutor toEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), logger, "to");
 
         sourceEx.start();
         toEx.start();
