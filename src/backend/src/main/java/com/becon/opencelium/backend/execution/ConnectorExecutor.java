@@ -19,8 +19,6 @@ import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
@@ -30,9 +28,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class ConnectorExecutor {
     private final Connector connector;
@@ -122,7 +120,7 @@ public class ConnectorExecutor {
                 logger.logAndSend("=================================== LOOP ===================================");
 
                 Loop loop = Loop.fromEx(operator);
-                Object referencedList = executionManager.getValue(loop.getListRef());
+                Object referencedList = executionManager.getValue(loop.getRef());
                 List<String> list = new ArrayList<>();
 
                 if (ObjectUtils.isEmpty(referencedList)) {
@@ -135,37 +133,25 @@ public class ConnectorExecutor {
                     }
 
                 } else if (loop.getOperator() == RelationalOperator.FOR_IN) {
-                    try {
-                        ObjectMapper mapper = new ObjectMapper();
-                        String jsonString = mapper.writeValueAsString(referencedList);
+                    Set<Object> loopingSet = ((Set<Object>) referencedList);
 
-                        Iterator<String> fieldNames = mapper.readTree(jsonString).fieldNames();
-
-                        while (fieldNames.hasNext()) {
-                            list.add(fieldNames.next());
-                        }
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-
+                    list.addAll(loopingSet.stream().map(Object::toString).toList());
                 } else {
                     String[] strs = ((String) referencedList).split(operator.getCondition().getRight());
 
                     Collections.addAll(list, strs);
                 }
-                loop.setLoopingList(list);
 
                 int length = list.size();
                 logger.logAndSend("LOOP_OPERATOR_RESULT: " + (length == 0 ? "EMPTY" : "NOT_EMPTY") + " -- index: " + index);
 
                 executionManager.getLoops().add(loop);
-                String counterValue;
                 for (int i = 0; i < length; i++) {
-                    logger.logAndSend("Loop: " + loop.getListRef() + " -------- index: " + list.get(i));
+                    logger.logAndSend("Loop: " + loop.getRef() + " -------- index: " + i);
 
                     // update currently executing loops' data
-                    counterValue = loop.getOperator() == RelationalOperator.FOR_IN ? list.get(i) : String.valueOf(i);
-                    loop.setCounterValue(counterValue);
+                    loop.setIndex(i);
+                    loop.setValue(list.get(i));
 
                     // if length !=0, then execute loop operators' body,
                     // there will be a circle if current run is not last one

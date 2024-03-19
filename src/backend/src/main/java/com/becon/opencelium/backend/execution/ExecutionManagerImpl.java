@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.Enhancement;
 import com.becon.opencelium.backend.execution.oc721.EnhancementService;
@@ -56,7 +57,13 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
         return loops.stream()
                 .limit(loopDepth)
-                .map(Loop::getCounterValue)
+                .map(loop -> {
+                    if (loop.getOperator() == RelationalOperator.FOR) {
+                        return String.valueOf(loop.getIndex());
+                    } else {
+                        return loop.getValue();
+                    }
+                })
                 .collect(Collectors.joining(", "));
     }
 

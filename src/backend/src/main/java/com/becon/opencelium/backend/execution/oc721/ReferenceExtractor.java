@@ -36,6 +36,15 @@ import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 
 public class ReferenceExtractor implements Extractor {
+    private static final String HAS_SPLIT_STRING_INDEX = "\\[([a-z0-9]+)\\]~";
+    private static final String SPLIT_STRING_LETTER_INDEX = "\\[([a-z])\\]~";
+    private static final String SPLIT_STRING_NUMBER_INDEX = "\\[([0-9]+)\\]~";
+    private static final String HAS_FOR_IN_KEY_INDEX = "\\['([a-z0-9]+)\\']~";
+    private static final String FOR_IN_KEY_LETTER_INDEX = "\\['([a-z])\\']~";
+    private static final String FOR_IN_VALUE_LETTER_INDEX = "\\['([a-z])\\']";
+    private static final String FOR_LETTER_INDEX = "\\[([a-z])\\]";
+
+
     private final ExecutionManager executionManager;
 
     public ReferenceExtractor(ExecutionManager executionManager) {
@@ -164,7 +173,7 @@ public class ReferenceExtractor implements Extractor {
             result = stringValue.replace("[", "")
                     .replace("]", "")
                     .replace("\"", "")
-                    .replace("\'", "").split(",");
+                    .replace("'", "").split(",");
         } else {
             result = value;
         }
@@ -183,29 +192,29 @@ public class ReferenceExtractor implements Extractor {
         String exchangeType = getExchangeType(ref);
         String key = executionManager.generateKey(operation.getLoopDepth());
 
-        String entityBody;
+        Object entityBody;
         MediaType mediaType;
 
         if (exchangeType.equals("response")) {
             ResponseEntity<?> responseEntity = operation.getResponses().get(key);
 
             mediaType = responseEntity.getHeaders().getContentType();
-            entityBody = bodyToString(responseEntity.getBody());
+            entityBody = responseEntity.getBody();
         } else {
             RequestEntity<?> requestEntity = operation.getRequests().get(key);
 
             mediaType = requestEntity.getHeaders().getContentType();
-            entityBody = bodyToString(requestEntity.getBody());
+            entityBody = requestEntity.getBody();
         }
 
         Object result;
 
         if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
-            result = getFromJSON(entityBody, ref, executionManager.getLoops());
+            result = getFromJSON(entityBody, ref);
         } else if (MediaType.APPLICATION_XML.isCompatibleWith(mediaType)) {
-            result = getFromXML(entityBody, ref, executionManager.getLoops());
+            result = getFromXML(entityBody, ref);
         } else {
-            result = entityBody;
+            result = bodyToString(entityBody);
         }
 
         return result;
@@ -219,60 +228,114 @@ public class ReferenceExtractor implements Extractor {
         }
     }
 
-    private Object getFromJSON(String jsonString, String ref, List<Loop> loops) {
-        String jsonPath = "$";
-        String refValue = getRefValue(ref);
-        String[] conditionParts = refValue.split("\\.");
-
-        boolean hasLoop = !loops.isEmpty();
+    private Object getFromJSON(Object body, String ref) {
+        Object result = body;
 
         // creating json path query
-        for (String part : conditionParts) {
-            if (part.isEmpty()) {
+        for (String path : getReferenceParts(ref)) {
+            if (path.isEmpty()) {
                 continue;
             }
 
-            part = part.replace("[]", "[*]");
+            // replace invalid reference part if exists
+            path = path.replace("[]", "[*]");
 
-            // set current value of iterators: e.g. if i=3 -> ...field[i]... -> ...field[3]...
-            Pattern pattern = Pattern.compile(RegExpression.arrayWithLetterIndex);
-            Matcher m = pattern.matcher(part);
-            boolean hasIndex = false;
-            String iterator = "";
+            Pattern pattern;
+            Matcher matcher;
 
-            while (m.find()) {
-                hasIndex = true;
-                iterator = m.group(1);
-            }
+            // CASE 1: SPLIT_STRING operator
+            pattern = Pattern.compile(HAS_SPLIT_STRING_INDEX);
+            matcher = pattern.matcher(path);
 
-            if ((part.contains("[]") || hasIndex) && hasLoop && !part.contains("[*]")) {
-                part = part.replace("[]", ""); // remove [index] and put []
-                if (hasIndex) {
-                    part = part.replace("[" + getLoopByIterator(iterator).getCounterName() + "]", "");
+            if (matcher.find()) {
+                // CASE 1.1: check if number index is supplied
+                pattern = Pattern.compile(SPLIT_STRING_NUMBER_INDEX);
+                matcher = pattern.matcher(path);
+                if (matcher.find()) {
+                    String index = matcher.group(1);
+
+                    Loop loop = getLoopByReference(ref);
+                    return ((String) result).split(loop.getDelimiter())[Integer.parseInt(index)];
                 }
 
-                part = part + "[" + getLoopByIterator(iterator).getCounterValue() + "]";
-            } else if ((part.contains("[]") || part.contains("[*]")) && !hasLoop) {
-                if (part.contains("[]")) {
-                    part = part.replace("[]", "");
-                    part = part + "[*]";
+                // CASE 1.2: check if letter index is supplied
+                pattern = Pattern.compile(SPLIT_STRING_LETTER_INDEX);
+                matcher = pattern.matcher(path);
+                if (matcher.find()) {
+                    String iterator = matcher.group(1);
+
+                    Loop loop = getLoopByIterator(iterator);
+                    return loop.getValue();
                 }
             }
 
-            jsonPath = jsonPath + "." + part;
+            // CASE 2: FOR_IN operator
+
+            // CASE 2.1: for KEYS
+            pattern = Pattern.compile(HAS_FOR_IN_KEY_INDEX);
+            matcher = pattern.matcher(path);
+
+            if (matcher.find()) {
+                // CASE 2.1.1: check if letter index is supplied
+                pattern = Pattern.compile(FOR_IN_KEY_LETTER_INDEX);
+                matcher = pattern.matcher(path);
+                if (matcher.find()) {
+                    String iterator = matcher.group(1);
+
+                    Loop loop = getLoopByIterator(iterator);
+                    return loop.getValue();
+                }
+
+                // CASE 2.1.2: key itself is supplied
+                pattern = Pattern.compile(HAS_FOR_IN_KEY_INDEX);
+                matcher = pattern.matcher(path);
+                if (matcher.find()) {
+                    return matcher.group(1);
+                }
+            }
+
+            // CASE 2.2: for VALUES
+            // if letter index is supplied then replace with actual 'field_name'
+            pattern = Pattern.compile(FOR_IN_VALUE_LETTER_INDEX);
+            matcher = pattern.matcher(path);
+
+            if (matcher.find()) {
+                String iterator = matcher.group(1);
+
+                Loop loop = getLoopByIterator(iterator);
+
+                path = path.replace("['" + iterator + "']", "");
+                path = path + "['" + loop.getValue() + "']";
+            }
+
+            // CASE 3: FOR operator
+            pattern = Pattern.compile(FOR_LETTER_INDEX);
+            matcher = pattern.matcher(path);
+
+            while (matcher.find()) {
+                String iterator = matcher.group(1);
+
+                Loop loop = getLoopByIterator(iterator);
+
+                path = path.replace("[" + iterator + "]", "");
+                path = path + "[" + loop.getIndex() + "]";
+            }
+
+            String jsonPath = "$" + (result instanceof List ? ".." : ".") + path;
+            result = JsonPath.read(bodyToString(result), jsonPath);
         }
 
-        return JsonPath.read(jsonString, jsonPath);
+        return result;
     }
 
-    private Object getFromXML(String xmlString, String ref, List<Loop> loops) {
+    private Object getFromXML(Object body, String ref) {
         ref = ref.replaceFirst("\\$", "");
 
         String xpathQuery = "//";
         String refValue = ConditionUtility.getRefValue(ref);
         String[] conditionParts = refValue.split("\\.");
 
-        boolean hasLoop = !loops.isEmpty();
+        boolean hasLoop = !executionManager.getLoops().isEmpty();
 
         for (String part : conditionParts) {
             if (part.isEmpty()) {
@@ -292,14 +355,13 @@ public class ReferenceExtractor implements Extractor {
                 iterator = m.group(1);
             }
 
-            int xmlIndex = Integer.parseInt(getLoopByIterator(iterator).getCounterValue()) + 1;
             if ((part.contains("[]") || hasIndex) && hasLoop) {
                 part = part.replace("[]", ""); // removed [index] and put []
                 if (hasIndex) {
                     part = part.replace("[" + iterator + "]", "");
                 }
 
-                part = part + "[" + xmlIndex + "]";
+                part = part + "[" + (getLoopByIterator(iterator).getIndex() + 1) + "]";
             } else if ((part.contains("[]") || part.contains("[*]")) && !hasLoop) {
                 part = part.contains("[*]") ? part : part.replace("[]", "") + "[*]";
             }
@@ -326,7 +388,8 @@ public class ReferenceExtractor implements Extractor {
                 xpathQuery = xpathQuery + "/text()";
             }
 
-            // convert 'xmlString' to XML Document
+            // convert 'body' to XML Document
+            String xmlString = bodyToString(body);
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document xmlDocument = builder.parse(new InputSource(new StringReader(xmlString)));
 
@@ -353,9 +416,9 @@ public class ReferenceExtractor implements Extractor {
         return ref.substring(ref.indexOf('(') + 1, ref.indexOf(')'));
     }
 
-    private static String getRefValue(String ref) {
+    private static String[] getReferenceParts(String ref) {
         if (ref.isEmpty()) {
-            return "";
+            return new String[]{""};
         }
 
         String[] refParts = ref.split("\\.");
@@ -364,18 +427,21 @@ public class ReferenceExtractor implements Extractor {
                 .replace(refParts[1] + ".", "");
 
         if (getExchangeType(ref).equals("response")) {
-            result = result.replace(refParts[2] + ".", "")
-                    .replace(refParts[0], "")
-                    .replace(refParts[1], "")
-                    .replace(refParts[2], "");
+            result = result.replace(refParts[2] + ".", "");
         }
 
-        return result;
+        return result.split("\\.");
     }
 
     private Loop getLoopByIterator(String iterator) {
         return executionManager.getLoops().stream()
-                .filter(loop -> Objects.equals(loop.getCounterName(), iterator))
+                .filter(loop -> Objects.equals(loop.getIterator(), iterator))
                 .findFirst().orElseThrow(() -> new RuntimeException("Wrong 'iterator' value is supplied"));
+    }
+
+    private Loop getLoopByReference(String reference) {
+        return executionManager.getLoops().stream()
+                .filter(loop -> loop.hasSameRef(reference))
+                .findFirst().orElseThrow(() -> new RuntimeException("Wrong 'reference' value is supplied"));
     }
 }

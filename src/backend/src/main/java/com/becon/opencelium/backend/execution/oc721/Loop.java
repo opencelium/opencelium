@@ -3,55 +3,69 @@ package com.becon.opencelium.backend.execution.oc721;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 
-import java.util.List;
 
 public class Loop {
-    private String listRef;
-    private List<String> loopingList;
-    private String counterName;
-    private String counterValue;
+    private String ref;
+    private String delimiter;
+    private String iterator;
+    private int index;
+    private String value;
     private RelationalOperator operator;
 
     public static Loop fromEx(OperatorEx operatorEx) {
         Loop result = new Loop();
 
-        result.setListRef(operatorEx.getCondition().getLeft());
-        result.setCounterName(operatorEx.getIterator());
+        result.setRef(operatorEx.getCondition().getLeft());
+        result.setDelimiter(operatorEx.getCondition().getRight());
+        result.setIterator(operatorEx.getIterator());
         result.setOperator(operatorEx.getCondition().getRelationalOperator());
 
         return result;
     }
 
-    public String getListRef() {
-        return listRef;
+    public boolean hasSameRef(String reference) {
+        // TODO: implement this method
+        return false;
     }
 
-    private void setListRef(String listRef) {
-        this.listRef = listRef;
+    public String getRef() {
+        return ref;
     }
 
-    public List<String> getLoopingList() {
-        return loopingList;
+    private void setRef(String ref) {
+        this.ref = ref;
     }
 
-    public void setLoopingList(List<String> loopingList) {
-        this.loopingList = loopingList;
+    public String getDelimiter() {
+        return delimiter;
     }
 
-    public String getCounterName() {
-        return counterName;
+    private void setDelimiter(String delimiter) {
+        this.delimiter = delimiter;
     }
 
-    private void setCounterName(String counterName) {
-        this.counterName = counterName;
+    public String getIterator() {
+        return iterator;
     }
 
-    public String getCounterValue() {
-        return counterValue;
+    private void setIterator(String iterator) {
+        this.iterator = iterator;
     }
 
-    public void setCounterValue(String counterValue) {
-        this.counterValue = counterValue;
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public RelationalOperator getOperator() {
