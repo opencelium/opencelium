@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.statement.operator;
 
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class NotLike implements Operator{
@@ -11,6 +12,6 @@ public class NotLike implements Operator{
         }
         String text = (String) val1;
         String regex = "^" + ((String) val2).replace("_", ".").replace("%",".*") + "$";
-        return !Pattern.matches(regex, text);
+        return !Pattern.matches(regex.toUpperCase(Locale.ROOT), text.toUpperCase(Locale.ROOT));
     }
 }
