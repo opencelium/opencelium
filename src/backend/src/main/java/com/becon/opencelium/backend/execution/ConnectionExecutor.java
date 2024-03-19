@@ -5,7 +5,6 @@ import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
-import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
@@ -32,7 +31,7 @@ public class ConnectionExecutor {
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
 
-        this.logger = new OcLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), JobExecutor.class);
+        this.logger = new OcLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), ConnectionExecutor.class);
 
         if (!executionObj.getLogger().isDebugMode()) {
             logger.disable();
