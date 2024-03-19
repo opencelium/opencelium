@@ -730,8 +730,9 @@ public class ConnectorExecutor {
             Object leftVariable = getValue(statementNode.getLeftStatementVariable(), "");
             String[] stringParts = leftVariable.toString().split(statementNode.getRightStatementVariable().getFiled());
             array = new ArrayList<>(Arrays.asList(stringParts));
+            executionContainer.setIterableArray(condition, stringParts);
         } else {
-            array = (List<Object>) message.getValue(condition, loopIterators);
+            array = (List<Object>) message.getValue(condition, loopIterators, null);
         }
 
         logger.logAndSend("============================= LOOP ======================== ");

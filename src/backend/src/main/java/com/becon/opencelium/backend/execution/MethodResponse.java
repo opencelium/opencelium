@@ -123,15 +123,59 @@ public class MethodResponse {
     //#ffffff.(response).result[index].id
     //#ffffff.(response).result[index] - get data from result where index = to current arr.index
     //#ffffff.(response).arr0[index].arr1[]
-    public Object getValue(String ref, Map<String, Integer> loopStack){
+    public Object getValue(String ref, Map<String, Integer> loopStack, Map<String, String[]> iterableArray){
 
-        if (responseFormat.equals("xml")) {
+        if (ref.contains("~")) { // get vale from array that is formed after using SplitString
+            return getValueFromArray(ref, loopStack, iterableArray);
+        } else if (responseFormat.equals("xml")) {
             return xmlPathFinder(ref, loopStack);
         } else if (responseFormat.equals("text")) {
             return textPathFinder(ref, loopStack);
         } else {
             return jsonPathFinder(ref, loopStack);
         }
+    }
+
+    private Object getValueFromArray(String ref, Map<String, Integer> loopStack, Map<String, String[]> iterableArray) {
+        String path = extractPath(ref);
+        String[] array = iterableArray.get(path);
+        String part = extractSpecificPart(ref);
+        // Getting current index of current loop
+//        boolean hasLoop = false;
+//        if (!loopStack.isEmpty()){
+//            hasLoop = true;
+//        }
+
+        Pattern pattern = Pattern.compile(RegExpression.arrayWithLetterIndex);
+        Matcher m = pattern.matcher(part);
+//        boolean hasIndex = false;
+        String condIndexArr = "";
+        while (m.find()) {
+//            hasIndex = true;
+            condIndexArr = m.group(1);
+        }
+        int index = loopStack.get(condIndexArr);
+        return array[index];
+    }
+
+    private String extractSpecificPart(String input) {
+        // Regular expression to match the desired pattern
+        Pattern pattern = Pattern.compile("\\.([a-zA-Z0-9_]+\\[.*?\\])~");
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.find()) {
+            return matcher.group(1); // Returns "prop1[x]" if found
+        }
+        return ""; // Returns an empty string if no match is found
+    }
+
+    private String extractPath(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        // Pattern to match up to the first occurrence of [ followed by any character until ]
+        String regex = "\\[([a-z,*]+)\\]~";
+        return input.split(regex, 2)[0];
     }
 
     private Object textPathFinder(String value, Map<String, Integer> loopStack) {

@@ -101,6 +101,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
             }
             format = methodNode.getResponseNode().getSuccess().getBody().getFormat();
             firstField = StringUtility.removeSquareBraces(firstField);
+            firstField = firstField.replace("~", "");
             currentField = fieldNodeRepository.findFirstFieldInResponse(connectionId,color,result,firstField)
                     .stream().findFirst().orElse(null);
         } else {
@@ -111,6 +112,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
             }
             format = methodNode.getRequestNode().getBodyNode().getFormat();
             firstField = StringUtility.removeSquareBraces(firstField);
+            firstField = firstField.replace("~", "");
             currentField = fieldNodeRepository.findFirstFieldInRequest(connectionId,color,firstField)
                     .stream().findFirst().orElse(null);
         }
@@ -127,6 +129,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
         while (!path.isEmpty()) {
             String nextField = path.pop();
             nextField = StringUtility.removeSquareBraces(nextField);
+            nextField = nextField.replace("~", "");
             if (path.isEmpty() && !currentField.getName().equals("__oc__attributes") && !nextField.equals("__oc__value") && format.equals("xml")) {
                 path.push("__oc__value");
             }

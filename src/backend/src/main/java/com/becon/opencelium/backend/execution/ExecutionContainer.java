@@ -54,6 +54,7 @@ public class ExecutionContainer {
     // Contains iterators with current indexes of loop statement
     // e.g. (i, 1) -> i = 1; (j, 2) -> j = 2 -----> [i][j] -> [0][2];
     private LinkedHashMap<String, Integer> loopIterators = new LinkedHashMap<>();
+    private LinkedHashMap<String, String[]> iterableArray = new LinkedHashMap<>();
     private String taId;
     private String conn;
     private int order;
@@ -95,7 +96,7 @@ public class ExecutionContainer {
         incomeRef.forEach(ref -> {
             try {
                 String incRef = ref;
-                if (format.equals("xml")) {
+                if (format.equals("xml") && !ref.contains("~")) {
                     incRef = incrementIndexes(ref);
                 }
                 String methodKey = ConditionUtility.getMethodKey(incRef);
@@ -103,7 +104,7 @@ public class ExecutionContainer {
                         .stream()
                         .filter(m -> m.getMethodKey().equals(methodKey))
                         .findFirst().orElse(null);
-                Object o = methodResponse.getValue(incRef, this.getLoopIterators());
+                Object o = methodResponse.getValue(incRef, this.getLoopIterators(), iterableArray);
                 String inFieldValue = o instanceof String ? o.toString() : mapperObj.writeValueAsString(o);
                 inFieldValue = inFieldValue.replace("__oc__attributes.", "@").replace(".__oc__value", "");
                 expertVarProperties.put(ref, inFieldValue);
@@ -188,7 +189,7 @@ public class ExecutionContainer {
                 .stream()
                 .filter(m -> m.getMethodKey().equals(color))
                 .findFirst().orElse(null);
-        return methodResponse.getValue(ref, this.getLoopIterators());
+        return methodResponse.getValue(ref, this.getLoopIterators(), iterableArray);
     }
 
     public String getValueFromQueryParams(String exp) {
@@ -400,6 +401,18 @@ public class ExecutionContainer {
 
     public void setPagination(Pagination pagination) {
         this.pagination = pagination;
+    }
+
+    public String[] getIterableArrayByCondition(String condition) {
+        return iterableArray.getOrDefault(condition, null);
+    }
+
+    public void setIterableArray(String condition, String[] array) {
+        this.iterableArray.put(condition, array);
+    }
+
+    public String[] deleteIterableArrayByCondition(String condition) {
+        return iterableArray.remove(condition);
     }
 
     // ==================================== private zone ====================================================== //
