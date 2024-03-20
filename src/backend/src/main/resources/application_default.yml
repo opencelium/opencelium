@@ -177,15 +177,13 @@ opencelium:
 #   notification:                                                         #
 #    tools:                                                               #
 #      incoming_webhook:                                                  #
-#        url:                                                             #
-#         first webhook slack,                                            #
-#         second webhook teams                                            #
+#        url: webhook url                                                  #
 #                                                                         #
 ###########################################################################
   notification:
     tools:
       incoming_webhook:
-        url: {put a webhook here}, {put another webhook here}
+        url: {put a webhook here}
 #  rest_template:
 #      proxy:
 #        host: 127.0.0.1
