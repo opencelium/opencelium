@@ -35,6 +35,9 @@ public class VariableNodeServiceImp implements VariableNodeService {
 
     private boolean containsLikeChars(String ref) {
         String[] refParts = ref.split("\\.");
+        if (refParts.length == 0 || !(refParts[0].equals("fail") || refParts[0].equals("success"))) {
+            return false;
+        }
         return refParts[1].startsWith("%") || refParts[refParts.length - 1].endsWith("%");
     }
 }
