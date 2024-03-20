@@ -279,12 +279,15 @@ public class ConnectorExecutor {
         return responseEntity;
     }
 
-    private MediaType getResponseContentType(HttpHeaders httpHeaders, FunctionInvoker functionInvoker) {
+    public static MediaType getResponseContentType(HttpHeaders httpHeaders, FunctionInvoker functionInvoker) {
         if (functionInvoker.getResponse() != null && functionInvoker.getResponse().getSuccess() != null
             && functionInvoker.getResponse().getSuccess().getHeader() != null){
             return MediaType.valueOf(functionInvoker.getResponse().getSuccess().getHeader().get("Content-Type"));
         }
-        return httpHeaders.getContentType();
+        if (httpHeaders.getContentType() != null) {
+            return httpHeaders.getContentType();
+        }
+        return MediaType.APPLICATION_JSON;
     }
 
     private HttpMethod getMethod(MethodNode methodNode){
@@ -401,7 +404,6 @@ public class ConnectorExecutor {
         Body b = functionInvoker.getRequest().getBody();
         String format = b == null ? "json" : b.getFormat();
 
-
         header.forEach((k,v) -> {
             String refRegex = "\\{(.*?)\\}";
             Pattern pattern = Pattern.compile(refRegex);
@@ -414,6 +416,11 @@ public class ConnectorExecutor {
             headerItem.put(k, v);
         });
         httpHeaders.setAll(headerItem);
+
+        // Jakob's request to solve lansweeper and to support old connection that doesn't have header info.
+        if (!httpHeaders.containsKey("Content-Type")) {
+            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        }
         if (executionContainer.getPagination() != null) {
             executionContainer.getPagination().insertPageValue(httpHeaders);
         }

@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.invoker;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
+import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.mysql.entity.Connector;
@@ -122,7 +123,7 @@ public class InvokerRequestBuilder {
         }
         RestTemplate restTemplate = createRestTemplate();
         ResponseEntity response;
-        if (header.getContentType().toString().contains("json")) {
+        if (ConnectorExecutor.getResponseContentType(header, functionInvoker).toString().contains("json")) {
             ResponseEntity o = restTemplate.exchange(url, method ,httpEntity, Object.class);
             response = InvokerRequestBuilder
                     .convertToStringResponse(o);
@@ -196,6 +197,10 @@ public class InvokerRequestBuilder {
             headerItem.put(k, v);
         });
         httpHeaders.setAll(headerItem);
+        // Jakob's request to solve lansweeper and to support old connection that doesn't have header info.
+        if (!httpHeaders.containsKey("Content-Type")) {
+            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        }
         return httpHeaders;
     }
 
