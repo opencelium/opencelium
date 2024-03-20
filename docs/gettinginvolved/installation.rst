@@ -553,7 +553,7 @@ Ansible
 """""""""""""""""
 
 .. note::
-	Only available for Ubuntu system (tested on 22.04 LTS)!
+	Only available for Ubuntu systems (tested on 22.04 LTS)!
 
 **Prepare environment:**
 
