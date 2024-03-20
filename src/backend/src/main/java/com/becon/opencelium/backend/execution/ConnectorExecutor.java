@@ -640,7 +640,7 @@ public class ConnectorExecutor {
                     .replace("\n", ",").split(",");
         } else if(ifStatement.getOperand().equals("Like") || ifStatement.getOperand().equals("NotLike")) {
             rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
-            rightStatement = addPercentForLikeValues(ifStatement.getRightStatementVariable().getFiled(), rightStatement.toString());
+            rightStatement = addPercentForLikeValues(ifStatement.getRightStatementVariable(), rightStatement.toString());
         }else {
             rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
         }
@@ -669,8 +669,16 @@ public class ConnectorExecutor {
         }
     }
 
-    private String addPercentForLikeValues(String fieldRef, String value) {
+    private String addPercentForLikeValues(StatementVariable statementVariable, String value) {
+        String ref =  statementNodeService.convertToRef(statementVariable);
+        if (!FieldNodeServiceImp.hasReference(ref)) {
+            return value;
+        }
+        String fieldRef = statementVariable.getFiled();
         String[] refParts = fieldRef.split("\\.");
+        if (refParts.length == 0) {
+            return value;
+        }
         if (refParts[1].startsWith("%")) {
             value = "%" + value;
         }
