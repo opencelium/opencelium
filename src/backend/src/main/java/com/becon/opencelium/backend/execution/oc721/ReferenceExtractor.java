@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.execution.ExecutionManager;
-import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
@@ -330,14 +329,11 @@ public class ReferenceExtractor implements Extractor {
 
     private Object getFromXML(Object body, String ref) {
         ref = ref.replaceFirst("\\$", "");
-
         String xpathQuery = "//";
-        String refValue = ConditionUtility.getRefValue(ref);
-        String[] conditionParts = refValue.split("\\.");
 
         boolean hasLoop = !executionManager.getLoops().isEmpty();
 
-        for (String part : conditionParts) {
+        for (String part : getReferenceParts(ref)) {
             if (part.isEmpty()) {
                 continue;
             }
@@ -422,15 +418,13 @@ public class ReferenceExtractor implements Extractor {
         }
 
         String[] refParts = ref.split("\\.");
-
-        String result = ref.replace(refParts[0] + ".", "")
-                .replace(refParts[1] + ".", "");
+        int from = 2;
 
         if (getExchangeType(ref).equals("response")) {
-            result = result.replace(refParts[2] + ".", "");
+            from++;
         }
 
-        return result.split("\\.");
+        return Arrays.copyOfRange(refParts, from, refParts.length);
     }
 
     private Loop getLoopByIterator(String iterator) {
