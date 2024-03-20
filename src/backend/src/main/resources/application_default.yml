@@ -185,8 +185,7 @@ opencelium:
   #   notification:                                                         #
   #    tools:                                                               #
   #      income_webhook:                                                    #
-  #        url:  first webhook,                                             #
-  #              second webhook                                             #
+  #        url: webhook                                                     #
   #                                                                         #
   ###########################################################################
   notification:
