@@ -9,7 +9,8 @@ public class Like implements Operator{
         if (!(val1 instanceof String text) || !(val2 instanceof String)) {
             throw new RuntimeException("Values should be string when using LIKE operator");
         }
-        String regex = "^" + ((String) val2).replace("_", ".").replace("%",".*") + "$";
+        // replace("_", ".") removed.
+        String regex = "^" + ((String) val2).replace("%",".*") + "$";
         return Pattern.matches(regex.toUpperCase(Locale.ROOT), text.toUpperCase(Locale.ROOT));
     }
 }

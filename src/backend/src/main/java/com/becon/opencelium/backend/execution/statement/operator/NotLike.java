@@ -11,7 +11,7 @@ public class NotLike implements Operator{
             throw new RuntimeException("Values should be string when using LIKE operator");
         }
         String text = (String) val1;
-        String regex = "^" + ((String) val2).replace("_", ".").replace("%",".*") + "$";
+        String regex = "^" + ((String) val2).replace("%",".*") + "$";
         return !Pattern.matches(regex.toUpperCase(Locale.ROOT), text.toUpperCase(Locale.ROOT));
     }
 }

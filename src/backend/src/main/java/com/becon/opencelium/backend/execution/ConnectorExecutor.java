@@ -631,7 +631,10 @@ public class ConnectorExecutor {
         if (ifStatement.getOperand().equals("AllowList") || ifStatement.getOperand().equals("DenyList") ) {
             rightStatement = ifStatement.getRightStatementVariable().getFiled()
                     .replace("\n", ",").split(",");
-        } else {
+        } else if(ifStatement.getOperand().equals("Like") || ifStatement.getOperand().equals("NotLike")) {
+            rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
+            rightStatement = addPercentForLikeValues(ifStatement.getRightStatementVariable().getFiled(), rightStatement.toString());
+        }else {
             rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
         }
 
@@ -644,6 +647,7 @@ public class ConnectorExecutor {
 
         }
 //        if (leftVariable instanceof NodeList)
+
         boolean result = operator.compare(leftVariable, rightStatement);
         if (ifStatement.getOperand().equals("DenyList")) {
             result = !result;
@@ -656,6 +660,18 @@ public class ConnectorExecutor {
             executeMethod(ifStatement.getBodyFunction());
             executeDecisionStatement(ifStatement.getBodyOperator());
         }
+    }
+
+    private String addPercentForLikeValues(String fieldRef, String value) {
+        String[] refParts = fieldRef.split("\\.");
+        if (refParts[1].startsWith("%")) {
+            value = "%" + value;
+        }
+        if (refParts[refParts.length - 1].endsWith("%")) {
+            value = value + "%";
+        }
+
+        return value;
     }
 
     private String createOperatorResultMessage(boolean conditionResult, String executionIndexOrder) {
