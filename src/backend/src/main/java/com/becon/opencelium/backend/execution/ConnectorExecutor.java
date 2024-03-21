@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 public class ConnectorExecutor {
     private final Connector connector;
@@ -133,9 +132,7 @@ public class ConnectorExecutor {
                     }
 
                 } else if (loop.getOperator() == RelationalOperator.FOR_IN) {
-                    Set<Object> loopingSet = ((Set<Object>) referencedList);
-
-                    list.addAll(loopingSet.stream().map(Object::toString).toList());
+                    list = (List<String>) referencedList;
                 } else {
                     String[] strs = ((String) referencedList).split(operator.getCondition().getRight());
 

@@ -22,6 +22,8 @@ import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,13 +37,11 @@ import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 
 public class ReferenceExtractor implements Extractor {
-    private static final String HAS_SPLIT_STRING_INDEX = "\\[([a-z0-9]+)\\]~";
-    private static final String SPLIT_STRING_LETTER_INDEX = "\\[([a-z])\\]~";
-    private static final String SPLIT_STRING_NUMBER_INDEX = "\\[([0-9]+)\\]~";
-    private static final String HAS_FOR_IN_KEY_INDEX = "\\['([a-z0-9]+)\\']~";
-    private static final String FOR_IN_KEY_LETTER_INDEX = "\\['([a-z])\\']~";
-    private static final String FOR_IN_VALUE_LETTER_INDEX = "\\['([a-z])\\']";
-    private static final String FOR_LETTER_INDEX = "\\[([a-z])\\]";
+
+    private static final String IS_FOR_IN_KEY_TYPE = "\\['(.*?)\\']~";
+    private static final String IS_FOR_IN_VALUE_TYPE = "\\['(.*?)\\']";
+    private static final String IS_SPLIT_STRING_TYPE = "\\[([a-z0-9*]+)\\]~";
+    private static final String ARRAY_LETTER_INDEX = "\\[([a-z])\\]";
 
 
     private final ExecutionManager executionManager;
@@ -242,82 +242,146 @@ public class ReferenceExtractor implements Extractor {
             Pattern pattern;
             Matcher matcher;
 
-            // CASE 1: SPLIT_STRING operator
-            pattern = Pattern.compile(HAS_SPLIT_STRING_INDEX);
+            // CASE 1: FOR_IN operator
+            // CASE 1.1: index types for KEY(s), there are 4 types:
+            // 1) obj['i']~            - field name on ith index (indexing starts from 0)
+            // 2) obj['1']~            - field name on 1st index (indexing starts from 0)
+            // 3) obj['*']~            - all field names
+            // 4) obj['field_name']~   - field name by this fields' name
+
+            pattern = Pattern.compile(IS_FOR_IN_KEY_TYPE);
             matcher = pattern.matcher(path);
 
             if (matcher.find()) {
-                // CASE 1.1: check if number index is supplied
-                pattern = Pattern.compile(SPLIT_STRING_NUMBER_INDEX);
-                matcher = pattern.matcher(path);
-                if (matcher.find()) {
-                    String index = matcher.group(1);
+                // 'field name' is a primitive type value so path will not continue further
+                // thus just return required value(s)
 
+                String match = matcher.group(1);
+
+                if (isLetter(match)) {
+                    // case 1.1.1: obj['i']~
+                    // find loop by its iterator
+                    Loop loop = getLoopByIterator(match);
+
+                    // return iterators' current value from loop
+                    return loop.getValue();
+                } else if (isNumber(match)) {
+                    // case 1.1.2: obj['1']~
+                    // get field names of the current object
+                    List<String> keys = getFieldNames(result);
+
+                    // return field name on the specified index
+                    int index = Integer.parseInt(match);
+                    return keys.get(index);
+                } else if (isStar(match)) {
+                    // case 1.1.3: obj['*']~
+                    // return all field names of the current object
+                    return getFieldNames(result);
+                } else {
+                    // case 1.1.4: obj['field_name']~
+                    // return just match itself
+                    return match;
+                }
+            }
+
+            // CASE 1.2: index types for VALUE(s), there are 4 types:
+            // 1) obj['i']             - value of the field on ith index (indexing starts from 0)
+            // 2) obj['1']             - value of the field on 1st index (indexing starts from 0)
+            // 3) obj['*']             - all values of the fields
+            // 4) obj['field_name']    - value of the field by its name
+
+            pattern = Pattern.compile(IS_FOR_IN_VALUE_TYPE);
+            matcher = pattern.matcher(path);
+
+            while (matcher.find()) {
+                String match = matcher.group(1);
+                String fieldName;
+
+                if (isLetter(match)) {
+                    // case 1.2.1: obj['i']
+                    // find loop by its iterator
+                    Loop loop = getLoopByIterator(match);
+
+                    // get current fields' name from loop
+                    fieldName = loop.getValue();
+                } else if (isNumber(match)) {
+                    // case 1.2.2: obj['1']
+                    // get field names of the current object
+                    List<String> keys = getFieldNames(result);
+
+                    // get field name on the required index
+                    int index = Integer.parseInt(match);
+                    fieldName = keys.get(index);
+                } else if (isStar(match)) {
+                    // case 1.2.3: obj['*']
+                    // TODO find a good implementation not to distrupt the flow
+                    continue;
+                } else {
+                    // case 1.2.4: obj['field_name']
+                    fieldName = match;
+                }
+
+                path = path.replace("['" + match + "']", "['" + fieldName + "']");
+            }
+
+            // CASE 2: SPLIT STRING operator, there are 3 cases
+            // 1) field[i]~            - string on the ith index (indexing starts from 0)
+            // 2) field[2]~            - string on the 2nd index (indexing starts from 0)
+            // 3) field[*]~            - all strings (after splitting)
+
+            pattern = Pattern.compile(IS_SPLIT_STRING_TYPE);
+            matcher = pattern.matcher(path);
+
+            while (matcher.find()) {
+                String match = matcher.group(1);
+
+                if (isLetter(match)) {
+                    // case 2.1: field[i]~
+                    // find loop by its iterator
+                    Loop loop = getLoopByIterator(match);
+
+                    // it is a primitive value so just return iterators' current value from loop
+                    return loop.getValue();
+                } else if (isNumber(match)) {
+                    // case 2.2: field[2]~
+
+                    // find loop by reference
                     Loop loop = getLoopByReference(ref);
-                    return ((String) result).split(loop.getDelimiter())[Integer.parseInt(index)];
-                }
 
-                // CASE 1.2: check if letter index is supplied
-                pattern = Pattern.compile(SPLIT_STRING_LETTER_INDEX);
-                matcher = pattern.matcher(path);
-                if (matcher.find()) {
-                    String iterator = matcher.group(1);
+                    // it is a primitive value just return string on the specified index
+                    int index = Integer.parseInt(match);
+                    return ((String) result).split(loop.getDelimiter())[index];
+                } else if (isStar(match)) {
+                    // case 2.3: field[*]~
+                    // find loop by reference
+                    Loop loop = getLoopByReference(ref);
 
-                    Loop loop = getLoopByIterator(iterator);
-                    return loop.getValue();
-                }
-            }
+                    // recreate list of strings split by delimiter
+                    List<String> strs = new ArrayList<>();
+                    Collections.addAll(strs, ((String) result).split(loop.getDelimiter()));
 
-            // CASE 2: FOR_IN operator
-
-            // CASE 2.1: for KEYS
-            pattern = Pattern.compile(HAS_FOR_IN_KEY_INDEX);
-            matcher = pattern.matcher(path);
-
-            if (matcher.find()) {
-                // CASE 2.1.1: check if letter index is supplied
-                pattern = Pattern.compile(FOR_IN_KEY_LETTER_INDEX);
-                matcher = pattern.matcher(path);
-                if (matcher.find()) {
-                    String iterator = matcher.group(1);
-
-                    Loop loop = getLoopByIterator(iterator);
-                    return loop.getValue();
-                }
-
-                // CASE 2.1.2: key itself is supplied
-                pattern = Pattern.compile(HAS_FOR_IN_KEY_INDEX);
-                matcher = pattern.matcher(path);
-                if (matcher.find()) {
-                    return matcher.group(1);
+                    result = strs;
+                } else {
+                    throw new RuntimeException("Wrong index is supplied to a SPLIT STRING operator, 'index' = " + match);
                 }
             }
 
-            // CASE 2.2: for VALUES
-            // if letter index is supplied then replace with actual 'field_name'
-            pattern = Pattern.compile(FOR_IN_VALUE_LETTER_INDEX);
-            matcher = pattern.matcher(path);
+            // CASE 3: FOR operator, there are 3 cases (2 of them is dealt automatically)
+            // 1) array[i]~            - value on the ith index (indexing starts from 0)
+            // 2) array[3]~            - value on the 3rd index (indexing starts from 0) (DONE by library)
+            // 3) array[*]~            - all values (DONE by library)
 
-            if (matcher.find()) {
-                String iterator = matcher.group(1);
-
-                Loop loop = getLoopByIterator(iterator);
-
-                path = path.replace("['" + iterator + "']", "");
-                path = path + "['" + loop.getValue() + "']";
-            }
-
-            // CASE 3: FOR operator
-            pattern = Pattern.compile(FOR_LETTER_INDEX);
+            pattern = Pattern.compile(ARRAY_LETTER_INDEX);
             matcher = pattern.matcher(path);
 
             while (matcher.find()) {
                 String iterator = matcher.group(1);
 
+                // find loop by its iterator
                 Loop loop = getLoopByIterator(iterator);
 
-                path = path.replace("[" + iterator + "]", "");
-                path = path + "[" + loop.getIndex() + "]";
+                // replace iterator with its current number value
+                path = path.replace("[" + iterator + "]", "[" + loop.getValue() + "]");
             }
 
             String jsonPath = "$" + (result instanceof List ? ".." : ".") + path;
@@ -437,5 +501,45 @@ public class ReferenceExtractor implements Extractor {
         return executionManager.getLoops().stream()
                 .filter(loop -> loop.hasSameRef(reference))
                 .findFirst().orElseThrow(() -> new RuntimeException("Wrong 'reference' value is supplied"));
+    }
+
+    private List<String> getFieldNames(Object body) {
+        List<String> result = new ArrayList<>();
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonObject = mapper.writeValueAsString(body);
+
+            Iterator<String> fieldNames = mapper.readTree(jsonObject).fieldNames();
+            while (fieldNames.hasNext()) {
+                result.add(fieldNames.next());
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
+    }
+
+    private boolean isLetter(String str) {
+        return str != null && str.length() == 1 && Character.isLetter(str.charAt(0));
+    }
+
+    private boolean isNumber(String str) {
+        if (str == null) {
+            return false;
+        }
+
+        for (int ch : str.toCharArray()) {
+            if (!Character.isDigit(ch)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isStar(String str) {
+        return "*".equals(str);
     }
 }
