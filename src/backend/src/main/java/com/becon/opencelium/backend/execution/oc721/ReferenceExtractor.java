@@ -229,9 +229,11 @@ public class ReferenceExtractor implements Extractor {
 
     private Object getFromJSON(Object body, String ref) {
         Object result = body;
+        int partCount = 0;
 
         // creating json path query
         for (String path : getReferenceParts(ref)) {
+            partCount++;
             if (path.isEmpty()) {
                 continue;
             }
@@ -268,7 +270,8 @@ public class ReferenceExtractor implements Extractor {
                 } else if (isNumber(match)) {
                     // case 1.1.2: obj['1']~
                     // get field names of the current object
-                    List<String> keys = getFieldNames(result);
+                    Object currentBody = getFromJSON(body, getPointerToBody(ref, partCount, matcher.group(0)));
+                    List<String> keys = getFieldNames(currentBody);
 
                     // return field name on the specified index
                     int index = Integer.parseInt(match);
@@ -276,7 +279,8 @@ public class ReferenceExtractor implements Extractor {
                 } else if (isStar(match)) {
                     // case 1.1.3: obj['*']~
                     // return all field names of the current object
-                    return getFieldNames(result);
+                    Object currentBody = getFromJSON(body, getPointerToBody(ref, partCount, matcher.group(0)));
+                    return getFieldNames(currentBody);
                 } else {
                     // case 1.1.4: obj['field_name']~
                     // return just match itself
@@ -307,7 +311,8 @@ public class ReferenceExtractor implements Extractor {
                 } else if (isNumber(match)) {
                     // case 1.2.2: obj['1']
                     // get field names of the current object
-                    List<String> keys = getFieldNames(result);
+                    Object currentBody = getFromJSON(body, getPointerToBody(ref, partCount, matcher.group(0)));
+                    List<String> keys = getFieldNames(currentBody);
 
                     // get field name on the required index
                     int index = Integer.parseInt(match);
@@ -489,6 +494,24 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return Arrays.copyOfRange(refParts, from, refParts.length);
+    }
+
+    private static String getPointerToBody(String ref, int partCount, String remove) {
+        partCount += 1;
+
+        if (getExchangeType(ref).equals("response")) {
+            partCount++;
+        }
+
+        String[] refParts = ref.split("\\.");
+        String result = "";
+        for (int i = 0; i < partCount; i++) {
+            result += refParts[i] + ".";
+        }
+
+        result += refParts[partCount].replace(remove, "");
+
+        return result;
     }
 
     private Loop getLoopByIterator(String iterator) {
