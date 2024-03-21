@@ -53,8 +53,7 @@ public class ConnectionExecutor {
     }
 
     private RestTemplate getRestTemplate(Connector connector) {
-        // TODO: where to get timeout ?
-        int timeout = 5000;
+        int timeout = connector.getTimeout();
         RestTemplateBuilder restTemplateBuilder =
                 new RestTemplateBuilder(new RestCustomizer(proxy.getHost(), proxy.getPort(), proxy.getUser(), proxy.getPassword(), connector.isSslCert(), timeout));
         if (timeout > 0) {

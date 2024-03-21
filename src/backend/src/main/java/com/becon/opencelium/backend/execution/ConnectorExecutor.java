@@ -46,8 +46,12 @@ public class ConnectorExecutor {
         this.direction = direction;
 
         this.executables = new ArrayList<>();
-        this.executables.addAll(connectorEx.getMethods());
-        this.executables.addAll(connectorEx.getOperators());
+        if (Objects.nonNull(connectorEx.getMethods())) {
+            this.executables.addAll(connectorEx.getMethods());
+        }
+        if (Objects.nonNull(connectorEx.getOperators())) {
+            this.executables.addAll(connectorEx.getOperators());
+        }
         this.executables.sort(getComparator());
 
         this.connector = Connector.fromEx(connectorEx);
