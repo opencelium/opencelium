@@ -2,6 +2,12 @@ pipelines:
     branches:
       prod:
         - step:
+          name: Refresh Git Tags
+          script:
+            - git fetch --tags # Fetch all tags from the remote repository
+            - git pull --tags # Pull any new tags from the remote repository
+        - step:
+           name: Sync Prod Branch 
            script:
              - git remote add sync git@github.com:opencelium/opencelium.git
              - git checkout prod
