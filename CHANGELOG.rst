@@ -4,6 +4,27 @@ Changelog
 
 |
 |
+3.2.1
+========
+
+:Date: March 19, 2024
+
+Features
+--------
+
+* Handling Pagination Data
+
+Fixes
+--------
+
+* Bug in communication check function (OC-733)
+* LIKE operator in If condition not working (OC-795)
+* Rename SSL Switch (OC-799)
+* Loop / SplitString not working (OC-797)
+* operator regex is not supported (OC -559)
+* Converter Add MimeType (OC-805)
+
+|
 3.2
 ========
 
