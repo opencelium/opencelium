@@ -4,10 +4,12 @@ pipelines:
       - step:
           name: Sync Tags
           script:
-            - git fetch --tags # Fetch all tags from the remote repository
+            - git fetch --prune --tags # Fetch and prune all tags from the remote repository
             - git pull --tags # Pull any new tags from the remote repository
             - git tag -l | xargs git tag -d # Delete all local tags
             - git fetch --tags # Fetch tags again after local deletion
+            - git push origin --delete $(git tag -l) # Delete all tags from the remote repository
+            - git push --tags # Push the remaining tags to the remote repository
       - step:
           name: Sync Prod Branch
           script:
