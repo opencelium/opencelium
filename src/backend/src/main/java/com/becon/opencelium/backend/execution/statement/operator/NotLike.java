@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.statement.operator;
 
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class NotLike implements Operator{
@@ -10,7 +11,7 @@ public class NotLike implements Operator{
             throw new RuntimeException("Values should be string when using LIKE operator");
         }
         String text = (String) val1;
-        String regex = "^" + ((String) val2).replace("_", ".").replace("%",".*") + "$";
-        return !Pattern.matches(regex, text);
+        String regex = "(?i)^" + ((String) val2).replace("%", ".*") + "$";
+        return !Pattern.compile(regex, Pattern.DOTALL).matcher(text).find();
     }
 }

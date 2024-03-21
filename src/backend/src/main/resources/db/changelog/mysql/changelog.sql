@@ -356,3 +356,11 @@ ALTER TABLE data_aggregator ALTER COLUMN is_active SET DEFAULT 1;
 --changeset 3.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE webhook MODIFY COLUMN token LONGTEXT;
 
+--changeset 3.2.1:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+SELECT VERSION();
+
+--changeset 3.2.1:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connector CHANGE ssl_cert ssl_validation tinyint(4);
+
+
+

@@ -40,11 +40,13 @@ public class ConditionResource {
     }
 
     public ConditionResource(StatementNode entity) {
-        if (entity.getType().equals("if")){
-            this.relationalOperator = entity.getOperand();
-            this.rightStatement = ConditionUtility.buildStatement(entity.getRightStatementVariable());
-        }
+//        if (entity.getType().equals("if")){
+//            this.relationalOperator = entity.getOperand();
+//            this.rightStatement = ConditionUtility.buildStatement(entity.getRightStatementVariable());
+//        }
         this.leftStatement = ConditionUtility.buildStatement(entity.getLeftStatementVariable());
+        this.relationalOperator = entity.getOperand();
+        this.rightStatement = ConditionUtility.buildStatement(entity.getRightStatementVariable());
     }
 
     public String getRelationalOperator() {

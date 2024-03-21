@@ -14,50 +14,16 @@
  */
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
-import {ApplicationRequest} from "@application/requests/classes/Application";
-import {RemoteApiRequestProps, REQUEST_METHOD} from "@application/requests/interfaces/IApplication";
 import {errorHandler} from "@application/utils/utils";
-import {GraphQLLoginProps, GraphQLRequestProps} from "../../requests/interfaces/IGraphQL";
+import GraphiQLContext from "@entity/connection/components/classes/graphiql/GraphiQLContext";
 
-export const graphQLRequest = ({accessToken, url, sslOn, ...body}: GraphQLRequestProps) => {
-    const requestProps: RemoteApiRequestProps = {
-        body: body,
-        header: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${accessToken}`,
-            "crossDomain": "1"
-        },
-        method: REQUEST_METHOD.POST,
-        url: url,
-        sslOn,
-    }
-    const Request = new ApplicationRequest();
-    return Request.remoteApiRequest(requestProps);
-}
 
 export const graphQLLogin = createAsyncThunk(
     'graphQL/login',
-    async(data: GraphQLLoginProps, thunkAPI) => {
+    async(connector: any, thunkAPI) => {
         try {
-            const {url, user, password, sslOn} = data;
-            const request = new ApplicationRequest();
-            const loginProps: RemoteApiRequestProps = {
-                body: {
-                    query: "mutation($user: String, $password: String) {authentication { login(login: $user, password: $password){ status accessToken refreshToken }}}",
-                    variables: {
-                        user,
-                        password,
-                    }
-                },
-                header: {
-                    "Content-Type": "application/json",
-                },
-                method: REQUEST_METHOD.POST,
-                url,
-                sslOn,
-            }
-            const response = await request.remoteApiRequest(loginProps);
-            return JSON.parse(response.data.body);
+            let request = new GraphiQLContext(connector);
+            return await request.login(connector);
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -65,6 +31,5 @@ export const graphQLLogin = createAsyncThunk(
 )
 
 export default {
-    graphQLRequest,
     graphQLLogin,
 }

@@ -255,7 +255,7 @@ export function ConnectionForm(type) {
                     errors: this.state.validateLogicResult,
                     justUpdate: (entity) => this.justUpdate(entity),
                     testConnection: (entity) => this.testConnection(entity),
-                    additionalButtonsProps: {
+                    additionalButtonsProps: this.isView ? null : {
                         saveAndExit: {
                             isLoading: !this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START),
                             onClick: (a) => this.doAction(a)
@@ -607,30 +607,35 @@ export function ConnectionForm(type) {
                 contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.redirectUrl};
 
                 let contents = [
-                    {
-                        inputs: [
-                            {
-                                ...INPUTS.CONNECTION_TITLE,
-                                error: validationMessages.title,
-                                label: t(`${this.translationKey}.FORM.TITLE`),
-                                maxLength: 256,
-                                required: true,
-                                readOnly: this.isView,
-                            },
-                            {...INPUTS.DESCRIPTION,
-                                label: t(`${this.translationKey}.FORM.DESCRIPTION`),
-                                readOnly: this.isView,
-                            },
-                            this.getFirstConnectorFormSection(),
-                        ],
-                        formClassName: this.isView ? styles.direction_form : '',
-                        hint: {text: t(`${this.translationKey}.FORM.HINT_1`)},
-                        header: t(`${this.translationKey}.FORM.PAGE_1`),
-                        visible: this.isAdd || this.isView,
-                    },
-                    this.getSecondFormSection(),
                     this.getThirdFormSection()
                 ];
+                if(this.isAdd || this.isUpdate){
+                    contents = [
+                        {
+                            inputs: [
+                                {
+                                    ...INPUTS.CONNECTION_TITLE,
+                                    error: validationMessages.title,
+                                    label: t(`${this.translationKey}.FORM.TITLE`),
+                                    maxLength: 256,
+                                    required: true,
+                                    readOnly: this.isView,
+                                },
+                                {...INPUTS.DESCRIPTION,
+                                    label: t(`${this.translationKey}.FORM.DESCRIPTION`),
+                                    readOnly: this.isView,
+                                },
+                                this.getFirstConnectorFormSection(),
+                            ],
+                            formClassName: this.isView ? styles.direction_form : '',
+                            hint: {text: t(`${this.translationKey}.FORM.HINT_1`)},
+                            header: t(`${this.translationKey}.FORM.PAGE_1`),
+                            visible: this.isAdd || this.isView,
+                        },
+                        this.getSecondFormSection(),
+                        ...contents,
+                    ]
+                }
                 const additionalButtons = (entity, updateEntity) => {
                     if(this.isView || contents.length < 2){
                         return null;

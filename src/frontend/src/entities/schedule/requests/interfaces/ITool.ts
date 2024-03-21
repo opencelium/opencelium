@@ -20,7 +20,7 @@ export interface GetAllToolsResponse {
     result: ToolModel[],
 }
 
-export default interface ITeams{
+export default interface ITool {
 
     //to get all tools
     getAllTools(): Promise<AxiosResponse<GetAllToolsResponse>>,

@@ -17,6 +17,8 @@
 package com.becon.opencelium.backend;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.ReadContext;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.CredentialsProvider;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
@@ -34,6 +36,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 @SpringBootTest
 public class ApplicationTests {

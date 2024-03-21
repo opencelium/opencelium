@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.invoker;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
+import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.mysql.entity.Connector;
@@ -32,10 +33,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
@@ -124,8 +122,15 @@ public class InvokerRequestBuilder {
             httpEntity = new HttpEntity <Object> (header);
         }
         RestTemplate restTemplate = createRestTemplate();
-        ResponseEntity<Object> response = restTemplate.exchange(url, method ,httpEntity, Object.class);
-        return convertToStringResponse(response);
+        ResponseEntity response;
+        if (ConnectorExecutor.getResponseContentType(header, functionInvoker).toString().contains("json")) {
+            ResponseEntity o = restTemplate.exchange(url, method ,httpEntity, Object.class);
+            response = InvokerRequestBuilder
+                    .convertToStringResponse(o);
+        } else {
+            response = restTemplate.exchange(url, method ,httpEntity, String.class);
+        }
+        return response;
     }
 
     private RestTemplate createRestTemplate() {
@@ -192,6 +197,10 @@ public class InvokerRequestBuilder {
             headerItem.put(k, v);
         });
         httpHeaders.setAll(headerItem);
+        // Jakob's request to solve lansweeper and to support old connection that doesn't have header info.
+        if (!httpHeaders.containsKey("Content-Type")) {
+            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        }
         return httpHeaders;
     }
 

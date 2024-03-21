@@ -16,11 +16,13 @@
 
 package com.becon.opencelium.backend.invoker.entity;
 
+import com.becon.opencelium.backend.invoker.paginator.entity.Pagination;
 import com.becon.opencelium.backend.resource.connector.FunctionResource;
 
 public class FunctionInvoker {
     private String name;
     private String type;
+    private Pagination pagination;
     private RequestInv request;
     private ResponseInv response;
 
@@ -48,6 +50,14 @@ public class FunctionInvoker {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Pagination getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Pagination pagination) {
+        this.pagination = pagination;
     }
 
     public RequestInv getRequest() {

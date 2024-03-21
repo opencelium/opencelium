@@ -18,33 +18,32 @@ import GraphiQL from "graphiql";
 import {FetcherParams} from "@graphiql/toolkit/src/create-fetcher/types";
 import {useAppDispatch} from "@application/utils/store";
 import {GraphQL} from "@entity/connection/classes/GraphQL";
-import {graphQLLogin, graphQLRequest} from "@entity/connection/redux_toolkit/action_creators/GraphQLCreators";
+import {graphQLLogin} from "@entity/connection/redux_toolkit/action_creators/GraphQLCreators";
 // @ts-ignore
 import {GraphQLRequestProps} from "../@requestInterface/graphql/IGraphQL";
 import {GraphiQLEditorProps} from "@entity/connection/components/graphiql_editor/interfaces";
 import {GraphiQLEditorStyled} from "@entity/connection/components/graphiql_editor/styles";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import Loading from "@app_component/base/loading/Loading";
+import GraphiQLContext from "@root/components/classes/graphiql/GraphiQLContext";
 
 const GraphiQLEditor: FC<GraphiQLEditorProps> =
     ({
         query,
         update,
         readOnly,
-        credentials,
         connector,
     }) => {
         const dispatch = useAppDispatch();
         const {accessToken, logining} = GraphQL.getReduxState();
         const [shouldRevokeToken, setShouldRevokeToken] = useState(false);
-        const {url, user, password} = credentials;
         const sslOn = connector.sslCert;
         useEffect(() => {
-            dispatch(graphQLLogin({url, user, password, sslOn}));
+            dispatch(graphQLLogin(connector));
         }, []);
         useEffect(() => {
             if(shouldRevokeToken && logining !== API_REQUEST_STATE.ERROR){
-                dispatch(graphQLLogin({url, user, password, sslOn}));
+                dispatch(graphQLLogin(connector));
                 setShouldRevokeToken(false);
             }
         }, [shouldRevokeToken]);
@@ -56,20 +55,18 @@ const GraphiQLEditor: FC<GraphiQLEditorProps> =
                 }
             }
         }, [logining])
-        const graphQLFetcher = (graphQLParams: FetcherParams) => {
-            const requestProps: GraphQLRequestProps = {url, accessToken, sslOn, ...graphQLParams};
-            return graphQLRequest(requestProps).then((response: any) => {
-                const result = JSON.parse(response.data.body);
-                if(result && result.errors && result.errors.length > 0 && result.errors[0].extensions && result.errors[0].extensions.causes && result.errors[0].extensions.causes.length > 0 &&  result.errors[0].extensions.causes[0].error){
-                    if(result.errors[0].extensions.causes[0].error === 'AccessDeniedException'){
-                        setShouldRevokeToken(true);
-                        return {};
-                    }
+        const graphQLFetcher = async (graphQLParams: FetcherParams) => {
+            const requestProps: GraphQLRequestProps = {url: connector.requestData.url, accessToken, sslOn, ...graphQLParams};
+            let request = new GraphiQLContext(connector);
+            const response = await request.query(requestProps);
+            const result = JSON.parse(response.data.body);
+            if(result && result.errors && result.errors.length > 0 && result.errors[0].extensions && result.errors[0].extensions.causes && result.errors[0].extensions.causes.length > 0 &&  result.errors[0].extensions.causes[0].error){
+                if(result.errors[0].extensions.causes[0].error === 'AccessDeniedException'){
+                    setShouldRevokeToken(true);
+                    return {};
                 }
-                return result;
-            }).catch((error) => {
-                console.log(error);
-            });
+            }
+            return result;
         }
         const generateQuery = (query: string) => {
             let result = {query: query};

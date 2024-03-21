@@ -152,7 +152,7 @@ management:
       show-details: always
 
 opencelium:
-  version: 3.2
+  version: 3.2.1
   reboot:
     path: src/backend/src/main/resources/bashfile/restart.sh
     assistant:
@@ -173,20 +173,17 @@ opencelium:
 #                                                                         #
 #   Configuration for Notification                                        #
 #                                                                         #
-#   Teams: https://learn.microsoft.com/en-us/graph/auth/auth-concepts     #
-#   Slack: https://api.slack.com/messaging/webhooks                       #
+#   for handling several webhooks separate value by ","                   #
+#   notification:                                                         #
+#    tools:                                                               #
+#      incoming_webhook:                                                  #
+#        url: webhook url                                                  #
 #                                                                         #
 ###########################################################################
   notification:
     tools:
-      slack:
-        webhook:
-      teams:
-        grant_type: refresh_token
-        client_id:
-        client_secret:
-        refresh_token:
-        tenant:
+      incoming_webhook:
+        url: {put a webhook here}
 #  rest_template:
 #      proxy:
 #        host: 127.0.0.1

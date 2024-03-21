@@ -43,22 +43,13 @@ class GraphQLBody extends React.Component{
     render(){
         const {readOnly, method, connectors, connector} = this.props;
         const currentConnector = connectors.find(c => c.connectorId === connector.id);
-        let credentials = {url: '', user: '', password: ''};
-        if(currentConnector){
-            credentials = {
-                url: currentConnector.requestData.url,
-                user: currentConnector.requestData.username,
-                password: currentConnector.requestData.password,
-            }
-        }
         const value = method.request.getBodyFields();
         return(
             <GraphiQLEditor
                 update={(data) => this.update(data)}
                 query={value.query}
                 readOnly={readOnly}
-                credentials={credentials}
-                connector={connector}
+                connector={currentConnector || connector}
             />
         );
     }

@@ -248,7 +248,6 @@ public class ActionUtility {
                                              List<OperatorResource> operatorResources,
                                              ConnectorNode connectorNode,
                                              String connectionName){
-        String invokerName = connectorNode.getName();
         LinkedList<String> indexes = getIndexes(methodResources, operatorResources);
         if (indexes.isEmpty() || startsWithMethod(indexes.get(0), methodResources)){
             return null;
@@ -276,6 +275,9 @@ public class ActionUtility {
 
         StatementNode statementNode = toOperatorNode(operatorResource);
 
+        if(operatorResource.getCondition() != null) {
+            statementNode.setOperand(operatorResource.getCondition().getRelationalOperator());
+        }
         statementNode.setIterator(operatorResource.getIterator());
         statementNode.setRightStatementVariable(ConditionUtility.buildStringStatement(operatorResource.getCondition().getRightStatement()));
         statementNode.setLeftStatementVariable(ConditionUtility.buildStringStatement(operatorResource.getCondition().getLeftStatement()));

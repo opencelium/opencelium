@@ -26,6 +26,18 @@ public class VariableNodeServiceImp implements VariableNodeService {
         if (statementVariable == null){
             return null;
         }
-        return statementVariable.getColor() + ".(" + statementVariable.getType() + ")." + statementVariable.getFiled();
+        String field = statementVariable.getFiled();
+        if (containsLikeChars(statementVariable.getFiled())) {
+            field = statementVariable.getFiled().replace("%", "");
+        }
+        return statementVariable.getColor() + ".(" + statementVariable.getType() + ")." + field;
+    }
+
+    private boolean containsLikeChars(String ref) {
+        String[] refParts = ref.split("\\.");
+        if (refParts.length == 0 || !(refParts[0].equals("fail") || refParts[0].equals("success"))) {
+            return false;
+        }
+        return refParts[1].startsWith("%") || refParts[refParts.length - 1].endsWith("%");
     }
 }

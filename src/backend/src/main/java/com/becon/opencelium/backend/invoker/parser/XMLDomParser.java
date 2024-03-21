@@ -36,8 +36,8 @@ public class XMLDomParser<R> implements XMLParser<Node, R> {
     }
 
     @Override
-    public R doAction(String node, Function<Node, R> parser){
-
+    public R doAction(String node, Function<Node, R> parser) {
+        result = null;
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node element = nodeList.item(i);
 

@@ -17,10 +17,10 @@
 package com.becon.opencelium.backend.aspect;
 
 
+import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
-import com.becon.opencelium.backend.execution.notification.SlackService;
-import com.becon.opencelium.backend.execution.notification.TeamsService;
+import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.service.*;
 import com.becon.opencelium.backend.quartz.JobExecutor;
@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -54,10 +55,7 @@ public class ExecutionAspect {
     private EmailServiceImpl emailService;
 
     @Autowired
-    private TeamsService teamsService;
-
-    @Autowired
-    private SlackService slackService;
+    private IncomingWebhookService slackService;
 
     @Autowired
     private ExecutionServiceImp executionServiceImp;
@@ -65,8 +63,8 @@ public class ExecutionAspect {
     @Autowired
     private ArgumentServiceImp argumentServiceImp;
 
-    @Value("${opencelium.notification.tools.slack.webhook}")
-    private String slackWebhook;
+    @Autowired
+    private Environment env;
 
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -99,36 +97,41 @@ public class ExecutionAspect {
 
     private void triggerNotifications(List<EventNotification> eventNotifications, String eventType, Exception ex) {
         String to, subject, message;
-        for (EventNotification en : eventNotifications) {
-            if (!en.getEventType().equals(eventType)){
+        for (EventNotification evtn : eventNotifications) {
+            if (!evtn.getEventType().equals(eventType)){
                 continue;
             }
-            if (en.getEventRecipients() == null | en.getEventRecipients().isEmpty()) {
-                en.getEventRecipients().add(new EventRecipient(slackWebhook));
+            if (evtn.getEventRecipients() == null || evtn.getEventRecipients().isEmpty()) {
+                if (evtn.getEventMessage().getType().equalsIgnoreCase("incoming_webhook")) {
+                    String[] defaultRecipients = env.getProperty(YamlPropConst.INCOMING_WEBHOOK, String[].class);
+                    if (defaultRecipients != null) {
+                        for (String defaultRecipient : defaultRecipients) {
+                            evtn.getEventRecipients().add(new EventRecipient(defaultRecipient));
+                        }
+                    }
+                }
             }
-            for (EventRecipient er : en.getEventRecipients()) {
+            for (EventRecipient er : evtn.getEventRecipients()) {
                 User user = userService.findByEmail(er.getDestination()).orElse(null);
                 String lang =  user == null ? "en" : user.getUserDetail().getLang();
-                EventContent content = en.getEventMessage().getEventContents().stream()
+                EventContent content = evtn.getEventMessage().getEventContents().stream()
                         .filter(c -> c.getLanguage().equalsIgnoreCase(lang)).findFirst().orElse(null);
                 if (content == null) {
                     String defaultLang = LangEnum.EN.getCode();
-                    content = en.getEventMessage().getEventContents().stream()
+                    content = evtn.getEventMessage().getEventContents().stream()
                             .filter(c -> c.getLanguage().equals(defaultLang)).findFirst()
                             .orElseThrow(() -> new RuntimeException("Default language(" + defaultLang + ") of content not found"));
                 }
 
-                message = replaceConstants(content.getBody(), user, ex, en);
-                subject = replaceConstants(content.getSubject(), user, ex, en);
+                message = replaceConstants(content.getBody(), user, ex, evtn);
+                subject = replaceConstants(content.getSubject(), user, ex, evtn);
                 to = er.getDestination();
-                String type = en.getEventMessage().getType();// email, slack, jira, etc
+                String type = evtn.getEventMessage().getType();// email, income_webhook etc
                 try {
                     if (type.equals("email")) {
                         emailService.sendMessage(to, subject, message);
-                    } else if (type.equals("slack")) {
+                    } else if (type.equals("slack") || type.equalsIgnoreCase("incoming_webhook")) {
                         slackService.sendMessage(to, subject, message);
-                    } else if (type.equals("teams")) {
-                        teamsService.sendMessage(to, subject, message);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -17,25 +17,13 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import { TeamsRequest } from "@entity/schedule/requests/classes/Teams";
 
-export const getAllTeams = createAsyncThunk(
-    'schedule/notification/get/all/teams',
+export const getTeamsWebhook = createAsyncThunk(
+    'schedule/notification/get/teams/webhook',
     async(data: never, thunkAPI) => {
         try {
             const request = new TeamsRequest();
-            const response = await request.getAllTeams();
-            return response.data.value;
-        } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
-        }
-    }
-)
-export const getAllChannelsByTeam = createAsyncThunk(
-    'schedule/notification/get/all/channels/by/team',
-    async(teamId: string, thunkAPI) => {
-        try {
-            const request = new TeamsRequest({endpoint: `/${teamId}/channel/all`});
-            const response = await request.getAllChannelsByTeam();
-            return response.data.value;
+            const response = await request.getWebhook();
+            return response.data.result;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -43,6 +31,5 @@ export const getAllChannelsByTeam = createAsyncThunk(
 )
 
 export default {
-    getAllTeams,
-    getAllChannelsByTeam,
+    getTeamsWebhook,
 }
