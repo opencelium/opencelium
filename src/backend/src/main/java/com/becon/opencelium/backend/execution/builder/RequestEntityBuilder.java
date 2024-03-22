@@ -120,8 +120,8 @@ public class RequestEntityBuilder {
     private String defaultRequestEntityBuilder() {
         RequestBodyDTO body = operation.getRequestBody();
 
-        if (ObjectUtils.isEmpty(body)) {
-            return "";
+        if (body == null || body.getSchema() == null) {
+            return null;
         }
 
         // create the copy of current 'schema'
@@ -131,16 +131,17 @@ public class RequestEntityBuilder {
         replaceRefs(copiedSchema);
 
         MediaType mediaType = body.getContent();
-        if (MediaType.APPLICATION_JSON.equals(mediaType)) {
-            return SchemaDTOUtil.toJSON(copiedSchema);
+        String requestBody;
+        if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
+            requestBody = SchemaDTOUtil.toJSON(copiedSchema);
+        } else if (MediaType.APPLICATION_XML.isCompatibleWith(mediaType)) {
+            requestBody = SchemaDTOUtil.toXML(copiedSchema);
+        } else {
+            // for other types just return schemas' value as text
+            requestBody = SchemaDTOUtil.toText(copiedSchema);
         }
 
-        if (MediaType.APPLICATION_XML.equals(mediaType)) {
-            return SchemaDTOUtil.toXML(copiedSchema);
-        }
-
-        // for other types just return schemas' value as text
-        return SchemaDTOUtil.toText(copiedSchema);
+        return requestBody;
     }
 
     private void replaceRefs(SchemaDTO schema) {
@@ -151,14 +152,33 @@ public class RequestEntityBuilder {
 
             if (referencedSchema == null) {
                 schema.setValue(null);
-            } else {
-                // TODO: if schema.type == UNDEFINED then use following code otherwise do mapping to required type
-                // if schema is referenced then correct the type and fields
+            } else if (referencedSchema.getType() == DataType.UNDEFINED || schema.getType() == referencedSchema.getType()) {
+                // if type of schema is UNDEFINED or the same as referencedSchema then
+                // replace all values of this schema with referenced schema
                 schema.setType(referencedSchema.getType());
                 schema.setValue(referencedSchema.getValue());
                 schema.setItems(referencedSchema.getItems());
                 schema.setProperties(referencedSchema.getProperties());
                 schema.setXml(referencedSchema.getXml());
+            } else {
+                // schema and referencedSchema both not null and have different type
+                DataType requiredType = schema.getType();
+                DataType availableType = referencedSchema.getType();
+                // do some cleanup to the schema
+                schema.setValue(null);
+                schema.setItems(null);
+                schema.setXml(null);
+                schema.setProperties(null);
+
+                if (requiredType == DataType.ARRAY) {
+                    schema.setItems(List.of(referencedSchema));
+                } else if (requiredType == DataType.OBJECT) {
+                    schema.setProperties(Map.of(referencedSchema.getValue(), referencedSchema));
+                } else if (availableType.isPrimitive()){
+                    schema.setValue(referencedSchema.getValue());
+                } else {
+                    throw new RuntimeException(String.format("SchemaDTO cannot be converted from %s type to %s type", availableType, requiredType));
+                }
             }
 
             // referenced schema does not contain other reference, end recursion
