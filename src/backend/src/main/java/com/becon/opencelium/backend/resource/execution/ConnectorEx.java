@@ -79,12 +79,4 @@ public class ConnectorEx {
     public void setInvoker(String invoker) {
         this.invoker = invoker;
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }
