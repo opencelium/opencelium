@@ -20,6 +20,10 @@ public class ConnectorEx {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public List<OperationDTO> getMethods() {
         return methods;
     }
