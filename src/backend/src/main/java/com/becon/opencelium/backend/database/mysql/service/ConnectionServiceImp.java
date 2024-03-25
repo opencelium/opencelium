@@ -104,8 +104,11 @@ public class ConnectionServiceImp implements ConnectionService {
         }
 
         //checking existence of connectors
-        connectorService.getById(connection.getToConnector());
-        connectorService.getById(connection.getFromConnector());
+        Connector from = connectorService.getById(connection.getToConnector());
+        Connector to = connectorService.getById(connection.getFromConnector());
+
+        connectionMng.getFromConnector().setTitle(from.getTitle());
+        connectionMng.getToConnector().setTitle(to.getTitle());
 
         //checking existence of category
         if (connection.getCategoryId() != null) {
@@ -148,8 +151,11 @@ public class ConnectionServiceImp implements ConnectionService {
         }
 
         //checking existence of connectors
-        connectorService.getById(connection.getToConnector());
-        connectorService.getById(connection.getFromConnector());
+        Connector from = connectorService.getById(connection.getToConnector());
+        Connector to = connectorService.getById(connection.getFromConnector());
+
+        connectionMng.getFromConnector().setTitle(from.getTitle());
+        connectionMng.getToConnector().setTitle(to.getTitle());
 
         //checking existence of category
         if (connection.getCategoryId() != null && !connection.getCategoryId().equals(sCon.getCategoryId())) {
