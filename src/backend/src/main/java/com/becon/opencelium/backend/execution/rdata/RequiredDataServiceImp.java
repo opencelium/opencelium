@@ -27,7 +27,10 @@ public class RequiredDataServiceImp implements RequiredDataService {
             return Optional.of(rqsd.getValue());
         }
         Extractor extractor = ExtractorFactory.getInstance(refType);
-        return extractor.setRequestData(requestData).setFunctions(functionInvokerList).getValue(rqsd.getField());
+        return extractor
+                .setRequestData(requestData)
+                .setFunctions(functionInvokerList)
+                .getValue(rqsd.getField());
     }
 
     private DataRef getRefType(String expression) {
