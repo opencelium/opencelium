@@ -16,6 +16,10 @@ public class ConnectorEx {
     public ConnectorEx() {
     }
 
+    public String getName() {
+        return name;
+    }
+
     public List<OperationDTO> getMethods() {
         return methods;
     }
