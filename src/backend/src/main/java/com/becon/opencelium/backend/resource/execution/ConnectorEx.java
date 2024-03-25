@@ -16,6 +16,14 @@ public class ConnectorEx {
     public ConnectorEx() {
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public List<OperationDTO> getMethods() {
         return methods;
     }
@@ -48,14 +56,6 @@ public class ConnectorEx {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public boolean isSslCert() {
         return sslCert;
     }
@@ -78,13 +78,5 @@ public class ConnectorEx {
 
     public void setInvoker(String invoker) {
         this.invoker = invoker;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }
