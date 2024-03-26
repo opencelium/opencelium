@@ -415,3 +415,6 @@ ALTER TABLE connector CHANGE ssl_cert ssl_validation tinyint(4);
 
 --changeset 4.0:14 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE connection ADD COLUMN category_id INT NULL;
+
+--changeset 4.0:15 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE event_recipient MODIFY COLUMN destination TEXT;
