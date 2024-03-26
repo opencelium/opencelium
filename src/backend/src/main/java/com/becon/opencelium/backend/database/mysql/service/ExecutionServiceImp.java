@@ -26,13 +26,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ExecutionServiceImp implements ExecutionService{
+public class ExecutionServiceImp implements ExecutionService {
     @Autowired
     private ExecutionRepository executionRepository;
 
     @Override
-    public void save(Execution execution) {
-        executionRepository.save(execution);
+    public Execution save(Execution execution) {
+        return executionRepository.save(execution);
     }
 
     @Override
@@ -50,11 +50,17 @@ public class ExecutionServiceImp implements ExecutionService{
         return executionRepository.findById(id);
     }
 
+    @Override
+    public Execution getById(long id) {
+        return executionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("EXECUTION_NOT_FOUND"));
+    }
+
     public double getAvgDurationOfExecution(int schedulerId) {
         List<Execution> executions = getExecutionsBySchedulerId(schedulerId);
         List<Long> diffArray = new ArrayList<>();
-        for (Execution e : executions){
-            if (e.getEndTime() == null || !e.getStatus().equals("S")){
+        for (Execution e : executions) {
+            if (e.getEndTime() == null || !e.getStatus().equals("S")) {
                 continue;
             }
             long endTime = e.getEndTime().getTime();
