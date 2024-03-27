@@ -356,6 +356,15 @@ ALTER TABLE data_aggregator ALTER COLUMN is_active SET DEFAULT 1;
 --changeset 3.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE webhook MODIFY COLUMN token LONGTEXT;
 
+--changeset 3.2.1:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+SELECT VERSION();
+
+--changeset 3.2.1:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connector CHANGE ssl_cert ssl_validation tinyint(4);
+
+--changeset 3.2.1:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE event_recipient MODIFY COLUMN destination TEXT;
+
 --changeset 4.0:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 SELECT VERSION();
 
@@ -410,11 +419,11 @@ CREATE TABLE category (
     FOREIGN KEY (parent_category) REFERENCES category(id)
 );
 
+----changeset 4.0:13 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--ALTER TABLE connector CHANGE ssl_cert ssl_validation tinyint(4);
+
 --changeset 4.0:13 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-ALTER TABLE connector CHANGE ssl_cert ssl_validation tinyint(4);
+ALTER TABLE connection ADD COLUMN IF NOT EXISTS category_id INT NULL;
 
---changeset 4.0:14 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-ALTER TABLE connection ADD COLUMN category_id INT NULL;
-
---changeset 4.0:15 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-ALTER TABLE event_recipient MODIFY COLUMN destination TEXT;
+----changeset 4.0:15 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--ALTER TABLE event_recipient MODIFY COLUMN destination TEXT;
