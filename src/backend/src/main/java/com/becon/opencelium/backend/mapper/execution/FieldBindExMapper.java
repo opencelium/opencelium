@@ -59,7 +59,7 @@ public class FieldBindExMapper {
 
     public List<FieldBindEx> toEntityAll(List<FieldBindingMng> dtoList) {
         if (dtoList == null || dtoList.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
         List<FieldBindEx> fieldBindExes = new ArrayList<>();
         for (FieldBindingMng fieldBindMng : dtoList) {

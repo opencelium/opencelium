@@ -23,11 +23,13 @@ import java.util.Optional;
 
 public interface ExecutionService {
 
-    void save(Execution execution);
+    Execution save(Execution execution);
 
     void deleteAllBySchedulerId(int schedulerId);
 
     List<Execution> getExecutionsBySchedulerId(int schedulerId);
 
     Optional<Execution> findById(long id);
+
+    Execution getById(long id);
 }

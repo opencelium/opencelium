@@ -21,20 +21,17 @@ import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.LangEnum;
-import com.becon.opencelium.backend.execution.notification.*;
-import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
-import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
+import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import org.aspectj.lang.annotation.*;
-import org.checkerframework.checker.units.qual.A;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -49,63 +46,120 @@ import java.util.stream.Collectors;
 public class ExecutionAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
+    private final SchedulerService schedulerService;
+    private final UserService userService;
+    private final IncomingWebhookService incomingWebhookService;
+    private final ExecutionService executionService;
+    private final EmailServiceImpl emailService;
+    private final Environment env;
+    private final LastExecutionService lastExecutionService;
 
-    @Autowired
-    private SchedulerServiceImp schedulerServiceImp;
-
-    @Autowired
-    private UserServiceImpl userService;
-
-    @Autowired
-    private IncomingWebhookService incomingWebhookService;
-
-    @Autowired
-    private ExecutionServiceImp executionServiceImp;
-
-    @Autowired
-    private ArgumentServiceImp argumentServiceImp;
-
-    @Autowired
-    private EmailServiceImpl emailService;
-
-    @Autowired
-    private Environment env;
+    public ExecutionAspect(
+            @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
+            @Qualifier("userServiceImpl") UserService userService,
+            @Qualifier("executionServiceImp") ExecutionService executionService,
+            @Qualifier("lastExecutionServiceImp") LastExecutionService lastExecutionService,
+            IncomingWebhookService incomingWebhookService,
+            EmailServiceImpl emailService,
+            Environment env
+    ) {
+        this.schedulerService = schedulerService;
+        this.userService = userService;
+        this.incomingWebhookService = incomingWebhookService;
+        this.executionService = executionService;
+        this.emailService = emailService;
+        this.env = env;
+        this.lastExecutionService = lastExecutionService;
+    }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
-    public void sendBefore(JobExecutionContext context){
+    public void sendBefore(JobExecutionContext context) {
         logger.info("------------------- PRE --------------------");
+
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
-        List<EventNotification> eventNotifications = schedulerServiceImp.getAllNotifications(schedulerId);
+
+        long execId = initExecutionObj(schedulerId);
+        jobDataMap.put("execId", execId);
+
+        List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(eventNotifications, "pre", null);
     }
 
-    @After("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
-    public void sendAfter(JobExecutionContext context){
+    @AfterReturning("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
+    public void sendAfter(JobExecutionContext context) {
         logger.info("------------------- POST --------------------");
+
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
-        List<EventNotification> en = schedulerServiceImp.getAllNotifications(schedulerId);
+
+        long execId = jobDataMap.getLong("execId");
+        updateExecutionObj(execId, true);
+
+        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
     }
 
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
-                   throwing="ex")
-    public void sendAlert(JobExecutionContext context, Exception ex){
+            throwing = "ex")
+    public void sendAlert(JobExecutionContext context, Exception ex) {
         logger.info("------------------- EXCEPTION --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
-        List<EventNotification> en = schedulerServiceImp.getAllNotifications(schedulerId);
+
+        long execId = jobDataMap.getLong("execId");
+        updateExecutionObj(execId, false);
+
+        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
+    }
+
+    private long initExecutionObj(int schedulerId) {
+        Execution execution = new Execution();
+        Scheduler scheduler = new Scheduler();
+        scheduler.setId(schedulerId);
+        execution.setScheduler(scheduler);
+        execution.setStartTime(new Date());
+        return executionService.save(execution)
+                .getId();
+    }
+
+    private void updateExecutionObj(long execId, boolean success) {
+        Execution execution = executionService.getById(execId);
+        execution.setEndTime(new Date());
+        execution.setStatus(success ? "S" : "F");
+        executionService.save(execution);
+
+        LastExecution le;
+        if (lastExecutionService.existsBySchedulerId(execution.getScheduler().getId())) {
+            le = lastExecutionService.findBySchedulerId(execution.getScheduler().getId());
+        } else {
+            le = new LastExecution();
+        }
+        if (success) {
+            le.setSuccessDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
+            le.setSuccessStartTime(execution.getStartTime());
+            le.setSuccessEndTime(execution.getEndTime());
+            le.setSuccessExecutionId(execution.getId());
+        } else {
+            le.setFailDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
+            le.setFailStartTime(execution.getStartTime());
+            le.setFailEndTime(execution.getEndTime());
+            le.setFailExecutionId(execution.getId());
+        }
+        if (le.getScheduler() == null) {
+            le.setScheduler(execution.getScheduler());
+        }
+        lastExecutionService.save(le);
     }
 
     private void triggerNotifications(List<EventNotification> eventNotifications, String eventType, Exception ex) {
         String to, subject, message;
         for (EventNotification en : eventNotifications) {
-            if (!en.getEventType().equals(eventType)){
+            if (!en.getEventType().equals(eventType)) {
                 continue;
             }
             if (en.getEventRecipients().isEmpty()) {
@@ -113,7 +167,7 @@ public class ExecutionAspect {
             }
             for (EventRecipient er : en.getEventRecipients()) {
                 User user = userService.findByEmail(er.getDestination()).orElse(null);
-                String lang =  user == null ? "en" : user.getUserDetail().getLang();
+                String lang = user == null ? "en" : user.getUserDetail().getLang();
                 EventContent content = en.getEventMessage().getEventContents().stream()
                         .filter(c -> c.getLanguage().equalsIgnoreCase(lang)).findFirst().orElse(null);
                 if (content == null) {
@@ -156,7 +210,8 @@ public class ExecutionAspect {
                     recipients.add(new EventRecipient(url));
                 }
             }
-            default -> throw new RuntimeException("Couldn't find tool type: " + type + ". Check application.yaml file;");
+            default ->
+                    throw new RuntimeException("Couldn't find tool type: " + type + ". Check application.yaml file;");
         }
     }
 
@@ -208,13 +263,13 @@ public class ExecutionAspect {
     }
 
     private Map<String, String> getArgsValues(List<Long> indexes, EventNotification en) {
-        LastExecution le = schedulerServiceImp.findById(en.getScheduler().getId()).get().getLastExecution();
+        LastExecution le = schedulerService.findById(en.getScheduler().getId()).get().getLastExecution();
         long exId = Math.max(le.getFailExecutionId(), le.getSuccessExecutionId());
-        Execution execution = executionServiceImp.findById(exId).orElse(null);
+        Execution execution = executionService.findById(exId).orElse(null);
         Objects.requireNonNull(execution);
         Map<String, String> resultMap = execution.getExecutionArguments().stream()
-                    .filter(ea -> indexes.contains(ea.getArgument().getId()))
-                    .collect(Collectors.toMap(ea -> Long.toString(ea.getArgument().getId()), ExecutionArgument::getValue));
+                .filter(ea -> indexes.contains(ea.getArgument().getId()))
+                .collect(Collectors.toMap(ea -> Long.toString(ea.getArgument().getId()), ExecutionArgument::getValue));
 
         indexes.stream()
                 .filter(id -> !resultMap.containsKey(Long.toString(id)))
@@ -227,7 +282,7 @@ public class ExecutionAspect {
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(text);
 
-        while (m.find()){
+        while (m.find()) {
             constants.add(m.group(1));
         }
         return constants;
@@ -235,11 +290,12 @@ public class ExecutionAspect {
 
     @Autowired
     private ConnectionServiceImp connectionServiceImp;
+
     private Map<String, String> getConstantValues(List<String> constants, User user, Exception ex, EventNotification en) {
         if (constants == null || constants.isEmpty()) {
             return null;
         }
-        Scheduler scheduler = schedulerServiceImp.findById(en.getScheduler()
+        Scheduler scheduler = schedulerService.findById(en.getScheduler()
                 .getId()).orElseThrow(() -> new RuntimeException("SCHEDULER_NOT_FOUND"));
         Connection connection = connectionServiceImp.findById(scheduler.getConnection().getId())
                 .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
