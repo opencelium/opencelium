@@ -245,11 +245,10 @@ public class ReferenceExtractor implements Extractor {
             Matcher matcher;
 
             // CASE 1: FOR_IN operator
-            // CASE 1.1: index types for KEY(s), there are 4 types:
+            // CASE 1.1: index types for KEY(s), there are 3 types:
             // 1) obj['i']~            - field name on ith index (indexing starts from 0)
-            // 2) obj['1']~            - field name on 1st index (indexing starts from 0)
             // 3) obj['*']~            - all field names
-            // 4) obj['field_name']~   - field name by this fields' name
+            // 4) obj['field_name']~   - field_name by this fields' name
 
             pattern = Pattern.compile(IS_FOR_IN_KEY_TYPE);
             matcher = pattern.matcher(path);
@@ -267,32 +266,21 @@ public class ReferenceExtractor implements Extractor {
 
                     // return iterators' current value from loop
                     return loop.getValue();
-                } else if (isNumber(match)) {
-                    // case 1.1.2: obj['1']~
-                    // get field names of the current object
-                    Object currentBody = getFromJSON(body, getPointerToBody(ref, partCount, matcher.group(0)));
-                    List<String> keys = getFieldNames(currentBody);
-
-                    // return field name on the specified index
-                    int index = Integer.parseInt(match);
-                    return keys.get(index);
-                } else if (isStar(match)) {
-                    // case 1.1.3: obj['*']~
+                } else if ("*".equals(match)) {
+                    // case 1.1.2: obj['*']~
                     // return all field names of the current object
                     Object currentBody = getFromJSON(body, getPointerToBody(ref, partCount, matcher.group(0)));
                     return getFieldNames(currentBody);
                 } else {
-                    // case 1.1.4: obj['field_name']~
+                    // case 1.1.3: obj['field_name']~
                     // return just match itself
                     return match;
                 }
             }
 
-            // CASE 1.2: index types for VALUE(s), there are 4 types:
+            // CASE 1.2: index types for VALUE(s), there are 2 types:
             // 1) obj['i']             - value of the field on ith index (indexing starts from 0)
-            // 2) obj['1']             - value of the field on 1st index (indexing starts from 0)
-            // 3) obj['*']             - all values of the fields
-            // 4) obj['field_name']    - value of the field by its name
+            // 2) obj['field_name']    - value of the field by its name
 
             pattern = Pattern.compile(IS_FOR_IN_VALUE_TYPE);
             matcher = pattern.matcher(path);
@@ -308,21 +296,8 @@ public class ReferenceExtractor implements Extractor {
 
                     // get current fields' name from loop
                     fieldName = loop.getValue();
-                } else if (isNumber(match)) {
-                    // case 1.2.2: obj['1']
-                    // get field names of the current object
-                    Object currentBody = getFromJSON(body, getPointerToBody(ref, partCount, matcher.group(0)));
-                    List<String> keys = getFieldNames(currentBody);
-
-                    // get field name on the required index
-                    int index = Integer.parseInt(match);
-                    fieldName = keys.get(index);
-                } else if (isStar(match)) {
-                    // case 1.2.3: obj['*']
-                    // TODO find a good implementation not to distrupt the flow
-                    continue;
                 } else {
-                    // case 1.2.4: obj['field_name']
+                    // case 1.2.2: obj['field_name']
                     fieldName = match;
                 }
 
@@ -331,8 +306,8 @@ public class ReferenceExtractor implements Extractor {
 
             // CASE 2: SPLIT STRING operator, there are 3 cases
             // 1) field[i]~            - string on the ith index (indexing starts from 0)
-            // 2) field[2]~            - string on the 2nd index (indexing starts from 0)
-            // 3) field[*]~            - all strings (after splitting)
+            // 2) field[*]~            - all strings (after splitting)
+            // 3) field[2]~            - string on the 2nd index (indexing starts from 0)
 
             pattern = Pattern.compile(IS_SPLIT_STRING_TYPE);
             matcher = pattern.matcher(path);
@@ -347,16 +322,7 @@ public class ReferenceExtractor implements Extractor {
 
                     // it is a primitive value so just return iterators' current value from loop
                     return loop.getValue();
-                } else if (isNumber(match)) {
-                    // case 2.2: field[2]~
-
-                    // find loop by reference
-                    Loop loop = getLoopByReference(ref);
-
-                    // it is a primitive value just return string on the specified index
-                    int index = Integer.parseInt(match);
-                    return ((String) result).split(loop.getDelimiter())[index];
-                } else if (isStar(match)) {
+                } else if ("*".equals(match)) {
                     // case 2.3: field[*]~
                     // find loop by reference
                     Loop loop = getLoopByReference(ref);
@@ -367,7 +333,19 @@ public class ReferenceExtractor implements Extractor {
 
                     result = strs;
                 } else {
-                    throw new RuntimeException("Wrong index is supplied to a SPLIT STRING operator, 'index' = " + match);
+                    // case 2.2: field[2]~
+                    int index;
+                    try{
+                        index = Integer.parseInt(match);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Wrong index is supplied to a SPLIT STRING operator, 'index' = " + match);
+                    }
+
+                    // find loop by reference
+                    Loop loop = getLoopByReference(ref);
+
+                    // it is a primitive value just return string on the specified index
+                    return ((String) result).split(loop.getDelimiter())[index];
                 }
             }
 
@@ -546,23 +524,5 @@ public class ReferenceExtractor implements Extractor {
 
     private boolean isLetter(String str) {
         return str != null && str.length() == 1 && Character.isLetter(str.charAt(0));
-    }
-
-    private boolean isNumber(String str) {
-        if (str == null) {
-            return false;
-        }
-
-        for (int ch : str.toCharArray()) {
-            if (!Character.isDigit(ch)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private boolean isStar(String str) {
-        return "*".equals(str);
     }
 }

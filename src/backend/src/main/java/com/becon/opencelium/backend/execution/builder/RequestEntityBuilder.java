@@ -56,7 +56,7 @@ public class RequestEntityBuilder {
         return this;
     }
 
-    public RequestEntity<?> createRequest() {
+    public RequestEntity<String> createRequest() {
         URI url = Objects.nonNull(URIBuilder) ? URIBuilder.build(operation, references) : defaultURLBuilder();
         HttpMethod method = defaultMethod();
         HttpHeaders headers = Objects.nonNull(headersBuilder) ? headersBuilder.build(operation, references) : defaultHeadersBuilder();
@@ -66,6 +66,10 @@ public class RequestEntityBuilder {
     }
 
     private HttpMethod defaultMethod() {
+        if (operation.getHttpMethod() == null) {
+            throw new RuntimeException("Http method should be supplied");
+        }
+
         return operation.getHttpMethod();
     }
 
@@ -132,13 +136,12 @@ public class RequestEntityBuilder {
 
         MediaType mediaType = body.getContent();
         String requestBody;
-        if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
-            requestBody = SchemaDTOUtil.toJSON(copiedSchema);
+        if (MediaType.TEXT_PLAIN.isCompatibleWith(mediaType)) {
+            requestBody = SchemaDTOUtil.toText(copiedSchema);
         } else if (MediaType.APPLICATION_XML.isCompatibleWith(mediaType)) {
             requestBody = SchemaDTOUtil.toXML(copiedSchema);
         } else {
-            // for other types just return schemas' value as text
-            requestBody = SchemaDTOUtil.toText(copiedSchema);
+            requestBody = SchemaDTOUtil.toJSON(copiedSchema);
         }
 
         return requestBody;
