@@ -54,9 +54,7 @@ public class ReferenceExtractor implements Extractor {
     public Object extractValue(String ref) {
         Object result = null;
 
-        if (ref == null) {
-            // this happens if statement(s) is null in a Condition
-        } else if (ref.matches(queryParams)) {
+        if (ref.matches(queryParams)) {
             // '${key}'
             // '${key:type}'
             // '${key.field[*]}'

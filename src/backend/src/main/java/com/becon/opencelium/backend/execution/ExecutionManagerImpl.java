@@ -102,6 +102,10 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
     @Override
     public Object getValue(String ref) {
+        if (ref == null) {
+            return null;
+        }
+
         return refExtractor.extractValue(ref);
     }
 

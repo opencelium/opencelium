@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
@@ -17,11 +16,6 @@ import java.util.stream.Collectors;
 
 public class SchemaDTOUtil {
 
-    private static final String DEFAULT_STRING = "";
-    private static final Integer DEFAULT_INTEGER = 0;
-    private static final Double DEFAULT_NUMBER = 0.0;
-    private static final Boolean DEFAULT_BOOLEAN = false;
-
     public static SchemaDTO copy(SchemaDTO schema) {
         if (schema == null) {
             return null;
@@ -29,9 +23,7 @@ public class SchemaDTOUtil {
 
         SchemaDTO result = new SchemaDTO();
         result.setType(schema.getType());
-
-        String value = schema.getValue() == null ? null : new String(schema.getValue());
-        result.setValue(value);
+        result.setValue(schema.getValue());
 
         Map<String, SchemaDTO> properties = schema.getProperties();
         if (properties != null) {
@@ -42,8 +34,6 @@ public class SchemaDTOUtil {
             });
 
             result.setProperties(temp);
-        } else {
-            result.setProperties(null);
         }
 
         List<SchemaDTO> items = schema.getItems();
@@ -53,37 +43,19 @@ public class SchemaDTOUtil {
                     .collect(Collectors.toList());
 
             result.setItems(temp);
-        } else {
-            result.setItems(null);
         }
 
-        XmlObjectDTO xml = schema.getXml();
-        if (xml != null) {
-            XmlObjectDTO temp = new XmlObjectDTO();
-
-            String name = xml.getName() == null ? null : new String(xml.getName());
-            temp.setName(name);
-
-            String namespace = xml.getNamespace() == null ? null : new String(xml.getNamespace());
-            temp.setNamespace(namespace);
-
-            String prefix = xml.getPrefix() == null ? null : new String(xml.getPrefix());
-            temp.setPrefix(prefix);
-
-            temp.setAttribute(xml.isAttribute());
-            temp.setWrapped(xml.isWrapped());
-
-            result.setXml(temp);
-        } else {
-            result.setXml(null);
-        }
+        XmlObjectDTO xml = XmlObjectDTO.copy(schema.getXml());
+        result.setXml(xml);
 
         return result;
     }
 
     public static String toJSON(SchemaDTO schema) {
-        if (schema == null || schema.getType() == null) {
-            throw new IllegalStateException("schema and data type must not be null");
+        if (schema == null) {
+            return null;
+        } else if (schema.getType() == null) {
+            throw new IllegalStateException("Data type must be supplied to SchemaDTO");
         }
 
         DataType type = schema.getType();
@@ -91,14 +63,14 @@ public class SchemaDTOUtil {
         if (type == DataType.OBJECT) {
             Map<String, SchemaDTO> properties = schema.getProperties();
 
-            // if properties is empty or null then stop recursion by returning 'empty' JSON object
-            if (CollectionUtils.isEmpty(properties)) {
-                return "{}";
+            // if 'properties' is null then just return null
+            if (properties == null) {
+                return null;
             }
 
             // loop through each property and convert it to JSON string recursively
             String object = properties.entrySet().stream()
-                    .map(entry -> "\"" + entry.getKey() + "\": " + toJSON(entry.getValue()))
+                    .map(entry -> "\"" + entry.getKey() + "\": " + SchemaDTOUtil.toJSON(entry.getValue()))
                     .collect(Collectors.joining(", "));
 
             return "{" + object + "}";
@@ -107,9 +79,9 @@ public class SchemaDTOUtil {
         if (type == DataType.ARRAY) {
             List<SchemaDTO> items = schema.getItems();
 
-            // if items is empty or null then stop recursion by returning 'empty' JSON array
-            if (CollectionUtils.isEmpty(items)) {
-                return "[]";
+            // if items is null then just return null
+            if (items == null) {
+                return null;
             }
 
             // loop through each item and convert it to JSON recursively
@@ -122,23 +94,10 @@ public class SchemaDTOUtil {
 
         String value = schema.getValue();
 
-        // if value is empty or null for a primitive then return DEFAULT value
-        if (ObjectUtils.isEmpty(value)) {
-            if (type == DataType.STRING) {
-                return "\"" + DEFAULT_STRING + "\"";
-            }
-
-            if (type == DataType.BOOLEAN) {
-                return DEFAULT_BOOLEAN.toString();
-            }
-
-            if (type == DataType.NUMBER) {
-                return DEFAULT_NUMBER.toString();
-            }
-
-            if (type == DataType.INTEGER) {
-                return DEFAULT_INTEGER.toString();
-            }
+        // at this point only primitives are left
+        // if value is null for a primitive then return null
+        if (value == null) {
+            return null;
         }
 
         // for STRING primitive we need to add double quote
@@ -146,13 +105,15 @@ public class SchemaDTOUtil {
     }
 
     public static String toXML(SchemaDTO schema) {
-        if (schema == null || schema.getType() == null) {
-            throw new IllegalStateException("schema and data type must not be null");
+        if (schema == null) {
+            return null;
+        } else if (schema.getType() == null) {
+            throw new IllegalStateException("Data type must be supplied to SchemaDTO");
         }
 
-        // handle unusual cases:
         DataType type = schema.getType();
 
+        // handle unusual cases:
         // case 1. schema with type STRING at the top level:
         if (type == DataType.STRING) {
             String value = schema.getValue();
@@ -180,7 +141,11 @@ public class SchemaDTOUtil {
     }
 
     public static String toText(SchemaDTO schema) {
-        return ObjectUtils.isEmpty(schema) ? "" : schema.getValue();
+        if (schema == null) {
+            return null;
+        }
+
+        return schema.getValue();
     }
 
     public static SchemaDTO fromObject(Object value) {
@@ -194,7 +159,7 @@ public class SchemaDTOUtil {
 
             return fromJSONNode(mapper.readTree(jsonString));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Supplied Object could not be converted to SchemaDTO", e);
         }
     }
 

@@ -7,6 +7,22 @@ public class XmlObjectDTO {
     private boolean attribute;
     private boolean wrapped;
 
+    public static XmlObjectDTO copy(XmlObjectDTO xml) {
+        if (xml == null) {
+            return null;
+        }
+
+        XmlObjectDTO result = new XmlObjectDTO();
+
+        result.setName(xml.getName());
+        result.setNamespace(xml.getNamespace());
+        result.setPrefix(xml.getPrefix());
+        result.setAttribute(xml.isAttribute());
+        result.setWrapped(xml.isWrapped());
+
+        return result;
+    }
+
     public String getName() {
         return name;
     }

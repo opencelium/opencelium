@@ -124,7 +124,7 @@ public class RequestEntityBuilder {
     private String defaultRequestEntityBuilder() {
         RequestBodyDTO body = operation.getRequestBody();
 
-        if (body == null || body.getSchema() == null) {
+        if (body == null) {
             return null;
         }
 
@@ -148,6 +148,10 @@ public class RequestEntityBuilder {
     }
 
     private void replaceRefs(SchemaDTO schema) {
+        if (schema == null) {
+            return;
+        }
+
         String value = schema.getValue();
 
         if (ReferenceExtractor.isReference(value)) {
@@ -189,13 +193,13 @@ public class RequestEntityBuilder {
         }
 
         List<SchemaDTO> items = schema.getItems();
-        if (schema.getType() == DataType.ARRAY && !CollectionUtils.isEmpty(items)) {
+        if (schema.getType() == DataType.ARRAY && items != null) {
             // loop through all 'items' to replace referenced ones
             items.forEach(this::replaceRefs);
         }
 
         Map<String, SchemaDTO> properties = schema.getProperties();
-        if (schema.getType() == DataType.OBJECT && !CollectionUtils.isEmpty(properties)) {
+        if (schema.getType() == DataType.OBJECT && properties != null) {
             // loop through all 'properties' to replace referenced ones
             properties.forEach((name, schemaDTO) -> replaceRefs(schemaDTO));
         }
@@ -209,7 +213,9 @@ public class RequestEntityBuilder {
 
         // filters parameter by location
         return operation.getParameters().stream()
+                .filter(Objects::nonNull)
                 .filter(p -> p.getIn() == location)
+                .filter(p -> p.getSchema() != null)
                 .collect(Collectors.toList());
     }
 }
