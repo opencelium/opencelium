@@ -16,8 +16,6 @@
 
 package com.becon.opencelium.backend.resource.update_assistant.migrate.neo4j;
 
-import org.springframework.data.neo4j.core.schema.RelationshipProperties;
-
 public class Linked {
 
     private Long id;

@@ -464,16 +464,32 @@ public class UpdateAssistantController {
              Session session = driver.session()) {
             driver.verifyConnectivity();
 
-            Result result = session.run("MATCH (n:Person) RETURN n LIMIT 25");
+            String cypherQuery = """
+                    MATCH (conn:Connection {connectionId: 1})
+                    OPTIONAL MATCH (conn)-[:from_connector]->(from:Connector),
+                                   (conn)-[:to_connector]->(to:Connector)
+                    OPTIONAL MATCH (from)-[:start_action]->(from_startMethod:Method)
+                    OPTIONAL MATCH (from)-[:start_action]->(from_startOperator:Statement)
+                    OPTIONAL MATCH (to)-[:start_action]->(to_startMethod:Method)
+                    OPTIONAL MATCH (to)-[:start_action]->(to_startOperator:Statement)
+                    RETURN conn, from, to, from_startMethod, from_startOperator, to_startMethod, to_startOperator;
+                    """;
+
+            ArrayList<Object> res = new ArrayList<>();
+            Result result = session.run(cypherQuery);
             while (result.hasNext()) {
                 Record record = result.next();
-                Value value = record.get("n");
-                Node node = value.asNode();
-//                Person person = objectMapper.convertValue(node.asMap(), Person.class);
-                System.out.println();
+                Value conn = record.get("conn");
+                Value from = record.get("from");
+                Value to = record.get("to");
+                Value so = record.get("so");
+                res.add(objectMapper.convertValue(conn.asNode().asMap(), Object.class));
+                res.add(objectMapper.convertValue(from.asNode().asMap(), Object.class));
+                res.add(objectMapper.convertValue(to.asNode().asMap(), Object.class));
+                res.add(objectMapper.convertValue(so.asNode().asMap(), Object.class));
             }
 
-            return ResponseEntity.ok(null);
+            return ResponseEntity.ok(res);
         }
     }
 }

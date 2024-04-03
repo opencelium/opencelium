@@ -16,11 +16,6 @@
 
 package com.becon.opencelium.backend.resource.update_assistant.migrate.neo4j;
 
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
-import org.springframework.data.neo4j.core.schema.Id;
-import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Relationship;
-
 public class StatementNode {
     private Long id;
 
