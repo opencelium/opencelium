@@ -28,7 +28,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
             final JobKey jobKey = new JobKey(jobName, "connection");
             if (scheduler.getCronExp() == null || scheduler.getCronExp().isBlank()) {
                 scheduler.setCronExp(DEFAULT_CRON_EXP);
-            }else {
+            } else {
                 validateCron(scheduler.getCronExp());
             }
 
@@ -84,7 +84,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         final JobKey jobKey = new JobKey(jobName, "connection");
         if (scheduler.getCronExp() == null || scheduler.getCronExp().isBlank()) {
             scheduler.setCronExp(DEFAULT_CRON_EXP);
-        }else {
+        } else {
             validateCron(scheduler.getCronExp());
         }
 
@@ -195,7 +195,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         if (scheduler.getConnection() == null || scheduler.getConnection().getId() == null) {
             throw new ConnectionNotFoundException(0L);
         }
-        return scheduler.getId() + "-" + scheduler.getConnection().getId();
+        return scheduler.getConnection().getId() + "-" + scheduler.getId();
     }
 
     enum TriggerType {
