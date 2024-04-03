@@ -21,17 +21,14 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
-public class RequestNode {
+import java.util.List;
 
+public class HeaderNode {
     private Long id;
 
-    private String name = "request";
-    private String method;
-    private String endpoint;
+    private String name = "header";
 
-    private HeaderNode headerNode;
-
-    private BodyNode bodyNode;
+    private List<ItemNode> items;
 
     public Long getId() {
         return id;
@@ -41,39 +38,15 @@ public class RequestNode {
         this.id = id;
     }
 
-    public String getEndpoint() {
-        return endpoint;
-    }
-
     public String getName() {
         return name;
     }
 
-    public String getMethod() {
-        return method;
+    public List<ItemNode> getItems() {
+        return items;
     }
 
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public HeaderNode getHeaderNode() {
-        return headerNode;
-    }
-
-    public void setHeaderNode(HeaderNode headerNode) {
-        this.headerNode = headerNode;
-    }
-
-    public BodyNode getBodyNode() {
-        return bodyNode;
-    }
-
-    public void setBodyNode(BodyNode bodyNode) {
-        this.bodyNode = bodyNode;
+    public void setItems(List<ItemNode> items) {
+        this.items = items;
     }
 }

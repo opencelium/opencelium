@@ -16,18 +16,25 @@
 
 package com.becon.opencelium.backend.resource.update_assistant.migrate.neo4j;
 
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
-import org.springframework.data.neo4j.core.schema.Id;
-import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.schema.RelationshipProperties;
 
-@Node("Response")
-public class ResponseNode {
+public class Linked {
 
     private Long id;
-    private String name = "response";
-    private ResultNode success;
-    private ResultNode fail;
+
+    private FieldNode fieldNodeStart;
+
+    private FieldNode fieldNodeEnd;
+
+    public Linked() {
+
+    }
+
+    public Linked(FieldNode fieldNodeStart, FieldNode fieldNodeEnd) {
+
+        this.fieldNodeStart = fieldNodeStart;
+        this.fieldNodeEnd = fieldNodeEnd;
+    }
 
     public Long getId() {
         return id;
@@ -37,23 +44,19 @@ public class ResponseNode {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public FieldNode getFieldNodeStart() {
+        return fieldNodeStart;
     }
 
-    public ResultNode getSuccess() {
-        return success;
+    public void setFieldNodeStart(FieldNode fieldNodeStart) {
+        this.fieldNodeStart = fieldNodeStart;
     }
 
-    public void setSuccess(ResultNode success) {
-        this.success = success;
+    public FieldNode getFieldNodeEnd() {
+        return fieldNodeEnd;
     }
 
-    public ResultNode getFail() {
-        return fail;
-    }
-
-    public void setFail(ResultNode fail) {
-        this.fail = fail;
+    public void setFieldNodeEnd(FieldNode fieldNodeEnd) {
+        this.fieldNodeEnd = fieldNodeEnd;
     }
 }

@@ -19,19 +19,21 @@ package com.becon.opencelium.backend.resource.update_assistant.migrate.neo4j;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Relationship;
 
-public class RequestNode {
+public class ItemNode {
 
     private Long id;
 
-    private String name = "request";
-    private String method;
-    private String endpoint;
+    private String name;
+    private String value;
 
-    private HeaderNode headerNode;
+    public ItemNode() {
+    }
 
-    private BodyNode bodyNode;
+    public ItemNode(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
 
     public Long getId() {
         return id;
@@ -41,39 +43,19 @@ public class RequestNode {
         this.id = id;
     }
 
-    public String getEndpoint() {
-        return endpoint;
-    }
-
     public String getName() {
         return name;
     }
 
-    public String getMethod() {
-        return method;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setMethod(String method) {
-        this.method = method;
+    public String getValue() {
+        return value;
     }
 
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public HeaderNode getHeaderNode() {
-        return headerNode;
-    }
-
-    public void setHeaderNode(HeaderNode headerNode) {
-        this.headerNode = headerNode;
-    }
-
-    public BodyNode getBodyNode() {
-        return bodyNode;
-    }
-
-    public void setBodyNode(BodyNode bodyNode) {
-        this.bodyNode = bodyNode;
+    public void setValue(String value) {
+        this.value = value;
     }
 }

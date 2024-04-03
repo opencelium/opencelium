@@ -16,18 +16,16 @@
 
 package com.becon.opencelium.backend.resource.update_assistant.migrate.neo4j;
 
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
-import org.springframework.data.neo4j.core.schema.Id;
-import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Relationship;
+import java.util.List;
 
-@Node("Response")
-public class ResponseNode {
+public class FieldNode {
 
     private Long id;
-    private String name = "response";
-    private ResultNode success;
-    private ResultNode fail;
+    private String name;
+    private String value;
+    private String type;
+    private List<FieldNode> child;
+    private List<AttributeNode> attribute;
 
     public Long getId() {
         return id;
@@ -41,19 +39,39 @@ public class ResponseNode {
         return name;
     }
 
-    public ResultNode getSuccess() {
-        return success;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setSuccess(ResultNode success) {
-        this.success = success;
+    public String getValue() {
+        return value;
     }
 
-    public ResultNode getFail() {
-        return fail;
+    public void setValue(String value) {
+        this.value = value;
     }
 
-    public void setFail(ResultNode fail) {
-        this.fail = fail;
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public List<FieldNode> getChild() {
+        return child;
+    }
+
+    public void setChild(List<FieldNode> child) {
+        this.child = child;
+    }
+
+    public List<AttributeNode> getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(List<AttributeNode> attribute) {
+        this.attribute = attribute;
     }
 }
