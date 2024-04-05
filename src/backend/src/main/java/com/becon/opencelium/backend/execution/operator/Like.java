@@ -10,7 +10,8 @@ public class Like implements Operator {
             throw new RuntimeException("Like operator only supports String values");
         }
 
-        String regex = "^" + ((String) o2).replace("_", ".").replace("%", ".*") + "$";
-        return Pattern.matches(regex, value);
+        // replace("_", ".") removed.
+        String regex = "(?i)^" + ((String) o2).replace("%", ".*") + "$";
+        return Pattern.compile(regex, Pattern.DOTALL).matcher(value).find();
     }
 }

@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -27,7 +28,7 @@ public class OperatorExMapper {
 
     public List<OperatorEx> toEntityAll(List<OperatorMng> dtoList) {
         if (dtoList == null || dtoList.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
         List<OperatorEx> operatorExes = new ArrayList<>();
         for (OperatorMng operatorMng : dtoList) {
