@@ -32,8 +32,10 @@ import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.resource.update_assistant.VersionDTO;
+import com.becon.opencelium.backend.resource.update_assistant.migrate.neo4j.ConnectionNode;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
+import com.becon.opencelium.backend.utility.Neo4jDriverUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.zaxxer.hikari.pool.HikariPool;
@@ -465,14 +467,10 @@ public class UpdateAssistantController {
             driver.verifyConnectivity();
 
             String cypherQuery = "MATCH p=((:Connection{connectionId:2})-[*]->()) return p";
-
             ArrayList<Object> res = new ArrayList<>();
             Result result = session.run(cypherQuery);
-            while (result.hasNext()) {
-                Record record = result.next();
-                Value conn = record.get("p");
-                res.add(objectMapper.convertValue(conn.asNode().asMap(), Object.class));
-            }
+            ConnectionNode connectionNode = Neo4jDriverUtility
+                    .convertResultToConnectionNode(result);
 
             return ResponseEntity.ok(res);
         }
