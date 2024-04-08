@@ -19,4 +19,8 @@ public enum DataType {
     public String getType() {
         return type;
     }
+
+    public boolean isPrimitive() {
+        return this.type.equals("string") || this.type.equals("number") || this.type.equals("integer") || this.type.equals("boolean");
+    }
 }

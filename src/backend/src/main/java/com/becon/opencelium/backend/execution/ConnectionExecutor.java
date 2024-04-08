@@ -5,7 +5,6 @@ import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
-import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
@@ -32,8 +31,11 @@ public class ConnectionExecutor {
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
 
-        // TODO: logger will be initialized after all necessary fields added to execution object
-        this.logger = new OcLogger<>(false, simpMessagingTemplate, new ExecutionLog(), JobExecutor.class);
+        this.logger = new OcLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), ConnectionExecutor.class);
+
+        if (!executionObj.getLogger().isDebugMode()) {
+            logger.disable();
+        }
     }
 
     public void start() {
@@ -51,8 +53,7 @@ public class ConnectionExecutor {
     }
 
     private RestTemplate getRestTemplate(Connector connector) {
-        // TODO: where to get timeout ?
-        int timeout = 5000;
+        int timeout = connector.getTimeout();
         RestTemplateBuilder restTemplateBuilder =
                 new RestTemplateBuilder(new RestCustomizer(proxy.getHost(), proxy.getPort(), proxy.getUser(), proxy.getPassword(), connector.isSslCert(), timeout));
         if (timeout > 0) {

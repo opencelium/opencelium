@@ -7,6 +7,7 @@ public class ConnectorEx {
     private int id;
     private String name;
     private boolean sslCert;
+    private int timeout;
     private boolean action;
     private String invoker;
     private List<OperationDTO> methods;
@@ -62,6 +63,14 @@ public class ConnectorEx {
 
     public void setSslCert(boolean sslCert) {
         this.sslCert = sslCert;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 
     public boolean isAction() {

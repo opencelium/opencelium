@@ -1,9 +1,11 @@
 package com.becon.opencelium.backend.resource.execution;
 
+import com.becon.opencelium.backend.enums.RelationalOperator;
+
 public class ConditionEx {
     private String left;
     private String right;
-    private String relationalOperator;
+    private RelationalOperator relationalOperator;
 
     public ConditionEx() {
     }
@@ -24,11 +26,11 @@ public class ConditionEx {
         this.right = right;
     }
 
-    public String getRelationalOperator() {
+    public RelationalOperator getRelationalOperator() {
         return relationalOperator;
     }
 
-    public void setRelationalOperator(String relationalOperator) {
+    public void setRelationalOperator(RelationalOperator relationalOperator) {
         this.relationalOperator = relationalOperator;
     }
 }

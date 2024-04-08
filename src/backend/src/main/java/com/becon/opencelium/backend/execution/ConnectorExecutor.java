@@ -2,12 +2,14 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.enums.LogType;
 import com.becon.opencelium.backend.enums.OperatorType;
+import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
 import com.becon.opencelium.backend.execution.oc721.Connector;
+import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
@@ -24,6 +26,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -43,8 +46,12 @@ public class ConnectorExecutor {
         this.direction = direction;
 
         this.executables = new ArrayList<>();
-        this.executables.addAll(connectorEx.getMethods());
-        this.executables.addAll(connectorEx.getOperators());
+        if (Objects.nonNull(connectorEx.getMethods())) {
+            this.executables.addAll(connectorEx.getMethods());
+        }
+        if (Objects.nonNull(connectorEx.getOperators())) {
+            this.executables.addAll(connectorEx.getOperators());
+        }
         this.executables.sort(getComparator());
 
         this.connector = Connector.fromEx(connectorEx);
@@ -113,15 +120,39 @@ public class ConnectorExecutor {
                     execute(headPointer + 1, tail, hasCircle, loopHead, loopTail);
                 }
             } else {
-                int length = executeForOperator(operator);
                 logger.logAndSend("=================================== LOOP ===================================");
+
+                Loop loop = Loop.fromEx(operator);
+                Object referencedList = executionManager.getValue(loop.getRef());
+                List<String> list = new ArrayList<>();
+
+                if (ObjectUtils.isEmpty(referencedList)) {
+                    // if list empty just do nothing
+                } else if (loop.getOperator() == RelationalOperator.FOR) {
+                    int length = ((List<Object>) referencedList).size();
+
+                    for (int i = 0; i < length; i++) {
+                        list.add(String.valueOf(i));
+                    }
+
+                } else if (loop.getOperator() == RelationalOperator.FOR_IN) {
+                    list = (List<String>) referencedList;
+                } else {
+                    String[] strs = ((String) referencedList).split(operator.getCondition().getRight());
+
+                    Collections.addAll(list, strs);
+                }
+
+                int length = list.size();
                 logger.logAndSend("LOOP_OPERATOR_RESULT: " + (length == 0 ? "EMPTY" : "NOT_EMPTY") + " -- index: " + index);
 
+                executionManager.getLoops().add(loop);
                 for (int i = 0; i < length; i++) {
-                    logger.logAndSend("Loop: " + operator.getCondition().getLeft() + " -------- index: " + i);
+                    logger.logAndSend("Loop: " + loop.getRef() + " -------- index: " + i);
 
-                    // add/update currently executing loops' data
-                    executionManager.getLoops().put(operator.getIterator(), String.valueOf(i));
+                    // update currently executing loops' data
+                    loop.setIndex(i);
+                    loop.setValue(list.get(i));
 
                     // if length !=0, then execute loop operators' body,
                     // there will be a circle if current run is not last one
@@ -129,8 +160,7 @@ public class ConnectorExecutor {
                 }
 
                 // remove executed loops' data
-                executionManager.getLoops().remove(operator.getIterator());
-
+                executionManager.getLoops().remove(loop);
             }
 
             // log after executing operator
@@ -200,14 +230,6 @@ public class ConnectorExecutor {
         return operator.apply(leftValue, rightValue);
     }
 
-    private int executeForOperator(OperatorEx operatorDTO) {
-        String leftValueReference = operatorDTO.getCondition().getLeft();
-
-        List<Object> loopingList = (List<Object>) executionManager.getValue(leftValueReference);
-
-        return ObjectUtils.isEmpty(loopingList) ? 0 : loopingList.size();
-    }
-
     private SchemaDTO resolveReferences(String ref) {
         Object value = executionManager.getValue(ref);
 
@@ -227,7 +249,7 @@ public class ConnectorExecutor {
     }
 
     private String[] getNextIndex(int lastExecuted, boolean hasCircle, int loopHead, int loopTail) {
-        String[] result = new String[2];
+        String[] result = {"null", "null"};
         Object next;
         if (hasCircle && lastExecuted == loopTail) {
             next = executables.get(loopHead + 1);
