@@ -188,10 +188,16 @@ public class BindingUtility {
         String name = fieldPaths.get(0);
         Map<String, Object> resultMap = new HashMap<>();
         for (Map.Entry<String, Object> entry : src.entrySet()) {
-            if (name.equals(entry.getKey())) { // object or primitive
+            if (name.equals(entry.getKey()) && fieldPaths.size() == 1) {// the last field
+                resultMap.put(entry.getKey(), putIdToBody(entry.getValue(), id));
+            } else if (name.equals(entry.getKey())) { // object or primitive
                 fieldPaths.remove(0);
                 resultMap.put(entry.getKey(), processJSON(entry.getValue(), fieldPaths, id, null));
             } else if (name.matches(entry.getKey() + "\\[.*]")) { //array
+                if (fieldPaths.size() == 1 && name.endsWith("[*]")) {
+                    resultMap.put(entry.getKey(), putIdToBody(entry.getValue(), id));
+                    continue;
+                }
                 fieldPaths.remove(0);
                 String index = name.substring(name.indexOf('[') + 1, name.indexOf(']'));
                 resultMap.put(entry.getKey(), processJSON(entry.getValue(), fieldPaths, id, index));
@@ -212,8 +218,8 @@ public class BindingUtility {
                 return doWithJsonBody(map, fieldPaths, id);
             }
         } else { // array
-            if (index.isEmpty()) {
-                //ex. param[];
+            if (index.isEmpty() || index.equals("*")) {
+                //ex. param[] or param[*];
                 //if a field to be bound is whole array then we needn't process it. Just bind id.
                 return putIdToBody(value, id);
             } else if (index.matches("[0-9]+")) {

@@ -20,7 +20,6 @@ import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
-import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
 import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
@@ -124,7 +123,7 @@ public class ConnectionServiceImp implements ConnectionService {
         //saving enhancements
         if (enhancements != null && !enhancements.isEmpty()) {
             enhancements.forEach(enhancement -> enhancement.setConnection(savedConnection));
-            enhancementService.saveAll(enhancements);
+            enhancements = enhancementService.saveAll(enhancements);
             for (int i = 0; i < connectionMng.getFieldBindings().size(); i++) {
                 connectionMng.getFieldBindings().get(i).setEnhancementId(enhancements.get(i).getId());
             }
@@ -227,7 +226,13 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteById(Long id) {
         Connection connection = getById(id);
         deleteSchedules(connection);
-        ConnectionMng deleted = connectionMngService.delete(id);
+        ConnectionMng deleted;
+        try {
+            deleted = connectionMngService.delete(id);
+        } catch (Exception e) {
+            connectionRepository.deleteById(id);
+            return;
+        }
         try {
             connectionRepository.deleteById(id);
         } catch (Exception e) {
@@ -250,7 +255,13 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteAndTrackIt(Long id) {
         Connection connection = getById(id);
         deleteSchedules(connection);
-        ConnectionMng deleted = connectionMngService.delete(id);
+        ConnectionMng deleted;
+        try {
+            deleted = connectionMngService.delete(id);
+        } catch (Exception e) {
+            connectionRepository.deleteById(id);
+            return;
+        }
         try {
             connectionRepository.deleteById(id);
             connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);

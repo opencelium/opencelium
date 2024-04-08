@@ -74,7 +74,7 @@ public class CategoryController {
 
     @Operation(summary = "Creates a category")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
+            @ApiResponse(responseCode = "201",
                     description = "Category has been successfully created",
                     content = @Content(schema = @Schema(implementation = CategoryDTO.class))),
             @ApiResponse(responseCode = "401",
@@ -91,10 +91,11 @@ public class CategoryController {
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .buildAndExpand().toUri();
-        return ResponseEntity.created(uri).body(categoryMapper.toDTO(categoryService.get(id)));
+        return ResponseEntity.created(uri)
+                .body(categoryMapper.toDTO(categoryService.get(id)));
     }
 
-    @Operation(summary = "Modifies a category by provided connection ID and accepting category data in request body.")
+    @Operation(summary = "Modifies a category by provided category ID and accepting category data in request body.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Category has been successfully modified",
