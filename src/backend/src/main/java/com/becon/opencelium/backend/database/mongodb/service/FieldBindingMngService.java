@@ -31,6 +31,7 @@ public interface FieldBindingMngService {
     void delete(FieldBindingMng fb);
 
     void deleteAll(List<FieldBindingMng> fieldBindings);
+    List<FieldBindingMng> getAllByConnectionId(Long connectionId);
 
     void doWithPatchedEnhancement(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails.PatchOperationDetail details);
 }

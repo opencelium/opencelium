@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import java.util.List;
 
 public interface ConnectionMngService {
+    boolean existsByConnectionId(Long id);
     ConnectionMng save(ConnectionMng connectionMng);
     void updateAndBind(ConnectionMng old, ConnectionMng connectionMng);
     ConnectionMng saveDirectly(ConnectionMng connectionMng);

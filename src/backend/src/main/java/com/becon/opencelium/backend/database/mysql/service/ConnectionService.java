@@ -66,4 +66,6 @@ public interface ConnectionService {
     List<Connection> getAllByCategoryId(Integer categoryId);
 
     List<ConnectionDTO> getAllFullConnection();
+
+    List<Connection> findAllNotCompleted();
 }

@@ -47,6 +47,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
+    public boolean existsByConnectionId(Long id) {
+        return connectionMngRepository.existsByConnectionId(id);
+    }
+
+    @Override
     public ConnectionMng save(ConnectionMng connectionMng) {
         if (connectionMng == null) return null;
         try {

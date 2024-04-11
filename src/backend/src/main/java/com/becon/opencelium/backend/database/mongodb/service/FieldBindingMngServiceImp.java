@@ -89,6 +89,17 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         fieldBindingRepository.deleteAll(fieldBindings);
     }
 
+    public List<FieldBindingMng> getAllByConnectionId(Long connectionId) {
+        List<FieldBindingMng> fieldBindingMngs = new ArrayList<>();
+        List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
+        if (enhancements!=null) {
+            for (Enhancement enhancement : enhancements) {
+                fieldBindingMngs.add(enhancementService.toFieldBinding(enhancement));
+            }
+        }
+        return fieldBindingMngs;
+    }
+
     @Override
     public void doWithPatchedEnhancement(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails.PatchOperationDetail opDetail) {
         if (opDetail.isEnhancementAdded()) {

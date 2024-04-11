@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.resource.update_assistant.migrate;
+package com.becon.opencelium.backend.resource.update_assistant;
 
 import jakarta.annotation.Resource;
 

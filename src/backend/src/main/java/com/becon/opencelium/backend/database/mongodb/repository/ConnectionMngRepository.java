@@ -15,4 +15,6 @@ public interface ConnectionMngRepository extends MongoRepository<ConnectionMng,S
     void deleteById(String id);
 
     List<ConnectionMng> findAllByConnectionIdIn(List<Long> ids);
+
+    boolean existsByConnectionId(Long id);
 }

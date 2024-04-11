@@ -16,21 +16,32 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.repository.EnhancementRepository;
+import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EnhancementServiceImp implements EnhancementService {
 
     private final EnhancementRepository enhancementRepository;
+    private final Mapper<Enhancement, EnhancementDTO> enhancementMapper;
+    private final Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper;
 
-    public EnhancementServiceImp(EnhancementRepository enhancementRepository) {
+    public EnhancementServiceImp(EnhancementRepository enhancementRepository, Mapper<Enhancement, EnhancementDTO> enhancementMapper, Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper) {
         this.enhancementRepository = enhancementRepository;
+        this.enhancementMapper = enhancementMapper;
+        this.enhancementMngMapper = enhancementMngMapper;
     }
 
     @Override
@@ -72,11 +83,6 @@ public class EnhancementServiceImp implements EnhancementService {
     }
 
     @Override
-    public FieldBindingDTO toFieldBindingResource(Enhancement enhancement) {
-        return null;
-    }
-
-    @Override
     public boolean existById(Integer id) {
         return enhancementRepository.existsById(id);
     }
@@ -84,6 +90,26 @@ public class EnhancementServiceImp implements EnhancementService {
     @Override
     public void deleteById(Integer id) {
         enhancementRepository.deleteById(id);
+    }
+
+    public FieldBindingMng toFieldBinding(Enhancement enhancement) {
+        FieldBindingMng fieldBindingMng = new FieldBindingMng();
+        EnhancementMng enhancementMng = enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancement));
+        fieldBindingMng.setEnhancementId(enhancement.getId());
+        List<LinkedFieldMng> toField = Arrays.stream(enhancement.getArgs().split(";"))
+                .filter(f -> f.contains("RESULT_VAR")).map(f -> (f.split("="))[1].trim())
+                .map(f -> toLinkedFieldResource(f)).collect(Collectors.toList());
+        List<LinkedFieldMng> fromField = Arrays.stream(enhancement.getArgs().split(";"))
+                .filter(f -> !f.contains("RESULT_VAR")).map(f -> (f.split("="))[1].trim())
+                .map(f -> toLinkedFieldResource(f)).collect(Collectors.toList());
+        fieldBindingMng.setEnhancement(enhancementMng);
+        fieldBindingMng.setFrom(fromField);
+        fieldBindingMng.setTo(toField);
+        return fieldBindingMng;
+    }
+
+    private LinkedFieldMng toLinkedFieldResource(String value) {
+        return null;
     }
 
 }

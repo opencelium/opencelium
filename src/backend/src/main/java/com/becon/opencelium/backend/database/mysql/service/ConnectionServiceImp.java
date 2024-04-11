@@ -370,6 +370,18 @@ public class ConnectionServiceImp implements ConnectionService {
         return res;
     }
 
+    @Override
+    public List<Connection> findAllNotCompleted() {
+        List<Connection> all = findAll();
+        List<Connection> res = new ArrayList<>();
+        for (Connection connection : all) {
+            if(!connectionMngService.existsByConnectionId(connection.getId())){
+                res.add(connection);
+            }
+        }
+        return res;
+    }
+
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods

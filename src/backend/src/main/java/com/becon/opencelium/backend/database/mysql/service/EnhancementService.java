@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
@@ -31,7 +32,7 @@ public interface EnhancementService {
     Enhancement getById(Integer id);
     Optional<Enhancement> findById(Integer enhId);
     void deleteAll(List<Integer> ids);
-    FieldBindingDTO toFieldBindingResource(Enhancement enhancement);
+    FieldBindingMng toFieldBinding(Enhancement enhancement);
 
     boolean existById(Integer id);
 
