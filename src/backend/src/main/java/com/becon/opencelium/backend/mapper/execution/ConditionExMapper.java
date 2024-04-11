@@ -16,6 +16,7 @@ public class ConditionExMapper {
         } else {
             ro = RelationalOperator.fromName(dto.getRelationalOperator());
         }
+
         StatementMng ls = dto.getLeftStatement();
         StatementMng rs = dto.getRightStatement();
         switch (ro) {
@@ -38,7 +39,8 @@ public class ConditionExMapper {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
             }
         }
-        condition.setRelationalOperator(ro.name());
+
+        condition.setRelationalOperator(ro);
         return condition;
     }
 }

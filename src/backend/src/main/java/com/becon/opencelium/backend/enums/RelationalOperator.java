@@ -34,6 +34,7 @@ public enum RelationalOperator {
     RelationalOperator(String name) {
         this.name = name;
     }
+
     public static RelationalOperator fromName(String name) {
         if (name != null) {
             for (RelationalOperator g : RelationalOperator.values()) {

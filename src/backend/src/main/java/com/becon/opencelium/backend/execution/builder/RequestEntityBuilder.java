@@ -56,7 +56,7 @@ public class RequestEntityBuilder {
         return this;
     }
 
-    public RequestEntity<?> createRequest() {
+    public RequestEntity<String> createRequest() {
         URI url = Objects.nonNull(URIBuilder) ? URIBuilder.build(operation, references) : defaultURLBuilder();
         HttpMethod method = defaultMethod();
         HttpHeaders headers = Objects.nonNull(headersBuilder) ? headersBuilder.build(operation, references) : defaultHeadersBuilder();
@@ -66,6 +66,10 @@ public class RequestEntityBuilder {
     }
 
     private HttpMethod defaultMethod() {
+        if (operation.getHttpMethod() == null) {
+            throw new RuntimeException("Http method should be supplied");
+        }
+
         return operation.getHttpMethod();
     }
 
@@ -120,8 +124,8 @@ public class RequestEntityBuilder {
     private String defaultRequestEntityBuilder() {
         RequestBodyDTO body = operation.getRequestBody();
 
-        if (ObjectUtils.isEmpty(body)) {
-            return "";
+        if (body == null) {
+            return null;
         }
 
         // create the copy of current 'schema'
@@ -131,19 +135,23 @@ public class RequestEntityBuilder {
         replaceRefs(copiedSchema);
 
         MediaType mediaType = body.getContent();
-        if (MediaType.APPLICATION_JSON.equals(mediaType)) {
-            return SchemaDTOUtil.toJSON(copiedSchema);
+        String requestBody;
+        if (MediaType.TEXT_PLAIN.isCompatibleWith(mediaType)) {
+            requestBody = SchemaDTOUtil.toText(copiedSchema);
+        } else if (MediaType.APPLICATION_XML.isCompatibleWith(mediaType)) {
+            requestBody = SchemaDTOUtil.toXML(copiedSchema);
+        } else {
+            requestBody = SchemaDTOUtil.toJSON(copiedSchema);
         }
 
-        if (MediaType.APPLICATION_XML.equals(mediaType)) {
-            return SchemaDTOUtil.toXML(copiedSchema);
-        }
-
-        // for other types just return schemas' value as text
-        return SchemaDTOUtil.toText(copiedSchema);
+        return requestBody;
     }
 
     private void replaceRefs(SchemaDTO schema) {
+        if (schema == null) {
+            return;
+        }
+
         String value = schema.getValue();
 
         if (ReferenceExtractor.isReference(value)) {
@@ -151,14 +159,33 @@ public class RequestEntityBuilder {
 
             if (referencedSchema == null) {
                 schema.setValue(null);
-            } else {
-                // TODO: if schema.type == UNDEFINED then use following code otherwise do mapping to required type
-                // if schema is referenced then correct the type and fields
+            } else if (referencedSchema.getType() == DataType.UNDEFINED || schema.getType() == referencedSchema.getType()) {
+                // if type of schema is UNDEFINED or the same as referencedSchema then
+                // replace all values of this schema with referenced schema
                 schema.setType(referencedSchema.getType());
                 schema.setValue(referencedSchema.getValue());
                 schema.setItems(referencedSchema.getItems());
                 schema.setProperties(referencedSchema.getProperties());
                 schema.setXml(referencedSchema.getXml());
+            } else {
+                // schema and referencedSchema both not null and have different type
+                DataType requiredType = schema.getType();
+                DataType availableType = referencedSchema.getType();
+                // do some cleanup to the schema
+                schema.setValue(null);
+                schema.setItems(null);
+                schema.setXml(null);
+                schema.setProperties(null);
+
+                if (requiredType == DataType.ARRAY) {
+                    schema.setItems(List.of(referencedSchema));
+                } else if (requiredType == DataType.OBJECT) {
+                    schema.setProperties(Map.of(referencedSchema.getValue(), referencedSchema));
+                } else if (availableType.isPrimitive()){
+                    schema.setValue(referencedSchema.getValue());
+                } else {
+                    throw new RuntimeException(String.format("SchemaDTO cannot be converted from %s type to %s type", availableType, requiredType));
+                }
             }
 
             // referenced schema does not contain other reference, end recursion
@@ -166,13 +193,13 @@ public class RequestEntityBuilder {
         }
 
         List<SchemaDTO> items = schema.getItems();
-        if (schema.getType() == DataType.ARRAY && !CollectionUtils.isEmpty(items)) {
+        if (schema.getType() == DataType.ARRAY && items != null) {
             // loop through all 'items' to replace referenced ones
             items.forEach(this::replaceRefs);
         }
 
         Map<String, SchemaDTO> properties = schema.getProperties();
-        if (schema.getType() == DataType.OBJECT && !CollectionUtils.isEmpty(properties)) {
+        if (schema.getType() == DataType.OBJECT && properties != null) {
             // loop through all 'properties' to replace referenced ones
             properties.forEach((name, schemaDTO) -> replaceRefs(schemaDTO));
         }
@@ -186,7 +213,9 @@ public class RequestEntityBuilder {
 
         // filters parameter by location
         return operation.getParameters().stream()
+                .filter(Objects::nonNull)
                 .filter(p -> p.getIn() == location)
+                .filter(p -> p.getSchema() != null)
                 .collect(Collectors.toList());
     }
 }

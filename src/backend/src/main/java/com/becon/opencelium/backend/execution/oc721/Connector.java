@@ -9,6 +9,7 @@ public class Connector {
     private String name;
     private String invoker;
     private boolean sslCert;
+    private int timeout;
     private boolean isActive;
     private Map<String, String> requiredData;
 
@@ -22,6 +23,7 @@ public class Connector {
         result.setName(connectorEx.getName());
         result.setInvoker(connectorEx.getInvoker());
         result.setSslCert(connectorEx.isSslCert());
+        result.setTimeout(connectorEx.getTimeout());
         result.setActive(connectorEx.isAction());
         result.setRequiredData(connectorEx.getRequiredData());
 
@@ -54,6 +56,14 @@ public class Connector {
 
     public void setSslCert(boolean sslCert) {
         this.sslCert = sslCert;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 
     public boolean isActive() {

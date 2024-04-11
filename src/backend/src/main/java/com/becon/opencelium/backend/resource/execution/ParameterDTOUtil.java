@@ -14,9 +14,7 @@ public class ParameterDTOUtil {
 
     public static ParameterDTO copy(ParameterDTO parameter) {
         ParameterDTO result = new ParameterDTO();
-        String name = parameter.getName() == null ? null : new String(parameter.getName());
-        result.setName(name);
-
+        result.setName(parameter.getName());
         result.setIn(parameter.getIn());
         result.setStyle(parameter.getStyle());
         result.setExplode(parameter.isExplode());
@@ -28,8 +26,10 @@ public class ParameterDTOUtil {
 
     // conversions comply with oas v3.1.0
     public static String toString(ParameterDTO parameter) {
-        if (parameter == null || parameter.getStyle() == null) {
-            throw new IllegalStateException("parameter and parameter style must not be null");
+        if (parameter == null) {
+            return null;
+        } else if (parameter.getStyle() == null) {
+            throw new IllegalStateException("Param style must be supplied to ParameterDTO");
         }
 
         return switch (parameter.getStyle()) {
