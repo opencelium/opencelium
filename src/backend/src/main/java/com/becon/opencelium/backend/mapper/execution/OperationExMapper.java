@@ -280,10 +280,202 @@ public class OperationExMapper {
         for (Map.Entry<String, Object> entry : fields.entrySet()) {
             LinkedList<String> hierarchy = new LinkedList<>();
             hierarchy.add(entry.getKey());
-            props.put(entry.getKey(), getSchemaFromObject(hierarchy, entry.getValue(), connectionId, methodName));
+            if (body.getFormat().equals("json")) {
+                props.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), connectionId, methodName));
+            } else if (body.getFormat().equals("xml")) {
+                String name = entry.getKey();
+                if (name.contains(":")) {
+                    name = name.split(":")[1];
+                }
+                props.put(name, getSchemaFromObjectXML(hierarchy, entry.getValue(), connectionId, methodName));
+            }
         }
+        schemaDTO.setXml(new XmlObjectDTO());
         schemaDTO.setProperties(props);
         return schemaDTO;
+    }
+
+    private static final String OC_VALUE = "__oc__value";
+    private static final String OC_ATTRIBUTES = "__oc__attributes";
+
+    private void setXML(SchemaDTO currSchema, Map<String, String> map) {
+        /*
+            name is not null when it is an attribute. In other cases it will be ignored
+            namespace is not null when it is an attribute and prefix!=null
+            prefix will be detected from field's name.
+            ex. If field's name is 'amp:amp_ap_list', then prefix = amp, schema's name = amp_ap_list and namespace also must be given
+            attribute: true if and only if it is attribute
+            wrapped: false(always?)
+         */
+
+        /*
+        "amp:amp_ap_detail": {
+               "__oc__attributes": {
+                     "xmlns:amp": "http://www.airwave.com",
+                     "id":"123"
+                },
+                "ap":"aaa"
+         }
+         ---------------------------------------------
+         amp_ap_detail:
+            type: object
+            properties:
+                ap:
+                    type: string
+                    value: aaa
+                id:
+                    type: string
+                    value: 123
+                    xml:
+                        attribute: true
+            xml:
+                namespace: http://www.airwave.com
+                prefix: amp
+         */
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (entry.getKey().contains("xmlns:")) {
+                XmlObjectDTO xmlObjectDTO = new XmlObjectDTO();
+                String name = entry.getKey().split(":")[1];
+                xmlObjectDTO.setPrefix(name);
+                xmlObjectDTO.setNamespace(entry.getValue());
+                currSchema.setXml(xmlObjectDTO);
+            } else {
+                SchemaDTO schemaDTO = new SchemaDTO();
+                currSchema.getProperties().put(entry.getKey(), schemaDTO);
+                XmlObjectDTO xmlObjectDTO = new XmlObjectDTO();
+                xmlObjectDTO.setAttribute(true);
+                schemaDTO.setXml(xmlObjectDTO);
+                schemaDTO.setValue(entry.getValue());
+                xmlObjectDTO.setName(entry.getKey());
+            }
+        }
+        if (currSchema.getXml() == null) {
+            currSchema.setXml(new XmlObjectDTO());
+        }
+    }
+
+    private SchemaDTO getSchemaFromObjectXML(LinkedList<String> hierarchy, Object value, Long connectionId, String methodName) {
+        SchemaDTO schemaDTO = new SchemaDTO();
+        DataType type = getType(value);
+        if (value == null || type == null)
+            return null;
+        if (type == DataType.OBJECT) {
+            Map<String, Object> map = (Map<String, Object>) value;
+            if (map.size() == 2 && map.containsKey(OC_VALUE) && map.containsKey(OC_ATTRIBUTES)) {
+                String strVal = String.valueOf(map.get(OC_VALUE));
+                schemaDTO.setValue(strVal);
+                if (map.get(OC_VALUE) instanceof Boolean) {
+                    schemaDTO.setType(DataType.BOOLEAN);
+                } else if (map.get(OC_VALUE) instanceof Integer) {
+                    schemaDTO.setType(DataType.INTEGER);
+                } else if (map.get(OC_VALUE) instanceof Number) {
+                    schemaDTO.setType(DataType.NUMBER);
+                } else {
+                    hierarchy.add(OC_VALUE);
+                    schemaDTO.setType(findTypeOfReference(strVal, connectionId, methodName, hierarchy));
+                    hierarchy.remove(OC_VALUE);
+                }
+                Object attr = map.get(OC_ATTRIBUTES);
+                if (attr != null && !attr.equals("")) {
+                    Map<String, String> attrs = (Map<String, String>) attr;
+                    schemaDTO.setProperties(new HashMap<>());
+                    setXML(schemaDTO, attrs);
+                } else {
+                    schemaDTO.setXml(new XmlObjectDTO());
+                }
+            } else {
+                schemaDTO.setType(DataType.OBJECT);
+                Map<String, SchemaDTO> fields = new LinkedHashMap<>();
+                schemaDTO.setProperties(fields);
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    if (entry.getKey().equals(OC_ATTRIBUTES)) {
+                        if (entry.getValue() != null && !entry.getValue().equals("")) {
+                            Map<String, String> attrs = (Map<String, String>) entry.getValue();
+                            setXML(schemaDTO, attrs);
+                        } else {
+                            schemaDTO.setXml(new XmlObjectDTO());
+                        }
+                    } else {
+                        String name = entry.getKey();
+                        if (name.contains(":")) {
+                            name = name.split(":")[1];
+                        }
+                        hierarchy.add(entry.getKey());
+                        fields.put(name, getSchemaFromObjectXML(hierarchy, entry.getValue(), connectionId, methodName));
+                    }
+                }
+            }
+        } else if (type == DataType.ARRAY) {
+            List<?> items = (List<?>) value;
+            schemaDTO.setType(DataType.ARRAY);
+            List<SchemaDTO> elements = new ArrayList<>();
+            schemaDTO.setItems(elements);
+            for (int i = 0; i < items.size(); i++) {
+                hierarchy.add("[" + i + "]");
+                elements.add(getSchemaFromObjectXML(hierarchy, items.get(i), connectionId, methodName));
+            }
+            XmlObjectDTO xod = new XmlObjectDTO();
+            schemaDTO.setXml(xod);
+        }
+        hierarchy.removeLast();
+        return schemaDTO;
+    }
+
+    @SuppressWarnings("unchecked")
+    private SchemaDTO getSchemaFromObjectJSON(LinkedList<String> hierarchy, Object obj, Long connectionId, String methodName) {
+        SchemaDTO schemaDTO = new SchemaDTO();
+        DataType type = getType(obj);
+        if (obj == null || type == null)
+            return null;
+        if (type == DataType.STRING) {
+            String value = String.valueOf(obj);
+            schemaDTO.setType(findTypeOfReference(value, connectionId, methodName, hierarchy));
+            schemaDTO.setValue(value);
+        } else if (type != DataType.OBJECT && type != DataType.ARRAY) {
+            schemaDTO.setType(type);
+            schemaDTO.setValue(String.valueOf(obj));
+        } else if (obj instanceof List<?> items) {
+            schemaDTO.setType(DataType.ARRAY);
+            List<SchemaDTO> elements = new ArrayList<>();
+            for (int i = 0; i < items.size(); i++) {
+                hierarchy.add("[" + i + "]");
+                elements.add(getSchemaFromObjectJSON(hierarchy, items.get(i), connectionId, methodName));
+            }
+            schemaDTO.setItems(elements);
+        } else {
+            Map<String, ?> map = (Map<String, ?>) obj;
+            schemaDTO.setType(DataType.OBJECT);
+            Map<String, SchemaDTO> fields = new LinkedHashMap<>();
+            for (Map.Entry<String, ?> entry : map.entrySet()) {
+                hierarchy.add(entry.getKey());
+                fields.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), connectionId, methodName));
+            }
+            schemaDTO.setProperties(fields);
+        }
+        hierarchy.removeLast();
+        return schemaDTO;
+    }
+
+    private DataType findTypeOfReference(String value, Long connectionId, String methodName, LinkedList<String> hierarchy) {
+        if (value.matches(RegExpression.requiredData)
+                || value.matches(RegExpression.enhancement)
+                || value.matches(RegExpression.directRef)) {
+
+            ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+            Connector fromConnector = connectorService.getById(connectionMng.getFromConnector().getConnectorId());
+            Connector toConnector = connectorService.getById(connectionMng.getToConnector().getConnectorId());
+
+            DataType dataType = invokerService.findFieldType(fromConnector.getInvoker(), methodName, (LinkedList<String>) hierarchy.clone());
+            if (dataType == null) {
+                dataType = invokerService.findFieldType(toConnector.getInvoker(), methodName, (LinkedList<String>) hierarchy.clone());
+                if (dataType == null) {
+                    throw new RuntimeException("METHOD_NOT_FOUND_IN_INVOKER");
+                }
+            }
+            return dataType;
+        } else {
+            return DataType.STRING;
+        }
     }
 
     private SchemaDTO getSchema(Node node) {
@@ -317,59 +509,6 @@ public class OperationExMapper {
                 schemaDTO.getProperties().put(field.getKey(), getSchema(field));
             }
         }
-        return schemaDTO;
-    }
-
-    @SuppressWarnings("unchecked")
-    private SchemaDTO getSchemaFromObject(LinkedList<String> hierarchy, Object obj, Long connectionId, String methodName) {
-        SchemaDTO schemaDTO = new SchemaDTO();
-        DataType type = getType(obj);
-        if (obj == null || type == null)
-            return null;
-        if (type == DataType.STRING) {
-            String value = String.valueOf(obj);
-            if (value.matches(RegExpression.requiredData)
-                    || value.matches(RegExpression.enhancement)
-                    || value.matches(RegExpression.directRef)) {
-
-                ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
-                Connector fromConnector = connectorService.getById(connectionMng.getFromConnector().getConnectorId());
-                Connector toConnector = connectorService.getById(connectionMng.getToConnector().getConnectorId());
-
-                DataType dataType = invokerService.findFieldType(fromConnector.getInvoker(), methodName, (LinkedList<String>) hierarchy.clone());
-                if (dataType == null) {
-                    dataType = invokerService.findFieldType(toConnector.getInvoker(), methodName, (LinkedList<String>) hierarchy.clone());
-                    if (dataType == null) {
-                        throw new RuntimeException("METHOD_NOT_FOUND_IN_INVOKER");
-                    }
-                }
-                schemaDTO.setType(dataType);
-            } else {
-                schemaDTO.setType(DataType.STRING);
-            }
-            schemaDTO.setValue(value);
-        } else if (type != DataType.OBJECT & type != DataType.ARRAY) {
-            schemaDTO.setType(type);
-            schemaDTO.setValue(String.valueOf(obj));
-        } else if (obj instanceof List<?> items) {
-            schemaDTO.setType(DataType.ARRAY);
-            List<SchemaDTO> elements = new ArrayList<>();
-            for (int i = 0; i < items.size(); i++) {
-                hierarchy.add("[" + i + "]");
-                elements.add(getSchemaFromObject(hierarchy, items.get(i), connectionId, methodName));
-            }
-            schemaDTO.setItems(elements);
-        } else {
-            Map<String, ?> map = (Map<String, ?>) obj;
-            schemaDTO.setType(DataType.OBJECT);
-            Map<String, SchemaDTO> fields = new LinkedHashMap<>();
-            for (Map.Entry<String, ?> entry : map.entrySet()) {
-                hierarchy.add(entry.getKey());
-                fields.put(entry.getKey(), getSchemaFromObject(hierarchy, entry.getValue(), connectionId, methodName));
-            }
-            schemaDTO.setProperties(fields);
-        }
-        hierarchy.removeLast();
         return schemaDTO;
     }
 
