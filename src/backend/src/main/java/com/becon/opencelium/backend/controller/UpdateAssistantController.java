@@ -108,6 +108,7 @@ public class UpdateAssistantController {
     private ConnectorServiceImp connectorServiceImp;
     @Autowired
     private FieldBindingMngServiceImp fieldBindingMngServiceImp;
+    @Autowired
     private ConnectionMngServiceImp connectionMngServiceImp;
 
     @GetMapping("/all")
@@ -471,6 +472,7 @@ public class UpdateAssistantController {
             driver.verifyConnectivity();
             List<Connection> connections = connectionServiceImp.findAllNotCompleted();
             for (Connection connection : connections) {
+                //building connection's data from mysql
                 ConnectionMng connectionMng = new ConnectionMng();
                 connectionMng.setConnectionId(connection.getId());
                 Connector from = connectorServiceImp.getById(connection.getFromConnector());
@@ -487,9 +489,12 @@ public class UpdateAssistantController {
                 String cypherQuery = "MATCH p=((:Connection{connectionId:%d})-[*]->()) return p".formatted(connection.getId());
                 Result result = session.run(cypherQuery);
 
-                Neo4jDriverUtility
-                        .convertResultToConnection(result, connectionMng);
+                Neo4jDriverUtility.convertResultToConnection(result, connectionMng);
+
+                //setting fieldBindings
                 connectionMng.setFieldBindings(fieldBindingMngServiceImp.getAllByConnectionId(connection.getId()));
+
+                //saving to mongodb
                 connectionMngServiceImp.save(connectionMng);
             }
 

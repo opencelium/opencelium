@@ -7,23 +7,21 @@ import org.neo4j.driver.types.Node;
 import org.neo4j.driver.types.Path;
 import org.neo4j.driver.types.Relationship;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class Neo4jDriverUtility {
 
     public static void convertResultToConnection(final Result result, ConnectionMng connectionMng) {
-        List<Record> recordsForFromConnector = new ArrayList<>();//each of them has at least 3 nodes
-        List<Record> recordsForToConnector = new ArrayList<>(); //each of them has at least 3 nodes
+        //Each records' structure : 0 - Connection, 1 - Connector, 2 - Method or Statement, ...
+        List<Record> recordsForFromConnector = new ArrayList<>();
+        List<Record> recordsForToConnector = new ArrayList<>();
 
         while (result.hasNext()) {
             Record record = result.next();
             Path connectionPath = record.get("p").asPath();
             List<Relationship> relationships = (List<Relationship>) connectionPath.relationships();
-            if (relationships.size() < 2) {//only connection and connector
+            if (relationships.size() < 2 || relationships.get(relationships.size() - 1).hasType("linked")) {
                 continue;
             }
             if (relationships.get(0).hasType("from_connector")) {//is it from connector?
@@ -32,18 +30,16 @@ public class Neo4jDriverUtility {
                 recordsForToConnector.add(record);
             }
         }
-        fillConnector(recordsForFromConnector, connectionMng.getFromConnector());
-        fillConnector(recordsForToConnector, connectionMng.getToConnector());
+        setMethodAndOperators(recordsForFromConnector, connectionMng.getFromConnector());
+        setMethodAndOperators(recordsForToConnector, connectionMng.getToConnector());
     }
 
-    private static void fillConnector(List<Record> records, ConnectorMng connectorMng) {
-        List<MethodMng> methods = new ArrayList<>();
-        List<OperatorMng> operators = new ArrayList<>();
-        //x - an index of method or operator node
-        //y - indicates a record's index that we have to start searching
-        crawlMethodAndOperators(methods, operators, 0, records);
-        connectorMng.setMethods(methods);
-        connectorMng.setOperators(operators);
+    private static void setMethodAndOperators(List<Record> records, ConnectorMng connectorMng) {
+        connectorMng.setMethods(new ArrayList<>());
+        connectorMng.setOperators(new ArrayList<>());
+
+        //adds all methods and operators to the methods and the operators lists
+        crawlMethodAndOperators(connectorMng.getMethods(), connectorMng.getOperators(), 0, records);
     }
 
     private static int crawlMethodAndOperators(List<MethodMng> methods, List<OperatorMng> operators, int y, List<Record> records) {
@@ -56,31 +52,44 @@ public class Neo4jDriverUtility {
                 MethodMng method = mapMethod(node.asMap());
                 methods.add(method);
 
-                Node nextNode = records.get(i + 1).get("p").asPath().end();
+                if (i + 1 >= records.size()) {
+                    return i;
+                }
+                Node lastNodeOfNextRecord = records.get(i + 1).get("p").asPath().end();
 
-                if (nextNode.hasLabel("Method") || nextNode.hasLabel("Statement")) {
+                if (lastNodeOfNextRecord.hasLabel("Method") || lastNodeOfNextRecord.hasLabel("Statement")) {
                     i = crawlMethodAndOperators(methods, operators, i + 1, records);
-                } else if (nextNode.hasLabel("Request")) {
+                    //i - an index of the last visited record
+                } else if (lastNodeOfNextRecord.hasLabel("Request")) {
                     i = getRequest(method, i + 1, records);
+                    //i - an index of the last visited record
                     i = getResponse(method, i + 1, records);
-                } else if (nextNode.hasLabel("Response")) {
+                    //i - an index of the last visited record
+                } else if (lastNodeOfNextRecord.hasLabel("Response")) {
                     i = getResponse(method, i + 1, records);
+                    //i - an index of the last visited record
                     i = getRequest(method, i + 1, records);
+                    //i - an index of the last visited record
                 }
             } else if (node.hasLabel("Statement")) {
-                OperatorMng operator = mapStatement(records.get(i).get("p").asPath().end().asMap());
+                OperatorMng operator = mapStatement(node.asMap());
                 operators.add(operator);
 
-                Node nextNode = records.get(i).get("p").asPath().end();
+                if (i + 1 >= records.size()) {
+                    return i;
+                }
+                Node lastNodeOfNextRecord = records.get(i + 1).get("p").asPath().end();
 
-                if (nextNode.hasLabel("Method") || nextNode.hasLabel("Statement")) {
+                if (lastNodeOfNextRecord.hasLabel("Method") || lastNodeOfNextRecord.hasLabel("Statement")) {
                     i = crawlMethodAndOperators(methods, operators, i + 1, records);
-                } else if (nextNode.hasLabel("Variable")) {
+                    //i - an index of the last visited record
+                } else if (lastNodeOfNextRecord.hasLabel("Variable")) {
                     if (relationships.get(relationships.size() - 1).hasType("left")) {
                         completeOperator(operator.getCondition(), records.get(i + 1), "left");
                     } else {
                         completeOperator(operator.getCondition(), records.get(i + 1), "right");
                     }
+                    //Variable records will be only in one record. So the last visited index is i+1
                     i++;
                 }
             }
@@ -136,13 +145,11 @@ public class Neo4jDriverUtility {
         resultMng.setBody(new BodyMng());
         if (name.equals("success")) {
             responseMng.setSuccess(resultMng);
-            y = getBody(resultMng.getBody(), y + 1, records);
-            return getResult(responseMng, y + 1, records);
         } else {
             responseMng.setFail(resultMng);
-            y = getBody(resultMng.getBody(), y + 1, records);
-            return getResult(responseMng, y + 1, records);
         }
+        y = getBody(resultMng.getBody(), y + 1, records);
+        return getResult(responseMng, y + 1, records);
     }
 
     private static int getHeader(Map<String, String> header, int y, List<Record> records) {
@@ -163,7 +170,6 @@ public class Neo4jDriverUtility {
         return records.size() - 1;
     }
 
-    @SuppressWarnings("unchecked")
     private static int getBody(BodyMng bodyMng, int y, List<Record> records) {
         Path path = records.get(y).get("p").asPath();
         Node node = path.end();
@@ -177,11 +183,66 @@ public class Neo4jDriverUtility {
         bodyMng.setType(type);
         bodyMng.setFormat(format);
         bodyMng.setFields(new HashMap<>());
-        return getFields(bodyMng.getFields(), records, y+1);
+        return getFields(bodyMng.getFields(), records, y + 1, 1);
     }
 
-    private static int getFields(Object object, List<Record> records, int y) {
-        return 0;
+    private static int getFields(Map<String, Object> fields, List<Record> records, int y, int level) {
+        for (int i = y; i < records.size(); i++) {
+            Path path = records.get(i).get("p").asPath();
+            Node node = path.end();
+            int currLevel = findLevelOfField(path);
+            int nextLevel = findLevelOfField(records.get(i + 1).get("p").asPath());
+            if (level == 0 || !node.hasLabel("Field") || currLevel != level) {
+                return i - 1;
+            }
+            String name = (String) node.asMap().get("name");
+            String type = (String) node.asMap().get("type");
+            switch (type) {
+                case "object" -> {
+                    Map<String, Object> map = new HashMap<>();
+                    fields.put(name, map);
+                    i = getFields(map, records, i + 1, nextLevel);
+                }
+                case "array" -> {
+                    Object value = node.asMap().getOrDefault("value", null);
+                    if (value != null && value.equals("")) {
+                        fields.put(name, new ArrayList<>());
+                        i = getFields(fields, records, i + 1, nextLevel);
+                    } else {
+                        List<Map<String, Object>> list = new ArrayList<>();
+                        list.add(new HashMap<>());
+                        fields.put(name, list);
+                        i = getFields(list.get(0), records, i + 1, nextLevel);
+                    }
+                }
+                default -> { //string, integer, boolean
+                    Object value = node.asMap().get("value");
+                    if (value instanceof String str) {
+                        fields.put(name, str);
+                    } else if (value instanceof Boolean b) {
+                        fields.put(name, b);
+                    } else if (value instanceof Integer in) {
+                        fields.put(name, in);
+                    } else {
+                        fields.put(name, value);
+                    }
+                    i = getFields(fields, records, i + 1, nextLevel);
+                }
+            }
+            y = i;
+        }
+        return y;
+    }
+
+    private static int findLevelOfField(Path path) {
+        Iterable<Relationship> relationships = path.relationships();
+        int count = 0;
+        for (Relationship r : relationships) {
+            if (r.hasType("has_field")) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private static void completeOperator(ConditionMng conditionMng, Record record, String side) {
@@ -213,7 +274,7 @@ public class Neo4jDriverUtility {
         String name = (String) fields.get("name");
         String index = (String) fields.get("index");
         String label = (String) fields.get("label");
-        int aggregatorId = (Integer) fields.get("aggregatorId");
+        int aggregatorId = (Integer) fields.getOrDefault("aggregatorId", 0);
         MethodMng methodMng = new MethodMng();
         methodMng.setColor(color);
         methodMng.setName(name);
@@ -234,21 +295,5 @@ public class Neo4jDriverUtility {
         statementMng.setType(type);
         statementMng.setRightPropertyValue(rightPropertyValue);
         return statementMng;
-    }
-
-    private static class Wrap {
-        public Wrap(int back) {
-            this.back = back;
-        }
-
-        private int back;
-
-        public int getBack() {
-            return back;
-        }
-
-        public void setBack(int back) {
-            this.back = back;
-        }
     }
 }

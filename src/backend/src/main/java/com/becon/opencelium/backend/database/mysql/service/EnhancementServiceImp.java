@@ -24,6 +24,7 @@ import com.becon.opencelium.backend.database.mysql.repository.EnhancementReposit
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
+import com.becon.opencelium.backend.utility.PathUtility;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -67,7 +68,7 @@ public class EnhancementServiceImp implements EnhancementService {
     @Override
     public Enhancement getById(Integer id) {
         return enhancementRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("ENHANCEMENT_NOT_FOUND"));
+                .orElseThrow(() -> new RuntimeException("ENHANCEMENT_NOT_FOUND"));
     }
 
 
@@ -98,10 +99,10 @@ public class EnhancementServiceImp implements EnhancementService {
         fieldBindingMng.setEnhancementId(enhancement.getId());
         List<LinkedFieldMng> toField = Arrays.stream(enhancement.getArgs().split(";"))
                 .filter(f -> f.contains("RESULT_VAR")).map(f -> (f.split("="))[1].trim())
-                .map(f -> toLinkedFieldResource(f)).collect(Collectors.toList());
+                .map(this::toLinkedFieldResource).collect(Collectors.toList());
         List<LinkedFieldMng> fromField = Arrays.stream(enhancement.getArgs().split(";"))
                 .filter(f -> !f.contains("RESULT_VAR")).map(f -> (f.split("="))[1].trim())
-                .map(f -> toLinkedFieldResource(f)).collect(Collectors.toList());
+                .map(this::toLinkedFieldResource).collect(Collectors.toList());
         fieldBindingMng.setEnhancement(enhancementMng);
         fieldBindingMng.setFrom(fromField);
         fieldBindingMng.setTo(toField);
@@ -109,7 +110,15 @@ public class EnhancementServiceImp implements EnhancementService {
     }
 
     private LinkedFieldMng toLinkedFieldResource(String value) {
-        return null;
+        value = value.substring(value.indexOf("#")).trim();
+        String exchange = PathUtility.getExchange(value);
+        String status = PathUtility.getStatus(value);
+        String fields = PathUtility.getFields(value);
+        LinkedFieldMng lf = new LinkedFieldMng();
+        lf.setColor("#" + exchange);
+        lf.setType(status);
+        lf.setField(fields);
+        return lf;
     }
 
 }
