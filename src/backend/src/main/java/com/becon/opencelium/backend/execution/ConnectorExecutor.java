@@ -189,7 +189,7 @@ public class ConnectorExecutor {
         logger.logAndSend("Header: " + requestEntity.getHeaders());
         logger.logAndSend("Body: " + requestEntity.getBody());
 
-        ResponseEntity<?> responseEntity = this.restTemplate.exchange(requestEntity, Object.class);
+        ResponseEntity<?> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
         logger.logAndSend("============================================================================");
         logger.logAndSend("Response: " + responseEntity.getBody());
 

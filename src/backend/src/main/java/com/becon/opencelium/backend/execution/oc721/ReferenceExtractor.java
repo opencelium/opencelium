@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -218,6 +217,10 @@ public class ReferenceExtractor implements Extractor {
     }
 
     public static String bodyToString(Object body) {
+        if (body instanceof String) {
+            return (String) body;
+        }
+
         try {
             return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
         } catch (Exception e) {
@@ -374,7 +377,7 @@ public class ReferenceExtractor implements Extractor {
 
     private Object getFromXML(Object body, String ref) {
         ref = ref.replaceFirst("\\$", "");
-        String xpathQuery = "//";
+        String xpathQuery = "/";
 
         boolean hasLoop = !executionManager.getLoops().isEmpty();
 
@@ -407,14 +410,8 @@ public class ReferenceExtractor implements Extractor {
                 part = part.contains("[*]") ? part : part.replace("[]", "") + "[*]";
             }
 
-            xpathQuery = xpathQuery + part + "/";
+            xpathQuery += "/" + part;
         }
-
-        // remove the last slash (/)
-        xpathQuery = Optional.of(xpathQuery)
-                .filter(str -> !str.isEmpty())
-                .map(str -> str.substring(0, str.length() - 1))
-                .orElse(xpathQuery);
 
         xpathQuery = xpathQuery.replace("/__oc__value", "");
         xpathQuery = xpathQuery.replace("/__oc__attributes", "");
