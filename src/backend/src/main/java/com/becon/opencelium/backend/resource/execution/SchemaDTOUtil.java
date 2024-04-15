@@ -200,27 +200,21 @@ public class SchemaDTOUtil {
 
         // check if we have 'xml/namespace'
         XmlObjectDTO xml = schema.getXml();
-        String namespace = xml.getNamespace();
-        String prefix = xml.getPrefix();
+        if (xml != null && xml.getNamespace() != null) {
+            String prefix = xml.getPrefix() == null ? "" : ":" + xml.getPrefix();
 
-        if (namespace != null) {
-            if (prefix != null) {
-                attributes.add("xmlns:" + prefix + "=\"" + namespace + "\"");
-            } else {
-                attributes.add("xmlns=\"" + namespace + "\"");
-            }
+            attributes.add("xmlns" + prefix + "=\"" + xml.getNamespace() + "\"");
         }
 
         if (schema.getProperties() != null) {
             // add prefix to all attributes if exists
-            prefix = (prefix == null) ? "" : prefix + ":";
+            String prefix = (xml == null || xml.getPrefix() == null) ? "" : xml.getPrefix() + ":";
 
-            final String finalPrefix = prefix;
             schema.getProperties().forEach((name, value) -> {
                 if (value.getXml() != null && value.getXml().isAttribute()) {
                     String attributeName = getName(name, value);
 
-                    attributes.add(finalPrefix + attributeName + "=\"" + value.getValue() + "\"");
+                    attributes.add(prefix + attributeName + "=\"" + value.getValue() + "\"");
                 }
             });
 
