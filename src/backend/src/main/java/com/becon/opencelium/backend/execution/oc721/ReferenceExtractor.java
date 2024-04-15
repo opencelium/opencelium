@@ -364,7 +364,7 @@ public class ReferenceExtractor implements Extractor {
                 path = path.replace("[" + iterator + "]", "[" + loop.getValue() + "]");
             }
 
-            String jsonPath = "$" + (result instanceof List ? ".." : ".") + path;
+            String jsonPath = (result instanceof List && !path.startsWith("[") ? "$[*]." : "$.") + path;
             result = JsonPath.read(bodyToString(result), jsonPath);
         }
 
