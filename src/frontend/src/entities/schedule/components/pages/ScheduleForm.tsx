@@ -38,7 +38,7 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
     } = Schedule.getReduxState();
     const dispatch = useAppDispatch();
     const {gettingConnections, metaConnections} = Connection.getReduxState()
-    const connectionOptions: OptionProps[] = metaConnections.map(connection => {return {label: connection.title, value: connection.connectionId.toString(), data: connection.description}});
+    const connectionOptions: OptionProps[] = metaConnections.map(connection => {return {label: connection.title, value: connection.id.toString(), data: connection.description}});
     const didMount = useRef(false);
     let navigate = useNavigate();
     let urlParams = useParams();
