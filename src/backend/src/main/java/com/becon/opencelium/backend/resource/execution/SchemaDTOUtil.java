@@ -153,8 +153,18 @@ public class SchemaDTOUtil {
         String tagValue = getValue(name, value);
 
         if (tagValue.isBlank()) {
+            // if 'tagValue' is blank then write self-closing tag
             collector.append("<").append(tagName).append(attributes).append("/>");
+        } else if (value != null && value.getType() == DataType.ARRAY) {
+            if (value.getXml() != null && value.getXml().isWrapped()) {
+                // if 'wrapped' is true then wrap 'tagValue' with its name - 'tagName' then write
+                collector.append("<").append(tagName).append(attributes).append(">").append(tagValue).append("</").append(tagName).append(">");
+            } else {
+                // if 'wrapped' is false then just write 'tagValue'
+                collector.append(tagValue);
+            }
         } else {
+            // for any other cases write full tag
             collector.append("<").append(tagName).append(attributes).append(">").append(tagValue).append("</").append(tagName).append(">");
         }
     }
@@ -237,31 +247,26 @@ public class SchemaDTOUtil {
 
             String arrayName = getName(name, value);
 
-            StringBuilder result = new StringBuilder();
+            StringBuilder array = new StringBuilder();
             for (SchemaDTO item : value.getItems()) {
-                writeTag(result, arrayName, item);
+                writeTag(array, arrayName, item);
             }
 
-            if (value.getXml() != null && value.getXml().isWrapped()) {
-                String attributes = getAttributes(value);
-
-                return "<" + arrayName + attributes + ">" + result + "</" + arrayName + ">";
-            }
-
-            return result.toString();
+            return array.toString();
         } else {
             if (value.getProperties() == null) {
                 return "";
             }
 
-            StringBuilder result = new StringBuilder();
-            value.getProperties().forEach((propName, propValue) -> {
-                if (propValue.getXml() != null && !propValue.getXml().isAttribute()) {
-                    writeTag(result, propName, propValue);
+            StringBuilder object = new StringBuilder();
+            value.getProperties().forEach((propertyName, propertyValue) -> {
+                // skip attributes
+                if (propertyValue.getXml() == null || !propertyValue.getXml().isAttribute()) {
+                    writeTag(object, propertyName, propertyValue);
                 }
             });
 
-            return result.toString();
+            return object.toString();
         }
     }
 
