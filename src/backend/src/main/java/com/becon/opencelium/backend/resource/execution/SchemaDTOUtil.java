@@ -152,10 +152,7 @@ public class SchemaDTOUtil {
         String attributes = getAttributes(value);
         String tagValue = getValue(name, value);
 
-        if (tagValue.isBlank()) {
-            // if 'tagValue' is blank then write self-closing tag
-            collector.append("<").append(tagName).append(attributes).append("/>");
-        } else if (value != null && value.getType() == DataType.ARRAY) {
+        if (value != null && value.getType() == DataType.ARRAY) {
             if (value.getXml() != null && value.getXml().isWrapped()) {
                 // if 'wrapped' is true then wrap 'tagValue' with its name - 'tagName' then write
                 collector.append("<").append(tagName).append(attributes).append(">").append(tagValue).append("</").append(tagName).append(">");
