@@ -15,7 +15,7 @@ public class PathUtility {
     public static String getStatus(String path) {
         // request.success
         String[] status = path.substring(1, path.indexOf(')')).split("\\.");
-        return status.length == 2 ? status[1] : "";
+        return status.length == 2 ? status[1].substring(1) : "";
     }
 
     public static String getFields(String path) {
