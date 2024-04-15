@@ -217,10 +217,6 @@ public class ReferenceExtractor implements Extractor {
     }
 
     public static String bodyToString(Object body) {
-        if (body instanceof String) {
-            return (String) body;
-        }
-
         try {
             return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
         } catch (Exception e) {
@@ -427,7 +423,7 @@ public class ReferenceExtractor implements Extractor {
             }
 
             // convert 'body' to XML Document
-            String xmlString = bodyToString(body);
+            String xmlString = (String) body;
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document xmlDocument = builder.parse(new InputSource(new StringReader(xmlString)));
 
