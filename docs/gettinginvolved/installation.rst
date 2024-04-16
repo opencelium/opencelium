@@ -101,10 +101,9 @@ Debian/Ubuntu (example for 22.04 LTS)
 	Afterword you can connect to `http://[opencelium-server]`
 	
 	| Default User and Password is:
-	```
+	
 	| admin@opencelium.io
 	| 1234
-	```
 
 SUSE Linux Enterprise Server (example for SLES 15 SP5)
 """""""""""""""""
