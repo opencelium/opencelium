@@ -29,10 +29,13 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 
 	cd /opt
-	git clone -b <StableVersion> https://github.com/opencelium/opencelium.git . 
-	
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_<StableVersion>.zip/download?distro_version_id=230"
+	unzip -o -d /opt/ /opt/oc_<StableVersion>.zip
+	rm /opt/oc_<StableVersion>.zip
+		
 .. note::
-	Get stable versions here https://github.com/opencelium/opencelium/tags
+	Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
+
 
 **Configuration:**
 
