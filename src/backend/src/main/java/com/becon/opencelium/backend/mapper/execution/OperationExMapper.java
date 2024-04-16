@@ -207,7 +207,7 @@ public class OperationExMapper {
         //loop for storing all parameters to parametersMap
         for (String p : pairsRaw) {
             String[] split = p.split("=");
-            parametersMap.merge(split[0], split[1], (oldV, newV) -> oldV + "&" + newV);
+            parametersMap.merge(split[0], split.length == 1 ? "" : split[1], (oldV, newV) -> oldV + "&" + newV);
         }
 
         //main loop for making parameterDTO depending on param's style.
