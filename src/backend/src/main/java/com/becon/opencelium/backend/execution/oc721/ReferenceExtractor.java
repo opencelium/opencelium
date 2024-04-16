@@ -54,7 +54,17 @@ public class ReferenceExtractor implements Extractor {
     public Object extractValue(String ref) {
         Object result = null;
 
-        if (ref.matches(queryParams)) {
+        if (ref.matches(directRef) || ref.matches(responsePointer)) {
+            // extract direct reference if necessary
+            // '{%#ababab.(response).success.field[*]%}'
+            if (ref.startsWith("{%") && ref.endsWith("%}")) {
+                ref = ref.substring(2, ref.length() - 2);
+            }
+
+            // '#ababab.(response).success.field[*]
+            // '#ababab.(request).field[*]
+            result = extractFromOperation(ref);
+        } else if (ref.matches(queryParams)) {
             // '${key}'
             // '${key:type}'
             // '${key.field[*]}'
@@ -64,15 +74,6 @@ public class ReferenceExtractor implements Extractor {
             // '{key}'
             // '{#ctorId.key}'
             result = extractFromRequestData(ref);
-        } else if (ref.matches(directRef) || ref.matches(responsePointer)) {
-            // extract direct reference if necessary
-            if (ref.startsWith("{%") && ref.endsWith("%}")) {
-                ref = ref.substring(2, ref.length() - 2);
-            }
-
-            // '#ababab.(response).success.field[*]
-            // '#ababab.(request).field[*]
-            result = extractFromOperation(ref);
         } else if (ref.matches(enhancement)) {
             // '#{%bindId%}'
             result = extractFromEnhancement(ref);
@@ -82,7 +83,7 @@ public class ReferenceExtractor implements Extractor {
     }
 
     public static boolean isReference(String ref) {
-        return ref != null && (ref.matches(directRef) || ref.matches(queryParams) || ref.matches(requestData) || ref.matches(enhancement));
+        return ref != null && (ref.matches(directRef) || ref.matches(responsePointer) || ref.matches(queryParams) || ref.matches(requestData) || ref.matches(enhancement));
     }
 
     private Object extractFromEnhancement(String ref) {

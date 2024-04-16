@@ -103,7 +103,7 @@ public class RequestEntityBuilder {
         String query = getParamsByLocation(ParamLocation.QUERY).stream()
                 .map(ParameterDTOUtil::copy)
                 .peek(parameter -> replaceRefs(parameter.getSchema()))
-                .map(parameter -> parameter.getName() + "=" + ParameterDTOUtil.toString(parameter))
+                .map(ParameterDTOUtil::toString)
                 .collect(Collectors.joining("&"));
 
         if (!ObjectUtils.isEmpty(query)) {
