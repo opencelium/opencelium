@@ -21,42 +21,8 @@ Debian/Ubuntu (example for 22.04 LTS)
 	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
 	
 	apt update
-	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j nginx
+	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j=1:5.7.0 nginx
 	
-
-	apt install neo4j=1:5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	service neo4j start
-	systemctl enable neo4j
-
-.. note::
-	Change password (secret1234) if you want.
-
-8. Install MariaDB:
-
-.. code-block:: sh
-	:linenos:
-
-	apt install mariadb-server mariadb-client
-	mysql_secure_installation
-	
-.. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command:
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root
-		
-	If this works (without your password), please set your password again with this command:
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
-		
-	Change password (root) if you want.
-
 **Install Application:**
 
 .. code-block:: sh
@@ -104,6 +70,9 @@ Debian/Ubuntu (example for 22.04 LTS)
 	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	systemctl restart neo4j.service
 	systemctl enable neo4j.service
+	
+.. note::
+	Change password (secret1234) if you want.
 
 3. nginx:
 
