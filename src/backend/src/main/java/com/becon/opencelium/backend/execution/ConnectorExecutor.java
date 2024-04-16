@@ -11,6 +11,7 @@ import com.becon.opencelium.backend.execution.logger.msg.MethodData;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
@@ -19,6 +20,7 @@ import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
@@ -189,7 +191,14 @@ public class ConnectorExecutor {
         logger.logAndSend("Header: " + requestEntity.getHeaders());
         logger.logAndSend("Body: " + requestEntity.getBody());
 
-        ResponseEntity<?> responseEntity = this.restTemplate.exchange(requestEntity, Object.class);
+        MediaType mediaType = operationDTO.getRequestBody() == null ? MediaType.APPLICATION_JSON : operationDTO.getRequestBody().getContent();
+        ResponseEntity<?> responseEntity;
+        if (MediaType.APPLICATION_XML.isCompatibleWith(mediaType)) {
+            responseEntity = this.restTemplate.exchange(requestEntity, String.class);
+        } else {
+            responseEntity = this.restTemplate.exchange(requestEntity, Object.class);
+        }
+
         logger.logAndSend("============================================================================");
         logger.logAndSend("Response: " + responseEntity.getBody());
 
@@ -216,7 +225,13 @@ public class ConnectorExecutor {
             logger.logAndSend("Left Statement: " + leftValue);
         }
 
-        Object rightValue = executionManager.getValue(condition.getRight());
+        Object rightValue;
+        if (ReferenceExtractor.isReference(condition.getRight())) {
+            rightValue = executionManager.getValue(condition.getRight());
+        } else {
+            rightValue = condition.getRight();
+        }
+
         if (rightValue != null) {
             if (rightValue.getClass().isArray()) {
                 logger.logAndSend("Right Statement: " + Arrays.toString((String[]) rightValue));

@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -365,7 +364,7 @@ public class ReferenceExtractor implements Extractor {
                 path = path.replace("[" + iterator + "]", "[" + loop.getValue() + "]");
             }
 
-            String jsonPath = "$" + (result instanceof List ? ".." : ".") + path;
+            String jsonPath = (result instanceof List && !path.startsWith("[") ? "$[*]." : "$.") + path;
             result = JsonPath.read(bodyToString(result), jsonPath);
         }
 
@@ -374,7 +373,7 @@ public class ReferenceExtractor implements Extractor {
 
     private Object getFromXML(Object body, String ref) {
         ref = ref.replaceFirst("\\$", "");
-        String xpathQuery = "//";
+        String xpathQuery = "/";
 
         boolean hasLoop = !executionManager.getLoops().isEmpty();
 
@@ -407,14 +406,8 @@ public class ReferenceExtractor implements Extractor {
                 part = part.contains("[*]") ? part : part.replace("[]", "") + "[*]";
             }
 
-            xpathQuery = xpathQuery + part + "/";
+            xpathQuery += "/" + part;
         }
-
-        // remove the last slash (/)
-        xpathQuery = Optional.of(xpathQuery)
-                .filter(str -> !str.isEmpty())
-                .map(str -> str.substring(0, str.length() - 1))
-                .orElse(xpathQuery);
 
         xpathQuery = xpathQuery.replace("/__oc__value", "");
         xpathQuery = xpathQuery.replace("/__oc__attributes", "");
@@ -430,7 +423,7 @@ public class ReferenceExtractor implements Extractor {
             }
 
             // convert 'body' to XML Document
-            String xmlString = bodyToString(body);
+            String xmlString = (String) body;
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document xmlDocument = builder.parse(new InputSource(new StringReader(xmlString)));
 

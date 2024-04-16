@@ -4,15 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
+
 
 public class SchemaDTOUtil {
 
@@ -51,11 +50,26 @@ public class SchemaDTOUtil {
         return result;
     }
 
+    public static SchemaDTO fromObject(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonString = mapper.writeValueAsString(value);
+
+            return fromJSONNode(mapper.readTree(jsonString));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Supplied Object could not be converted to SchemaDTO", e);
+        }
+    }
+
     public static String toJSON(SchemaDTO schema) {
         if (schema == null) {
             return null;
         } else if (schema.getType() == null) {
-            throw new IllegalStateException("Data type must be supplied to SchemaDTO");
+            throw new RuntimeException("Data type must be supplied to SchemaDTO");
         }
 
         DataType type = schema.getType();
@@ -104,42 +118,6 @@ public class SchemaDTOUtil {
         return type == DataType.STRING ? "\"" + value + "\"" : value;
     }
 
-    public static String toXML(SchemaDTO schema) {
-        if (schema == null) {
-            return null;
-        } else if (schema.getType() == null) {
-            throw new IllegalStateException("Data type must be supplied to SchemaDTO");
-        }
-
-        DataType type = schema.getType();
-
-        // handle unusual cases:
-        // case 1. schema with type STRING at the top level:
-        if (type == DataType.STRING) {
-            String value = schema.getValue();
-
-            // if value is null or empty then return root
-            if (ObjectUtils.isEmpty(value)) {
-                return tagWriter("root", value);
-            }
-
-            // if value is not null then work with string as array
-            StringBuilder result = new StringBuilder();
-            for (char ch : value.toCharArray()) {
-                result.append(tagWriter("element", String.valueOf(ch)));
-            }
-
-            return tagWriter("root", result.toString());
-        }
-
-        // case 2. schema with types INTEGER, NUMBER, BOOLEAN at the top level:
-        if (type == DataType.INTEGER || type == DataType.NUMBER || type == DataType.BOOLEAN) {
-            return tagWriter("root", null);
-        }
-
-        return toXML("root", true, schema);
-    }
-
     public static String toText(SchemaDTO schema) {
         if (schema == null) {
             return null;
@@ -148,100 +126,139 @@ public class SchemaDTOUtil {
         return schema.getValue();
     }
 
-    public static SchemaDTO fromObject(Object value) {
-        if (value == null) {
+    public static String toXML(SchemaDTO schema) {
+        if (schema == null) {
             return null;
         }
 
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonString = mapper.writeValueAsString(value);
+        // root 'schema' should be an Object type and should have only one property
+        DataType type = schema.getType();
+        if (type == null) {
+            throw new RuntimeException("DataType must be supplied to SchemaDTO");
+        } else if (type != DataType.OBJECT || schema.getProperties() == null || schema.getProperties().size() != 1) {
+            throw new RuntimeException("Couldn't find root element");
+        }
 
-            return fromJSONNode(mapper.readTree(jsonString));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Supplied Object could not be converted to SchemaDTO", e);
+        StringBuilder result = new StringBuilder();
+        schema.getProperties().forEach((name, value) -> {
+            writeTag(result, name, value);
+        });
+
+        return result.toString();
+    }
+
+    private static void writeTag(StringBuilder collector, String name, SchemaDTO value) {
+        String tagName = getName(name, value);
+        String attributes = getAttributes(value);
+        String tagValue = getValue(name, value);
+
+        if (value != null && value.getType() == DataType.ARRAY) {
+            if (value.getXml() != null && value.getXml().isWrapped()) {
+                // if 'wrapped' is true then wrap 'tagValue' with its name - 'tagName' then write
+                collector.append("<").append(tagName).append(attributes).append(">").append(tagValue).append("</").append(tagName).append(">");
+            } else {
+                // if 'wrapped' is false then just write 'tagValue'
+                collector.append(tagValue);
+            }
+        } else {
+            // for any other cases write full tag
+            collector.append("<").append(tagName).append(attributes).append(">").append(tagValue).append("</").append(tagName).append(">");
         }
     }
 
-    private static String toXML(String tag, boolean topLayer, SchemaDTO schema) {
-        DataType type = schema.getType();
+    private static String getName(String name, SchemaDTO value) {
+        String result = name;
 
-        if (type == DataType.OBJECT) {
-            Map<String, SchemaDTO> properties = schema.getProperties();
+        if (value == null || value.getXml() == null) {
+            return result;
+        }
 
-            // for empty object we have two cases:
-            if (ObjectUtils.isEmpty(properties)) {
-                // case 1. for top level object return root
-                if (topLayer) {
-                    return tagWriter("root", null);
+        XmlObjectDTO xml = value.getXml();
+        // check if we have 'xml/name'
+        if (xml.getName() != null) {
+            result = xml.getName();
+        }
+
+        // check if we have 'xml/prefix'
+        if (xml.getPrefix() != null) {
+            result = xml.getPrefix() + ":" + result;
+        }
+
+        return result;
+    }
+
+    private static String getAttributes(SchemaDTO schema) {
+        if (schema == null) {
+            return "";
+        }
+
+        List<String> attributes = new ArrayList<>();
+        attributes.add("");
+
+        // check if we have 'xml/namespace'
+        XmlObjectDTO xml = schema.getXml();
+        if (xml != null && xml.getNamespace() != null) {
+            String prefix = xml.getPrefix() == null ? "" : ":" + xml.getPrefix();
+
+            attributes.add("xmlns" + prefix + "=\"" + xml.getNamespace() + "\"");
+        }
+
+        if (schema.getProperties() != null) {
+            // add prefix to all attributes if exists
+            String prefix = (xml == null || xml.getPrefix() == null) ? "" : xml.getPrefix() + ":";
+
+            schema.getProperties().forEach((name, value) -> {
+                if (value.getXml() != null && value.getXml().isAttribute()) {
+                    String attributeName = getName(name, value);
+
+                    attributes.add(prefix + attributeName + "=\"" + value.getValue() + "\"");
                 }
+            });
 
-                // case 2. for inner object return self-closing tag
-                return "<" + tag + " />";
-            }
+        }
 
-            // for object with body convert all fields to XML and join them then wrap inside given tag
-            StringJoiner object = new StringJoiner("");
-            for (Map.Entry<String, SchemaDTO> entry : properties.entrySet()) {
-                String xml = toXML(entry.getKey(), false, entry.getValue());
-                object.add(xml);
-            }
+        return String.join(" ", attributes);
+    }
 
-            return tagWriter(tag, object.toString());
+    private static String getValue(String name, SchemaDTO value) {
+        if (value == null) {
+            return "";
+        }
+
+        DataType type = value.getType();
+
+        if (type.isPrimitive()) {
+            return value.getValue() == null ? "" : value.getValue();
         }
 
         if (type == DataType.ARRAY) {
-            List<SchemaDTO> items = schema.getItems();
-
-            // for empty array we have two cases:
-            if (ObjectUtils.isEmpty(items)) {
-                // case 1. for top level array return root
-                if (topLayer) {
-                    return tagWriter("root", null);
-                }
-
-                // case 2. for inner array return empty string
+            if (value.getItems() == null) {
                 return "";
             }
 
-            // for non-empty top layer array
-            if (topLayer) {
-                StringJoiner array = new StringJoiner("");
-                for (int index = 0; index < items.size(); index++) {
-                    SchemaDTO item = items.get(index);
-                    // if items' type is object we need its 'index' as tag, otherwise tag is 'element'
-                    String currentTag = item.getType() == DataType.OBJECT ? String.valueOf(index) : "element";
+            String arrayName = getName(name, value);
 
-                    String xml = toXML(currentTag, false, item);
-                    array.add(xml);
-                }
-
-                return tagWriter(tag, array.toString());
-            }
-
-            // for not top layer arrays, tag is inherited
-            StringJoiner array = new StringJoiner("");
-            for (SchemaDTO item : items) {
-                // item inherits its tag from wrapped type
-                String xml = toXML(tag, false, item);
-                array.add(xml);
+            StringBuilder array = new StringBuilder();
+            for (SchemaDTO item : value.getItems()) {
+                writeTag(array, arrayName, item);
             }
 
             return array.toString();
+        } else {
+            if (value.getProperties() == null) {
+                return "";
+            }
+
+            StringBuilder object = new StringBuilder();
+            value.getProperties().forEach((propertyName, propertyValue) -> {
+                // skip attributes
+                if (propertyValue.getXml() == null || !propertyValue.getXml().isAttribute()) {
+                    writeTag(object, propertyName, propertyValue);
+                }
+            });
+
+            return object.toString();
         }
-
-        // for primitive types we have two cases (for this always topLevel = false):
-        // value = null  : ... => <tag />
-        // value != null : ... => <tag>value</tag>
-        String value = schema.getValue();
-
-        return value == null ? "<" + tag + " />" : tagWriter(tag, value);
-    }
-
-    private static String tagWriter(String tag, String value) {
-        if (value == null) return tagWriter(tag, "");
-
-        return "<" + tag + ">" + value + "</" + tag + ">";
     }
 
     private static SchemaDTO fromJSONNode(JsonNode jsonNode) {

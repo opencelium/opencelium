@@ -24,6 +24,9 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.becon.opencelium.backend.constant.RegExpression.directRef;
+
+
 public class RequestEntityBuilder {
     private final OperationDTO operation;
     private final Function<String, SchemaDTO> references;
@@ -159,7 +162,7 @@ public class RequestEntityBuilder {
 
             if (referencedSchema == null) {
                 schema.setValue(null);
-            } else if (referencedSchema.getType() == DataType.UNDEFINED || schema.getType() == referencedSchema.getType()) {
+            } else if (schema.getType() == DataType.UNDEFINED || schema.getType() == referencedSchema.getType() || value.matches(directRef)) {
                 // if type of schema is UNDEFINED or the same as referencedSchema then
                 // replace all values of this schema with referenced schema
                 schema.setType(referencedSchema.getType());
