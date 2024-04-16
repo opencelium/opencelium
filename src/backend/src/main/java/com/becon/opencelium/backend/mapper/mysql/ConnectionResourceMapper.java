@@ -25,7 +25,6 @@ import org.mapstruct.ReportingPolicy;
 public interface ConnectionResourceMapper extends Mapper<Connection, ConnectionResource> {
     @Override
     @Mappings({
-            @Mapping(target = "id", source = "connectionId"),
             @Mapping(target = "fromConnector", source = "fromConnector.connectorId"),
             @Mapping(target = "toConnector", source = "toConnector.connectorId"),
             @Mapping(target = "icon", expression = "java(StringUtility.findImageFromUrl(dto.getIcon()))"),
@@ -35,7 +34,6 @@ public interface ConnectionResourceMapper extends Mapper<Connection, ConnectionR
 
     @Override
     @Mappings({
-            @Mapping(target = "connectionId", source = "id"),
             @Mapping(target = "fromConnector", qualifiedByName = {"helperMapper","getConnectorResourceById"}),
             @Mapping(target = "toConnector", qualifiedByName = {"helperMapper","getConnectorResourceById"}),
             @Mapping(target = "icon", expression = "java(StringUtility.resolveImagePath(entity.getIcon()))"),
