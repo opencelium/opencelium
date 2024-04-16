@@ -34,6 +34,7 @@ import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
 import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
+import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
 
 public class ReferenceExtractor implements Extractor {
 
@@ -63,7 +64,12 @@ public class ReferenceExtractor implements Extractor {
             // '{key}'
             // '{#ctorId.key}'
             result = extractFromRequestData(ref);
-        } else if (ref.matches(directRef)) {
+        } else if (ref.matches(directRef) || ref.matches(responsePointer)) {
+            // extract direct reference if necessary
+            if (ref.startsWith("{%") && ref.endsWith("%}")) {
+                ref = ref.substring(2, ref.length() - 2);
+            }
+
             // '#ababab.(response).success.field[*]
             // '#ababab.(request).field[*]
             result = extractFromOperation(ref);
