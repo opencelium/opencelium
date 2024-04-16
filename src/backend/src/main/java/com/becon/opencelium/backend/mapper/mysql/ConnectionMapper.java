@@ -43,6 +43,7 @@ public interface ConnectionMapper extends Mapper<Connection, ConnectionDTO> {
 
     @Override
     @Mappings({
+            @Mapping(target = "id", ignore = true),
             @Mapping(target = "connectionId", source = "id"),
             @Mapping(target = "fromConnector", qualifiedByName = {"helperMapper","getConnectorDTOById"}),
             @Mapping(target = "toConnector", qualifiedByName = {"helperMapper","getConnectorDTOById"}),

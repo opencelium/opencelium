@@ -38,6 +38,9 @@ public class OperationExMapper {
     }
 
     public List<OperationDTO> toOperationAll(List<MethodMng> methods, Long connectionId) {
+        if (methods == null || methods.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<OperationDTO> operations = new ArrayList<>();
         for (MethodMng method : methods) {
             operations.add(toOperation(method, connectionId));
@@ -107,7 +110,6 @@ public class OperationExMapper {
      */
     private List<ParameterDTO> getHeaderParameters(@NonNull Map<String, String> header, MediaType mediaType) {
         List<ParameterDTO> parameters = new ArrayList<>();
-
         for (Map.Entry<String, String> entry : header.entrySet()) {
             ParameterDTO parameterDTO = new ParameterDTO();
             //parameter's default fields are :

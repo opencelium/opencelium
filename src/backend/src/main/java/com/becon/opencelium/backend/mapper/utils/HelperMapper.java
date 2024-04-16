@@ -27,10 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Mapper(
@@ -123,6 +120,9 @@ public abstract class HelperMapper {
 
     @Named("getFieldBindings")
     public List<FieldBindingDTO> getFieldBindings(List<Enhancement> enhancements) {
+        if(enhancements == null){
+            return Collections.emptyList();
+        }
         List<FieldBindingDTO> list = new ArrayList<>(enhancements.size());
         ArrayList<Integer> ids = new ArrayList<>();
         for (Enhancement enhancement : enhancements) {
