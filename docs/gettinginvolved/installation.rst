@@ -94,6 +94,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 .. note::
 	Afterword you can connect to `http://[opencelium-server]`
+	
 	Default User and Password is:
 	```
 	admin@opencelium.io
