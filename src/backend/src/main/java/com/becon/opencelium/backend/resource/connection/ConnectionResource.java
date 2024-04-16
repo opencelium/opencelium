@@ -26,7 +26,7 @@ import java.util.List;
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConnectionResource {
-    private Long id;
+    private Long connectionId;
     private String title;
     private String description;
     private String icon;
@@ -35,12 +35,12 @@ public class ConnectionResource {
     private List<EnhancementDTO> enhancements;
     private Integer categoryId;
 
-    public Long getId() {
-        return id;
+    public Long getConnectionId() {
+        return connectionId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setConnectionId(Long connectionId) {
+        this.connectionId = connectionId;
     }
 
     public String getTitle() {
