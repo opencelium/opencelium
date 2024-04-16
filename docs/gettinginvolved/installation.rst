@@ -29,11 +29,13 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 
 	cd /opt
-	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_<StableVersion>.zip/download?distro_version_id=230"
-	unzip -o -d /opt/ /opt/oc_<StableVersion>.zip
-	rm /opt/oc_<StableVersion>.zip
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_3.2.1.zip/download?distro_version_id=230"
+	unzip -o -d /opt/ /opt/oc_3.2.1.zip
+	rm /opt/oc_3.2.1.zip
+	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
 		
 .. note::
+	Change "3.2.1" to latest stable version.
 	Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 
 
@@ -98,10 +100,10 @@ Debian/Ubuntu (example for 22.04 LTS)
 .. note::
 	Afterword you can connect to `http://[opencelium-server]`
 	
-	Default User and Password is:
+	| Default User and Password is:
 	```
-	admin@opencelium.io
-	1234
+	| admin@opencelium.io
+	| 1234
 	```
 
 SUSE Linux Enterprise Server (example for SLES 15 SP5)
