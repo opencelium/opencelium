@@ -8,67 +8,22 @@ Installation
 
 Debian/Ubuntu (example for 22.04 LTS)
 """""""""""""""""
-**Prepare environment:**
-
-1. Update Debian/Ubuntu system:
+**Prepare environment / Install required packages:**
 
 .. code-block:: sh
 	:linenos:
 
 	apt update
-	apt install unzip
-	apt-get install libpng-dev libcurl4-gnutls-dev libexpat1-dev gettext libz-dev libssl-dev*
-
-2. Install nodejs:
-
-.. code-block:: sh
-	:linenos:
+	apt dist-upgrade
+	apt install unzip gpg git
 	
-	apt install curl
-	curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-	apt-get install -y nodejs
-	
-3. Install yarn:
-
-.. code-block:: sh
-	:linenos:
-
-	curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-	echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-	apt-get update && apt-get install yarn
-	
-4. Install git:
-
-.. code-block:: sh
-	:linenos:
-
-	apt-get install git
-	
-5. Install java:
-
-.. code-block:: sh
-	:linenos:
-
-	apt install openjdk-17-jdk
-
-6. Install gradle:
-
-.. code-block:: sh
-	:linenos:
-	
-	apt-get install software-properties-common
-	add-apt-repository ppa:cwchien/gradle
-	apt-get update
-	apt upgrade gradle
-	
-7. Install neo4j:
-
-.. code-block:: sh
-	:linenos:
-
-	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
+	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/neo4j.gpg
 	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
+	
 	apt update
+	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j nginx
+	
+
 	apt install neo4j=1:5.7.0
 	/usr/bin/neo4j-admin dbms set-initial-password secret1234
 	service neo4j start
@@ -104,8 +59,6 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 **Install Application:**
 
-1. Get frontend repository
-
 .. code-block:: sh
 	:linenos:
 
@@ -115,81 +68,68 @@ Debian/Ubuntu (example for 22.04 LTS)
 .. note::
 	Get stable versions here https://github.com/opencelium/opencelium/tags
 
-2. Build frontend project
+**Configuration:**
+
+1. MariaDB:
 
 .. code-block:: sh
 	:linenos:
-
-	cd src/frontend
-	yarn
+	
+	systemctl enable mariadb
+	mysql_secure_installation
+	
 
 .. note::
-	If yarn doesn't run properly, use this command to increase the amount of inotify watchers:
-
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
+	
 	.. code-block:: sh
 		:linenos:	
-
-		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-
-3. Enable OC service
-
-.. code-block:: sh
-	:linenos:
-
-	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
-
-4. Start frontend
-
-.. code-block:: sh
-	:linenos:
-
-	oc start_frontend
-
-5. Create application.yml file for backend
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend
-	cp src/main/resources/application_default.yml src/main/resources/application.yml
 	
-.. note::
-	Make changes inside the file application.yml! 
-	Change neo4j and mysql database password.
+		mysql -u root
+		
+	If this works (without your password), please set your password again with this command:
+	
+	.. code-block:: sh
+		:linenos:	
+	
+		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		
+	Change password (root) if you want.
 
-6. Install database 
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend/database
-	mysql -u root -p -e "source oc_data.sql"
-
-7. Build backend project
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend/
-	gradle build
-
-8. Start backend
+2. neo4j:
 
 .. code-block:: sh
 	:linenos:
+	
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
+	systemctl restart neo4j.service
+	systemctl enable neo4j.service
 
+3. nginx:
+
+.. code-block:: sh
+	:linenos:
+	
+	rm /etc/nginx/sites-enabled/default
+	ln -s /opt/conf/nginx.conf /etc/nginx/sites-enabled/
+	systemctl restart nginx
+	systemctl enable nginx
+	
+4. OpenCelium:
+
+.. code-block:: sh
+	:linenos:
+	
+	cp /opt/src/backend/src/main/resources/application_default.yml /opt/src/backend/src/main/resources/application.yml
 	oc start_backend
 
-9. Welcome to OC
-
-.. code-block:: sh
-	:linenos:
-	
-	Visit opencelium http://SERVERIP:8888
-
-
-
-
+.. note::
+	Afterword you can connect to `http://[opencelium-server]`
+	Default User and Password is:
+	```
+	admin@opencelium.io
+	1234
+	```
 
 SUSE Linux Enterprise Server (example for SLES 15 SP5)
 """""""""""""""""
