@@ -58,6 +58,8 @@ public class OperationExMapper {
         } else {
             method.getRequest().setHeader(new HashMap<>());
         }
+        //Content-Type in the header is being set to path and header parameters as a mediatype !!!
+        //RequestBody's mediatype will be taken from body's format !!!
 
         OperationDTO operationDTO = new OperationDTO();
         operationDTO.setOperationId(method.getColor());
@@ -65,7 +67,7 @@ public class OperationExMapper {
         operationDTO.setName(method.getName());
         operationDTO.setPath(method.getRequest().getEndpoint());
         operationDTO.setExecOrder(method.getIndex());
-        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), mediaType, connectionId, method.getName()));
+        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), connectionId, method.getName()));
         operationDTO.setParameters(getParameters(method.getRequest(), mediaType));
         return operationDTO;
     }
@@ -254,8 +256,15 @@ public class OperationExMapper {
         return parameters;
     }
 
-    private RequestBodyDTO getRequestBody(@NonNull BodyMng body, MediaType mediaType, Long connectionId, String methodName) {
+    private RequestBodyDTO getRequestBody(@NonNull BodyMng body, Long connectionId, String methodName) {
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
+        MediaType mediaType = switch (body.getFormat()) {
+            case "xml" -> MediaType.APPLICATION_XML;
+            case "x-www-form-urlencoded" -> MediaType.APPLICATION_FORM_URLENCODED;
+            case "form-data" -> MediaType.MULTIPART_FORM_DATA;
+            case "graphql+json" -> MediaType.APPLICATION_GRAPHQL;
+            default -> MediaType.APPLICATION_JSON;
+        };
         requestBodyDTO.setContent(mediaType);
         requestBodyDTO.setSchema(getSchema(body, connectionId, methodName));
         return requestBodyDTO;

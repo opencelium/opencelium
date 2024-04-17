@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
+import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -63,6 +64,31 @@ public class ConnectorExMapper {
         connectorEx.setId(dto.getConnectorId());
         connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(), connectionId));
         connectorEx.setOperators(operatorExMapper.toEntityAll(dto.getOperators()));
+
+        setPagination(connectorEx, invoker);
         return connectorEx;
+    }
+
+    private void setPagination(ConnectorEx connectorEx, Invoker invoker) {
+        connectorEx.setPagination(invoker.getPagination());
+
+        List<OperationDTO> operations = connectorEx.getMethods();
+
+        for (OperationDTO operation : operations) {
+            invoker.getOperations().stream()
+                    .filter(f -> f.getName().equals(operation.getName()))
+                    .findAny()
+                    .ifPresentOrElse(ff -> {
+                        if (ff.getType().equals("page")) {
+                            if (ff.getPagination() == null) {
+                                operation.setPagination(invoker.getPagination());
+                            } else {
+                                operation.setPagination(ff.getPagination());
+                            }
+                        }
+                    }, () -> {
+                        throw new RuntimeException("Method not found with name: " + operation.getName());
+                    });
+        }
     }
 }

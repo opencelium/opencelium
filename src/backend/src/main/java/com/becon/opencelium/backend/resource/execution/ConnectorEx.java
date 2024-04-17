@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.resource.execution;
 
+import com.becon.opencelium.backend.invoker.entity.Pagination;
+
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +12,7 @@ public class ConnectorEx {
     private int timeout;
     private boolean action;
     private String invoker;
+    private Pagination pagination;
     private List<OperationDTO> methods;
     private List<OperatorEx> operators;
     private Map<String, String> requiredData;
@@ -87,5 +90,13 @@ public class ConnectorEx {
 
     public void setInvoker(String invoker) {
         this.invoker = invoker;
+    }
+
+    public Pagination getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Pagination pagination) {
+        this.pagination = pagination;
     }
 }
