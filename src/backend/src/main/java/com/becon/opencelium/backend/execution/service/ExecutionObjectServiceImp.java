@@ -60,6 +60,5 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
         executionObj.setLogger(logger);
 
         return executionObj;
-
     }
 }

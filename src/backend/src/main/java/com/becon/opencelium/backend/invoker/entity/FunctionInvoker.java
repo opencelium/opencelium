@@ -23,6 +23,7 @@ public class FunctionInvoker {
     private String type;
     private RequestInv request;
     private ResponseInv response;
+    private Pagination pagination;
 
     public FunctionInvoker() {
     }
@@ -64,5 +65,13 @@ public class FunctionInvoker {
 
     public void setResponse(ResponseInv response) {
         this.response = response;
+    }
+
+    public Pagination getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Pagination pagination) {
+        this.pagination = pagination;
     }
 }

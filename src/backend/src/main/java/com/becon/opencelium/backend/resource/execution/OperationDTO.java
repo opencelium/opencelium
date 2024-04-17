@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.resource.execution;
 
+import com.becon.opencelium.backend.invoker.entity.Pagination;
 import jakarta.annotation.Resource;
 import org.springframework.http.HttpMethod;
 
@@ -16,6 +17,7 @@ public class OperationDTO {
     private List<ParameterDTO> parameters;
     private RequestBodyDTO requestBody;
     private List<ResponseDTO> responses;
+    private Pagination pagination;
 
     public String getPath() {
         return path;
@@ -87,5 +89,13 @@ public class OperationDTO {
 
     public void setResponses(List<ResponseDTO> responses) {
         this.responses = responses;
+    }
+
+    public Pagination getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Pagination pagination) {
+        this.pagination = pagination;
     }
 }
