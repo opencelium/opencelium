@@ -59,11 +59,11 @@ public class RequestEntityBuilder {
         return this;
     }
 
-    public RequestEntity<String> createRequest() {
+    public RequestEntity<Object> createRequest() {
         URI url = Objects.nonNull(URIBuilder) ? URIBuilder.build(operation, references) : defaultURLBuilder();
         HttpMethod method = defaultMethod();
         HttpHeaders headers = Objects.nonNull(headersBuilder) ? headersBuilder.build(operation, references) : defaultHeadersBuilder();
-        String body = Objects.nonNull(requestEntityBuilder) ? requestEntityBuilder.build(operation, references) : defaultRequestEntityBuilder();
+        Object body = Objects.nonNull(requestEntityBuilder) ? requestEntityBuilder.build(operation, references) : defaultRequestEntityBuilder();
 
         return new RequestEntity<>(body, headers, method, url);
     }
@@ -124,7 +124,7 @@ public class RequestEntityBuilder {
         return headers;
     }
 
-    private String defaultRequestEntityBuilder() {
+    private Object defaultRequestEntityBuilder() {
         RequestBodyDTO body = operation.getRequestBody();
 
         if (body == null) {
