@@ -57,6 +57,7 @@ export default class CBody{
     }
 
     checkType(bodyType){
+        return true;
         if(bodyType === FIELD_TYPE_STRING || bodyType === FIELD_TYPE_OBJECT || bodyType === FIELD_TYPE_ARRAY){
             return true;
         }
@@ -65,6 +66,7 @@ export default class CBody{
     }
 
     checkFormat(bodyFormat){
+        return true;
         for(const format in BODY_FORMAT) {
             if(bodyFormat === BODY_FORMAT[format]){
                 return true;
