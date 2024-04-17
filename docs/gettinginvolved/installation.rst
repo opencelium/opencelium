@@ -67,7 +67,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 		
 	Change password (root) if you want.
 
-2. neo4j:
+2. Neo4j:
 
 .. code-block:: sh
 	:linenos:
@@ -79,7 +79,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 .. note::
 	Change password (secret1234) if you want.
 
-3. nginx:
+3. Nginx:
 
 .. code-block:: sh
 	:linenos:
@@ -127,7 +127,8 @@ Debian/Ubuntu (example for 22.04 LTS)
 	| If you just have key and pem you can create a p12 with this command
 	
 	.. code-block:: sh
-		:linenos:	
+		:linenos:
+		
 		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
 	
 .. code-block:: sh
@@ -136,7 +137,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	oc start_backend
 
 .. note::
-	Afterword you can connect to `http://localhost`	
+	| Afterwards you can connect to `http://localhost`	
 	|Default User and Password is:
 	
 	| admin@opencelium.io
