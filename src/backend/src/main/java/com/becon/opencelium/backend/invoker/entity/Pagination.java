@@ -4,6 +4,10 @@ import java.util.List;
 
 public class Pagination {
 
+    public Pagination(List<PageParamRule> pageParamRules) {
+        this.pageParamRules = pageParamRules;
+    }
+
     private List<PageParamRule> pageParamRules;
 
     public List<PageParamRule> getPageParams() {

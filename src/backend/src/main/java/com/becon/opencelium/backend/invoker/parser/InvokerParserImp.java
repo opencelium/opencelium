@@ -106,11 +106,7 @@ public class InvokerParserImp {
     private Pagination getPagination(NodeList nodeList){
         InvokerParserFactory<Pagination> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, Pagination> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
-        return xmlDomParser.doAction("pagination", node -> {
-            Pagination pagination = new Pagination();
-            pagination.setPageParams(getPageRules(node.getChildNodes()));
-            return pagination;
-        });
+        return xmlDomParser.doAction("pagination", node -> new Pagination(getPageRules(node.getChildNodes())));
     }
 
     private List<FunctionInvoker> getOperation(NodeList nodeList){
@@ -130,6 +126,7 @@ public class InvokerParserImp {
             String type = node.getAttributes().getNamedItem("type").getNodeValue();
             function.setName(name);
             function.setType(type);
+            function.setPagination(getPagination(node.getChildNodes()));
             function.setRequest(getRequest(node.getChildNodes()));
             function.setResponse(getResponse(node.getChildNodes()));
             functions.add(function);
