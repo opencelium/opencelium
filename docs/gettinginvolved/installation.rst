@@ -123,7 +123,8 @@ Debian/Ubuntu (example for 22.04 LTS)
 	| - change MariaDB root user to opencelium and set password
 	| - change password of neo4j user
 
-	| For SSL, add certs to the ssl section. It has to be a p12 keystore file with password! 
+	| For SSL, add certs to the "Webserver configuration section".  
+	| It has to be a p12 keystore file with password! 
 	| If you just have key and pem you can create a p12 with this command
 	
 	.. code-block:: sh
@@ -138,7 +139,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 .. note::
 	| Afterwards you can connect to `http://localhost`	
-	|Default User and Password is:
+	| Default User and Password is:
 	
 	| admin@opencelium.io
 	| 1234
