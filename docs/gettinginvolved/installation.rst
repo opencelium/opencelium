@@ -36,7 +36,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 		
 .. note::
 	Change "3.2.1" to latest stable version.
-	Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
+	| Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 
 
 **Configuration:**
@@ -89,18 +89,46 @@ Debian/Ubuntu (example for 22.04 LTS)
 	systemctl restart nginx
 	systemctl enable nginx
 	
+.. note::
+	For SSL use the following commands instead:
+		
+	.. code-block:: sh
+		:linenos:	
+	
+		rm /etc/nginx/sites-enabled/default
+		ln -s /opt/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
+		
+	and change the certificates within the config with your own:
+	.. code-block:: sh
+		:linenos:	
+	
+		ssl_certificate /etc/ssl/certs/opencelium.pem;
+		ssl_certificate_key /etc/ssl/private/opencelium.key;
+	
 4. OpenCelium:
 
 .. code-block:: sh
 	:linenos:
 	
 	cp /opt/src/backend/src/main/resources/application_default.yml /opt/src/backend/src/main/resources/application.yml
+	
+	
+.. note::
+	Within section "Database configuration section of MariaDB and Neo4j":
+	| - change MariaDB root user to opencelium and set password
+	| - change password of neo4j user
+
+	|For SSL, add certs to the ssl section. It has to be a p12 keystore file with password!!. 
+	If you just have key and pem you can create a p12 as follows
+	
+	.. code-block:: sh
+		:linenos:	
+		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
+	
 	oc start_backend
 
 .. note::
-	Afterword you can connect to `http://[opencelium-server]`
-	
-	| Default User and Password is:
+	Afterword you can connect to `http://localhost`	Default User and Password is:
 	
 	| admin@opencelium.io
 	| 1234
