@@ -35,7 +35,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
 		
 .. note::
-	Change "3.2.1" to latest stable version.
+	| Change "3.2.1" to latest stable version.
 	| Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 
 
@@ -104,6 +104,9 @@ Debian/Ubuntu (example for 22.04 LTS)
 		ssl_certificate /etc/ssl/certs/opencelium.pem;
 		ssl_certificate_key /etc/ssl/private/opencelium.key;
 		
+.. code-block:: sh
+	:linenos:
+	
 	systemctl restart nginx
 	systemctl enable nginx
 	
@@ -116,12 +119,12 @@ Debian/Ubuntu (example for 22.04 LTS)
 	
 	
 .. note::
-	Within section "Database configuration section of MariaDB and Neo4j":
-	| change MariaDB root user to opencelium and set password
-	| change password of neo4j user
+	| Within section "Database configuration section of MariaDB and Neo4j":
+	| - change MariaDB root user to opencelium and set password
+	| - change password of neo4j user
 
-	For SSL, add certs to the ssl section. It has to be a p12 keystore file with password!!. 
-	If you just have key and pem you can create a p12 as follows
+	| For SSL, add certs to the ssl section. It has to be a p12 keystore file with password! 
+	| If you just have key and pem you can create a p12 with this command
 	
 	.. code-block:: sh
 		:linenos:	
