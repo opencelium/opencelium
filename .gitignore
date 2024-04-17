@@ -2,3 +2,4 @@
 /logs
 /.idea
 src/backend/src/main/resources/invoker/baramundi.xml
+/.vscode
