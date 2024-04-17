@@ -14,6 +14,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 import java.net.URI;
@@ -29,13 +31,13 @@ import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 
 public class RequestEntityBuilder {
     private final OperationDTO operation;
-    private final Function<String, SchemaDTO> references;
+    private final Function<String, Object> references;
 
     private URIBuilder URIBuilder;
     private HeadersBuilder headersBuilder;
-    private BodyBuilder requestEntityBuilder;
+    private BodyBuilder bodyBuilder;
 
-    public RequestEntityBuilder(OperationDTO operation, Function<String, SchemaDTO> references) {
+    public RequestEntityBuilder(OperationDTO operation, Function<String, Object> references) {
         this.operation = operation;
         this.references = references;
     }
@@ -54,16 +56,16 @@ public class RequestEntityBuilder {
         return this;
     }
 
-    public RequestEntityBuilder withCustomRequestEntity(BodyBuilder requestEntityBuilder) {
-        this.requestEntityBuilder = requestEntityBuilder;
+    public RequestEntityBuilder withCustomBody(BodyBuilder bodyBuilder) {
+        this.bodyBuilder = bodyBuilder;
         return this;
     }
 
-    public RequestEntity<String> createRequest() {
+    public RequestEntity<Object> createRequest() {
         URI url = Objects.nonNull(URIBuilder) ? URIBuilder.build(operation, references) : defaultURLBuilder();
         HttpMethod method = defaultMethod();
         HttpHeaders headers = Objects.nonNull(headersBuilder) ? headersBuilder.build(operation, references) : defaultHeadersBuilder();
-        String body = Objects.nonNull(requestEntityBuilder) ? requestEntityBuilder.build(operation, references) : defaultRequestEntityBuilder();
+        Object body = Objects.nonNull(bodyBuilder) ? bodyBuilder.build(operation, references) : defaultBodyBuilder();
 
         return new RequestEntity<>(body, headers, method, url);
     }
@@ -124,11 +126,16 @@ public class RequestEntityBuilder {
         return headers;
     }
 
-    private String defaultRequestEntityBuilder() {
+    private Object defaultBodyBuilder() {
         RequestBodyDTO body = operation.getRequestBody();
 
         if (body == null) {
             return null;
+        }
+
+        MediaType mediaType = body.getContent();
+        if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)) {
+            return toFormUrlencoded(body.getSchema());
         }
 
         // create the copy of current 'schema'
@@ -137,17 +144,46 @@ public class RequestEntityBuilder {
         // replace all reference value before converting 'body' to String
         replaceRefs(copiedSchema);
 
-        MediaType mediaType = body.getContent();
         String requestBody;
         if (MediaType.TEXT_PLAIN.isCompatibleWith(mediaType)) {
             requestBody = SchemaDTOUtil.toText(copiedSchema);
         } else if (MediaType.APPLICATION_XML.isCompatibleWith(mediaType)) {
             requestBody = SchemaDTOUtil.toXML(copiedSchema);
-        } else {
+        }  else {
             requestBody = SchemaDTOUtil.toJSON(copiedSchema);
         }
 
         return requestBody;
+    }
+
+    private MultiValueMap<String, Object> toFormUrlencoded(SchemaDTO schema) {
+        if (schema == null) {
+            return null;
+        }
+
+        if (schema.getType() == DataType.OBJECT) {
+            MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
+
+            Map<String, SchemaDTO> properties = schema.getProperties();
+            if (properties == null) {
+                return formData;
+            }
+
+            Object value;
+            for (Map.Entry<String, SchemaDTO> property : properties.entrySet()) {
+                value = property.getValue() == null ? null : property.getValue().getValue();
+
+                if (value != null && ReferenceExtractor.isReference((String) value)) {
+                    value = references.apply((String) value);
+                }
+
+                formData.add(property.getKey(), value);
+            }
+
+            return formData;
+        } else {
+            throw new RuntimeException("Unsupported DataType for 'application/x-www-form-urlencoded', type = " + schema.getType());
+        }
     }
 
     private void replaceRefs(SchemaDTO schema) {
@@ -158,7 +194,7 @@ public class RequestEntityBuilder {
         String value = schema.getValue();
 
         if (ReferenceExtractor.isReference(value)) {
-            SchemaDTO referencedSchema = references.apply(value);
+            SchemaDTO referencedSchema = SchemaDTOUtil.fromObject(references.apply(value));;
 
             if (referencedSchema == null) {
                 schema.setValue(null);
