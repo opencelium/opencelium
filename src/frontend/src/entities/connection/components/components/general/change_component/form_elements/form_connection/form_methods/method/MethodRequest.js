@@ -76,6 +76,7 @@ class MethodRequest extends Component{
             );
         }
         switch(method.bodyFormat){
+            case BODY_FORMAT.X_WWW_URL_ENCODED:
             case BODY_FORMAT.JSON:
                 return (
                     <JsonBody
