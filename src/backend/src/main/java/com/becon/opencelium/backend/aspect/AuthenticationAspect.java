@@ -16,9 +16,9 @@
 
 package com.becon.opencelium.backend.aspect;
 
-import com.becon.opencelium.backend.mysql.entity.Activity;
-import com.becon.opencelium.backend.mysql.service.ActivityServiceImpl;
-import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.database.mysql.entity.Activity;
+import com.becon.opencelium.backend.database.mysql.service.ActivityServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;

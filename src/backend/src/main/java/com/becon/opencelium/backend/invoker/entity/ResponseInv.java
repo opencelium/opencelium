@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.invoker.entity;
 
-import com.becon.opencelium.backend.resource.connector.ResponseResource;
+import com.becon.opencelium.backend.resource.connector.ResponseDTO;
 
 public class ResponseInv {
     private ResultInv success;
@@ -25,9 +25,9 @@ public class ResponseInv {
     public ResponseInv() {
     }
 
-    public ResponseInv(ResponseResource responseResource) {
-        this.success = new ResultInv(responseResource.getSuccess());
-        this.fail = new ResultInv(responseResource.getFail());
+    public ResponseInv(ResponseDTO responseDTO) {
+        this.success = new ResultInv(responseDTO.getSuccess());
+        this.fail = new ResultInv(responseDTO.getFail());
     }
 
     public ResultInv getSuccess() {

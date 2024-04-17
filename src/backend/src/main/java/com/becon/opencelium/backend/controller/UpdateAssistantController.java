@@ -16,23 +16,32 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.application.entity.SystemOverview;
-import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.application.assistant.AssistantServiceImp;
 import com.becon.opencelium.backend.application.assistant.UpdatePackageServiceImp;
+import com.becon.opencelium.backend.application.entity.AvailableUpdate;
+import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
+import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
+import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngServiceImp;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
-import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
-import com.becon.opencelium.backend.resource.application.*;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
+import com.becon.opencelium.backend.resource.application.MigrateDataResource;
+import com.becon.opencelium.backend.resource.update_assistant.Neo4jConfigResource;
+import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.resource.update_assistant.VersionDTO;
-import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
+import com.becon.opencelium.backend.utility.Neo4jDriverUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.zaxxer.hikari.pool.HikariPool;
@@ -44,6 +53,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.neo4j.driver.*;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -58,9 +68,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -95,14 +103,16 @@ public class UpdateAssistantController {
     private ConnectionServiceImp connectionServiceImp;
 
     @Autowired
-    private ConnectionNodeServiceImp connectionNodeServiceImp;
-
-    @Autowired
     private UpdatePackageServiceImp updatePackageServiceImp;
-
+    @Autowired
+    private ConnectorServiceImp connectorServiceImp;
+    @Autowired
+    private FieldBindingMngServiceImp fieldBindingMngServiceImp;
+    @Autowired
+    private ConnectionMngServiceImp connectionMngServiceImp;
 
     @GetMapping("/all")
-    public List<String> getAll(){
+    public List<String> getAll() {
         DataSource dataSource = jdbcTemplate.getDataSource();
         assert dataSource != null;
         HikariPool hikariPool = (HikariPool) new DirectFieldAccessor(dataSource).getPropertyValue("pool");
@@ -113,34 +123,34 @@ public class UpdateAssistantController {
 
     @Operation(summary = "Checks if OpenCelium is up and running.")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                      description = "OpenCelium is up and running"),
-        @ApiResponse( responseCode = "401",
-                      description = "Unauthorized",
-                      content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                      description = "Internal Error",
-                      content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "200",
+                    description = "OpenCelium is up and running"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/oc/test")
-    public ResponseEntity<?> ocTest(){
+    public ResponseEntity<?> ocTest() {
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Returns current version of OpenCelium")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "The version has been successfully retrieved",
-                content = @Content(schema = @Schema(implementation = VersionDTO.class))),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "200",
+                    description = "The version has been successfully retrieved",
+                    content = @Content(schema = @Schema(implementation = VersionDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/oc/version")
-    public ResponseEntity<?> ocCurrentVersion(){
+    public ResponseEntity<?> ocCurrentVersion() {
         String version = assistantServiceImp.getCurrentVersion();
         VersionDTO versionDTO = new VersionDTO(version);
         return ResponseEntity.ok().body(versionDTO);
@@ -155,13 +165,13 @@ public class UpdateAssistantController {
 
     @Operation(summary = "Returns current versions of tools that are used in OpenCelium")
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "200",
+            @ApiResponse(responseCode = "200",
                     description = "Overview of tools has been successfully retrieved",
                     content = @Content(schema = @Schema(implementation = SystemOverviewResource.class))),
-            @ApiResponse( responseCode = "401",
+            @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
+            @ApiResponse(responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
@@ -174,20 +184,20 @@ public class UpdateAssistantController {
 
     @Operation(summary = "Returns list of current offline versions of tools that are used in OpenCelium")
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "200",
+            @ApiResponse(responseCode = "200",
                     description = "List of offline versions has been successfully retrieved",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = AvailableUpdateResource.class)))),
-            @ApiResponse( responseCode = "401",
+            @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
+            @ApiResponse(responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/oc/offline/version/all")
     public ResponseEntity<?> getOfflineVersion() {
 
-        List<AvailableUpdate> offVersions  = packageServiceImp.getOffVersions();
+        List<AvailableUpdate> offVersions = packageServiceImp.getOffVersions();
         List<AvailableUpdateResource> packageResource = offVersions.stream()
                 .map(p -> packageServiceImp.toResource(p)).collect(Collectors.toList());
         return ResponseEntity.ok(packageResource);
@@ -195,12 +205,12 @@ public class UpdateAssistantController {
 
     @Operation(summary = "Returns current versions of tools that are used in OpenCelium from Service Portal")
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "200",
+            @ApiResponse(responseCode = "200",
                     description = "Returns response from Service Portal in json format"),
-            @ApiResponse( responseCode = "401",
+            @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
+            @ApiResponse(responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
@@ -212,15 +222,15 @@ public class UpdateAssistantController {
 
     @Operation(summary = "Validates weather an oc_service.sh file exists or not")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "Returns response from Service Portal in json format",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "200",
+                    description = "Returns response from Service Portal in json format",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/oc/restart/file/exists")
     public ResponseEntity<?> fileExists() {
@@ -262,7 +272,7 @@ public class UpdateAssistantController {
 //        }
 //    }
 
-//    @GetMapping("/subscription/repo/diff/files")
+    //    @GetMapping("/subscription/repo/diff/files")
 //    public ResponseEntity<?> getDiffFiles() {
 //        try {
 //            DiffFilesResource diffFilesName = new DiffFilesResource(assistantServiceImp.getChangedFileName());
@@ -293,12 +303,12 @@ public class UpdateAssistantController {
 
     @Operation(summary = "Migrates invokers, templates and connections to a selected version")
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "200",
+            @ApiResponse(responseCode = "200",
                     description = "Migration has been done successfully"),
-            @ApiResponse( responseCode = "401",
+            @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
+            @ApiResponse(responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
@@ -355,7 +365,7 @@ public class UpdateAssistantController {
             ObjectMapper objectMapper = new ObjectMapper();
             for (HashMap<String, Object> connection : cns) {
                 String str = objectMapper.writeValueAsString(connection);
-                ConnectionResource connectionResource = objectMapper.readValue(str, ConnectionResource.class);
+                ConnectionDTO connectionResource = objectMapper.readValue(str, ConnectionDTO.class);
                 assistantServiceImp.updateConnection(connectionResource);
             }
 
@@ -371,13 +381,13 @@ public class UpdateAssistantController {
 
     @Operation(summary = "Uploads zip file that contains OpenCelium versions")
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "200",
+            @ApiResponse(responseCode = "200",
                     description = "Migration has been done successfully",
                     content = @Content(schema = @Schema(implementation = AvailableUpdateResource.class))),
-            @ApiResponse( responseCode = "401",
+            @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
+            @ApiResponse(responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
@@ -397,13 +407,13 @@ public class UpdateAssistantController {
 
     @Operation(summary = "Deletes zip file that contains OpenCelium versions")
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "204",
+            @ApiResponse(responseCode = "204",
                     description = "Deletion has been done successfully",
                     content = @Content),
-            @ApiResponse( responseCode = "401",
+            @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
+            @ApiResponse(responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
@@ -415,8 +425,8 @@ public class UpdateAssistantController {
         return ResponseEntity.noContent().build();
     }
 
-    private boolean checkJsonExtension(String extension){
-        if (!(extension.equals("json") || extension.equals("JSON"))){
+    private boolean checkJsonExtension(String extension) {
+        if (!(extension.equals("json") || extension.equals("JSON"))) {
             return false;
         }
         return true;
@@ -424,18 +434,18 @@ public class UpdateAssistantController {
 
     @Operation(summary = "Returns changelogs of specified package")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "Changelog has been retrieved successfully",
-                content = @Content(schema = @Schema(implementation = org.springframework.core.io.Resource.class)),
-                headers = {
-                        @Header(name = "Content-Disposition", description = "Default value - attachment; filename=\"{filename}\"")
-                }),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "200",
+                    description = "Changelog has been retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = org.springframework.core.io.Resource.class)),
+                    headers = {
+                            @Header(name = "Content-Disposition", description = "Default value - attachment; filename=\"{filename}\"")
+                    }),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/changelog/file/{packageName}")
     public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String packageName) {
@@ -450,9 +460,45 @@ public class UpdateAssistantController {
             }
             return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getFilename() + "\"").body(file);
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw new StorageFileNotFoundException("Could not read file: " + packageName + "/CHANGELOG", e);
+        }
+    }
+
+    @PostMapping("/db/migrate")
+    public ResponseEntity<?> dbMigrate(@RequestBody Neo4jConfigResource neo4jConfig) {
+        try (var driver = GraphDatabase.driver(neo4jConfig.getUrl(), AuthTokens.basic(neo4jConfig.getUsername(), neo4jConfig.getPassword()));
+             Session session = driver.session()) {
+            driver.verifyConnectivity();
+            List<Connection> connections = connectionServiceImp.findAllNotCompleted();
+            for (Connection connection : connections) {
+                //building connection's data from mysql
+                ConnectionMng connectionMng = new ConnectionMng();
+                connectionMng.setConnectionId(connection.getId());
+                Connector from = connectorServiceImp.getById(connection.getFromConnector());
+                Connector to = connectorServiceImp.getById(connection.getToConnector());
+                ConnectorMng fromMng = new ConnectorMng();
+                fromMng.setTitle(from.getTitle());
+                fromMng.setConnectorId(from.getId());
+                ConnectorMng toMng = new ConnectorMng();
+                toMng.setTitle(to.getTitle());
+                toMng.setConnectorId(to.getId());
+                connectionMng.setFromConnector(fromMng);
+                connectionMng.setToConnector(toMng);
+
+                String cypherQuery = "MATCH p=((:Connection{connectionId:%d})-[*]->()) return p".formatted(connection.getId());
+                Result result = session.run(cypherQuery);
+
+                Neo4jDriverUtility.convertResultToConnection(result, connectionMng);
+
+                //setting fieldBindings
+                connectionMng.setFieldBindings(fieldBindingMngServiceImp.getAllByConnectionId(connection.getId()));
+
+                //saving to mongodb
+                connectionMngServiceImp.save(connectionMng);
+            }
+
+            return ResponseEntity.ok().build();
         }
     }
 }

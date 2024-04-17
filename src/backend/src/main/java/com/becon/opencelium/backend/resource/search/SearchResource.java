@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.resource.search;
 
-import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.mysql.entity.Connector;
-import com.becon.opencelium.backend.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import jakarta.annotation.Resource;
 
 @Resource
@@ -14,7 +14,7 @@ public class SearchResource {
 
     public SearchResource(Connection connection) {
         this.id = connection.getId();
-        this.title = connection.getName();
+        this.title = connection.getTitle();
         this.components = "connection";
     }
 

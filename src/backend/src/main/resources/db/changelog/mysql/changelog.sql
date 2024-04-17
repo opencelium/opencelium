@@ -356,3 +356,74 @@ ALTER TABLE data_aggregator ALTER COLUMN is_active SET DEFAULT 1;
 --changeset 3.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE webhook MODIFY COLUMN token LONGTEXT;
 
+--changeset 3.2.1:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+SELECT VERSION();
+
+--changeset 3.2.1:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connector CHANGE ssl_cert ssl_validation tinyint(4);
+
+--changeset 3.2.1:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE event_recipient MODIFY COLUMN destination TEXT;
+
+--changeset 4.0:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+SELECT VERSION();
+
+--changeset 4.0:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table connection modify from_connector int null;
+
+--changeset 4.0:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table connection modify to_connector int null;
+
+--changeset 4.0:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table enhancement change name title varchar(255);
+
+--changeset 4.0:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table enhancement change expert_code script text;
+
+--changeset 4.0:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table enhancement change expert_var variables text;
+
+--changeset 4.0:8 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table connection change name title varchar(128);
+
+--changeset 4.0:9 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+create table connection_history(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY ,
+    connection_id INT(11) NOT NULL ,
+    user_id INT(11) NOT NULL,
+    oc_version VARCHAR(10) NOT NULL,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    json_patch JSON,
+    action  VARCHAR(45),
+    FOREIGN KEY (connection_id) REFERENCES connection(id),
+    FOREIGN KEY (user_id) REFERENCES user(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--changeset 4.0:10 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table enhancement change variables args text;
+
+--changeset 4.0:11 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+alter table connection_history
+    drop foreign key connection_history_ibfk_1;
+
+alter table connection_history
+    add constraint connection_history_ibfk_1
+        foreign key (connection_id) references connection (id)
+            on delete cascade;
+
+--changeset 4.0:12 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE category (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    parent_category INT,
+    FOREIGN KEY (parent_category) REFERENCES category(id)
+);
+
+----changeset 4.0:13 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--ALTER TABLE connector CHANGE ssl_cert ssl_validation tinyint(4);
+
+--changeset 4.0:13 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connection ADD COLUMN IF NOT EXISTS category_id INT NULL;
+
+----changeset 4.0:15 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--ALTER TABLE event_recipient MODIFY COLUMN destination TEXT;

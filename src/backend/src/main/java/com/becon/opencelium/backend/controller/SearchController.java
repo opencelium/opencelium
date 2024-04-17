@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
-import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.search.SearchResource;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Search", description = "Manages operations related to search function")

@@ -16,22 +16,23 @@
 
 package com.becon.opencelium.backend.invoker.entity;
 
-import com.becon.opencelium.backend.resource.connector.FunctionResource;
+import com.becon.opencelium.backend.resource.connector.FunctionDTO;
 
 public class FunctionInvoker {
     private String name;
     private String type;
     private RequestInv request;
     private ResponseInv response;
+    private Pagination pagination;
 
     public FunctionInvoker() {
     }
 
-    public FunctionInvoker(FunctionResource functionResource) {
-        this.name = functionResource.getName();
-        this.type = functionResource.getType();
-        this.request = new RequestInv(functionResource.getRequest());
-        this.response = new ResponseInv(functionResource.getResponse());
+    public FunctionInvoker(FunctionDTO functionDTO) {
+        this.name = functionDTO.getName();
+        this.type = functionDTO.getType();
+        this.request = new RequestInv(functionDTO.getRequest());
+        this.response = new ResponseInv(functionDTO.getResponse());
     }
 
     public String getName() {
@@ -64,5 +65,13 @@ public class FunctionInvoker {
 
     public void setResponse(ResponseInv response) {
         this.response = response;
+    }
+
+    public Pagination getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Pagination pagination) {
+        this.pagination = pagination;
     }
 }

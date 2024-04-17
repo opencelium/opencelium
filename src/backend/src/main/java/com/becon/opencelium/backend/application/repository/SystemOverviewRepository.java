@@ -4,16 +4,10 @@ import com.becon.opencelium.backend.application.entity.SystemOverview;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.Transaction;
-import org.neo4j.driver.internal.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -36,9 +30,6 @@ public class SystemOverviewRepository {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private Driver neo4jDriver;
-
-    @Autowired
     private YamlPropertiesFactoryBean yamlPropertiesFactoryBean;
 
     public SystemOverview getCurrentOverview() {
@@ -54,18 +45,6 @@ public class SystemOverviewRepository {
         } catch (SQLException e){
             e.printStackTrace();
             systemOverview.setMariadb("Service is down. Unable to detect version. ");
-        }
-
-
-        // get neo4j version
-        try (Session session = neo4jDriver.session(); Transaction transaction = session.beginTransaction()){
-            String version = transaction
-                    .run("call dbms.components() yield versions unwind versions as version return version;")
-                    .single().get(0).asString();
-            systemOverview.setNeo4j(version);
-        } catch (Exception e) {
-            e.printStackTrace();
-            systemOverview.setNeo4j("Service is down. Unable to detect version. ");
         }
 
         // get elasticsearch version

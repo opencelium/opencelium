@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.invoker.entity;
 
-import com.becon.opencelium.backend.resource.connector.RequestResource;
+import com.becon.opencelium.backend.resource.connector.RequestDTO;
 
 import java.util.Map;
 
@@ -30,11 +30,11 @@ public class RequestInv {
     public RequestInv() {
     }
 
-    public RequestInv(RequestResource requestResource) {
-        this.method = requestResource.getMethod();
-        this.method = requestResource.getEndpoint();
-        this.header = requestResource.getHeader();
-        this.body = new Body(requestResource.getBody());
+    public RequestInv(RequestDTO requestDTO) {
+        this.method = requestDTO.getMethod();
+        this.method = requestDTO.getEndpoint();
+        this.header = requestDTO.getHeader();
+        this.body = new Body(requestDTO.getBody());
     }
 
     public String getMethod() {

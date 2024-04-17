@@ -17,8 +17,6 @@
 package com.becon.opencelium.backend.utility;
 
 import com.becon.opencelium.backend.constant.RegExpression;
-import com.becon.opencelium.backend.neo4j.entity.StatementVariable;
-import com.becon.opencelium.backend.resource.connection.StatementResource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,22 +37,6 @@ public class ConditionUtility {
         }
 
         return matcher.group();
-    }
-
-    public static StatementResource buildStatement(StatementVariable statementVariable){
-        if (statementVariable == null){
-            return null;
-        }
-        return new StatementResource(statementVariable);
-    }
-
-    //TODO: should be in StatementNodeService class;
-    public static StatementVariable buildStringStatement(StatementResource statementResource){
-        if (statementResource == null){
-            return null;
-        }
-
-        return new StatementVariable(statementResource);
     }
 
     public static String getArray(String condition) {
@@ -189,6 +171,14 @@ public class ConditionUtility {
             return Integer.parseInt(number);
         } else {
             throw  new RuntimeException("Operands '>, <, >=, <=' don't work with String");
+        }
+    }
+
+    public static void eraseArrayBrackets(String[] array) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].matches(".+\\[.+]")) {
+                array[i] = array[i].replaceAll("\\[.+]", "");
+            }
         }
     }
 }

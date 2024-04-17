@@ -17,15 +17,16 @@
 package com.becon.opencelium.backend.constant;
 
 public interface PathConstant {
-    public static final String NEO4J = "com.becon.opencelium.backend.neo4j";
-    public static final String MYSQl = "com.becon.opencelium.backend.mysql";
-    public static final String ELASTICSEARCH = "com.becon.opencelium.backend.elasticsearch";
-    public static final String INVOKER = "src/main/resources/invoker/";
-    public static final String IMAGES = "/api/storage/files/";
-    public static final String TEMPLATE = "src/main/resources/templates/";
-    public static final String VERSIONS = "versions/";
-    public static final String ASSISTANT = "assistant/";
-    public static final String RESOURCES = "src/main/resources/";
-    public static final String ICONS = "src/main/resources/icon/";
-    public static final String APP_DEFAULT_YML = "src/backend/src/main/resources/application_default.yml";
+    String NEO4J = "com.becon.opencelium.backend.neo4j";
+    String MONGODB = "com.becon.opencelium.backend.database.mongodb";
+    String MYSQl = "com.becon.opencelium.backend.database.mysql";
+    String ELASTICSEARCH = "com.becon.opencelium.backend.elasticsearch";
+    String INVOKER = "src/main/resources/invoker/";
+    String IMAGES = "/api/storage/files/";
+    String TEMPLATE = "src/main/resources/templates/";
+    String VERSIONS = "versions/";
+    String ASSISTANT = "assistant/";
+    String RESOURCES = "src/main/resources/";
+    String ICONS = "src/main/resources/icon/";
+    String APP_DEFAULT_YML = "src/backend/src/main/resources/application_default.yml";
 }

@@ -1,20 +1,15 @@
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.enums.LangEnum;
-import com.becon.opencelium.backend.execution.notification.TeamsService;
 import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
-import com.becon.opencelium.backend.mysql.entity.EventContent;
-import com.becon.opencelium.backend.mysql.entity.EventMessage;
-import com.becon.opencelium.backend.mysql.service.ContentServiceImpl;
-import com.becon.opencelium.backend.mysql.service.MessageServiceImpl;
+import com.becon.opencelium.backend.database.mysql.entity.*;
+import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.LanguageDTO;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
-import com.becon.opencelium.backend.resource.notification.tool.teams.TeamsDto;
-import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
-import com.becon.opencelium.backend.resource.user.UserRoleResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,12 +17,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,9 +38,6 @@ public class MessageController {
 
     @Autowired
     private ContentServiceImpl contentService;
-
-    @Autowired
-    private TeamsService teamsService;
 
     @Autowired
     private Environment env;
@@ -249,21 +238,21 @@ public class MessageController {
         return ResponseEntity.ok(resultDTO);
     }
 
-    @GetMapping("/tools/teams/team/all")
-    public ResponseEntity<?> getAllTeamsTeam() throws Exception {
-        TeamsDto teams = teamsService.getAllTeams();
-        return ResponseEntity.ok(teams);
-    }
+//    @GetMapping("/tools/teams/team/all")
+//    public ResponseEntity<?> getAllTeamsTeam() throws Exception {
+//        TeamsDto teams = teamsService.getAllTeams();
+//        return ResponseEntity.ok(teams);
+//    }
+//
+//    @GetMapping("/tools/teams/team/{teamId}/channel/all")
+//    public ResponseEntity<?> getAllTeamChannels(@PathVariable String teamId) throws Exception {
+//        TeamsDto channels = teamsService.getAllChannels(teamId);
+//        return ResponseEntity.ok(channels);
+//    }
 
-    @GetMapping("/tools/teams/team/{teamId}/channel/all")
-    public ResponseEntity<?> getAllTeamChannels(@PathVariable String teamId) throws Exception {
-        TeamsDto channels = teamsService.getAllChannels(teamId);
-        return ResponseEntity.ok(channels);
-    }
-
-    @GetMapping("/tools/slack/webhook")
+    @GetMapping("/tools/incoming_webhook")
     public ResponseEntity<?> getSlackWebhook() throws Exception {
-        String webhook = env.getProperty("opencelium.notification.tools.slack.webhook");
+        String webhook = env.getProperty(YamlPropConst.INCOMING_WEBHOOK);
         ResultDTO<String> webhookDto = new ResultDTO<>(webhook);
         return ResponseEntity.ok(webhookDto);
     }

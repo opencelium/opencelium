@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.execution.rdata;
 
-import com.becon.opencelium.backend.mysql.entity.RequestData;
+
+import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 
 import java.util.Optional;
 

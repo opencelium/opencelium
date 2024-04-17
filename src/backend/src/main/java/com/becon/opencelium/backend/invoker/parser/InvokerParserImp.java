@@ -18,7 +18,12 @@ package com.becon.opencelium.backend.invoker.parser;
 
 import com.becon.opencelium.backend.factory.InvokerParserFactory;
 import com.becon.opencelium.backend.invoker.entity.*;
+import com.becon.opencelium.backend.invoker.enums.PageParam;
+import com.becon.opencelium.backend.invoker.enums.PageParamAction;
+import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.sun.xml.messaging.saaj.soap.ver1_1.BodyElement1_1Impl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -26,6 +31,8 @@ import org.w3c.dom.NodeList;
 import java.util.*;
 
 public class InvokerParserImp {
+
+    private static final Logger logger = LoggerFactory.getLogger(InvokerParserImp.class);
 
     private Document document;
 
@@ -43,12 +50,14 @@ public class InvokerParserImp {
         XMLParser<Node, Invoker> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
         return xmlDomParser.doAction("invoker", node -> {
             NodeList childNode = node.getChildNodes();
-            invoker.setName(getName(childNode));
+            String invokerName = getName(childNode);
+            invoker.setName(invokerName);
             invoker.setDescription(getDescription(childNode));
             invoker.setHint(getHint(childNode));
             invoker.setIcon(getIcon(childNode));
             invoker.setAuthType(getAuthType(childNode));
             invoker.setRequiredData(getRequired(childNode));
+            invoker.setPagination(getPagination(childNode));
             invoker.setOperations(getOperation(childNode));
             return invoker;
         });
@@ -57,7 +66,11 @@ public class InvokerParserImp {
     private String getName(NodeList nodeList){
         InvokerParserFactory<String> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, String> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
-        return xmlDomParser.doAction("name", Node::getTextContent);
+        return xmlDomParser.doAction("name", node -> {
+
+            logger.info("Loading Process Started for Invoker << " + node.getTextContent() + " >>");
+            return node.getTextContent();
+        });
     }
 
     private String getDescription(NodeList nodeList){
@@ -90,6 +103,12 @@ public class InvokerParserImp {
         return xmlDomParser.doAction("authType", Node::getTextContent);
     }
 
+    private Pagination getPagination(NodeList nodeList){
+        InvokerParserFactory<Pagination> invokerParserFactory = new InvokerParserFactory<>();
+        XMLParser<Node, Pagination> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
+        return xmlDomParser.doAction("pagination", node -> new Pagination(getPageRules(node.getChildNodes())));
+    }
+
     private List<FunctionInvoker> getOperation(NodeList nodeList){
         List<FunctionInvoker> functionInvokers = new ArrayList<>();
         InvokerParserFactory<List<FunctionInvoker>> invokerParserFactory = new InvokerParserFactory<>();
@@ -107,6 +126,7 @@ public class InvokerParserImp {
             String type = node.getAttributes().getNamedItem("type").getNodeValue();
             function.setName(name);
             function.setType(type);
+            function.setPagination(getPagination(node.getChildNodes()));
             function.setRequest(getRequest(node.getChildNodes()));
             function.setResponse(getResponse(node.getChildNodes()));
             functions.add(function);
@@ -251,6 +271,34 @@ public class InvokerParserImp {
         });
     }
 
+    private List<PageParamRule> getPageRules(NodeList nodeList) {
+        InvokerParserFactory<PageParamRule> invokerParserFactory = new InvokerParserFactory<>();
+        XMLParser<Node, PageParamRule> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
+        LinkedList<PageParamRule> rules = new LinkedList<>();
+        for (PageParam param : PageParam.values()) {
+            PageParamRule pageParamRule = null;
+            pageParamRule = xmlDomParser.doAction(param.toString(), node -> {
+                PageParamRule rule = new PageParamRule();
+                rule.setParam(param);
+                rule.setValue(getValueOrDefault(param, node));
+
+                if (node.getAttributes().getNamedItem("action") != null) {
+                    rule.setAction(PageParamAction.fromString(node.getAttributes().getNamedItem("action").getNodeValue()));
+                }
+                if (node.getAttributes().getNamedItem("ref") != null) {
+                    rule.setRef(node.getAttributes().getNamedItem("ref").getNodeValue());
+                }
+                return rule;
+            });
+            if (pageParamRule == null) {
+                continue;
+            }
+            rules.add(pageParamRule);
+        }
+        logger.info("Following parameters from pagination was fetched: " + rules);
+        return rules;
+    }
+
     private List<RequiredData> getRequestDataItems(NodeList nodeList){
         InvokerParserFactory<List<RequiredData>> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, List<RequiredData>> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
@@ -282,5 +330,18 @@ public class InvokerParserImp {
             items.put(key,value);
             return items;
         });
+    }
+
+    private String getValueOrDefault(PageParam pageParam, Node node) {
+        if (node.getTextContent().isEmpty()) {
+            switch (pageParam) {
+                case LIMIT:
+                case OFFSET:
+                case PAGE:
+                    return "0";
+            }
+        }
+        return node.getTextContent();
+
     }
 }

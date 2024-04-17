@@ -28,33 +28,28 @@ spring:
     password: root
     initialization-mode: always
     driver-class-name: org.mariadb.jdbc.Driver
-  neo4j:
-    url: bolt://localhost:7687
-    authentication:
-      username: neo4j
-      password: secret1234
 ###########################################################################
 #                                                                         #
 #   Mail configuration section                                            #
 #                                                                         #
 ###########################################################################
-  mail:
-    opencelium:
-      from: noreply@opencelium.io
-  #    enabled: false
-    host: smtp.gmail.com
-    port: 587
-    username:
-    password:
-    properties:
-      mail:
-        smtp:
-          auth: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-          starttls:
-            enable: true
+#  mail:
+#    opencelium:
+#      from: noreply@opencelium.io
+#  #    enabled: false
+#    host: smtp.gmail.com
+#    port: 587
+#    username:
+#    password:
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          connectiontimeout: 5000
+#          timeout: 5000
+#          writetimeout: 5000
+#          starttls:
+#            enable: true
   #        ssl:
   #          trust: example.host.de
 ###########################################################################
@@ -82,8 +77,16 @@ spring:
   main:
     banner-mode: "off"
   data:
-    rest:
-      basePath: /api
+    mongodb:
+  #  Uncomment if authentication is located in another database and don't forget to comment "uri"
+  #      authentication-database: admin
+  #      host: localhost
+  #      port: 27017
+  #      database: opencelium
+  #      username: admin
+  #      password: secretsecret
+  #     Example - mongodb://<username>:<password>@<host>:<port>/<database>
+  #      uri: mongodb://oc_admin:secretsecret@localhost:27017/opencelium
   jpa:
     properties:
       hibernate:
@@ -110,6 +113,11 @@ spring:
     job-store-type: jdbc
   liquibase:
     change-log: classpath:/db/changelog/changelog-master.xml
+  mvc:
+    throw-exception-if-no-handler-found: true #enables exception handling for endpoints that is not defined in controllers
+  web:
+    resources:
+      add-mappings=false:
 
 springdoc:
   swagger-ui:
@@ -152,7 +160,7 @@ management:
       show-details: always
 
 opencelium:
-  version: 3.2
+  version: 4.0
   reboot:
     path: src/backend/src/main/resources/bashfile/restart.sh
     assistant:
@@ -169,24 +177,30 @@ opencelium:
     secret: becon.opencelium
     activity-time: 18000
     experation-time: 86400
-###########################################################################
-#                                                                         #
-#   Configuration for Notification                                        #
-#                                                                         #
-#   Teams: https://learn.microsoft.com/en-us/graph/auth/auth-concepts     #
-#   Slack: https://api.slack.com/messaging/webhooks                       #
-#                                                                         #
-###########################################################################
+  ###########################################################################
+  #                                                                         #
+  #   Configuration for Notification                                        #
+  #                                                                         #
+  #   for handling several webhooks separate url "," and then webhook       #
+  #   notification:                                                         #
+  #    tools:                                                               #
+  #      income_webhook:                                                    #
+  #        url: webhook                                                     #
+  #                                                                         #
+  ###########################################################################
   notification:
     tools:
-      slack:
-        webhook:
+      incoming_webhook:
+        url: {insert you webhook url here}
       teams:
         grant_type: refresh_token
         client_id:
         client_secret:
         refresh_token:
         tenant:
+  connector:
+    security:
+      key: it's secret key
 #  rest_template:
 #      proxy:
 #        host: 127.0.0.1

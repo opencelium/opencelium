@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.security;
 
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.exception.WrongHeaderAuthTypeException;
-import com.becon.opencelium.backend.mysql.service.ActivityServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.ActivityServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

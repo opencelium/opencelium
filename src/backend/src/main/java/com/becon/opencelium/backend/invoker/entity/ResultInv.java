@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.invoker.entity;
 
-import com.becon.opencelium.backend.resource.connector.ResultResource;
+import com.becon.opencelium.backend.resource.connector.ResultDTO;
 
 import java.util.Map;
 
@@ -29,7 +29,7 @@ public class ResultInv {
     public ResultInv() {
     }
 
-    public ResultInv(ResultResource result) {
+    public ResultInv(ResultDTO result) {
         this.header = result.getHeader();
         if (result.getBody() != null) {
             this.body = new Body(result.getBody());

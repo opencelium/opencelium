@@ -25,6 +25,7 @@ import {putAsterixInEmptyBrackets} from "@change_component/form_elements/form_co
 export const BODY_FORMAT = {
     JSON: 'json',
     XML: 'xml',
+    X_WWW_URL_ENCODED: 'x-www-form-urlencoded'
 };
 
 export const BODY_DATA = {
@@ -57,6 +58,7 @@ export default class CBody{
     }
 
     checkType(bodyType){
+        return true;
         if(bodyType === FIELD_TYPE_STRING || bodyType === FIELD_TYPE_OBJECT || bodyType === FIELD_TYPE_ARRAY){
             return true;
         }
@@ -65,6 +67,7 @@ export default class CBody{
     }
 
     checkFormat(bodyFormat){
+        return true;
         for(const format in BODY_FORMAT) {
             if(bodyFormat === BODY_FORMAT[format]){
                 return true;

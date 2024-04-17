@@ -19,20 +19,17 @@ package com.becon.opencelium.backend.invoker.service;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
-import com.becon.opencelium.backend.resource.connector.InvokerResource;
+import com.becon.opencelium.backend.resource.execution.DataType;
 import org.w3c.dom.Document;
 
-import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public interface InvokerService {
 
-    Invoker toEntity(InvokerResource resource);
-    InvokerResource toResource(Invoker entity);
     FunctionInvoker getTestFunction(String invokerName);
     FunctionInvoker getAuthFunction(String invokerName);
     File findFileByInvokerName(String invokerName);
@@ -40,7 +37,7 @@ public interface InvokerService {
     boolean existsByName(String name);
     List<Invoker> findAll();
     void delete(String name);
-    String findFieldType(String name, String methodName, String exchangeType, String result, String fieldName);
+    DataType findFieldType(String name, String methodName, LinkedList<String> hierarchy);
     String findFieldByPath(String invoker, String method, String path);
     Document getDocument(String name) throws Exception;
     void save(Document document);
@@ -49,6 +46,6 @@ public interface InvokerService {
     Map<String, Invoker> findAllAsMap();
     List<FunctionInvoker> getAuthFunctions(String invoker);
     boolean existsByFileName(String fileName);
-
+    void deleteInvokerFile(String name);
 //    Object findField(String field, Map<String, Object> body);
 }

@@ -19,39 +19,21 @@ package com.becon.opencelium.backend.invoker;
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
-import com.becon.opencelium.backend.mysql.entity.Connector;
-import com.becon.opencelium.backend.mysql.entity.RequestData;
+import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.net.InetSocketAddress;
-import java.security.cert.X509Certificate;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,9 +105,23 @@ public class InvokerRequestBuilder {
         if (body == null || body.equals("null")){
             httpEntity = new HttpEntity <Object> (header);
         }
+        ResponseEntity response;
         RestTemplate restTemplate = createRestTemplate();
-        ResponseEntity<Object> response = restTemplate.exchange(url, method ,httpEntity, Object.class);
-        return convertToStringResponse(response);
+        if (getResponseContentType(header, functionInvoker).toString().contains("json")) {
+            response = InvokerRequestBuilder
+                    .convertToStringResponse(restTemplate.exchange(url, method ,httpEntity, Object.class));
+        } else {
+            response = restTemplate.exchange(url, method ,httpEntity, String.class);
+        }
+        return response;
+    }
+
+    private MediaType getResponseContentType(HttpHeaders httpHeaders, FunctionInvoker functionInvoker) {
+        if (functionInvoker.getResponse() != null && functionInvoker.getResponse().getSuccess() != null
+                && functionInvoker.getResponse().getSuccess().getHeader() != null){
+            return MediaType.valueOf(functionInvoker.getResponse().getSuccess().getHeader().get("Content-Type"));
+        }
+        return httpHeaders.getContentType();
     }
 
     private RestTemplate createRestTemplate() {

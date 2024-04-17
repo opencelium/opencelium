@@ -1,75 +1,65 @@
-/*
- * // Copyright (C) <2020> <becon GmbH>
- * //
- * // This program is free software: you can redistribute it and/or modify
- * // it under the terms of the GNU General Public License as published by
- * // the Free Software Foundation, version 3 of the License.
- * //
- * // This program is distributed in the hope that it will be useful,
- * // but WITHOUT ANY WARRANTY; without even the implied warranty of
- * // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * // GNU General Public License for more details.
- * //
- * // You should have received a copy of the GNU General Public License
- * // along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 package com.becon.opencelium.backend.execution;
 
-import com.becon.opencelium.backend.constant.Constant;
-import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
-import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.mysql.entity.Connector;
-import com.becon.opencelium.backend.mysql.entity.Scheduler;
-import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
-import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
-import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
+import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
+import com.becon.opencelium.backend.execution.oc721.Connector;
+import com.becon.opencelium.backend.execution.oc721.FieldBind;
+import com.becon.opencelium.backend.resource.execution.ConnectionEx;
+import com.becon.opencelium.backend.resource.execution.ExecutionObj;
+import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.time.Duration;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-
-//@Service
 public class ConnectionExecutor {
+    private final Map<String, Object> queryParams;
+    private final ConnectionEx connection;
+    private final OcLogger<ExecutionLog> logger;
+    private final ProxyEx proxy;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
-    private ConnectionNodeServiceImp connectionNodeService;
-    private ConnectorServiceImp connectorService;
-    private ExecutionContainer executionContainer;
-    private ConnectorExecutor connectorExecutor;
-    private boolean debugMode;
+    public ConnectionExecutor(ExecutionObj executionObj) {
+        this.queryParams = executionObj.getQueryParams();
+        this.connection = executionObj.getConnection();
+        this.proxy = executionObj.getProxy();
 
-    public ConnectionExecutor(ConnectionNodeServiceImp connectionNodeService, ConnectorServiceImp connectorService,
-                              ExecutionContainer executionContainer, ConnectorExecutor connectorExecutor) {
-        this.connectionNodeService = connectionNodeService;
-        this.connectorService = connectorService;
-        this.executionContainer = executionContainer;
-        this.connectorExecutor = connectorExecutor;
-        this.debugMode = debugMode;
+        this.logger = new OcLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), ConnectionExecutor.class);
+
+        if (!executionObj.getLogger().isDebugMode()) {
+            logger.disable();
+        }
     }
 
-    public void start(Scheduler scheduler) throws Exception{
-        executionContainer.setMethodResponses(new ArrayList<>());
+    public void start() {
+        Connector source = Connector.fromEx(connection.getSource());
+        Connector target = Connector.fromEx(connection.getTarget());
+        List<FieldBind> fieldBind = connection.getFieldBind().stream().map(FieldBind::fromEx).collect(Collectors.toList());
 
-        Connection connection = scheduler.getConnection();
-        ConnectionNode connectionNode = connectionNodeService.findByConnectionId(connection.getId())
-                .orElseThrow(() -> new RuntimeException("Connection not found by id - " + connection.getId()));
+        ExecutionManager executionManager = new ExecutionManagerImpl(queryParams, source, target, fieldBind);
 
-        Connector fromConnector = connectorService.findById(connection.getFromConnector())
-                .orElseThrow(() -> new ConnectorNotFoundException(connection.getFromConnector()));
+        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), logger, "from");
+        ConnectorExecutor toEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), logger, "to");
 
-        Connector toConnector = connectorService.findById(connection.getToConnector())
-                .orElseThrow(() -> new ConnectorNotFoundException(connection.getFromConnector()));
+        sourceEx.start();
+        toEx.start();
+    }
 
+    private RestTemplate getRestTemplate(Connector connector) {
+        int timeout = connector.getTimeout();
+        RestTemplateBuilder restTemplateBuilder =
+                new RestTemplateBuilder(new RestCustomizer(proxy.getHost(), proxy.getPort(), proxy.getUser(), proxy.getPassword(), connector.isSslCert(), timeout));
+        if (timeout > 0) {
+            restTemplateBuilder.setReadTimeout(Duration.ofMillis(timeout));
+        }
 
-        connectorExecutor.start(connectionNode.getFromConnector(), fromConnector, toConnector,
-                                Constant.CONN_FROM);
-        connectorExecutor.start(connectionNode.getToConnector(), toConnector, fromConnector,
-                                Constant.CONN_TO);
+        return restTemplateBuilder.build();
     }
 }

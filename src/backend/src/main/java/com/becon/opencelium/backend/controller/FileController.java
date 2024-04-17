@@ -21,21 +21,19 @@ import com.becon.opencelium.backend.application.assistant.UpdatePackageServiceIm
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
-import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
-import com.becon.opencelium.backend.mysql.entity.Connector;
-import com.becon.opencelium.backend.mysql.entity.User;
-import com.becon.opencelium.backend.mysql.entity.UserDetail;
-import com.becon.opencelium.backend.mysql.entity.UserRole;
-import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
-import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
-import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
-import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
+import com.becon.opencelium.backend.database.mysql.entity.UserRole;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.FileDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
-import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
@@ -50,12 +48,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -70,7 +65,6 @@ import org.w3c.dom.Document;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
-import java.net.InetAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -83,7 +77,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 @Controller
@@ -119,10 +112,12 @@ public class FileController {
 //    private InvokerContainer invokerContainer;
 
     private final UserStorageService storageService;
+    private final Mapper<Connector, ConnectorResource> connectorMapper;
 
     @Autowired
-    public FileController(UserStorageService storageService) {
+    public FileController(UserStorageService storageService, Mapper<Connector, ConnectorResource> connectorMapper) {
         this.storageService = storageService;
+        this.connectorMapper = connectorMapper;
     }
 
     @Operation(summary = "Uploads profile picture of a user by provided user email")
@@ -472,7 +467,7 @@ public class FileController {
             // Save file in storage
             storageService.store(file, newFilename);
             connectorService.save(connector);
-            ConnectorResource resource = connectorService.toResource(connector);
+            ConnectorResource resource = connectorMapper.toDTO(connector);
             return ResponseEntity.ok().body(resource);
         } catch (Exception e){
             throw new RuntimeException(e);

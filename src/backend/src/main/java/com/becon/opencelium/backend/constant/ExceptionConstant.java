@@ -37,4 +37,10 @@ public interface ExceptionConstant {
 
     // ----------------------------------------- Connection ----------------------------------------------- //
     String CONNECTION_NOT_FOUND = "CONNECTION_NOT_FOUND";
+
+    // ----------------------------------------- Enhancement ----------------------------------------------- //
+    String ENHANCEMENT_NOT_FOUND = "ENHANCEMENT_NOT_FOUND";
+
+    // ----------------------------------------- Scheduler ----------------------------------------------- //
+    String SCHEDULER_NOT_FOUND = "SCHEDULER_NOT_FOUND";
 }

@@ -1,9 +1,9 @@
 package com.becon.opencelium.backend.execution.rdata.extractor;
 
 import com.becon.opencelium.backend.constant.DataRef;
+import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
-import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -31,10 +31,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class BodyExtractor implements Extractor{
+public class BodyExtractor implements Extractor {
 
     private List<RequestData> requestData;
     private List<FunctionInvoker> functionInvokers;
+    private boolean disableSll;
 
     @Override
     public Extractor setRequestData(List<RequestData> requestData) {
@@ -45,6 +46,12 @@ public class BodyExtractor implements Extractor{
     @Override
     public Extractor setFunctions(List<FunctionInvoker> functionInvokerList) {
         this.functionInvokers = functionInvokerList;
+        return this;
+    }
+
+    @Override
+    public Extractor disableSslValidation(boolean disable) {
+        this.disableSll = disable;
         return this;
     }
 
@@ -62,6 +69,7 @@ public class BodyExtractor implements Extractor{
             FunctionInvoker functionInvoker = getFunctionInvoker(ref);
             ResponseEntity<String> response = invokerRequestBuilder
                                         .setRequestData(requestData)
+                                        .setSslCert(disableSll)
                                         .setFunction(functionInvoker).sendRequest();
             String path = getPathFromRef(expr);
             String value = getValueFromResponse(path, response);

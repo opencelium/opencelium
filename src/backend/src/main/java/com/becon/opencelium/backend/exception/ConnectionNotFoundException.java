@@ -23,7 +23,7 @@ public class ConnectionNotFoundException extends RuntimeException{
     private final Long id;
 
     public ConnectionNotFoundException(final Long id) {
-        super(ExceptionConstant.CONNECTOR_NOT_FOUND);
+        super(ExceptionConstant.CONNECTION_NOT_FOUND);
         this.id = id;
     }
 
