@@ -8,85 +8,50 @@ Installation
 
 Debian/Ubuntu (example for 22.04 LTS)
 """""""""""""""""
-**Prepare environment:**
-
-1. Update Debian/Ubuntu system:
+**Prepare environment / Install required packages:**
 
 .. code-block:: sh
 	:linenos:
 
 	apt update
-	apt install unzip
-	apt-get install libpng-dev libcurl4-gnutls-dev libexpat1-dev gettext libz-dev libssl-dev*
-
-2. Install nodejs:
-
-.. code-block:: sh
-	:linenos:
+	apt dist-upgrade
+	apt install unzip gpg git
 	
-	apt install curl
-	curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-	apt-get install -y nodejs
-	
-3. Install yarn:
-
-.. code-block:: sh
-	:linenos:
-
-	curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-	echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-	apt-get update && apt-get install yarn
-	
-4. Install git:
-
-.. code-block:: sh
-	:linenos:
-
-	apt-get install git
-	
-5. Install java:
-
-.. code-block:: sh
-	:linenos:
-
-	apt install openjdk-17-jdk
-
-6. Install gradle:
-
-.. code-block:: sh
-	:linenos:
-	
-	apt-get install software-properties-common
-	add-apt-repository ppa:cwchien/gradle
-	apt-get update
-	apt upgrade gradle
-	
-7. Install neo4j:
-
-.. code-block:: sh
-	:linenos:
-
-	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
+	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/neo4j.gpg
 	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
+	
 	apt update
-	apt install neo4j=1:5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	service neo4j start
-	systemctl enable neo4j
-
-.. note::
-	Change password (secret1234) if you want.
-
-8. Install MariaDB:
+	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j=1:5.7.0 nginx
+	
+**Install Application:**
 
 .. code-block:: sh
 	:linenos:
 
-	apt install mariadb-server mariadb-client
+	cd /opt
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_3.2.1.zip/download?distro_version_id=230"
+	unzip -o -d /opt/ /opt/oc_3.2.1.zip
+	rm /opt/oc_3.2.1.zip
+	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
+		
+.. note::
+	| Change "3.2.1" to latest stable version.
+	| Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
+
+
+**Configuration:**
+
+1. MariaDB:
+
+.. code-block:: sh
+	:linenos:
+	
+	systemctl enable mariadb
 	mysql_secure_installation
 	
+
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command:
+	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
 	
 	.. code-block:: sh
 		:linenos:	
@@ -102,94 +67,82 @@ Debian/Ubuntu (example for 22.04 LTS)
 		
 	Change password (root) if you want.
 
-**Install Application:**
-
-1. Get frontend repository
+2. Neo4j:
 
 .. code-block:: sh
 	:linenos:
-
-	cd /opt
-	git clone -b <StableVersion> https://github.com/opencelium/opencelium.git . 
+	
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
+	systemctl restart neo4j.service
+	systemctl enable neo4j.service
 	
 .. note::
-	Get stable versions here https://github.com/opencelium/opencelium/tags
+	Change password (secret1234) if you want.
 
-2. Build frontend project
+3. Nginx:
 
 .. code-block:: sh
 	:linenos:
-
-	cd src/frontend
-	yarn
-
+	
+	rm /etc/nginx/sites-enabled/default
+	ln -s /opt/conf/nginx.conf /etc/nginx/sites-enabled/
+	
 .. note::
-	If yarn doesn't run properly, use this command to increase the amount of inotify watchers:
-
+	For SSL use the following commands instead:
+		
 	.. code-block:: sh
 		:linenos:	
-
-		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-
-3. Enable OC service
+	
+		rm /etc/nginx/sites-enabled/default
+		ln -s /opt/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
+		
+	and include your own certificates in the config file:
+	
+	.. code-block:: sh
+		:linenos:	
+	
+		ssl_certificate /etc/ssl/certs/opencelium.pem;
+		ssl_certificate_key /etc/ssl/private/opencelium.key;
+		
+.. code-block:: sh
+	:linenos:
+	
+	systemctl restart nginx
+	systemctl enable nginx
+	
+4. OpenCelium:
 
 .. code-block:: sh
 	:linenos:
-
-	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
-
-4. Start frontend
-
-.. code-block:: sh
-	:linenos:
-
-	oc start_frontend
-
-5. Create application.yml file for backend
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend
-	cp src/main/resources/application_default.yml src/main/resources/application.yml
+	
+	cp /opt/src/backend/src/main/resources/application_default.yml /opt/src/backend/src/main/resources/application.yml
+	
 	
 .. note::
-	Make changes inside the file application.yml! 
-	Change neo4j and mysql database password.
+	| Within section "Database configuration section of MariaDB and Neo4j":
+	| - change MariaDB root user to opencelium and set password
+	| - change password of neo4j user
 
-6. Install database 
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend/database
-	mysql -u root -p -e "source oc_data.sql"
-
-7. Build backend project
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend/
-	gradle build
-
-8. Start backend
-
-.. code-block:: sh
-	:linenos:
-
-	oc start_backend
-
-9. Welcome to OC
-
+	| For SSL, add certs to the "Webserver configuration section".  
+	| It has to be a p12 keystore file with password! 
+	| If you just have key and pem you can create a p12 with this command
+	
+	.. code-block:: sh
+		:linenos:
+		
+		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
+	
 .. code-block:: sh
 	:linenos:
 	
-	Visit opencelium http://SERVERIP:8888
+	oc start_backend
 
-
-
-
+.. note::
+	| Afterwards you can connect to `http://localhost`	
+	| Default User and Password is:
+	
+	| admin@opencelium.io
+	| 1234
 
 SUSE Linux Enterprise Server (example for SLES 15 SP5)
 """""""""""""""""
