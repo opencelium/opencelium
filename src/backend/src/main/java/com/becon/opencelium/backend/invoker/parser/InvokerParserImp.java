@@ -275,13 +275,13 @@ public class InvokerParserImp {
         InvokerParserFactory<PageParamRule> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, PageParamRule> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
         LinkedList<PageParamRule> rules = new LinkedList<>();
-
         for (PageParam param : PageParam.values()) {
             PageParamRule pageParamRule = null;
             pageParamRule = xmlDomParser.doAction(param.toString(), node -> {
                 PageParamRule rule = new PageParamRule();
-                rule.setValue(node.getTextContent());
                 rule.setParam(param);
+                rule.setValue(getValueOrDefault(param, node));
+
                 if (node.getAttributes().getNamedItem("action") != null) {
                     rule.setAction(PageParamAction.fromString(node.getAttributes().getNamedItem("action").getNodeValue()));
                 }
@@ -330,5 +330,18 @@ public class InvokerParserImp {
             items.put(key,value);
             return items;
         });
+    }
+
+    private String getValueOrDefault(PageParam pageParam, Node node) {
+        if (node.getTextContent().isEmpty()) {
+            switch (pageParam) {
+                case LIMIT:
+                case OFFSET:
+                case PAGE:
+                    return "0";
+            }
+        }
+        return node.getTextContent();
+
     }
 }
