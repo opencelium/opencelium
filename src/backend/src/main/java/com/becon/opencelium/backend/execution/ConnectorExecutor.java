@@ -183,7 +183,7 @@ public class ConnectorExecutor {
     private void executeOperation(OperationDTO operationDTO) {
         RequestEntity<?> requestEntity = RequestEntityBuilder.start()
                 .forOperation(operationDTO)
-                .usingReferences(this::resolveReferences)
+                .usingReferences(executionManager::getValue)
                 .createRequest();
 
         logger.logAndSend("Http Method: " + requestEntity.getMethod());
@@ -243,12 +243,6 @@ public class ConnectorExecutor {
         Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(condition.getRelationalOperator());
 
         return operator.apply(leftValue, rightValue);
-    }
-
-    private SchemaDTO resolveReferences(String ref) {
-        Object value = executionManager.getValue(ref);
-
-        return SchemaDTOUtil.fromObject(value);
     }
 
     private int getTailPointer(int headPointer) {
