@@ -25,7 +25,7 @@ import {putAsterixInEmptyBrackets} from "@change_component/form_elements/form_co
 export const BODY_FORMAT = {
     JSON: 'json',
     XML: 'xml',
-    X_WWW_URL_ENCODED: 'x-www-url-encoded'
+    X_WWW_URL_ENCODED: 'x-www-form-urlencoded'
 };
 
 export const BODY_DATA = {
