@@ -24,6 +24,7 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
@@ -31,9 +32,11 @@ import org.springframework.stereotype.Component;
 public class JobExecutor extends QuartzJobBean {
 
     private final ExecutionObjectService executionObjectService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public JobExecutor(@Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService) {
+    public JobExecutor(@Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService, SimpMessagingTemplate simpMessagingTemplate) {
         this.executionObjectService = executionObjectService;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @Override
@@ -41,10 +44,9 @@ public class JobExecutor extends QuartzJobBean {
         JobDataMap dataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
         ExecutionObj executionObj = executionObjectService.buildObj(data);
-        ConnectionExecutor executor = new ConnectionExecutor(executionObj);
+        ConnectionExecutor executor = new ConnectionExecutor(executionObj, simpMessagingTemplate);
 
         executor.start();
         System.out.println("End of execution!");
-
     }
 }

@@ -8,7 +8,6 @@ import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.client.RestTemplate;
@@ -23,10 +22,8 @@ public class ConnectionExecutor {
     private final ConnectionEx connection;
     private final OcLogger<ExecutionLog> logger;
     private final ProxyEx proxy;
-    @Autowired
-    private SimpMessagingTemplate simpMessagingTemplate;
 
-    public ConnectionExecutor(ExecutionObj executionObj) {
+    public ConnectionExecutor(ExecutionObj executionObj, SimpMessagingTemplate simpMessagingTemplate) {
         this.queryParams = executionObj.getQueryParams();
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
