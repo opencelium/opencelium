@@ -166,14 +166,14 @@ public class QuartzJobScheduler implements SchedulingStrategy {
     }
 
     @Override
-    public Map<Integer, Long> getRunningJobs() {
+    public Map<Long, Integer> getRunningJobs() {
         try {
             return quartzScheduler.getCurrentlyExecutingJobs()
                     .stream()
                     .map(JobExecutionContext::getJobDetail)
                     .map(JobDetail::getKey)
                     .collect(Collectors.toMap(e ->
-                            Integer.parseInt(e.getName().split("-")[0]), e -> Long.valueOf(e.getName().split("-")[1])));
+                            Long.valueOf(e.getName().split("-")[0]), e -> Integer.parseInt(e.getName().split("-")[1])));
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }

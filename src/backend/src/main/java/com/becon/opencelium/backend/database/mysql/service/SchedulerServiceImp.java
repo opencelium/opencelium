@@ -242,14 +242,14 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public List<RunningJobsResource> getAllRunningJobs() throws Exception {
-        Map<Integer, Long> runningJobs = schedulingStrategy.getRunningJobs();
+        Map<Long, Integer> runningJobs = schedulingStrategy.getRunningJobs();
         List<RunningJobsResource> runningJobsResources = new ArrayList<>();
-        runningJobs.forEach((k, v) -> {
+        runningJobs.forEach((connId, schedId) -> {
             RunningJobsResource jobsResource = new RunningJobsResource();
-            Scheduler scheduler = getById(k);
+            Scheduler scheduler = getById(schedId);
             jobsResource.setSchedulerId(scheduler.getId());
             jobsResource.setTitle(scheduler.getTitle());
-            Connection connection = connectionService.getById(v);
+            Connection connection = connectionService.getById(connId);
             jobsResource.setToConnector(String.valueOf(connection.getToConnector()));
             jobsResource.setFromConnector(String.valueOf(connection.getFromConnector()));
             runningJobsResources.add(jobsResource);

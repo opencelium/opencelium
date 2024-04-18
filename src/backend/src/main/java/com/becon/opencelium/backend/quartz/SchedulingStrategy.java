@@ -10,6 +10,6 @@ public interface SchedulingStrategy {
     void runJob(Scheduler scheduler);
     void resumeJob(Scheduler scheduler);
     void pauseJob(Scheduler scheduler);
-    Map<Integer,Long> getRunningJobs();
+    Map<Long,Integer> getRunningJobs();
     void validateCron(String cron);
 }

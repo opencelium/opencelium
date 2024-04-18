@@ -10,6 +10,9 @@ public enum OpType {
         this.value = value;
     }
     public static OpType fromValue(String value) {
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
         for (OpType opType : OpType.values()) {
             if (opType.getValue().equals(value)) {
                 return opType;
