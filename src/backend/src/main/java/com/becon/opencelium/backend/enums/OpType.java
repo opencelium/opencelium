@@ -3,7 +3,8 @@ package com.becon.opencelium.backend.enums;
 public enum OpType {
     TEST("test"),
     PAGINATION("page"),
-    AUTH("auth");
+    AUTH("auth"),
+    DEFAULT(null);
     private final String value;
 
     OpType(String value) {
@@ -13,12 +14,12 @@ public enum OpType {
         if (value == null || value.isEmpty()) {
             return null;
         }
-        for (OpType opType : OpType.values()) {
-            if (opType.getValue().equals(value)) {
-                return opType;
-            }
-        }
-        throw new IllegalArgumentException(value);
+         return switch (value) {
+            case "test" -> OpType.TEST;
+            case "page" -> OpType.PAGINATION;
+            case "auth" -> OpType.AUTH;
+            default -> OpType.DEFAULT;
+        };
     }
 
     public String getValue() {
