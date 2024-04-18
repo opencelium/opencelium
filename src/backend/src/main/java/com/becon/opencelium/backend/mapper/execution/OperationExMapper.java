@@ -257,7 +257,7 @@ public class OperationExMapper {
     }
 
     private RequestBodyDTO getRequestBody(BodyMng body, Long connectionId, String methodName) {
-        if(body == null){
+        if (body == null) {
             return null;
         }
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
@@ -286,20 +286,23 @@ public class OperationExMapper {
 
     private SchemaDTO getSchema(BodyMng body, Long connectionId, String methodName) {
         Map<String, Object> fields = body.getFields();
+        if (fields == null) {
+            return null;
+        }
         SchemaDTO schemaDTO = new SchemaDTO();
         schemaDTO.setType(DataType.OBJECT);
         Map<String, SchemaDTO> props = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : fields.entrySet()) {
             LinkedList<String> hierarchy = new LinkedList<>();
             hierarchy.add(entry.getKey());
-            if (body.getFormat().equals("json")) {
-                props.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), connectionId, methodName));
-            } else if (body.getFormat().equals("xml")) {
+            if (body.getFormat().equals("xml")) {
                 String name = entry.getKey();
                 if (name.contains(":")) {
                     name = name.split(":")[1];
                 }
                 props.put(name, getSchemaFromObjectXML(hierarchy, entry.getValue(), connectionId, methodName));
+            } else {
+                props.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), connectionId, methodName));
             }
         }
         schemaDTO.setXml(new XmlObjectDTO());
