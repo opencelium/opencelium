@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.enums.OpType;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
@@ -85,6 +86,9 @@ public class ConnectorExMapper {
                             } else {
                                 operation.setPagination(ff.getPagination());
                             }
+                            operation.setOperationType(OpType.PAGINATION);
+                        } else {
+                            operation.setOperationType(OpType.fromValue(ff.getType()));
                         }
                     }, () -> {
                         throw new RuntimeException("Method not found with name: " + operation.getName());
