@@ -257,10 +257,10 @@ public class OperationExMapper {
     }
 
     private RequestBodyDTO getRequestBody(BodyMng body, Long connectionId, String methodName) {
-        RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
         if(body == null){
-            return requestBodyDTO;
+            return null;
         }
+        RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
         MediaType mediaType = switch (body.getFormat()) {
             case "xml" -> MediaType.APPLICATION_XML;
             case "x-www-form-urlencoded" -> MediaType.APPLICATION_FORM_URLENCODED;
