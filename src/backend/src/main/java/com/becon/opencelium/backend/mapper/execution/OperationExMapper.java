@@ -256,8 +256,11 @@ public class OperationExMapper {
         return parameters;
     }
 
-    private RequestBodyDTO getRequestBody(@NonNull BodyMng body, Long connectionId, String methodName) {
+    private RequestBodyDTO getRequestBody(BodyMng body, Long connectionId, String methodName) {
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
+        if(body == null){
+            return requestBodyDTO;
+        }
         MediaType mediaType = switch (body.getFormat()) {
             case "xml" -> MediaType.APPLICATION_XML;
             case "x-www-form-urlencoded" -> MediaType.APPLICATION_FORM_URLENCODED;
@@ -282,8 +285,6 @@ public class OperationExMapper {
     }
 
     private SchemaDTO getSchema(BodyMng body, Long connectionId, String methodName) {
-        if (body == null || body.getFields() == null)
-            return null;
         Map<String, Object> fields = body.getFields();
         SchemaDTO schemaDTO = new SchemaDTO();
         schemaDTO.setType(DataType.OBJECT);

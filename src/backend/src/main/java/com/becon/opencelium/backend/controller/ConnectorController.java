@@ -129,6 +129,7 @@ public class ConnectorController {
         }
 
         Connector connector = connectorResourceMapper.toEntity(connectorResource);
+        connector.setId(0);
         Connector saved = connectorService.save(connector);
         return ResponseEntity.ok().body(connectorResourceMapper.toDTO(saved));
     }
