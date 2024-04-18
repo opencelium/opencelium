@@ -4,7 +4,7 @@ public enum OpType {
     TEST("test"),
     PAGINATION("page"),
     AUTH("auth"),
-    DEFAULT(null);
+    DEFAULT("");
     private final String value;
 
     OpType(String value) {
