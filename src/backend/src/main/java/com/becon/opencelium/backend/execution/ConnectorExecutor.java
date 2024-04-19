@@ -44,6 +44,7 @@ public class ConnectorExecutor {
     private final List<Object> executables;
     private final OcLogger<ExecutionLog> logger;
     private final String direction;
+    private static final String BREAK = "======================= %s %s -- INDEX: %s =======================";
 
     public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, String direction) {
         this.executionManager = executionManager;
@@ -100,7 +101,7 @@ public class ConnectorExecutor {
 
             // set up logger for the current operation
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
-            logger.logAndSend("============================================================================");
+            logger.logAndSend(String.format(BREAK, "FUNCTION", "START", index));
             logger.logAndSend(String.format(
                     "Function: %s -- next function: %s -- next operator: %s -- index: %s",
                     operation.getName(), next[0], next[1], index
@@ -112,7 +113,7 @@ public class ConnectorExecutor {
             logger.getLogEntity().setMethodData(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
-                logger.logAndSend("============================================================================");
+                logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "START", index));
                 logger.logAndSend(String.format(
                         "=============== %s =============== -- next function: %s -- next operator: %s -- index: %s",
                         operator.getCondition().getRelationalOperator(), next[0], next[1], index
@@ -126,11 +127,11 @@ public class ConnectorExecutor {
                     execute(headPointer + 1, tail, hasCircle, loopHead, loopTail);
                 }
             } else {
-                logger.logAndSend("=================================== LOOP ===================================");
-
                 Loop loop = Loop.fromEx(operator);
                 Object referencedList = executionManager.getValue(loop.getRef());
                 List<String> list = new ArrayList<>();
+
+                logger.logAndSend(String.format(BREAK, loop.getOperator().toString().toUpperCase(), "START", index));
 
                 if (ObjectUtils.isEmpty(referencedList)) {
                     // if list empty just do nothing
@@ -176,6 +177,7 @@ public class ConnectorExecutor {
                     "Operator: -- next function: %s -- next operator: %s -- type: %s -- index: %s",
                     next[0], next[1], operator.getType(), index)
             );
+            logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "END", index));
         } else {
             throw new RuntimeException("Wrong type is supplied");
         }
@@ -255,6 +257,7 @@ public class ConnectorExecutor {
                     responseEntity.getStatusCode());
         }
         logger.logAndSend("Response: " + responseEntity.getBody());
+        logger.logAndSend(String.format(BREAK, "FUNCTION", "END", getIndex(dto)));
 
         Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
