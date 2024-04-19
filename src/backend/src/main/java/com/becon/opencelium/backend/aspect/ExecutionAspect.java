@@ -17,15 +17,20 @@
 package com.becon.opencelium.backend.aspect;
 
 
+import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.LangEnum;
+import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
+import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.annotation.*;
+import org.openjdk.nashorn.api.scripting.JSObject;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -36,6 +41,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,12 +60,14 @@ public class ExecutionAspect {
     private final EmailServiceImpl emailService;
     private final Environment env;
     private final LastExecutionService lastExecutionService;
+    private final DataAggregatorService dataAggregatorService;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             @Qualifier("userServiceImpl") UserService userService,
             @Qualifier("executionServiceImp") ExecutionService executionService,
             @Qualifier("lastExecutionServiceImp") LastExecutionService lastExecutionService,
+            @Qualifier("dataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
             IncomingWebhookService incomingWebhookService,
             EmailServiceImpl emailService,
             Environment env
@@ -70,6 +79,7 @@ public class ExecutionAspect {
         this.emailService = emailService;
         this.env = env;
         this.lastExecutionService = lastExecutionService;
+        this.dataAggregatorService = dataAggregatorService;
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -97,7 +107,8 @@ public class ExecutionAspect {
 
         long execId = jobDataMap.getLong("execId");
         updateExecutionObj(execId, true);
-
+        List<Operation> operations = (List<Operation>) context.get("operationsEx");
+        executeAggregator(operations, execId);
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
     }
@@ -112,7 +123,8 @@ public class ExecutionAspect {
 
         long execId = jobDataMap.getLong("execId");
         updateExecutionObj(execId, false);
-
+        List<Operation> operations = (List<Operation>) context.get("operationsEx");
+        executeAggregator(operations, execId);
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
     }
@@ -334,5 +346,63 @@ public class ExecutionAspect {
             }
         });
         return cValues;
+    }
+
+    // TODO: Refactor so that Execution of aggregator should be in separate class;
+    private void executeAggregator(List<Operation> operations, long execId) {
+        Execution execution = executionService.getById(execId);
+        operations.stream()
+                .filter(op -> op.getAggregatorId() != null)
+                .forEach(op -> {
+                    DataAggregator da = dataAggregatorService.getById(op.getAggregatorId());
+                    if (!da.isActive()) {
+                        return;
+                    }
+                    List<JSHttpObject> responseObjects = op.getResponses().values()
+                            .stream()
+                            .map(JSHttpObject::new).toList();
+
+                    List<JSHttpObject> requestObjects = op.getRequests().values()
+                            .stream()
+                            .map(JSHttpObject::new).toList();
+                    List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), responseObjects, requestObjects, da.getArgs(), execution);
+                    execution.setExecutionArguments(exarg);
+                    if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {
+                        executionService.save(execution);
+                    }
+                });
+    }
+
+    private List<ExecutionArgument> getExecutionArgs(String script, List<JSHttpObject> responses, List<JSHttpObject> requests, Set<Argument> args, Execution execution) {
+        try {
+            ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+            String stringifiedResponses = new ObjectMapper().writeValueAsString(responses);
+            engine.put("dataModel", stringifiedResponses);
+            JSObject objRes = (JSObject)engine.eval("JSON.parse(dataModel)");
+            engine.put(AggrConst.RESPONSES, objRes);
+
+            String stringifiedRequests = new ObjectMapper().writeValueAsString(responses);
+            engine.put("dataModel", stringifiedRequests);
+            JSObject objReq = (JSObject)engine.eval("JSON.parse(dataModel)");
+            engine.put(AggrConst.REQUESTS, objReq);
+            engine.eval(script);
+
+            List<ExecutionArgument> executionArguments = new ArrayList<>();
+            args.forEach(arg -> {
+                Object value = engine.get(arg.getName());
+                if (value == null) {
+                    return;
+                }
+                ExecutionArgument executionArgument = new ExecutionArgument();
+                executionArgument.setExecution(execution);
+                executionArgument.setArgument(arg);
+                executionArgument.setValue(value.toString());
+                executionArguments.add(executionArgument);
+            });
+            return executionArguments;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -16,5 +16,6 @@ public interface ExecutionManager {
     Object executeScript(String bindId);
     Object getValue(String ref);
     void addOperation(Operation operation);
+    List<Operation> getAllOperations();
     void setCurrentCtorId(Integer ctorId);
 }

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service("DataAggregatorServiceImp")
+@Service
 public class DataAggregatorServiceImp implements DataAggregatorService {
 
     private final ArgumentService argumentService;

@@ -47,6 +47,6 @@ public class JobExecutor extends QuartzJobBean {
         ConnectionExecutor executor = new ConnectionExecutor(executionObj, simpMessagingTemplate);
 
         executor.start();
-        System.out.println("End of execution!");
+        context.put("operationsEx", executor.getOperations());
     }
 }

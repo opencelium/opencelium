@@ -115,6 +115,11 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
+    public List<Operation> getAllOperations() {
+        return operations;
+    }
+
+    @Override
     public void setCurrentCtorId(Integer ctorId) {
         this.currentCtorId = ctorId;
     }

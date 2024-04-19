@@ -31,7 +31,7 @@ public class AggregatorController {
     private final ArgumentService argumentService;
 
     @Autowired
-    public AggregatorController(@Qualifier("DataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
+    public AggregatorController(@Qualifier("dataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
                                 @Qualifier("ArgumentServiceImp") ArgumentService argumentService) {
         this.dataAggregatorService = dataAggregatorService;
         this.argumentService = argumentService;

@@ -1,21 +1,31 @@
 package com.becon.opencelium.backend.execution;
 
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
 
-public class JsResponseObject {
+public class JSHttpObject {
     private int status;
     private Map<String, String> header;
     private String body;
 
-    public JsResponseObject() {
+    public JSHttpObject() {
     }
 
-    public JsResponseObject(ResponseEntity<String> responseEntity) {
+    public JSHttpObject(RequestEntity<?> responseEntity) {
+        this.header = responseEntity.getHeaders().toSingleValueMap();
+        if (responseEntity.getBody() != null) {
+            this.body = responseEntity.getBody().toString();
+        }
+    }
+
+    public JSHttpObject(ResponseEntity<?> responseEntity) {
         this.status = responseEntity.getStatusCode().value();
         this.header = responseEntity.getHeaders().toSingleValueMap();
-        this.body = responseEntity.getBody();
+        if (responseEntity.getBody() != null) {
+            this.body = responseEntity.getBody().toString();
+        }
     }
 
     public int getStatus() {
