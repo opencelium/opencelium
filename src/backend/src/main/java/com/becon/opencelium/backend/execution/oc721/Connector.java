@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.oc721;
 
+import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 
 import java.util.Map;
@@ -11,6 +12,7 @@ public class Connector {
     private boolean sslCert;
     private int timeout;
     private boolean isActive;
+    private Pagination pagination;
     private Map<String, String> requiredData;
 
     public Integer getId() {
@@ -25,6 +27,7 @@ public class Connector {
         result.setSslCert(connectorEx.isSslCert());
         result.setTimeout(connectorEx.getTimeout());
         result.setActive(connectorEx.isAction());
+        result.setPagination(connectorEx.getPagination());
         result.setRequiredData(connectorEx.getRequiredData());
 
         return result;
@@ -72,6 +75,14 @@ public class Connector {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public Pagination getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Pagination pagination) {
+        this.pagination = pagination;
     }
 
     public Map<String, String> getRequiredData() {
