@@ -10,6 +10,8 @@ import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
+import com.becon.opencelium.backend.invoker.entity.Pagination;
+import com.becon.opencelium.backend.invoker.enums.PageParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 
 public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<String, Object> queryParams;
@@ -28,6 +32,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final List<FieldBind> fieldBind;
     private final List<Operation> operations = new ArrayList<>();
     private Integer currentCtorId;
+    private Pagination pagination;
 
     public ExecutionManagerImpl(Map<String, Object> queryParams, Connector connectorFrom, Connector connectorTo, List<FieldBind> fieldBind) {
         this.queryParams = queryParams;
@@ -104,6 +109,9 @@ public class ExecutionManagerImpl implements ExecutionManager {
     public Object getValue(String ref) {
         if (ref == null) {
             return null;
+        } else if (ref.matches(pageRef)) {
+            String param = ref.replace("@{", "").replace("}","");
+            return pagination.getParamValue(PageParam.fromString(param));
         }
 
         return refExtractor.extractValue(ref);
@@ -122,5 +130,10 @@ public class ExecutionManagerImpl implements ExecutionManager {
     @Override
     public void setCurrentCtorId(Integer ctorId) {
         this.currentCtorId = ctorId;
+    }
+
+    @Override
+    public void setPagination(Pagination pagination) {
+        this.pagination = pagination;
     }
 }

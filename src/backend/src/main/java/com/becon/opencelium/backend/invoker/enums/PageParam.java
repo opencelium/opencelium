@@ -10,6 +10,7 @@ public enum PageParam {
     CURSOR("cursor");
     private final String param;
     private static final Map<String, PageParam> STRING_TO_ENUM = new HashMap<>();
+
     PageParam(String param) {
         this.param = param;
     }
@@ -19,6 +20,7 @@ public enum PageParam {
             STRING_TO_ENUM.put(p.toString().toLowerCase(), p);
         }
     }
+
     public static PageParam fromString(String param) {
         PageParam pageParam = STRING_TO_ENUM.get(param.toLowerCase());
         if (pageParam != null) {
@@ -27,6 +29,7 @@ public enum PageParam {
         throw new IllegalArgumentException("Unknown pagination param: " + param + "\n" +
                 "Use following params: " + Arrays.toString(PageParam.values()));
     }
+
     @Override
     public String toString() {
         return param;

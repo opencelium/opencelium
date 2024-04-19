@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
+import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
@@ -83,8 +84,10 @@ public class ReferenceExtractor implements Extractor {
     }
 
     public static boolean isReference(String ref) {
-        return ref != null && (ref.matches(directRef) || ref.matches(responsePointer) ||
-                               ref.matches(queryParams) || ref.matches(requestData) || ref.matches(enhancement));
+        return ref != null && (
+            ref.matches(directRef) || ref.matches(responsePointer) || ref.matches(queryParams) ||
+            ref.matches(requestData) || ref.matches(enhancement) || ref.matches(pageRef)
+        );
     }
 
     private Object extractFromEnhancement(String ref) {
@@ -225,6 +228,10 @@ public class ReferenceExtractor implements Extractor {
     }
 
     public static String bodyToString(Object body) {
+        if (body instanceof String result) {
+            return result;
+        }
+        
         try {
             return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
         } catch (Exception e) {
