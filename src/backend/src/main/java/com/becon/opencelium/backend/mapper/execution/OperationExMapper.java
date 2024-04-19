@@ -65,6 +65,7 @@ public class OperationExMapper {
         operationDTO.setOperationId(method.getColor());
         operationDTO.setHttpMethod(HttpMethod.valueOf(method.getRequest().getMethod()));
         operationDTO.setName(method.getName());
+        operationDTO.setAggregatorId(method.getDataAggregator());
         operationDTO.setPath(method.getRequest().getEndpoint());
         operationDTO.setExecOrder(method.getIndex());
         operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), connectionId, method.getName()));

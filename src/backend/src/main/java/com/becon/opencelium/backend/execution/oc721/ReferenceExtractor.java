@@ -83,7 +83,8 @@ public class ReferenceExtractor implements Extractor {
     }
 
     public static boolean isReference(String ref) {
-        return ref != null && (ref.matches(directRef) || ref.matches(responsePointer) || ref.matches(queryParams) || ref.matches(requestData) || ref.matches(enhancement));
+        return ref != null && (ref.matches(directRef) || ref.matches(responsePointer) ||
+                               ref.matches(queryParams) || ref.matches(requestData) || ref.matches(enhancement));
     }
 
     private Object extractFromEnhancement(String ref) {

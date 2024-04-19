@@ -351,6 +351,9 @@ public class ExecutionAspect {
     // TODO: Refactor so that Execution of aggregator should be in separate class;
     private void executeAggregator(List<Operation> operations, long execId) {
         Execution execution = executionService.getById(execId);
+        if (operations == null) {
+            return;
+        }
         operations.stream()
                 .filter(op -> op.getAggregatorId() != null)
                 .forEach(op -> {
