@@ -86,7 +86,7 @@ public class PageParamRule {
         return clone;
     }
 
-    private String parseRef(Function<Integer, String> function){
+    private String parseRef(Function<Integer, String> function) {
         if (ref == null || ref.isEmpty()) {
             return "";
         }

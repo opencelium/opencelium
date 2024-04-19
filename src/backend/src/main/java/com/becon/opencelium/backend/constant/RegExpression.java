@@ -15,4 +15,5 @@ public interface RegExpression {
     String directRef = "#[a-zA-Z0-9]{6}\\.(\\(response\\)|\\(request\\))\\..+";
     String enhancement = "#\\{%[0-9a-fA-F]{24}%\\}";
     String requestData = "\\{(.*?)\\}";
+    String pageRef = "@\\{([^}]+)\\}";
 }

@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.enums.LogType;
+import com.becon.opencelium.backend.enums.OpType;
 import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
@@ -14,16 +15,21 @@ import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
+import com.becon.opencelium.backend.invoker.entity.Pagination;
+import com.becon.opencelium.backend.invoker.enums.PageParam;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,7 +66,7 @@ public class ConnectorExecutor {
 
     public void start() {
         logger.getLogEntity().setType(LogType.INFO);
-        logger.getLogEntity().setConnector( new ConnectorLog(connector.getName(), direction));
+        logger.getLogEntity().setConnector(new ConnectorLog(connector.getName(), direction));
 
         // set id of currently executing connector
         executionManager.setCurrentCtorId(connector.getId());
@@ -180,34 +186,84 @@ public class ConnectorExecutor {
         execute(tail + 1, tailPointer, hasCircle, loopHead, loopTail);
     }
 
-    private void executeOperation(OperationDTO operationDTO) {
-        RequestEntity<?> requestEntity = RequestEntityBuilder.start()
-                .forOperation(operationDTO)
-                .usingReferences(executionManager::getValue)
-                .createRequest();
+    private void executeOperation(OperationDTO dto) {
+        Pagination pagination = null;
+        if (dto.getOperationType() == OpType.PAGINATION) {
+            pagination = dto.getPagination() != null ? dto.getPagination() : connector.getPagination();
 
-        logger.logAndSend("Http Method: " + requestEntity.getMethod());
-        logger.logAndSend("URL: " + requestEntity.getUrl());
-        logger.logAndSend("Header: " + requestEntity.getHeaders());
-        logger.logAndSend("Body: " + requestEntity.getBody());
-
-        MediaType mediaType = operationDTO.getRequestBody() == null ? MediaType.APPLICATION_JSON : operationDTO.getRequestBody().getContent();
-        ResponseEntity<?> responseEntity;
-        if (MediaType.APPLICATION_XML.isCompatibleWith(mediaType)) {
-            responseEntity = this.restTemplate.exchange(requestEntity, String.class);
-        } else {
-            responseEntity = this.restTemplate.exchange(requestEntity, Object.class);
+            if (pagination != null) {
+                pagination = pagination.clone();
+                executionManager.setPagination(pagination);
+            }
         }
 
-        logger.logAndSend("============================================================================");
-        logger.logAndSend("Response: " + responseEntity.getBody());
-        logger.logAndSend(String.format(BREAK, "FUNCTION", "END", getIndex(operationDTO)));
+        boolean hasMore = false;
+        RequestEntity<?> requestEntity = null;
+        ResponseEntity<?> responseEntity;
+        do {
+            requestEntity = RequestEntityBuilder.start()
+                    .forOperation(dto)
+                    .usingReferences(executionManager::getValue)
+                    .createRequest();
 
-        Operation operation = executionManager.findOperationByColor(operationDTO.getOperationId())
+            URI uri = requestEntity.getUrl();
+            if (pagination != null && pagination.existsParam(PageParam.LINK)) {
+                String nextElemLink = pagination.findParam(PageParam.LINK).getValue();
+                if (nextElemLink != null && !nextElemLink.isEmpty()) {
+                    try {
+                        uri = new URI(nextElemLink);
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+            logger.logAndSend("Http Method: " + requestEntity.getMethod());
+            logger.logAndSend("URL: " + uri);
+            logger.logAndSend("Header: " + requestEntity.getHeaders());
+            logger.logAndSend("Body: " + requestEntity.getBody());
+            logger.logAndSend("============================================================================");
+
+            HttpEntity<Object> httpEntity;
+            if (requestEntity.getBody() == null) {
+                httpEntity = new HttpEntity<>(requestEntity.getHeaders());
+            } else {
+                httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
+            }
+
+            MediaType mediaType;
+            if (dto.getRequestBody() != null && dto.getRequestBody().getContent() != null) {
+                mediaType = dto.getRequestBody().getContent();
+            } else {
+                mediaType = requestEntity.getHeaders().getContentType();
+            }
+
+            if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
+                responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, Object.class);
+            } else {
+                responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, String.class);
+            }
+
+            if (pagination != null) {
+                pagination.updateParamValues(responseEntity, mediaType);
+                hasMore = pagination.hasMore();
+            }
+        } while (hasMore);
+
+        if (pagination != null) {
+            String paginatedBody = pagination.findParam(PageParam.RESULT).getValue();
+            responseEntity = new ResponseEntity<>(paginatedBody,
+                    responseEntity.getHeaders(),
+                    responseEntity.getStatusCode());
+        }
+        logger.logAndSend("Response: " + responseEntity.getBody());
+        logger.logAndSend(String.format(BREAK, "FUNCTION", "END", getIndex(dto)));
+
+        Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
                     int loopDepth = executionManager.getLoops().size(); // in which depth the operation is executed
 
-                    Operation newOperation = Operation.fromDTO(operationDTO, loopDepth);
+                    Operation newOperation = Operation.fromDTO(dto, loopDepth);
                     executionManager.addOperation(newOperation);
 
                     return newOperation;
@@ -263,7 +319,7 @@ public class ConnectorExecutor {
         Object next;
         if (hasCircle && lastExecuted == loopTail) {
             next = executables.get(loopHead + 1);
-        } else if (lastExecuted + 1 < executables.size()){
+        } else if (lastExecuted + 1 < executables.size()) {
             next = executables.get(lastExecuted + 1);
         } else {
             return result;

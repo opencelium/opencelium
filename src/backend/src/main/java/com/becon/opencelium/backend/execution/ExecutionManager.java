@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.invoker.entity.Pagination;
 
 import java.util.List;
 import java.util.Map;
@@ -17,4 +18,5 @@ public interface ExecutionManager {
     Object getValue(String ref);
     void addOperation(Operation operation);
     void setCurrentCtorId(Integer ctorId);
+    void setPagination(Pagination pagination);
 }
