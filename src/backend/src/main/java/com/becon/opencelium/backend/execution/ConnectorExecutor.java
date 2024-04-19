@@ -191,6 +191,7 @@ public class ConnectorExecutor {
 
             if (pagination != null) {
                 pagination = pagination.clone();
+                executionManager.setPagination(pagination);
             }
         }
 
