@@ -229,7 +229,13 @@ public class ConnectorExecutor {
                 httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
             }
 
-            MediaType mediaType = dto.getRequestBody() == null ? MediaType.APPLICATION_JSON : dto.getRequestBody().getContent();
+            MediaType mediaType;
+            if (dto.getRequestBody() != null && dto.getRequestBody().getContent() != null) {
+                mediaType = dto.getRequestBody().getContent();
+            } else {
+                mediaType = requestEntity.getHeaders().getContentType();
+            }
+
             if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
                 responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, Object.class);
             } else {
