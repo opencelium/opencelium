@@ -9,10 +9,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 @Component
@@ -175,5 +172,18 @@ public class PatchHelper {
 
     public int getIndexOfList(int idx, int size) {
         return idx == -1 ? size - 1 : idx;
+    }
+
+    public JsonPatch changeEachValue(JsonPatch patch, Object obj) {
+        JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        List<JsonNode> nodeList = new ArrayList<>();
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            ((ObjectNode) next).remove("value");
+            ((ObjectNode) next).put("value", mapper.createObjectNode());
+            nodeList.add(next);
+        }
+        return mapper.convertValue(nodeList, JsonPatch.class);
     }
 }

@@ -1,0 +1,18 @@
+versions:
+  - version: 1.0
+    changes:
+      - changeset: 1
+        path: server.port
+        value: 8082
+        operation: add
+      - changeset: 2
+        path: server.error.path
+        value: /error
+        operation: add
+      - changeset: 3
+        path: spring.obid
+        value: Obid
+        operation: add
+      - changeset: 4
+        path: spring.obid
+        operation: remove

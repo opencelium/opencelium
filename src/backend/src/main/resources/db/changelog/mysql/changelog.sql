@@ -427,3 +427,14 @@ ALTER TABLE connection ADD COLUMN IF NOT EXISTS category_id INT NULL;
 
 ----changeset 4.0:15 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 --ALTER TABLE event_recipient MODIFY COLUMN destination TEXT;
+
+--changeset 4.0:17 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE change_set_yml (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    version VARCHAR(20) NOT NULL,
+    op VARCHAR(10) NOT NULL,
+    value VARCHAR(255),
+    path VARCHAR(255) NOT NULL,
+    timestamp BIGINT NOT NULL,
+    success bool default false
+);

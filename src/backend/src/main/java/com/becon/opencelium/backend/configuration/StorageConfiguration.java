@@ -24,11 +24,14 @@ import com.becon.opencelium.backend.database.mysql.service.RequestDataService;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.storage.UserStorageService;
+import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
+import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,20 +44,22 @@ public class StorageConfiguration {
     private final UserStorageService userStorageService;
 
     private final ConnectorService connectorService;
-
     private final InvokerContainer invokerContainer;
     private final RequestDataService requestDataService;
+    private final ChangeSetDao changeSetDao;
 
     public StorageConfiguration(
             UserStorageService userStorageService,
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("requestDataServiceImp") RequestDataService requestDataService,
-            InvokerContainer invokerContainer
+            InvokerContainer invokerContainer,
+            DataSource dataSource
     ) {
         this.userStorageService = userStorageService;
         this.connectorService = connectorService;
         this.invokerContainer = invokerContainer;
         this.requestDataService = requestDataService;
+        this.changeSetDao = new ChangeSetDao(dataSource);
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -111,5 +116,10 @@ public class StorageConfiguration {
         // creates storage for files
         userStorageService.init();
         // create defou
+
+        if (YAMLMigrator.changeSetsToSave != null) {
+            changeSetDao.createAll(YAMLMigrator.changeSetsToSave);
+            YAMLMigrator.changeSetsToSave = null;
+        }
     }
 }
