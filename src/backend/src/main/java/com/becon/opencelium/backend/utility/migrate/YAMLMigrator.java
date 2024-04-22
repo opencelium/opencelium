@@ -78,7 +78,7 @@ public class YAMLMigrator {
         String fullVersionOfLastChangeSetInFile = getLastChangeSetVersionToApply(changelog);
 
         // there is not any new changes
-        if (lastSavedSet != null && isGreaterThanOrEqual(lastSavedSet.getVersion(), fullVersionOfLastChangeSetInFile)) {
+        if (fullVersionOfLastChangeSetInFile ==null || lastSavedSet != null && isGreaterThanOrEqual(lastSavedSet.getVersion(), fullVersionOfLastChangeSetInFile)) {
             return;
         }
 
@@ -156,6 +156,9 @@ public class YAMLMigrator {
     //TODO: must be refactored
     private static String getLastChangeSetVersionToApply(Map<String, Object> changelog) {
         ArrayList<Map<String, Object>> versions = (ArrayList<Map<String, Object>>) changelog.getOrDefault("versions", new ArrayList<>());
+        if(versions == null || versions.isEmpty()){
+            return null;
+        }
         Map<String, Object> lastVersion = versions.get(versions.size() - 1);
         Double version = (Double) lastVersion.get("version");
         ArrayList<Map<String, Object>> changes = (ArrayList<Map<String, Object>>) lastVersion.getOrDefault("changes", new ArrayList<>());
