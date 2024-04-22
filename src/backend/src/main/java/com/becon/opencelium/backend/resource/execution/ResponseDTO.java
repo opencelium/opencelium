@@ -2,8 +2,6 @@ package com.becon.opencelium.backend.resource.execution;
 
 import org.springframework.http.MediaType;
 
-import java.util.Map;
-
 public class ResponseDTO {
     private MediaType content;
     private String status; //success or fail

@@ -227,7 +227,7 @@ public class ConnectorExecutor {
             logger.logAndSend("============================================================================");
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
-            Class<?> responseType = getResponseType(dto, requestEntity.getHeaders());
+            Class<?> responseType = getResponseType(dto);
 
             responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
 
@@ -289,37 +289,12 @@ public class ConnectorExecutor {
         return operator.apply(leftValue, rightValue);
     }
 
-    private Class<?> getResponseType(OperationDTO dto, HttpHeaders headers) {
-        // look through responses to identify response type
+    private Class<?> getResponseType(OperationDTO dto) {
+        MediaType mediaType = null;
         for (ResponseDTO response : dto.getResponses()) {
             if ("success".equals(response.getStatus())) {
-                if ("json".equals(response.getFormat())) {
-                    // response has format == 'json'
-                    return Object.class;
-                } else if (response.getFormat() != null) {
-                    // response has format != null & != 'json'
-                    return String.class;
-                }
-
-                if (response.getHeader() != null && response.getHeader().containsKey("Content-Type")) {
-                    String contentType = response.getHeader().get("Content-Type");
-                    if ("application/json".equals(contentType)) {
-                        // response header has content type = 'application/json'
-                        return Object.class;
-                    } else if (contentType != null) {
-                        // response header has content type != null & != 'application/json'
-                        return String.class;
-                    }
-                }
+                mediaType = response.getContent();
             }
-        }
-
-        // if success response does not have info on content type, then look through request
-        MediaType mediaType = null;
-        if (dto.getRequestBody() != null && dto.getRequestBody().getContent() != null) {
-            mediaType = dto.getRequestBody().getContent();
-        } else if (headers.getContentType() != null){
-            mediaType = headers.getContentType();
         }
 
         return MediaType.APPLICATION_JSON.isCompatibleWith(mediaType) ? Object.class : String.class;
