@@ -1,11 +1,13 @@
 package com.becon.opencelium.backend.resource.execution;
 
+import org.springframework.http.MediaType;
+
 import java.util.Map;
 
 public class ResponseDTO {
+    private MediaType content;
     private String status; //success or fail
     private String code;
-    private Map<String, String> header;
     private String format;
     private String data;
 
@@ -15,14 +17,6 @@ public class ResponseDTO {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public Map<String, String> getHeader() {
-        return header;
-    }
-
-    public void setHeader(Map<String, String> header) {
-        this.header = header;
     }
 
     public String getFormat() {
@@ -47,5 +41,13 @@ public class ResponseDTO {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public MediaType getContent() {
+        return content;
+    }
+
+    public void setContent(MediaType content) {
+        this.content = content;
     }
 }

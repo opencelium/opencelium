@@ -63,7 +63,7 @@ public class ConnectorExMapper {
         connectorEx.setRequiredData(map);
 
         connectorEx.setId(dto.getConnectorId());
-        connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(), connectionId));
+        connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(), connectionId, connector.getInvoker()));
         connectorEx.setOperators(operatorExMapper.toEntityAll(dto.getOperators()));
 
         setPagination(connectorEx, invoker);

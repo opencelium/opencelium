@@ -5,6 +5,8 @@ import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
+import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,29 +36,25 @@ public class OperationExMapper {
         this.connectorService = connectorService;
     }
 
-    public List<OperationDTO> toOperationAll(List<MethodMng> methods, Long connectionId) {
+    public List<OperationDTO> toOperationAll(List<MethodMng> methods, Long connectionId, String invoker) {
         if (methods == null || methods.isEmpty()) {
             return Collections.emptyList();
         }
         List<OperationDTO> operations = new ArrayList<>();
         for (MethodMng method : methods) {
-            operations.add(toOperation(method, connectionId));
+            operations.add(toOperation(method, connectionId, invoker));
         }
         return operations;
     }
 
-    public OperationDTO toOperation(@NonNull MethodMng method, Long connectionId) {
-        Map<String, String> header = method.getRequest().getHeader();
-        MediaType mediaType = null;
-        if (header != null) {
-            if (header.containsKey(HEADER_CONTENT_TYPE)) {
-                mediaType = MediaType.valueOf(header.get(HEADER_CONTENT_TYPE));
-            }
-        } else {
-            method.getRequest().setHeader(new HashMap<>());
-        }
-        //Content-Type in the header is being set to path and header parameters as a mediatype !!!
-        //RequestBody's mediatype will be taken from body's format !!!
+    public OperationDTO toOperation(@NonNull MethodMng method, Long connectionId, String invokerStr) {
+        Invoker invoker = invokerService.findByName(invokerStr);
+        List<FunctionInvoker> operations = invoker.getOperations();
+        FunctionInvoker fiv = operations.stream()
+                .filter(o -> o.getName().equals(method.getName()))
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("No operation found for name: " + method.getName()));
+        MediaType mediaType = getMediaType(method, fiv);
 
         OperationDTO operationDTO = new OperationDTO();
         operationDTO.setOperationId(method.getColor());
@@ -65,20 +63,58 @@ public class OperationExMapper {
         operationDTO.setAggregatorId(method.getDataAggregator());
         operationDTO.setPath(method.getRequest().getEndpoint());
         operationDTO.setExecOrder(method.getIndex());
-        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), connectionId, method.getName()));
-        operationDTO.setResponses(getResponses(method.getResponse()));
+        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), connectionId, method.getName(), mediaType));
+        operationDTO.setResponses(getResponses(method.getResponse(), fiv));
         operationDTO.setParameters(getParameters(method.getRequest(), mediaType));
         return operationDTO;
     }
 
-    private List<ResponseDTO> getResponses(ResponseMng response) {
+    private MediaType getMediaType(MethodMng methodMng, FunctionInvoker fiv) {
+        MediaType mediaType;
+        if ((mediaType = getContentTypeFromHeader(methodMng.getRequest().getHeader())) != null) {
+            return mediaType;
+        }
+
+        if ((mediaType = getContentTypeFromHeader(fiv.getRequest().getHeader())) != null) {
+            return mediaType;
+        }
+
+        if (methodMng.getRequest().getBody() != null && (mediaType = getMediaTypeFromBody(methodMng.getRequest().getBody().getFormat())) != null) {
+            return mediaType;
+        }
+        return fiv.getRequest().getBody() == null || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null ? MediaType.APPLICATION_JSON : mediaType;
+    }
+
+    private MediaType getContentTypeFromHeader(Map<String, String> header) {
+        if (header != null && header.containsKey(HEADER_CONTENT_TYPE)) {
+            String contentType = header.get(HEADER_CONTENT_TYPE);
+            if (contentType != null) {
+                try {
+                    return MediaType.parseMediaType(contentType);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return null;
+    }
+
+    private MediaType getMediaTypeFromBody(String format) {
+        return switch (format) {
+            case "xml" -> MediaType.APPLICATION_XML;
+            case "json" -> MediaType.APPLICATION_JSON;
+            case "text" -> MediaType.TEXT_PLAIN;
+            case "x-www-form-urlencoded" -> MediaType.APPLICATION_FORM_URLENCODED;
+            default -> null;
+        };
+    }
+
+    private List<ResponseDTO> getResponses(ResponseMng response, FunctionInvoker fiv) {
         List<ResponseDTO> res = new ArrayList<>(2);
         if (response == null) {
             return res;
         }
         if (response.getSuccess() != null) {
             ResponseDTO success = new ResponseDTO();
-            success.setHeader(response.getSuccess().getHeader());
             success.setStatus("success");
             success.setCode(response.getSuccess().getStatus());
             if (response.getSuccess().getBody() != null) {
@@ -86,10 +122,11 @@ public class OperationExMapper {
                 success.setData(response.getSuccess().getBody().getData());
             }
             res.add(success);
+            MediaType mt = getContentTypeFromHeader(fiv.getResponse().getSuccess().getHeader());
+            success.setContent(mt==null ? MediaType.APPLICATION_JSON : mt);
         }
         if (response.getFail() != null) {
             ResponseDTO fail = new ResponseDTO();
-            fail.setHeader(response.getFail().getHeader());
             fail.setStatus("fail");
             fail.setCode(response.getFail().getStatus());
             if (response.getFail().getBody() != null) {
@@ -97,6 +134,8 @@ public class OperationExMapper {
                 fail.setData(response.getFail().getBody().getData());
             }
             res.add(fail);
+            MediaType mt = getContentTypeFromHeader(fiv.getResponse().getFail().getHeader());
+            fail.setContent(mt==null ? MediaType.APPLICATION_JSON : mt);
         }
         return res;
     }
@@ -285,18 +324,11 @@ public class OperationExMapper {
         return parameters;
     }
 
-    private RequestBodyDTO getRequestBody(BodyMng body, Long connectionId, String methodName) {
+    private RequestBodyDTO getRequestBody(BodyMng body, Long connectionId, String methodName, MediaType mediaType) {
         if (body == null) {
             return null;
         }
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
-        MediaType mediaType = switch (body.getFormat()) {
-            case "xml" -> MediaType.APPLICATION_XML;
-            case "x-www-form-urlencoded" -> MediaType.APPLICATION_FORM_URLENCODED;
-            case "form-data" -> MediaType.MULTIPART_FORM_DATA;
-            case "graphql+json" -> MediaType.APPLICATION_GRAPHQL;
-            default -> MediaType.APPLICATION_JSON;
-        };
         requestBodyDTO.setContent(mediaType);
         requestBodyDTO.setSchema(getSchema(body, connectionId, methodName));
         return requestBodyDTO;
@@ -334,7 +366,9 @@ public class OperationExMapper {
                 props.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), connectionId, methodName));
             }
         }
-        schemaDTO.setXml(new XmlObjectDTO());
+        if(body.getFormat().equals("xml")){
+            schemaDTO.setXml(new XmlObjectDTO());
+        }
         schemaDTO.setProperties(props);
         return schemaDTO;
     }
@@ -343,39 +377,6 @@ public class OperationExMapper {
     private static final String OC_ATTRIBUTES = "__oc__attributes";
 
     private void setXML(SchemaDTO currSchema, Map<String, String> map) {
-        /*
-            name is not null when it is an attribute. In other cases it will be ignored
-            namespace is not null when it is an attribute and prefix!=null
-            prefix will be detected from field's name.
-            ex. If field's name is 'amp:amp_ap_list', then prefix = amp, schema's name = amp_ap_list and namespace also must be given
-            attribute: true if and only if it is attribute
-            wrapped: false(always?)
-         */
-
-        /*
-        "amp:amp_ap_detail": {
-               "__oc__attributes": {
-                     "xmlns:amp": "http://www.airwave.com",
-                     "id":"123"
-                },
-                "ap":"aaa"
-         }
-         ---------------------------------------------
-         amp_ap_detail:
-            type: object
-            properties:
-                ap:
-                    type: string
-                    value: aaa
-                id:
-                    type: string
-                    value: 123
-                    xml:
-                        attribute: true
-            xml:
-                namespace: http://www.airwave.com
-                prefix: amp
-         */
         for (Map.Entry<String, String> entry : map.entrySet()) {
             if (entry.getKey().contains("xmlns:")) {
                 XmlObjectDTO xmlObjectDTO = new XmlObjectDTO();
