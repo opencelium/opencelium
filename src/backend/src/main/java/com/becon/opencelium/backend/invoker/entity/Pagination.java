@@ -4,19 +4,28 @@ import com.becon.opencelium.backend.invoker.enums.PageParam;
 import com.becon.opencelium.backend.invoker.enums.PageParamAction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.ReadContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+import java.io.StringReader;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -209,9 +218,8 @@ public class Pagination implements Cloneable {
                 case "header":
                     return headers.getFirst(param);
                 case "body":
-                    // TODO: Add xml support
-                    ReadContext ctx = JsonPath.parse(payload);
-                    Object res = ctx.read(getRefPath(path));
+                    Object res = getValueFromBody(getRefPath(path));
+
                     if (res == null) {
                         return "";
                     }
@@ -220,6 +228,46 @@ public class Pagination implements Cloneable {
                     throw new RuntimeException(location + " not found in path " + path + ". Should be one of [header, url, body]");
             }
             return "";
+        }
+
+        private Object getValueFromBody(String jsonPath) {
+            if (MediaType.APPLICATION_JSON.isCompatibleWith(headers.getContentType())) {
+                return JsonPath.read(payload, jsonPath);
+            } else {
+                jsonPath = jsonPath.replaceFirst("\\$", ".");
+                String xpathQuery = jsonPath.replace(".", "/");
+
+                try {
+                    XPath xpath = XPathFactory.newInstance().newXPath();
+
+                    List<String> cpart = Arrays.asList(xpathQuery.split("/"));
+
+                    String lastElem = cpart.get(cpart.size() - 1);
+                    if (!lastElem.contains("@") && !(lastElem.contains("[*]") || lastElem.contains("[]"))) {
+                        xpathQuery = xpathQuery + "/text()";
+                    }
+
+                    DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                    Document xmlDocument = builder.parse(new InputSource(new StringReader(payload)));
+
+                    NodeList nodeList = (NodeList) xpath.compile(xpathQuery).evaluate(xmlDocument, XPathConstants.NODESET);
+                    ArrayList<Object> result = new ArrayList<>();
+                    for (int j = 0; j < nodeList.getLength(); j++) {
+                        Node node = nodeList.item(j);
+                        result.add(node.getNodeValue());
+                    }
+
+                    if (result.isEmpty()) {
+                        return null;
+                    } else if (result.size() == 1) {
+                        return result.get(0);
+                    } else {
+                        return result;
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
         private String getRefSuffix(String ref) {
