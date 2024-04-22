@@ -95,61 +95,16 @@ public class Pagination implements Cloneable {
         return this.currentSize;
     }
 
-    // example:  http://localhost:9090/api/@{var1}/path?offset=@{var2}
-    // adds params if  reference is not null. works with query params
-    public URI insertPageValue(URI uri) throws URISyntaxException {
-        String url = uri.toString();
-        for (PageParamRule paramRule : pageParamRules) {
-            String ref = paramRule.getRef();
-            if (ref == null) {
-                continue;
-            }
-            PageParamAction action = paramRule.getAction();
-            if (ref.contains("request.url.$")) {
-                String param = paramRule.getRefSuffix();
-                if (!action.equals(PageParamAction.WRITE)) {
-                    continue;
-                }
-                url = uri.getRawQuery() == null ? url.concat("?" + param + "=" + paramRule.getValue())
-                        : url.concat("&" + param + "=" + paramRule.getValue());
-            }
-        }
-        return new URI(url);
-    }
-
-    // Works only with references. If reference is not null or empty then it inserts or reads.
-    public void insertPageValue(HttpHeaders headers) {
-        pageParamRules.stream().filter(paramRule -> paramRule.getRef() != null)
-                .filter(paramRule -> paramRule.getRef().contains("request.header.$"))
-                .filter(paramRule -> paramRule.getAction().equals(PageParamAction.WRITE))
-                .forEach(paramRule -> {
-                    String key = paramRule.getRefSuffix();
-                    headers.add(key, paramRule.getValue());
-                });
-    }
-
-    public String insertPageValue(String payload) {
-        final String[] result = new String[1];
-        pageParamRules.stream().filter(paramRule -> paramRule.getRef().equals("request.body.$"))
-                .filter(paramRule -> paramRule.getAction().equals(PageParamAction.WRITE))
-                .forEach(paramRule -> {
-                    String path = paramRule.getRefPath();
-                    // TODO: test for an array
-                    // TODO: Add xml support
-                    result[0] = JsonPath.parse(payload).set(path, paramRule.getValue()).json();
-                });
-        return result[0];
-    }
-
-    public void updateParamValues(ResponseEntity<?> response, MediaType mediaType) {
-        if (mediaType == null && response.getHeaders().getContentType() != null) {
-            mediaType = response.getHeaders().getContentType();
-        } else {
-            mediaType = MediaType.APPLICATION_JSON;
+    public void updateParamValues(ResponseEntity<?> response, Class<?> responseType) {
+        boolean needConversion = true;
+        if (response.getHeaders().getContentType() != null && !MediaType.APPLICATION_JSON.isCompatibleWith(response.getHeaders().getContentType())) {
+            needConversion = false;
+        } else if (responseType.equals(String.class)) {
+            needConversion = false;
         }
 
         String body;
-        if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
+        if (needConversion) {
             try {
                 body = new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(response.getBody());
             } catch (Exception e) {

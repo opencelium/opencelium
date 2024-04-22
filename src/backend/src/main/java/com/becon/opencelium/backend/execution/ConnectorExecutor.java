@@ -17,14 +17,8 @@ import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.invoker.enums.PageParam;
-import com.becon.opencelium.backend.resource.execution.ConditionEx;
-import com.becon.opencelium.backend.resource.execution.ConnectorEx;
-import com.becon.opencelium.backend.resource.execution.OperationDTO;
-import com.becon.opencelium.backend.resource.execution.OperatorEx;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
+import com.becon.opencelium.backend.resource.execution.*;
+import org.springframework.http.*;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -224,28 +218,13 @@ public class ConnectorExecutor {
             logger.logAndSend("Body: " + requestEntity.getBody());
             logger.logAndSend("============================================================================");
 
-            HttpEntity<Object> httpEntity;
-            if (requestEntity.getBody() == null) {
-                httpEntity = new HttpEntity<>(requestEntity.getHeaders());
-            } else {
-                httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
-            }
+            HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
+            Class<?> responseType = getResponseType(dto, requestEntity.getHeaders());
 
-            MediaType mediaType;
-            if (dto.getRequestBody() != null && dto.getRequestBody().getContent() != null) {
-                mediaType = dto.getRequestBody().getContent();
-            } else {
-                mediaType = requestEntity.getHeaders().getContentType();
-            }
-
-            if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
-                responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, Object.class);
-            } else {
-                responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, String.class);
-            }
+            responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
 
             if (pagination != null) {
-                pagination.updateParamValues(responseEntity, mediaType);
+                pagination.updateParamValues(responseEntity, responseType);
                 hasMore = pagination.hasMore();
             }
         } while (hasMore);
@@ -300,6 +279,42 @@ public class ConnectorExecutor {
         Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(condition.getRelationalOperator());
 
         return operator.apply(leftValue, rightValue);
+    }
+
+    private Class<?> getResponseType(OperationDTO dto, HttpHeaders headers) {
+        // look through responses to identify response type
+        for (ResponseDTO response : dto.getResponses()) {
+            if ("success".equals(response.getStatus())) {
+                if ("json".equals(response.getFormat())) {
+                    // response has format == 'json'
+                    return Object.class;
+                } else if (response.getFormat() != null) {
+                    // response has format != null & != 'json'
+                    return String.class;
+                }
+
+                if (response.getHeader() != null && response.getHeader().containsKey("Content-Type")) {
+                    String contentType = response.getHeader().get("Content-Type");
+                    if ("application/json".equals(contentType)) {
+                        // response header has content type = 'application/json'
+                        return Object.class;
+                    } else if (contentType != null) {
+                        // response header has content type != null & != 'application/json'
+                        return String.class;
+                    }
+                }
+            }
+        }
+
+        // if success response does not have info on content type, then look through request
+        MediaType mediaType = null;
+        if (dto.getRequestBody() != null && dto.getRequestBody().getContent() != null) {
+            mediaType = dto.getRequestBody().getContent();
+        } else if (headers.getContentType() != null){
+            mediaType = headers.getContentType();
+        }
+
+        return MediaType.APPLICATION_JSON.isCompatibleWith(mediaType) ? Object.class : String.class;
     }
 
     private int getTailPointer(int headPointer) {
