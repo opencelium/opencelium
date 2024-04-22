@@ -1,10 +1,7 @@
 package com.becon.opencelium.backend.mapper.execution;
 
 import com.becon.opencelium.backend.constant.RegExpression;
-import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
-import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
+import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
@@ -69,8 +66,39 @@ public class OperationExMapper {
         operationDTO.setPath(method.getRequest().getEndpoint());
         operationDTO.setExecOrder(method.getIndex());
         operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), connectionId, method.getName()));
+        operationDTO.setResponses(getResponses(method.getResponse()));
         operationDTO.setParameters(getParameters(method.getRequest(), mediaType));
         return operationDTO;
+    }
+
+    private List<ResponseDTO> getResponses(ResponseMng response) {
+        List<ResponseDTO> res = new ArrayList<>(2);
+        if (response == null) {
+            return res;
+        }
+        if (response.getSuccess() != null) {
+            ResponseDTO success = new ResponseDTO();
+            success.setHeader(response.getSuccess().getHeader());
+            success.setStatus("success");
+            success.setCode(response.getSuccess().getStatus());
+            if (response.getSuccess().getBody() != null) {
+                success.setFormat(response.getSuccess().getBody().getFormat());
+                success.setData(response.getSuccess().getBody().getData());
+            }
+            res.add(success);
+        }
+        if (response.getFail() != null) {
+            ResponseDTO fail = new ResponseDTO();
+            fail.setHeader(response.getFail().getHeader());
+            fail.setStatus("fail");
+            fail.setCode(response.getFail().getStatus());
+            if (response.getFail().getBody() != null) {
+                fail.setFormat(response.getFail().getBody().getFormat());
+                fail.setData(response.getFail().getBody().getData());
+            }
+            res.add(fail);
+        }
+        return res;
     }
 
     /**
