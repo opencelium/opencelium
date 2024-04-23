@@ -86,10 +86,19 @@ public class Neo4jDriverUtility {
                 } else if (lastNodeOfNextRecord.hasLabel("Variable")) {
                     if (relationships.get(relationships.size() - 1).hasType("left")) {
                         completeOperator(operator.getCondition(), records.get(i + 1), "left");
+                        Node nextnext = records.get(i + 2).get("p").asPath().end();
+                        if(nextnext.hasLabel("Variable")){
+                            completeOperator(operator.getCondition(), records.get(i + 2), "right");
+                            i++;
+                        }
                     } else {
                         completeOperator(operator.getCondition(), records.get(i + 1), "right");
+                        Node nextnext = records.get(i + 2).get("p").asPath().end();
+                        if(nextnext.hasLabel("Variable")){
+                            completeOperator(operator.getCondition(), records.get(i + 2), "left");
+                            i++;
+                        }
                     }
-                    //Variable records will be only in one record. So the last visited index is i+1
                     i++;
                 }
             }
@@ -186,6 +195,8 @@ public class Neo4jDriverUtility {
         return getFields(bodyMng.getFields(), records, y + 1, 1);
     }
 
+    private static final String OC_ATTRIBUTES = "__oc__attributes";
+
     private static int getFields(Map<String, Object> fields, List<Record> records, int y, int level) {
         for (int i = y; i < records.size(); i++) {
             Path path = records.get(i).get("p").asPath();
@@ -199,14 +210,26 @@ public class Neo4jDriverUtility {
             String type = (String) node.asMap().get("type");
             switch (type) {
                 case "object" -> {
-                    Map<String, Object> map = new HashMap<>();
-                    fields.put(name, map);
-                    i = getFields(map, records, i + 1, nextLevel);
+                    Object value = node.asMap().get("value");
+                    if (name.equals(OC_ATTRIBUTES) && value != null && value.equals("")) {
+                        fields.put(name, "");
+                        if (nextLevel < currLevel) {
+                            return i;
+                        }
+                        i = getFields(fields, records, i + 1, nextLevel);
+                    } else {
+                        Map<String, Object> map = new HashMap<>();
+                        fields.put(name, map);
+                        i = getFields(map, records, i + 1, nextLevel);
+                    }
                 }
                 case "array" -> {
-                    Object value = node.asMap().getOrDefault("value", null);
+                    Object value = node.asMap().get("value");
                     if (value != null && value.equals("")) {
                         fields.put(name, new ArrayList<>());
+                        if (nextLevel < currLevel) {
+                            return i;
+                        }
                         i = getFields(fields, records, i + 1, nextLevel);
                     } else {
                         List<Map<String, Object>> list = new ArrayList<>();
@@ -225,6 +248,9 @@ public class Neo4jDriverUtility {
                         fields.put(name, in);
                     } else {
                         fields.put(name, value);
+                    }
+                    if (nextLevel < currLevel) {
+                        return i;
                     }
                     i = getFields(fields, records, i + 1, nextLevel);
                 }
