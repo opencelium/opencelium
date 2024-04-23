@@ -1,1 +1,7 @@
 versions:
+  - version: 1.0
+    changes:
+      - changeset: 1
+        operation: add
+        value: 8000
+        path: server.port
