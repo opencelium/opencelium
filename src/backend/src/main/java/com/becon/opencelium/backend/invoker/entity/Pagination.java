@@ -4,19 +4,28 @@ import com.becon.opencelium.backend.invoker.enums.PageParam;
 import com.becon.opencelium.backend.invoker.enums.PageParamAction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.ReadContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+import java.io.StringReader;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,61 +104,16 @@ public class Pagination implements Cloneable {
         return this.currentSize;
     }
 
-    // example:  http://localhost:9090/api/@{var1}/path?offset=@{var2}
-    // adds params if  reference is not null. works with query params
-    public URI insertPageValue(URI uri) throws URISyntaxException {
-        String url = uri.toString();
-        for (PageParamRule paramRule : pageParamRules) {
-            String ref = paramRule.getRef();
-            if (ref == null) {
-                continue;
-            }
-            PageParamAction action = paramRule.getAction();
-            if (ref.contains("request.url.$")) {
-                String param = paramRule.getRefSuffix();
-                if (!action.equals(PageParamAction.WRITE)) {
-                    continue;
-                }
-                url = uri.getRawQuery() == null ? url.concat("?" + param + "=" + paramRule.getValue())
-                        : url.concat("&" + param + "=" + paramRule.getValue());
-            }
-        }
-        return new URI(url);
-    }
-
-    // Works only with references. If reference is not null or empty then it inserts or reads.
-    public void insertPageValue(HttpHeaders headers) {
-        pageParamRules.stream().filter(paramRule -> paramRule.getRef() != null)
-                .filter(paramRule -> paramRule.getRef().contains("request.header.$"))
-                .filter(paramRule -> paramRule.getAction().equals(PageParamAction.WRITE))
-                .forEach(paramRule -> {
-                    String key = paramRule.getRefSuffix();
-                    headers.add(key, paramRule.getValue());
-                });
-    }
-
-    public String insertPageValue(String payload) {
-        final String[] result = new String[1];
-        pageParamRules.stream().filter(paramRule -> paramRule.getRef().equals("request.body.$"))
-                .filter(paramRule -> paramRule.getAction().equals(PageParamAction.WRITE))
-                .forEach(paramRule -> {
-                    String path = paramRule.getRefPath();
-                    // TODO: test for an array
-                    // TODO: Add xml support
-                    result[0] = JsonPath.parse(payload).set(path, paramRule.getValue()).json();
-                });
-        return result[0];
-    }
-
-    public void updateParamValues(ResponseEntity<?> response, MediaType mediaType) {
-        if (mediaType == null && response.getHeaders().getContentType() != null) {
-            mediaType = response.getHeaders().getContentType();
-        } else {
-            mediaType = MediaType.APPLICATION_JSON;
+    public void updateParamValues(ResponseEntity<?> response, Class<?> responseType) {
+        boolean needConversion = true;
+        if (response.getHeaders().getContentType() != null && !MediaType.APPLICATION_JSON.isCompatibleWith(response.getHeaders().getContentType())) {
+            needConversion = false;
+        } else if (responseType.equals(String.class)) {
+            needConversion = false;
         }
 
         String body;
-        if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
+        if (needConversion) {
             try {
                 body = new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(response.getBody());
             } catch (Exception e) {
@@ -254,9 +218,8 @@ public class Pagination implements Cloneable {
                 case "header":
                     return headers.getFirst(param);
                 case "body":
-                    // TODO: Add xml support
-                    ReadContext ctx = JsonPath.parse(payload);
-                    Object res = ctx.read(getRefPath(path));
+                    Object res = getValueFromBody(getRefPath(path));
+
                     if (res == null) {
                         return "";
                     }
@@ -265,6 +228,46 @@ public class Pagination implements Cloneable {
                     throw new RuntimeException(location + " not found in path " + path + ". Should be one of [header, url, body]");
             }
             return "";
+        }
+
+        private Object getValueFromBody(String jsonPath) {
+            if (MediaType.APPLICATION_JSON.isCompatibleWith(headers.getContentType())) {
+                return JsonPath.read(payload, jsonPath);
+            } else {
+                jsonPath = jsonPath.replaceFirst("\\$", ".");
+                String xpathQuery = jsonPath.replace(".", "/");
+
+                try {
+                    XPath xpath = XPathFactory.newInstance().newXPath();
+
+                    List<String> cpart = Arrays.asList(xpathQuery.split("/"));
+
+                    String lastElem = cpart.get(cpart.size() - 1);
+                    if (!lastElem.contains("@") && !(lastElem.contains("[*]") || lastElem.contains("[]"))) {
+                        xpathQuery = xpathQuery + "/text()";
+                    }
+
+                    DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                    Document xmlDocument = builder.parse(new InputSource(new StringReader(payload)));
+
+                    NodeList nodeList = (NodeList) xpath.compile(xpathQuery).evaluate(xmlDocument, XPathConstants.NODESET);
+                    ArrayList<Object> result = new ArrayList<>();
+                    for (int j = 0; j < nodeList.getLength(); j++) {
+                        Node node = nodeList.item(j);
+                        result.add(node.getNodeValue());
+                    }
+
+                    if (result.isEmpty()) {
+                        return null;
+                    } else if (result.size() == 1) {
+                        return result.get(0);
+                    } else {
+                        return result;
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
         private String getRefSuffix(String ref) {

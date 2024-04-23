@@ -450,7 +450,9 @@ public class ReferenceExtractor implements Extractor {
                 result.add(node.getNodeValue());
             }
 
-            if (result.size() == 1) {
+            if (result.isEmpty()) {
+                return "";
+            } else if (result.size() == 1) {
                 return result.get(0);
             } else {
                 return result;

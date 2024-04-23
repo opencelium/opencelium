@@ -194,7 +194,7 @@ public class RequestEntityBuilder {
         String value = schema.getValue();
 
         if (ReferenceExtractor.isReference(value)) {
-            SchemaDTO referencedSchema = SchemaDTOUtil.fromObject(references.apply(value));;
+            SchemaDTO referencedSchema = SchemaDTOUtil.fromObject(references.apply(value));
 
             if (referencedSchema == null) {
                 schema.setValue(null);

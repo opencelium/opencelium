@@ -21,7 +21,9 @@ import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
+import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -101,7 +103,7 @@ public class ConnectorExecutor {
 
             // set up logger for the current operation
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
-            logger.logAndSend(String.format(BREAK, "FUNCTION", "START", index));
+            logger.logAndSend(String.format(BREAK, "API OPERATION", "START", index));
             logger.logAndSend(String.format(
                     "Function: %s -- next function: %s -- next operator: %s -- index: %s",
                     operation.getName(), next[0], next[1], index
@@ -109,6 +111,7 @@ public class ConnectorExecutor {
 
             executeOperation(operation);
 
+            logger.logAndSend(String.format(BREAK, "API OPERATION", "END", index));
             // clean up after operation execution
             logger.getLogEntity().setMethodData(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
@@ -145,7 +148,7 @@ public class ConnectorExecutor {
                 } else if (loop.getOperator() == RelationalOperator.FOR_IN) {
                     list = (List<String>) referencedList;
                 } else {
-                    String[] strs = ((String) referencedList).split(operator.getCondition().getRight());
+                    String[] strs = ((String) referencedList).split(loop.getDelimiter());
 
                     Collections.addAll(list, strs);
                 }
@@ -193,12 +196,12 @@ public class ConnectorExecutor {
 
             if (pagination != null) {
                 pagination = pagination.clone();
-                executionManager.setPagination(pagination);
             }
         }
+        executionManager.setPagination(pagination);
 
         boolean hasMore = false;
-        RequestEntity<?> requestEntity = null;
+        RequestEntity<?> requestEntity;
         ResponseEntity<?> responseEntity;
         do {
             requestEntity = RequestEntityBuilder.start()
@@ -224,28 +227,13 @@ public class ConnectorExecutor {
             logger.logAndSend("Body: " + requestEntity.getBody());
             logger.logAndSend("============================================================================");
 
-            HttpEntity<Object> httpEntity;
-            if (requestEntity.getBody() == null) {
-                httpEntity = new HttpEntity<>(requestEntity.getHeaders());
-            } else {
-                httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
-            }
+            HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
+            Class<?> responseType = getResponseType(dto);
 
-            MediaType mediaType;
-            if (dto.getRequestBody() != null && dto.getRequestBody().getContent() != null) {
-                mediaType = dto.getRequestBody().getContent();
-            } else {
-                mediaType = requestEntity.getHeaders().getContentType();
-            }
-
-            if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
-                responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, Object.class);
-            } else {
-                responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, String.class);
-            }
+            responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
 
             if (pagination != null) {
-                pagination.updateParamValues(responseEntity, mediaType);
+                pagination.updateParamValues(responseEntity, responseType);
                 hasMore = pagination.hasMore();
             }
         } while (hasMore);
@@ -257,7 +245,6 @@ public class ConnectorExecutor {
                     responseEntity.getStatusCode());
         }
         logger.logAndSend("Response: " + responseEntity.getBody());
-        logger.logAndSend(String.format(BREAK, "FUNCTION", "END", getIndex(dto)));
 
         Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
@@ -300,6 +287,17 @@ public class ConnectorExecutor {
         Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(condition.getRelationalOperator());
 
         return operator.apply(leftValue, rightValue);
+    }
+
+    private Class<?> getResponseType(OperationDTO dto) {
+        MediaType mediaType = MediaType.APPLICATION_JSON;
+        for (ResponseDTO response : dto.getResponses()) {
+            if ("success".equals(response.getStatus())) {
+                mediaType = response.getContent();
+            }
+        }
+
+        return MediaType.APPLICATION_JSON.isCompatibleWith(mediaType) ? Object.class : String.class;
     }
 
     private int getTailPointer(int headPointer) {
