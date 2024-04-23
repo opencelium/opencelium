@@ -103,7 +103,7 @@ public class ConnectorExecutor {
 
             // set up logger for the current operation
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
-            logger.logAndSend(String.format(BREAK, "FUNCTION", "START", index));
+            logger.logAndSend(String.format(BREAK, "API OPERATION", "START", index));
             logger.logAndSend(String.format(
                     "Function: %s -- next function: %s -- next operator: %s -- index: %s",
                     operation.getName(), next[0], next[1], index
@@ -111,6 +111,7 @@ public class ConnectorExecutor {
 
             executeOperation(operation);
 
+            logger.logAndSend(String.format(BREAK, "API OPERATION", "END", index));
             // clean up after operation execution
             logger.getLogEntity().setMethodData(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
@@ -195,12 +196,12 @@ public class ConnectorExecutor {
 
             if (pagination != null) {
                 pagination = pagination.clone();
-                executionManager.setPagination(pagination);
             }
         }
+        executionManager.setPagination(pagination);
 
         boolean hasMore = false;
-        RequestEntity<?> requestEntity = null;
+        RequestEntity<?> requestEntity;
         ResponseEntity<?> responseEntity;
         do {
             requestEntity = RequestEntityBuilder.start()
@@ -244,7 +245,6 @@ public class ConnectorExecutor {
                     responseEntity.getStatusCode());
         }
         logger.logAndSend("Response: " + responseEntity.getBody());
-        logger.logAndSend(String.format(BREAK, "FUNCTION", "END", getIndex(dto)));
 
         Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
@@ -290,7 +290,7 @@ public class ConnectorExecutor {
     }
 
     private Class<?> getResponseType(OperationDTO dto) {
-        MediaType mediaType = null;
+        MediaType mediaType = MediaType.APPLICATION_JSON;
         for (ResponseDTO response : dto.getResponses()) {
             if ("success".equals(response.getStatus())) {
                 mediaType = response.getContent();
