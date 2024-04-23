@@ -66,7 +66,7 @@ type ConnectorPanelType = "fromConnector" | "toConnector";
 
 type RelationalOperatorForIf = "IsNull" | "AllowList" | "DenyList" | "IsTypeOf" | "PropertyExists" | "PropertyNotExists" | "Contains" | "NotContains" | "ContainsSubStr" | "NotContainsSubStr" | "RegExp" | "Like" | "NotLike" | ">=" | ">" | "<=" | "<" | "=" | "!=" | "NotNull" | "IsEmpty" | "NotEmpty";
 
-type RelationalOperatorForLoop = "SplitString";
+type RelationalOperatorForLoop = "SplitString" | "forin";
 
 interface IBaseAnimationData {
   index: string;

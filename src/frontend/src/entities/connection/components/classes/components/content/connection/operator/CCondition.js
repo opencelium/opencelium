@@ -42,6 +42,7 @@ const OPERATOR_LABELS_FOR_IF = {
 
 const OPERATOR_LABELS_FOR_LOOP = {
     SPLIT_STRING: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{"÷ String"}</span>);},
+    FOR_IN: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{"for...in"}</span>);},
 }
 
 //value - operator name for backend
@@ -74,7 +75,8 @@ export const FUNCTIONAL_OPERATORS_FOR_IF = [
     {value: 'NotEmpty', hasValue: false}
 ].sort((f1, f2) => f1.value > f2.value ? 1 : f1.value === f2.value ? 0 : -1);
 export const FUNCTIONAL_OPERATORS_FOR_LOOP = [
-    {value: 'SplitString', label: <span>SplitString({OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING()})</span>, hasValue: true, placeholderValue: OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING(true)}
+    {value: 'SplitString', label: <span>SplitString({OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING()})</span>, hasValue: true, placeholderValue: OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING(true)},
+    {value: 'forin', hasValue: false, label: <span>{OPERATOR_LABELS_FOR_LOOP.FOR_IN()}</span>, placeholderValue: OPERATOR_LABELS_FOR_LOOP.FOR_IN(true)},
 ].sort((f1, f2) => f1.value > f2.value ? 1 : f1.value === f2.value ? 0 : -1);
 
 /**
