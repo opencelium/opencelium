@@ -78,25 +78,31 @@ public class Neo4jDriverUtility {
                 if (i + 1 >= records.size()) {
                     return i;
                 }
-                Node lastNodeOfNextRecord = records.get(i + 1).get("p").asPath().end();
+                Path nextPath = records.get(i + 1).get("p").asPath();
+                Node lastNodeOfNextRecord = nextPath.end();
+                var nextRelationships = (List<Relationship>) nextPath.relationships();
 
                 if (lastNodeOfNextRecord.hasLabel("Method") || lastNodeOfNextRecord.hasLabel("Statement")) {
                     i = crawlMethodAndOperators(methods, operators, i + 1, records);
                     //i - an index of the last visited record
                 } else if (lastNodeOfNextRecord.hasLabel("Variable")) {
-                    if (relationships.get(relationships.size() - 1).hasType("left")) {
+                    if (nextRelationships.get(nextRelationships.size() - 1).hasType("left")) {
                         completeOperator(operator.getCondition(), records.get(i + 1), "left");
-                        Node nextnext = records.get(i + 2).get("p").asPath().end();
-                        if(nextnext.hasLabel("Variable")){
-                            completeOperator(operator.getCondition(), records.get(i + 2), "right");
-                            i++;
+                        if (i + 2 < records.size()) {
+                            Node nextnext = records.get(i + 2).get("p").asPath().end();
+                            if (nextnext.hasLabel("Variable")) {
+                                completeOperator(operator.getCondition(), records.get(i + 2), "right");
+                                i++;
+                            }
                         }
                     } else {
                         completeOperator(operator.getCondition(), records.get(i + 1), "right");
-                        Node nextnext = records.get(i + 2).get("p").asPath().end();
-                        if(nextnext.hasLabel("Variable")){
-                            completeOperator(operator.getCondition(), records.get(i + 2), "left");
-                            i++;
+                        if (i + 2 < records.size()) {
+                            Node nextnext = records.get(i + 2).get("p").asPath().end();
+                            if (nextnext.hasLabel("Variable")) {
+                                completeOperator(operator.getCondition(), records.get(i + 2), "left");
+                                i++;
+                            }
                         }
                     }
                     i++;
