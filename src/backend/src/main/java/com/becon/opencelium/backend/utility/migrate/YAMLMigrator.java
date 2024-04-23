@@ -10,6 +10,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -31,8 +32,9 @@ public class YAMLMigrator {
     private static final File CHANGELOG_FILE;
     private static final File APP_YML_COMPILED_FILE;
     private static final File APP_YML_FILE;
+    private static final File BACKUP_YML_FILE;
 
-    public static List<ChangeSet> changeSetsToSave;
+    private static List<ChangeSet> changeSetsToSave;
 
     static {
         YAML_MAPPER.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
@@ -47,6 +49,7 @@ public class YAMLMigrator {
         APP_YML_FILE = new File(root.resolve("src/main/resources/application.yml").toString());
         APP_YML_COMPILED_FILE = new File(root.resolve("build/resources/main/application.yml").toString());
         CHANGELOG_FILE = new File(root.resolve("build/resources/main/db/changelog/springboot/application_changelog.yml").toString());
+        BACKUP_YML_FILE = new File(root.resolve("build/resources/main/application_copy.yml").toString());
     }
 
     public static void run() {
@@ -62,14 +65,14 @@ public class YAMLMigrator {
         }
 
         //preparing a file before read
-        if(!prepare()) return;
+        if (!prepare()) return;
 
         //parse application.yml file
-        Map<String, Object> yaml = readYAMLFile(APP_YML_FILE);
-        if (yaml == null) return;
+        Map<String, Object> appYamlMap = readYAMLFile(APP_YML_FILE);
+        if (appYamlMap == null) return;
 
         // read datasource's configs from yaml file and set datasource to jdbcTemplate
-        setDataSource(yaml);
+        if (!setDataSource(appYamlMap)) return;
 
         Map<String, Object> changelog = readYAMLFile(CHANGELOG_FILE);
         if (changelog == null || changelog.isEmpty()) return;
@@ -82,7 +85,7 @@ public class YAMLMigrator {
             return;
         }
 
-        List<ChangeSet> changeSetList = validateAndMapConvert((ArrayList<Map<String, Object>>) changelog.get("versions"));
+        List<ChangeSet> changeSetList = validateAndConvert((ArrayList<Map<String, Object>>) changelog.get("versions"));
 
         List<ChangeSet> newChangeSets = new ArrayList<>();
         for (ChangeSet changeSet : changeSetList) {
@@ -92,7 +95,7 @@ public class YAMLMigrator {
         }
         if (newChangeSets.isEmpty()) return;
 
-        Object patched = yaml;
+        Object patched = appYamlMap;
         for (int i = 0; i < newChangeSets.size(); i++) {
             ChangeSet changeSet = newChangeSets.get(i);
             JsonPatch singleJsonPatch = convertToJsonPatch(changeSet);
@@ -120,6 +123,15 @@ public class YAMLMigrator {
     }
 
     private static boolean prepare() {
+        try {
+            if (!BACKUP_YML_FILE.createNewFile()) {
+                return false;
+            }
+            FileCopyUtils.copy(APP_YML_FILE, BACKUP_YML_FILE);
+        } catch (IOException e) {
+            LOGGER.warning("An error occurred to copy application.yml file");
+            return false;
+        }
         StringBuilder sb;
         try (BufferedReader reader = new BufferedReader(new FileReader(APP_YML_FILE))) {
             String line;
@@ -142,11 +154,20 @@ public class YAMLMigrator {
         try (FileOutputStream fosCOM = new FileOutputStream(APP_YML_COMPILED_FILE)) {
             fosCOM.write(sb.toString().getBytes());
         } catch (IOException e) {
+            try {
+                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_COMPILED_FILE);
+            } catch (IOException ignored) {
+            }
             return false;
         }
+
         try (FileOutputStream fos = new FileOutputStream(APP_YML_FILE)) {
             fos.write(sb.toString().getBytes());
         } catch (IOException e) {
+            try {
+                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_FILE);
+            } catch (IOException ignored) {
+            }
             return false;
         }
         return true;
@@ -161,8 +182,6 @@ public class YAMLMigrator {
             return;
         }
 
-
-
         try {
             YAML_MAPPER.writeValue(APP_YML_FILE, yaml);
             YAML_MAPPER.writeValue(APP_YML_COMPILED_FILE, yaml);
@@ -170,7 +189,9 @@ public class YAMLMigrator {
             LOGGER.warning("Failed to write YAML file");
             return;
         }
+
         try {
+            // checking an existence of table
             DAO.getLast();
         } catch (BadSqlGrammarException e) {
             YAMLMigrator.changeSetsToSave = changeSetsForSave;
@@ -193,18 +214,21 @@ public class YAMLMigrator {
     }
 
 
-    //TODO: must be refactored
     private static String getLastChangeSetVersionToApply(Map<String, Object> changelog) {
-        ArrayList<Map<String, Object>> versions = (ArrayList<Map<String, Object>>) changelog.getOrDefault("versions", new ArrayList<>());
-        if (versions == null || versions.isEmpty()) {
+        var versions = (ArrayList<Map<String, Object>>) changelog.getOrDefault("versions", new ArrayList<Map<String, Object>>());
+        if (versions.isEmpty()) {
             return null;
         }
-        Map<String, Object> lastVersion = versions.get(versions.size() - 1);
-        Double version = (Double) lastVersion.get("version");
-        ArrayList<Map<String, Object>> changes = (ArrayList<Map<String, Object>>) lastVersion.getOrDefault("changes", new ArrayList<>());
-        Map<String, Object> lastChaneSet = changes.get(changes.size() - 1);
-        Integer changeset = (Integer) lastChaneSet.get("changeset");
-        return version + ":" + changeset;
+        var lastVersion = versions.get(versions.size() - 1);
+        try {
+            Double version = (Double) lastVersion.get("version");
+            var changes = (ArrayList<Map<String, Object>>) lastVersion.get("changes");
+            Map<String, Object> lastChaneSet = changes.get(changes.size() - 1);
+            var changeset = (Integer) lastChaneSet.get("changeset");
+            return version + ":" + changeset;
+        } catch (Exception e) {
+            return "-1.0:0";
+        }
     }
 
     private static JsonPatch convertToJsonPatch(ChangeSet changeSet) {
@@ -239,18 +263,18 @@ public class YAMLMigrator {
         return OBJECT_MAPPER.convertValue(opList, JsonPatch.class);
     }
 
-    private static List<ChangeSet> validateAndMapConvert(ArrayList<Map<String, Object>> versions) {
+    private static List<ChangeSet> validateAndConvert(ArrayList<Map<String, Object>> versions) {
         List<ChangeSet> res = new ArrayList<>();
         for (Map<String, Object> version : versions) {
             if (!version.containsKey("version") || !version.containsKey("changes")) {
-                LOGGER.warning("Version does not contain 'version' or 'changes' field");
+                LOGGER.warning("Version does not contain 'version' and|or 'changes' field. All the rest changesets are ignored");
                 return res;
             }
             Double versionVal;
             try {
                 versionVal = (Double) version.get("version");
             } catch (Exception e) {
-                LOGGER.warning(version.get("version") + " is not a number");
+                LOGGER.warning(version.get("version") + " is not a number. All the rest changesets are ignored");
                 return res;
             }
             try {
@@ -266,7 +290,7 @@ public class YAMLMigrator {
                     res.add(changeSet);
                 }
             } catch (Exception e) {
-                LOGGER.warning("An error is occurred while reading changeset. So the next ones ignored");
+                LOGGER.warning("An error is occurred while reading changeset. All the rest changesets are ignored");
                 return res;
             }
         }
@@ -274,9 +298,9 @@ public class YAMLMigrator {
     }
 
     @SuppressWarnings("unchecked")
-    private static void setDataSource(Map<String, Object> yaml) {
-        Map<String, Object> spring = (Map<String, Object>) yaml.get("spring");
-        Map<String, Object> datasource = (Map<String, Object>) spring.get("datasource");
+    private static boolean setDataSource(Map<String, Object> yaml) {
+        Map<String, Object> spring = (Map<String, Object>) yaml.getOrDefault("spring", new HashMap<>());
+        Map<String, Object> datasource = (Map<String, Object>) spring.getOrDefault("datasource", new HashMap<>());
         String url = datasource.getOrDefault("url", "").toString();
         String username = datasource.getOrDefault("username", "").toString();
         String password = datasource.getOrDefault("password", "").toString();
@@ -292,10 +316,11 @@ public class YAMLMigrator {
         try {
             dataSource.getConnection();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            LOGGER.warning("An error is occurred while connecting to the database");
+            return false;
         }
-
         JDBC_TEMPLATE.setDataSource(dataSource);
+        return true;
     }
 
     private static boolean isGreaterThanOrEqual(String v1, String v2) {
@@ -329,7 +354,14 @@ public class YAMLMigrator {
             return null;
         }
     }
-    private static class Comment{
+
+    public static List<ChangeSet> getChangeSetsToSave() {
+        List<ChangeSet> list = changeSetsToSave;
+        changeSetsToSave = null;
+        return list;
+    }
+
+    private static class Comment {
         List<String> lines = new ArrayList<>();
         String prev;
         String next;
