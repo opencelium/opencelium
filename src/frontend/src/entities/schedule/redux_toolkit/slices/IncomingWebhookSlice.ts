@@ -18,7 +18,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {ICommonState} from "@application/interfaces/core";
 import {CommonState} from "@application/utils/store";
-import {getIncomingWebhook} from "@entity/schedule/redux_toolkit/action_creators/IncomingWebhookCreator";
+import {getIncomingWebhook} from "@entity/schedule/redux_toolkit/action_creators/IncomingWebhookCreators";
 
 export interface IncomingWebhookState extends ICommonState{
     webhook: string,
