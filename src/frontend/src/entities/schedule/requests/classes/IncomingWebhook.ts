@@ -14,15 +14,20 @@
  */
 
 import {AxiosResponse} from "axios";
-import {ToolModel} from "@entity/schedule/requests/models/Tool";
+import Request from "@entity/application/requests/classes/Request";
+import {IRequestSettings} from "@application/requests/interfaces/IRequest";
+import {GetWebhookResponse, IIncomingWebhook} from "@entity/schedule/requests/interfaces/IIncomingWebhook";
 
-export interface GetAllToolsResponse {
-    result: ToolModel[],
-}
 
-export default interface ITool{
+export class IncomingWebhookRequest extends Request implements IIncomingWebhook {
 
-    //to get all tools
-    getAllTools(): Promise<AxiosResponse<GetAllToolsResponse>>,
+    constructor(settings?: Partial<IRequestSettings>) {
+        super({url: 'message/tools', ...settings});
+    }
+
+    async getWebhook(): Promise<AxiosResponse<GetWebhookResponse>>{
+        this.endpoint = "/incoming_webhook";
+        return super.get<GetWebhookResponse>();
+    }
 
 }

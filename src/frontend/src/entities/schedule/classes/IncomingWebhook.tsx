@@ -13,16 +13,12 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AxiosResponse} from "axios";
-import {ToolModel} from "@entity/schedule/requests/models/Tool";
+import {RootState, useAppSelector} from "@application/utils/store";
 
-export interface GetAllToolsResponse {
-    result: ToolModel[],
-}
+export default class IncomingWebhook {
 
-export default interface ITool{
-
-    //to get all tools
-    getAllTools(): Promise<AxiosResponse<GetAllToolsResponse>>,
+    static getReduxState(){
+        return useAppSelector((state: RootState) => state.incomingWebhookReducer);
+    }
 
 }
