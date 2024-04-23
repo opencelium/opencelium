@@ -28,7 +28,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class Application {
 
 	public static void main(String[] args) {
-		YAMLMigrator.run();
+//		YAMLMigrator.run();
 		SpringApplication.run(Application.class, args);
 	}
 }
