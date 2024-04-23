@@ -16,7 +16,7 @@ public class ChangeSetResultExtractor implements ResultSetExtractor<ChangeSet> {
         cs.setValue(rs.getString("value"));
         cs.setVersion(rs.getString("version"));
         cs.setTimestamp(rs.getLong("timestamp"));
-        cs.setSuccess(rs.getBoolean("success"));
+        cs.setSuccess(rs.getInt("success") == 1);
         return cs;
     }
 

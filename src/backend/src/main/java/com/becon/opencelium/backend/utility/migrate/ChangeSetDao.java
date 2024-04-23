@@ -33,7 +33,7 @@ public class ChangeSetDao {
     }
 
     public ChangeSet getLast() {
-        List<ChangeSet> list = template.query("select * from change_set_yml where succes = 1 ORDER BY timestamp DESC limit 1",
+        List<ChangeSet> list = template.query("select * from change_set_yml where success ORDER BY timestamp DESC limit 1",
                 new ChangeSetRowMapper());
         if (list.isEmpty()) {
             return null;

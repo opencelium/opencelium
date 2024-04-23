@@ -1,12 +1,9 @@
 package com.becon.opencelium.backend.utility.migrate;
 
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -14,8 +11,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
@@ -35,6 +31,7 @@ public class YAMLMigrator {
     private static final File CHANGELOG_FILE;
     private static final File APP_YML_COMPILED_FILE;
     private static final File APP_YML_FILE;
+
     public static List<ChangeSet> changeSetsToSave;
 
     static {
@@ -64,6 +61,9 @@ public class YAMLMigrator {
             return;
         }
 
+        //preparing a file before read
+        if(!prepare()) return;
+
         //parse application.yml file
         Map<String, Object> yaml = readYAMLFile(APP_YML_FILE);
         if (yaml == null) return;
@@ -78,7 +78,7 @@ public class YAMLMigrator {
         String fullVersionOfLastChangeSetInFile = getLastChangeSetVersionToApply(changelog);
 
         // there is not any new changes
-        if (fullVersionOfLastChangeSetInFile ==null || lastSavedSet != null && isGreaterThanOrEqual(lastSavedSet.getVersion(), fullVersionOfLastChangeSetInFile)) {
+        if (fullVersionOfLastChangeSetInFile == null || lastSavedSet != null && isGreaterThanOrEqual(lastSavedSet.getVersion(), fullVersionOfLastChangeSetInFile)) {
             return;
         }
 
@@ -96,7 +96,7 @@ public class YAMLMigrator {
         for (int i = 0; i < newChangeSets.size(); i++) {
             ChangeSet changeSet = newChangeSets.get(i);
             JsonPatch singleJsonPatch = convertToJsonPatch(changeSet);
-            if(singleJsonPatch == null){
+            if (singleJsonPatch == null) {
                 changeSet.setSuccess(false);
                 continue;
             }
@@ -105,12 +105,12 @@ public class YAMLMigrator {
                 changeSet.setSuccess(true);
             } catch (RuntimeException e) {
                 if (e.getCause().getMessage().equals("parent of node to add does not exist")) {
-                    patched = fillUp(changeSet.getPath().replaceAll("\\.","/"), singleJsonPatch, patched);
+                    patched = fillUp(changeSet.getPath().replaceAll("\\.", "/"), singleJsonPatch, patched);
                     i--;
                 } else if (e.getCause().getMessage().equals("value cannot be null")) {
                     changeSet.setSuccess(false);
                 } else {
-                    LOGGER.warning("An error occurred while applying "+changeSet.getVersion()+" - changeset : " + e.getCause().getMessage());
+                    LOGGER.warning("An error occurred while applying " + changeSet.getVersion() + " - changeset : " + e.getCause().getMessage());
                     finish(patched, newChangeSets.subList(0, i));
                     return;
                 }
@@ -119,10 +119,50 @@ public class YAMLMigrator {
         finish(patched, newChangeSets);
     }
 
+    private static boolean prepare() {
+        StringBuilder sb;
+        try (BufferedReader reader = new BufferedReader(new FileReader(APP_YML_FILE))) {
+            String line;
+            sb = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("{") && line.contains("}") && !isCommentLine(line)) {
+                    String val = line.substring(line.indexOf(":") + 1).trim();
+                    if (val.startsWith("{") && val.endsWith("}")) {
+                        val = val.replaceFirst("\\{", "#").substring(0, val.length() - 1);
+                        line = line.substring(0, line.indexOf(":") + 2) + val;
+                    }
+                }
+                sb.append(line);
+                sb.append("\n");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try (FileOutputStream fosCOM = new FileOutputStream(APP_YML_COMPILED_FILE)) {
+            fosCOM.write(sb.toString().getBytes());
+        } catch (IOException e) {
+            return false;
+        }
+        try (FileOutputStream fos = new FileOutputStream(APP_YML_FILE)) {
+            fos.write(sb.toString().getBytes());
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isCommentLine(String line) {
+        return line.trim().startsWith("#");
+    }
+
     private static void finish(Object yaml, List<ChangeSet> changeSetsForSave) {
         if (changeSetsForSave.isEmpty()) {
             return;
         }
+
+
+
         try {
             YAML_MAPPER.writeValue(APP_YML_FILE, yaml);
             YAML_MAPPER.writeValue(APP_YML_COMPILED_FILE, yaml);
@@ -156,7 +196,7 @@ public class YAMLMigrator {
     //TODO: must be refactored
     private static String getLastChangeSetVersionToApply(Map<String, Object> changelog) {
         ArrayList<Map<String, Object>> versions = (ArrayList<Map<String, Object>>) changelog.getOrDefault("versions", new ArrayList<>());
-        if(versions == null || versions.isEmpty()){
+        if (versions == null || versions.isEmpty()) {
             return null;
         }
         Map<String, Object> lastVersion = versions.get(versions.size() - 1);
@@ -203,7 +243,7 @@ public class YAMLMigrator {
         List<ChangeSet> res = new ArrayList<>();
         for (Map<String, Object> version : versions) {
             if (!version.containsKey("version") || !version.containsKey("changes")) {
-                LOGGER.warning("Version does not contain 'version' or 'changeset' field");
+                LOGGER.warning("Version does not contain 'version' or 'changes' field");
                 return res;
             }
             Double versionVal;
@@ -288,5 +328,10 @@ public class YAMLMigrator {
             //Table has not been created yet
             return null;
         }
+    }
+    private static class Comment{
+        List<String> lines = new ArrayList<>();
+        String prev;
+        String next;
     }
 }
