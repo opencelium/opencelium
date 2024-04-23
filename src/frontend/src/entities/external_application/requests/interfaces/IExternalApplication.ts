@@ -25,24 +25,15 @@ export interface ElasticSearchResponseProps{
     status: ExternalApplicationStatus,
 }
 
-export interface Neo4jResponseProps{
-    details: {version: string, nodes: number},
-    status: ExternalApplicationStatus,
-}
-
 export interface ActuatorHealthResponseProps{
     components: {
         elasticsearch: ElasticSearchResponseProps,
-        neo4j: Neo4jResponseProps,
     },
     status: ExternalApplicationStatus
 }
 
 
 export interface IExternalApplicationRequest{
-
-    //to check neo4j status
-    checkNeo4j(): Promise<AxiosResponse<Neo4jResponseProps>>,
 
     //to check elastic search status
     checkElasticsearch(): Promise<AxiosResponse<ElasticSearchResponseProps>>,

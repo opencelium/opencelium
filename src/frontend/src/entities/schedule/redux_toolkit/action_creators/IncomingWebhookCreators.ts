@@ -13,16 +13,23 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AxiosResponse} from "axios";
-import {ToolModel} from "@entity/schedule/requests/models/Tool";
+import {createAsyncThunk} from "@reduxjs/toolkit";
+import {IncomingWebhookRequest} from "@entity/schedule/requests/classes/IncomingWebhook";
+import {errorHandler} from "@application/utils/utils";
 
-export interface GetAllToolsResponse {
-    result: ToolModel[],
-}
+export const getIncomingWebhook = createAsyncThunk(
+    'schedule/notification/get/incoming_webhook',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new IncomingWebhookRequest();
+            const response = await request.getWebhook();
+            return response.data.result;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 
-export default interface ITool{
-
-    //to get all tools
-    getAllTools(): Promise<AxiosResponse<GetAllToolsResponse>>,
-
+export default {
+    getIncomingWebhook,
 }

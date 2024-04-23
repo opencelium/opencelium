@@ -22,7 +22,6 @@ import {
 } from "../interfaces/IExternalApplication";
 import {
     ActuatorHealthResponseProps,
-    Neo4jResponseProps
 } from "../interfaces/IExternalApplication";
 
 
@@ -30,11 +29,6 @@ export class ExternalApplicationRequest extends Request implements IExternalAppl
 
     constructor(settings?: Partial<IRequestSettings>) {
         super({url: 'actuator/health', ...settings});
-    }
-
-    async checkNeo4j(): Promise<AxiosResponse<Neo4jResponseProps>>{
-        this.endpoint = '/neo4j';
-        return super.get<Neo4jResponseProps>();
     }
 
     async checkElasticsearch(): Promise<AxiosResponse<ElasticSearchResponseProps>>{

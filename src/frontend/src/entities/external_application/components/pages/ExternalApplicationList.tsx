@@ -14,13 +14,12 @@
  */
 
 import React, {FC, useEffect} from 'react';
-import {kibanaUrl, neo4jUrl} from "@entity/application/requests/classes/url";
+import {kibanaUrl} from "@entity/application/requests/classes/url";
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
 import KibanaImagePath from "@image/apps/kibana.png";
-import Neo4jImagePath from "@image/apps/neo4j.png";
 import {ExternalApplicationListProps} from "../pages/interfaces";
 import ExternalApplications from "../../collections/ExternalApplications";
 import {checkAllExternalApplications} from "../../redux_toolkit/action_creators/ExternalApplicationCreators";
@@ -39,10 +38,6 @@ const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(Ext
         externalApplications.push({
             id: 1, name: 'Kibana', icon: KibanaImagePath, link: kibanaUrl, value: 'elasticsearch',
             status: actuatorHealth.components?.elasticsearch?.status || ExternalApplicationStatus.DOWN,
-        })
-        externalApplications.push({
-            id: 2, name: 'Neo4j', icon: Neo4jImagePath, link: neo4jUrl, value: 'neo4j',
-            status: actuatorHealth.components?.neo4j?.status || ExternalApplicationStatus.DOWN,
         })
     }
     const CExternalApplications = new ExternalApplications(externalApplications);

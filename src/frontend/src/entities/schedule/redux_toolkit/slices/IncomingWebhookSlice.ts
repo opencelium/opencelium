@@ -18,21 +18,21 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {ICommonState} from "@application/interfaces/core";
 import {CommonState} from "@application/utils/store";
-import {getTeamsWebhook} from "@entity/schedule/redux_toolkit/action_creators/TeamsCreators";
+import {getIncomingWebhook} from "@entity/schedule/redux_toolkit/action_creators/IncomingWebhookCreators";
 
-export interface TeamsState extends ICommonState{
+export interface IncomingWebhookState extends ICommonState{
     webhook: string,
     gettingWebhook: API_REQUEST_STATE,
 }
 
-const initialState: TeamsState = {
+const initialState: IncomingWebhookState = {
     webhook: '',
     gettingWebhook: API_REQUEST_STATE.INITIAL,
     ...CommonState,
 }
 
-export const teamsSlice = createSlice({
-    name: 'teams',
+export const incomingWebhookSlice = createSlice({
+    name: 'incomingWebhook',
     initialState,
     reducers: {
         clearWebhook: (state) => {
@@ -40,26 +40,23 @@ export const teamsSlice = createSlice({
         }
     },
     extraReducers: {
-        [getTeamsWebhook.pending.type]: (state) => {
+        [getIncomingWebhook.pending.type]: (state) => {
             state.gettingWebhook = API_REQUEST_STATE.START;
         },
-        [getTeamsWebhook.fulfilled.type]: (state, action: PayloadAction<string>) => {
+        [getIncomingWebhook.fulfilled.type]: (state, action: PayloadAction<string>) => {
             state.gettingWebhook = API_REQUEST_STATE.FINISH;
             state.webhook = action.payload;
             state.error = null;
         },
-        [getTeamsWebhook.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        [getIncomingWebhook.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingWebhook = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }
 })
 
-export const {
-    clearWebhook,
-} = teamsSlice.actions;
+export const {clearWebhook} = incomingWebhookSlice.actions;
 
-export const actions = {
-}
+export const actions = {}
 
-export default teamsSlice.reducer;
+export default incomingWebhookSlice.reducer;

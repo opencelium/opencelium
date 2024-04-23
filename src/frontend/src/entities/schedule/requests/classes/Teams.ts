@@ -16,22 +16,17 @@
 import {AxiosResponse} from "axios";
 import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
-import {GetAllChannelsResponse, GetAllTeamsResponse, ITeams} from "../interfaces/ITeams";
-import {TeamChannelModel, TeamModel} from "@entity/schedule/requests/models/Teams";
+import {GetWebhookResponse, ITeams} from "../interfaces/ITeams";
 
 
 export class TeamsRequest extends Request implements ITeams{
 
     constructor(settings?: Partial<IRequestSettings>) {
-        super({url: 'message/tools/teams/team', ...settings});
+        super({url: 'message/tools', ...settings});
     }
 
-    async getAllTeams(): Promise<AxiosResponse<GetAllTeamsResponse>>{
-        this.endpoint = "/all";
-        return super.get<GetAllTeamsResponse>();
-    }
-
-    async getAllChannelsByTeam(): Promise<AxiosResponse<GetAllChannelsResponse>>{
-        return super.get<GetAllChannelsResponse>();
+    async getWebhook(): Promise<AxiosResponse<GetWebhookResponse>>{
+        this.endpoint = "/income_webhook";
+        return super.get<GetWebhookResponse>();
     }
 }

@@ -84,11 +84,7 @@ class SystemOverview extends React.Component{
      */
     validateSystemRequirements(entity){
         const {t, checkResetFiles} = this.props;
-        const isNeo4jUp = entity.systemRequirements && entity.systemRequirements.hasOwnProperty('components') && entity.systemRequirements.components && entity.systemRequirements.components.hasOwnProperty('neo4j') && entity.systemRequirements.components.neo4j.status === APP_STATUS_UP;
         const isOCVersionUnknown = !entity.systemRequirements.hasOwnProperty('components') || !entity.systemRequirements.components.hasOwnProperty(OC_NAME.toLowerCase()) || entity.systemRequirements.components[OC_NAME.toLowerCase()].details.version === '';
-        if(!isNeo4jUp) {
-            this.setValidationMessage(t('FORM.VALIDATION_MESSAGES.NEO4j_DOWN'));
-        }
         if(isOCVersionUnknown) {
             this.setValidationMessage(t('FORM.VALIDATION_MESSAGES.UNKNOWN_OC_VERSION'));
         }
@@ -99,7 +95,7 @@ class SystemOverview extends React.Component{
     render(){
         const {validationMessage} = this.state;
         const {t, systemRequirements} = this.props;
-        const VISIBLE_SERVICES = ['db', 'elasticsearch', 'neo4j', OC_NAME.toLowerCase(), 'os'];
+        const VISIBLE_SERVICES = ['db', 'elasticsearch', OC_NAME.toLowerCase(), 'os'];
         const backupLogLink = 'https://docs.opencelium.io/en/prod/gettinginvolved/administration.html';
         const backupLinkText = t('FORM.BACKUP_LINK_TEXT');
         return(

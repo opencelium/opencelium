@@ -107,7 +107,7 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         propertyName: "timeout", props: {icon: 'history_toggle_off', label: 'Timeout', type: InputTextType.Number}
     })
     const SslCertInput = connector.getSwitch({
-        propertyName: "sslCert", props: {icon: 'verified', label: 'SSL Certificate', name: connector.sslCert ? 'SSL Certificate is activated' : 'SSL Certificate is deactivated'}
+        propertyName: "sslCert", props: {icon: 'verified', label: 'Disable SSL Validation', name: connector.sslCert ? 'SSL Validation is deactivated' : 'SSL Validation is activated'}
     })
     const Icon = connector.getFile({propertyName: "iconFile", props: {label: "Icon",}});
     let actions = [<Button

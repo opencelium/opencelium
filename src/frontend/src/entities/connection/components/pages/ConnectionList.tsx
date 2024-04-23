@@ -22,7 +22,6 @@ import {useAppDispatch} from "@application/utils/store";
 import {getAllMetaConnections} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
-import {checkNeo4j} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 import {ExternalApplication} from "@entity/external_application/classes/ExternalApplication";
 import {ExternalApplicationStatus} from "@entity/external_application/requests/interfaces/IExternalApplication";
 import {INotification, NotificationType} from "@application/interfaces/INotification";
@@ -32,28 +31,13 @@ import { ConnectionPermissions } from '@entity/connection/constants';
 const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
     const {gettingMetaConnections, metaConnections, deletingConnectionsById, updatingConnection} = Connection.getReduxState();
-    const {neo4jCheckResults} = ExternalApplication.getReduxState();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     useEffect(() => {
         dispatch(getAllMetaConnections());
-        dispatch(checkNeo4j())
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
     }, [metaConnections])
-    useEffect(() => {
-        if(neo4jCheckResults?.status === ExternalApplicationStatus.DOWN){
-            let date = new Date();
-            const notification: INotification = {
-                id: date.getTime(),
-                type: NotificationType.ERROR,
-                actionType: checkNeo4j.rejected.type,
-                createdTime: date.getTime().toString(),
-                params: {message: ExternalApplicationStatus.DOWN}
-            }
-            dispatch(addNotification(notification))
-        }
-    },[neo4jCheckResults])
     const CConnections = new Connections(metaConnections, dispatch, deletingConnectionsById, updatingConnection);
     return (
         <CollectionView collection={CConnections} shouldBeUpdated={shouldBeUpdated} isLoading={gettingMetaConnections === API_REQUEST_STATE.START} componentPermission={ConnectionPermissions}/>

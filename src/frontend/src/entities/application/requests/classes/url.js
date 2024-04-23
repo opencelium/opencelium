@@ -23,7 +23,6 @@ if(isBuild){
 const apiPort = window.config.env.urlInfo.port.api;
 const socketPort = window.config.env.urlInfo.port.socket;
 const kibanaPort = window.config.env.urlInfo.port.kibana;
-const neo4jPort = window.config.env.urlInfo.port.neo4j;
 if(window.config.env.urlInfo.hasOwnProperty('protocol') && window.config.env.urlInfo.protocol !== '') protocol = window.config.env.urlInfo.protocol;
 if(window.config.env.urlInfo.hasOwnProperty('hostname') && window.config.env.urlInfo.hostname !== '') hostname = window.config.env.urlInfo.hostname;
 if(window.config.env.urlInfo.port.hasOwnProperty('application')) port = window.config.env.urlInfo.port.application;
@@ -39,7 +38,6 @@ export const baseUrl = `${protocol}//${hostname}:${apiPort}/`;
 export const baseUrlApi = `${protocol}//${hostname}:${apiPort}/api/`;
 export const socketServer = `${protocol}//${hostname}:${socketPort}/`;
 export const kibanaUrl = `${protocol}//${hostname}:${kibanaPort}/app/kibana`;
-export const neo4jUrl = `${protocol}//${hostname}:${neo4jPort}/`;
 
 export const appUrl = `${protocol}//${hostname}:${port}/apps`;
 export const invokerUrl = `${protocol}//${hostname}:${port}/invokers`;

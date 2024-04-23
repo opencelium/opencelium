@@ -32,13 +32,11 @@ export interface INotificationSelect{
     typeSelect: OptionProps,
     templateSelect: OptionProps,
     recipientsSelect: OptionProps[],
-    teamSelect: OptionProps,
-    channelSelect: OptionProps,
 }
 
 export interface INotificationText{
     name: string,
-    slackWebhook: string,
+    incomingWebhook: string,
 }
 
 export interface INotificationForm extends INotificationText, INotificationSelect, INotificationRadios, IForm<INotificationText, INotificationSelect, INotificationRadios, {}, {}, {}>{
@@ -61,6 +59,4 @@ export interface INotification extends INotificationForm{
     notificationType?: string,
     template: INotificationTemplate,
     recipients: string[],
-    team: string,
-    channel: string,
 }
