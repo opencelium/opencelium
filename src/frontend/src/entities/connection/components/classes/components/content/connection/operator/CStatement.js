@@ -91,6 +91,7 @@ export default class CStatement{
         this._color = this.checkColor(color) ? color : DEFAULT_COLOR;
         this._field = '';
         this._responseType = RESPONSE_SUCCESS;
+        this._rightPropertyValue = '';
     }
 
     get responseType(){
