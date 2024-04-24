@@ -112,10 +112,33 @@ public class Neo4jDriverUtility {
                     }
                     i++;
                 }
+            } else if (node.hasLabel("Request")) {
+                MethodMng method = findPrevMethod(methods, path);
+                i = getRequest(method, i, records, method.getName());
+                i = getResponse(method, i, records, method.getName());
+            } else if (node.hasLabel("Response")) {
+                MethodMng method = findPrevMethod(methods, path);
+                i = getResponse(method, i, records, method.getName());
+                i = getRequest(method, i, records, method.getName());
             }
             y = i;
         }
         return y;
+    }
+
+    private static MethodMng findPrevMethod(List<MethodMng> methods, Path path) {
+        Node a = null;
+        Node b = null;
+        for (Node node : path.nodes()) {
+            a = b;
+            b = node;
+        }
+        var map = a.asMap();
+        String color = (String) map.get("color");
+        return methods.stream()
+                .filter(m -> m.getColor().equals(color))
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("Method not found with color: " + color));
     }
 
     // exception-free
