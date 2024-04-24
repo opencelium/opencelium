@@ -123,15 +123,15 @@ public class YAMLMigrator {
     }
 
     private static boolean prepare() {
-        try {
-            if (!BACKUP_YML_FILE.createNewFile()) {
-                return false;
-            }
-            FileCopyUtils.copy(APP_YML_FILE, BACKUP_YML_FILE);
-        } catch (IOException e) {
-            LOGGER.warning("An error occurred to copy application.yml file");
-            return false;
-        }
+//        try {
+//            if (!BACKUP_YML_FILE.createNewFile()) {
+//                return false;
+//            }
+//            FileCopyUtils.copy(APP_YML_FILE, BACKUP_YML_FILE);
+//        } catch (IOException e) {
+//            LOGGER.warning("An error occurred to copy application.yml file");
+//            return false;
+//        }
         StringBuilder sb;
         try (BufferedReader reader = new BufferedReader(new FileReader(APP_YML_FILE))) {
             String line;
@@ -154,20 +154,20 @@ public class YAMLMigrator {
         try (FileOutputStream fosCOM = new FileOutputStream(APP_YML_COMPILED_FILE)) {
             fosCOM.write(sb.toString().getBytes());
         } catch (IOException e) {
-            try {
-                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_COMPILED_FILE);
-            } catch (IOException ignored) {
-            }
+//            try {
+//                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_COMPILED_FILE);
+//            } catch (IOException ignored) {
+//            }
             return false;
         }
 
         try (FileOutputStream fos = new FileOutputStream(APP_YML_FILE)) {
             fos.write(sb.toString().getBytes());
         } catch (IOException e) {
-            try {
-                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_FILE);
-            } catch (IOException ignored) {
-            }
+//            try {
+//                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_FILE);
+//            } catch (IOException ignored) {
+//            }
             return false;
         }
         return true;
@@ -284,7 +284,7 @@ public class YAMLMigrator {
                     Map<String, Object> map = (Map<String, Object>) change;
                     ChangeSet changeSet = new ChangeSet();
                     changeSet.setPath((String) map.get("path"));
-                    changeSet.setValue(map.getOrDefault("value", null));
+                    changeSet.setValue(map.get("value"));
                     changeSet.setOperation((String) map.get("operation"));
                     changeSet.setVersion(versionVal + ":" + map.get("changeset"));
                     res.add(changeSet);

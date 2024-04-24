@@ -174,11 +174,11 @@ public class BindingUtility {
     }
 
     public static Map<String, Object> doWithBody(Map<String, Object> src, List<String> fieldPaths, String id, String format) {
-        return switch (format) {
-            case "json" -> doWithJsonBody(src, fieldPaths, id);
-            case "xml" -> doWithXMLBody(src, fieldPaths, id);
-            default -> src;
-        };
+        if (format.equals("xml")) {
+            return doWithXMLBody(src, fieldPaths, id);
+        } else {
+            return doWithJsonBody(src, fieldPaths, id);
+        }
     }
 
 //--------------------------------------------------------------------------------------------------------//

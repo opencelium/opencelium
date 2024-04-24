@@ -17,8 +17,8 @@ public class ChangeSetDao {
     }
 
     public void create(ChangeSet changeSet) {
-        template.update("INSERT INTO change_set_yml (version, path, op, timestamp, success) VALUES(?,?,?,?,?)",
-                changeSet.getVersion(), changeSet.getPath(), changeSet.getOperation(), System.currentTimeMillis(), changeSet.isSuccess());
+        template.update("INSERT INTO change_set_yml (version, path, op, timestamp, success, value) VALUES(?,?,?,?,?,?)",
+                changeSet.getVersion(), changeSet.getPath(), changeSet.getOperation(), System.currentTimeMillis(), changeSet.isSuccess(), changeSet.getValue());
     }
 
     public ChangeSet get(int id) {
