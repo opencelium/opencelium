@@ -148,7 +148,7 @@ public class ConnectorExecutor {
                 } else if (loop.getOperator() == RelationalOperator.FOR_IN) {
                     list = (List<String>) referencedList;
                 } else {
-                    String[] strs = ((String) referencedList).split(operator.getCondition().getRight());
+                    String[] strs = ((String) referencedList).split(loop.getDelimiter());
 
                     Collections.addAll(list, strs);
                 }

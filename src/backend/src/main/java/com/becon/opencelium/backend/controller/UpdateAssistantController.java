@@ -21,16 +21,7 @@ import com.becon.opencelium.backend.application.assistant.UpdatePackageServiceIm
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
-import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
-import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngServiceImp;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
-import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.application.MigrateDataResource;
 import com.becon.opencelium.backend.resource.update_assistant.Neo4jConfigResource;
@@ -41,7 +32,6 @@ import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.resource.update_assistant.VersionDTO;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
-import com.becon.opencelium.backend.utility.Neo4jDriverUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.zaxxer.hikari.pool.HikariPool;
@@ -53,10 +43,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.neo4j.driver.*;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -85,9 +73,6 @@ public class UpdateAssistantController {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private Environment env;
-
-    @Autowired
     private AssistantServiceImp assistantServiceImp;
 
     @Autowired
@@ -97,19 +82,7 @@ public class UpdateAssistantController {
     private TemplateServiceImp templateServiceImp;
 
     @Autowired
-    private InvokerServiceImp invokerServiceImp;
-
-    @Autowired
-    private ConnectionServiceImp connectionServiceImp;
-
-    @Autowired
     private UpdatePackageServiceImp updatePackageServiceImp;
-    @Autowired
-    private ConnectorServiceImp connectorServiceImp;
-    @Autowired
-    private FieldBindingMngServiceImp fieldBindingMngServiceImp;
-    @Autowired
-    private ConnectionMngServiceImp connectionMngServiceImp;
 
     @GetMapping("/all")
     public List<String> getAll() {
@@ -467,38 +440,7 @@ public class UpdateAssistantController {
 
     @PostMapping("/db/migrate")
     public ResponseEntity<?> dbMigrate(@RequestBody Neo4jConfigResource neo4jConfig) {
-        try (var driver = GraphDatabase.driver(neo4jConfig.getUrl(), AuthTokens.basic(neo4jConfig.getUsername(), neo4jConfig.getPassword()));
-             Session session = driver.session()) {
-            driver.verifyConnectivity();
-            List<Connection> connections = connectionServiceImp.findAllNotCompleted();
-            for (Connection connection : connections) {
-                //building connection's data from mysql
-                ConnectionMng connectionMng = new ConnectionMng();
-                connectionMng.setConnectionId(connection.getId());
-                Connector from = connectorServiceImp.getById(connection.getFromConnector());
-                Connector to = connectorServiceImp.getById(connection.getToConnector());
-                ConnectorMng fromMng = new ConnectorMng();
-                fromMng.setTitle(from.getTitle());
-                fromMng.setConnectorId(from.getId());
-                ConnectorMng toMng = new ConnectorMng();
-                toMng.setTitle(to.getTitle());
-                toMng.setConnectorId(to.getId());
-                connectionMng.setFromConnector(fromMng);
-                connectionMng.setToConnector(toMng);
-
-                String cypherQuery = "MATCH p=((:Connection{connectionId:%d})-[*]->()) return p".formatted(connection.getId());
-                Result result = session.run(cypherQuery);
-
-                Neo4jDriverUtility.convertResultToConnection(result, connectionMng);
-
-                //setting fieldBindings
-                connectionMng.setFieldBindings(fieldBindingMngServiceImp.getAllByConnectionId(connection.getId()));
-
-                //saving to mongodb
-                connectionMngServiceImp.save(connectionMng);
-            }
-
-            return ResponseEntity.ok().build();
-        }
+        assistantServiceImp.doMigrate(neo4jConfig);
+        return ResponseEntity.ok().build();
     }
 }

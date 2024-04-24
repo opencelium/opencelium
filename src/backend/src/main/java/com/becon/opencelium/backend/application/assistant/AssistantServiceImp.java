@@ -3,14 +3,29 @@ package com.becon.opencelium.backend.application.assistant;
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.repository.SystemOverviewRepository;
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
+import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
+import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngServiceImp;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.update_assistant.Neo4jConfigResource;
+import com.becon.opencelium.backend.utility.Neo4jDriverUtility;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.neo4j.driver.AuthTokens;
+import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.Result;
+import org.neo4j.driver.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.env.Environment;
@@ -47,6 +62,7 @@ import java.util.zip.ZipInputStream;
 @Service
 public class AssistantServiceImp implements ApplicationService {
 
+    private static final Logger log = LoggerFactory.getLogger(AssistantServiceImp.class);
     @Autowired
     private SystemOverviewRepository systemOverviewRepository;
 
@@ -60,13 +76,13 @@ public class AssistantServiceImp implements ApplicationService {
     private ConnectionServiceImp connectionService;
 
     @Autowired
-    private EnhancementServiceImp enhancementService;
-
-    @Autowired
-    private ValidationContext validationContext;
-
-    @Autowired
     private YamlPropertiesFactoryBean yamPropsFactory;
+    @Autowired
+    private ConnectorServiceImp connectorServiceImp;
+    @Autowired
+    private ConnectionMngServiceImp connectionMngServiceImp;
+    @Autowired
+    private FieldBindingMngServiceImp fieldBindingMngServiceImp;
 
     @Override
     public SystemOverview getSystemOverview() {
@@ -95,8 +111,7 @@ public class AssistantServiceImp implements ApplicationService {
                 Files.copy(inputStream, target,
                         StandardCopyOption.REPLACE_EXISTING);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             throw new StorageException("Failed to store file " + filename, e);
         }
@@ -105,23 +120,21 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
 
-
     @Override
     public void deleteZipFile(Path path) {
-        if(path.equals("")){
+        if (path.equals("")) {
             return;
         }
         try {
             File tempFile = new File(path.toString());
-            if(!tempFile.exists()){
+            if (!tempFile.exists()) {
                 return;
             }
             Files.walk(path)
                     .sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             throw new StorageException("Failed to delete stored file", e);
         }
     }
@@ -141,7 +154,7 @@ public class AssistantServiceImp implements ApplicationService {
     @Override
     public void createTmpDir(String dir) {
         Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/");
-        if (Files.notExists(filePath)){
+        if (Files.notExists(filePath)) {
             File directory = new File(PathConstant.ASSISTANT + "temporary/" + dir + "/");
             directory.mkdir();
             System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "temporary/" + dir + "/");
@@ -150,7 +163,7 @@ public class AssistantServiceImp implements ApplicationService {
         List<String> folders = Arrays.asList("connection/", "template/", "invoker/");
         folders.forEach(f -> {
             Path path = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/" + f);
-            if (Files.notExists(path)){
+            if (Files.notExists(path)) {
                 File directory = new File(PathConstant.ASSISTANT + "temporary/" + dir + "/" + f);
                 directory.mkdir();
                 System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "temporary/" + dir + "/" + f);
@@ -217,7 +230,7 @@ public class AssistantServiceImp implements ApplicationService {
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File(PathConstant.ASSISTANT + "temporary/" + dir + "/" + filename + ".xml"));
             transformer.transform(source, result);
-        } catch (TransformerException ex){
+        } catch (TransformerException ex) {
             throw new RuntimeException(ex);
         }
     }
@@ -257,7 +270,7 @@ public class AssistantServiceImp implements ApplicationService {
         getText(process.getErrorStream());
 
         process = Runtime.getRuntime().exec("git"
-                + " --git-dir=" + gitDir + " --work-tree=" + workTree +  " checkout -f tags/" + version);
+                + " --git-dir=" + gitDir + " --work-tree=" + workTree + " checkout -f tags/" + version);
         getText(process.getInputStream());
         getText(process.getErrorStream());
     }
@@ -273,7 +286,7 @@ public class AssistantServiceImp implements ApplicationService {
         Process fetch = Runtime.getRuntime().exec("git fetch");
         getText(fetch.getInputStream());
         getText(fetch.getErrorStream());
-        
+
         fetch = Runtime.getRuntime().exec("git diff origin/master --name-only --exit-code");
         getText(fetch.getErrorStream());
         List<String> filesName = getText(fetch.getInputStream());
@@ -363,8 +376,8 @@ public class AssistantServiceImp implements ApplicationService {
 ////            unzipFolder(oc, target);
 //    }
 
-        @Override
-    public void  updateOff(String dir) throws Exception { // removed version parameter
+    @Override
+    public void updateOff(String dir) throws Exception { // removed version parameter
         dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
 //            InputStream oc = Files.newInputStream(Paths.get(dir));
         File backendRoot = new File("");
@@ -407,8 +420,8 @@ public class AssistantServiceImp implements ApplicationService {
             HttpMethod method = HttpMethod.GET;
             HttpHeaders header = new HttpHeaders();
             header.set("Content-Type", "application/json");
-            HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
-            ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
+            HttpEntity<Object> httpEntity = new HttpEntity<Object>(header);
+            ResponseEntity<String> response = restTemplate.exchange(url, method, httpEntity, String.class);
             return true;
         } catch (Exception e) {
             return false;
@@ -422,9 +435,9 @@ public class AssistantServiceImp implements ApplicationService {
         } catch (IOException e) {
             System.out.println("Exception while moving file: " + e.getMessage());
         }
-        if(result != null) {
+        if (result != null) {
             System.out.println("File moved successfully.");
-        }else{
+        } else {
             System.out.println("File movement failed.");
         }
     }
@@ -434,7 +447,7 @@ public class AssistantServiceImp implements ApplicationService {
 
     }
 
-    public void runScript(){
+    public void runScript() {
         final String scriptPath = "/path/to/sh/file";
         String script = "clean.sh";
         try {
@@ -453,24 +466,20 @@ public class AssistantServiceImp implements ApplicationService {
 
     }
 
-    private static Document convertStringToXMLDocument(String xmlString)
-    {
+    private static Document convertStringToXMLDocument(String xmlString) {
         //Parser that produces DOM object trees from XML content
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
         //API to obtain DOM Document instance
         DocumentBuilder builder = null;
-        try
-        {
+        try {
             //Create DocumentBuilder with default configuration
             builder = factory.newDocumentBuilder();
 
             //Parse the content to Document object
             Document doc = builder.parse(new InputSource(new StringReader(xmlString)));
             return doc;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -574,5 +583,63 @@ public class AssistantServiceImp implements ApplicationService {
         }
 
         return normalizePath;
+    }
+
+    @Override
+    public void doMigrate(Neo4jConfigResource neo4jConfig) {
+        try (var driver = GraphDatabase.driver(neo4jConfig.getUrl(), AuthTokens.basic(neo4jConfig.getUsername(), neo4jConfig.getPassword()));
+             Session session = driver.session()) {
+            driver.verifyConnectivity();
+            List<Connection> connections = connectionService.findAllNotCompleted();
+            if (connections.isEmpty()) {
+                log.info("No connections to migrate");
+                return;
+            }
+            for (Connection connection : connections) {
+                try {
+                    //building connection's data from mysql
+                    ConnectionMng connectionMng = new ConnectionMng();
+                    connectionMng.setConnectionId(connection.getId());
+                    Connector from = connectorServiceImp.getById(connection.getFromConnector());
+                    Connector to = connectorServiceImp.getById(connection.getToConnector());
+                    ConnectorMng fromMng = new ConnectorMng();
+                    fromMng.setTitle(from.getTitle());
+                    fromMng.setConnectorId(from.getId());
+                    ConnectorMng toMng = new ConnectorMng();
+                    toMng.setTitle(to.getTitle());
+                    toMng.setConnectorId(to.getId());
+                    connectionMng.setFromConnector(fromMng);
+                    connectionMng.setToConnector(toMng);
+
+                    String cypherQuery = "MATCH p=((:Connection{connectionId:%d})-[*]->()) return p".formatted(connection.getId());
+                    Result result = session.run(cypherQuery);
+
+                    if (!result.hasNext()) {
+                        log.warn("Connection[name: {}, id: {}] is not found in neo4j", connection.getTitle(), connection.getId());
+                        continue;
+                    }
+
+                    try {
+                        Neo4jDriverUtility.convertResultToConnection(result, connectionMng);
+                    } catch (Exception e) {
+                        log.error("Cannot convert Connection[name: {}, id: {}] from neo4j. {}", connection.getTitle(), connection.getId(), e.getMessage());
+                        e.printStackTrace();
+                        continue;
+                    }
+
+                    //setting fieldBindings
+                    connectionMng.setFieldBindings(fieldBindingMngServiceImp.getAllByConnectionId(connection.getId()));
+
+                    //saving to mongodb
+                    connectionMngServiceImp.save(connectionMng);
+                    log.info("Connection[name: {}, id: {}] successfully migrated", connection.getTitle(), connection.getId());
+                } catch (Exception e) {
+                    log.error("Some error occurred during migration of Connection[name: {}, id: {}]", connection.getTitle(), connection.getId());
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to connect to neo4j");
+        }
     }
 }

@@ -20,6 +20,11 @@ public class Loop {
         result.setIterator(operatorEx.getIterator());
         result.setOperator(operatorEx.getCondition().getRelationalOperator());
 
+        // if loops' type is FOR_IN then add indicator
+        if (result.getOperator() == RelationalOperator.FOR_IN) {
+            result.setRef(result.getRef() + "['*']~");
+        }
+
         return result;
     }
 
