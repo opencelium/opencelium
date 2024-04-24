@@ -14,15 +14,14 @@
  */
 
 import {AxiosResponse} from "axios";
-import {ToolModel} from "@entity/schedule/requests/models/Tool";
 
-export interface GetAllToolsResponse {
-    result: ToolModel[],
+export interface GetWebhookResponse {
+    result: string,
 }
 
-export default interface ITool{
+export interface IIncomingWebhook {
 
-    //to get all tools
-    getAllTools(): Promise<AxiosResponse<GetAllToolsResponse>>,
+    //to get webhook
+    getWebhook(): Promise<AxiosResponse<GetWebhookResponse>>,
 
 }

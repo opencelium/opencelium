@@ -74,12 +74,8 @@ export class NotificationRequest extends Request implements INotificationRequest
             case 'email':
                 mappedNotification.recipients = notification.recipientsSelect.map(recipient => recipient.value);
                 break;
-            case 'teams':
-                mappedNotification.team = notification.teamSelect.value;
-                mappedNotification.channel = notification.channelSelect.value;
-                break;
-            case 'slack':
-                mappedNotification.recipients = notification.slackWebhook ? [notification.slackWebhook] : [];
+            case 'incoming_webhook':
+                mappedNotification.recipients = notification.incomingWebhook ? [notification.incomingWebhook] : [];
                 break;
         }
         if(notification.id !== 0){

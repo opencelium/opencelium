@@ -70,12 +70,6 @@ export const notificationSlice = createSlice({
         clearCurrentNotification: (state) => {
             state.currentNotification = null;
         },
-        clearTeamFromCurrentNotification: (state) => {
-            state.currentNotification = {...state.currentNotification, team: '', channel: ''};
-        },
-        clearChannelFromCurrentNotification: (state) => {
-            state.currentNotification = {...state.currentNotification, channel: ''};
-        }
     },
     extraReducers: {
         [checkNotificationName.pending.type]: (state) => {
@@ -197,7 +191,7 @@ export const notificationSlice = createSlice({
 })
 
 export const {
-    clearCurrentNotification, clearTeamFromCurrentNotification, clearChannelFromCurrentNotification,
+    clearCurrentNotification,
 } = notificationSlice.actions;
 
 export default notificationSlice.reducer;

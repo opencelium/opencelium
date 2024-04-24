@@ -18,8 +18,6 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {ICommonState} from "@application/interfaces/core";
 import {CommonState} from "@application/utils/store";
-import {TeamChannelModel, TeamModel} from "@entity/schedule/requests/models/Teams";
-import {getAllChannelsByTeam, getAllTeams} from "@entity/schedule/redux_toolkit/action_creators/TeamsCreators";
 import {getSlackWebhook} from "@entity/schedule/redux_toolkit/action_creators/SlackCreator";
 
 export interface SlackState extends ICommonState{
