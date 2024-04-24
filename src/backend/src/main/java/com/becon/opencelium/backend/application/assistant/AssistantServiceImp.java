@@ -593,6 +593,7 @@ public class AssistantServiceImp implements ApplicationService {
             List<Connection> connections = connectionService.findAllNotCompleted();
             if (connections.isEmpty()) {
                 log.info("No connections to migrate");
+                return;
             }
             for (Connection connection : connections) {
                 try {
