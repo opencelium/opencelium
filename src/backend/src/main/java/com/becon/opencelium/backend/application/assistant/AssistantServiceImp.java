@@ -622,7 +622,8 @@ public class AssistantServiceImp implements ApplicationService {
                     try {
                         Neo4jDriverUtility.convertResultToConnection(result, connectionMng);
                     } catch (Exception e) {
-                        log.error("Cannot convert Connection[name: {}, id: {}] from neo4j", connection.getTitle(), connection.getId());
+                        log.error("Cannot convert Connection[name: {}, id: {}] from neo4j. {}", connection.getTitle(), connection.getId(), e.getMessage());
+                        e.printStackTrace();
                         continue;
                     }
 
@@ -634,7 +635,7 @@ public class AssistantServiceImp implements ApplicationService {
                     log.info("Connection[name: {}, id: {}] successfully migrated", connection.getTitle(), connection.getId());
                 } catch (Exception e) {
                     log.error("Some error occurred during migration of Connection[name: {}, id: {}]", connection.getTitle(), connection.getId());
-                    continue;
+                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {
