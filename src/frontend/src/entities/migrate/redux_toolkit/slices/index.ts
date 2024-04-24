@@ -13,5 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import migrationReducer from "./MigrationSlice";
+
 export default {
+    migrationReducer,
 }

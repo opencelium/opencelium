@@ -17,27 +17,37 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ICommonState} from "@application/interfaces/core";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
+import {IResponse} from "@application/requests/interfaces/IResponse";
+import {IInvoker} from "@entity/invoker/interfaces/IInvoker";
+import {migrate} from "@entity/migrate/redux_toolkit/action_creators/MigrationCreators";
 
-export interface EntityApplicationState extends ICommonState{
-    documentation: any,
-    checkingApi: API_REQUEST_STATE,
-    updatingLogoData: API_REQUEST_STATE,
+export interface MigrationState extends ICommonState{
+    migrating: API_REQUEST_STATE,
 }
 
-const initialState: EntityApplicationState = {
-    documentation: null,
-    checkingApi: API_REQUEST_STATE.INITIAL,
-    updatingLogoData: API_REQUEST_STATE.INITIAL,
+const initialState: MigrationState = {
+    migrating: API_REQUEST_STATE.INITIAL,
     ...CommonState,
 }
 
-export const applicationSlice = createSlice({
-    name: 'entity_application',
+export const migrationSlice = createSlice({
+    name: 'migration',
     initialState,
     reducers: {
     },
     extraReducers: {
+        [migrate.pending.type]: (state) => {
+            state.migrating = API_REQUEST_STATE.START;
+        },
+        [migrate.fulfilled.type]: (state, action: PayloadAction<IInvoker[]>) => {
+            state.migrating = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [migrate.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.migrating = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
     }
 })
 
-export default applicationSlice.reducer;
+export default migrationSlice.reducer;

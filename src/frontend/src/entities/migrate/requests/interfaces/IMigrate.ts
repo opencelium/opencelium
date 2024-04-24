@@ -13,5 +13,15 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export default {
+import {AxiosResponse} from "axios";
+import {IResponse} from "@application/requests/interfaces/IResponse";
+
+export interface MigrateRequestProps {
+    url: string;
+    username: string;
+    password: string;
+}
+
+export default interface IMigrateRequest {
+    migrateFromNeo4jToMongoDB(data: MigrateRequestProps): Promise<AxiosResponse<IResponse>>,
 }
