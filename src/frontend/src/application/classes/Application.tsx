@@ -124,17 +124,21 @@ export class Application{
             const originalMethod = descriptor.value;
             descriptor.value = function () {
                 let reference = this;
-                const isValid = params && params.hasNoValidation ? true : reference.validate();
-                if(isValid) {
-                    if(originalMethod.apply(this, arguments)) {
-                        if (typeof reference.dispatch === 'function') {
-                            let data = {...reference};
-                            if(params && params.mapping){
-                                data = params.mapping(reference);
+                if(this) {
+                    const isValid = params && params.hasNoValidation ? true : reference.validate();
+                    if (isValid) {
+                        if (originalMethod.apply(this, arguments)) {
+                            if (typeof reference.dispatch === 'function') {
+                                let data = {...reference};
+                                if (params && params.mapping) {
+                                    data = params.mapping(reference);
+                                }
+                                reference.dispatch(action(data));
                             }
-                            reference.dispatch(action(data));
                         }
                     }
+                } else {
+                    //form.action.handleClick should be called like this: () => classInstance.method()
                 }
             };
             return descriptor;

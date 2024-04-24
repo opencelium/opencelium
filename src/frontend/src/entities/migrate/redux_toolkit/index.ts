@@ -13,5 +13,10 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import reducers from "./slices";
+import actionCreators from "./action_creators";
+
 export default {
+    reducers,
+    actionCreators,
 }

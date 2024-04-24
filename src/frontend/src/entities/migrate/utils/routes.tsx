@@ -13,5 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export default {
-}
+import React from "react";
+import {Route} from "react-router-dom";
+import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
+import MigrationForm from "@entity/migrate/components/pages/MigrationForm";
+
+export default (
+    <Route path="/migration" key={'migration'}>
+        <Route index element={<ErrorBoundary><MigrationForm/></ErrorBoundary>}/>
+    </Route>
+)

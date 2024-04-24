@@ -13,5 +13,15 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+
+import {migrate} from "@entity/migrate/redux_toolkit/action_creators/MigrationCreators";
+
 export default {
+    fulfilled: {
+        [migrate.fulfilled.type]: "The migration was successfully fulfilled",
+    },
+    rejected: {
+        [migrate.rejected.type]: "The migration was rejected",
+    },
 }
