@@ -14,7 +14,7 @@
  */
 
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
-import {Request} from "@application/requests/classes/Request";
+import Request from "@entity/application/requests/classes/Request";
 import IMigrateRequest, {MigrateRequestProps} from "../interfaces/IMigrate";
 import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";

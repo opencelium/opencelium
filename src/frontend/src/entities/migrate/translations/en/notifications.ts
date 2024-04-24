@@ -22,6 +22,8 @@ export default {
         [migrate.fulfilled.type]: "The migration was successfully fulfilled",
     },
     rejected: {
-        [migrate.rejected.type]: "The migration was rejected",
+        [migrate.rejected.type]: {
+            "__DEFAULT__": "The migration was rejected"
+        },
     },
 }
