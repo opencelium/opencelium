@@ -117,8 +117,8 @@ public class StorageConfiguration {
         userStorageService.init();
         // create defou
 
-        if (YAMLMigrator.getChangeSetsToSave() != null) {
-            changeSetDao.createAll(YAMLMigrator.getChangeSetsToSave());
-        }
+//        if (YAMLMigrator.getChangeSetsToSave() != null) {
+//            changeSetDao.createAll(YAMLMigrator.getChangeSetsToSave());
+//        }
     }
 }
