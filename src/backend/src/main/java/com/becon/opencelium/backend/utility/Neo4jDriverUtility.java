@@ -19,6 +19,7 @@ public class Neo4jDriverUtility {
 
         while (result.hasNext()) {
             Record record = result.next();
+
             Path connectionPath = record.get("p").asPath();
             List<Relationship> relationships = (List<Relationship>) connectionPath.relationships();
             if (relationships.size() < 2 || relationships.get(relationships.size() - 1).hasType("linked")) {
@@ -54,15 +55,18 @@ public class Neo4jDriverUtility {
                 if (i + 1 >= records.size()) {
                     return i;
                 }
-                Node lastNodeOfNextRecord = records.get(i + 1).get("p").asPath().end();
+                Path nextPath = records.get(i + 1).get("p").asPath();
+                Node lastNodeOfNextRecord = nextPath.end();
                 if (lastNodeOfNextRecord.hasLabel("Method") || lastNodeOfNextRecord.hasLabel("Statement")) {
                     i = crawlMethodAndOperators(methods, operators, i + 1, records);
                 } else if (lastNodeOfNextRecord.hasLabel("Request")) {
-                    i = getRequest(method, i + 1, records, method.getName());
-                    i = getResponse(method, i + 1, records, method.getName());
+                    MethodMng prevMethod = findPrevMethod(methods, nextPath);
+                    i = getRequest(prevMethod, i + 1, records, prevMethod.getName());
+                    i = getResponse(prevMethod, i + 1, records, prevMethod.getName());
                 } else if (lastNodeOfNextRecord.hasLabel("Response")) {
-                    i = getResponse(method, i + 1, records, method.getName());
-                    i = getRequest(method, i + 1, records, method.getName());
+                    MethodMng prevMethod = findPrevMethod(methods, nextPath);
+                    i = getResponse(prevMethod, i + 1, records, prevMethod.getName());
+                    i = getRequest(prevMethod, i + 1, records, prevMethod.getName());
                 }
             } else if (node.hasLabel("Statement")) { //exception-free
                 OperatorMng operator = mapStatement(node.asMap());
@@ -88,11 +92,11 @@ public class Neo4jDriverUtility {
             } else if (node.hasLabel("Request")) {
                 MethodMng method = findPrevMethod(methods, path);
                 i = getRequest(method, i, records, method.getName());
-                i = getResponse(method, i, records, method.getName());
+//                i = getResponse(method, i, records, method.getName());
             } else if (node.hasLabel("Response")) {
                 MethodMng method = findPrevMethod(methods, path);
                 i = getResponse(method, i, records, method.getName());
-                i = getRequest(method, i, records, method.getName());
+//                i = getRequest(method, i, records, method.getName());
             } else if (node.hasLabel("Variable")) {
                 var relationships = (List<Relationship>) path.relationships();
                 if (relationships.get(relationships.size() - 1).hasType("left")) {
@@ -133,8 +137,10 @@ public class Neo4jDriverUtility {
         }
         var map = a.asMap();
         String color = (String) map.get("color");
+        String index = (String) map.get("index");
+        String name = (String) map.get("name");
         return methods.stream()
-                .filter(m -> m.getColor().equals(color))
+                .filter(m -> m.getColor().equals(color) && m.getName().equals(name) && m.getIndex().equals(index))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Method not found with color: " + color));
     }
@@ -158,7 +164,6 @@ public class Neo4jDriverUtility {
         }
         Record record = records.get(y);
         Path path = record.get("p").asPath();
-        List<Relationship> relationships = (List<Relationship>) path.relationships();
         Node node = path.end();
         if (!node.hasLabel("Request")) {
             return y - 1;
@@ -171,10 +176,14 @@ public class Neo4jDriverUtility {
         requestMng.setBody(new BodyMng());
         requestMng.setHeader(new HashMap<>());
         methodMng.setRequest(requestMng);
-        if (relationships.get(relationships.size() - 1).hasType("has_header")) {
+        if (y + 1 >= records.size()) {
+            return y;
+        }
+        Node nextNode = records.get(y + 1).get("p").asPath().end();
+        if (nextNode.hasLabel("Header")) {
             y = getHeader(requestMng.getHeader(), y + 1, records);
             y = getBody(requestMng.getBody(), y + 1, records, methodName);
-        } else {
+        } else if (nextNode.hasLabel("Body")) {
             y = getBody(requestMng.getBody(), y + 1, records, methodName);
             y = getHeader(requestMng.getHeader(), y + 1, records);
         }
