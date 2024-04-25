@@ -6,15 +6,11 @@ import org.neo4j.driver.Result;
 import org.neo4j.driver.types.Node;
 import org.neo4j.driver.types.Path;
 import org.neo4j.driver.types.Relationship;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 
 public class Neo4jDriverUtility {
-    private static final Map<String, LinkedList<String>> errorContainer = new HashMap<>();
-    private static final Logger log = LoggerFactory.getLogger(Neo4jDriverUtility.class);
 
     public static void convertResultToConnection(final Result result, ConnectionMng connectionMng) {
         //Each records' structure : 0 - Connection, 1 - Connector, 2 - Method or Statement, ...
@@ -59,23 +55,15 @@ public class Neo4jDriverUtility {
                     return i;
                 }
                 Node lastNodeOfNextRecord = records.get(i + 1).get("p").asPath().end();
-                errorContainer.put(method.getName(), new LinkedList<>());
-                errorContainer.get(method.getName()).add("Method[name: " + method.getName() + "]");
                 if (lastNodeOfNextRecord.hasLabel("Method") || lastNodeOfNextRecord.hasLabel("Statement")) {
                     i = crawlMethodAndOperators(methods, operators, i + 1, records);
-                    //i - an index of the last visited record
                 } else if (lastNodeOfNextRecord.hasLabel("Request")) {
                     i = getRequest(method, i + 1, records, method.getName());
-                    //i - an index of the last visited record
                     i = getResponse(method, i + 1, records, method.getName());
-                    //i - an index of the last visited record
                 } else if (lastNodeOfNextRecord.hasLabel("Response")) {
                     i = getResponse(method, i + 1, records, method.getName());
-                    //i - an index of the last visited record
                     i = getRequest(method, i + 1, records, method.getName());
-                    //i - an index of the last visited record
                 }
-                errorContainer.remove(method.getName());
             } else if (node.hasLabel("Statement")) { //exception-free
                 OperatorMng operator = mapStatement(node.asMap());
                 operators.add(operator);
@@ -85,30 +73,15 @@ public class Neo4jDriverUtility {
                 }
                 Path nextPath = records.get(i + 1).get("p").asPath();
                 Node lastNodeOfNextRecord = nextPath.end();
-                var nextRelationships = (List<Relationship>) nextPath.relationships();
 
                 if (lastNodeOfNextRecord.hasLabel("Method") || lastNodeOfNextRecord.hasLabel("Statement")) {
                     i = crawlMethodAndOperators(methods, operators, i + 1, records);
-                    //i - an index of the last visited record
                 } else if (lastNodeOfNextRecord.hasLabel("Variable")) {
+                    var nextRelationships = (List<Relationship>) nextPath.relationships();
                     if (nextRelationships.get(nextRelationships.size() - 1).hasType("left")) {
                         completeOperator(operator.getCondition(), records.get(i + 1), "left");
-                        if (i + 2 < records.size()) {
-                            Node nextnext = records.get(i + 2).get("p").asPath().end();
-                            if (nextnext.hasLabel("Variable")) {
-                                completeOperator(operator.getCondition(), records.get(i + 2), "right");
-                                i++;
-                            }
-                        }
                     } else {
                         completeOperator(operator.getCondition(), records.get(i + 1), "right");
-                        if (i + 2 < records.size()) {
-                            Node nextnext = records.get(i + 2).get("p").asPath().end();
-                            if (nextnext.hasLabel("Variable")) {
-                                completeOperator(operator.getCondition(), records.get(i + 2), "left");
-                                i++;
-                            }
-                        }
                     }
                     i++;
                 }
@@ -120,10 +93,35 @@ public class Neo4jDriverUtility {
                 MethodMng method = findPrevMethod(methods, path);
                 i = getResponse(method, i, records, method.getName());
                 i = getRequest(method, i, records, method.getName());
+            } else if (node.hasLabel("Variable")) {
+                var relationships = (List<Relationship>) path.relationships();
+                if (relationships.get(relationships.size() - 1).hasType("left")) {
+                    OperatorMng prevOperator = findPrevOperator(operators, path);
+                    completeOperator(prevOperator.getCondition(), records.get(i), "left");
+                } else {
+                    OperatorMng prevOperator = findPrevOperator(operators, path);
+                    completeOperator(prevOperator.getCondition(), records.get(i), "right");
+                }
             }
             y = i;
         }
         return y;
+    }
+
+    private static OperatorMng findPrevOperator(List<OperatorMng> operators, Path path) {
+        Node a = null;
+        Node b = null;
+        for (Node node : path.nodes()) {
+            a = b;
+            b = node;
+        }
+        var map = a.asMap();
+        String index = (String) map.get("index");
+        String type = (String) map.get("type");
+        return operators.stream()
+                .filter(o -> o.getIndex().equals(index) && o.getType().equals(type))
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("Operator[index: " + index + ", type: " + type + "] not found"));
     }
 
     private static MethodMng findPrevMethod(List<MethodMng> methods, Path path) {
@@ -141,21 +139,23 @@ public class Neo4jDriverUtility {
                 .orElseThrow(() -> new RuntimeException("Method not found with color: " + color));
     }
 
-    // exception-free
     private static int getResponse(MethodMng method, int y, List<Record> records, String methodName) {
+        if (y >= records.size()) {
+            return records.size() - 1;
+        }
         if (!records.get(y).get("p").asPath().end().hasLabel("Response")) {
             return y - 1;
         }
-        errorContainer.get(methodName).add("Response");
         ResponseMng responseMng = new ResponseMng();
         method.setResponse(responseMng);
         y = getResult(responseMng, y + 1, records, methodName);
-        errorContainer.get(methodName).removeLast();
         return y;
     }
 
-    // exception-free
     private static int getRequest(MethodMng methodMng, int y, List<Record> records, String methodName) {
+        if (y >= records.size()) {
+            return records.size() - 1;
+        }
         Record record = records.get(y);
         Path path = record.get("p").asPath();
         List<Relationship> relationships = (List<Relationship>) path.relationships();
@@ -163,7 +163,6 @@ public class Neo4jDriverUtility {
         if (!node.hasLabel("Request")) {
             return y - 1;
         }
-        errorContainer.get(methodName).add("Request");
         String method = ((String) node.asMap().get("method"));
         String endpoint = ((String) node.asMap().get("endpoint"));
         RequestMng requestMng = new RequestMng();
@@ -179,11 +178,9 @@ public class Neo4jDriverUtility {
             y = getBody(requestMng.getBody(), y + 1, records, methodName);
             y = getHeader(requestMng.getHeader(), y + 1, records);
         }
-        errorContainer.get(methodName).removeLast();
         return y;
     }
 
-    // exception-free
     private static int getResult(ResponseMng responseMng, int y, List<Record> records, String methodName) {
         if (y >= records.size())
             return records.size() - 1;
@@ -206,8 +203,10 @@ public class Neo4jDriverUtility {
         return getResult(responseMng, y + 1, records, methodName);
     }
 
-    // exception-free
     private static int getHeader(Map<String, String> header, int y, List<Record> records) {
+        if (y >= records.size()) {
+            return records.size() - 1;
+        }
         if (!records.get(y).get("p").asPath().end().hasLabel("Header")) {
             return y - 1;
         }
@@ -225,13 +224,13 @@ public class Neo4jDriverUtility {
         return records.size() - 1;
     }
 
-    // exception-free
     private static int getBody(BodyMng bodyMng, int y, List<Record> records, String methodName) {
-        errorContainer.get(methodName).add("Body");
+        if (y >= records.size()) {
+            return records.size() - 1;
+        }
         Path path = records.get(y).get("p").asPath();
         Node node = path.end();
         if (!node.hasLabel("Body")) {
-            errorContainer.get(methodName).removeLast();
             return y - 1;
         }
         String data = ((String) node.asMap().get("data"));
@@ -242,7 +241,6 @@ public class Neo4jDriverUtility {
         bodyMng.setFormat(format);
         bodyMng.setFields(new HashMap<>());
         y = getFields(bodyMng.getFields(), records, y + 1, 1, methodName);
-        errorContainer.get(methodName).removeLast();
         return y;
     }
 
@@ -250,82 +248,71 @@ public class Neo4jDriverUtility {
 
     private static int getFields(Map<String, Object> fields, List<Record> records, int y, int level, String methodName) {
         for (int i = y; i < records.size(); i++) {
-            String name = "";
-            String type = "";
-            try {
-                Path path = records.get(i).get("p").asPath();
-                Node node = path.end();
-                int currLevel = findLevelOfField(path);
-                int nextLevel;
-                if (i + 1 >= records.size()) {
-                    nextLevel = -1;
-                } else {
-                    nextLevel = findLevelOfField(records.get(i + 1).get("p").asPath());
-                }
-                if (level == 0 || !node.hasLabel("Field") || currLevel != level) {
-                    return i - 1;
-                }
-                name = (String) node.asMap().get("name");
-                type = (String) node.asMap().get("type");
-                switch (type) {
-                    case "object" -> {
-                        Object value = node.asMap().get("value");
-                        if (name.equals(OC_ATTRIBUTES) && value != null && value.equals("")) {
-                            fields.put(name, "");
-                            if (nextLevel < currLevel) {
-                                return i;
-                            }
-                            i = getFields(fields, records, i + 1, nextLevel, methodName);
-                        } else {
-                            Map<String, Object> map = new HashMap<>();
-                            fields.put(name, map);
-                            i = getFields(map, records, i + 1, nextLevel, methodName);
-                        }
-                    }
-                    case "array" -> {
-                        Object value = node.asMap().get("value");
-                        if (value != null && value.equals("")) {
-                            fields.put(name, new ArrayList<>());
-                            if (nextLevel < currLevel) {
-                                return i;
-                            }
-                            i = getFields(fields, records, i + 1, nextLevel, methodName);
-                        } else {
-                            List<Map<String, Object>> list = new ArrayList<>();
-                            list.add(new HashMap<>());
-                            fields.put(name, list);
-                            i = getFields(list.get(0), records, i + 1, nextLevel, methodName);
-                        }
-                    }
-                    default -> { //string, integer, boolean
-                        Object value = node.asMap().get("value");
-                        if (value instanceof String str) {
-                            fields.put(name, str);
-                        } else if (value instanceof Boolean b) {
-                            fields.put(name, b);
-                        } else if (value instanceof Integer in) {
-                            fields.put(name, in);
-                        } else {
-                            fields.put(name, value);
-                        }
+            Path path = records.get(i).get("p").asPath();
+            Node node = path.end();
+            int currLevel = findLevelOfField(path);
+            int nextLevel;
+            if (i + 1 >= records.size()) {
+                nextLevel = -1;
+            } else {
+                nextLevel = findLevelOfField(records.get(i + 1).get("p").asPath());
+            }
+            if (level == 0 || !node.hasLabel("Field") || currLevel != level) {
+                return i - 1;
+            }
+            String name = (String) node.asMap().get("name");
+            String type = (String) node.asMap().get("type");
+            switch (type) {
+                case "object" -> {
+                    Object value = node.asMap().get("value");
+                    if (name.equals(OC_ATTRIBUTES) && value != null && value.equals("")) {
+                        fields.put(name, "");
                         if (nextLevel < currLevel) {
                             return i;
                         }
                         i = getFields(fields, records, i + 1, nextLevel, methodName);
+                    } else {
+                        Map<String, Object> map = new HashMap<>();
+                        fields.put(name, map);
+                        i = getFields(map, records, i + 1, nextLevel, methodName);
                     }
                 }
-                if (nextLevel == -1) {
-                    return i - 1;
+                case "array" -> {
+                    Object value = node.asMap().get("value");
+                    if (value != null && value.equals("")) {
+                        fields.put(name, new ArrayList<>());
+                        if (nextLevel < currLevel) {
+                            return i;
+                        }
+                        i = getFields(fields, records, i + 1, nextLevel, methodName);
+                    } else {
+                        List<Map<String, Object>> list = new ArrayList<>();
+                        list.add(new HashMap<>());
+                        fields.put(name, list);
+                        i = getFields(list.get(0), records, i + 1, nextLevel, methodName);
+                    }
                 }
-                y = i;
-            } catch (Exception e) {
-                if (errorContainer.containsKey(methodName)) {
-                    RuntimeException ex = new RuntimeException("Error while getting Field[name: %s, type: %s]. See field's location: %s".formatted(name, type, errorContainer.get(methodName).toString()));
-                    errorContainer.remove(methodName);
-                    throw ex;
+                default -> { //string, integer, boolean
+                    Object value = node.asMap().get("value");
+                    if (value instanceof String str) {
+                        fields.put(name, str);
+                    } else if (value instanceof Boolean b) {
+                        fields.put(name, b);
+                    } else if (value instanceof Integer in) {
+                        fields.put(name, in);
+                    } else {
+                        fields.put(name, value);
+                    }
+                    if (nextLevel < currLevel) {
+                        return i;
+                    }
+                    i = getFields(fields, records, i + 1, nextLevel, methodName);
                 }
-                throw e;
             }
+            if (nextLevel == -1) {
+                return i - 1;
+            }
+            y = i;
         }
         return y;
     }
