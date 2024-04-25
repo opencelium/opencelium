@@ -174,7 +174,7 @@ public class PatchHelper {
         return idx == -1 ? size - 1 : idx;
     }
 
-    public JsonPatch changeEachValue(JsonPatch patch, Object obj) {
+    public JsonPatch changeEachValue(JsonPatch patch) {
         JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
         Iterator<JsonNode> nodes = jsonNode.elements();
         List<JsonNode> nodeList = new ArrayList<>();
@@ -183,6 +183,32 @@ public class PatchHelper {
             ((ObjectNode) next).remove("value");
             ((ObjectNode) next).put("value", mapper.createObjectNode());
             nodeList.add(next);
+        }
+        return mapper.convertValue(nodeList, JsonPatch.class);
+    }
+
+    public int size(JsonPatch jsonPatch) {
+        JsonNode jsonNode = mapper.convertValue(jsonPatch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        int i = 0;
+        while (nodes.hasNext()) {
+            nodes.next();
+            i++;
+        }
+        return i;
+    }
+
+    public JsonPatch delete(JsonPatch jsonPatch, int start, int end) {
+        JsonNode jsonNode = mapper.convertValue(jsonPatch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+        List<JsonNode> nodeList = new ArrayList<>();
+        int i = 0;
+        while (nodes.hasNext()) {
+            JsonNode next = nodes.next();
+            if (i < start || i >= end) {
+                nodeList.add(next);
+            }
+            i++;
         }
         return mapper.convertValue(nodeList, JsonPatch.class);
     }

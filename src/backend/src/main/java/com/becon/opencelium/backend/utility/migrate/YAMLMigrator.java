@@ -37,6 +37,7 @@ public class YAMLMigrator {
     private static List<ChangeSet> changeSetsToSave;
 
     static {
+        //yamlMapper config
         YAML_MAPPER.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
         YAML_MAPPER.enable(JsonParser.Feature.ALLOW_YAML_COMMENTS);
         YAML_MAPPER.disable(YAMLGenerator.Feature.SPLIT_LINES);
@@ -44,7 +45,9 @@ public class YAMLMigrator {
 
         JDBC_TEMPLATE = new JdbcTemplate();
         DAO = new ChangeSetDao(JDBC_TEMPLATE);
+
         PATCH_HELPER = new PatchHelper(OBJECT_MAPPER);
+
         Path root = Paths.get(new File("").toURI());
         APP_YML_FILE = new File(root.resolve("src/main/resources/application.yml").toString());
         APP_YML_COMPILED_FILE = new File(root.resolve("build/resources/main/application.yml").toString());
@@ -66,6 +69,13 @@ public class YAMLMigrator {
 
         //preparing a file before read
         if (!prepare()) return;
+        //from this line backup file exists. In case of exception, this file must be deleted
+
+        runInternally();
+        BACKUP_YML_FILE.delete();
+    }
+
+    public static void runInternally() {
 
         //parse application.yml file
         Map<String, Object> appYamlMap = readYAMLFile(APP_YML_FILE);
@@ -107,13 +117,18 @@ public class YAMLMigrator {
                 patched = PATCH_HELPER.patch(singleJsonPatch, patched, Object.class);
                 changeSet.setSuccess(true);
             } catch (RuntimeException e) {
-                if (e.getCause().getMessage().equals("parent of node to add does not exist")) {
-                    patched = fillUp(changeSet.getPath().replaceAll("\\.", "/"), singleJsonPatch, patched);
+                if (e.getCause() != null && (e.getCause().getMessage().equals("parent of node to add does not exist") || e.getCause().getMessage().equals("parent of path to add to is not a container"))) {
+                    if (PATCH_HELPER.size(singleJsonPatch) == 2) {
+                        JsonPatch firstOp = PATCH_HELPER.delete(singleJsonPatch, 1, 2);
+                        patched = fillUp(changeSet.getPath().replaceAll("\\.", "/"), firstOp, patched);
+                    } else {
+                        patched = fillUp(changeSet.getPath().replaceAll("\\.", "/"), singleJsonPatch, patched);
+                    }
                     i--;
-                } else if (e.getCause().getMessage().equals("value cannot be null")) {
+                } else if (e.getCause() != null && e.getCause().getMessage().equals("value cannot be null")) {
                     changeSet.setSuccess(false);
                 } else {
-                    LOGGER.warning("An error occurred while applying " + changeSet.getVersion() + " - changeset : " + e.getCause().getMessage());
+                    LOGGER.warning("An error occurred while applying " + changeSet.getVersion() + " - changeset : " + (e.getCause() == null ? e.getMessage() : e.getCause().getMessage()));
                     finish(patched, newChangeSets.subList(0, i));
                     return;
                 }
@@ -123,15 +138,16 @@ public class YAMLMigrator {
     }
 
     private static boolean prepare() {
-//        try {
-//            if (!BACKUP_YML_FILE.createNewFile()) {
-//                return false;
-//            }
-//            FileCopyUtils.copy(APP_YML_FILE, BACKUP_YML_FILE);
-//        } catch (IOException e) {
-//            LOGGER.warning("An error occurred to copy application.yml file");
-//            return false;
-//        }
+        try {
+            if (!BACKUP_YML_FILE.exists() && !BACKUP_YML_FILE.createNewFile()) {
+                return false;
+            }
+            FileCopyUtils.copy(APP_YML_FILE, BACKUP_YML_FILE);
+        } catch (IOException e) {
+            LOGGER.warning("An error occurred to copy application.yml file");
+            return false;
+        }
+
         StringBuilder sb;
         try (BufferedReader reader = new BufferedReader(new FileReader(APP_YML_FILE))) {
             String line;
@@ -148,30 +164,31 @@ public class YAMLMigrator {
                 sb.append("\n");
             }
         } catch (IOException e) {
+            BACKUP_YML_FILE.delete();
             throw new RuntimeException(e);
         }
 
         try (FileOutputStream fosCOM = new FileOutputStream(APP_YML_COMPILED_FILE)) {
             fosCOM.write(sb.toString().getBytes());
         } catch (IOException e) {
-//            try {
-//                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_COMPILED_FILE);
-//            } catch (IOException ignored) {
-//            }
+            try {
+                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_COMPILED_FILE);
+            } catch (IOException ignored) {
+            }
             return false;
         }
 
         try (FileOutputStream fos = new FileOutputStream(APP_YML_FILE)) {
             fos.write(sb.toString().getBytes());
         } catch (IOException e) {
-//            try {
-//                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_FILE);
-//            } catch (IOException ignored) {
-//            }
+            try {
+                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_FILE);
+            } catch (IOException ignored) {
+            }
             return false;
         }
         return true;
-    }
+    } //ready
 
     private static boolean isCommentLine(String line) {
         return line.trim().startsWith("#");
@@ -186,6 +203,14 @@ public class YAMLMigrator {
             YAML_MAPPER.writeValue(APP_YML_FILE, yaml);
             YAML_MAPPER.writeValue(APP_YML_COMPILED_FILE, yaml);
         } catch (IOException e) {
+            try {
+                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_FILE);
+                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_COMPILED_FILE);
+            } catch (IOException ex) {
+                LOGGER.warning("Failed to write application.yml file. Please check application.yml and rerun");
+                BACKUP_YML_FILE.delete();
+                throw new RuntimeException(ex);
+            }
             LOGGER.warning("Failed to write YAML file");
             return;
         }
@@ -202,11 +227,11 @@ public class YAMLMigrator {
 
     private static Object fillUp(String path, final JsonPatch jsonPatch, Object obj) {
         JsonPatch parent = PATCH_HELPER.changeEachPath(jsonPatch, x -> x.substring(0, x.lastIndexOf("/")));
-        parent = PATCH_HELPER.changeEachValue(parent, new HashMap<String, Object>());
+        parent = PATCH_HELPER.changeEachValue(parent);
         try {
             return PATCH_HELPER.patch(parent, obj, Object.class);
         } catch (RuntimeException e) {
-            if (e.getMessage().equals("parent of node to add does not exist")) {
+            if (e.getCause() != null && (e.getCause().getMessage().equals("parent of node to add does not exist") || e.getCause().getMessage().equals("parent of path to add to is not a container"))) {
                 return fillUp(path.substring(0, path.lastIndexOf("/")), parent, obj);
             }
             throw e;
@@ -239,27 +264,39 @@ public class YAMLMigrator {
                 map.put("op", changeSet.getOperation());
                 map.put("path", "/" + changeSet.getPath().replaceAll("\\.", "/"));
                 map.put("value", changeSet.getValue());
+                opList.add(map);
             }
             case "modify" -> {
                 map.put("op", "replace");
                 map.put("path", "/" + changeSet.getPath().replaceAll("\\.", "/"));
                 map.put("value", changeSet.getValue());
+                opList.add(map);
             }
             case "delete" -> {
                 map.put("op", "remove");
                 map.put("path", "/" + changeSet.getPath().replaceAll("\\.", "/"));
+                changeSet.setValue(null);
+                opList.add(map);
             }
             case "rename" -> {
+                Map<String, Object> prev = new HashMap<>();
+                String toPath = "/" + ((String) (changeSet.getValue())).replaceAll("\\.", "/");
+                prev.put("op", "add");
+                prev.put("path", toPath);
+                prev.put("value", "");
+                opList.add(prev);
+
+                String fromPath = "/" + changeSet.getPath().replaceAll("\\.", "/");
                 map.put("op", "move");
-                map.put("from", "/" + changeSet.getPath().replaceAll("\\.", "/"));
-                map.put("to", "/" + ((String) (changeSet.getValue())).replaceAll("\\.", "/"));
+                map.put("from", fromPath);
+                map.put("path", toPath);
+                opList.add(map);
             }
             default -> {
                 LOGGER.warning("Unsupported operation: " + changeSet.getOperation());
                 return null;
             }
         }
-        opList.add(map);
         return OBJECT_MAPPER.convertValue(opList, JsonPatch.class);
     }
 

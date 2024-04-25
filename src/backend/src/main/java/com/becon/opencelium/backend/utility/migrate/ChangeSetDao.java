@@ -1,11 +1,14 @@
 package com.becon.opencelium.backend.utility.migrate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.util.List;
 
 public class ChangeSetDao {
+    private static final Logger log = LoggerFactory.getLogger(ChangeSetDao.class);
     private final JdbcTemplate template;
 
     public ChangeSetDao(DataSource dataSource) {
@@ -43,11 +46,16 @@ public class ChangeSetDao {
     }
 
     public void createAll(List<ChangeSet> list) {
-        if(list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty()) {
             return;
         }
         for (ChangeSet changeSet : list) {
             create(changeSet);
+            if (changeSet.isSuccess()) {
+                log.info("YAML changelog: {} successfully applied", changeSet.getVersion());
+            } else {
+                log.warn("YAML changelog: {} is ignored", changeSet.getVersion());
+            }
         }
     }
 }
