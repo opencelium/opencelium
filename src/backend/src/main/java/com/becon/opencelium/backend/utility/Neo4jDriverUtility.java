@@ -185,6 +185,8 @@ public class Neo4jDriverUtility {
 
     // exception-free
     private static int getResult(ResponseMng responseMng, int y, List<Record> records, String methodName) {
+        if (y >= records.size())
+            return records.size() - 1;
         Path path = records.get(y).get("p").asPath();
         Node node = path.end();
         if (!node.hasLabel("Result")) {
@@ -254,7 +256,12 @@ public class Neo4jDriverUtility {
                 Path path = records.get(i).get("p").asPath();
                 Node node = path.end();
                 int currLevel = findLevelOfField(path);
-                int nextLevel = findLevelOfField(records.get(i + 1).get("p").asPath());
+                int nextLevel;
+                if (i + 1 >= records.size()) {
+                    nextLevel = -1;
+                } else {
+                    nextLevel = findLevelOfField(records.get(i + 1).get("p").asPath());
+                }
                 if (level == 0 || !node.hasLabel("Field") || currLevel != level) {
                     return i - 1;
                 }
@@ -306,6 +313,9 @@ public class Neo4jDriverUtility {
                         }
                         i = getFields(fields, records, i + 1, nextLevel, methodName);
                     }
+                }
+                if (nextLevel == -1) {
+                    return i - 1;
                 }
                 y = i;
             } catch (Exception e) {
