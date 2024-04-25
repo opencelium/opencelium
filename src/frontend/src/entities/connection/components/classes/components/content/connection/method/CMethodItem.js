@@ -73,6 +73,35 @@ export default class CMethodItem{
         return new Set(references ? references/*.map(ref => ref.substring(0, 7))*/ : []);
     }
 
+    cleanEndpointFromReference(methodColor) {
+        const referenceRegExp = new RegExp("\\{%" + methodColor + "\\.(\\(response\\)|\\(request\\))\\..+?%\\}", "g");
+        this.request.endpoint = this.request.endpoint.replace(referenceRegExp, '');
+    }
+
+    cleanBodyFromReference(methodColor) {
+        const bodyString = JSON.stringify(this.request.body.fields);
+        const regex = /"((?:#[0-9A-Fa-f]{6}\.\((?:request|response)\)\.[^;]+;?)+)"/g;
+        let result = bodyString;
+        let match;
+
+        while ((match = regex.exec(bodyString)) !== null) {
+            const elements = match[1].split(';');
+            const filteredElements = elements.filter(element => {
+                const elementColor = element.split('.')[0];
+                return elementColor !== methodColor;
+            });
+            const newElementsString = filteredElements.join(';');
+            result = result.replace(match[1], newElementsString);
+        }
+
+        this.request.body.fields = JSON.parse(result);
+    }
+
+    cleanFromReference(methodColor) {
+        this.cleanEndpointFromReference(methodColor);
+        this.cleanBodyFromReference(methodColor);
+    }
+
     checkError(error){
         if(error && error.hasOwnProperty('hasError')){
             return error;
