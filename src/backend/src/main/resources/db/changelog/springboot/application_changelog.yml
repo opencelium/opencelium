@@ -3,5 +3,5 @@ versions:
     changes:
       - changeset: 1
         operation: add
-        value: 8000
+        value: 9090
         path: server.port
