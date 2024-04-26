@@ -19,22 +19,27 @@ import Text from "@app_component/base/text/Text";
 import { MessageStyled, ResponseMessage, } from './styles';
 import ReactJson from "react-json-view";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
+import {isJsonString} from "@application/utils/utils";
 
 const LogMessage: FC<React.HTMLAttributes<HTMLDivElement> & {message: string, index: number}> = ({ index, message, ...props}) => {
     let jsonLabel = '';
     let isJson = false;
     let json = null;
-    const responseSplit = message.split('Response : ');
+    const responseSplit = message.split('Response: ');
     const bodySplit = message.split('Body: ');
     if(responseSplit.length > 1){
-        jsonLabel = 'Response: ';
-        isJson = true;
-        json = JSON.parse(responseSplit[1]);
+        if(isJsonString(responseSplit[1])) {
+            jsonLabel = 'Response: ';
+            isJson = true;
+            json = JSON.parse(responseSplit[1]);
+        }
     }
     if(bodySplit.length > 1){
-        jsonLabel = 'Body: ';
-        isJson = true;
-        json = JSON.parse(bodySplit[1]);
+        if(isJsonString(bodySplit[1])) {
+            jsonLabel = 'Body: ';
+            isJson = true;
+            json = JSON.parse(bodySplit[1]);
+        }
     }
     if(message === ConnectionLogs.MethodResponseMessage){
         return null;
