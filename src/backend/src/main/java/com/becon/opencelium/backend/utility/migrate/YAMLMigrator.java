@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.github.fge.jsonpatch.JsonPatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -16,16 +18,11 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
+import java.util.*;
 
 public class YAMLMigrator {
     private static final JdbcTemplate JDBC_TEMPLATE;
     private static final ChangeSetDao DAO;
-    private static final Logger LOGGER = Logger.getLogger(YAMLMigrator.class.getName());
     private static final YAMLMapper YAML_MAPPER = new YAMLMapper();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final PatchHelper PATCH_HELPER;
@@ -33,10 +30,12 @@ public class YAMLMigrator {
     private static final File APP_YML_COMPILED_FILE;
     private static final File APP_YML_FILE;
     private static final File BACKUP_YML_FILE;
+    private static final Logger log = LoggerFactory.getLogger(YAMLMigrator.class);
 
     private static List<ChangeSet> changeSetsToSave;
 
     static {
+        //yamlMapper config
         YAML_MAPPER.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
         YAML_MAPPER.enable(JsonParser.Feature.ALLOW_YAML_COMMENTS);
         YAML_MAPPER.disable(YAMLGenerator.Feature.SPLIT_LINES);
@@ -44,12 +43,20 @@ public class YAMLMigrator {
 
         JDBC_TEMPLATE = new JdbcTemplate();
         DAO = new ChangeSetDao(JDBC_TEMPLATE);
+
         PATCH_HELPER = new PatchHelper(OBJECT_MAPPER);
+
         Path root = Paths.get(new File("").toURI());
         APP_YML_FILE = new File(root.resolve("src/main/resources/application.yml").toString());
         APP_YML_COMPILED_FILE = new File(root.resolve("build/resources/main/application.yml").toString());
         CHANGELOG_FILE = new File(root.resolve("build/resources/main/db/changelog/springboot/application_changelog.yml").toString());
         BACKUP_YML_FILE = new File(root.resolve("build/resources/main/application_copy.yml").toString());
+    }
+
+    public static List<ChangeSet> getChangeSetsToSave() {
+        List<ChangeSet> list = changeSetsToSave;
+        changeSetsToSave = null;
+        return list;
     }
 
     public static void run() {
@@ -60,13 +67,74 @@ public class YAMLMigrator {
 
         // checking an existence of application.yml file
         if (!APP_YML_FILE.exists()) {
-            LOGGER.warning("A file 'application.yml' does not exist");
+            log.warn("A file 'application.yml' does not exist");
             return;
         }
 
         //preparing a file before read
         if (!prepare()) return;
+        //from this line backup file exists. In case of exception, this file must be deleted
 
+        runInternally();
+        BACKUP_YML_FILE.delete();
+    }
+
+    // // // private
+
+    private static boolean prepare() {
+        try {
+            if (!BACKUP_YML_FILE.exists() && !BACKUP_YML_FILE.createNewFile()) {
+                return false;
+            }
+            FileCopyUtils.copy(APP_YML_FILE, BACKUP_YML_FILE);
+        } catch (IOException e) {
+            log.warn("An error occurred to copy application.yml file");
+            return false;
+        }
+
+        StringBuilder sb;
+        try (BufferedReader reader = new BufferedReader(new FileReader(APP_YML_FILE))) {
+            String line;
+            sb = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("{") && line.contains("}") && !isCommentLine(line)) {
+                    String val = line.substring(line.indexOf(":") + 1).trim();
+                    if (val.startsWith("{") && val.endsWith("}")) {
+                        val = val.replaceFirst("\\{", "#").substring(0, val.length() - 1);
+                        line = line.substring(0, line.indexOf(":") + 2) + val;
+                    }
+                }
+                sb.append(line);
+                sb.append("\n");
+            }
+        } catch (IOException e) {
+            BACKUP_YML_FILE.delete();
+            throw new RuntimeException(e);
+        }
+
+        try (FileOutputStream fosCOM = new FileOutputStream(APP_YML_COMPILED_FILE)) {
+            fosCOM.write(sb.toString().getBytes());
+        } catch (IOException e) {
+            try {
+                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_COMPILED_FILE);
+            } catch (IOException ignored) {
+            }
+            return false;
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(APP_YML_FILE)) {
+            fos.write(sb.toString().getBytes());
+        } catch (IOException e) {
+            try {
+                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_FILE);
+            } catch (IOException ignored) {
+            }
+            return false;
+        }
+        return true;
+    } //ready
+
+    private static void runInternally() {
         //parse application.yml file
         Map<String, Object> appYamlMap = readYAMLFile(APP_YML_FILE);
         if (appYamlMap == null) return;
@@ -107,13 +175,18 @@ public class YAMLMigrator {
                 patched = PATCH_HELPER.patch(singleJsonPatch, patched, Object.class);
                 changeSet.setSuccess(true);
             } catch (RuntimeException e) {
-                if (e.getCause().getMessage().equals("parent of node to add does not exist")) {
-                    patched = fillUp(changeSet.getPath().replaceAll("\\.", "/"), singleJsonPatch, patched);
+                if (e.getCause() != null && (e.getCause().getMessage().equals("parent of node to add does not exist") || e.getCause().getMessage().equals("parent of path to add to is not a container"))) {
+                    if (PATCH_HELPER.size(singleJsonPatch) == 2) {
+                        JsonPatch firstOp = PATCH_HELPER.delete(singleJsonPatch, 1, 2);
+                        patched = fillUp(changeSet.getPath().replaceAll("\\.", "/"), firstOp, patched);
+                    } else {
+                        patched = fillUp(changeSet.getPath().replaceAll("\\.", "/"), singleJsonPatch, patched);
+                    }
                     i--;
-                } else if (e.getCause().getMessage().equals("value cannot be null")) {
+                } else if (e.getCause() != null && e.getCause().getMessage().equals("value cannot be null")) {
                     changeSet.setSuccess(false);
                 } else {
-                    LOGGER.warning("An error occurred while applying " + changeSet.getVersion() + " - changeset : " + e.getCause().getMessage());
+                    log.warn("An error occurred while applying {} - changeset : {}", changeSet.getVersion(), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
                     finish(patched, newChangeSets.subList(0, i));
                     return;
                 }
@@ -122,71 +195,29 @@ public class YAMLMigrator {
         finish(patched, newChangeSets);
     }
 
-    private static boolean prepare() {
-//        try {
-//            if (!BACKUP_YML_FILE.createNewFile()) {
-//                return false;
-//            }
-//            FileCopyUtils.copy(APP_YML_FILE, BACKUP_YML_FILE);
-//        } catch (IOException e) {
-//            LOGGER.warning("An error occurred to copy application.yml file");
-//            return false;
-//        }
-        StringBuilder sb;
-        try (BufferedReader reader = new BufferedReader(new FileReader(APP_YML_FILE))) {
-            String line;
-            sb = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("{") && line.contains("}") && !isCommentLine(line)) {
-                    String val = line.substring(line.indexOf(":") + 1).trim();
-                    if (val.startsWith("{") && val.endsWith("}")) {
-                        val = val.replaceFirst("\\{", "#").substring(0, val.length() - 1);
-                        line = line.substring(0, line.indexOf(":") + 2) + val;
-                    }
-                }
-                sb.append(line);
-                sb.append("\n");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        try (FileOutputStream fosCOM = new FileOutputStream(APP_YML_COMPILED_FILE)) {
-            fosCOM.write(sb.toString().getBytes());
-        } catch (IOException e) {
-//            try {
-//                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_COMPILED_FILE);
-//            } catch (IOException ignored) {
-//            }
-            return false;
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(APP_YML_FILE)) {
-            fos.write(sb.toString().getBytes());
-        } catch (IOException e) {
-//            try {
-//                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_FILE);
-//            } catch (IOException ignored) {
-//            }
-            return false;
-        }
-        return true;
-    }
-
-    private static boolean isCommentLine(String line) {
-        return line.trim().startsWith("#");
-    }
-
     private static void finish(Object yaml, List<ChangeSet> changeSetsForSave) {
-        if (changeSetsForSave.isEmpty()) {
-            return;
-        }
+        if (changeSetsForSave.isEmpty()) return;
+        //read comments
+        List<Comment> commentLines = readComments();
+        //replace null variables with empty
+        changeRenamedPaths(commentLines, changeSetsForSave);
 
         try {
             YAML_MAPPER.writeValue(APP_YML_FILE, yaml);
             YAML_MAPPER.writeValue(APP_YML_COMPILED_FILE, yaml);
+
+            //write comments
+            writeComments(commentLines);
         } catch (IOException e) {
-            LOGGER.warning("Failed to write YAML file");
+            try {
+                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_FILE);
+                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_COMPILED_FILE);
+            } catch (IOException ex) {
+                log.warn("Failed to write application.yml file. Please check application.yml and rerun");
+                BACKUP_YML_FILE.delete();
+                throw new RuntimeException(ex);
+            }
+            log.warn("Failed to write YAML file");
             return;
         }
 
@@ -200,19 +231,34 @@ public class YAMLMigrator {
         DAO.createAll(changeSetsForSave);
     }
 
+    private static void changeRenamedPaths(List<Comment> commentLines, List<ChangeSet> changeSets) {
+        for (ChangeSet changeSet : changeSets) {
+            if (changeSet.getOperation().equals("rename")) {
+                for (Comment cl : commentLines) {
+                    if (!cl.prev.isEmpty() && cl.prev.equals(changeSet.getPath())) {
+                        cl.prev = (String) changeSet.getValue();
+                    }
+                }
+            }
+        }
+    }
+
     private static Object fillUp(String path, final JsonPatch jsonPatch, Object obj) {
         JsonPatch parent = PATCH_HELPER.changeEachPath(jsonPatch, x -> x.substring(0, x.lastIndexOf("/")));
-        parent = PATCH_HELPER.changeEachValue(parent, new HashMap<String, Object>());
+        parent = PATCH_HELPER.changeEachValue(parent);
         try {
             return PATCH_HELPER.patch(parent, obj, Object.class);
         } catch (RuntimeException e) {
-            if (e.getMessage().equals("parent of node to add does not exist")) {
+            if (e.getCause() != null && (e.getCause().getMessage().equals("parent of node to add does not exist") || e.getCause().getMessage().equals("parent of path to add to is not a container"))) {
                 return fillUp(path.substring(0, path.lastIndexOf("/")), parent, obj);
             }
             throw e;
         }
     }
 
+    private static boolean isCommentLine(String line) {
+        return line.trim().startsWith("#") || line.isEmpty();
+    }
 
     private static String getLastChangeSetVersionToApply(Map<String, Object> changelog) {
         var versions = (ArrayList<Map<String, Object>>) changelog.getOrDefault("versions", new ArrayList<Map<String, Object>>());
@@ -239,27 +285,39 @@ public class YAMLMigrator {
                 map.put("op", changeSet.getOperation());
                 map.put("path", "/" + changeSet.getPath().replaceAll("\\.", "/"));
                 map.put("value", changeSet.getValue());
+                opList.add(map);
             }
             case "modify" -> {
                 map.put("op", "replace");
                 map.put("path", "/" + changeSet.getPath().replaceAll("\\.", "/"));
                 map.put("value", changeSet.getValue());
+                opList.add(map);
             }
             case "delete" -> {
                 map.put("op", "remove");
                 map.put("path", "/" + changeSet.getPath().replaceAll("\\.", "/"));
+                changeSet.setValue(null);
+                opList.add(map);
             }
             case "rename" -> {
+                Map<String, Object> prev = new HashMap<>();
+                String toPath = "/" + ((String) (changeSet.getValue())).replaceAll("\\.", "/");
+                prev.put("op", "add");
+                prev.put("path", toPath);
+                prev.put("value", "");
+                opList.add(prev);
+
+                String fromPath = "/" + changeSet.getPath().replaceAll("\\.", "/");
                 map.put("op", "move");
-                map.put("from", "/" + changeSet.getPath().replaceAll("\\.", "/"));
-                map.put("to", "/" + ((String) (changeSet.getValue())).replaceAll("\\.", "/"));
+                map.put("from", fromPath);
+                map.put("path", toPath);
+                opList.add(map);
             }
             default -> {
-                LOGGER.warning("Unsupported operation: " + changeSet.getOperation());
+                log.warn("Unsupported operation: {}", changeSet.getOperation());
                 return null;
             }
         }
-        opList.add(map);
         return OBJECT_MAPPER.convertValue(opList, JsonPatch.class);
     }
 
@@ -267,14 +325,14 @@ public class YAMLMigrator {
         List<ChangeSet> res = new ArrayList<>();
         for (Map<String, Object> version : versions) {
             if (!version.containsKey("version") || !version.containsKey("changes")) {
-                LOGGER.warning("Version does not contain 'version' and|or 'changes' field. All the rest changesets are ignored");
+                log.warn("Version does not contain 'version' and|or 'changes' field. All the rest changesets are ignored");
                 return res;
             }
             Double versionVal;
             try {
                 versionVal = (Double) version.get("version");
             } catch (Exception e) {
-                LOGGER.warning(version.get("version") + " is not a number. All the rest changesets are ignored");
+                log.warn("{} is not a number. All the rest changesets are ignored", version.get("version"));
                 return res;
             }
             try {
@@ -290,7 +348,7 @@ public class YAMLMigrator {
                     res.add(changeSet);
                 }
             } catch (Exception e) {
-                LOGGER.warning("An error is occurred while reading changeset. All the rest changesets are ignored");
+                log.warn("An error is occurred while reading changeset. All the rest changesets are ignored");
                 return res;
             }
         }
@@ -316,7 +374,7 @@ public class YAMLMigrator {
         try {
             dataSource.getConnection();
         } catch (SQLException e) {
-            LOGGER.warning("An error is occurred while connecting to the database");
+            log.warn("An error is occurred while connecting to the database");
             return false;
         }
         JDBC_TEMPLATE.setDataSource(dataSource);
@@ -336,16 +394,6 @@ public class YAMLMigrator {
         return false;
     }
 
-    private static Map<String, Object> readYAMLFile(File file) {
-        try {
-            return YAML_MAPPER.readValue(file, new TypeReference<>() {
-            });
-        } catch (IOException e) {
-            LOGGER.warning("Failed to parse '" + file.getName() + "' file");
-            return null;
-        }
-    }
-
     private static ChangeSet getLastChangeSet() {
         try {
             return DAO.getLast();
@@ -355,15 +403,193 @@ public class YAMLMigrator {
         }
     }
 
-    public static List<ChangeSet> getChangeSetsToSave() {
-        List<ChangeSet> list = changeSetsToSave;
-        changeSetsToSave = null;
-        return list;
+    private static Map<String, Object> readYAMLFile(File file) {
+        try {
+            return YAML_MAPPER.readValue(file, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            log.warn("Failed to parse '{}' file", file.getName());
+            return null;
+        }
+    }
+
+    private static LinkedList<String> readFile(File file) {
+        LinkedList<String> lines = new LinkedList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            lines = new LinkedList<>();
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            log.warn("Unable to read application.yaml file. Comments may be ignored");
+        }
+        return lines;
+    }
+
+    private static List<Comment> readComments() {
+        ArrayList<Comment> comments = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(APP_YML_FILE))) {
+            String line;
+            boolean hasPrev = false;
+            Stack<String> stack = new Stack<>();
+            while ((line = reader.readLine()) != null) {
+                if (isCommentLine(line)) {
+                    if (!hasPrev) {
+                        Comment comment = new Comment();
+                        comment.lines.add(line);
+                        comment.prev = getFullPath(stack);
+                        comments.add(comment);
+                    } else {
+                        Comment comment = comments.get(comments.size() - 1);
+                        comment.lines.add(line);
+                    }
+                    hasPrev = true;
+                } else if (!line.trim().startsWith("-")) {
+                    hasPrev = false;
+                    if (!stack.isEmpty()) {
+                        int prev = Integer.parseInt(stack.peek());
+                        String tabs = headingTabs(line);
+                        int tabsInt = Integer.parseInt(tabs);
+                        if (prev == tabsInt) {
+                            stack.pop();
+                            stack.pop();
+                        } else if (prev > tabsInt) {
+                            int diff = (prev - tabsInt) / 2 + 1;
+                            while (diff > 0) {
+                                diff--;
+                                stack.pop();
+                                stack.pop();
+                            }
+                        }
+                    }
+                    String trim = line.trim();
+                    String name = trim.substring(0, trim.indexOf(":"));
+                    stack.push(name);
+                    stack.push(headingTabs(line));
+                }
+            }
+            return comments;
+        } catch (IOException e) {
+            log.warn("Unable to read comments from application.yaml file. Some comments may be ignored");
+            return comments;
+        }
+    }
+
+    private static void writeComments(List<Comment> commentLines) throws IOException {
+        LinkedList<String> lines = readFile(APP_YML_FILE);
+
+        //sweeping null values
+        for (int i = 0; i < lines.size(); i++) {
+            if (!isCommentLine(lines.get(i)) && lines.get(i).endsWith(" null")) {
+                lines.set(i, lines.get(i).substring(0, lines.get(i).lastIndexOf("null")));
+            }
+        }
+
+        commentLines.stream()
+                .filter(c -> c.prev.isEmpty())
+                .findAny()
+                .ifPresent(cc -> lines.addAll(0, cc.lines));
+
+        for (Comment comment : commentLines) {
+            if (comment.prev.isEmpty()) continue;
+            Stack<String> stack = new Stack<>();
+            boolean is = false;
+            for (int i = 0; i < lines.size(); i++) {
+                if (isCommentLine(lines.get(i))) {
+                    continue;
+                }
+                if (!lines.get(i).trim().startsWith("-")) {
+                    if (!stack.isEmpty()) {
+                        int prev = Integer.parseInt(stack.peek());
+                        String tabs = headingTabs(lines.get(i));
+                        int tabsInt = Integer.parseInt(tabs);
+                        if (prev == tabsInt) {
+                            stack.pop();
+                            stack.pop();
+                        } else if (prev > tabsInt) {
+                            int diff = (prev - tabsInt) / 2 + 1;
+                            while (diff > 0) {
+                                diff--;
+                                stack.pop();
+                                stack.pop();
+                            }
+                        }
+                    }
+                    String trim = lines.get(i).trim();
+                    String name = trim.substring(0, trim.indexOf(":"));
+                    stack.push(name);
+                    stack.push(headingTabs(lines.get(i)));
+                }
+                String path = getFullPath(stack);
+                String root = path.split("\\.")[0];
+                if (is && comment.prev.equals(path)) {
+                    lines.addAll(i + 1, comment.lines);
+                    break;
+                }
+                if (comment.prev.startsWith(root)) {
+                    is = true;
+                } else if (is) {
+                    lines.addAll(i, comment.lines);
+                    break;
+                }
+
+                if (lines.size() - 1 == i) {
+                    log.error("Cannot find this comment section's place to move:\n{}", comment.lines);
+                }
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        lines.forEach(line -> sb.append(line).append("\n"));
+
+        try (FileWriter fw = new FileWriter(APP_YML_FILE);
+             FileWriter fw1 = new FileWriter(APP_YML_COMPILED_FILE)) {
+            fw.write(sb.toString());
+            fw1.write(sb.toString());
+        } catch (IOException e) {
+            log.warn("Cannot move comments into application.yaml file. Comments may be ignored");
+        }
+    }
+
+    private static String getFullPath(Stack<String> stack) {
+        if (stack.isEmpty()) {
+            return "";
+        }
+        var sb = new StringBuilder();
+        int i = 0;
+        Iterator<String> iterator = stack.elements().asIterator();
+        while (iterator.hasNext()) {
+            if ((i & 1) == 0) {
+                sb.append(iterator.next());
+                sb.append(".");
+            } else {
+                iterator.next();
+            }
+            i++;
+        }
+        return sb.deleteCharAt(sb.length() - 1).toString();
+    }
+
+    private static String headingTabs(String line) {
+        if (!line.startsWith(" ")) {
+            return "0";
+        }
+        int i = -1;
+        for (char c : line.toCharArray()) {
+            i++;
+            if (c != ' ') {
+                if ((i & 1) == 0) {
+                    return i + "";
+                }
+                return i + 1 + "";
+            }
+        }
+        return i + "";
     }
 
     private static class Comment {
-        List<String> lines = new ArrayList<>();
-        String prev;
-        String next;
+        private final List<String> lines = new ArrayList<>();
+        private String prev;
     }
 }

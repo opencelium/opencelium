@@ -22,6 +22,7 @@ import com.jayway.jsonpath.JsonPath;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.slf4j.Logger;
@@ -619,6 +620,10 @@ public class AssistantServiceImp implements ApplicationService {
                         continue;
                     }
 
+//                    while (result.hasNext()) {
+//                        Record record = result.next();
+//                        System.out.println(record.get("p").asPath().end().labels());
+//                    }
                     try {
                         Neo4jDriverUtility.convertResultToConnection(result, connectionMng);
                     } catch (Exception e) {
