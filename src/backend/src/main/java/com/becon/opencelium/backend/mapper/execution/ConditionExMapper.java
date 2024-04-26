@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.mapper.execution;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConditionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.StatementMng;
+import com.becon.opencelium.backend.enums.DataTypeEnum;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import org.springframework.stereotype.Component;
@@ -28,8 +29,8 @@ public class ConditionExMapper {
                     condition.setRight(rs.getColor() + ".(" + rs.getType() + ")." + rs.getField());
                 }
             }
-            case EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO, LIKE, MATCHES,
-                 MATCHES_IN_LIST, NOT_LIKE, REGEX -> {
+            case EQUAL_TO, NOT_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO, LIKE,
+                 MATCHES, MATCHES_IN_LIST, NOT_LIKE, REGEX, PROPERTY_NOT_EXISTS, PROPERTY_EXISTS -> {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
                 if (rs.getColor() == null || rs.getColor().isBlank() || rs.getType() == null || rs.getType().isBlank()) {
                     condition.setRight(rs.getField());
@@ -37,8 +38,12 @@ public class ConditionExMapper {
                     condition.setRight(rs.getColor() + ".(" + rs.getType() + ")." + rs.getField());
                 }
             }
-            case PROPERTY_NOT_EXISTS, PROPERTY_EXISTS, IS_TYPE_OF -> {
-                //TODO: ???
+            case IS_TYPE_OF -> {
+                condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
+                try {
+                    condition.setRight(DataTypeEnum.getEnumType(rs.getField()).name());
+                } catch (Exception ignored) {
+                }
             }
             case SPLIT_STRING -> {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
@@ -46,6 +51,9 @@ public class ConditionExMapper {
             }
             case IS_EMPTY, IS_NOT_EMPTY, IS_NOT_NULL, IS_NULL, FOR, FOR_IN, DEFAULT -> {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
+            }
+            case CONTAINS_SUB_STR, NOT_CONTAINS_SUB_STR -> {
+                //TODO: ???
             }
         }
 
