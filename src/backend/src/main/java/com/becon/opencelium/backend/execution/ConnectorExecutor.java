@@ -272,10 +272,22 @@ public class ConnectorExecutor {
         }
 
         Object rightValue;
-        if (ReferenceExtractor.isReference(condition.getRight())) {
-            rightValue = executionManager.getValue(condition.getRight());
+        String likeValueRef = condition.getRight();
+        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
+            int beginIndex = likeValueRef.startsWith("%") ? 1 : 0;
+            int endIndex = likeValueRef.length() - (likeValueRef.endsWith("%") ? 1 : 0);
+
+            likeValueRef = likeValueRef.substring(beginIndex, endIndex);
+        }
+
+        if (ReferenceExtractor.isReference(likeValueRef)) {
+            rightValue = executionManager.getValue(likeValueRef);
         } else {
-            rightValue = condition.getRight();
+            rightValue = likeValueRef;
+        }
+
+        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
+            rightValue = condition.getRight().replace(likeValueRef, (String) rightValue);
         }
 
         if (rightValue != null) {
