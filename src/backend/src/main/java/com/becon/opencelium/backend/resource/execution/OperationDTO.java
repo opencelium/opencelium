@@ -13,6 +13,7 @@ public class OperationDTO {
     private HttpMethod httpMethod;
     private String name;
     private String operationId;
+    private String invoker; // TODO: need for RequestEntity building when invoker = CheckMK, will be removed in future refactoring
     private String execOrder;
     private Integer aggregatorId;
     private List<ParameterDTO> parameters;
@@ -51,6 +52,14 @@ public class OperationDTO {
 
     public void setOperationId(String operationId) {
         this.operationId = operationId;
+    }
+
+    public String getInvoker() {
+        return invoker;
+    }
+
+    public void setInvoker(String invoker) {
+        this.invoker = invoker;
     }
 
     public String getExecOrder() {
