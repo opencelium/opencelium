@@ -620,10 +620,6 @@ public class AssistantServiceImp implements ApplicationService {
                         continue;
                     }
 
-//                    while (result.hasNext()) {
-//                        Record record = result.next();
-//                        System.out.println(record.get("p").asPath().end().labels());
-//                    }
                     try {
                         Neo4jDriverUtility.convertResultToConnection(result, connectionMng);
                     } catch (Exception e) {

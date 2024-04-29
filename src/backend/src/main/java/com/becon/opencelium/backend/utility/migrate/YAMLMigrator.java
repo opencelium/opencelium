@@ -71,17 +71,18 @@ public class YAMLMigrator {
             return;
         }
 
-        //preparing a file before read
+        // preparing a file before read
         if (!prepare()) return;
-        //from this line backup file exists. In case of exception, this file must be deleted
+        // prepare method creates a backup file. In case of any exception, this file must be deleted!
 
         runInternally();
         BACKUP_YML_FILE.delete();
     }
 
-    // // // private
+    // // // private zone
 
     private static boolean prepare() {
+        // creating a backup file of application.yml
         try {
             if (!BACKUP_YML_FILE.exists() && !BACKUP_YML_FILE.createNewFile()) {
                 return false;
@@ -132,10 +133,10 @@ public class YAMLMigrator {
             return false;
         }
         return true;
-    } //ready
+    }
 
     private static void runInternally() {
-        //parse application.yml file
+        // parse application.yml file
         Map<String, Object> appYamlMap = readYAMLFile(APP_YML_FILE);
         if (appYamlMap == null) return;
 
@@ -148,6 +149,11 @@ public class YAMLMigrator {
         ChangeSet lastSavedSet = getLastChangeSet();
         String fullVersionOfLastChangeSetInFile = getLastChangeSetVersionToApply(changelog);
 
+        if (lastSavedSet == null) {
+            String ocVersion = getOcVersion(appYamlMap);
+            lastSavedSet = new ChangeSet();
+            lastSavedSet.setVersion(ocVersion);
+        }
         // there is not any new changes
         if (fullVersionOfLastChangeSetInFile == null || lastSavedSet != null && isGreaterThanOrEqual(lastSavedSet.getVersion(), fullVersionOfLastChangeSetInFile)) {
             return;
@@ -193,6 +199,12 @@ public class YAMLMigrator {
             }
         }
         finish(patched, newChangeSets);
+    }
+
+    private static String getOcVersion(Map<String, Object> map) {
+        var oc = (Map<String, Object>) map.get("opencelium");
+        var version = (Double) oc.getOrDefault("version", "0.0");
+        return version + ":0";
     }
 
     private static void finish(Object yaml, List<ChangeSet> changeSetsForSave) {
@@ -355,7 +367,6 @@ public class YAMLMigrator {
         return res;
     }
 
-    @SuppressWarnings("unchecked")
     private static boolean setDataSource(Map<String, Object> yaml) {
         Map<String, Object> spring = (Map<String, Object>) yaml.getOrDefault("spring", new HashMap<>());
         Map<String, Object> datasource = (Map<String, Object>) spring.getOrDefault("datasource", new HashMap<>());
