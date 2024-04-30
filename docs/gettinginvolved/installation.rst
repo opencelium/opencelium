@@ -3,15 +3,15 @@ Installation
 ##################
 
 .. note::
-	Please check the software requirements, before installing OC. 
+	Please check the software requirements, before installing OC 
 
 Debian/Ubuntu (example for 22.04 LTS)
 """""""""""""""""
 
 Prepare environment:
-==================
+-------------------
 
-Update your system, download and install all required packages.
+Update your system, download and install all required packages
 
 .. code-block:: sh
 	:linenos:
@@ -38,7 +38,7 @@ Update your system, download and install all required packages.
 Install Application:
 ==================
 
-Download and unzip application, and create a link for it.
+Download and unzip application, and create a link for it
 
 .. code-block:: sh
 	:linenos:
@@ -53,7 +53,8 @@ Configuration:
 ==================
 
 **1. MariaDB:**
-| Create database for OpenCelium, mysql user for OpenCelium, enable mysql service and secure mysql installation.
+
+Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation
 
 
 .. code-block:: sh
@@ -69,7 +70,7 @@ Configuration:
 
 **2. Neo4j:**
 
-Set your password for neo4j, restart and enable neo4j service.
+Set your password for neo4j, restart and enable neo4j service
 
 .. code-block:: sh
 	:linenos:
@@ -85,6 +86,8 @@ Set your password for neo4j, restart and enable neo4j service.
 
 .. code-block:: sh
 	:linenos:
+	
+Remove default config and link OpenCelium config	
 	
 	rm /etc/nginx/sites-enabled/default
 	ln -s /opt/conf/nginx.conf /etc/nginx/sites-enabled/
@@ -109,6 +112,8 @@ Set your password for neo4j, restart and enable neo4j service.
 .. code-block:: sh
 	:linenos:
 	
+Finally reload config and enable nginx
+	
 	systemctl restart nginx
 	systemctl enable nginx
 	
@@ -125,7 +130,7 @@ Set your password for neo4j, restart and enable neo4j service.
 	| - change MariaDB root user to opencelium and set password
 	| - change password of neo4j user
 
-	Just in case you are using SSL add certs to the ssl section. It has to be a p12 keystore file with password!!. If you just have key and pem you can create a p12 as follows:
+	Just in case you are using SSL, add certs to the ssl section. It has to be a p12 keystore file with password!!. If you just have key and pem you can create a p12 as follows:
 
 	
 	.. code-block:: sh
