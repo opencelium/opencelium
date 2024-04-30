@@ -29,8 +29,30 @@ public class ConditionExMapper {
                     condition.setRight(rs.getColor() + ".(" + rs.getType() + ")." + rs.getField());
                 }
             }
-            case EQUAL_TO, NOT_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO, LIKE,
-                 MATCHES, MATCHES_IN_LIST, NOT_LIKE, REGEX, PROPERTY_NOT_EXISTS, PROPERTY_EXISTS -> {
+            case LIKE, NOT_LIKE -> {
+                condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
+                if (rs.getColor() == null || rs.getColor().isBlank() || rs.getType() == null || rs.getType().isBlank()) {
+                    condition.setRight(rs.getField());
+                } else {
+                    if (!rs.getField().contains("%")) {
+                        condition.setRight(rs.getColor() + ".(" + rs.getType() + ")." + rs.getField());
+                        return condition;
+                    }
+                    boolean first, last;
+                    if (rs.getType().equals("response")) {
+                        first = rs.getField().startsWith("success.%") || rs.getField().startsWith("fail.%");
+                    } else {
+                        first = rs.getField().startsWith("%");
+                    }
+                    last = rs.getField().endsWith("%");
+
+                    rs.setField(rs.getField().replaceAll("%", ""));
+
+                    condition.setRight((first ? "%" : "") + rs.getColor() + ".(" + rs.getType() + ")." + rs.getField() + (last ? "%" : ""));
+                }
+            }
+            case EQUAL_TO, NOT_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO,
+                 MATCHES, MATCHES_IN_LIST, REGEX, PROPERTY_NOT_EXISTS, PROPERTY_EXISTS -> {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
                 if (rs.getColor() == null || rs.getColor().isBlank() || rs.getType() == null || rs.getType().isBlank()) {
                     condition.setRight(rs.getField());
