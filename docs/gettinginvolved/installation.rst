@@ -21,7 +21,15 @@ Debian/Ubuntu (example for 22.04 LTS)
 	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
 	
 	apt update
-	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j=1:5.7.0 nginx
+	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j nginx
+
+.. note::
+	On restricted systems, you may have to change permissions after wget:
+	.. code-block:: sh
+		:linenos:	
+	
+		chmod a+r /etc/apt/trusted.gpg.d/neo4j.gpg
+
 	
 **Install Application:**
 
@@ -29,16 +37,11 @@ Debian/Ubuntu (example for 22.04 LTS)
 	:linenos:
 
 	cd /opt
-	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_3.2.1.zip/download?distro_version_id=230"
-	unzip -o -d /opt/ /opt/oc_3.2.1.zip
-	rm /opt/oc_3.2.1.zip
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_stable.zip/download?distro_version_id=230"
+	unzip -o -d /opt/ /opt/oc_stable.zip
+	rm /opt/oc_stable.zip
 	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
 		
-.. note::
-	| Change "3.2.1" to latest stable version.
-	| Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
-
-
 **Configuration:**
 
 1. MariaDB:
@@ -48,24 +51,16 @@ Debian/Ubuntu (example for 22.04 LTS)
 	
 	systemctl enable mariadb
 	mysql_secure_installation
+	mysql -u root -p -e "source /opt/src/backend/database/oc_data.sql"
+	mysql -u root -p
+	CREATE USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';
+	GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost';
+	FLUSH PRIVILEGES;
+	exit
 	
-
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root
-		
-	If this works (without your password), please set your password again with this command:
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
-		
-	Change password (root) if you want.
+	Please change the password (secret1234).
+
 
 2. Neo4j:
 
@@ -77,7 +72,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	systemctl enable neo4j.service
 	
 .. note::
-	Change password (secret1234) if you want.
+	Please change the password (secret1234).
 
 3. Nginx:
 
@@ -123,9 +118,8 @@ Debian/Ubuntu (example for 22.04 LTS)
 	| - change MariaDB root user to opencelium and set password
 	| - change password of neo4j user
 
-	| For SSL, add certs to the "Webserver configuration section".  
-	| It has to be a p12 keystore file with password! 
-	| If you just have key and pem you can create a p12 with this command
+	Just in case you are using SSL add certs to the ssl section. It has to be a p12 keystore file with password!!. If you just have key and pem you can create a p12 as follows:
+
 	
 	.. code-block:: sh
 		:linenos:
