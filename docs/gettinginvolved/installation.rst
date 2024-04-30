@@ -82,7 +82,7 @@ Set your password for neo4j, restart and enable neo4j service
 .. note::
 	Please change the password (secret1234).
 
-3. Nginx:
+**3. Nginx:**
 
 Remove default config and link OpenCelium config
 
@@ -93,7 +93,7 @@ Remove default config and link OpenCelium config
 	ln -s /opt/conf/nginx.conf /etc/nginx/sites-enabled/
 	
 .. note::
-	For SSL use the following commands instead:
+	If you like to use SSL, do the following:
 		
 	.. code-block:: sh
 		:linenos:	
@@ -101,7 +101,7 @@ Remove default config and link OpenCelium config
 		rm /etc/nginx/sites-enabled/default
 		ln -s /opt/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
 		
-	and include your own certificates in the config file:
+	and change the certificates, within the config, with your own:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -119,6 +119,8 @@ Finally reload config and enable nginx
 	
 4. OpenCelium:
 
+Create and adjust configuration
+
 .. code-block:: sh
 	:linenos:
 	
@@ -131,13 +133,17 @@ Finally reload config and enable nginx
 	| - change MariaDB root user to opencelium and set password
 	| - change password of neo4j user
 
-	Just in case you are using SSL, add certs to the ssl section. It has to be a p12 keystore file with password!!. If you just have key and pem you can create a p12 as follows:
+	| Just in case you are using SSL, add certs to the ssl section. 
+	| It has to be a p12 keystore file with password! 
+	| If you just have key and pem you can create a p12 as follows:
 
 	
 	.. code-block:: sh
 		:linenos:
 		
 		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
+	
+Start OpenCelium backend	
 	
 .. code-block:: sh
 	:linenos:
