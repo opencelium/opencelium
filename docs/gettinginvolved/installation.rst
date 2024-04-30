@@ -5,10 +5,13 @@ Installation
 .. note::
 	Please check the software requirements, before installing OC. 
 
-
 Debian/Ubuntu (example for 22.04 LTS)
 """""""""""""""""
-**Prepare environment / Install required packages:**
+
+Prepare environment:
+==================
+
+Update your system, download and install all required packages.
 
 .. code-block:: sh
 	:linenos:
@@ -25,13 +28,17 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 .. note::
 	On restricted systems, you may have to change permissions after wget:
+
 	.. code-block:: sh
 		:linenos:	
 	
 		chmod a+r /etc/apt/trusted.gpg.d/neo4j.gpg
 
 	
-**Install Application:**
+Install Application:
+==================
+
+Download and unzip application, and create a link for it.
 
 .. code-block:: sh
 	:linenos:
@@ -42,27 +49,28 @@ Debian/Ubuntu (example for 22.04 LTS)
 	rm /opt/oc_stable.zip
 	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
 		
-**Configuration:**
+Configuration:
+==================
 
-1. MariaDB:
+**1. MariaDB:**
+
+Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation.
+
 
 .. code-block:: sh
 	:linenos:
 	
+	mysql -u root -e "source /opt/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	systemctl enable mariadb
 	mysql_secure_installation
-	mysql -u root -p -e "source /opt/src/backend/database/oc_data.sql"
-	mysql -u root -p
-	CREATE USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';
-	GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost';
-	FLUSH PRIVILEGES;
-	exit
 	
 .. note::
 	Please change the password (secret1234).
 
 
-2. Neo4j:
+**2. Neo4j:**
+
+Set your password for neo4j, restart and enable neo4j service.
 
 .. code-block:: sh
 	:linenos:
@@ -74,7 +82,9 @@ Debian/Ubuntu (example for 22.04 LTS)
 .. note::
 	Please change the password (secret1234).
 
-3. Nginx:
+**3. Nginx:**
+
+Remove default config and link OpenCelium config.
 
 .. code-block:: sh
 	:linenos:
@@ -83,7 +93,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	ln -s /opt/conf/nginx.conf /etc/nginx/sites-enabled/
 	
 .. note::
-	For SSL use the following commands instead:
+	If you like to use SSL, do the following:
 		
 	.. code-block:: sh
 		:linenos:	
@@ -91,7 +101,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 		rm /etc/nginx/sites-enabled/default
 		ln -s /opt/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
 		
-	and include your own certificates in the config file:
+	and change the certificates, within the config, with your own:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -99,13 +109,17 @@ Debian/Ubuntu (example for 22.04 LTS)
 		ssl_certificate /etc/ssl/certs/opencelium.pem;
 		ssl_certificate_key /etc/ssl/private/opencelium.key;
 		
+Reload config and enable nginx.
+
 .. code-block:: sh
 	:linenos:
 	
 	systemctl restart nginx
 	systemctl enable nginx
 	
-4. OpenCelium:
+**4. OpenCelium:**
+
+Create and adjust configuration.
 
 .. code-block:: sh
 	:linenos:
@@ -114,17 +128,22 @@ Debian/Ubuntu (example for 22.04 LTS)
 	
 	
 .. note::
+	| Modify application.yml
 	| Within section "Database configuration section of MariaDB and Neo4j":
 	| - change MariaDB root user to opencelium and set password
 	| - change password of neo4j user
 
-	Just in case you are using SSL add certs to the ssl section. It has to be a p12 keystore file with password!!. If you just have key and pem you can create a p12 as follows:
+	| Just in case you are using SSL, add certs to the ssl section. 
+	| It has to be a p12 keystore file with password! 
+	| If you just have key and pem you can create a p12 as follows:
 
 	
 	.. code-block:: sh
 		:linenos:
 		
 		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
+	
+Finally start OpenCelium backend.	
 	
 .. code-block:: sh
 	:linenos:
