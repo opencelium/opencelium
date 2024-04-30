@@ -9,7 +9,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 """""""""""""""""
 
 Prepare environment:
--------------------
+==================
 
 Update your system, download and install all required packages
 
@@ -84,10 +84,10 @@ Set your password for neo4j, restart and enable neo4j service
 
 3. Nginx:
 
+Remove default config and link OpenCelium config
+
 .. code-block:: sh
 	:linenos:
-	
-Remove default config and link OpenCelium config	
 	
 	rm /etc/nginx/sites-enabled/default
 	ln -s /opt/conf/nginx.conf /etc/nginx/sites-enabled/
@@ -109,10 +109,10 @@ Remove default config and link OpenCelium config
 		ssl_certificate /etc/ssl/certs/opencelium.pem;
 		ssl_certificate_key /etc/ssl/private/opencelium.key;
 		
+Finally reload config and enable nginx
+
 .. code-block:: sh
 	:linenos:
-	
-Finally reload config and enable nginx
 	
 	systemctl restart nginx
 	systemctl enable nginx
@@ -126,6 +126,7 @@ Finally reload config and enable nginx
 	
 	
 .. note::
+	| Modify application.yml
 	| Within section "Database configuration section of MariaDB and Neo4j":
 	| - change MariaDB root user to opencelium and set password
 	| - change password of neo4j user
