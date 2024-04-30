@@ -1,13 +1,12 @@
-==================
+##################
 Installation
-==================
+##################
 
 .. note::
 	Please check the software requirements, before installing OC. 
 
-------------------
 Debian/Ubuntu (example for 22.04 LTS)
-------------------
+"""""""""""""""""
 
 Prepare environment:
 ==================
@@ -54,7 +53,7 @@ Configuration:
 ==================
 
 **1. MariaDB:**
-Create database for OpenCelium, mysql user for OpenCelium, enable mysql service and secure mysql installation.
+| Create database for OpenCelium, mysql user for OpenCelium, enable mysql service and secure mysql installation.
 
 
 .. code-block:: sh
@@ -68,7 +67,7 @@ Create database for OpenCelium, mysql user for OpenCelium, enable mysql service 
 	Please change the password (secret1234).
 
 
-2. Neo4j:
+**2. Neo4j:**
 
 Set your password for neo4j, restart and enable neo4j service.
 
