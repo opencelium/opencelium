@@ -12,7 +12,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 Prepare environment:
 ==================
 
-Update your system, download and install all required packages
+Update your system, download and install all required packages.
 
 .. code-block:: sh
 	:linenos:
@@ -36,7 +36,10 @@ Update your system, download and install all required packages
 		chmod a+r /etc/apt/trusted.gpg.d/neo4j.gpg
 
 	
-**Install Application:**
+Install Application:
+==================
+
+Download and unzip application, and create a link for it.
 
 .. code-block:: sh
 	:linenos:
@@ -47,9 +50,12 @@ Update your system, download and install all required packages
 	rm /opt/oc_stable.zip
 	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
 		
-**Configuration:**
+Configuration:
+==================
 
-1. MariaDB:
+**1. MariaDB:**
+Create database for OpenCelium, mysql user for OpenCelium, enable mysql service and secure mysql installation.
+
 
 .. code-block:: sh
 	:linenos:
@@ -63,6 +69,8 @@ Update your system, download and install all required packages
 
 
 2. Neo4j:
+
+Set your password for neo4j, restart and enable neo4j service.
 
 .. code-block:: sh
 	:linenos:
