@@ -3,7 +3,7 @@ Installation
 ##################
 
 .. note::
-	Please check the software requirements, before installing OC 
+	Please check the software requirements, before installing OC. 
 
 Debian/Ubuntu (example for 22.04 LTS)
 """""""""""""""""
@@ -11,7 +11,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 Prepare environment:
 ==================
 
-Update your system, download and install all required packages
+Update your system, download and install all required packages.
 
 .. code-block:: sh
 	:linenos:
@@ -38,7 +38,7 @@ Update your system, download and install all required packages
 Install Application:
 ==================
 
-Download and unzip application, and create a link for it
+Download and unzip application, and create a link for it.
 
 .. code-block:: sh
 	:linenos:
@@ -54,7 +54,7 @@ Configuration:
 
 **1. MariaDB:**
 
-Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation
+Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation.
 
 
 .. code-block:: sh
@@ -70,7 +70,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 
 **2. Neo4j:**
 
-Set your password for neo4j, restart and enable neo4j service
+Set your password for neo4j, restart and enable neo4j service.
 
 .. code-block:: sh
 	:linenos:
@@ -84,7 +84,7 @@ Set your password for neo4j, restart and enable neo4j service
 
 **3. Nginx:**
 
-Remove default config and link OpenCelium config
+Remove default config and link OpenCelium config.
 
 .. code-block:: sh
 	:linenos:
@@ -109,7 +109,7 @@ Remove default config and link OpenCelium config
 		ssl_certificate /etc/ssl/certs/opencelium.pem;
 		ssl_certificate_key /etc/ssl/private/opencelium.key;
 		
-Finally reload config and enable nginx
+Reload config and enable nginx.
 
 .. code-block:: sh
 	:linenos:
@@ -117,9 +117,9 @@ Finally reload config and enable nginx
 	systemctl restart nginx
 	systemctl enable nginx
 	
-4. OpenCelium:
+**4. OpenCelium:**
 
-Create and adjust configuration
+Create and adjust configuration.
 
 .. code-block:: sh
 	:linenos:
@@ -143,7 +143,7 @@ Create and adjust configuration
 		
 		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
 	
-Start OpenCelium backend	
+Finally start OpenCelium backend.	
 	
 .. code-block:: sh
 	:linenos:
