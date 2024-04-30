@@ -24,8 +24,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j nginx
 
 .. note::
-	On restricted systems you may have to change permissions after wget:
-	
+	On restricted systems, you may have to change permissions after wget:
 	.. code-block:: sh
 		:linenos:	
 	
@@ -53,11 +52,15 @@ Debian/Ubuntu (example for 22.04 LTS)
 	systemctl enable mariadb
 	mysql_secure_installation
 	mysql -u root -p -e "source /opt/src/backend/database/oc_data.sql"
-	mysql -uroot -p
-	CREATE USER 'opencelium'@'localhost' IDENTIFIED BY 'userpw123'; # change password
+	mysql -u root -p
+	CREATE USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';
 	GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost';
 	FLUSH PRIVILEGES;
 	exit
+	
+.. note::
+	Please change the password (secret1234).
+
 
 2. Neo4j:
 
@@ -69,7 +72,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	systemctl enable neo4j.service
 	
 .. note::
-	Change password (secret1234) if you want.
+	Please change the password (secret1234).
 
 3. Nginx:
 
@@ -115,7 +118,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 	| - change MariaDB root user to opencelium and set password
 	| - change password of neo4j user
 
-	Just in case you are using SSL add certs to the ssl section. It has to be a p12 keystore file with password!!. If you just have key and pem you can create a p12 as follows:For SSL, add certs to the "Webserver configuration section".  
+	Just in case you are using SSL add certs to the ssl section. It has to be a p12 keystore file with password!!. If you just have key and pem you can create a p12 as follows:
 
 	
 	.. code-block:: sh
