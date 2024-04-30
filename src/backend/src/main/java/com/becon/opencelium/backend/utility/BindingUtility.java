@@ -16,21 +16,27 @@ public class BindingUtility {
             if (method != null) {
                 if (method.getRequest() != null && method.getRequest().getBody() != null) {
                     Map<String, Object> fields = method.getRequest().getBody().getFields();
-                    for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                        entry.setValue(findRefAndReplace(entry.getValue(), fbs));
-                    }
-                }
-                if (method.getResponse() != null && method.getResponse() != null) {
-                    if (method.getResponse().getFail() != null && method.getResponse().getFail().getBody() != null) {
-                        Map<String, Object> fields = method.getResponse().getFail().getBody().getFields();
+                    if (fields != null) {
                         for (Map.Entry<String, Object> entry : fields.entrySet()) {
                             entry.setValue(findRefAndReplace(entry.getValue(), fbs));
                         }
                     }
+                }
+                if (method.getResponse() != null) {
+                    if (method.getResponse().getFail() != null && method.getResponse().getFail().getBody() != null) {
+                        Map<String, Object> fields = method.getResponse().getFail().getBody().getFields();
+                        if(fields != null) {
+                            for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                                entry.setValue(findRefAndReplace(entry.getValue(), fbs));
+                            }
+                        }
+                    }
                     if (method.getResponse().getSuccess() != null && method.getResponse().getSuccess().getBody() != null) {
                         Map<String, Object> fields = method.getResponse().getSuccess().getBody().getFields();
-                        for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                            entry.setValue(findRefAndReplace(entry.getValue(), fbs));
+                        if(fields != null) {
+                            for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                                entry.setValue(findRefAndReplace(entry.getValue(), fbs));
+                            }
                         }
                     }
                 }
