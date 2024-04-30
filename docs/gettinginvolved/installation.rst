@@ -8,7 +8,9 @@ Installation
 
 Debian/Ubuntu (example for 22.04 LTS)
 """""""""""""""""
-**Prepare environment / Install required packages:**
+**Prepare environment:**
+
+Update your system, download and install all required packages
 
 .. code-block:: sh
 	:linenos:
@@ -25,6 +27,7 @@ Debian/Ubuntu (example for 22.04 LTS)
 
 .. note::
 	On restricted systems, you may have to change permissions after wget:
+
 	.. code-block:: sh
 		:linenos:	
 	
@@ -49,14 +52,9 @@ Debian/Ubuntu (example for 22.04 LTS)
 .. code-block:: sh
 	:linenos:
 	
+	mysql -u root -e "source /opt/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	systemctl enable mariadb
 	mysql_secure_installation
-	mysql -u root -p -e "source /opt/src/backend/database/oc_data.sql"
-	mysql -u root -p
-	CREATE USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';
-	GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost';
-	FLUSH PRIVILEGES;
-	exit
 	
 .. note::
 	Please change the password (secret1234).
