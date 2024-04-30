@@ -1,14 +1,16 @@
-##################
+==================
 Installation
-##################
+==================
 
 .. note::
 	Please check the software requirements, before installing OC. 
 
-
+------------------
 Debian/Ubuntu (example for 22.04 LTS)
-"""""""""""""""""
-**Prepare environment:**
+------------------
+
+Prepare environment:
+==================
 
 Update your system, download and install all required packages
 
