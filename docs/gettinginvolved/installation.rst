@@ -21,15 +21,15 @@ Debian/Ubuntu (example for 22.04 LTS)
 	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
 	
 	apt update
-	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j=1:5.7.0 nginx
+	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j nginx
 
 .. note::
 	On restricted systems you may have to change permissions after wget:
 	
 	.. code-block:: sh
-	:linenos:	
+		:linenos:	
 	
-	chmod a+r /etc/apt/trusted.gpg.d/neo4j.gpg
+		chmod a+r /etc/apt/trusted.gpg.d/neo4j.gpg
 
 	
 **Install Application:**
@@ -43,11 +43,6 @@ Debian/Ubuntu (example for 22.04 LTS)
 	rm /opt/oc_stable.zip
 	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
 		
-.. note::
-	| For older versions change "stable" to version number (e.g. "3.2").
-	| Get versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
-
-
 **Configuration:**
 
 1. MariaDB:
