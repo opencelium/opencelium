@@ -23,7 +23,6 @@ import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +55,10 @@ public class ConnectorExecutor {
 
         this.executables = new ArrayList<>();
         if (Objects.nonNull(connectorEx.getMethods())) {
-            this.executables.addAll(connectorEx.getMethods());
+            connectorEx.getMethods().forEach(o -> {
+                o.setInvoker(connectorEx.getInvoker());
+                executables.add(o);
+            });
         }
         if (Objects.nonNull(connectorEx.getOperators())) {
             this.executables.addAll(connectorEx.getOperators());
@@ -244,7 +246,7 @@ public class ConnectorExecutor {
                     responseEntity.getHeaders(),
                     responseEntity.getStatusCode());
         }
-        logger.logAndSend("Response: " + responseEntity.getBody());
+        logger.logAndSend("Response : " + responseEntity.getBody());
 
         Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
@@ -270,10 +272,22 @@ public class ConnectorExecutor {
         }
 
         Object rightValue;
-        if (ReferenceExtractor.isReference(condition.getRight())) {
-            rightValue = executionManager.getValue(condition.getRight());
+        String likeValueRef = condition.getRight();
+        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
+            int beginIndex = likeValueRef.startsWith("%") ? 1 : 0;
+            int endIndex = likeValueRef.length() - (likeValueRef.endsWith("%") ? 1 : 0);
+
+            likeValueRef = likeValueRef.substring(beginIndex, endIndex);
+        }
+
+        if (ReferenceExtractor.isReference(likeValueRef)) {
+            rightValue = executionManager.getValue(likeValueRef);
         } else {
-            rightValue = condition.getRight();
+            rightValue = likeValueRef;
+        }
+
+        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
+            rightValue = condition.getRight().replace(likeValueRef, (String) rightValue);
         }
 
         if (rightValue != null) {

@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.execution.operator.factory;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.operator.Contains;
 import com.becon.opencelium.backend.execution.operator.ContainsSubStr;
+import com.becon.opencelium.backend.execution.operator.DenyList;
 import com.becon.opencelium.backend.execution.operator.EqualTo;
 import com.becon.opencelium.backend.execution.operator.GreaterThan;
 import com.becon.opencelium.backend.execution.operator.GreaterThanOrEqualTo;
@@ -51,7 +52,8 @@ public class ComparisonOperatorFactory implements OperatorFactory {
             case NOT_EQUAL_TO -> new NotEqualTo();
             case CONTAINS_SUB_STR -> new ContainsSubStr();
             case NOT_CONTAINS_SUB_STR -> new NotContainsSubStr();
-            case DENYLIST, DEFAULT -> throw new RuntimeException("Operator '" + operator.name() + "' is not supported");
+            case DENYLIST -> new DenyList();
+            case DEFAULT -> throw new RuntimeException("Operator '" + operator.name() + "' is not supported");
             default -> null;
         };
     }

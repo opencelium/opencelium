@@ -27,6 +27,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 
 public class RequestEntityBuilder {
@@ -65,7 +68,7 @@ public class RequestEntityBuilder {
         URI url = Objects.nonNull(URIBuilder) ? URIBuilder.build(operation, references) : defaultURLBuilder();
         HttpMethod method = defaultMethod();
         HttpHeaders headers = Objects.nonNull(headersBuilder) ? headersBuilder.build(operation, references) : defaultHeadersBuilder();
-        Object body = Objects.nonNull(bodyBuilder) ? bodyBuilder.build(operation, references) : defaultBodyBuilder();
+        Object body = Objects.nonNull(bodyBuilder) ? bodyBuilder.build(operation, references) : defaultBodyBuilder(headers.getContentType());
 
         return new RequestEntity<>(body, headers, method, url);
     }
@@ -126,15 +129,14 @@ public class RequestEntityBuilder {
         return headers;
     }
 
-    private Object defaultBodyBuilder() {
+    private Object defaultBodyBuilder(MediaType contentType) {
         RequestBodyDTO body = operation.getRequestBody();
 
         if (body == null) {
             return null;
         }
 
-        MediaType mediaType = body.getContent();
-        if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)) {
+        if (APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType) && !"CheckMK".equals(operation.getInvoker())) {
             return toFormUrlencoded(body.getSchema());
         }
 
@@ -145,12 +147,20 @@ public class RequestEntityBuilder {
         replaceRefs(copiedSchema);
 
         String requestBody;
-        if (MediaType.TEXT_PLAIN.isCompatibleWith(mediaType)) {
+        MediaType bodyContent = body.getContent();
+        if (TEXT_PLAIN.isCompatibleWith(bodyContent)) {
             requestBody = SchemaDTOUtil.toText(copiedSchema);
-        } else if (MediaType.APPLICATION_XML.isCompatibleWith(mediaType)) {
+        } else if (APPLICATION_XML.isCompatibleWith(bodyContent)) {
             requestBody = SchemaDTOUtil.toXML(copiedSchema);
         }  else {
             requestBody = SchemaDTOUtil.toJSON(copiedSchema);
+        }
+
+        // TODO: works only for CheckMk. Should be deleted in future releases.
+        if ("CheckMK".equals(operation.getInvoker()) && requestBody != null && !requestBody.isEmpty() && APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
+            return new LinkedMultiValueMap<>(){{
+                add("request", requestBody);
+            }};
         }
 
         return requestBody;
