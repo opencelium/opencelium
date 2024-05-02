@@ -59,7 +59,9 @@ const Button: FC<ButtonProps> =
                 navigate(href, { replace: false });
             }
         } else{
-            handleClick();
+            if(handleClick) {
+                handleClick();
+            }
         }
         hasConfirmation && toggleConfirmation(false);
     };

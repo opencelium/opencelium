@@ -20,14 +20,13 @@ import {CheckForUpdateProps} from "@application/requests/interfaces/IUpdateAssis
 import {NotificationType} from "@application/interfaces/INotification";
 import {getActionWithoutType} from "@application/utils/utils";
 import {AppDispatch} from "@application/utils/store";
-import LinkMessage from "@app_component/base/link_message/LinkMessage";
 import InterpolateTranslation from "@app_component/base/interpolate_translation/InterpolateTranslation";
 import {checkForUpdates} from "../../redux_toolkit/action_creators/UpdateAssistantCreators";
 
 const GET_LAST_AVAILABLE_VERSION = (responseType: NotificationType, dispatch: AppDispatch, navigate: NavigateFunction, params: IApplicationResponse<CheckForUpdateProps>) => {
     // @ts-ignore
     return (<InterpolateTranslation i18nKey={`notifications.${responseType}.${checkForUpdates[responseType].type}`}>
-            OC Update <LinkMessage dispatch={dispatch} navigate={navigate} link={'update_assistant'} message={params.data.version} shouldSetSearchValue={false}/> available.
+            OC Update v{params.data.version} is available.
         </InterpolateTranslation>
     );
 }

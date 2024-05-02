@@ -31,9 +31,9 @@ const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.RE
         {id: 6, name: 'Data Aggregator', link: '/data_aggregator'},
         //{id: 6, name: 'Converter', link: '/template_converter'},
         {id: 7, name: 'Notification Templates', link: '/notification_templates'},
-        {id: 8, name: 'Update Assistant', link: '/update_assistant'},
-        {id: 9, name: 'Swagger API Docs', link: `${baseUrl}docs`, isExternalHref: true},
-        {id: 10, name: 'Migration', link: `/migration`},
+        //{id: 8, name: 'Update Assistant', link: '/update_assistant'},
+        {id: 8, name: 'Swagger API Docs', link: `${baseUrl}docs`, isExternalHref: true},
+        {id: 9, name: 'Migration', link: `/migration`},
     ];
     const CAdminCards = new AdminCards(adminCards);
     return (

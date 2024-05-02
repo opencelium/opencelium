@@ -304,6 +304,18 @@ export const deleteSchedulesById = createAsyncThunk(
     }
 )
 
+export const terminateExecution = createAsyncThunk(
+    'schedule/terminate',
+    async(scheduleId: number, thunkAPI) => {
+        try {
+            const request = new ScheduleRequest({endpoint: `/terminate/${scheduleId}`});
+            await request.terminateExecution();
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export default {
     checkScheduleTitle,
     switchScheduleStatus,
@@ -323,4 +335,5 @@ export default {
     deleteScheduleById,
     deleteTestScheduleById,
     deleteSchedulesById,
+    terminateExecution,
 }

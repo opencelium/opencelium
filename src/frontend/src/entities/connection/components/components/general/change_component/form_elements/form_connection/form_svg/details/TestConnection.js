@@ -201,7 +201,7 @@ class TestConnectionButton extends React.Component{
             isTriggerFailed, startGettingSchedule,
         } = this.state;
         const {
-            isTestingConnection, connection,
+            isTestingConnection, connection, testSchedule,
         } = this.props;
         const isCreatingConnectionLoading = startAddingConnection;
         const isCreatingScheduleLoading = isCreatingConnectionLoading || startAddingSchedule;
@@ -254,8 +254,8 @@ class TestConnectionButton extends React.Component{
                             <div>
                                 <Text value={
                                         <div>
-                                            {"Execute the connection ("}
-                                            <Counter shouldStart={startTriggeringSchedule || startGettingSchedule} shouldStop={!isExecutionLoading} size={TextSize.Size_12}/>
+                                            {"Connection Execution ("}
+                                            <Counter schedule={testSchedule} shouldStart={startTriggeringSchedule || startGettingSchedule} shouldStop={!isExecutionLoading} size={TextSize.Size_12}/>
                                             {")"}
                                         </div>
                                     } size={TextSize.Size_14}/>
