@@ -12,4 +12,5 @@ public interface SchedulingStrategy {
     void pauseJob(Scheduler scheduler);
     Map<Long,Integer> getRunningJobs();
     void validateCron(String cron);
+    void terminate(Scheduler scheduler);
 }

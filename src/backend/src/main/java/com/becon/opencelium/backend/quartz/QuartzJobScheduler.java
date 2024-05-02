@@ -188,6 +188,20 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         }
     }
 
+    @Override
+    public void terminate(Scheduler scheduler) {
+        String jobName = getJobName(scheduler);
+        JobKey jobKey = new JobKey(jobName, "connection");
+        try {
+            if (!quartzScheduler.checkExists(jobKey)) {
+                return;
+            }
+            quartzScheduler.interrupt(jobKey);
+        } catch (SchedulerException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private String getJobName(Scheduler scheduler) {
         if (scheduler == null || scheduler.getId() == 0) {
             throw new SchedulerNotFoundException(0);
