@@ -21,7 +21,7 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import {useAppDispatch} from "@application/utils/store";
 import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 
-const MaxExecutionTime = 2;
+const MaxExecutionTime = 10;
 
 const getTime = (totalSeconds: number) => {
     let seconds: number | string = MaxExecutionTime - Math.floor(totalSeconds % 60);
