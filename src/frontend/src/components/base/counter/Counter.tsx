@@ -21,7 +21,7 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import {useAppDispatch} from "@application/utils/store";
 import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 
-const MaxExecutionTime = 10;
+const MaxExecutionTime = 1
 
 const getTime = (totalSeconds: number) => {
     let seconds: number | string = MaxExecutionTime - Math.floor(totalSeconds % 60);
@@ -71,7 +71,7 @@ const Counter: FC<CounterProps> = ({shouldStart, shouldStop, size, style, schedu
     }, [shouldStop, currentTimer]);
     const time = useMemo(() => getTime(currentTimer), [currentTimer]);
     return (
-        <CounterStyled style={style}>
+        <CounterStyled style={{...style, color: currentTimer === MaxExecutionTime ? '#8c3838' : '000'}}>
             <Text size={size} value={`${time.hours ? `${time.hours}` : '00'}:${time.minutes ? `${time.minutes}` : '00'}:${time.seconds}`}/>
         </CounterStyled>
     );

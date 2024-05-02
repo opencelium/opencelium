@@ -157,6 +157,7 @@ export const scheduleSlice = createSlice({
         },
         [startTestSchedule.pending.type]: (state) => {
             state.startingTestSchedule = API_REQUEST_STATE.START;
+            state.terminatingExecution = API_REQUEST_STATE.INITIAL;
         },
         [startTestSchedule.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
             state.startingTestSchedule = API_REQUEST_STATE.FINISH;
