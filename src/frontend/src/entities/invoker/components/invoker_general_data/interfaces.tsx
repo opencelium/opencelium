@@ -23,6 +23,7 @@ interface InvokerGeneralDataProps{
     isView?: boolean,
     isReadonly?: boolean,
     nameValidationMessage?: string,
+    setNameValidationMessage: (newMessage: string) => void;
 }
 
 export {

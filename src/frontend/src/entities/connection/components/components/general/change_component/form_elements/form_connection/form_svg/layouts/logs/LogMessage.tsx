@@ -25,7 +25,7 @@ const LogMessage: FC<React.HTMLAttributes<HTMLDivElement> & {message: string, in
     let jsonLabel = '';
     let isJson = false;
     let json = null;
-    const responseSplit = message.split('Response: ');
+    const responseSplit = message.split('Response : ');
     const bodySplit = message.split('Body: ');
     if(responseSplit.length > 1){
         if(isJsonString(responseSplit[1])) {
