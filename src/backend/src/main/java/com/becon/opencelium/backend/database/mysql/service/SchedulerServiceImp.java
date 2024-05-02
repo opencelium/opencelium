@@ -241,6 +241,12 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
+    public void terminate(Integer schedulerId) {
+        Scheduler scheduler = getById(schedulerId);
+        schedulingStrategy.terminate(scheduler);
+    }
+
+    @Override
     public List<RunningJobsResource> getAllRunningJobs() throws Exception {
         Map<Long, Integer> runningJobs = schedulingStrategy.getRunningJobs();
         List<RunningJobsResource> runningJobsResources = new ArrayList<>();
