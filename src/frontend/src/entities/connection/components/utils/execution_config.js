@@ -50,6 +50,18 @@ const T_V13V12 = [
 ];
 const T_V12V11 = [];
 const T_V11V10 = [];
+const T_V31V40 = [
+    {id: 1, "type":"REMOVE_EMPTY_PROPERTIES"},
+];
+const T_V311V40 = [
+    {id: 1, "type":"REMOVE_EMPTY_PROPERTIES"},
+];
+const T_V312V40 = [
+    {id: 1, "type":"REMOVE_EMPTY_PROPERTIES"},
+];
+const T_V32V40 = [
+    {id: 1, "type":"REMOVE_EMPTY_PROPERTIES"},
+];
 const T_V321V40 = [
     {id: 1, "type":"REMOVE_EMPTY_PROPERTIES"},
 ];
@@ -64,6 +76,10 @@ const TEMPLATE_CONFIGS = {
     'V1.3V1.2': T_V13V12,
     'V1.2V1.1': T_V12V11,
     'V1.1V1.0': T_V11V10,
+    'V3.1V4.0': T_V31V40,
+    'V3.1.1V4.0': T_V311V40,
+    'V3.1.2V4.0': T_V312V40,
+    'V3.2V4.0': T_V32V40,
     'V3.2.1V4.0': T_V321V40,
 };
 const INVOKER_CONFIGS = {
