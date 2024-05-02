@@ -16,10 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
-import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
-import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
@@ -47,6 +44,7 @@ public class SchedulerServiceImp implements SchedulerService {
     private final ConnectionService connectionService;
     private final WebhookService webhookService;
     private final ExecutionService executionService;
+    private final ConnectorService connectorService;
     private final LastExecutionService lastExecutionService;
     private final RecipientService recipientService;
     private final MessageService messageService;
@@ -63,6 +61,7 @@ public class SchedulerServiceImp implements SchedulerService {
             @Qualifier("lastExecutionServiceImp") LastExecutionService lastExecutionService,
             @Qualifier("messageServiceImpl") MessageService messageService,
             @Qualifier("recipientServiceImpl") RecipientService recipientService,
+            @Qualifier("connectorServiceImp") ConnectorService connectorService,
             SchedulerRepository schedulerRepository,
             NotificationRepository notificationRepository,
             SchedulerFactoryBean schedulerFactoryBean,
@@ -78,6 +77,7 @@ public class SchedulerServiceImp implements SchedulerService {
         this.notificationRepository = notificationRepository;
         this.schedulerRepository = schedulerRepository;
         this.connectionMapper = connectionMapper;
+        this.connectorService = connectorService;
     }
 
     @Override
@@ -241,6 +241,12 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
+    public void terminate(Integer schedulerId) {
+        Scheduler scheduler = getById(schedulerId);
+        schedulingStrategy.terminate(scheduler);
+    }
+
+    @Override
     public List<RunningJobsResource> getAllRunningJobs() throws Exception {
         Map<Long, Integer> runningJobs = schedulingStrategy.getRunningJobs();
         List<RunningJobsResource> runningJobsResources = new ArrayList<>();
@@ -250,8 +256,11 @@ public class SchedulerServiceImp implements SchedulerService {
             jobsResource.setSchedulerId(scheduler.getId());
             jobsResource.setTitle(scheduler.getTitle());
             Connection connection = connectionService.getById(connId);
-            jobsResource.setToConnector(String.valueOf(connection.getToConnector()));
-            jobsResource.setFromConnector(String.valueOf(connection.getFromConnector()));
+
+            Connector fromCotr = connectorService.getById(connection.getFromConnector());
+            Connector toCtor = connectorService.getById(connection.getToConnector());
+            jobsResource.setToConnector(toCtor.getTitle());
+            jobsResource.setFromConnector(fromCotr.getTitle());
             runningJobsResources.add(jobsResource);
         });
         return runningJobsResources;

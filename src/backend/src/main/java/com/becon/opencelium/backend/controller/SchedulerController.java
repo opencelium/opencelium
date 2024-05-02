@@ -368,6 +368,24 @@ public class SchedulerController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Terminates a scheduler by provided scheduler ID")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Scheduler has been terminated",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/terminate/{schedulerId}")
+    public ResponseEntity<?> terminate(@PathVariable Integer schedulerId){
+        schedulerService.terminate(schedulerId);
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "Retrieves list of running schedulers")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
