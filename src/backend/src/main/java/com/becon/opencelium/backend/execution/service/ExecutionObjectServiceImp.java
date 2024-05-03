@@ -54,8 +54,8 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
 
         Logger logger = new Logger();
         logger.setDebugMode(scheduler.getDebugMode());
-        if (WebSocketConfig.schedulerId != null) {
-            logger.setWSocketOpen(scheduler.getId() == WebSocketConfig.schedulerId);
+        if (WebSocketConfig.getSchedulerId() != null) {
+            logger.setWSocketOpen(scheduler.getId() == WebSocketConfig.getSchedulerId());
         }
         executionObj.setLogger(logger);
 
