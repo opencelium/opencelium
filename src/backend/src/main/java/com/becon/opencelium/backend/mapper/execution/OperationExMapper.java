@@ -82,7 +82,9 @@ public class OperationExMapper {
         if (methodMng.getRequest().getBody() != null && (mediaType = getMediaTypeFromBody(methodMng.getRequest().getBody().getFormat())) != null) {
             return mediaType;
         }
-        return fiv.getRequest().getBody() == null || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null ? MediaType.APPLICATION_JSON : mediaType;
+        return fiv.getRequest().getBody() == null || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null
+                ? MediaType.APPLICATION_JSON
+                : mediaType;
     }
 
     private MediaType getContentTypeFromHeader(Map<String, String> header) {
@@ -122,8 +124,10 @@ public class OperationExMapper {
                 success.setData(response.getSuccess().getBody().getData());
             }
             res.add(success);
-            MediaType mt = getContentTypeFromHeader(fiv.getResponse().getSuccess().getHeader());
-            success.setContent(mt==null ? MediaType.APPLICATION_JSON : mt);
+            MediaType mt = fiv.getResponse().getSuccess().getBody() != null
+                    ? getMediaTypeFromBody(fiv.getResponse().getSuccess().getBody().getFormat())
+                    : MediaType.APPLICATION_JSON;
+            success.setContent(mt == null ? MediaType.APPLICATION_JSON : mt);
         }
         if (response.getFail() != null) {
             ResponseDTO fail = new ResponseDTO();
@@ -134,8 +138,10 @@ public class OperationExMapper {
                 fail.setData(response.getFail().getBody().getData());
             }
             res.add(fail);
-            MediaType mt = getContentTypeFromHeader(fiv.getResponse().getFail().getHeader());
-            fail.setContent(mt==null ? MediaType.APPLICATION_JSON : mt);
+            MediaType mt = fiv.getResponse().getFail().getBody() != null
+                    ? getMediaTypeFromBody(fiv.getResponse().getFail().getBody().getFormat())
+                    : MediaType.APPLICATION_JSON;
+            fail.setContent(mt == null ? MediaType.APPLICATION_JSON : mt);
         }
         return res;
     }
@@ -366,7 +372,7 @@ public class OperationExMapper {
                 props.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), connectionId, methodName));
             }
         }
-        if(body.getFormat().equals("xml")){
+        if (body.getFormat().equals("xml")) {
             schemaDTO.setXml(new XmlObjectDTO());
         }
         schemaDTO.setProperties(props);
