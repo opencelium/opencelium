@@ -55,6 +55,8 @@ Configuration:
 
 Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation.
 
+.. note::
+	Please change the password (secret1234).
 
 .. code-block:: sh
 	:linenos:
@@ -63,13 +65,12 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	systemctl enable mariadb
 	mysql_secure_installation
 	
-.. note::
-	Please change the password (secret1234).
-
-
 **2. Neo4j:**
 
 Set your password for neo4j, restart and enable neo4j service.
+
+.. note::
+	Please change the password (secret1234).
 
 .. code-block:: sh
 	:linenos:
@@ -78,9 +79,6 @@ Set your password for neo4j, restart and enable neo4j service.
 	systemctl restart neo4j.service
 	systemctl enable neo4j.service
 	
-.. note::
-	Please change the password (secret1234).
-
 **3. Nginx:**
 
 Remove default config and link OpenCelium config.
@@ -100,7 +98,7 @@ Remove default config and link OpenCelium config.
 		rm /etc/nginx/sites-enabled/default
 		ln -s /opt/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
 		
-	and change the certificates, within the config, with your own:
+	and change the certificates, within the config (/opt/conf/nginx-ssl.conf), with your own:
 	
 	.. code-block:: sh
 		:linenos:	
