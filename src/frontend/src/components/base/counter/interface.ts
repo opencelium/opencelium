@@ -14,12 +14,14 @@
  */
 
 import {TextSize} from "@app_component/base/text/interfaces";
+import ModelSchedule from "@entity/schedule/requests/models/Schedule";
 
 interface CounterProps{
     shouldStart: boolean,
     shouldStop?: boolean,
     size?: TextSize,
     style?: any,
+    schedule: ModelSchedule,
 }
 
 export {

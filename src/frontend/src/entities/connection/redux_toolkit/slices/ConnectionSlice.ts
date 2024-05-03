@@ -560,7 +560,7 @@ const connectionReducers = (isModal: boolean = false) => {
           (connection) => connection.connectionId !== action.payload
         );
         state.metaConnections = state.metaConnections.filter(
-          (connection) => connection.connectionId !== action.payload
+          (connection) => connection.id !== action.payload
         );
         if (
           state.currentConnection &&
@@ -617,7 +617,7 @@ const connectionReducers = (isModal: boolean = false) => {
         state.metaConnections = state.metaConnections.filter(
           (connection) =>
             action.payload.findIndex(
-              (id) => `${id}` === `${connection.connectionId}`
+              (id) => `${id}` === `${connection.id}`
             ) === -1
         );
         if (

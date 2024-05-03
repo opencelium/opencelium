@@ -35,10 +35,7 @@ const ExecutionStatus: FC<ExecutionStatusProps> =
             }
             setLastStatusColor(newLastStatusColor);
         }, [schedule?.lastExecution, schedule.status])
-        if(!hasActions){
-            let status = schedule.status ? 'on' : 'off';
-            return <td key={'status'} title={status}>{status}</td>;
-        }
+
         return (
             <td key={'status'} style={{background: lastStatusColor}}></td>
         );
