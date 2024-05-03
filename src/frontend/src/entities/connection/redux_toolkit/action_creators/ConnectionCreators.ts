@@ -207,6 +207,9 @@ export const getAllConnections = createAsyncThunk(
                         return false;
                     }
                 }
+                if(connection.title.trim() === ''){
+                    return false;
+                }
                 return true;
             }) || [];
         } catch(e){
@@ -228,6 +231,9 @@ export const getAllMetaConnections = createAsyncThunk(
                     if(connection.title.split('_').length >= 3){
                         return false;
                     }
+                }
+                if(connection.title.trim() === ''){
+                    return false;
                 }
                 return true;
             }) || [];

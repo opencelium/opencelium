@@ -20,19 +20,18 @@ import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.quartz.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JobExecutor extends QuartzJobBean {
-
+public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
     private final SimpMessagingTemplate simpMessagingTemplate;
+
+    private Thread thread;
 
     public JobExecutor(@Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService, SimpMessagingTemplate simpMessagingTemplate) {
         this.executionObjectService = executionObjectService;
@@ -41,12 +40,26 @@ public class JobExecutor extends QuartzJobBean {
 
     @Override
     public void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        JobDataMap dataMap = context.getMergedJobDataMap();
-        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
-        ExecutionObj executionObj = executionObjectService.buildObj(data);
-        ConnectionExecutor executor = new ConnectionExecutor(executionObj, simpMessagingTemplate);
+        thread = Thread.currentThread();
+        try {
+            JobDataMap dataMap = context.getMergedJobDataMap();
+            QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
+            ExecutionObj executionObj = executionObjectService.buildObj(data);
+            ConnectionExecutor executor = new ConnectionExecutor(executionObj, simpMessagingTemplate);
 
-        executor.start();
-        context.put("operationsEx", executor.getOperations());
+            executor.start();
+            context.put("operationsEx", executor.getOperations());
+        } catch (ThreadDeath ignored) {
+        } finally {
+            thread = null;
+        }
+    }
+
+    @Override
+    public void interrupt() {
+        if (thread != null) {
+            thread.stop();
+            thread = null;
+        }
     }
 }

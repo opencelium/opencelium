@@ -24,6 +24,7 @@ interface OperationItemsProps{
     updateOperations?: (operations: Operation[]) => void;
     validations?: {index: number, message: string}[],
     error?: string,
+    setOperationsValidationMessage: (newMessage: string) => void;
 }
 
 interface MethodTitleStyledProps{

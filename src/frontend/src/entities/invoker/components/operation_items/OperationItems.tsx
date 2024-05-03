@@ -36,6 +36,7 @@ const OperationItems: FC<OperationItemsProps> =
         updateOperations,
         validations,
         error,
+        setOperationsValidationMessage
     }) => {
     const [collapseKey, setCollapseKey] = useState('');
     const [newOperation, setNewOperation] = useState<Operation>(new Operation());
@@ -73,17 +74,20 @@ const OperationItems: FC<OperationItemsProps> =
         let newOperations: Operation[] = [...operations];
         newOperations.unshift(newOperation);
         updateOperations(newOperations);
+        setOperationsValidationMessage('');
         setNewOperation(new Operation());
     }
     const deleteOperation = (operation: Operation, index: number) => {
         let newOperations = [...operations];
         newOperations.splice(index, 1);
         updateOperations(newOperations);
+        setOperationsValidationMessage('');
     }
     const updateExistOperation = (operation: Operation, index: number) => {
         let newOperations = [...operations];
         newOperations[index] = new Operation({...operation});
         updateOperations(newOperations);
+        setOperationsValidationMessage('');
     }
     const hasTestConnectionSwitch = operations.findIndex(operation => operation.type === 'test') === -1;
     return (

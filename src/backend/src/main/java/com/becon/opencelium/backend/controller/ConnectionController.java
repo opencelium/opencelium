@@ -208,7 +208,7 @@ public class ConnectionController {
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         connectionService.deleteById(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Creates an empty connection and returns it's id")

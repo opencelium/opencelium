@@ -52,13 +52,15 @@ public interface SchedulerService {
     void saveEntity(Scheduler scheduler);
     void disable(Scheduler scheduler);
     void enable(Scheduler scheduler);
-    List<RunningJobsResource> getAllRunningJobs() throws Exception;
+    void terminate(Integer schedulerId);
 
+    List<RunningJobsResource> getAllRunningJobs() throws Exception;
     List<EventNotification> getAllNotifications(int schedulerId);
     Optional<EventNotification> getNotification(int notificationId);
     EventNotification toNotificationEntity(NotificationResource resource);
     NotificationResource toNotificationResource(EventNotification eventNotification);
     void saveNotification(EventNotification eventNotification);
     void deleteNotificationById(int id);
+
     Scheduler getById(int id);
 }

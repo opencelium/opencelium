@@ -23,7 +23,7 @@ const {
 
 export default {
     fulfilled: {
-        [checkForUpdates.fulfilled.type]: "OC Update <1><0>{{version}}</0></1> available",
+        [checkForUpdates.fulfilled.type]: "OC Update v<1><0>{{version}}</0></1> is available",
         [uploadApplicationFile.fulfilled.type]: "New version was successfully uploaded",
         [deleteApplicationFile.fulfilled.type]: "The version was successfully removed",
         [updateApplication.fulfilled.type]: "Opencelium was successfully updated",

@@ -57,6 +57,7 @@ function mapStateToProps(state){
         startingSchedule: scheduleOverview.startingTestSchedule,
         addingSchedule: scheduleOverview.addingTestSchedule,
         deletingSchedule: scheduleOverview.deletingTestScheduleById,
+        terminatingExecution: scheduleOverview.terminatingExecution,
         scheduleError: scheduleOverview.error,
     };
 }
@@ -99,7 +100,7 @@ class TestConnectionButton extends React.Component{
             startTestSchedule, deleteTestConnectionById, deletingConnection,
             connectionError, scheduleError, deletingSchedule, deleteTestScheduleById,
             currentSchedule, gettingScheduleById, getScheduleById, setTestingConnection,
-            isTestingConnection,
+            isTestingConnection, terminatingExecution,
         } = this.props;
         const {
             startAddingConnection, startAddingSchedule, startTriggeringSchedule,
@@ -201,7 +202,7 @@ class TestConnectionButton extends React.Component{
             isTriggerFailed, startGettingSchedule,
         } = this.state;
         const {
-            isTestingConnection, connection,
+            isTestingConnection, connection, testSchedule, terminatingExecution,
         } = this.props;
         const isCreatingConnectionLoading = startAddingConnection;
         const isCreatingScheduleLoading = isCreatingConnectionLoading || startAddingSchedule;
@@ -254,15 +255,16 @@ class TestConnectionButton extends React.Component{
                             <div>
                                 <Text value={
                                         <div>
-                                            {"Execute the connection ("}
-                                            <Counter shouldStart={startTriggeringSchedule || startGettingSchedule} shouldStop={!isExecutionLoading} size={TextSize.Size_12}/>
+                                            {"Connection Execution ("}
+                                            <Counter schedule={testSchedule} shouldStart={startTriggeringSchedule || startGettingSchedule} shouldStop={!isExecutionLoading} size={TextSize.Size_12}/>
                                             {")"}
                                         </div>
                                     } size={TextSize.Size_14}/>
                             </div>
                             <FontIcon
+                                iconStyles={{color: isTriggerFailed || terminatingExecution !== API_REQUEST_STATE.INITIAL ? '#8c3838' : '#000'}}
                                 isLoading={isExecutionLoading}
-                                value={isExecutionLoading ? ' ' : isTriggerFailed ? 'close' : 'done'} size={20}/>
+                                value={isExecutionLoading ? ' ' : isTriggerFailed || terminatingExecution !== API_REQUEST_STATE.INITIAL ? 'close' : 'done'} size={20}/>
                             <div>
                                 <Text value={`Cleaning process `} size={TextSize.Size_14}/>
                             </div>

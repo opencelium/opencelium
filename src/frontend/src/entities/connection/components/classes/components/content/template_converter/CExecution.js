@@ -32,16 +32,31 @@ export const RULE_TYPES = {
     SET_RESULT_ARRAY_FOR_IDOIT_SYSTEM: 'SET_RESULT_ARRAY_FOR_IDOIT_SYSTEM',
     CORRECT_BODY: 'CORRECT_BODY',
     SET_ITERATORS_IN_BRACKETS: 'SET_ITERATORS_IN_BRACKETS',
+    REMOVE_EMPTY_PROPERTIES: 'REMOVE_EMPTY_PROPERTIES',
 };
 
 export default class CExecution{
 
     static executeConfig({fromVersion = '', toVersion = ''}, jsonData){
-        let executionResult = {jsonData, error: {message: ''}};
+        let executionResult = {jsonData: JSON.parse(JSON.stringify(jsonData)), error: {message: ''}};
         const config = getConfig(fromVersion, toVersion, 'template');
         if(isArray(config) && config.length > 0) {
             for (let i = 0; i < config.length; i++) {
                 switch (config[i].type) {
+                    case RULE_TYPES.REMOVE_EMPTY_PROPERTIES:
+                        const fromConnectorMethods = executionResult?.jsonData?.fromConnector?.methods || [];
+                        const toConnectorMethods = executionResult?.jsonData?.toConnector?.methods || [];
+                        for(let j = 0; j < fromConnectorMethods.length; j++) {
+                            if(executionResult.jsonData.fromConnector.methods[j]?.request?.body?.fields){
+                                executionResult.jsonData.fromConnector.methods[j].request.body.fields = CExecution.removeEmptyProperties(fromConnectorMethods[j].request.body.fields);
+                            }
+                        }
+                        for(let j = 0; j < toConnectorMethods.length; j++) {
+                            if(executionResult.jsonData.toConnector.methods[j]?.request?.body?.fields) {
+                                executionResult.jsonData.toConnector.methods[j].request.body.fields = CExecution.removeEmptyProperties(toConnectorMethods[j].request.body.fields);
+                            }
+                        }
+                        break;
                     case RULE_TYPES.RENAME_PARAM:
                         executionResult = CExecution.renameParam(config[i], executionResult.jsonData);
                         break;
@@ -195,6 +210,20 @@ export default class CExecution{
                 error.data = {...json};
             }
         });
+    }
+
+    static removeEmptyProperties(jsonData) {
+        let obj = {...jsonData};
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                if (typeof obj[key] === 'object') {
+                    obj[key] = CExecution.removeEmptyProperties(obj[key]);
+                } else if (obj[key] === '') {
+                    delete obj[key];
+                }
+            }
+        }
+        return obj;
     }
 
     static renameParam(rule, jsonData){

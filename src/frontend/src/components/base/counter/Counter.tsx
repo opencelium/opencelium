@@ -18,9 +18,13 @@ import Text from "@app_component/base/text/Text";
 import {CounterStyled} from './styles';
 import {CounterProps} from './interface';
 import {TextSize} from "@app_component/base/text/interfaces";
+import {useAppDispatch} from "@application/utils/store";
+import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
+
+const MaxExecutionTime = 1
 
 const getTime = (totalSeconds: number) => {
-    let seconds: number | string = Math.floor(totalSeconds % 60);
+    let seconds: number | string = MaxExecutionTime - Math.floor(totalSeconds % 60);
     if(seconds < 10){
         seconds = `0${seconds}`;
     }
@@ -39,7 +43,8 @@ const getTime = (totalSeconds: number) => {
     }
 }
 
-const Counter: FC<CounterProps> = ({shouldStart, shouldStop, size, style}) => {
+const Counter: FC<CounterProps> = ({shouldStart, shouldStop, size, style, schedule}) => {
+    const dispatch = useAppDispatch();
     const [currentTimer, setCurrentTimer] = useState(0);
     const [localInterval, setLocalInterval] = useState(null);
     useEffect(() => {
@@ -50,18 +55,23 @@ const Counter: FC<CounterProps> = ({shouldStart, shouldStop, size, style}) => {
     useEffect(() => {
         if(shouldStart) {
             setLocalInterval(() => setInterval(() => {
-                setCurrentTimer(currentTimer => currentTimer + 1);
+                if (currentTimer < MaxExecutionTime) {
+                    setCurrentTimer(currentTimer => currentTimer + 1);
+                }
             }, 1000));
         }
     }, [shouldStart]);
     useEffect(() => {
-        if(shouldStop) {
+        if(shouldStop || currentTimer === MaxExecutionTime) {
+            if(currentTimer === MaxExecutionTime) {
+                dispatch(terminateExecution(schedule.schedulerId));
+            }
             clearInterval(localInterval);
         }
-    }, [shouldStop]);
+    }, [shouldStop, currentTimer]);
     const time = useMemo(() => getTime(currentTimer), [currentTimer]);
     return (
-        <CounterStyled style={style}>
+        <CounterStyled style={{...style, color: currentTimer === MaxExecutionTime ? '#8c3838' : '000'}}>
             <Text size={size} value={`${time.hours ? `${time.hours}` : '00'}:${time.minutes ? `${time.minutes}` : '00'}:${time.seconds}`}/>
         </CounterStyled>
     );
