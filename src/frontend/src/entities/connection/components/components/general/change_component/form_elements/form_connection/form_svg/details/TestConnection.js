@@ -237,6 +237,7 @@ class TestConnectionButton extends React.Component{
                 >
                     <PopoverHeader>
                         {"Test Connection"}
+                        <span style={{fontSize: 14}}>{` (limit 60 seconds)`}</span>
                     </PopoverHeader>
                     <PopoverBody>
                         <div style={{justifyContent: 'center', display: 'grid', gridTemplateColumns: '100% auto', padding: '5px'}}>

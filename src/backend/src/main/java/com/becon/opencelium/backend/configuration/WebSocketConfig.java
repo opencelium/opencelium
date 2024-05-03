@@ -25,7 +25,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
 
     // Required for sending logs only for this scheduler other will be ignored;
-    public static Integer schedulerId;
+    private static Integer schedulerId;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -76,5 +76,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 return ChannelInterceptor.super.preSend(message, channel);
             }
         });
+    }
+
+    public static Integer getSchedulerId() {
+        return schedulerId;
     }
 }

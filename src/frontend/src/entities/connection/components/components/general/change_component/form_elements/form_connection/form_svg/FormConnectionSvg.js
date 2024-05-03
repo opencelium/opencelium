@@ -167,6 +167,7 @@ class FormConnectionSvg extends Component {
           updateConnection={(a, b) => this.updateEntity(a, b)}
         />
         <TechnicalLayout
+          formConnectionSvg={this}
           ref={this.technicalLayoutRef}
           readOnly={data.readOnly}
           setIsCreateElementPanelOpened={(a, b) =>
