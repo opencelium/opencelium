@@ -43,10 +43,10 @@ Download and unzip application, and create a link for it.
 .. code-block:: sh
 	:linenos:
 
-	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_stable.zip/download?distro_version_id=230" -P /opt/
-	unzip -o -d /opt/ /opt/oc_stable.zip
-	rm /opt/oc_stable.zip
-	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_stable.zip/download?distro_version_id=230" -P /opt/opencelium/
+	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_stable.zip
+	rm /opt/opencelium/oc_stable.zip
+	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 		
 Configuration:
 ==================
@@ -61,7 +61,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 .. code-block:: sh
 	:linenos:
 	
-	mysql -u root -e "source /opt/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	systemctl enable mariadb
 	mysql_secure_installation
 	
@@ -70,7 +70,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 Set your password for neo4j, restart and enable neo4j service.
 
 .. note::
-	Please change the password (secret1234) in the following command line!.
+	Please change the password (secret1234) in the following command line!
 
 .. code-block:: sh
 	:linenos:
@@ -87,7 +87,7 @@ Remove default config and link OpenCelium config.
 	:linenos:
 	
 	rm /etc/nginx/sites-enabled/default
-	ln -s /opt/conf/nginx.conf /etc/nginx/sites-enabled/
+	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/
 	
 .. note::
 	If you like to use SSL, do the following:
@@ -96,9 +96,9 @@ Remove default config and link OpenCelium config.
 		:linenos:	
 	
 		rm /etc/nginx/sites-enabled/default
-		ln -s /opt/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
+		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
 		
-	and change the certificates, within the config (/opt/conf/nginx-ssl.conf), with your own:
+	and change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
 	
 	.. code-block:: sh
 		:linenos:	
@@ -121,7 +121,7 @@ Create and adjust configuration.
 .. code-block:: sh
 	:linenos:
 	
-	cp /opt/src/backend/src/main/resources/application_default.yml /opt/src/backend/src/main/resources/application.yml
+	cp /opt/opencelium/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
 	
 	
 .. note::
