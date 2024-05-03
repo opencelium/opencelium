@@ -61,45 +61,44 @@ class Details extends React.Component {
       return null;
     }
     let details = currentTechnicalItem ? currentTechnicalItem : null;
-    let detailsStyle = {};
-    if (!isDetailsOpened) {
-      return (
-        <TooltipButton
-          size={TextSize.Size_20}
-          position={'bottom'}
-          className={styles.show_icon}
-          icon={'chevron_left'}
-          tooltip={'Show Details'}
-          target={`show_connection_button`}
-          hasBackground={false}
-          handleClick={this.toggleDetails}
-        />
-      );
-    }
+    let detailsStyle = {overflow: 'hidden'};
+
     return (
-      <div
-        className={`${styles.details_maximized} ${styles.details_right}`}
-        style={detailsStyle}
-      >
-        <SettingsPanel {...this.props} />
-        <div className={styles.details_data}>
-          <div className={styles.title}>Details</div>
-          {details ? (
-            <React.Fragment>
-              <div className={styles.label}>
-                <Description
-                  ref={this.descriptionRef}
-                  readOnly={readOnly}
-                  details={details}
-                  updateConnection={updateConnection}
-                />
-              </div>
-            </React.Fragment>
-          ) : (
-            <div>{'There is no selected item'}</div>
-          )}
+      <>
+      {!isDetailsOpened && <TooltipButton
+            size={TextSize.Size_20}
+            position={'bottom'}
+            className={styles.show_icon}
+            icon={'chevron_left'}
+            tooltip={'Show Details'}
+            target={`show_connection_button`}
+            hasBackground={false}
+            handleClick={this.toggleDetails}
+        />}
+        <div
+          className={`${styles.details_maximized} ${styles.details_right}`}
+          style={{...detailsStyle, width: isDetailsOpened ? '300px' : 0}}
+        >
+          <SettingsPanel {...this.props} />
+          <div className={styles.details_data}>
+            <div className={styles.title}>Details</div>
+            {details ? (
+              <React.Fragment>
+                <div className={styles.label}>
+                  <Description
+                    ref={this.descriptionRef}
+                    readOnly={readOnly}
+                    details={details}
+                    updateConnection={updateConnection}
+                  />
+                </div>
+              </React.Fragment>
+            ) : (
+              <div>{'There is no selected item'}</div>
+            )}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 }
