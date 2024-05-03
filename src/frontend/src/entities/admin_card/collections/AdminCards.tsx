@@ -22,14 +22,20 @@ import {PermissionTooltipButton} from "@app_component/base/button/PermissionButt
 import {SortType} from "@app_component/collection/collection_view/interfaces";
 import {AdminCardProps, IAdminCard} from "../interfaces/IAdminCard";
 import {AdminCard} from "../classes/AdminCard";
+import {IConnector} from "@entity/connector/interfaces/IConnector";
+import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
 
 class AdminCards extends ListCollection<AdminCardProps>{
     name: string = 'adminCards';
     entities: IAdminCard[];
     title = 'Admin Panel';
+    getListRawUrl = (entity: IAdminCard) => {
+        return `${entity.link}`;
+    };
+    ListRawComponent = DefaultListRaw;
     keyPropName: AdminCardProps ='id';
     sortingProps: AdminCardProps[] = ['name'];
-    listProps: ListProp<AdminCardProps>[] = [{propertyKey: 'name', replace: true, getValue: (AdminCard: IAdminCard) => {
+    listProps: ListProp<AdminCardProps>[] = [{propertyKey: 'name', replace: true, style:{justifyContent: 'start', marginLeft: '-24px'}, getValue: (AdminCard: IAdminCard) => {
         return <td key={AdminCard.id} style={{textAlign: 'left'}}>{AdminCard.name}</td>
     }}];
     gridProps = {title: 'name'};

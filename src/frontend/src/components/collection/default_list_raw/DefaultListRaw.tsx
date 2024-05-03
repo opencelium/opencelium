@@ -26,6 +26,7 @@ const DefaultListRaw: FC<DefaultListRawProps> =
          children,
          url,
          id,
+         entity,
      }) => {
         let navigate = useNavigate();
         return (
@@ -39,7 +40,11 @@ const DefaultListRaw: FC<DefaultListRawProps> =
                                 break;
                             } else{
                                 if(element.id === id){
-                                    navigate(url, {replace: false})
+                                    if(entity.isExternalHref) {
+                                        window.open(url, '_blank').focus()
+                                    } else {
+                                        navigate(url, {replace: false})
+                                    }
                                     break;
                                 }
                                 if(element.parentElement){
@@ -49,7 +54,11 @@ const DefaultListRaw: FC<DefaultListRawProps> =
                                 }
                             }
                             if(element.id === id){
-                                navigate(url, {replace: false})
+                                if(entity.isExternalHref) {
+                                    window.open(url, '_blank').focus()
+                                } else {
+                                    navigate(url, {replace: false})
+                                }
                                 break;
                             }
                         }

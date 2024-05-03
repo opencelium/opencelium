@@ -18,6 +18,7 @@
 interface DefaultListRawProps{
     url: string,
     id: string,
+    entity: any,
 }
 
 export {
