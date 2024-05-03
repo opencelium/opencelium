@@ -424,6 +424,12 @@ const connectionReducers = (isModal: boolean = false) => {
                 ? action.payload
                 : connection
         );
+        if (
+            state.currentConnection &&
+            state.currentConnection.connectionId === action.payload.connectionId
+        ) {
+          state.currentConnection = action.payload;
+        }
         state.error = null;
       },
       [getAndUpdateConnectionTitle.rejected.type]: (
@@ -451,6 +457,12 @@ const connectionReducers = (isModal: boolean = false) => {
                 ? action.payload
                 : connection
         );
+        if (
+            state.currentConnection &&
+            state.currentConnection.connectionId === action.payload.connectionId
+        ) {
+          state.currentConnection = action.payload;
+        }
         state.error = null;
       },
       [getAndUpdateConnectionDescription.rejected.type]: (
