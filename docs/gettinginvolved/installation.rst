@@ -145,7 +145,10 @@ Finally start OpenCelium backend.
 .. code-block:: sh
 	:linenos:
 	
-	oc start_backend
+	ln -s /opt/opencelium/conf/opencelium.service /etc/systemd/system/opencelium.service
+	systemctl daemon-reload
+	systemctl enable opencelium
+	systemctl start opencelium
 
 .. note::
 	| Afterwards you can connect to `http://localhost`	
