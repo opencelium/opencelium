@@ -21,7 +21,7 @@ Update your system, download and install all required packages.
 	apt install unzip gpg git
 	
 	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/neo4j.gpg
-	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
+	echo 'deb https://debian.neo4j.com stable latest' | tee -a /etc/apt/sources.list.d/neo4j.list
 	
 	apt update
 	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j nginx
@@ -43,8 +43,7 @@ Download and unzip application, and create a link for it.
 .. code-block:: sh
 	:linenos:
 
-	cd /opt
-	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_stable.zip/download?distro_version_id=230"
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_stable.zip/download?distro_version_id=230" -P /opt/
 	unzip -o -d /opt/ /opt/oc_stable.zip
 	rm /opt/oc_stable.zip
 	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
