@@ -156,6 +156,14 @@ Finally start OpenCelium backend.
 	
 	| admin@opencelium.io
 	| 1234
+	
+	| If you want to have a look into OpenCelium Logs please use:
+	
+	.. code-block:: sh
+		:linenos:
+		
+		journalctl -xe -u opencelium -f
+		
 
 SUSE Linux Enterprise Server (example for SLES 15 SP5)
 """""""""""""""""
