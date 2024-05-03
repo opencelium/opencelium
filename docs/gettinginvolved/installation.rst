@@ -21,7 +21,7 @@ Update your system, download and install all required packages.
 	apt install unzip gpg git
 	
 	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/neo4j.gpg
-	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
+	echo 'deb https://debian.neo4j.com stable latest' | tee -a /etc/apt/sources.list.d/neo4j.list
 	
 	apt update
 	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j nginx
