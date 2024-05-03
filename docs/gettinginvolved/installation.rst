@@ -56,7 +56,7 @@ Configuration:
 Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation.
 
 .. note::
-	Please change the password (secret1234).
+	Please change the password (secret1234) in the following command line!
 
 .. code-block:: sh
 	:linenos:
@@ -70,7 +70,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 Set your password for neo4j, restart and enable neo4j service.
 
 .. note::
-	Please change the password (secret1234).
+	Please change the password (secret1234) in the following command line!.
 
 .. code-block:: sh
 	:linenos:
