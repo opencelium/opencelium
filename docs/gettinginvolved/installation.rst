@@ -340,61 +340,17 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 
 Red Hat Enterprise Linux (example for Red Hat 9.2)
 """""""""""""""""
-**Prepare environment:**
 
-1. Update Red Hat system:
+Prepare environment:
+==================
+
+1. Update your system, download and install all required packages.
 
 .. code-block:: sh
 	:linenos:
 
 	yum update
-
-2. Install nodejs:
-
-.. code-block:: sh
-	:linenos:
-	
-	yum install -y gcc-c++ make
-	curl -sL https://rpm.nodesource.com/setup_20.x | sudo -E bash -
-	yum install nodejs
-
-3. Install yarn:
-
-.. code-block:: sh
-	:linenos:
-
-	curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
-	yum install yarn
-
-4. Install git:
-
-.. code-block:: sh
-	:linenos:
-
-	yum install git
-
-5. Install java:
-
-.. code-block:: sh
-	:linenos:
-
-	yum install java-17-openjdk
-
-6. Install gradle:
-
-.. code-block:: sh
-	:linenos:
-	
-	cd /tmp
-	wget https://services.gradle.org/distributions/gradle-7.4.2-all.zip
-	mkdir /opt/gradle
-	unzip -d /opt/gradle gradle-7.4.2-all.zip
-	export PATH=$PATH:/opt/gradle/gradle-7.4.2/bin
-
-7. Install neo4j:
-
-.. code-block:: sh
-	:linenos:
+	yum install unzip gpg git
 
 	rpm --import https://debian.neo4j.com/neotechnology.gpg.key
 	cat <<EOF>  /etc/yum.repos.d/neo4j.repo
@@ -404,125 +360,137 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 	enabled=1
 	gpgcheck=1
 	EOF
-	yum install neo4j-5.7.0-1
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	systemctl start neo4j
-	systemctl enable neo4j	
+	yum install mariadb-server java-17-openjdk neo4j nginx
 	
-.. note::
-	Change password (secret1234) if you want.
+Install Application:
+==================
 
-8. Install MariaDB:
+Download and unzip application, and create a link for it.
 
 .. code-block:: sh
 	:linenos:
 
-	yum install mariadb-server
-	systemctl start mariadb
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_stable.zip/download?distro_version_id=230" -P /opt/opencelium/
+	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_stable.zip
+	rm /opt/opencelium/oc_stable.zip
+	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
+		
+Configuration:
+==================
+
+**1. MariaDB:**
+
+Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation.
+
+.. note::
+	Please change the password (secret1234) in the following command line!
+
+.. code-block:: sh
+	:linenos:
+	
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	systemctl enable mariadb
 	mysql_secure_installation
+	
+**2. Neo4j:**
+
+Set your password for neo4j, restart and enable neo4j service.
 
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
+	Please change the password (secret1234) in the following command line!
+
+.. code-block:: sh
+	:linenos:
 	
-	.. code-block:: sh
-		:linenos:	
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
+	systemctl restart neo4j.service
+	systemctl enable neo4j.service
 	
-		mysql -u root
+**3. Nginx:**
+
+Remove default config and link OpenCelium config.
+
+.. code-block:: sh
+	:linenos:
+	
+	rm /etc/nginx/sites-enabled/default
+	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/
+	
+.. note::
+	If you like to use SSL, do the following:
 		
-	If this works (without your password), please set your password again with this command:
-	
 	.. code-block:: sh
 		:linenos:	
 	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		rm /etc/nginx/sites-enabled/default
+		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
 		
-	Change password (root) if you want.
-
-**Install Application:**
-
-1. Get frontend repository
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt
-	git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . 
+	and change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
 	
-.. note::	
-	Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
-
-2. Run frontend with yarn
-
-.. code-block:: sh
-	:linenos:
-
-	cd src/frontend
-	yarn
-	
-.. note::
-	If yarn doesn't run properly, use this command to increase the amount of inotify watchers:
-
 	.. code-block:: sh
 		:linenos:	
-
-		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-
-3. Enable OC service
-
-.. code-block:: sh
-	:linenos:
-
-	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
-	oc start_frontend
-
-
-4. Create application.yml file for backend
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend
-	cp src/main/resources/application_default.yml src/main/resources/application.yml
-
-.. note::
-	Make changes inside the file application.yml! 
-	Change neo4j and mysql database password.
-
-5. Install database 
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend/database
-	mysql -u root -p -e "source oc_data.sql"
-
-6. Build backend project
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend/
-	gradle build
-
-7. Start backend
-
-.. code-block:: sh
-	:linenos:
-
-	oc start_backend
-
-8. Welcome to OC
+	
+		ssl_certificate /etc/ssl/certs/opencelium.pem;
+		ssl_certificate_key /etc/ssl/private/opencelium.key;
+		
+Reload config and enable nginx.
 
 .. code-block:: sh
 	:linenos:
 	
-	Visit opencelium http://SERVERIP:8888
+	systemctl restart nginx
+	systemctl enable nginx
+	
+**4. OpenCelium:**
+
+Create and adjust configuration.
+
+.. code-block:: sh
+	:linenos:
+	
+	cp /opt/opencelium/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
+	
+	
+.. note::
+	| Modify application.yml
+	| Within section "Database configuration section of MariaDB and Neo4j":
+	| - change MariaDB root user to opencelium and set password
+	| - change password of neo4j user
+
+	| Just in case you are using SSL, add certs to the ssl section. 
+	| It has to be a p12 keystore file with password! 
+	| If you just have key and pem you can create a p12 as follows:
+
+	
+	.. code-block:: sh
+		:linenos:
+		
+		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
+	
+Finally start OpenCelium backend.	
+	
+.. code-block:: sh
+	:linenos:
+	
+	ln -s /opt/opencelium/conf/opencelium.service /etc/systemd/system/opencelium.service
+	systemctl daemon-reload
+	systemctl enable opencelium
+	systemctl start opencelium
 
 .. note::
-        Please make sure that firewall is disabled (service firewalld stop)!
-
-
+	| Afterwards you can connect to `http://localhost`	
+	| Default User and Password is:
+	
+	| admin@opencelium.io
+	| 1234
+	
+	| If you want to have a look into OpenCelium Logs please use:
+	
+	.. code-block:: sh
+		:linenos:
+		
+		journalctl -xe -u opencelium -f
+		
 Ansible
 """""""""""""""""
 
