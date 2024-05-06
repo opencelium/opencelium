@@ -4,50 +4,48 @@ import com.becon.opencelium.backend.constant.YamlPropConst;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.*;
+import javax.crypto.spec.*;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.security.spec.KeySpec;
+import java.security.*;
+import java.security.spec.*;
 import java.util.Base64;
 
 @Component
 public class Encoder {
-    private final String secretKey;
     private static final String DEFAULT_SECRET_KEY = "It's a secret key";
     private static final String SALT = "opencelium-salt";
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final int KEY_LENGTH = 256;
     private static final int ITERATION_COUNT = 65536;
 
+    private final SecretKeySpec secretKeySpec;
+    private final Cipher cipher;
+    private final SecureRandom secureRandom;
+
     public Encoder(Environment environment) {
-        secretKey = environment.getProperty(YamlPropConst.CONNECTOR_SECRET_KEY, DEFAULT_SECRET_KEY);
+        String secretKey = environment.getProperty(YamlPropConst.CONNECTOR_SECRET_KEY, DEFAULT_SECRET_KEY);
+
+        try {
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            KeySpec spec = new PBEKeySpec(secretKey.toCharArray(), SALT.getBytes(), ITERATION_COUNT, KEY_LENGTH);
+            SecretKey tmp = factory.generateSecret(spec);
+            secretKeySpec = new SecretKeySpec(tmp.getEncoded(), "AES");
+
+            cipher = Cipher.getInstance(ALGORITHM);
+            secureRandom = new SecureRandom();
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException e) {
+            throw new RuntimeException("Error initializing encoder", e);
+        }
     }
 
     public String decrypt(String strToDecrypt) {
-
         try {
             byte[] encryptedData = Base64.getDecoder().decode(strToDecrypt);
-            byte[] iv = new byte[16];
-            System.arraycopy(encryptedData, 0, iv, 0, iv.length);
-            IvParameterSpec ivspec = new IvParameterSpec(iv);
+            IvParameterSpec ivspec = new IvParameterSpec(encryptedData, 0, 16);
 
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-            KeySpec spec = new PBEKeySpec(secretKey.toCharArray(), SALT.getBytes(), ITERATION_COUNT, KEY_LENGTH);
-            SecretKey tmp = factory.generateSecret(spec);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(tmp.getEncoded(), "AES");
-
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivspec);
-
-            byte[] cipherText = new byte[encryptedData.length - 16];
-            System.arraycopy(encryptedData, 16, cipherText, 0, cipherText.length);
-
-            byte[] decryptedText = cipher.doFinal(cipherText);
+            byte[] decryptedText = cipher.doFinal(encryptedData, 16, encryptedData.length - 16);
             return new String(decryptedText, StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -55,23 +53,14 @@ public class Encoder {
     }
 
     public String encrypt(String strToEncrypt) {
-
         try {
-
-            SecureRandom secureRandom = new SecureRandom();
             byte[] iv = new byte[16];
             secureRandom.nextBytes(iv);
             IvParameterSpec ivspec = new IvParameterSpec(iv);
 
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-            KeySpec spec = new PBEKeySpec(secretKey.toCharArray(), SALT.getBytes(), ITERATION_COUNT, KEY_LENGTH);
-            SecretKey tmp = factory.generateSecret(spec);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(tmp.getEncoded(), "AES");
-
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivspec);
-
             byte[] cipherText = cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8));
+
             byte[] encryptedData = new byte[iv.length + cipherText.length];
             System.arraycopy(iv, 0, encryptedData, 0, iv.length);
             System.arraycopy(cipherText, 0, encryptedData, iv.length, cipherText.length);
