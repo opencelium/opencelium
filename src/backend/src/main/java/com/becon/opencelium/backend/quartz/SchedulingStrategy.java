@@ -6,7 +6,7 @@ import java.util.Map;
 public interface SchedulingStrategy {
     void addJob(Scheduler scheduler);
     void deleteJob(Scheduler scheduler);
-    void rescheduleJob(Scheduler scheduler);
+    void rescheduleJob(Scheduler scheduler, Long oldCon);
     void runJob(Scheduler scheduler);
     void resumeJob(Scheduler scheduler);
     void pauseJob(Scheduler scheduler);

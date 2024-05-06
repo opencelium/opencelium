@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.quartz;
 
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
@@ -79,24 +80,33 @@ public class QuartzJobScheduler implements SchedulingStrategy {
     }
 
     @Override
-    public void rescheduleJob(Scheduler scheduler) {
-        final String jobName = getJobName(scheduler);
+    public void rescheduleJob(Scheduler updated, Long oldCon) {
+        if (!updated.getConnection().getId().equals(oldCon)) {
+            deleteJob(new Scheduler() {{
+                setId(updated.getId());
+                setConnection(new Connection(oldCon));
+            }}); //delete old job
+            addJob(updated); //add new job
+            return;
+        }
+        final String jobName = getJobName(updated);
         final JobKey jobKey = new JobKey(jobName, "connection");
-        if (scheduler.getCronExp() == null || scheduler.getCronExp().isBlank()) {
-            scheduler.setCronExp(DEFAULT_CRON_EXP);
+        if (updated.getCronExp() == null || updated.getCronExp().isBlank()) {
+            updated.setCronExp(DEFAULT_CRON_EXP);
         } else {
-            validateCron(scheduler.getCronExp());
+            validateCron(updated.getCronExp());
         }
 
         try {
-            Trigger currTrigger = quartzScheduler.getTrigger(new TriggerKey(String.valueOf(scheduler.getId()), String.valueOf(scheduler.getConnection().getId())));
+            Trigger currTrigger = quartzScheduler
+                    .getTrigger(new TriggerKey(String.valueOf(updated.getId()), String.valueOf(updated.getConnection().getId())));
             if (currTrigger == null) {
                 throw new RuntimeException("JOB_NOT_FOUND");
             }
 
             CronTrigger newTrigger = newTrigger()
                     .withIdentity(currTrigger.getKey())
-                    .withSchedule(CronScheduleBuilder.cronSchedule(scheduler.getCronExp()))
+                    .withSchedule(CronScheduleBuilder.cronSchedule(updated.getCronExp()))
                     .forJob(jobKey)
                     .build();
 

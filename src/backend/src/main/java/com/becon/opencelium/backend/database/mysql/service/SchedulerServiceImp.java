@@ -95,14 +95,14 @@ public class SchedulerServiceImp implements SchedulerService {
     public Scheduler update(@NonNull Scheduler scheduler) {
 
         Scheduler entity = getById(scheduler.getId());
+        Long oldCon = entity.getConnection().getId();
         if (!Objects.equals(entity.getTitle(), scheduler.getTitle()) && existsByTitle(scheduler.getTitle())) {
             throw new RuntimeException("TITLE_ALREADY_EXISTS");
         }
 
-        getById(scheduler.getId());
-        Scheduler updated = schedulerRepository.save(scheduler);
-        schedulingStrategy.rescheduleJob(updated);
-        return updated;
+        schedulerRepository.save(scheduler);
+        schedulingStrategy.rescheduleJob(scheduler, oldCon);
+        return scheduler;
     }
 
     @Override

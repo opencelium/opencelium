@@ -111,7 +111,7 @@ public class TemplateServiceImp implements TemplateService {
     @Override
     public boolean existsById(String templateId) {
         List<Template> templates = getAll(PathConstant.TEMPLATE);
-        return templates.stream().anyMatch(t -> t.getTemplateId().equals(templateId));
+        return templateId == null || templates.stream().anyMatch(t -> t.getTemplateId().equals(templateId));
     }
 
     @Override
