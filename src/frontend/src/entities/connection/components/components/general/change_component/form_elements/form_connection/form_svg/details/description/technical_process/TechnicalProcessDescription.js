@@ -184,7 +184,7 @@ class TechnicalProcessDescription extends React.Component {
                 }
                 <Col xs={12} className={styles.col} id="response_label">
                     <b>{`Response`}</b>
-                    <TooltipFontIcon className={styles.response_toggle_icon} onClick={(a) => this.toggleResponseVisibleIcon(a)} tooltip={isResponseVisible ? 'Hide' : 'Show'} value={isResponseVisible ? 'arrow_drop_up' : 'arrow_drop_down'}/>
+                    <TooltipFontIcon tooltipPosition={'right'} className={styles.response_toggle_icon} onClick={(a) => this.toggleResponseVisibleIcon(a)} tooltip={isResponseVisible ? 'Hide' : 'Show'} value={isResponseVisible ? 'arrow_drop_up' : 'arrow_drop_down'}/>
                 </Col>
                 {isResponseVisible &&
                 <Col xs={12} className={styles.col}>

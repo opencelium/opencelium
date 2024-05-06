@@ -768,6 +768,9 @@
 .method_endpoint_label_has_error{
   color: red;
 }
+.endpoint_editable:focus-visible {
+  outline: none;
+}
 .method_endpoint_delimiter{
    width: 5%;
    float: left;
