@@ -40,7 +40,7 @@ export default class CStatement{
 
     static createStatement(statement = null){
         let color = statement && statement.hasOwnProperty('color') && statement.color ? statement.color : '';
-        let field = statement && statement.hasOwnProperty('field') && statement.field ? statement.field : '';
+        let field = statement && statement.hasOwnProperty('field') ? statement.field : '';
         let rightPropertyValue = statement && statement.hasOwnProperty('rightPropertyValue') && statement.rightPropertyValue ? statement.rightPropertyValue : '';
         let parent = statement && statement.hasOwnProperty('parent') ? statement.parent : null;
         let type = statement && statement.hasOwnProperty('type') && statement.type ? statement.type : '';

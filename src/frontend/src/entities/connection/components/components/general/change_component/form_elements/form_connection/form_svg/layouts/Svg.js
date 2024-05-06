@@ -419,7 +419,8 @@ class Svg extends React.Component {
     renderItems(){
         const {
             isItemDraggable, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened,
-            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll, isTestingConnection, isCreateElementPanelOpened, setRef
+            readOnly, deleteProcess, setCurrentItem, setSelectAll, isSelectedAll, isTestingConnection, isCreateElementPanelOpened, setRef,
+            formConnectionSvg
         } = this.props;
         return items.map((item,key) => {
             let currentItem = null;
@@ -433,6 +434,7 @@ class Svg extends React.Component {
                     return(
                         <Operator
                             ref={this.operatorRef}
+                            formConnectionSvg={formConnectionSvg}
                             key={key}
                             isItemDraggable={isItemDraggable && !isTestingConnection}
                             type={'if'}
@@ -452,6 +454,7 @@ class Svg extends React.Component {
                     return(
                         <Operator
                             ref={this.operatorRef}
+                            formConnectionSvg={formConnectionSvg}
                             key={key}
                             isItemDraggable={isItemDraggable && !isTestingConnection}
                             type={'loop'}
