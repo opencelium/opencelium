@@ -239,11 +239,17 @@ public class FileController {
             if (!checkJsonExtension(extension)){
                 throw new StorageException("File should be JSON");
             }
+            String id;
             //Generate new file name
-            String id = UUID.randomUUID().toString();
             ObjectMapper objectMapper = new ObjectMapper();
             Template template = objectMapper.readValue(file.getBytes(), Template.class);
-            template.setTemplateId(id);
+            if(template.getTemplateId() != null && templateService.existsById(template.getTemplateId())){
+                templateService.deleteById(template.getTemplateId());
+                id = template.getTemplateId();
+            } else {
+                id = UUID.randomUUID().toString();
+                template.setTemplateId(id);
+            }
             // Save file in storage
             templateService.save(template);
 

@@ -83,6 +83,23 @@ public class TemplateController {
         return ResponseEntity.ok().body(templateResource);
     }
 
+    @Operation(summary = "Checks if a template with given id is exists or not")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Exists or not ",
+                    content = @Content(schema = @Schema(implementation = Boolean.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/check/{id}")
+    public ResponseEntity<Boolean> exists(@PathVariable String id){
+        return ResponseEntity.ok(templateService.existsById(id));
+    }
+
 
     @Operation(summary = "Retrieves templates from database based on 'from' and 'to' connector 'id's")
     @ApiResponses(value = {
