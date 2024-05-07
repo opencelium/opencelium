@@ -43,12 +43,12 @@ export class UpdateAssistantRequest extends Request implements IUpdateAssistantR
     }
 
     async uploadApplicationFile(application: FormData): Promise<AxiosResponse<IResponse>>{
-        this.url = '/assistant/zipfile';
+        this.url = 'assistant/zipfile';
         return super.post<IResponse>(application);
     }
 
     async deleteApplicationFile(): Promise<AxiosResponse<IResponse>>{
-        this.url = '/assistant/zipfile';
+        this.url = '    assistant/zipfile';
         return super.delete<IResponse>();
     }
 
