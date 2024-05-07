@@ -44,9 +44,10 @@ class Url extends React.Component{
         this.toggleUrlVisibleIcon();
     }
 
-    updateConnection(){
+    updateConnection(entity = null){
         const {connection, updateConnection} = this.props;
-        updateConnection(connection);
+        let currentEntity = entity === null ? connection : entity;
+        updateConnection(currentEntity);
     }
 
     renderInfo(){
@@ -58,7 +59,7 @@ class Url extends React.Component{
                     method={connector.getMethodByIndex(method.index)}
                     connector={connector}
                     connection={connection}
-                    updateEntity={() => this.updateConnection()}
+                    updateEntity={(a) => this.updateConnection(a)}
                     theme={{
                         queryInput: styles.url_endpoint_query_input,
                         paramGenerator: styles.url_endpoint_param_generator,

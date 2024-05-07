@@ -329,7 +329,7 @@ class Endpoint extends Component{
                         style={contentEditableStyles}
                     />
                     <ParamGenerator
-                        updateConnection={updateEntity}
+                        updateConnection={(a) => updateEntity(a)}
                         connection={connection}
                         connector={connector}
                         method={method}
