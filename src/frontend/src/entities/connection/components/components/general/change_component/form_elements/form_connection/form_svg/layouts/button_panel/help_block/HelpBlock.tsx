@@ -44,7 +44,7 @@ import AnimationEditor from './AnimationEditor';
 import AnimationOverlay from "./AnimationOverlay";
 
 
-const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, updateEntity}) => {
+const HelpBlock: FC<{entity: any, updateEntity: any, readOnly?: boolean, theme?: any}> = ({entity, updateEntity, readOnly}) => {
   const dispatch = useAppDispatch();
   const { connectors } = Connector.getReduxState();
   const { gettingInvokers } = Invoker.getReduxState();
@@ -174,6 +174,7 @@ const HelpBlock: FC<{entity: any, updateEntity: any, theme?: any}> = ({entity, u
           </React.Fragment>
         </Dialog>
         <SyncInvokers
+          isDisabled={readOnly}
           connection={entity}
           updateConnection={updateEntity}
           connectors={connectors}

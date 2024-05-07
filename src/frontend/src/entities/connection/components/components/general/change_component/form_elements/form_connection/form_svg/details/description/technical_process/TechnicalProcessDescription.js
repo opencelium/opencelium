@@ -139,6 +139,7 @@ class TechnicalProcessDescription extends React.Component {
                 })}
                 {/*{requestFormat === 'json' && <TestMethodButton connection={connection}/>}*/}
                 <DataAggregator
+                    readOnly={readOnly}
                     details={details}
                     connection={connection}
                     currentItem={details.entity}

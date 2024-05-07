@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
+import React, {Component, useEffect} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
@@ -23,7 +23,12 @@ import {
     updateConnection,
     testConnection,
 } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
-import {setCurrentTechnicalItem, setCurrentConnection} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {
+    setCurrentTechnicalItem,
+    setCurrentConnection,
+    setTemplatePanelVisibility, setSavePanelVisibility
+} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {addTemplate, getTemplatesByConnectors as fetchTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {permission} from "@entity/application/utils/permission";
@@ -31,6 +36,7 @@ import {ConnectionForm} from "@entity/connection/components/components/content/c
 import {useNavigate} from "react-router";
 import {ConnectionPermissions} from "@entity/connection/constants";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import {useAppDispatch} from "@application/utils/store";
 
 
 function mapStateToProps(state){
@@ -61,7 +67,11 @@ function mapStateToProps(state){
 /**
  * Component to Add Connection
  */
-@connect(mapStateToProps, {updateConnection, addConnection, addTemplate, fetchConnectors, checkConnectionTitle, fetchTemplates, testConnection, setCurrentTechnicalItem, setCurrentConnection})
+@connect(mapStateToProps, {
+    updateConnection, addConnection, addTemplate, fetchConnectors, checkConnectionTitle,
+    fetchTemplates, testConnection, setCurrentTechnicalItem, setCurrentConnection,
+    setFullScreen,
+})
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @ConnectionForm('add')
@@ -70,5 +80,12 @@ class ConnectionAdd extends Component{}
 
 export default function(props) {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    useEffect(() => {
+        return () => {
+            dispatch(setTemplatePanelVisibility(false))
+            dispatch(setSavePanelVisibility(false))
+        }
+    }, []);
     return <ConnectionAdd {...props} navigate={navigate} />;
 }

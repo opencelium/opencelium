@@ -94,6 +94,7 @@ class ButtonPanel extends React.Component {
         />
         {isButtonPanelOpened && <div className={styles.button_panel_divider} />}
         <HelpBlock
+            readOnly={readOnly}
             entity={entity}
             updateEntity={updateEntity}
         />

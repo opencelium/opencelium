@@ -121,7 +121,7 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
         <React.Fragment>
             {!tooltipButtonProps &&
                 <Button
-                    isDisabled={allMethodOptions.length === 0}
+                    isDisabled={allMethodOptions.length === 0 || readOnly}
                     label={'Aggregator'}
                     icon={'subtitles'}
                     isLoading={gettingAllAggregators === API_REQUEST_STATE.START}
@@ -135,6 +135,7 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
             }
             {tooltipButtonProps &&
                 <TooltipButton
+                    isDisabled={readOnly}
                     position={tooltipButtonProps.position}
                     icon={tooltipButtonProps.icon}
                     tooltip={tooltipButtonProps.tooltip}

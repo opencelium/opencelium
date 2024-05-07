@@ -9,7 +9,7 @@ import TooltipButton from '@app_component/base/tooltip_button/TooltipButton';
 import { ColorTheme } from '@style/Theme';
 
 
-export default ({connection, updateConnection, connectors, tooltipButtonProps}: {connection: CConnection, updateConnection: any, connectors: any[], tooltipButtonProps: any}) => {
+export default ({connection, updateConnection, connectors, tooltipButtonProps, isDisabled}: {connection: CConnection, updateConnection: any, connectors: any[], tooltipButtonProps: any, isDisabled?: boolean}) => {
     const dispatch = useAppDispatch();
     const sync = () => {
         const fromConnector = connectors.find(c => c.connectorId === connection.fromConnector.id);
@@ -36,6 +36,7 @@ export default ({connection, updateConnection, connectors, tooltipButtonProps}: 
         <React.Fragment>
             {!tooltipButtonProps &&
                 <Button
+                    isDisabled={isDisabled}
                     icon={'description'}
                     size={TextSize.Size_16}
                     hasConfirmation={true}
@@ -46,6 +47,7 @@ export default ({connection, updateConnection, connectors, tooltipButtonProps}: 
             }
             {tooltipButtonProps &&
                 <TooltipButton
+                    isDisabled={isDisabled}
                     position={tooltipButtonProps.position}
                     icon={tooltipButtonProps.icon}
                     tooltip={tooltipButtonProps.tooltip}

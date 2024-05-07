@@ -13,15 +13,21 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
+import React, {Component, useEffect} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
+import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {
+    setCurrentConnection, setSavePanelVisibility,
+    setTemplatePanelVisibility
+} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {getConnectionById as fetchConnection} from '@entity/connection/redux_toolkit/action_creators/ConnectionCreators';
 import {permission} from "@entity/application/utils/permission";
 import {ConnectionForm} from "@entity/connection/components/components/content/connections/ConnectionForm";
 import {useNavigate, useParams} from "react-router";
 import {ConnectionPermissions} from "@entity/connection/constants";
+import {useAppDispatch} from "@application/utils/store";
 
 
 const connectionPrefixURL = '/connections';
@@ -41,7 +47,7 @@ function mapStateToProps(state){
 /**
  * Component to View Connection
  */
-@connect(mapStateToProps, {fetchConnection, })
+@connect(mapStateToProps, {fetchConnection, setFullScreen, setCurrentConnection})
 @permission(ConnectionPermissions.READ, true)
 @withTranslation(['connections', 'app'])
 @ConnectionForm('view')
@@ -50,5 +56,10 @@ class ConnectionView extends Component{}
 export default function(props) {
     const navigate = useNavigate();
     let urlParams = useParams();
+    const dispatch = useAppDispatch();
+    useEffect(() => {
+        dispatch(setTemplatePanelVisibility(false))
+        dispatch(setSavePanelVisibility(false))
+    }, []);
     return <ConnectionView {...props} navigate={navigate} params={urlParams} />;
 }

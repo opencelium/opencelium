@@ -23,11 +23,12 @@ class LoadTemplate extends Component {
 
     render(){
         const {showDialog} = this.state;
-        const {data, entity, updateEntity, tooltipButtonProps} = this.props;
+        const {data, entity, updateEntity, isDisabled, tooltipButtonProps} = this.props;
         return (
             <React.Fragment>
                 {tooltipButtonProps ?
                 <TooltipButton
+                    isDisabled={isDisabled}
                     position={tooltipButtonProps.position}
                     icon={tooltipButtonProps.icon}
                     tooltip={tooltipButtonProps.tooltip}

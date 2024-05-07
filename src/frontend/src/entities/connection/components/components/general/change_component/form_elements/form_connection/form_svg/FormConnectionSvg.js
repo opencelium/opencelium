@@ -202,7 +202,7 @@ class FormConnectionSvg extends Component {
             updateConnection={(a, b) => this.updateEntity(a, b)}
           />
         )}
-        <ButtonPanel data={data} entity={entity} updateEntity={updateEntity} currentTechnicalItem={currentTechnicalItem} setCurrentTechnicalItem={setCurrentTechnicalItem} />
+        <ButtonPanel readOnly={data.readOnly} data={data} entity={entity} updateEntity={updateEntity} currentTechnicalItem={currentTechnicalItem} setCurrentTechnicalItem={setCurrentTechnicalItem} />
         <LogPanel />
       </div>
     );

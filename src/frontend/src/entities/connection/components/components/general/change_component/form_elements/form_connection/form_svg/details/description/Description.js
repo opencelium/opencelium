@@ -69,6 +69,7 @@ class Description extends React.Component{
                     })
                 }
                 <DataAggregator
+                    readOnly={readOnly}
                     details={details}
                     connection={connection}
                     currentItem={details.entity}

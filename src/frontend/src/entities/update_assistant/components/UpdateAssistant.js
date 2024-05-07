@@ -213,13 +213,13 @@ class UpdateAssistant extends Component{
                     name: 'availableUpdates',
                     label: t('FORM.AVAILABLE_UPDATES'),
                     Component: AvailableUpdates,
-                    componentProps: {openNextForm: () => this.showNextFormSection('hasTemplateFileUpdate')},
+                    componentProps: {openNextForm: () => this.showNextFormSection('hasFinishUpdate')},
                 },
             ],
             hint: {text: t('FORM.HINT_2')},
             header: t(`FORM.PAGE_2`),
             visible: hasAvailableUpdates,
-        },{
+        },/*{
             inputs:[
                 {
                     ...INPUTS.COMPONENT,
@@ -261,7 +261,7 @@ class UpdateAssistant extends Component{
             hint: {text: t('FORM.HINT_5')},
             header: t(`FORM.PAGE_5`),
             visible: hasInvokerFileUpdate && hasConnectionMigration,
-        },{
+        },*/{
             inputs:[
                 {
                     ...INPUTS.COMPONENT,
@@ -272,7 +272,7 @@ class UpdateAssistant extends Component{
                 },
             ],
             header: t(`FORM.PAGE_6`),
-            visible: hasConnectionMigration && hasFinishUpdate,
+            visible: hasFinishUpdate,
         },
         ];
         return (
