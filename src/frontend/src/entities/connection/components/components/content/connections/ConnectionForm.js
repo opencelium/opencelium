@@ -272,6 +272,7 @@ export function ConnectionForm(type) {
                     errors: this.state.validateLogicResult,
                     justUpdate: (entity) => this.justUpdate(entity),
                     testConnection: (entity) => this.testConnection(entity),
+                    validateLogic: (entity) => this.validateLogic(entity),
                     additionalButtonsProps,
                 };
             }
@@ -376,7 +377,7 @@ export function ConnectionForm(type) {
                     connector.forEach((operator) => {
                         const condition = operator.condition;
                         let operatorErrors = [];
-                        if(!condition.leftStatement || !condition.leftStatement.color){
+                        if(!condition.leftStatement || !condition.leftStatement.color || !condition.leftStatement.field){
                             operatorErrors.push('Left Statement is missing');
                         }
                         if(operator.type === IF_OPERATOR && !condition.relationalOperator){
@@ -421,6 +422,11 @@ export function ConnectionForm(type) {
                 checkOperator(toConnectorOperators, CONNECTOR_TO);
                 checkFieldBinding();
                 const hasErrors = errors.operators[CONNECTOR_FROM].length > 0 || errors.operators[CONNECTOR_TO].length > 0 || errors.methods[CONNECTOR_FROM].length > 0 || errors.methods[CONNECTOR_TO].length > 0;
+                if(hasErrors) {
+                    this.setState({
+                        validateLogicResult: {toggleFlag: !this.state.validateLogicResult.toggleFlag, ...errors},
+                    })
+                }
                 return {passed: !hasErrors, result: errors};
             }
 
@@ -548,7 +554,7 @@ export function ConnectionForm(type) {
                     let newState = {
                         validationMessages: allValidations,
                         entity: Object.assign({}, convertedObject),
-                        validateLogicResult: {toggleFlag: !this.state.validateLogicResult.toggleFlag, ...logicValidation.result},
+                        //validateLogicResult: {toggleFlag: !this.state.validateLogicResult.toggleFlag, ...logicValidation.result},
                     }
                     if(hasErrorMessage){
                         newState.runTest = false;

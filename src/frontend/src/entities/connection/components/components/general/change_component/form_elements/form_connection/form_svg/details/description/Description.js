@@ -65,7 +65,7 @@ class Description extends React.Component{
                 <Condition ref={this.conditionRef} readOnly={readOnly} nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details}/>
                 {
                     errorMessages.map(error => {
-                        return <div style={{color: errorColor}}>{error}</div>
+                        return <div style={{color: errorColor, width: '100%'}}>{error}</div>
                     })
                 }
                 <DataAggregator

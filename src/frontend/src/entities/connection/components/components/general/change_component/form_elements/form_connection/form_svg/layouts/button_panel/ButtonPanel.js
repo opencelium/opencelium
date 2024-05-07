@@ -81,7 +81,7 @@ class ButtonPanel extends React.Component {
           !isButtonPanelOpened && styles.button_panel_active
         } ${isDetailsOpened && styles.button_panel_details_opened}`}
       >
-        <TestBlock />
+        <TestBlock data={data}/>
         {isButtonPanelOpened && <div className={styles.button_panel_divider} />}
         <ControlsBlock
           data={data}

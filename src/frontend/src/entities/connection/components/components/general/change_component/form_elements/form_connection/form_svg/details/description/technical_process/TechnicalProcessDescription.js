@@ -180,7 +180,7 @@ class TechnicalProcessDescription extends React.Component {
                 </Col>
                 {
                     isErrorLocationRequest ? errors.messages.map(error => {
-                        return <div style={{color: errorColor}}>{error}</div>
+                        return <div style={{color: errorColor, width: '100%'}}>{error}</div>
                     }) : null
                 }
                 <Col xs={12} className={styles.col} id="response_label">

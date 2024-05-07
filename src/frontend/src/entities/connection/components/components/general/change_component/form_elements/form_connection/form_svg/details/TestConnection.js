@@ -184,21 +184,24 @@ class TestConnectionButton extends React.Component{
         const {
             connection, setInitialTestConnectionState, setInitialTestScheduleState,
             setTestingConnection, isTestingConnection, setFullScreenFormSection,
-            addTestConnection, setButtonPanelVisibility,
+            addTestConnection, setButtonPanelVisibility, data,
         } = this.props;
         const newState = {};
-        if(!isTestingConnection) {
-            setInitialTestConnectionState();
-            setInitialTestScheduleState();
-            setTimeout(() => addTestConnection(connection.getObjectForBackend()), 500);
-            setTestingConnection(true);
-            newState.startAddingConnection = true;
-            newState.isFinishedTriggering = false;
-            newState.isTriggerFailed = false;
+        const testResult = data.validateLogic(connection.getObjectForBackend());
+        if(testResult.passed) {
+            if (!isTestingConnection) {
+                setInitialTestConnectionState();
+                setInitialTestScheduleState();
+                setTimeout(() => addTestConnection(connection.getObjectForBackend()), 500);
+                setTestingConnection(true);
+                newState.startAddingConnection = true;
+                newState.isFinishedTriggering = false;
+                newState.isTriggerFailed = false;
+            }
+            setButtonPanelVisibility(false);
+            setFullScreenFormSection(true);
+            this.setState(newState);
         }
-        setButtonPanelVisibility(false);
-        setFullScreenFormSection(true);
-        this.setState(newState);
     }
 
     render(){
