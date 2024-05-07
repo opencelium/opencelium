@@ -56,7 +56,7 @@ const LogPanel: FC<{isModal?: boolean}> = ({isModal}) => {
     return (
         <React.Fragment>
             <TopStyled logPanelHeight={logPanelHeight}>
-                {logPanelHeight !== 0 && <HeaderStyled value={'Logs'} width={isDetailsOpened ? 'calc(100% - 300px)' : '100%'}/>}
+                {logPanelHeight !== 0 && <HeaderStyled id={'test_execution_process'} value={'Logs'} width={isDetailsOpened ? 'calc(100% - 300px)' : '100%'}/>}
 
                 {logPanelHeight !== 0 && <ClearButtonStyled
                     right={isDetailsOpened ? isFullScreen ? 312 : 300 : isFullScreen ? 12 : 2}

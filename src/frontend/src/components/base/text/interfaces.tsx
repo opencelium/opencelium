@@ -31,6 +31,7 @@ export enum TextSize{
 }
 
 interface TextProps extends TextStyledProps{
+    id?: string;
     value?: any,
     namespace?: string,
     transKey?: string,

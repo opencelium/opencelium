@@ -22,6 +22,7 @@ import { TextStyled, LoadingStyled } from './styles';
 
 const Text: FC<TextProps> =
     ({
+        id,
         value,
         namespace,
         transKey,
@@ -33,6 +34,9 @@ const Text: FC<TextProps> =
     }) => {
     const {t, i18n} = useTranslation();
     let textProps:any = {};
+    if(id) {
+        textProps.id = id;
+    }
     const hasKey = !!transKey;
     let valueComponent = null;
     if(isLoading){
