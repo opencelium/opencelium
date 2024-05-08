@@ -26,8 +26,8 @@ public interface PathConstant {
     String TEMPLATE = "src/main/resources/templates/";
     String VERSIONS = "versions/";
     String ASSISTANT = "assistant/";
-    String INSTRUCTION = "instruction/";
+    String INSTRUCTION = "instruction/update_instruction.html";
     String RESOURCES = "src/main/resources/";
     String ICONS = "src/main/resources/icon/";
-    String APP_DEFAULT_YML = "src/backend/src/main/resources/application_default.yml";
+    String APP_DEFAULT_YML = "src/main/resources/application_default.yml";
 }

@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
+import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,13 +54,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         if (directories == null) {
             return null;
         }
-        List<AvailableUpdate> versions;
-        try {
-            versions = getAllAvailableUpdates(directories);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return versions;
+        return getAllAvailableUpdates(directories);
     }
 
     @Override
@@ -73,7 +68,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     // assistant/versions/{folder}
     @Override
-    public AvailableUpdate getAvailableUpdate(String version) throws Exception {
+    public AvailableUpdate getAvailableUpdate(String version) {
         String status = getVersionStatus(version);
         version = version.replace(".", "_");
         AvailableUpdate availableUpdate = new AvailableUpdate();
@@ -104,10 +99,11 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         availableUpdateResource.setStatus(offVersions.getStatus());
         availableUpdateResource.setName(offVersions.getVersion());
         availableUpdateResource.setChangelogLink(offVersions.getChangelogLink());
+        availableUpdateResource.setInstruction(offVersions.getInstruction());
         return availableUpdateResource;
     }
 
-    private List<AvailableUpdate> getAllAvailableUpdates(String[] appDirectories) throws Exception {
+    private List<AvailableUpdate> getAllAvailableUpdates(String[] appDirectories) {
         List<AvailableUpdate> packages = new LinkedList<>();
         for (String appDir : appDirectories) {
             AvailableUpdate availableUpdate = getAvailableUpdate(appDir);
@@ -192,21 +188,22 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     /**
      * Reads the content of a specified file inside a zip archive into a single string.
-     * @param folder Path to the zip file.
+     * @param versionFolder Path to the zip file.
      * @return The content of the file as a string.
      * @throws IOException If an I/O error occurs reading from the zip file or if the file is not found.
      */
-    public static String extractInstruction(String folder) {
+    private String extractInstruction(String versionFolder) {
 
         try {
-            String zipFilePath = PathConstant.ASSISTANT + PathConstant.VERSIONS + folder;
-
+            String zipFilePath = PathConstant.ASSISTANT + PathConstant.VERSIONS + versionFolder;
+            File file = findFirstZipFileFromVersionFolder(zipFilePath);
+            String instructionPath = FileNameUtils.removeExtension(file.getName()) + "/" +PathConstant.INSTRUCTION;
             // Open the zip file
-            try (ZipFile zipFile = new ZipFile(zipFilePath)) {
+            try (ZipFile zipFile = new ZipFile(file)) {
                 // Get the zip entry for the specific file
-                ZipEntry entry = zipFile.getEntry(Constant.INSTRUCTION);
+                ZipEntry entry = zipFile.getEntry(instructionPath);
                 if (entry == null) {
-                    throw new IOException("File not found in the zip archive: " + folder);
+                    throw new IOException("File " + instructionPath + " not found in the zip archive " + versionFolder);
                 }
 
                 // Read the content of the file
@@ -227,5 +224,21 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private File findFirstZipFileFromVersionFolder(String directoryPath) throws IOException {
+        File dir = new File(directoryPath);
+
+        // Ensure the directory path is valid and it is a directory
+        if (!dir.exists() || !dir.isDirectory()) {
+            throw new IOException("Provided path is not a directory.");
+        }
+
+        // Find the first zip file in the directory
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".zip"));
+        if (files == null || files.length == 0) {
+            throw new IOException("No zip files found in the directory.");
+        }
+        return files[0];
     }
 }
