@@ -19,10 +19,6 @@ import {withTranslation} from "react-i18next";
 import {INPUTS} from "@entity/connection/components/utils/constants/inputs";
 import SystemOverview from "@entity/update_assistant/components/system_overview/SystemOverview";
 import AvailableUpdates, {ONLINE_UPDATE} from "@entity/update_assistant/components/available_updates/AvailableUpdates";
-import TemplateFileUpdate from "@entity/update_assistant/components/file_update/TemplateFileUpdate";
-import {permission} from "@entity/connection/components/decorators/permission";
-import InvokerFileUpdate from "@entity/update_assistant/components/file_update/InvokerFileUpdate";
-import ConnectionFileUpdate from "@entity/update_assistant/components/migration/ConnectionFileUpdate";
 import FinishUpdate from "@entity/update_assistant/components/FinishUpdate";
 
 import CVoiceControl from "@entity/connection/components/classes/voice_control/CVoiceControl";
@@ -30,7 +26,6 @@ import Form from "@change_component/Form";
 import {updateApplication as updateSystem, checkApplicationBeforeUpdate as checkResetFiles} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {logout as logoutUserFulfilled} from "@application/redux_toolkit/slices/AuthSlice";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {UpdateAssistantPermissions} from "../constants";
 
 
 function mapStateToProps(state){

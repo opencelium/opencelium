@@ -54,7 +54,7 @@ export interface IUpdateAssistantRequest{
     getOfflineUpdates(): Promise<AxiosResponse<OfflineUpdateProps[]>>,
 
     //to upload an application as zip file
-    uploadApplicationFile(application: FormData): Promise<AxiosResponse<IResponse>>,
+    uploadApplicationFile(application: FormData): Promise<AxiosResponse<OfflineUpdateProps>>,
 
     //to delete local application (zip file)
     deleteApplicationFile(): Promise<AxiosResponse<IResponse>>,
