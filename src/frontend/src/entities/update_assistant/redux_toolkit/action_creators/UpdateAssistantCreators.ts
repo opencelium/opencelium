@@ -129,7 +129,7 @@ export const updateApplication = createAsyncThunk(
     async(data: any, thunkAPI) => {
         try {
             const request = new UpdateAssistantRequest();
-            const response = await request.uploadApplicationFile(data);
+            const response = await request.updateApplication(data);
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
