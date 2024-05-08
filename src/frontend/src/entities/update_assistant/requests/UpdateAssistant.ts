@@ -48,7 +48,7 @@ export class UpdateAssistantRequest extends Request implements IUpdateAssistantR
     }
 
     async deleteApplicationFile(): Promise<AxiosResponse<IResponse>>{
-        this.url = '    assistant/zipfile';
+        this.url = 'assistant/zipfile';
         return super.delete<IResponse>();
     }
 
