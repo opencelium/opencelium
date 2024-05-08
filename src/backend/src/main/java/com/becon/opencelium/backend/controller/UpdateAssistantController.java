@@ -274,7 +274,7 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(templateResources);
     }
 
-    @Operation(summary = "Migrates invokers, templates and connections to a selected version")
+    @Operation(summary = "Migrates invokers, templates and connections to a selected version and replacing all files from zip file")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Migration has been done successfully"),
@@ -297,26 +297,6 @@ public class UpdateAssistantController {
             } else {
                 dir = migrateDataResource.getVersion();
             }
-            assistantServiceImp.createTmpDir(dir);
-
-            // saving files to tmp folder
-            if (migrateDataResource.getInvokers() != null) {
-                migrateDataResource.getInvokers().forEach(inv -> {
-                    assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
-                });
-            }
-
-            if (migrateDataResource.getTemplates() != null) {
-                migrateDataResource.getTemplates().forEach(temp -> {
-                    assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
-                });
-            }
-
-            if (migrateDataResource.getConnections() != null) {
-                migrateDataResource.getConnections().forEach(ction -> {
-                    assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
-                });
-            }
 
             //////test commit
             if (migrateDataResource.isOnline()) {
@@ -325,24 +305,12 @@ public class UpdateAssistantController {
                 assistantServiceImp.updateOff(dir);
             }
 
-//             after updateAll need to move or replace files in main project
-            Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
-            assistantServiceImp.moveToTmpFolder(filePath, PathConstant.INVOKER, ".xml");
+            //TODO: template update and migration
+            //TODO: invoker update and migration
+            //TODO: connection update and migration
 
-            filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/template");
-            assistantServiceImp.moveToTmpFolder(filePath, PathConstant.TEMPLATE, ".json");
-
-            Object connectionResources = migrateDataResource.getConnections().stream()
-                    .map(t -> JsonPath.read(t, "$.connection")).collect(Collectors.toList());
-            List<HashMap> cns = (ArrayList) connectionResources;
-            ObjectMapper objectMapper = new ObjectMapper();
-            for (HashMap<String, Object> connection : cns) {
-                String str = objectMapper.writeValueAsString(connection);
-                ConnectionDTO connectionResource = objectMapper.readValue(str, ConnectionDTO.class);
-                assistantServiceImp.updateConnection(connectionResource);
-            }
-
-            assistantServiceImp.buildAndRestart();
+            // User will manually from terminal
+//            assistantServiceImp.buildAndRestart();
 
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -10,6 +10,7 @@ public class AvailableUpdateResource {
     private String name;
     private String changelogLink;
     private String status;
+    private String instruction;
 
     public String getFolder() {
         return folder;
@@ -41,5 +42,13 @@ public class AvailableUpdateResource {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getInstruction() {
+        return instruction;
+    }
+
+    public void setInstruction(String instruction) {
+        this.instruction = instruction;
     }
 }

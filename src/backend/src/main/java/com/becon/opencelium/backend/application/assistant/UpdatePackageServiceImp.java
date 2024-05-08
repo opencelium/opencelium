@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.application.assistant;
 
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
+import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,15 +19,15 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 @Service
 public class UpdatePackageServiceImp implements UpdatePackageService {
@@ -80,6 +81,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         availableUpdate.setStatus(status);
         availableUpdate.setChangelogLink(getChangelogLink(version));
         availableUpdate.setVersion(version);
+        availableUpdate.setInstruction(extractInstruction(version));
         return availableUpdate;
     }
 
@@ -186,5 +188,44 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
             hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
         return new String(hexChars, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Reads the content of a specified file inside a zip archive into a single string.
+     * @param folder Path to the zip file.
+     * @return The content of the file as a string.
+     * @throws IOException If an I/O error occurs reading from the zip file or if the file is not found.
+     */
+    public static String extractInstruction(String folder) {
+
+        try {
+            String zipFilePath = PathConstant.ASSISTANT + PathConstant.VERSIONS + folder;
+
+            // Open the zip file
+            try (ZipFile zipFile = new ZipFile(zipFilePath)) {
+                // Get the zip entry for the specific file
+                ZipEntry entry = zipFile.getEntry(Constant.INSTRUCTION);
+                if (entry == null) {
+                    throw new IOException("File not found in the zip archive: " + folder);
+                }
+
+                // Read the content of the file
+                try (InputStream stream = zipFile.getInputStream(entry);
+                     BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+                    StringBuilder contentBuilder = new StringBuilder();
+                    String line;
+
+                    // Read each line from the BufferedReader and append it to the StringBuilder
+                    while ((line = reader.readLine()) != null) {
+                        contentBuilder.append(line).append(System.lineSeparator());
+                    }
+
+                    // Return the string content of the file
+                    return contentBuilder.toString();
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
