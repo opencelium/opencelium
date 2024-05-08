@@ -319,8 +319,8 @@ class Endpoint extends Component{
                         dangerouslySetInnerHTML={{__html: htmlValue}}
                         contentEditable={!readOnly}
                         onInput={(a) => this.onChangeEndpoint(a)}
-                        onMouseDown={(a) => this.setCaretPosition(a)}
-                        onMouseUp={(a) => this.setCaretPosition(a)}
+                        onMouseDown={(a) => {this.setCaretPosition(a)}}
+                        onMouseUp={(a) => {this.setCaretPosition(a)}}
                         onKeyDown={(a) => this.setCaretPosition(a)}
                         onKeyUp={(a) => this.setCaretPosition(a)}
                         onBlur={(a) => this.saveEndpoint(a)}

@@ -299,8 +299,10 @@ export function setFocusByCaretPositionInDivEditable(elem, caretPosition){
         let range = document.createRange();
         let sel = window.getSelection();
         let childNodeIndex = 0;
+        let elemLength = 0;
         for(let i = 0; i < elem.children.length; i++){
             caretPosition -= elem.children[i].innerText.length;
+            elemLength += elem.children[i].innerText.length;
             if(caretPosition <= 0){
                 caretPosition = elem.children[i].innerText.length + caretPosition;
                 break;
@@ -317,14 +319,22 @@ export function setFocusByCaretPositionInDivEditable(elem, caretPosition){
         const childNode = elem.childNodes[childNodeIndex];
         if(childNode) {
             if (childNode.nodeType === 1) {
-                if (caretPosition < childNode.firstChild.length) {
+                if (caretPosition <= childNode.firstChild.length) {
                     range.setStart(childNode.firstChild, caretPosition);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    //elem.focus();
                 } else {
                     return;
                 }
             } else {
-                if (caretPosition < childNode.length) {
+                if (caretPosition <= childNode.length) {
                     range.setStart(childNode, caretPosition);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    //elem.focus();
                 } else {
                     return;
                 }
@@ -332,10 +342,6 @@ export function setFocusByCaretPositionInDivEditable(elem, caretPosition){
         } else{
             return;
         }
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-        elem.focus();
     }
 }
 
