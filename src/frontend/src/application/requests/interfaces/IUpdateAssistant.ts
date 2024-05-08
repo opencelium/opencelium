@@ -26,13 +26,15 @@ export interface OnlineUpdateProps{
     name: string,
     version: string,
     status: UpdateStatus,
+    instructions: string,
 }
 
 export interface OfflineUpdateProps{
     name: string,
     status: UpdateStatus,
     folder: string,
-    changelogLing: string,
+    changelogLink: string,
+    instructions: string,
 }
 
 export interface CheckForUpdateProps{

@@ -33,12 +33,7 @@ class FinishUpdate extends React.Component{
         return(
             <div className={styles.finish_update}>
                 <div className={styles.header}>{t('FORM.FINISH.HEADER')}</div>
-                <div>{t('FORM.FINISH.NEW_VERSION')}</div>
-                <Translate i18nKey="update_assistant:FORM.FINISH.LOG_MESSAGE"
-                           values={{restoreLinkText}}
-                           components={[
-                               <a href={updateLogLink} target={'_blank'} children={restoreLinkText}/>
-                           ]}/>
+                <div dangerouslySetInnerHTML={{__html: entity.availableUpdates.selectedVersion?.instructions || ''}}/>
                 <div className={styles.hint}><span>{t('FORM.FINISH.HINT')}</span>: {t('FORM.FINISH.CLEAR_CACHE')}</div>
                 <Button
                     style={{float: 'right'}}
