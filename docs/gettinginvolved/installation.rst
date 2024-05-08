@@ -5,7 +5,7 @@ Installation
 .. note::
 	Please check the software requirements, before installing OC. 
 
-Debian/Ubuntu (example for 22.04 LTS)
+Debian/Ubuntu (example for 24.04 LTS)
 """""""""""""""""
 
 Prepare environment:
@@ -43,9 +43,9 @@ Download and unzip application, and create a link for it.
 .. code-block:: sh
 	:linenos:
 
-	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_stable.zip/download?distro_version_id=230" -P /opt/opencelium/
-	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_stable.zip
-	rm /opt/opencelium/oc_stable.zip
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
+	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
+	rm /opt/opencelium/oc_latest.zip
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 		
 Configuration:
@@ -370,9 +370,9 @@ Download and unzip application, and create a link for it.
 .. code-block:: sh
 	:linenos:
 
-	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_stable.zip/download?distro_version_id=230" -P /opt/opencelium/
-	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_stable.zip
-	rm /opt/opencelium/oc_stable.zip
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
+	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
+	rm /opt/opencelium/oc_latest.zip
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 		
 Configuration:
@@ -388,6 +388,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 .. code-block:: sh
 	:linenos:
 	
+	systemctl start mariadb
 	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	systemctl enable mariadb
 	mysql_secure_installation
@@ -501,30 +502,33 @@ Ansible
 
 1. Install Ansible:
 
-.. note::
-	Use default Ansible installation guide. You can find documentation here -> https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+.. code-block:: sh
+	:linenos:
+	
+	add-apt-repository ppa:ansible/ansible
+	apt install ansible
 
 2. Get oc playbook:
 
 .. code-block:: sh
 	:linenos:
 
-	cd /etc/ansible
-	git clone https://bitbucket.org/becon_gmbh/opencelium.setup.ansible.git .
+	mkdir /etc/ansible
+	git clone https://github.com/opencelium/ansible.git /etc/ansible/
 
-3. Add localhost in ansible
+3. Download application files
 
 .. code-block:: sh
 	:linenos:
 
-	printf "[local]\nlocalhost ansible_connection=local" >> hosts
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /etc/ansible/opencelium/files/
 
 4. Run playbook
 
 .. code-block:: sh
 	:linenos:
 
-	ansible-playbook --connection=local -e 'host_key_checking=False' playbooks/install_oc.yml
+	ansible-playbook --connection=local /etc/ansible/install_oc.yml
 
 
 Docker Compose
