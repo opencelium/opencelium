@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.application.repository;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
+import com.becon.opencelium.backend.constant.PathConstant;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -102,7 +103,7 @@ public class SystemOverviewRepository {
             int read = 0;
             StringBuilder stringBuilder = new StringBuilder();
             while (zipEntry != null) {
-                if (zipEntry.getName().contains("backend/src/main/resources/application_default.yml")) {
+                if (zipEntry.getName().contains("backend/" + PathConstant.APP_DEFAULT_YML)) {
                     while ((read = zis.read(buffer, 0, 1024)) >= 0) {
                         stringBuilder.append(new String(buffer, 0, read));
                     }
