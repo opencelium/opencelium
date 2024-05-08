@@ -5,6 +5,7 @@ public class AvailableUpdate {
     private String version;
     private String changelogLink;
     private String status;
+    private String instruction;
 
     public String getFolder() {
         return folder;
@@ -36,5 +37,13 @@ public class AvailableUpdate {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getInstruction() {
+        return instruction;
+    }
+
+    public void setInstruction(String instruction) {
+        this.instruction = instruction;
     }
 }
