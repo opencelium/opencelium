@@ -26,7 +26,7 @@ export interface OnlineUpdateProps{
     name: string,
     version: string,
     status: UpdateStatus,
-    instructions: string,
+    instruction: string,
 }
 
 export interface OfflineUpdateProps{
@@ -34,7 +34,7 @@ export interface OfflineUpdateProps{
     status: UpdateStatus,
     folder: string,
     changelogLink: string,
-    instructions: string,
+    instruction: string,
 }
 
 export interface CheckForUpdateProps{
@@ -54,7 +54,7 @@ export interface IUpdateAssistantRequest{
     getOfflineUpdates(): Promise<AxiosResponse<OfflineUpdateProps[]>>,
 
     //to upload an application as zip file
-    uploadApplicationFile(application: FormData): Promise<AxiosResponse<IResponse>>,
+    uploadApplicationFile(application: FormData): Promise<AxiosResponse<OfflineUpdateProps>>,
 
     //to delete local application (zip file)
     deleteApplicationFile(): Promise<AxiosResponse<IResponse>>,

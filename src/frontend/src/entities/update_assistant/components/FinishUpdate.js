@@ -33,7 +33,7 @@ class FinishUpdate extends React.Component{
         return(
             <div className={styles.finish_update}>
                 <div className={styles.header}>{t('FORM.FINISH.HEADER')}</div>
-                <div dangerouslySetInnerHTML={{__html: entity.availableUpdates.selectedVersion?.instructions || ''}}/>
+                <div dangerouslySetInnerHTML={{__html: entity.availableUpdates.selectedVersion?.instruction || ''}}/>
                 <div className={styles.hint}><span>{t('FORM.FINISH.HINT')}</span>: {t('FORM.FINISH.CLEAR_CACHE')}</div>
                 <Button
                     style={{float: 'right'}}

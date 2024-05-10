@@ -126,6 +126,7 @@ export const updateAssistantSlice = createSlice({
         },
         [uploadApplicationFile.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
             state.uploadingApplicationFile = API_REQUEST_STATE.FINISH;
+            state.offlineUpdates.push(action.payload);
             state.error = null;
         },
         [uploadApplicationFile.rejected.type]: (state, action: PayloadAction<IResponse>) => {
