@@ -27,7 +27,6 @@ public class YAMLMigrator {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final PatchHelper PATCH_HELPER;
     private static final File CHANGELOG_FILE;
-    private static final File APP_YML_COMPILED_FILE;
     private static final File APP_YML_FILE;
     private static final File BACKUP_YML_FILE;
     private static final Logger log = LoggerFactory.getLogger(YAMLMigrator.class);
@@ -48,9 +47,8 @@ public class YAMLMigrator {
 
         Path root = Paths.get(new File("").toURI());
         APP_YML_FILE = new File(root.resolve("src/main/resources/application.yml").toString());
-        APP_YML_COMPILED_FILE = new File(root.resolve("build/resources/main/application.yml").toString());
-        CHANGELOG_FILE = new File(root.resolve("build/resources/main/db/changelog/springboot/application_changelog.yml").toString());
-        BACKUP_YML_FILE = new File(root.resolve("build/resources/main/application_copy.yml").toString());
+        CHANGELOG_FILE = new File(root.resolve("src/main/resources/db/changelog/springboot/application_changelog.yml").toString());
+        BACKUP_YML_FILE = new File(root.resolve("src/main/resources/application_copy.yml").toString());
     }
 
     public static List<ChangeSet> getChangeSetsToSave() {
@@ -113,16 +111,6 @@ public class YAMLMigrator {
             throw new RuntimeException(e);
         }
 
-        try (FileOutputStream fosCOM = new FileOutputStream(APP_YML_COMPILED_FILE)) {
-            fosCOM.write(sb.toString().getBytes());
-        } catch (IOException e) {
-            try {
-                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_COMPILED_FILE);
-            } catch (IOException ignored) {
-            }
-            return false;
-        }
-
         try (FileOutputStream fos = new FileOutputStream(APP_YML_FILE)) {
             fos.write(sb.toString().getBytes());
         } catch (IOException e) {
@@ -155,7 +143,7 @@ public class YAMLMigrator {
             lastSavedSet.setVersion(ocVersion);
         }
         // there is not any new changes
-        if (fullVersionOfLastChangeSetInFile == null || lastSavedSet != null && isGreaterThanOrEqual(lastSavedSet.getVersion(), fullVersionOfLastChangeSetInFile)) {
+        if (fullVersionOfLastChangeSetInFile == null || isGreaterThanOrEqual(lastSavedSet.getVersion(), fullVersionOfLastChangeSetInFile)) {
             return;
         }
 
@@ -163,7 +151,7 @@ public class YAMLMigrator {
 
         List<ChangeSet> newChangeSets = new ArrayList<>();
         for (ChangeSet changeSet : changeSetList) {
-            if (lastSavedSet == null || !isGreaterThanOrEqual(lastSavedSet.getVersion(), changeSet.getVersion())) {
+            if (!isGreaterThanOrEqual(lastSavedSet.getVersion(), changeSet.getVersion())) {
                 newChangeSets.add(changeSet);
             }
         }
@@ -204,7 +192,7 @@ public class YAMLMigrator {
     private static String getOcVersion(Map<String, Object> map) {
         var oc = (Map<String, Object>) map.get("opencelium");
         var version = (Double) oc.getOrDefault("version", "0.0");
-        return version + ":0";
+        return version + ":-1";
     }
 
     private static void finish(Object yaml, List<ChangeSet> changeSetsForSave) {
@@ -216,14 +204,11 @@ public class YAMLMigrator {
 
         try {
             YAML_MAPPER.writeValue(APP_YML_FILE, yaml);
-            YAML_MAPPER.writeValue(APP_YML_COMPILED_FILE, yaml);
-
             //write comments
             writeComments(commentLines);
         } catch (IOException e) {
             try {
                 FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_FILE);
-                FileCopyUtils.copy(BACKUP_YML_FILE, APP_YML_COMPILED_FILE);
             } catch (IOException ex) {
                 log.warn("Failed to write application.yml file. Please check application.yml and rerun");
                 BACKUP_YML_FILE.delete();
@@ -554,10 +539,8 @@ public class YAMLMigrator {
         StringBuilder sb = new StringBuilder();
         lines.forEach(line -> sb.append(line).append("\n"));
 
-        try (FileWriter fw = new FileWriter(APP_YML_FILE);
-             FileWriter fw1 = new FileWriter(APP_YML_COMPILED_FILE)) {
+        try (FileWriter fw = new FileWriter(APP_YML_FILE)) {
             fw.write(sb.toString());
-            fw1.write(sb.toString());
         } catch (IOException e) {
             log.warn("Cannot move comments into application.yaml file. Comments may be ignored");
         }
