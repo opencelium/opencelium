@@ -110,9 +110,10 @@ public class EnhancementServiceImp implements EnhancementService {
     }
 
     private LinkedFieldMng toLinkedFieldResource(String value) {
-        value = value.substring(value.indexOf("#")).trim();
+        value = value.trim();
         String exchange = PathUtility.getExchange(value);
-        String status = PathUtility.getStatus(value);
+        String status = value.split("\\.")[1];
+        status = status.substring(1, status.length() - 1);
         String fields = PathUtility.getFields(value);
         LinkedFieldMng lf = new LinkedFieldMng();
         lf.setColor("#" + exchange);
