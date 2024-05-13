@@ -1,8 +1,5 @@
 package com.becon.opencelium.backend.utility;
 
-
-import com.becon.opencelium.backend.execution.oc721.Loop;
-
 import java.util.Arrays;
 
 
@@ -25,9 +22,24 @@ public class DirectRefUtility {
         return ref;
     }
 
+    public static String getColor(String ref){
+        return ref.substring(ref.indexOf('#'), ref.indexOf('.'));
+    }
+
     public static String getExchangeType(String ref){
         // #ffffff.(response | request). ...
         return ref.substring(ref.indexOf('(') + 1, ref.indexOf(')'));
+    }
+
+    public static String getResult(String ref) {
+        String exchange = getExchangeType(ref);
+        String res = "";
+
+        if (exchange.equals("response")){
+            res = ref.split("\\.")[2];
+        }
+
+        return res;
     }
 
     public static String[] getReferenceParts(String ref) {
@@ -61,6 +73,25 @@ public class DirectRefUtility {
         result += refParts[partCount].replace(remove, "");
 
         return result;
+    }
+
+    public static String getRefValue(String ref) {
+        if (ref.equals("")){
+            return "";
+        }
+        String[] refParts = ref.split("\\.");
+        String result = "";
+        if(getExchangeType(ref).equals("response")){
+            return ref.replace(refParts[0]+".", "")
+                    .replace(refParts[1] + ".", "")
+                    .replace(refParts[2] + ".", "")
+                    .replace(refParts[0], "")
+                    .replace(refParts[1], "")
+                    .replace(refParts[2], "");
+        }
+
+        return ref.replace(refParts[0]+".", "")
+                .replace(refParts[1] + ".", "");
     }
 
     public static boolean equals(String ref1, String ref2) {

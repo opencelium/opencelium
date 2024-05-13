@@ -185,8 +185,8 @@ public class ReferenceExtractor implements Extractor {
     }
 
     private Object extractFromOperation(String ref) {
-        // find the operation by color
-        String color = ref.substring(ref.indexOf('#'), ref.indexOf('.'));
+        // find operation by color
+        String color = DirectRefUtility.getColor(ref);
 
         Operation operation = executionManager.findOperationByColor(color)
                 .orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
