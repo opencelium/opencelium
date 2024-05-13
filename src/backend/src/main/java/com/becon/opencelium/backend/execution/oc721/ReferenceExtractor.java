@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.execution.ExecutionManager;
+import com.becon.opencelium.backend.utility.DirectRefUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
@@ -36,15 +37,12 @@ import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
+import static com.becon.opencelium.backend.utility.DirectRefUtility.ARRAY_LETTER_INDEX;
+import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_KEY_TYPE;
+import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_VALUE_TYPE;
+import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_SPLIT_STRING_TYPE;
 
 public class ReferenceExtractor implements Extractor {
-
-    private static final String IS_FOR_IN_KEY_TYPE = "\\['(.*?)\\']~";
-    private static final String IS_FOR_IN_VALUE_TYPE = "\\['(.*?)\\']";
-    private static final String IS_SPLIT_STRING_TYPE = "\\[([a-z0-9*]+)\\]~";
-    private static final String ARRAY_LETTER_INDEX = "\\[([a-z])\\]";
-
-
     private final ExecutionManager executionManager;
 
     public ReferenceExtractor(ExecutionManager executionManager) {
@@ -58,12 +56,10 @@ public class ReferenceExtractor implements Extractor {
         if (ref.matches(directRef) || ref.matches(responsePointer)) {
             // extract direct reference if necessary
             // '{%#ababab.(response).success.field[*]%}'
-            if (ref.startsWith("{%") && ref.endsWith("%}")) {
-                ref = ref.substring(2, ref.length() - 2);
-            }
-
             // '#ababab.(response).success.field[*]
             // '#ababab.(request).field[*]
+            ref = DirectRefUtility.extractRef(ref);
+
             result = extractFromOperation(ref);
         } else if (ref.matches(queryParams)) {
             // '${key}'
@@ -196,7 +192,7 @@ public class ReferenceExtractor implements Extractor {
                 .orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
 
         // extract value
-        String exchangeType = getExchangeType(ref);
+        String exchangeType = DirectRefUtility.getExchangeType(ref);
         String key = executionManager.generateKey(operation.getLoopDepth());
 
         Object entityBody;
@@ -244,7 +240,7 @@ public class ReferenceExtractor implements Extractor {
         int partCount = 0;
 
         // creating json path query
-        for (String path : getReferenceParts(ref)) {
+        for (String path : DirectRefUtility.getReferenceParts(ref)) {
             partCount++;
             if (path.isEmpty()) {
                 continue;
@@ -271,7 +267,7 @@ public class ReferenceExtractor implements Extractor {
 
                 String match = matcher.group(1);
 
-                if (isLetter(match)) {
+                if (Loop.isIterator(match)) {
                     // case 1.1.1: obj['i']~
                     // find loop by its iterator
                     Loop loop = getLoopByIterator(match);
@@ -281,7 +277,7 @@ public class ReferenceExtractor implements Extractor {
                 } else if ("*".equals(match)) {
                     // case 1.1.2: obj['*']~
                     // return all field names of the current object
-                    Object currentBody = getFromJSON(body, getPointerToBody(ref, partCount, matcher.group(0)));
+                    Object currentBody = getFromJSON(body, DirectRefUtility.getPointerToBody(ref, partCount, matcher.group(0)));
                     return getFieldNames(currentBody);
                 } else {
                     // case 1.1.3: obj['field_name']~
@@ -301,7 +297,7 @@ public class ReferenceExtractor implements Extractor {
                 String match = matcher.group(1);
                 String fieldName;
 
-                if (isLetter(match)) {
+                if (Loop.isIterator(match)) {
                     // case 1.2.1: obj['i']
                     // find loop by its iterator
                     Loop loop = getLoopByIterator(match);
@@ -327,7 +323,7 @@ public class ReferenceExtractor implements Extractor {
             while (matcher.find()) {
                 String match = matcher.group(1);
 
-                if (isLetter(match)) {
+                if (Loop.isIterator(match)) {
                     // case 2.1: field[i]~
                     // find loop by its iterator
                     Loop loop = getLoopByIterator(match);
@@ -392,7 +388,7 @@ public class ReferenceExtractor implements Extractor {
 
         boolean hasLoop = !executionManager.getLoops().isEmpty();
 
-        for (String part : getReferenceParts(ref)) {
+        for (String part : DirectRefUtility.getReferenceParts(ref)) {
             if (part.isEmpty()) {
                 continue;
             }
@@ -462,44 +458,6 @@ public class ReferenceExtractor implements Extractor {
         }
     }
 
-    private static String getExchangeType(String ref){
-        // extracts type from direct reference: #ffffff.(response | request). ...
-        return ref.substring(ref.indexOf('(') + 1, ref.indexOf(')'));
-    }
-
-    private static String[] getReferenceParts(String ref) {
-        if (ref.isEmpty()) {
-            return new String[]{""};
-        }
-
-        String[] refParts = ref.split("\\.");
-        int from = 2;
-
-        if (getExchangeType(ref).equals("response")) {
-            from++;
-        }
-
-        return Arrays.copyOfRange(refParts, from, refParts.length);
-    }
-
-    private static String getPointerToBody(String ref, int partCount, String remove) {
-        partCount += 1;
-
-        if (getExchangeType(ref).equals("response")) {
-            partCount++;
-        }
-
-        String[] refParts = ref.split("\\.");
-        String result = "";
-        for (int i = 0; i < partCount; i++) {
-            result += refParts[i] + ".";
-        }
-
-        result += refParts[partCount].replace(remove, "");
-
-        return result;
-    }
-
     private Loop getLoopByIterator(String iterator) {
         return executionManager.getLoops().stream()
                 .filter(loop -> Objects.equals(loop.getIterator(), iterator))
@@ -508,7 +466,7 @@ public class ReferenceExtractor implements Extractor {
 
     private Loop getLoopByReference(String reference) {
         return executionManager.getLoops().stream()
-                .filter(loop -> loop.hasSameRef(reference))
+                .filter(loop -> DirectRefUtility.equals(loop.getRef(), reference))
                 .findFirst().orElseThrow(() -> new RuntimeException("Wrong 'reference' value is supplied"));
     }
 
@@ -528,9 +486,5 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return result;
-    }
-
-    private boolean isLetter(String str) {
-        return str != null && str.length() == 1 && Character.isLetter(str.charAt(0));
     }
 }

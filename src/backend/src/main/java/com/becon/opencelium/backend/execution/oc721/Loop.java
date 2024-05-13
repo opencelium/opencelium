@@ -28,31 +28,8 @@ public class Loop {
         return result;
     }
 
-    public boolean hasSameRef(String reference) {
-        String[] actualRefParts = ref.split("\\.");
-        String[] potentialRefParts = reference.split("\\.");
-
-        // 'reference' should contain 'ref' as it is a specific part of it:
-        if (actualRefParts.length > potentialRefParts.length) {
-            return false;
-        }
-
-        String part;
-        for (int i = 0; i < actualRefParts.length; i++) {
-            // if 'part' contains index then remove it, otherwise take whole part
-            if (actualRefParts[i].contains("[")) {
-                part = actualRefParts[i].substring(0, actualRefParts[i].indexOf('['));
-            } else {
-                part = actualRefParts[i];
-            }
-
-            // 'potentialRefParts[i]' should contain part
-            if (!potentialRefParts[i].contains(part)) {
-                return false;
-            }
-        }
-
-        return true;
+    public static boolean isIterator(String str) {
+        return str != null && str.length() == 1 && Character.isLetter(str.charAt(0));
     }
 
     public String getRef() {
