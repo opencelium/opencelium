@@ -81,13 +81,12 @@ Set your password for neo4j, restart and enable neo4j service.
 	
 **3. Nginx:**
 
-Remove default config and link OpenCelium config.
+Copy configfile for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
 	
-	rm /etc/nginx/sites-enabled/default
-	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/
+	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
 	If you like to use SSL, do the following:
@@ -95,8 +94,7 @@ Remove default config and link OpenCelium config.
 	.. code-block:: sh
 		:linenos:	
 	
-		rm /etc/nginx/sites-enabled/default
-		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
 	and change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
 	
@@ -167,176 +165,159 @@ Finally start OpenCelium backend.
 
 SUSE Linux Enterprise Server (example for SLES 15 SP5)
 """""""""""""""""
-**Prepare environment:**
 
-1. Install nodejs:
+Prepare environment:
+==================
 
-.. code-block:: sh
-	:linenos:
-	
-	zypper install nodejs20
-
-2. Install yarn:
+Update your system, download and install all required packages.
 
 .. code-block:: sh
 	:linenos:
 
-	sudo npm install yarn -g
-
-3. Install git:
-
-.. code-block:: sh
-	:linenos:
-
-	zypper install git
-
-4. Install java:
-
-.. code-block:: sh
-	:linenos:
-
-	zypper install java-17-openjdk
-
-6. Install gradle:
-
-.. code-block:: sh
-	:linenos:
-	
-	cd /tmp
-	wget https://services.gradle.org/distributions/gradle-7.4.2-all.zip
-	mkdir /opt/gradle
-	unzip -d /opt/gradle gradle-7.4.2-all.zip
-	export PATH=$PATH:/opt/gradle/gradle-7.4.2/bin
-
-7. Install neo4j:
-
-.. code-block:: sh
-	:linenos:
+	zypper install unzip gpg git insserv
 
 	zypper addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
 	zypper refresh
-	zypper install neo4j-5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	neo4j start
-	zypper install insserv
-	systemctl enable neo4j
 	
-.. note::
-	Change password (secret1234) if you want.
+	zypper install mariadb mariadb-client openjdk-17-jdk neo4j nginx
 
-8. Install MariaDB:
+.. note::
+	On restricted systems, you may have to change permissions after wget:
+
+	.. code-block:: sh
+		:linenos:	
+	
+		chmod a+r /etc/apt/trusted.gpg.d/neo4j.gpg
+
+	
+Install Application:
+==================
+
+Download and unzip application, and create a link for it.
 
 .. code-block:: sh
 	:linenos:
 
-	zypper install mariadb mariadb-client
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
+	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
+	rm /opt/opencelium/oc_latest.zip
+	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
+		
+Configuration:
+==================
+
+**1. MariaDB:**
+
+Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation.
+
+.. note::
+	Please change the password (secret1234) in the following command line!
+
+.. code-block:: sh
+	:linenos:
+	
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	rcmysql start
-	mysql_secure_installation
 	systemctl enable mariadb
+	mysql_secure_installation
+	
+**2. Neo4j:**
+
+Set your password for neo4j, restart and enable neo4j service.
 
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
+	Please change the password (secret1234) in the following command line!
+
+.. code-block:: sh
+	:linenos:
 	
-	.. code-block:: sh
-		:linenos:	
+	/usr/bin/neo4j-admin dbms set-initial-password secret1234
+	systemctl restart neo4j.service (neo4j start)
+	systemctl enable neo4j.service  (.service )
 	
-		mysql -u root
+**3. Nginx:**
+
+Copy configfile for OpenCelium.
+
+.. code-block:: sh
+	:linenos:
+	
+	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
+	
+.. note::
+	If you like to use SSL, do the following:
 		
-	If this works (without your password), please set your password again with this command:
-	
 	.. code-block:: sh
 		:linenos:	
 	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
-	Change password (root) if you want.
-
-**Install Application:**
-
-1. Get frontend repository
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt
-	git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . 
+	and change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
 	
-.. note::
-	Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
-
-2. Run frontend with yarn
-
-.. code-block:: sh
-	:linenos:
-
-	cd src/frontend
-	yarn
-	
-.. note::
-	If yarn doesn't run properly, use this command to increase the amount of inotify watchers:
-
 	.. code-block:: sh
 		:linenos:	
-
-		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-
-3. Enable OC service
-
-.. code-block:: sh
-	:linenos:
-
-	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
-
-4. Start frontend
+	
+		ssl_certificate /etc/ssl/certs/opencelium.pem;
+		ssl_certificate_key /etc/ssl/private/opencelium.key;
+		
+Reload config and enable nginx.
 
 .. code-block:: sh
 	:linenos:
+	
+	systemctl restart nginx
+	systemctl enable nginx
+	
+**4. OpenCelium:**
 
-	oc start_frontend
-
-5. Create application.yml file for backend
+Create and adjust configuration.
 
 .. code-block:: sh
 	:linenos:
-
-	cd /opt/src/backend
-	cp src/main/resources/application_default.yml src/main/resources/application.yml
+	
+	cp /opt/opencelium/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
+	
 	
 .. note::
-	Make changes inside the file application.yml! 
-	Change neo4j and mysql database password.
+	| Modify application.yml
+	| Within section "Database configuration section of MariaDB and Neo4j":
+	| - change MariaDB root user to opencelium and set password
+	| - change password of neo4j user
 
-6. Install database 
+	| Just in case you are using SSL, add certs to the ssl section. 
+	| It has to be a p12 keystore file with password! 
+	| If you just have key and pem you can create a p12 as follows:
 
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend/database
-	mysql -u root -p -e "source oc_data.sql"
-
-7. Build backend project
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend/
-	gradle build
-
-8. Start backend
-
-.. code-block:: sh
-	:linenos:
-
-	oc start_backend
-
-9. Welcome to OC
-
+	
+	.. code-block:: sh
+		:linenos:
+		
+		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
+	
+Finally start OpenCelium backend.	
+	
 .. code-block:: sh
 	:linenos:
 	
-	Visit opencelium http://SERVERIP:8888
+	ln -s /opt/opencelium/conf/opencelium.service /etc/systemd/system/opencelium.service
+	systemctl daemon-reload
+	systemctl enable opencelium
+	systemctl start opencelium
 
-
+.. note::
+	| Afterwards you can connect to `http://localhost`	
+	| Default User and Password is:
+	
+	| admin@opencelium.io
+	| 1234
+	
+	| If you want to have a look into OpenCelium Logs please use:
+	
+	.. code-block:: sh
+		:linenos:
+		
+		journalctl -xe -u opencelium -f
+		
 
 Red Hat Enterprise Linux (example for Red Hat 9.2)
 """""""""""""""""
@@ -409,13 +390,12 @@ Set your password for neo4j, restart and enable neo4j service.
 	
 **3. Nginx:**
 
-Remove default config and link OpenCelium config.
+Copy configfile for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
 	
-	rm /etc/nginx/sites-enabled/default
-	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/
+	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
 	If you like to use SSL, do the following:
@@ -423,8 +403,7 @@ Remove default config and link OpenCelium config.
 	.. code-block:: sh
 		:linenos:	
 	
-		rm /etc/nginx/sites-enabled/default
-		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
 	and change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
 	

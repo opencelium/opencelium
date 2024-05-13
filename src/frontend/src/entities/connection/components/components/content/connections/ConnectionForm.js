@@ -107,6 +107,11 @@ export function ConnectionForm(type) {
                         }
                     }
                 }
+                if(this.props.fetchingConnection && prevProps.fetchingConnection === API_REQUEST_STATE.START && this.props.fetchingConnection === API_REQUEST_STATE.ERROR) {
+                    if(error) {
+                        navigate(this.redirectUrl, { replace: false });
+                    }
+                }
                 if((this.props.fetchingConnection && prevProps.fetchingConnection === API_REQUEST_STATE.START && this.props.fetchingConnection === API_REQUEST_STATE.FINISH)
                 || (prevProps.connection === null && this.props.connection !== null)){
                     this.isFetchedConnection = true;

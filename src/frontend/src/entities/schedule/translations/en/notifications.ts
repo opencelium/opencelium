@@ -59,7 +59,8 @@ export default {
             "__DEFAULT__": "The notification was not updated"
         },
         [addSchedule.rejected.type]: {
-            "__DEFAULT__": "The schedule was not added"
+            "__DEFAULT__": "The schedule was not added",
+            "TITLE_ALREADY_EXISTS": "The schedule with such title already exists"
         },
         [deleteScheduleById.rejected.type]: {
             "__DEFAULT__": "The schedule was not removed"
