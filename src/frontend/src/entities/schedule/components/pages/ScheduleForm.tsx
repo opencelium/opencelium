@@ -75,6 +75,11 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
             didMount.current = true;
         }
     },[addingSchedule, updatingSchedule]);
+    useEffect(() => {
+        if(gettingScheduleById === API_REQUEST_STATE.ERROR && error) {
+            navigate('/schedules', { replace: false });
+        }
+    }, [gettingScheduleById])
     const TitleInput = schedule.getText({
         propertyName: "title", props: {autoFocus: !isView, icon: 'title', label: 'Title', required: true}
     })
