@@ -23,7 +23,8 @@ export default {
     },
     rejected: {
         [migrate.rejected.type]: {
-            "__DEFAULT__": "The migration was rejected"
+            "__DEFAULT__": "The unexpected error was occurred. Please, contact with the support team.",
+            "Failed to connect to neo4j": "Failed to connect to neo4j"
         },
     },
 }

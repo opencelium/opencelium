@@ -25,13 +25,16 @@ import {SortType} from "@app_component/collection/collection_view/interfaces";
 import {ColorTheme} from "@style/Theme";
 
 //TODO move DuplicateIcon in connection/components
-import {DuplicateIcon} from "@root/components/duplicate_icon/DuplicateIcon";
 import {ConnectionProps, IConnection} from "../interfaces/IConnection";
 import {Connection} from "../classes/Connection";
 import {deleteConnectionsById, getAndUpdateConnectionTitle, getAndUpdateConnectionDescription} from "../redux_toolkit/action_creators/ConnectionCreators";
 import {ConnectionPermissions} from "../constants";
 import InlineEditInput from "@app_component/collection/collection_view/InlineEditInput";
 import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
+import {DuplicateIcon} from "../components/components/duplicate_icon/DuplicateIcon";
+import {DownloadIcon} from "../components/components/download_icon/DownloadIcon";
+import {QuickAddButton} from "../components/components/quick_add/QuickAddButton";
+import AddConnectionButton from "../components/components/add_connection/AddConnectionButton";
 
 class Connections extends ListCollection<ConnectionProps>{
     name: string = 'connections';
@@ -83,10 +86,11 @@ class Connections extends ListCollection<ConnectionProps>{
     getTopActions = (viewType: ViewType, checkedIds: number[] = []) => {
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
-            <React.Fragment>
-                <PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Connection'} permission={ConnectionPermissions.CREATE}/>
+            <div style={{display: 'flex', gap: '10px'}}>
+                {/*<PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Connection'} permission={ConnectionPermissions.CREATE}/>*/}
+                <AddConnectionButton/>
                 {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteConnectionsById(checkedIds))} permission={ConnectionPermissions.DELETE}/>}
-            </React.Fragment>
+            </div>
         );
     };
     getListActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
@@ -97,6 +101,7 @@ class Connections extends ListCollection<ConnectionProps>{
                 <PermissionTooltipButton target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} href={`${entity.id}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
                 <PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'top'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
                 {hasDeleteButton && <PermissionTooltipButton target={`delete_entity_${entity.id.toString()}`} position={'top'} tooltip={'Delete'} hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
+                <DownloadIcon listConnection={entity}/>
             </React.Fragment>
         );
     };

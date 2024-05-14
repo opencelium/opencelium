@@ -19,7 +19,7 @@ import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
-import KibanaImagePath from "@image/apps/kibana.png";
+import MariaDBImagePath from "@image/apps/mariadb.png";
 import {ExternalApplicationListProps} from "../pages/interfaces";
 import ExternalApplications from "../../collections/ExternalApplications";
 import {checkAllExternalApplications} from "../../redux_toolkit/action_creators/ExternalApplicationCreators";
@@ -36,8 +36,9 @@ const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(Ext
     }, []);
     if((checkingAll === API_REQUEST_STATE.FINISH || checkingAll === API_REQUEST_STATE.ERROR) && actuatorHealth){
         externalApplications.push({
-            id: 1, name: 'Kibana', icon: KibanaImagePath, link: kibanaUrl, value: 'elasticsearch',
-            status: actuatorHealth.components?.elasticsearch?.status || ExternalApplicationStatus.DOWN,
+            id: 1, name: 'MariaDB', icon: MariaDBImagePath, link: '', value: 'db',
+            status: actuatorHealth.components?.db?.status || ExternalApplicationStatus.DOWN,
+            version: actuatorHealth.components?.db?.details.version || '',
         })
     }
     const CExternalApplications = new ExternalApplications(externalApplications);

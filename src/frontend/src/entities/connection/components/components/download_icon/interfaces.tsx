@@ -13,15 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from "styled-components";
+import {ITheme} from "@style/Theme";
 
-const ActionsStyled = styled.div`
-    display: flex;
-    >:not(:last-child){
-        margin-right: 10px;
-    }
-`;
+interface DownloadIconProps{
+    theme?: ITheme,
+    listConnection: any,
+}
 
 export {
-    ActionsStyled,
+    DownloadIconProps,
 }
