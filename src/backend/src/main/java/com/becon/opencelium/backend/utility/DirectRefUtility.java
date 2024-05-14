@@ -47,6 +47,7 @@ public class DirectRefUtility {
             return new String[]{""};
         }
 
+        // TODO rewrite splitting with dot, split if valid
         String[] refParts = ref.split("\\.");
         int from = 2;
 
@@ -58,13 +59,9 @@ public class DirectRefUtility {
     }
 
     public static String getPointerToBody(String ref, int partCount, String remove) {
-        partCount += 1;
+        String[] refParts = getReferenceParts(ref);
+        partCount = partCount + (getExchangeType(ref).equals("response") ? 2 : 1);
 
-        if (getExchangeType(ref).equals("response")) {
-            partCount++;
-        }
-
-        String[] refParts = ref.split("\\.");
         String result = "";
         for (int i = 0; i < partCount; i++) {
             result += refParts[i] + ".";
@@ -73,25 +70,6 @@ public class DirectRefUtility {
         result += refParts[partCount].replace(remove, "");
 
         return result;
-    }
-
-    public static String getRefValue(String ref) {
-        if (ref.equals("")){
-            return "";
-        }
-        String[] refParts = ref.split("\\.");
-        String result = "";
-        if(getExchangeType(ref).equals("response")){
-            return ref.replace(refParts[0]+".", "")
-                    .replace(refParts[1] + ".", "")
-                    .replace(refParts[2] + ".", "")
-                    .replace(refParts[0], "")
-                    .replace(refParts[1], "")
-                    .replace(refParts[2], "");
-        }
-
-        return ref.replace(refParts[0]+".", "")
-                .replace(refParts[1] + ".", "");
     }
 
     public static boolean equals(String ref1, String ref2) {
