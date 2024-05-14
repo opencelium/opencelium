@@ -2,10 +2,12 @@ package com.becon.opencelium.backend.application.repository;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -23,21 +25,22 @@ import java.util.zip.ZipInputStream;
 @Component
 public class SystemOverviewRepository {
 
+    private final DataSource dataSource;
+    private final JdbcTemplate jdbcTemplate;
+    private final YamlPropertiesFactoryBean yamlPropertiesFactoryBean;
+    private final MongoClient mongoClient;
 
-    @Autowired
-    private DataSource dataSource;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private YamlPropertiesFactoryBean yamlPropertiesFactoryBean;
+    public SystemOverviewRepository(DataSource dataSource, JdbcTemplate jdbcTemplate, YamlPropertiesFactoryBean yamlPropertiesFactoryBean, MongoClient mongoClient) {
+        this.dataSource = dataSource;
+        this.jdbcTemplate = jdbcTemplate;
+        this.yamlPropertiesFactoryBean = yamlPropertiesFactoryBean;
+        this.mongoClient = mongoClient;
+    }
 
     public SystemOverview getCurrentOverview() {
         SystemOverview systemOverview = new SystemOverview();
         systemOverview.setJava(System.getProperty("java.version"));
         systemOverview.setOs(System.getProperty("os.name"));
-
 
         // getting MariaDB version
         try {
@@ -48,15 +51,16 @@ public class SystemOverviewRepository {
             systemOverview.setMariadb("Service is down. Unable to detect version. ");
         }
 
-        // get elasticsearch version
-//        try {
-//            NodesInfoResponse nodesInfoResponse = client.admin().cluster().prepareNodesInfo().all().execute().actionGet();
-//            NodeInfo nodeInfo = nodesInfoResponse.getNodes().stream().findFirst().orElseThrow(() -> new RuntimeException("Node not found"));
-//            systemOverview.setElasticSearch(nodeInfo.getVersion().toString());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            systemOverview.setElasticSearch("Service is down. Unable to detect version. ");
-//        }
+        //getting mongoDB version
+        try {
+            MongoDatabase database = mongoClient.getDatabase("admin");
+            Document buildInfo = database.runCommand(new Document("buildInfo", 1));
+            String mongoVersion = buildInfo.getString("version");
+            systemOverview.setMongodb(mongoVersion);
+        }catch (Exception e){
+            e.printStackTrace();
+            systemOverview.setMongodb("Service is down. Unable to detect version. ");
+        }
 
         return systemOverview;
     }
