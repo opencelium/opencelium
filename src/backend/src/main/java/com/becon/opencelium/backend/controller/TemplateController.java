@@ -83,6 +83,24 @@ public class TemplateController {
         return ResponseEntity.ok().body(templateResource);
     }
 
+    @Operation(summary = "Retrieves a template from the database based on the provided connectionId")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Template has been retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = TemplateResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/connection/{connectionId}")
+    public ResponseEntity<?> getByConnectionId(@PathVariable Long connectionId){
+        TemplateResource resource = templateService.getByConnectionId(connectionId);
+        return ResponseEntity.ok().body(resource);
+    }
+
     @Operation(summary = "Checks if a template with given id is exists or not")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
