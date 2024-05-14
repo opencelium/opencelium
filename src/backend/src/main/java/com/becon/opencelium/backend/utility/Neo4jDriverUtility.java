@@ -288,12 +288,24 @@ public class Neo4jDriverUtility {
                 }
                 case "array" -> {
                     Object value = node.asMap().get("value");
-                    if (value != null && value.equals("")) {
-                        fields.put(name, new ArrayList<>());
-                        if (nextLevel < currLevel) {
-                            return i;
+                    if (value != null) {
+                        if (value instanceof String str) {
+                            if (str.isEmpty()) {
+                                fields.put(name, new ArrayList<>());
+                            } else if (str.charAt(0) == '[' && str.charAt(str.length() - 1) == ']') {
+                                List<Object> list = new ArrayList<>();
+                                str = str.substring(1, str.length() - 1);
+                                String[] elements = str.split(",");
+                                for (String element : elements) {
+                                    list.add(element.trim());
+                                }
+                                fields.put(name, list);
+                            }
+                            if (nextLevel < currLevel) {
+                                return i;
+                            }
+                            i = getFields(fields, records, i + 1, nextLevel, methodName);
                         }
-                        i = getFields(fields, records, i + 1, nextLevel, methodName);
                     } else {
                         List<Map<String, Object>> list = new ArrayList<>();
                         list.add(new HashMap<>());
