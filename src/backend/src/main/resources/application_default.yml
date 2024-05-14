@@ -11,7 +11,7 @@ server:
 #  ssl:
 #    enabled: true
 #    key-store-type: PKCS12
-#    key-store: src/main/resources/keystore.p12
+#    key-store: src/main/resources/opencelium.p12
 #    key-store-password: root
 #    key-password: root
 #    key-alias: tomcat
