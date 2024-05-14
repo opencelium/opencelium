@@ -8,7 +8,7 @@ Installation
 Debian/Ubuntu (example for 24.04 LTS)
 """""""""""""""""
 
-Prepare environment:
+Prepare environment
 ==================
 
 Update your system, download and install all required packages.
@@ -35,7 +35,7 @@ Update your system, download and install all required packages.
 		chmod a+r /etc/apt/trusted.gpg.d/neo4j.gpg
 
 	
-Install Application:
+Install Application
 ==================
 
 Download and unzip application, and create a link for it.
@@ -48,7 +48,7 @@ Download and unzip application, and create a link for it.
 	rm /opt/opencelium/oc_latest.zip
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 		
-Configuration:
+Configuration
 ==================
 
 **1. MariaDB:**
@@ -81,7 +81,7 @@ Set your password for neo4j, restart and enable neo4j service.
 	
 **3. Nginx:**
 
-Copy configfile for OpenCelium.
+Copy the configuration file for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
@@ -89,20 +89,22 @@ Copy configfile for OpenCelium.
 	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, do the following:
+	If you like to use SSL, change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
 		
-	.. code-block:: sh
-		:linenos:	
-	
-		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
-		
-	and change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
-	
 	.. code-block:: sh
 		:linenos:	
 	
 		ssl_certificate /etc/ssl/certs/opencelium.pem;
 		ssl_certificate_key /etc/ssl/private/opencelium.key;
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+		
+	and copy the configuration file for OpenCelium:
+	
+	.. code-block:: sh
+		:linenos:	
+	
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+
 		
 Reload config and enable nginx.
 
@@ -125,7 +127,7 @@ Create and adjust configuration.
 .. note::
 	| Modify application.yml
 	| Within section "Database configuration section of MariaDB and Neo4j":
-	| - change MariaDB root user to opencelium and set password
+	| - change password of opencelium user for MariaDB
 	| - change password of neo4j user
 
 	| Just in case you are using SSL, add certs to the ssl section. 
@@ -136,7 +138,7 @@ Create and adjust configuration.
 	.. code-block:: sh
 		:linenos:
 		
-		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
+		openssl pkcs12 -export -out opencelium.p12 -in /etc/ssl/certs/opencelium.pem -inkey /etc/ssl/private/opencelium.key
 	
 Finally start OpenCelium backend.	
 	
@@ -166,7 +168,7 @@ Finally start OpenCelium backend.
 SUSE Linux Enterprise Server (example for SLES 15 SP5)
 """""""""""""""""
 
-Prepare environment:
+Prepare environment
 ==================
 
 Update your system, download and install all required packages.
@@ -190,7 +192,7 @@ Update your system, download and install all required packages.
 		chmod a+r /etc/apt/trusted.gpg.d/neo4j.gpg
 
 	
-Install Application:
+Install Application
 ==================
 
 Download and unzip application, and create a link for it.
@@ -203,7 +205,7 @@ Download and unzip application, and create a link for it.
 	rm /opt/opencelium/oc_latest.zip
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 		
-Configuration:
+Configuration
 ==================
 
 **1. MariaDB:**
@@ -237,7 +239,7 @@ Set your password for neo4j, restart and enable neo4j service.
 	
 **3. Nginx:**
 
-Copy configfile for OpenCelium.
+Copy the configuration file for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
@@ -245,20 +247,21 @@ Copy configfile for OpenCelium.
 	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, do the following:
+	If you like to use SSL, change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
 		
-	.. code-block:: sh
-		:linenos:	
-	
-		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
-		
-	and change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
-	
 	.. code-block:: sh
 		:linenos:	
 	
 		ssl_certificate /etc/ssl/certs/opencelium.pem;
 		ssl_certificate_key /etc/ssl/private/opencelium.key;
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+		
+	and copy the configuration file for OpenCelium:
+	
+	.. code-block:: sh
+		:linenos:	
+	
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
 Reload config and enable nginx.
 
@@ -322,7 +325,7 @@ Finally start OpenCelium backend.
 Red Hat Enterprise Linux (example for Red Hat 9.2)
 """""""""""""""""
 
-Prepare environment:
+Prepare environment
 ==================
 
 1. Update your system, download and install all required packages.
@@ -343,7 +346,7 @@ Prepare environment:
 	EOF
 	yum install mariadb-server java-17-openjdk neo4j nginx
 	
-Install Application:
+Install Application
 ==================
 
 Download and unzip application, and create a link for it.
@@ -356,7 +359,7 @@ Download and unzip application, and create a link for it.
 	rm /opt/opencelium/oc_latest.zip
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 		
-Configuration:
+Configuration
 ==================
 
 **1. MariaDB:**
@@ -390,7 +393,7 @@ Set your password for neo4j, restart and enable neo4j service.
 	
 **3. Nginx:**
 
-Copy configfile for OpenCelium.
+Copy the configuration file for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
@@ -398,20 +401,21 @@ Copy configfile for OpenCelium.
 	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, do the following:
+	If you like to use SSL, change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
 		
-	.. code-block:: sh
-		:linenos:	
-	
-		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
-		
-	and change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
-	
 	.. code-block:: sh
 		:linenos:	
 	
 		ssl_certificate /etc/ssl/certs/opencelium.pem;
 		ssl_certificate_key /etc/ssl/private/opencelium.key;
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+		
+	and copy the configuration file for OpenCelium:
+	
+	.. code-block:: sh
+		:linenos:	
+	
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
 Reload config and enable nginx.
 
