@@ -14,7 +14,6 @@
  */
 
 import React, {FC, useEffect} from 'react';
-import {kibanaUrl} from "@entity/application/requests/classes/url";
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
