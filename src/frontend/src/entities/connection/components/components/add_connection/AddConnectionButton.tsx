@@ -27,6 +27,7 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dispatch = useAppDispatch();
     let navigate = useNavigate();
+    const [startAdding, setStartAdding] = useState<boolean>(false);
     const {addingConnection, currentConnection, checkingConnectionTitle, isCurrentConnectionHasUniqueTitle} = Connection.getReduxState();
     const {templates, gettingTemplates} = useAppSelector((state: RootState) => state.templateReducer);
     const {connectors, gettingConnectors} = Connector.getReduxState();
@@ -100,6 +101,7 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
         setValidateMessageToConnector(validateMessageToConnector);
         setValidateMessageTemplate(validateMessageTemplate);
         if(title !== '' && fromConnector && toConnector && template){
+            setStartAdding(true);
             // @ts-ignore
             const tmpConnection = new Connection({title, dispatch});
             dispatch(checkConnectionTitle(tmpConnection));
@@ -107,13 +109,18 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
         return false;
     }
     const createConnection = () => {
-        dispatch(addConnection({
-            ...template.content,
-            title: title,
-        }));
+        if(startAdding) {
+
+            dispatch(addConnection({
+                ...template.content,
+                title: title,
+            }));
+
+            setStartAdding(false);
+        }
     }
     useEffect(() => {
-        if(addingConnection === API_REQUEST_STATE.FINISH) {
+        if(addingConnection === API_REQUEST_STATE.FINISH && startAdding) {
             toggleForm();
         }
     }, [addingConnection])
@@ -130,12 +137,13 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
     }, [fromConnector, toConnector])
 
     useEffect(() => {
-        if(isCurrentConnectionHasUniqueTitle === TRIPLET_STATE.TRUE){
+        if(isCurrentConnectionHasUniqueTitle === TRIPLET_STATE.TRUE && startAdding){
             createConnection();
         }
         if(isCurrentConnectionHasUniqueTitle === TRIPLET_STATE.FALSE){
             setValidateMessageTitle('Title should be unique');
             setFocusById('duplicate_title');
+            setStartAdding(false);
         }
     }, [checkingConnectionTitle])
 

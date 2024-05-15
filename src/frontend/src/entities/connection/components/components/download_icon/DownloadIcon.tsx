@@ -17,12 +17,13 @@ import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
 import { DownloadIconProps } from './interfaces';
 import { DownloadIconStyled } from './styles';
-import {useAppDispatch} from "@application/utils/store";
-import {getConnectionById} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
+import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
 import {ColorTheme} from "@style/Theme";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
 import {ConnectionPermissions} from "@entity/connection/constants";
+import {getTemplateByConnectionId} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 
 
@@ -31,16 +32,22 @@ const DownloadIcon: FC<DownloadIconProps> =
         listConnection,
     }) => {
     const dispatch = useAppDispatch();
+    const {gettingTemplateByConnectionId} = useAppSelector((state: RootState) => state.templateReducer);
     const [isDownloading, setIsDownloading] = useState<boolean>(false);
     const downloadAsTemplate = () => {
         setIsDownloading(true);
-        dispatch(getConnectionById(listConnection.id));
+        dispatch(getTemplateByConnectionId(listConnection.id));
     }
     useEffect(() => {
-        if(isDownloading) {
-            setIsDownloading(false);
+        switch (gettingTemplateByConnectionId) {
+            case API_REQUEST_STATE.FINISH:
+            case API_REQUEST_STATE.ERROR:
+                if(isDownloading) {
+                    setIsDownloading(false);
+                }
+                break;
         }
-    }, []);
+    }, [gettingTemplateByConnectionId]);
     return (
         <DownloadIconStyled >
             <PermissionTooltipButton

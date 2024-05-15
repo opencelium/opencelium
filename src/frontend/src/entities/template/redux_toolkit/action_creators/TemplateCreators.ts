@@ -115,6 +115,19 @@ export const getTemplateById = createAsyncThunk(
     }
 )
 
+export const getTemplateByConnectionId = createAsyncThunk(
+    'template/get/byConnectionId',
+    async(templateId: number, thunkAPI) => {
+        try {
+            const request = new TemplateRequest({endpoint: `/connection/${templateId}`});
+            const response = await request.getTemplateByConnectionId();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const getTemplatesByConnectors = createAsyncThunk(
     'template/get/byConnectors',
     async({from, to}: {from: number, to: number} , thunkAPI) => {
@@ -176,6 +189,7 @@ export default {
     updateTemplate,
     updateTemplates,
     getTemplateById,
+    getTemplateByConnectionId,
     getAllTemplates,
     deleteTemplateById,
     deleteTemplatesById,

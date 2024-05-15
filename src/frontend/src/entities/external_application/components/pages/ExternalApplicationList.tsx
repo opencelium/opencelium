@@ -36,9 +36,13 @@ const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(Ext
     }, []);
     if((checkingAll === API_REQUEST_STATE.FINISH || checkingAll === API_REQUEST_STATE.ERROR) && actuatorHealth){
         externalApplications.push({
-            id: 1, name: 'MariaDB', icon: MariaDBImagePath, link: '', value: 'db',
-            status: actuatorHealth.components?.db?.status || ExternalApplicationStatus.DOWN,
-            version: actuatorHealth.components?.db?.details.version || '',
+            id: 1, name: actuatorHealth.components?.mariaDb?.details.name || 'MariaDB', icon: MariaDBImagePath, link: '', value: actuatorHealth.components?.mariaDb?.details.name || 'db',
+            status: actuatorHealth.components?.mariaDb?.status || ExternalApplicationStatus.DOWN,
+            version: actuatorHealth.components?.mariaDb?.details.version || '',
+        },{
+            id: 2, name: actuatorHealth.components?.mongoDb?.details.name || 'MongoDB', icon: MariaDBImagePath, link: '', value: actuatorHealth.components?.mongoDb?.details.name || 'db',
+            status: actuatorHealth.components?.mongoDb?.status || ExternalApplicationStatus.DOWN,
+            version: actuatorHealth.components?.mongoDb?.details.version || '',
         })
     }
     const CExternalApplications = new ExternalApplications(externalApplications);
