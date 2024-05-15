@@ -61,7 +61,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 .. code-block:: sh
 	:linenos:
 	
-	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	systemctl enable mariadb
 	mysql_secure_installation
 	
@@ -89,21 +89,20 @@ Copy the configuration file for OpenCelium.
 	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
-		
-	.. code-block:: sh
-		:linenos:	
-	
-		ssl_certificate /etc/ssl/certs/opencelium.pem;
-		ssl_certificate_key /etc/ssl/private/opencelium.key;
-		
-	and copy the configuration file for OpenCelium:
+	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
 	
 	.. code-block:: sh
 		:linenos:	
 	
 		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
-
+		
+	 and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
+			
+	.. code-block:: sh
+		:linenos:	
+	
+		ssl_certificate /etc/ssl/certs/opencelium.pem;
+		ssl_certificate_key /etc/ssl/private/opencelium.key;
 		
 Reload config and enable nginx.
 
@@ -137,7 +136,7 @@ Create and adjust configuration.
 	.. code-block:: sh
 		:linenos:
 		
-		openssl pkcs12 -export -out opencelium.p12 -in /etc/ssl/certs/opencelium.pem -inkey /etc/ssl/private/opencelium.key
+		openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/ssl/certs/opencelium.pem -inkey /etc/ssl/private/opencelium.key
 	
 Finally start OpenCelium backend.	
 	
@@ -177,18 +176,10 @@ Update your system, download and install all required packages.
 
 	zypper install unzip gpg git insserv
 
-	zypper addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
+	zypper addrepo --refresh https://yum.neo4j.com/stable/5 neo4j-repository
 	zypper refresh
 	
-	zypper install mariadb mariadb-client openjdk-17-jdk neo4j nginx
-
-.. note::
-	On restricted systems, you may have to change permissions after wget:
-
-	.. code-block:: sh
-		:linenos:	
-	
-		chmod a+r /etc/apt/trusted.gpg.d/neo4j.gpg
+	zypper install mariadb mariadb-client java-17-openjdk neo4j nginx
 
 	
 Install Application
@@ -216,9 +207,9 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 
 .. code-block:: sh
 	:linenos:
-	
-	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
-	rcmysql start
+
+	rcmysql start	
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	systemctl enable mariadb
 	mysql_secure_installation
 	
@@ -233,8 +224,8 @@ Set your password for neo4j, restart and enable neo4j service.
 	:linenos:
 	
 	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	systemctl restart neo4j.service (neo4j start)
-	systemctl enable neo4j.service  (.service )
+	systemctl restart neo4j.service
+	systemctl enable neo4j.service
 	
 **3. Nginx:**
 
@@ -246,20 +237,20 @@ Copy the configuration file for OpenCelium.
 	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
-		
-	.. code-block:: sh
-		:linenos:	
-	
-		ssl_certificate /etc/ssl/certs/opencelium.pem;
-		ssl_certificate_key /etc/ssl/private/opencelium.key;
-		
-	and copy the configuration file for OpenCelium:
+	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
 	
 	.. code-block:: sh
 		:linenos:	
 	
 		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+		
+	 and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
+			
+	.. code-block:: sh
+		:linenos:	
+	
+		ssl_certificate /etc/ssl/certs/opencelium.pem;
+		ssl_certificate_key /etc/ssl/private/opencelium.key;
 		
 Reload config and enable nginx.
 
@@ -293,7 +284,7 @@ Create and adjust configuration.
 	.. code-block:: sh
 		:linenos:
 		
-		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
+		openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/pki/tls/certs/opencelium.pem -inkey /etc/pki/tls//private/opencelium.key
 	
 Finally start OpenCelium backend.	
 	
@@ -371,7 +362,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	:linenos:
 	
 	systemctl start mariadb
-	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	systemctl enable mariadb
 	mysql_secure_installation
 	
@@ -399,20 +390,21 @@ Copy the configuration file for OpenCelium.
 	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
-		
-	.. code-block:: sh
-		:linenos:	
-	
-		ssl_certificate /etc/ssl/certs/opencelium.pem;
-		ssl_certificate_key /etc/ssl/private/opencelium.key;
-		
-	and copy the configuration file for OpenCelium:
+	If you like to use SSL, copy the SSL-configuration file for OpenCelium and create a link for the key-folder :
 	
 	.. code-block:: sh
 		:linenos:	
 	
 		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+		ln -s /etc/pki/tls/private/ /etc/ssl/private
+		
+	 and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
+			
+	.. code-block:: sh
+		:linenos:	
+	
+		ssl_certificate /etc/ssl/certs/opencelium.pem;
+		ssl_certificate_key /etc/ssl/private/opencelium.key;
 		
 Reload config and enable nginx.
 
@@ -446,7 +438,7 @@ Create and adjust configuration.
 	.. code-block:: sh
 		:linenos:
 		
-		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
+		openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/pki/tls/certs/opencelium.pem -inkey /etc/pki/tls//private/opencelium.key
 	
 Finally start OpenCelium backend.	
 	
