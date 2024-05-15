@@ -96,7 +96,7 @@ Copy the configuration file for OpenCelium.
 	
 		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
-	 and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
+	and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
 			
 	.. code-block:: sh
 		:linenos:	
@@ -244,7 +244,7 @@ Copy the configuration file for OpenCelium.
 	
 		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
-	 and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
+	and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
 			
 	.. code-block:: sh
 		:linenos:	
@@ -398,8 +398,8 @@ Copy the configuration file for OpenCelium.
 		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		ln -s /etc/pki/tls/private/ /etc/ssl/private
 		
-	 and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:
-		
+	and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:
+	
 	.. code-block:: sh
 		:linenos:
 		
