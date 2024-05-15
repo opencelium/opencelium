@@ -589,7 +589,13 @@ public class AssistantServiceImp implements ApplicationService {
         try (var driver = GraphDatabase.driver(neo4jConfig.getUrl(), AuthTokens.basic(neo4jConfig.getUsername(), neo4jConfig.getPassword()));
              Session session = driver.session()) {
             driver.verifyConnectivity();
-            List<Connection> connections = connectionService.findAllNotCompleted();
+            log.info("Connection successfully established to neo4j server with this credentials : [url: {}, username: {}, password: {}]", neo4jConfig.getUrl(), neo4jConfig.getUsername(), neo4jConfig.getPassword().replaceAll(".", "*"));
+            List<Connection> connections = null;
+            try {
+                connections = connectionService.findAllNotCompleted();
+            } catch (Exception e) {
+                log.error("Failed to retrieve connections from neo4j", e);
+            }
             if (connections.isEmpty()) {
                 log.info("No connections to migrate");
                 return;
@@ -638,6 +644,7 @@ public class AssistantServiceImp implements ApplicationService {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Failed to connect to neo4j");
         }
     }
