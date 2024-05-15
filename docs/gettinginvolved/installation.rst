@@ -391,18 +391,18 @@ Copy the configuration file for OpenCelium.
 	
 .. note::
 	If you like to use SSL, copy the SSL-configuration file for OpenCelium and create a link for the key-folder:
-
-	.. code-block:: sh
-		:linenos:	
 	
+	.. code-block:: sh
+		:linenos:
+		
 		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		ln -s /etc/pki/tls/private/ /etc/ssl/private
 		
-	 and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
-			
+	 and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:
+		
 	.. code-block:: sh
-		:linenos:	
-	
+		:linenos:
+		
 		ssl_certificate /etc/ssl/certs/opencelium.pem;
 		ssl_certificate_key /etc/ssl/private/opencelium.key;
 		
