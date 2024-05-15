@@ -18,7 +18,16 @@ import {RootState} from "@application/utils/store";
 import {exportTemplate, getTemplateByConnectionId} from "../redux_toolkit/action_creators/TemplateCreators";
 
 const templateMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
-    if(exportTemplate.fulfilled.type === action.type || getTemplateByConnectionId.fulfilled.type === action.type){
+    if(exportTemplate.fulfilled.type === action.type){
+        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(action.payload.templateContent));
+        let downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href",     dataStr);
+        downloadAnchorNode.setAttribute("download", action.payload.id + ".json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+    if(getTemplateByConnectionId.fulfilled.type === action.type){
         let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(action.payload));
         let downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href",     dataStr);

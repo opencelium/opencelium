@@ -110,18 +110,16 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
     }
     const createConnection = () => {
         if(startAdding) {
-
             dispatch(addConnection({
                 ...template.content,
                 title: title,
             }));
-
-            setStartAdding(false);
         }
     }
     useEffect(() => {
         if(addingConnection === API_REQUEST_STATE.FINISH && startAdding) {
             toggleForm();
+            setStartAdding(false);
         }
     }, [addingConnection])
     useEffect(() => {
@@ -158,15 +156,15 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
             <Dropdown isOpen={dropdownOpen} toggle={toggle} direction={direction}>
                 <DropdownToggleStyled caret>{"Add Connection"}</DropdownToggleStyled>
                 <DropdownMenu {...args}>
-                    <DropdownItemStyled onClick={toggleForm}>{"with template"}</DropdownItemStyled>
-                    <DropdownItemStyled onClick={openEditor}>{"with editor"}</DropdownItemStyled>
+                    <DropdownItemStyled onClick={toggleForm}>{"by template"}</DropdownItemStyled>
+                    <DropdownItemStyled onClick={openEditor}>{"using editor"}</DropdownItemStyled>
                 </DropdownMenu>
             </Dropdown>
             <Dialog
                 actions={[
                     {id: 'quick_add_ok', label: 'Ok', onClick: validateFields, isLoading: addingConnection === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START},
                     {id: 'quick_add_cancel', label: 'Cancel', onClick: toggleForm}]}
-                title={'Quick Add Connection'} active={isOpened} toggle={toggleForm}>
+                title={'Add Connection by Template'} active={isOpened} toggle={toggleForm}>
                 {isLoading ? <Loading color={ColorTheme.Blue}/> :
                     <React.Fragment>
                         <InputText
