@@ -92,7 +92,7 @@ Copy the configuration file for OpenCelium.
 	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
 	
 	.. code-block:: sh
-		:linenos:	
+		:linenos:
 	
 		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
@@ -240,7 +240,7 @@ Copy the configuration file for OpenCelium.
 	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
 	
 	.. code-block:: sh
-		:linenos:	
+		:linenos:
 	
 		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
@@ -390,10 +390,10 @@ Copy the configuration file for OpenCelium.
 	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, copy the SSL-configuration file for OpenCelium and create a link for the key-folder :
+	If you like to use SSL, copy the SSL-configuration file for OpenCelium and create a link for the key-folder:
 	
 	.. code-block:: sh
-		:linenos:	
+		:linenos:
 	
 		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		ln -s /etc/pki/tls/private/ /etc/ssl/private
