@@ -33,7 +33,6 @@ import InlineEditInput from "@app_component/collection/collection_view/InlineEdi
 import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
 import {DuplicateIcon} from "../components/components/duplicate_icon/DuplicateIcon";
 import {DownloadIcon} from "../components/components/download_icon/DownloadIcon";
-import {QuickAddButton} from "../components/components/quick_add/QuickAddButton";
 import AddConnectionButton from "../components/components/add_connection/AddConnectionButton";
 
 class Connections extends ListCollection<ConnectionProps>{
