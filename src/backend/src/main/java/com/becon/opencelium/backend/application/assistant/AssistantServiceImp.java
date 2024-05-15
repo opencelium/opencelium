@@ -657,7 +657,7 @@ public class AssistantServiceImp implements ApplicationService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to connect to neo4j");
+            throw new RuntimeException(e.getMessage());
         }
     }
 }
