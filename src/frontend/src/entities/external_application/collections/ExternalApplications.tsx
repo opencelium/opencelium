@@ -29,7 +29,7 @@ class ExternalApplications extends ListCollection<ExternalApplicationProps>{
     entities: IExternalApplication[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'External Application'}];
     keyPropName: ExternalApplicationProps ='id';
-    listProps: ListProp<ExternalApplicationProps>[] = [{propertyKey: 'name', width: '40%'}, {propertyKey: 'status', width: '40%'}];
+    listProps: ListProp<ExternalApplicationProps>[] = [{propertyKey: 'name', width: '33%'}, {propertyKey: 'status', width: '33%'}, {propertyKey: 'version', width: '34%'}];
     gridProps: ListCollectionCardProps = {
         title: 'name',
         subtitle: 'status',
@@ -47,8 +47,10 @@ class ExternalApplications extends ListCollection<ExternalApplicationProps>{
     };
     translations = {
         name: 'Name',
-        status: 'Status'
+        status: 'Status',
+        version: 'Version'
     };
+    hasActions = false;
     hasSearch = false;
     hasCardLink = true;
     hasCheckboxes = false;

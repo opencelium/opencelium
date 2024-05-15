@@ -20,9 +20,18 @@ import {ICommonState} from "@application/interfaces/core";
 import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {ITemplate} from "@entity/connection/interfaces/ITemplate";
 import {
-    addTemplate, checkTemplateName, deleteTemplateById,
-    deleteTemplatesById, exportTemplate, getAllTemplates, getTemplateById, getTemplatesByConnectors, importTemplate,
-    updateTemplate, updateTemplates,
+    addTemplate,
+    checkTemplateName,
+    deleteTemplateById,
+    deleteTemplatesById,
+    exportTemplate,
+    getAllTemplates,
+    getTemplateByConnectionId,
+    getTemplateById,
+    getTemplatesByConnectors,
+    importTemplate,
+    updateTemplate,
+    updateTemplates,
 } from "../action_creators/TemplateCreators";
 
 export interface TemplateState extends ICommonState{
@@ -35,6 +44,7 @@ export interface TemplateState extends ICommonState{
     updatingTemplate: API_REQUEST_STATE,
     updatingTemplates: API_REQUEST_STATE,
     gettingTemplate: API_REQUEST_STATE,
+    gettingTemplateByConnectionId: API_REQUEST_STATE,
     gettingTemplates: API_REQUEST_STATE,
     deletingTemplateById: API_REQUEST_STATE,
     deletingTemplatesById: API_REQUEST_STATE,
@@ -51,6 +61,7 @@ const initialState: TemplateState = {
     updatingTemplate: API_REQUEST_STATE.INITIAL,
     updatingTemplates: API_REQUEST_STATE.INITIAL,
     gettingTemplate: API_REQUEST_STATE.INITIAL,
+    gettingTemplateByConnectionId: API_REQUEST_STATE.INITIAL,
     gettingTemplates: API_REQUEST_STATE.INITIAL,
     deletingTemplateById: API_REQUEST_STATE.INITIAL,
     deletingTemplatesById: API_REQUEST_STATE.INITIAL,
@@ -164,6 +175,17 @@ export const templateSlice = createSlice({
         },
         [getTemplateById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingTemplate = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getTemplateByConnectionId.pending.type]: (state) => {
+            state.gettingTemplateByConnectionId = API_REQUEST_STATE.START;
+        },
+        [getTemplateByConnectionId.fulfilled.type]: (state, action: PayloadAction<ITemplate>) => {
+            state.gettingTemplateByConnectionId = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [getTemplateByConnectionId.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingTemplateByConnectionId = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [getAllTemplates.pending.type]: (state) => {

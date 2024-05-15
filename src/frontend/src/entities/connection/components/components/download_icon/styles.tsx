@@ -13,17 +13,12 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import styled from "styled-components";
 
 
-import {migrate} from "@entity/migrate/redux_toolkit/action_creators/MigrationCreators";
+const DownloadIconStyled = styled.span`
+    `;
 
-export default {
-    fulfilled: {
-        [migrate.fulfilled.type]: "The migration was successfully fulfilled",
-    },
-    rejected: {
-        [migrate.rejected.type]: {
-            "__NATIVE__": "-",
-        },
-    },
+export {
+    DownloadIconStyled,
 }

@@ -81,8 +81,10 @@ export class CNotification implements INotification{
             if(this.params?.message){
                 if(i18next.exists(`${translationKey}.${this.params.message}`)){
                     messageData.message = `${translationKey}.${this.params.message}`;
-                } else{
+                } else if(i18next.exists(`${translationKey}.__DEFAULT__`)) {
                     messageData.message = `${translationKey}.__DEFAULT__`;
+                } else if(i18next.exists(`${translationKey}.__NATIVE__`)) {
+                    messageData.message = this.params.message;
                 }
             } else{
                 messageData.message = translationKey;

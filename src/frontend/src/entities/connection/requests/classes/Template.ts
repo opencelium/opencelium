@@ -44,6 +44,10 @@ export class TemplateRequest extends Request implements ITemplateRequest{
         return super.get<ITemplate>();
     }
 
+    async getTemplateByConnectionId(): Promise<AxiosResponse<ITemplate>>{
+        return super.get<ITemplate>();
+    }
+
     async getAllTemplates(): Promise<AxiosResponse<ITemplate[]>>{
         return super.get<ITemplate[]>();
     }

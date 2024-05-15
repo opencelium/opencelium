@@ -14,12 +14,11 @@
  */
 
 import React, {FC, useEffect} from 'react';
-import {kibanaUrl} from "@entity/application/requests/classes/url";
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
-import KibanaImagePath from "@image/apps/kibana.png";
+import MariaDBImagePath from "@image/apps/mariadb.png";
 import {ExternalApplicationListProps} from "../pages/interfaces";
 import ExternalApplications from "../../collections/ExternalApplications";
 import {checkAllExternalApplications} from "../../redux_toolkit/action_creators/ExternalApplicationCreators";
@@ -36,8 +35,13 @@ const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(Ext
     }, []);
     if((checkingAll === API_REQUEST_STATE.FINISH || checkingAll === API_REQUEST_STATE.ERROR) && actuatorHealth){
         externalApplications.push({
-            id: 1, name: 'Kibana', icon: KibanaImagePath, link: kibanaUrl, value: 'elasticsearch',
-            status: actuatorHealth.components?.elasticsearch?.status || ExternalApplicationStatus.DOWN,
+            id: 1, name: actuatorHealth.components?.mariaDb?.details.name || 'MariaDB', icon: MariaDBImagePath, link: '', value: actuatorHealth.components?.mariaDb?.details.name || 'db',
+            status: actuatorHealth.components?.mariaDb?.status || ExternalApplicationStatus.DOWN,
+            version: actuatorHealth.components?.mariaDb?.details.version || '',
+        },{
+            id: 2, name: actuatorHealth.components?.mongoDb?.details.name || 'MongoDB', icon: MariaDBImagePath, link: '', value: actuatorHealth.components?.mongoDb?.details.name || 'db',
+            status: actuatorHealth.components?.mongoDb?.status || ExternalApplicationStatus.DOWN,
+            version: actuatorHealth.components?.mongoDb?.details.version || '',
         })
     }
     const CExternalApplications = new ExternalApplications(externalApplications);
