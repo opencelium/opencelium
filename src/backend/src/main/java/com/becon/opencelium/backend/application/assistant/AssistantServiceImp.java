@@ -19,6 +19,7 @@ import com.becon.opencelium.backend.resource.update_assistant.Neo4jConfigResourc
 import com.becon.opencelium.backend.utility.Neo4jDriverUtility;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
+import com.mongodb.client.MongoClient;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.GraphDatabase;
@@ -69,6 +70,8 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Autowired
     private Environment env;
+    @Autowired
+    private MongoClient mongoClient;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -588,14 +591,23 @@ public class AssistantServiceImp implements ApplicationService {
     public void doMigrate(Neo4jConfigResource neo4jConfig) {
         try (var driver = GraphDatabase.driver(neo4jConfig.getUrl(), AuthTokens.basic(neo4jConfig.getUsername(), neo4jConfig.getPassword()));
              Session session = driver.session()) {
-            driver.verifyConnectivity();
+            driver.verifyConnectivity(); //checking connectivity to neo4j
             log.info("Connection successfully established to neo4j server with this credentials : [url: {}, username: {}, password: {}]", neo4jConfig.getUrl(), neo4jConfig.getUsername(), neo4jConfig.getPassword().replaceAll(".", "*"));
+
+            try {
+                mongoClient.listDatabaseNames(); //checking connectivity to mongodb
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("Failed to connect to mongodb");
+            }
+
             List<Connection> connections = null;
             try {
                 connections = connectionService.findAllNotCompleted();
             } catch (Exception e) {
                 log.error("Failed to retrieve connections from neo4j", e);
             }
+
             if (connections.isEmpty()) {
                 log.info("No connections to migrate");
                 return;
