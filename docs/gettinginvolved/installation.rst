@@ -89,14 +89,13 @@ Copy the configuration file for OpenCelium.
 	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
+	If you like to use SSL, change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
 		
 	.. code-block:: sh
 		:linenos:	
 	
 		ssl_certificate /etc/ssl/certs/opencelium.pem;
 		ssl_certificate_key /etc/ssl/private/opencelium.key;
-		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
 	and copy the configuration file for OpenCelium:
 	
@@ -247,14 +246,13 @@ Copy the configuration file for OpenCelium.
 	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
+	If you like to use SSL, change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
 		
 	.. code-block:: sh
 		:linenos:	
 	
 		ssl_certificate /etc/ssl/certs/opencelium.pem;
 		ssl_certificate_key /etc/ssl/private/opencelium.key;
-		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
 	and copy the configuration file for OpenCelium:
 	
@@ -401,14 +399,13 @@ Copy the configuration file for OpenCelium.
 	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
+	If you like to use SSL, change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
 		
 	.. code-block:: sh
 		:linenos:	
 	
 		ssl_certificate /etc/ssl/certs/opencelium.pem;
 		ssl_certificate_key /etc/ssl/private/opencelium.key;
-		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
 	and copy the configuration file for OpenCelium:
 	
