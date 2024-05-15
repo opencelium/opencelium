@@ -40,4 +40,6 @@ public interface TemplateService {
     Optional<Template> findById(String id);
 
     boolean existsById(String templateId);
+
+    TemplateResource getByConnectionId(Long connectionId);
 }

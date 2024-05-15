@@ -4,10 +4,8 @@ public class SystemOverview {
 
     private String java;
     private String os;
-    private String neo4j;
-    private String kibana;
-    private String elasticSearch;
     private String mariadb;
+    private String mongodb;
 
     public String getJava() {
         return java;
@@ -25,35 +23,19 @@ public class SystemOverview {
         this.os = os;
     }
 
-    public String getNeo4j() {
-        return neo4j;
-    }
-
-    public void setNeo4j(String neo4j) {
-        this.neo4j = neo4j;
-    }
-
-    public String getKibana() {
-        return kibana;
-    }
-
-    public void setKibana(String kibana) {
-        this.kibana = kibana;
-    }
-
-    public String getElasticSearch() {
-        return elasticSearch;
-    }
-
-    public void setElasticSearch(String elasticSearch) {
-        this.elasticSearch = elasticSearch;
-    }
-
     public String getMariadb() {
         return mariadb;
     }
 
     public void setMariadb(String mariadb) {
         this.mariadb = mariadb;
+    }
+
+    public String getMongodb() {
+        return mongodb;
+    }
+
+    public void setMongodb(String mongodb) {
+        this.mongodb = mongodb;
     }
 }

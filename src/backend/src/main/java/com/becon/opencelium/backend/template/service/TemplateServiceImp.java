@@ -17,11 +17,17 @@
 package com.becon.opencelium.backend.template.service;
 
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.exception.WrongEncode;
+import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -39,6 +45,15 @@ import java.util.stream.Stream;
 
 @Service
 public class TemplateServiceImp implements TemplateService {
+    private final ConnectionService connectionService;
+    private final Mapper<ConnectionDTO, CtionTemplateResource> mapper;
+    private final Environment environment;
+
+    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionDTO, CtionTemplateResource> mapper, Environment environment) {
+        this.connectionService = connectionService;
+        this.mapper = mapper;
+        this.environment = environment;
+    }
 
     @Override
     public TemplateResource toResource(Template template) {
@@ -112,6 +127,20 @@ public class TemplateServiceImp implements TemplateService {
     public boolean existsById(String templateId) {
         List<Template> templates = getAll(PathConstant.TEMPLATE);
         return templateId == null || templates.stream().anyMatch(t -> t.getTemplateId().equals(templateId));
+    }
+
+    @Override
+    public TemplateResource getByConnectionId(Long connectionId) {
+        ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId);
+        CtionTemplateResource connectionRes = mapper.toDTO(connectionDTO);
+
+        TemplateResource templateResource = new TemplateResource();
+        templateResource.setConnection(connectionRes);
+        templateResource.setName(connectionRes.getTitle());
+        templateResource.setDescription(connectionRes.getDescription());
+        templateResource.setTemplateId(UUID.randomUUID().toString());
+        templateResource.setVersion(environment.getProperty("opencelium.version",""));
+        return templateResource;
     }
 
     @Override

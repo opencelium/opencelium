@@ -280,6 +280,9 @@ public class Neo4jDriverUtility {
                             return i;
                         }
                         i = getFields(fields, records, i + 1, nextLevel, methodName);
+                    } else if (value instanceof String str) {
+                        fields.put(name, str);
+                        i = getFields(fields, records, i + 1, nextLevel, methodName);
                     } else {
                         Map<String, Object> map = new HashMap<>();
                         fields.put(name, map);
@@ -300,6 +303,8 @@ public class Neo4jDriverUtility {
                                     list.add(element.trim());
                                 }
                                 fields.put(name, list);
+                            } else {
+                                fields.put(name, value);
                             }
                             if (nextLevel < currLevel) {
                                 return i;
