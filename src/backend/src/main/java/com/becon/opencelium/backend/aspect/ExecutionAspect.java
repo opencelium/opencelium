@@ -355,7 +355,7 @@ public class ExecutionAspect {
             return;
         }
         operations.stream()
-                .filter(op -> (op.getAggregatorId() != null) || (op.getAggregatorId() != 0))
+                .filter(op -> (op.getAggregatorId() != null) && (op.getAggregatorId() != 0))
                 .forEach(op -> {
                     DataAggregator da = dataAggregatorService.getById(op.getAggregatorId());
                     if (!da.isActive()) {
