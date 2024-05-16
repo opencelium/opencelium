@@ -156,8 +156,8 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
             <Dropdown isOpen={dropdownOpen} toggle={toggle} direction={direction}>
                 <DropdownToggleStyled caret>{"Add Connection"}</DropdownToggleStyled>
                 <DropdownMenu {...args}>
-                    <DropdownItemStyled onClick={toggleForm}>{"by template"}</DropdownItemStyled>
-                    <DropdownItemStyled onClick={openEditor}>{"using editor"}</DropdownItemStyled>
+                    <DropdownItemStyled onClick={toggleForm}>{"via template"}</DropdownItemStyled>
+                    <DropdownItemStyled onClick={openEditor}>{"via editor"}</DropdownItemStyled>
                 </DropdownMenu>
             </Dropdown>
             <Dialog
