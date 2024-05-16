@@ -11,29 +11,22 @@ Debian/Ubuntu (example for 24.04 LTS)
 Prepare environment
 ==================
 
-Update your system, download and install all required packages.
+**1. Update:**
+
+Update your system, download and install required packages.
 
 .. code-block:: sh
 	:linenos:
 
 	apt update
 	apt dist-upgrade
-	apt install unzip gpg git
-	
-	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/neo4j.gpg
-	echo 'deb https://debian.neo4j.com stable latest' | tee -a /etc/apt/sources.list.d/neo4j.list
-	
-	apt update
-	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j nginx
+	apt install unzip mariadb-server mariadb-client openjdk-17-jdk nginx
 
-.. note::
-	On restricted systems, you may have to change permissions after wget:
+**2. Install MongoDB:**
 
-	.. code-block:: sh
-		:linenos:	
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 	
-		chmod a+r /etc/apt/trusted.gpg.d/neo4j.gpg
-
 	
 Install Application
 ==================
@@ -65,19 +58,15 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	systemctl enable mariadb
 	mysql_secure_installation
 	
-**2. Neo4j:**
+**2. MongoDB:**
 
-Set your password for neo4j, restart and enable neo4j service.
-
-.. note::
-	Please change the password (secret1234) in the following command line!
+Start and enable mongod service.
 
 .. code-block:: sh
 	:linenos:
 	
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	systemctl restart neo4j.service
-	systemctl enable neo4j.service
+	systemctl start mongod
+	systemctl enable mongod
 	
 **3. Nginx:**
 
@@ -109,7 +98,7 @@ Reload config and enable nginx.
 .. code-block:: sh
 	:linenos:
 	
-	systemctl restart nginx
+	systemctl start nginx
 	systemctl enable nginx
 	
 **4. OpenCelium:**
@@ -124,9 +113,8 @@ Create and adjust configuration.
 	
 .. note::
 	| Modify application.yml
-	| Within section "Database configuration section of MariaDB and Neo4j":
+	| Within section "Database configuration section of MariaDB":
 	| - change password of opencelium user for MariaDB
-	| - change password of neo4j user
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
@@ -169,17 +157,19 @@ SUSE Linux Enterprise Server (example for SLES 15 SP5)
 Prepare environment
 ==================
 
-Update your system, download and install all required packages.
+**1. Update:**
+
+Update your system, download and install required packages.
 
 .. code-block:: sh
 	:linenos:
 
-	zypper install unzip gpg git insserv
+	zypper install unzip insserv mariadb mariadb-client java-17-openjdk nginx
 
-	zypper addrepo --refresh https://yum.neo4j.com/stable/5 neo4j-repository
-	zypper refresh
-	
-	zypper install mariadb mariadb-client java-17-openjdk neo4j nginx
+**2. Install MongoDB:**
+
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 
 	
 Install Application
@@ -213,19 +203,15 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	systemctl enable mariadb
 	mysql_secure_installation
 	
-**2. Neo4j:**
+**2. MongoDB:**
 
-Set your password for neo4j, restart and enable neo4j service.
-
-.. note::
-	Please change the password (secret1234) in the following command line!
+Start and enable mongod service.
 
 .. code-block:: sh
 	:linenos:
 	
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	systemctl restart neo4j.service
-	systemctl enable neo4j.service
+	systemctl start mongod
+	systemctl enable mongod
 	
 **3. Nginx:**
 
@@ -272,9 +258,8 @@ Create and adjust configuration.
 	
 .. note::
 	| Modify application.yml
-	| Within section "Database configuration section of MariaDB and Neo4j":
-	| - change MariaDB root user to opencelium and set password
-	| - change password of neo4j user
+	| Within section "Database configuration section of MariaDB":
+	| - change password of opencelium user for MariaDB 
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
@@ -317,23 +302,21 @@ Red Hat Enterprise Linux (example for Red Hat 9.2)
 Prepare environment
 ==================
 
-1. Update your system, download and install all required packages.
+**1. Update:**
+
+Update your system, download and install required packages.
 
 .. code-block:: sh
 	:linenos:
 
 	yum update
-	yum install unzip gpg git
+	yum install unzip mariadb-server java-17-openjdk nginx
 
-	rpm --import https://debian.neo4j.com/neotechnology.gpg.key
-	cat <<EOF>  /etc/yum.repos.d/neo4j.repo
-	[neo4j]
-	name=Neo4j RPM Repository
-	baseurl=https://yum.neo4j.com/stable/5
-	enabled=1
-	gpgcheck=1
-	EOF
-	yum install mariadb-server java-17-openjdk neo4j nginx
+**2. Install MongoDB:**
+
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+
 	
 Install Application
 ==================
@@ -366,19 +349,15 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	systemctl enable mariadb
 	mysql_secure_installation
 	
-**2. Neo4j:**
+**2. MongoDB:**
 
-Set your password for neo4j, restart and enable neo4j service.
-
-.. note::
-	Please change the password (secret1234) in the following command line!
+Start and enable mongod service.
 
 .. code-block:: sh
 	:linenos:
 	
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	systemctl restart neo4j.service
-	systemctl enable neo4j.service
+	systemctl restart mongod
+	systemctl enable mongod
 	
 **3. Nginx:**
 
@@ -426,9 +405,8 @@ Create and adjust configuration.
 	
 .. note::
 	| Modify application.yml
-	| Within section "Database configuration section of MariaDB and Neo4j":
-	| - change MariaDB root user to opencelium and set password
-	| - change password of neo4j user
+	| Within section "Database configuration section of MariaDB":
+	| - change password of opencelium user for MariaDB 
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
