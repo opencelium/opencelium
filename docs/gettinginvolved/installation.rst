@@ -168,8 +168,8 @@ Update your system, download and install required packages.
 
 **2. Install MongoDB:**
 
-Use default MongoDB installation guide.
-You can find documentation here `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux>`_
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 
 	
 Install Application
@@ -314,9 +314,8 @@ Update your system, download and install required packages.
 
 **2. Install MongoDB:**
 
-Use default MongoDB installation guide.
-You can find documentation here `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux>`_
-
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 
 	
 Install Application
