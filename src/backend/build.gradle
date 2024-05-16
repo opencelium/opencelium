@@ -60,6 +60,7 @@ dependencies {
 	implementation 'com.github.java-json-tools:json-patch:1.13'
 	implementation 'javax.json:javax.json-api:1.1.4'
 	implementation 'org.neo4j.driver:neo4j-java-driver:5.18.0'
+	implementation 'org.jsoup:jsoup:1.13.1'
 	compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	runtimeOnly 'mysql:mysql-connector-java'

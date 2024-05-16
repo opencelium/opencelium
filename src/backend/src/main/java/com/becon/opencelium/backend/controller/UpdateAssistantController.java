@@ -29,6 +29,7 @@ import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
+import com.becon.opencelium.backend.resource.update_assistant.PackageVersionResource;
 import com.becon.opencelium.backend.resource.update_assistant.VersionDTO;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
@@ -189,7 +190,7 @@ public class UpdateAssistantController {
     })
     @GetMapping(value = "/oc/online/version/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getOnlineVersion() {
-        String onVersions_json = packageServiceImp.getOnVersions();
+        List<PackageVersionResource> onVersions_json = packageServiceImp.getOnVersions();
         return ResponseEntity.ok(onVersions_json);
     }
 
