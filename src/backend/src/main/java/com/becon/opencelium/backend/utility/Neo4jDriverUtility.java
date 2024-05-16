@@ -61,12 +61,12 @@ public class Neo4jDriverUtility {
                     i = crawlMethodAndOperators(methods, operators, i + 1, records);
                 } else if (lastNodeOfNextRecord.hasLabel("Request")) {
                     MethodMng prevMethod = findPrevMethod(methods, nextPath);
-                    i = getRequest(prevMethod, i + 1, records, prevMethod.getName());
-                    i = getResponse(prevMethod, i + 1, records, prevMethod.getName());
+                    i = getRequest(prevMethod, i + 1, records);
+                    i = getResponse(prevMethod, i + 1, records);
                 } else if (lastNodeOfNextRecord.hasLabel("Response")) {
                     MethodMng prevMethod = findPrevMethod(methods, nextPath);
-                    i = getResponse(prevMethod, i + 1, records, prevMethod.getName());
-                    i = getRequest(prevMethod, i + 1, records, prevMethod.getName());
+                    i = getResponse(prevMethod, i + 1, records);
+                    i = getRequest(prevMethod, i + 1, records);
                 }
             } else if (node.hasLabel("Statement")) { //exception-free
                 OperatorMng operator = mapStatement(node.asMap());
@@ -91,11 +91,11 @@ public class Neo4jDriverUtility {
                 }
             } else if (node.hasLabel("Request")) {
                 MethodMng method = findPrevMethod(methods, path);
-                i = getRequest(method, i, records, method.getName());
+                i = getRequest(method, i, records);
 //                i = getResponse(method, i, records, method.getName());
             } else if (node.hasLabel("Response")) {
                 MethodMng method = findPrevMethod(methods, path);
-                i = getResponse(method, i, records, method.getName());
+                i = getResponse(method, i, records);
 //                i = getRequest(method, i, records, method.getName());
             } else if (node.hasLabel("Variable")) {
                 var relationships = (List<Relationship>) path.relationships();
@@ -145,7 +145,7 @@ public class Neo4jDriverUtility {
                 .orElseThrow(() -> new RuntimeException("Method not found with color: " + color));
     }
 
-    private static int getResponse(MethodMng method, int y, List<Record> records, String methodName) {
+    private static int getResponse(MethodMng method, int y, List<Record> records) {
         if (y >= records.size()) {
             return records.size() - 1;
         }
@@ -154,11 +154,11 @@ public class Neo4jDriverUtility {
         }
         ResponseMng responseMng = new ResponseMng();
         method.setResponse(responseMng);
-        y = getResult(responseMng, y + 1, records, methodName);
+        y = getResult(responseMng, y + 1, records);
         return y;
     }
 
-    private static int getRequest(MethodMng methodMng, int y, List<Record> records, String methodName) {
+    private static int getRequest(MethodMng methodMng, int y, List<Record> records) {
         if (y >= records.size()) {
             return records.size() - 1;
         }
@@ -182,15 +182,15 @@ public class Neo4jDriverUtility {
         Node nextNode = records.get(y + 1).get("p").asPath().end();
         if (nextNode.hasLabel("Header")) {
             y = getHeader(requestMng.getHeader(), y + 1, records);
-            y = getBody(requestMng.getBody(), y + 1, records, methodName);
+            y = getBody(requestMng.getBody(), y + 1, records);
         } else if (nextNode.hasLabel("Body")) {
-            y = getBody(requestMng.getBody(), y + 1, records, methodName);
+            y = getBody(requestMng.getBody(), y + 1, records);
             y = getHeader(requestMng.getHeader(), y + 1, records);
         }
         return y;
     }
 
-    private static int getResult(ResponseMng responseMng, int y, List<Record> records, String methodName) {
+    private static int getResult(ResponseMng responseMng, int y, List<Record> records) {
         if (y >= records.size())
             return records.size() - 1;
         Path path = records.get(y).get("p").asPath();
@@ -208,8 +208,8 @@ public class Neo4jDriverUtility {
         } else {
             responseMng.setFail(resultMng);
         }
-        y = getBody(resultMng.getBody(), y + 1, records, methodName);
-        return getResult(responseMng, y + 1, records, methodName);
+        y = getBody(resultMng.getBody(), y + 1, records);
+        return getResult(responseMng, y + 1, records);
     }
 
     private static int getHeader(Map<String, String> header, int y, List<Record> records) {
@@ -233,7 +233,7 @@ public class Neo4jDriverUtility {
         return records.size() - 1;
     }
 
-    private static int getBody(BodyMng bodyMng, int y, List<Record> records, String methodName) {
+    private static int getBody(BodyMng bodyMng, int y, List<Record> records) {
         if (y >= records.size()) {
             return records.size() - 1;
         }
@@ -249,13 +249,13 @@ public class Neo4jDriverUtility {
         bodyMng.setType(type);
         bodyMng.setFormat(format);
         bodyMng.setFields(new HashMap<>());
-        y = getFields(bodyMng.getFields(), records, y + 1, 1, methodName);
+        y = getFields(bodyMng.getFields(), records, y + 1, 1);
         return y;
     }
 
     private static final String OC_ATTRIBUTES = "__oc__attributes";
 
-    private static int getFields(Map<String, Object> fields, List<Record> records, int y, int level, String methodName) {
+    private static int getFields(Map<String, Object> fields, List<Record> records, int y, int level) {
         for (int i = y; i < records.size(); i++) {
             Path path = records.get(i).get("p").asPath();
             Node node = path.end();
@@ -271,26 +271,25 @@ public class Neo4jDriverUtility {
             }
             String name = (String) node.asMap().get("name");
             String type = (String) node.asMap().get("type");
+            Object value = node.asMap().get("value");
             switch (type) {
                 case "object" -> {
-                    Object value = node.asMap().get("value");
                     if (name.equals(OC_ATTRIBUTES) && value != null && value.equals("")) {
                         fields.put(name, "");
                         if (nextLevel < currLevel) {
                             return i;
                         }
-                        i = getFields(fields, records, i + 1, nextLevel, methodName);
+                        i = getFields(fields, records, i + 1, nextLevel);
                     } else if (value instanceof String str) {
                         fields.put(name, str);
-                        i = getFields(fields, records, i + 1, nextLevel, methodName);
+                        i = getFields(fields, records, i + 1, nextLevel);
                     } else {
                         Map<String, Object> map = new HashMap<>();
                         fields.put(name, map);
-                        i = getFields(map, records, i + 1, nextLevel, methodName);
+                        i = getFields(map, records, i + 1, nextLevel);
                     }
                 }
                 case "array" -> {
-                    Object value = node.asMap().get("value");
                     if (value != null) {
                         if (value instanceof String str) {
                             if (str.isEmpty()) {
@@ -309,19 +308,20 @@ public class Neo4jDriverUtility {
                             if (nextLevel < currLevel) {
                                 return i;
                             }
-                            i = getFields(fields, records, i + 1, nextLevel, methodName);
+                            i = getFields(fields, records, i + 1, nextLevel);
                         }
                     } else {
                         List<Map<String, Object>> list = new ArrayList<>();
                         list.add(new HashMap<>());
                         fields.put(name, list);
-                        i = getFields(list.get(0), records, i + 1, nextLevel, methodName);
+                        i = getFields(list.get(0), records, i + 1, nextLevel);
                     }
                 }
                 default -> { //string, integer, boolean
-                    Object value = node.asMap().get("value");
                     if (value instanceof String str) {
-                        fields.put(name, str);
+                        if(!str.isEmpty()) {
+                            fields.put(name, str);
+                        }
                     } else if (value instanceof Boolean b) {
                         fields.put(name, b);
                     } else if (value instanceof Integer in) {
@@ -332,7 +332,7 @@ public class Neo4jDriverUtility {
                     if (nextLevel < currLevel) {
                         return i;
                     }
-                    i = getFields(fields, records, i + 1, nextLevel, methodName);
+                    i = getFields(fields, records, i + 1, nextLevel);
                 }
             }
             if (nextLevel == -1) {
