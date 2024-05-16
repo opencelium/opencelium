@@ -12,6 +12,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,8 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     @Autowired
     private AssistantServiceImp assistantServiceImp;
+
+    private Logger logger = LoggerFactory.getLogger(UpdatePackageServiceImp.class);
 
     @Override
     public List<AvailableUpdate> getOffVersions() {
@@ -150,8 +154,6 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         for (Element title : titles) {
             String version = title.attr("title");
             if (pattern.matcher(version).matches()) {
-                PackageVersionResource packageVersionResource
-                        = new PackageVersionResource();
                 packVersion.add(version);
             }
         }
@@ -217,13 +219,15 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         try {
             String zipFilePath = PathConstant.ASSISTANT + PathConstant.VERSIONS + versionFolder;
             File file = findFirstZipFileFromVersionFolder(zipFilePath);
-            String instructionPath = FileNameUtils.removeExtension(file.getName()) + "/" +PathConstant.INSTRUCTION;
+            String folder = FileNameUtils.removeExtension(file.getName());
+            String instructionPath = folder + "/" +PathConstant.INSTRUCTION;
             // Open the zip file
             try (ZipFile zipFile = new ZipFile(file)) {
                 // Get the zip entry for the specific file
                 ZipEntry entry = zipFile.getEntry(instructionPath);
                 if (entry == null) {
-                    throw new IOException("File " + instructionPath + " not found in the zip archive " + versionFolder);
+                    logger.warn("File " + instructionPath + " not found in the zip archive. Folder: " + versionFolder);
+                    return "";
                 }
 
                 // Read the content of the file

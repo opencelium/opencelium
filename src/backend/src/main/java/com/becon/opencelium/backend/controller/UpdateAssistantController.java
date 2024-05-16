@@ -57,6 +57,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -266,7 +267,7 @@ public class UpdateAssistantController {
 //    }
 // ---------------------------------------------------------------------------------------------
     @GetMapping("/oc/template")
-    public ResponseEntity<?> getAssistentTemplateFiles() {
+    public ResponseEntity<?> getAssistantTemplateFiles() {
         String path = PathConstant.TEMPLATE;
         List<Template> templates = templateServiceImp.findAllByPath(path);
         List<TemplateResource> templateResources = templates.stream()
@@ -336,13 +337,13 @@ public class UpdateAssistantController {
     @PostMapping(value = "/zipfile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
         try {
-            String zipedAppVersion = assistantServiceImp.getVersion(file.getInputStream()).replace(".", "_");
-            Path target = Paths.get(PathConstant.ASSISTANT + "versions/" + zipedAppVersion);
+            String zippedAppVersion = assistantServiceImp.getVersion(file.getInputStream()).replace(".", "_");
+            Path target = Paths.get(PathConstant.ASSISTANT + "versions/" + zippedAppVersion);
             assistantServiceImp.uploadZipFile(file, target);
-            AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(zipedAppVersion);
+            AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(zippedAppVersion);
             AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
             return ResponseEntity.ok(availableUpdateResource);
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
