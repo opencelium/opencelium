@@ -24,8 +24,10 @@ Update your system, download and install required packages.
 
 **2. Install MongoDB:**
 
-Use default MongoDB installation guide.
-You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>` 
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>` 
+
+| The Docker images are hosted on `Dockerhub <https://hub.docker.com/u/opencelium>`_.
 	
 	
 Install Application
