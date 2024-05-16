@@ -25,9 +25,8 @@ Update your system, download and install required packages.
 **2. Install MongoDB:**
 
 Use default MongoDB installation guide.
-You can find documentation here `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux>`
-
-
+You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>` 
+	
 	
 Install Application
 ==================
@@ -66,7 +65,7 @@ Start and enable mongod service.
 .. code-block:: sh
 	:linenos:
 	
-	systemctl restart mongod
+	systemctl start mongod
 	systemctl enable mongod
 	
 **3. Nginx:**
@@ -99,7 +98,7 @@ Reload config and enable nginx.
 .. code-block:: sh
 	:linenos:
 	
-	systemctl restart nginx
+	systemctl start nginx
 	systemctl enable nginx
 	
 **4. OpenCelium:**
@@ -211,7 +210,7 @@ Start and enable mongod service.
 .. code-block:: sh
 	:linenos:
 	
-	systemctl restart mongod
+	systemctl start mongod
 	systemctl enable mongod
 	
 **3. Nginx:**
