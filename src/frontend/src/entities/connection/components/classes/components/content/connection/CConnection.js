@@ -606,13 +606,24 @@ export default class CConnection{
                 return;
         }
         let color = method.color;
+        let references = [];
         this.addRestColor(color);
+        const filteredFieldBinding = this.fieldBinding.filter(item => {
+            const fromHasColor = item.from.some(el => {
+                if(el.color === color) {
+                    references.push(el.getReference());
+                }
+                return el.color === color
+            });
+            //const toHasColor = item.to.some(el => el.color === color);
+            return fromHasColor/* || toHasColor*/;
+        })
         if(withCleanFieldBinding){
             this.cleanFieldBinding(connectorType, bindingItem);
         }
         connector.removeMethod(method, withRefactorIndexes);
-        this._fromConnector.cleanFromReference(color);
-        this._toConnector.cleanFromReference(color);
+        this._fromConnector.cleanFromReference(filteredFieldBinding, color, references);
+        this._toConnector.cleanFromReference(filteredFieldBinding, color, references);
     }
 
     removeConnectorOperator(connectorType, operator, withCleanFieldBinding){

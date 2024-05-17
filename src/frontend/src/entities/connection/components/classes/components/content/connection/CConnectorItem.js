@@ -1454,9 +1454,9 @@ export default class CConnectorItem{
         return !isExistNextIndexInMethods;
     }
 
-    cleanFromReference(methodColor) {
+    cleanFromReference(fieldBinding, methodColor, references) {
         for(let i = 0; i < this.methods.length; i++) {
-            this.methods[i].cleanFromReference(methodColor);
+            this.methods[i].cleanFromReference(fieldBinding, methodColor, references);
         }
         for(let i = 0; i < this.operators.length; i++) {
             this.operators[i].cleanFromReference(methodColor);
