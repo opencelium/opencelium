@@ -1,6 +1,15 @@
 package com.becon.opencelium.backend.utility;
 
+import org.mariadb.jdbc.type.LineString;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 
 public class DirectRefUtility {
@@ -47,15 +56,48 @@ public class DirectRefUtility {
             return new String[]{""};
         }
 
-        // TODO rewrite splitting with dot, split if valid
         String[] refParts = ref.split("\\.");
-        int from = 2;
+        // remove method color and exchange type
+        ref = ref.replace(refParts[0] + ".", "")
+                .replace(refParts[1] + ".", "");
 
         if (getExchangeType(ref).equals("response")) {
-            from++;
+            // remove 'fail' or 'success' for 'response' type
+            ref = ref.replace(refParts[2] + ".", "");
         }
 
-        return Arrays.copyOfRange(refParts, from, refParts.length);
+        ref += ".";
+
+        List<String> parts = new ArrayList<>();
+        StringBuilder holder = new StringBuilder();
+        Stack<Character> braces = new Stack<>();
+
+        for (char current : ref.toCharArray()) {
+            if (current == '.' && braces.isEmpty()) {
+                parts.add(holder.toString());
+
+                holder = new StringBuilder();
+            } else if (current == '[') {
+                braces.push(current);
+            } else if (current == ']') {
+                char top = braces.peek();
+                if (top == '[') {
+                    braces.pop();
+                } else {
+                    throw new RuntimeException("Wrong value is supplied to reference");
+                }
+            } else {
+                holder.append(current);
+            }
+        }
+
+        String[] result = new String[parts.size()];
+
+        for (int i = 0; i < parts.size(); i++) {
+            result[i] = parts.get(i);
+        }
+
+        return result;
     }
 
     public static String getPointerToBody(String ref, int partCount, String remove) {
