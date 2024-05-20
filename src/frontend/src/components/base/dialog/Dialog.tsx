@@ -74,13 +74,14 @@ const Dialog: FC<DialogProps> =
                                 return  <Button
                                             key={action.label}
                                             isDisabled={action.isDisabled}
-                                            color={action.isLoading ? ColorTheme.Blue : ''}
-                                            hasBackground={!action.isLoading}
+                                            color={action.isLoading ? '#fff' : ''}
+                                            hasBackground={true}
                                             isLoading={action.isLoading}
                                             label={action.label}
                                             handleClick={action.onClick}
                                             id={action.id ? action.id : `button_${action.label}`}
-                                            size={TextSize.Size_16} iconSize={TextSize.Size_14}
+                                            size={TextSize.Size_16}
+                                            iconSize={TextSize.Size_14}
                                         />
                             })
                         }

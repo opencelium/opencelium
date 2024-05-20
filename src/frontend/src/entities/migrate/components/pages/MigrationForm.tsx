@@ -30,9 +30,9 @@ const MigrationForm: FC<IForm> = ({}) => {
     } = CMigrationForm.getReduxState();
     const migrationForm = CMigrationForm.createState<IMigrationForm>({}, null);
     const TextInputs = migrationForm.getTexts([
-        {propertyName: "url", props: {icon: 'link', label: "Url"}},
-        {propertyName: "username", props: {icon: 'person', label: "Username"}},
-        {propertyName: "password", props: { icon: 'vpn_key', label: "Password", type: InputTextType.Password, }},
+        {propertyName: "url", props: {icon: 'link', label: "Url", placeholder: 'bolt://localhost:7687'}},
+        {propertyName: "username", props: {icon: 'person', label: "Username", placeholder: 'neo4j'}},
+        {propertyName: "password", props: { icon: 'vpn_key', label: "Password", type: InputTextType.Password, placeholder: 'secretsecret' }},
     ])
     const actions = [<Button
         key={'action_button'}

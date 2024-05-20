@@ -13,17 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {ITheme} from "@style/Theme";
 
+interface DownloadIconProps{
+    theme?: ITheme,
+    listConnection: any,
+}
 
-import {migrate} from "@entity/migrate/redux_toolkit/action_creators/MigrationCreators";
-
-export default {
-    fulfilled: {
-        [migrate.fulfilled.type]: "The migration was successfully fulfilled",
-    },
-    rejected: {
-        [migrate.rejected.type]: {
-            "__NATIVE__": "-",
-        },
-    },
+export {
+    DownloadIconProps,
 }

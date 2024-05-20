@@ -114,7 +114,7 @@ public class SchedulerServiceImp implements SchedulerService {
     public void deleteById(int id) {
         Scheduler scheduler = getById(id);
         schedulingStrategy.deleteJob(scheduler);
-        schedulerRepository.deleteById(id);
+        schedulerRepository.delete(scheduler);
     }
 
     @Override
@@ -216,7 +216,7 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public synchronized void startNow(Scheduler scheduler) {
-        schedulerRepository.save(scheduler);
+//        schedulerRepository.save(scheduler);
         schedulingStrategy.runJob(scheduler);
     }
 

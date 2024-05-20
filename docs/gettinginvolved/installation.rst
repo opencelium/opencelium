@@ -8,34 +8,27 @@ Installation
 Debian/Ubuntu (example for 24.04 LTS)
 """""""""""""""""
 
-Prepare environment:
+Prepare environment
 ==================
 
-Update your system, download and install all required packages.
+**1. Update:**
+
+Update your system, download and install required packages.
 
 .. code-block:: sh
 	:linenos:
 
 	apt update
 	apt dist-upgrade
-	apt install unzip gpg git
-	
-	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/neo4j.gpg
-	echo 'deb https://debian.neo4j.com stable latest' | tee -a /etc/apt/sources.list.d/neo4j.list
-	
-	apt update
-	apt install mariadb-server mariadb-client openjdk-17-jdk neo4j nginx
+	apt install unzip mariadb-server mariadb-client openjdk-17-jdk nginx
 
-.. note::
-	On restricted systems, you may have to change permissions after wget:
+**2. Install MongoDB:**
 
-	.. code-block:: sh
-		:linenos:	
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 	
-		chmod a+r /etc/apt/trusted.gpg.d/neo4j.gpg
-
 	
-Install Application:
+Install Application
 ==================
 
 Download and unzip application, and create a link for it.
@@ -48,7 +41,7 @@ Download and unzip application, and create a link for it.
 	rm /opt/opencelium/oc_latest.zip
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 		
-Configuration:
+Configuration
 ==================
 
 **1. MariaDB:**
@@ -61,45 +54,39 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 .. code-block:: sh
 	:linenos:
 	
-	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	systemctl enable mariadb
 	mysql_secure_installation
 	
-**2. Neo4j:**
+**2. MongoDB:**
 
-Set your password for neo4j, restart and enable neo4j service.
-
-.. note::
-	Please change the password (secret1234) in the following command line!
+Start and enable mongod service.
 
 .. code-block:: sh
 	:linenos:
 	
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	systemctl restart neo4j.service
-	systemctl enable neo4j.service
+	systemctl start mongod
+	systemctl enable mongod
 	
 **3. Nginx:**
 
-Remove default config and link OpenCelium config.
+Copy the configuration file for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
 	
-	rm /etc/nginx/sites-enabled/default
-	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/
+	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, do the following:
-		
+	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
+	
 	.. code-block:: sh
-		:linenos:	
+		:linenos:
 	
-		rm /etc/nginx/sites-enabled/default
-		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
-	and change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
-	
+	and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
+			
 	.. code-block:: sh
 		:linenos:	
 	
@@ -111,7 +98,7 @@ Reload config and enable nginx.
 .. code-block:: sh
 	:linenos:
 	
-	systemctl restart nginx
+	systemctl start nginx
 	systemctl enable nginx
 	
 **4. OpenCelium:**
@@ -126,9 +113,8 @@ Create and adjust configuration.
 	
 .. note::
 	| Modify application.yml
-	| Within section "Database configuration section of MariaDB and Neo4j":
-	| - change MariaDB root user to opencelium and set password
-	| - change password of neo4j user
+	| Within section "Database configuration section of MariaDB":
+	| - change password of opencelium user for MariaDB
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
@@ -138,7 +124,7 @@ Create and adjust configuration.
 	.. code-block:: sh
 		:linenos:
 		
-		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
+		openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/ssl/certs/opencelium.pem -inkey /etc/ssl/private/opencelium.key
 	
 Finally start OpenCelium backend.	
 	
@@ -167,202 +153,26 @@ Finally start OpenCelium backend.
 
 SUSE Linux Enterprise Server (example for SLES 15 SP5)
 """""""""""""""""
-**Prepare environment:**
 
-1. Install nodejs:
-
-.. code-block:: sh
-	:linenos:
-	
-	zypper install nodejs20
-
-2. Install yarn:
-
-.. code-block:: sh
-	:linenos:
-
-	sudo npm install yarn -g
-
-3. Install git:
-
-.. code-block:: sh
-	:linenos:
-
-	zypper install git
-
-4. Install java:
-
-.. code-block:: sh
-	:linenos:
-
-	zypper install java-17-openjdk
-
-6. Install gradle:
-
-.. code-block:: sh
-	:linenos:
-	
-	cd /tmp
-	wget https://services.gradle.org/distributions/gradle-7.4.2-all.zip
-	mkdir /opt/gradle
-	unzip -d /opt/gradle gradle-7.4.2-all.zip
-	export PATH=$PATH:/opt/gradle/gradle-7.4.2/bin
-
-7. Install neo4j:
-
-.. code-block:: sh
-	:linenos:
-
-	zypper addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
-	zypper refresh
-	zypper install neo4j-5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	neo4j start
-	zypper install insserv
-	systemctl enable neo4j
-	
-.. note::
-	Change password (secret1234) if you want.
-
-8. Install MariaDB:
-
-.. code-block:: sh
-	:linenos:
-
-	zypper install mariadb mariadb-client
-	rcmysql start
-	mysql_secure_installation
-	systemctl enable mariadb
-
-.. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root
-		
-	If this works (without your password), please set your password again with this command:
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
-		
-	Change password (root) if you want.
-
-**Install Application:**
-
-1. Get frontend repository
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt
-	git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . 
-	
-.. note::
-	Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
-
-2. Run frontend with yarn
-
-.. code-block:: sh
-	:linenos:
-
-	cd src/frontend
-	yarn
-	
-.. note::
-	If yarn doesn't run properly, use this command to increase the amount of inotify watchers:
-
-	.. code-block:: sh
-		:linenos:	
-
-		echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-
-3. Enable OC service
-
-.. code-block:: sh
-	:linenos:
-
-	ln -s /opt/scripts/oc_service.sh /usr/bin/oc
-
-4. Start frontend
-
-.. code-block:: sh
-	:linenos:
-
-	oc start_frontend
-
-5. Create application.yml file for backend
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend
-	cp src/main/resources/application_default.yml src/main/resources/application.yml
-	
-.. note::
-	Make changes inside the file application.yml! 
-	Change neo4j and mysql database password.
-
-6. Install database 
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend/database
-	mysql -u root -p -e "source oc_data.sql"
-
-7. Build backend project
-
-.. code-block:: sh
-	:linenos:
-
-	cd /opt/src/backend/
-	gradle build
-
-8. Start backend
-
-.. code-block:: sh
-	:linenos:
-
-	oc start_backend
-
-9. Welcome to OC
-
-.. code-block:: sh
-	:linenos:
-	
-	Visit opencelium http://SERVERIP:8888
-
-
-
-Red Hat Enterprise Linux (example for Red Hat 9.2)
-"""""""""""""""""
-
-Prepare environment:
+Prepare environment
 ==================
 
-1. Update your system, download and install all required packages.
+**1. Update:**
+
+Update your system, download and install required packages.
 
 .. code-block:: sh
 	:linenos:
 
-	yum update
-	yum install unzip gpg git
+	zypper install unzip insserv mariadb mariadb-client java-17-openjdk nginx
 
-	rpm --import https://debian.neo4j.com/neotechnology.gpg.key
-	cat <<EOF>  /etc/yum.repos.d/neo4j.repo
-	[neo4j]
-	name=Neo4j RPM Repository
-	baseurl=https://yum.neo4j.com/stable/5
-	enabled=1
-	gpgcheck=1
-	EOF
-	yum install mariadb-server java-17-openjdk neo4j nginx
+**2. Install MongoDB:**
+
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+
 	
-Install Application:
+Install Application
 ==================
 
 Download and unzip application, and create a link for it.
@@ -375,7 +185,7 @@ Download and unzip application, and create a link for it.
 	rm /opt/opencelium/oc_latest.zip
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 		
-Configuration:
+Configuration
 ==================
 
 **1. MariaDB:**
@@ -387,47 +197,41 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 
 .. code-block:: sh
 	:linenos:
-	
-	systemctl start mariadb
-	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost'  IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
+
+	rcmysql start	
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	systemctl enable mariadb
 	mysql_secure_installation
 	
-**2. Neo4j:**
+**2. MongoDB:**
 
-Set your password for neo4j, restart and enable neo4j service.
-
-.. note::
-	Please change the password (secret1234) in the following command line!
+Start and enable mongod service.
 
 .. code-block:: sh
 	:linenos:
 	
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
-	systemctl restart neo4j.service
-	systemctl enable neo4j.service
+	systemctl start mongod
+	systemctl enable mongod
 	
 **3. Nginx:**
 
-Remove default config and link OpenCelium config.
+Copy the configuration file for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
 	
-	rm /etc/nginx/sites-enabled/default
-	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/
+	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, do the following:
-		
+	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
+	
 	.. code-block:: sh
-		:linenos:	
+		:linenos:
 	
-		rm /etc/nginx/sites-enabled/default
-		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
-	and change the certificates, within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:
-	
+	and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
+			
 	.. code-block:: sh
 		:linenos:	
 	
@@ -454,9 +258,8 @@ Create and adjust configuration.
 	
 .. note::
 	| Modify application.yml
-	| Within section "Database configuration section of MariaDB and Neo4j":
-	| - change MariaDB root user to opencelium and set password
-	| - change password of neo4j user
+	| Within section "Database configuration section of MariaDB":
+	| - change password of opencelium user for MariaDB 
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
@@ -466,7 +269,154 @@ Create and adjust configuration.
 	.. code-block:: sh
 		:linenos:
 		
-		openssl pkcs12 -export -out ssl-cert-snakeoil.p12 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -inkey /etc/ssl/private/ssl-cert-snakeoil.key
+		openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/pki/tls/certs/opencelium.pem -inkey /etc/pki/tls//private/opencelium.key
+	
+Finally start OpenCelium backend.	
+	
+.. code-block:: sh
+	:linenos:
+	
+	ln -s /opt/opencelium/conf/opencelium.service /etc/systemd/system/opencelium.service
+	systemctl daemon-reload
+	systemctl enable opencelium
+	systemctl start opencelium
+
+.. note::
+	| Afterwards you can connect to `http://localhost`	
+	| Default User and Password is:
+	
+	| admin@opencelium.io
+	| 1234
+	
+	| If you want to have a look into OpenCelium Logs please use:
+	
+	.. code-block:: sh
+		:linenos:
+		
+		journalctl -xe -u opencelium -f
+		
+
+Red Hat Enterprise Linux (example for Red Hat 9.2)
+"""""""""""""""""
+
+Prepare environment
+==================
+
+**1. Update:**
+
+Update your system, download and install required packages.
+
+.. code-block:: sh
+	:linenos:
+
+	yum update
+	yum install unzip mariadb-server java-17-openjdk nginx
+
+**2. Install MongoDB:**
+
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+
+	
+Install Application
+==================
+
+Download and unzip application, and create a link for it.
+
+.. code-block:: sh
+	:linenos:
+
+	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
+	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
+	rm /opt/opencelium/oc_latest.zip
+	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
+		
+Configuration
+==================
+
+**1. MariaDB:**
+
+Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation.
+
+.. note::
+	Please change the password (secret1234) in the following command line!
+
+.. code-block:: sh
+	:linenos:
+	
+	systemctl start mariadb
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
+	systemctl enable mariadb
+	mysql_secure_installation
+	
+**2. MongoDB:**
+
+Start and enable mongod service.
+
+.. code-block:: sh
+	:linenos:
+	
+	systemctl restart mongod
+	systemctl enable mongod
+	
+**3. Nginx:**
+
+Copy the configuration file for OpenCelium.
+
+.. code-block:: sh
+	:linenos:
+	
+	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
+	
+.. note::
+	If you like to use SSL, copy the SSL-configuration file for OpenCelium and create a link to the key-folder:
+	
+	.. code-block:: sh
+		:linenos:
+		
+		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+		ln -s /etc/pki/tls/private/ /etc/ssl/private
+		
+	Change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:
+	
+	.. code-block:: sh
+		:linenos:
+		
+		ssl_certificate /etc/ssl/certs/opencelium.pem;
+		ssl_certificate_key /etc/ssl/private/opencelium.key;
+		
+Reload config and enable nginx.
+
+.. code-block:: sh
+	:linenos:
+	
+	systemctl restart nginx
+	systemctl enable nginx
+	
+**4. OpenCelium:**
+
+Create and adjust configuration.
+
+.. code-block:: sh
+	:linenos:
+	
+	cp /opt/opencelium/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
+	
+	
+.. note::
+	| Modify application.yml
+	| Within section "Database configuration section of MariaDB":
+	| - change password of opencelium user for MariaDB 
+
+	| Just in case you are using SSL, add certs to the ssl section. 
+	| It has to be a p12 keystore file with password! 
+	| If you just have key and pem you can create a p12 as follows:
+
+	
+	.. code-block:: sh
+		:linenos:
+		
+		openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/pki/tls/certs/opencelium.pem -inkey /etc/pki/tls//private/opencelium.key
 	
 Finally start OpenCelium backend.	
 	

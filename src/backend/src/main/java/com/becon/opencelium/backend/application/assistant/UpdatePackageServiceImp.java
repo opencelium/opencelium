@@ -1,32 +1,32 @@
 package com.becon.opencelium.backend.application.assistant;
 
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
-import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
+import com.becon.opencelium.backend.resource.update_assistant.PackageVersionResource;
 import com.becon.opencelium.backend.utility.FileNameUtils;
+import com.becon.opencelium.backend.utility.PackageVersionManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -45,6 +45,8 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     @Autowired
     private AssistantServiceImp assistantServiceImp;
 
+    private Logger logger = LoggerFactory.getLogger(UpdatePackageServiceImp.class);
+
     @Override
     public List<AvailableUpdate> getOffVersions() {
 
@@ -58,7 +60,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     }
 
     @Override
-    public String getOnVersions() {
+    public List<PackageVersionResource> getOnVersions() {
         try {
             return getVersions();
         } catch (Exception e) {
@@ -139,24 +141,44 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         }
     }
 
-    private String getVersions() throws Exception {
-        String version  = assistantServiceImp.getCurrentVersion();
-        String endpoint = "p984zhugh3443g8-438ghi4uh34g83-03ugoigh498t53y-" +
-                "483hy4pgh438ty3948gh34p8g-34ug394gheklrghdgopwuew09327-89f/" + version;
-        long date = new Date().getTime();
-        String url = "https://service.opencelium.io:443/api/" + endpoint;
+    private List<PackageVersionResource> getVersions() throws Exception {
+        String packageCloudUrl = "https://packagecloud.io/becon/opencelium";
+        String htmlResponse = restTemplate.getForObject(packageCloudUrl, String.class);
+        String currentVersion = env.getProperty(YamlPropConst.OC_VERSION);
 
-        HttpMethod method = HttpMethod.GET;
-        HttpHeaders header = new HttpHeaders();
-        header.set("x-access-token", "qpoeqavncbms09248527qrkazmvbgw9328uq0akzvzncbjgwh3pw09r0iavlhgwe98y349t8ghergiueh49230ur29ut3hg9");
-        header.set("x-sp-timestamp", String.valueOf(date));
+        Set<String> packVersion = new HashSet<>();
+        Document doc = Jsoup.parse(htmlResponse);
+        Elements titles = doc.select("a[title*=.zip]");  // Selects all <a> elements with href ending in .zip
 
-        String signature = generateSignature("tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv", "GET", "/api/" + endpoint, String.valueOf(date)).toLowerCase();
-        header.set("x-sp-signature", signature);
-        HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
-        ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
-        return response.getBody();
+        Pattern pattern = Pattern.compile("^oc_\\d+(\\.\\d+)*\\.zip$");
+        for (Element title : titles) {
+            String version = title.attr("title");
+            if (pattern.matcher(version).matches()) {
+                packVersion.add(version);
+            }
+        }
+
+        return PackageVersionManager.getPackageVersions(packVersion, currentVersion);
     }
+
+//    private String getVersions() throws Exception {
+//        String version  = assistantServiceImp.getCurrentVersion();
+//        String endpoint = "p984zhugh3443g8-438ghi4uh34g83-03ugoigh498t53y-" +
+//                "483hy4pgh438ty3948gh34p8g-34ug394gheklrghdgopwuew09327-89f/" + version;
+//        long date = new Date().getTime();
+//        String url = "https://service.opencelium.io:443/api/" + endpoint;
+//
+//        HttpMethod method = HttpMethod.GET;
+//        HttpHeaders header = new HttpHeaders();
+//        header.set("x-access-token", "qpoeqavncbms09248527qrkazmvbgw9328uq0akzvzncbjgwh3pw09r0iavlhgwe98y349t8ghergiueh49230ur29ut3hg9");
+//        header.set("x-sp-timestamp", String.valueOf(date));
+//
+//        String signature = generateSignature("tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv", "GET", "/api/" + endpoint, String.valueOf(date)).toLowerCase();
+//        header.set("x-sp-signature", signature);
+//        HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
+//        ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
+//        return response.getBody();
+//    }
 
     //'tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv', 'GET', `/api/${endpoint}`, currentDate
     private String generateSignature(String key, String httpMethod, String url, String currentDate) {
@@ -197,13 +219,15 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         try {
             String zipFilePath = PathConstant.ASSISTANT + PathConstant.VERSIONS + versionFolder;
             File file = findFirstZipFileFromVersionFolder(zipFilePath);
-            String instructionPath = FileNameUtils.removeExtension(file.getName()) + "/" +PathConstant.INSTRUCTION;
+            String folder = FileNameUtils.removeExtension(file.getName());
+            String instructionPath = folder + "/" +PathConstant.INSTRUCTION;
             // Open the zip file
             try (ZipFile zipFile = new ZipFile(file)) {
                 // Get the zip entry for the specific file
                 ZipEntry entry = zipFile.getEntry(instructionPath);
                 if (entry == null) {
-                    throw new IOException("File " + instructionPath + " not found in the zip archive " + versionFolder);
+                    logger.warn("File " + instructionPath + " not found in the zip archive. Folder: " + versionFolder);
+                    return "";
                 }
 
                 // Read the content of the file

@@ -4,6 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InvokerTemplateResource {
+    public InvokerTemplateResource() {
+    }
+
+    public InvokerTemplateResource(String name) {
+        this.name = name;
+    }
 
     private String name;
 

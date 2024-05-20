@@ -24,10 +24,15 @@ export interface ElasticSearchResponseProps{
     details: {version: string, error: string},
     status: ExternalApplicationStatus,
 }
+export interface DBResponseProps{
+    details: {version: string, name: string},
+    status: ExternalApplicationStatus,
+}
 
 export interface ActuatorHealthResponseProps{
     components: {
-        elasticsearch: ElasticSearchResponseProps,
+        mariaDb: DBResponseProps,
+        mongoDb: DBResponseProps,
     },
     status: ExternalApplicationStatus
 }

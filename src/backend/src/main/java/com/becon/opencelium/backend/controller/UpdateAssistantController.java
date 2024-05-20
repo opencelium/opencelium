@@ -29,6 +29,7 @@ import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
+import com.becon.opencelium.backend.resource.update_assistant.PackageVersionResource;
 import com.becon.opencelium.backend.resource.update_assistant.VersionDTO;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
@@ -56,6 +57,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -189,7 +191,7 @@ public class UpdateAssistantController {
     })
     @GetMapping(value = "/oc/online/version/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getOnlineVersion() {
-        String onVersions_json = packageServiceImp.getOnVersions();
+        List<PackageVersionResource> onVersions_json = packageServiceImp.getOnVersions();
         return ResponseEntity.ok(onVersions_json);
     }
 
@@ -265,7 +267,7 @@ public class UpdateAssistantController {
 //    }
 // ---------------------------------------------------------------------------------------------
     @GetMapping("/oc/template")
-    public ResponseEntity<?> getAssistentTemplateFiles() {
+    public ResponseEntity<?> getAssistantTemplateFiles() {
         String path = PathConstant.TEMPLATE;
         List<Template> templates = templateServiceImp.findAllByPath(path);
         List<TemplateResource> templateResources = templates.stream()
@@ -335,13 +337,13 @@ public class UpdateAssistantController {
     @PostMapping(value = "/zipfile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
         try {
-            String zipedAppVersion = assistantServiceImp.getVersion(file.getInputStream()).replace(".", "_");
-            Path target = Paths.get(PathConstant.ASSISTANT + "versions/" + zipedAppVersion);
+            String zippedAppVersion = assistantServiceImp.getVersion(file.getInputStream()).replace(".", "_");
+            Path target = Paths.get(PathConstant.ASSISTANT + "versions/" + zippedAppVersion);
             assistantServiceImp.uploadZipFile(file, target);
-            AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(zipedAppVersion);
+            AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(zippedAppVersion);
             AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
             return ResponseEntity.ok(availableUpdateResource);
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
