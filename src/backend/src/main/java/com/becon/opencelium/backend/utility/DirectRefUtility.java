@@ -57,11 +57,13 @@ public class DirectRefUtility {
         }
 
         String[] refParts = ref.split("\\.");
+        String exchangeType = getExchangeType(ref);
+
         // remove method color and exchange type
         ref = ref.replace(refParts[0] + ".", "")
                 .replace(refParts[1] + ".", "");
 
-        if (getExchangeType(ref).equals("response")) {
+        if ("response".equals(exchangeType)) {
             // remove 'fail' or 'success' for 'response' type
             ref = ref.replace(refParts[2] + ".", "");
         }
@@ -79,6 +81,7 @@ public class DirectRefUtility {
                 holder = new StringBuilder();
             } else if (current == '[') {
                 braces.push(current);
+                holder.append(current);
             } else if (current == ']') {
                 char top = braces.peek();
                 if (top == '[') {
@@ -86,6 +89,7 @@ public class DirectRefUtility {
                 } else {
                     throw new RuntimeException("Wrong value is supplied to reference");
                 }
+                holder.append(current);
             } else {
                 holder.append(current);
             }
