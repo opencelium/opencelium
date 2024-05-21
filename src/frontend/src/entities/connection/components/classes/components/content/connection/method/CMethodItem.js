@@ -78,28 +78,42 @@ export default class CMethodItem{
         this.request.endpoint = this.request.endpoint.replace(referenceRegExp, '');
     }
 
-    cleanBodyFromReference(methodColor) {
-        const bodyString = JSON.stringify(this.request.body.fields);
-        const regex = /"((?:#[0-9A-Fa-f]{6}\.\((?:request|response)\)\.[^;]+;?)+)"/g;
-        let result = bodyString;
-        let match;
-
-        while ((match = regex.exec(bodyString)) !== null) {
-            const elements = match[1].split(';');
-            const filteredElements = elements.filter(element => {
-                const elementColor = element.split('.')[0];
-                return elementColor !== methodColor;
-            });
-            const newElementsString = filteredElements.join(';');
-            result = result.replace(match[1], newElementsString);
+    cleanReferenceAtPath(path, references) {
+        const keys = path.split('.');
+        let current = this.request.body.fields;
+        let isFieldExist = true;
+        for (let i = 0; i < keys.length - 1; i++) {
+            if (!(keys[i] in current)) {
+                isFieldExist = false;
+            }
+            current = current[keys[i]];
         }
-
-        this.request.body.fields = JSON.parse(result);
+        if(isFieldExist) {
+            for(let i = 0;i < references.length; i++) {
+                current[keys[keys.length - 1]] = current[keys[keys.length - 1]].split(`${references[i]};`).join('');
+                current[keys[keys.length - 1]] = current[keys[keys.length - 1]].split(`${references[i]}`).join('');
+            }
+        }
     }
 
-    cleanFromReference(methodColor) {
+    cleanBodyFromReference(fieldBinding, methodColor, references) {
+        const fieldPaths = fieldBinding.reduce((acc, item) => {
+            item.to.forEach(el => {
+                if (el.color === this.color) {
+                    acc.push(el.field);
+                }
+            });
+            return acc;
+        }, []);
+        for(let i = 0; i < fieldPaths.length; i++) {
+            this.cleanReferenceAtPath(fieldPaths[i], references);
+        }
+        //this.request.body.fields = JSON.parse(result);
+    }
+
+    cleanFromReference(fieldBinding, methodColor, references) {
         this.cleanEndpointFromReference(methodColor);
-        this.cleanBodyFromReference(methodColor);
+        this.cleanBodyFromReference(fieldBinding, methodColor, references);
     }
 
     checkError(error){
