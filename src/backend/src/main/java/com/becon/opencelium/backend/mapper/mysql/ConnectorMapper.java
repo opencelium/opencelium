@@ -30,7 +30,8 @@ public interface ConnectorMapper extends Mapper<Connector, ConnectorDTO> {
     @Mappings({
             @Mapping(target = "id", source = "connectorId"),
             @Mapping(target = "invoker", source = "invoker.name"),
-            @Mapping(target = "icon", expression = "java(StringUtility.findImageFromUrl(dto.getIcon()))")
+            @Mapping(target = "icon", expression = "java(StringUtility.findImageFromUrl(dto.getIcon()))"),
+            @Mapping(target = "sslValidation", source = "sslCert")
     })
     Connector toEntity(ConnectorDTO dto);
 
@@ -39,7 +40,8 @@ public interface ConnectorMapper extends Mapper<Connector, ConnectorDTO> {
     @Mappings({
             @Mapping(target = "connectorId", source = "id"),
             @Mapping(target = "icon", expression = "java(StringUtility.resolveImagePath(entity.getIcon()))"),
-            @Mapping(target = "invoker", qualifiedByName = {"helperMapper", "getInvokerDTO"})
+            @Mapping(target = "invoker", qualifiedByName = {"helperMapper", "getInvokerDTO"}),
+            @Mapping(target = "sslCert", source = "sslValidation")
     })
     ConnectorDTO toDTO(Connector entity);
 }
