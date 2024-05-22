@@ -40,6 +40,7 @@ Download and unzip application, and create a link for it.
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
+	chmod +x /usr/bin/oc
 		
 Configuration
 ==================
@@ -68,14 +69,25 @@ Start and enable mongod service.
 	systemctl start mongod
 	systemctl enable mongod
 	
+	mongosh
+	use opencelium
+	db.createUser(
+	{
+	user: "oc_admin",
+	pwd: passwordPrompt(),
+	roles: [ "readWrite", "dbAdmin" ]
+	}
+	)
+	
 **3. Nginx:**
 
-Copy the configuration file for OpenCelium.
+Remove default config and link configuration file for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
 	
-	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
+	rm /etc/nginx/sites-enabled/default
+	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/oc.conf
 	
 .. note::
 	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
@@ -83,9 +95,9 @@ Copy the configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 	
-		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
-	and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
+	and change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:	
 			
 	.. code-block:: sh
 		:linenos:	
@@ -98,7 +110,7 @@ Reload config and enable nginx.
 .. code-block:: sh
 	:linenos:
 	
-	systemctl start nginx
+	systemctl restart nginx
 	systemctl enable nginx
 	
 **4. OpenCelium:**
@@ -115,6 +127,9 @@ Create and adjust configuration.
 	| Modify application.yml
 	| Within section "Database configuration section of MariaDB":
 	| - change password of opencelium user for MariaDB
+	
+	| Within section "Database configuration section of MongoDB":
+	| - change password of oc_admin user for MariaDB
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
