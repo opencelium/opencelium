@@ -57,7 +57,11 @@ public class ConnectionGCService {
         List<Connection> connections = connectionService.getAllConnectionsNotContains(allConnectionIds);
         if (connections.isEmpty()) {
             if (connectionMngService.count() != 0) {
-                connectionMngService.getAll().forEach(c -> connectionMngService.delete(c.getConnectionId()));
+                connectionMngService.getAll().forEach(c -> {
+                    if (!allConnectionIds.contains(c.getConnectionId())) {
+                        connectionMngService.delete(c.getConnectionId());
+                    }
+                });
             }
             return null;
         }

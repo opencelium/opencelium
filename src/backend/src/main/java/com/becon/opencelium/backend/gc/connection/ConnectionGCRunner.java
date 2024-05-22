@@ -63,6 +63,7 @@ public class ConnectionGCRunner extends GCRunner<ConnectionForGC> {
     private Criteria<ConnectionForGC> setCriteria() {
         return Criteria.<ConnectionForGC>builder()
                 .and(c -> c.getConnection().getTitle() != null)
+                .and(c -> !c.getConnection().getTitle().matches("!\\*test_connection_[0-9]{13}_operator_test"))
                 .build();
     }
 }

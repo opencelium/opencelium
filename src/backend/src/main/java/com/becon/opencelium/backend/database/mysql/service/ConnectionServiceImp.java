@@ -131,7 +131,9 @@ public class ConnectionServiceImp implements ConnectionService {
 
         //saving connectionMng
         connectionMng.setConnectionId(savedConnection.getId());
-        return connectionMngService.save(connectionMng);
+        ConnectionMng savedMng = connectionMngService.save(connectionMng);
+        connectionHistoryService.makeHistoryAndSave(savedConnection, null, Action.CREATE);
+        return savedMng;
     }
 
     @Override
