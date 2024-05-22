@@ -136,7 +136,7 @@ Create and adjust configuration.
 	| - change password of opencelium user for MariaDB
 	
 	| Within section "Database configuration section of MongoDB":
-	| - change password of oc_admin user for MariaDB
+	| - change password of oc_admin user for MongoDB
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
@@ -311,6 +311,10 @@ Create and adjust configuration.
 	| Modify application.yml
 	| Within section "Database configuration section of MariaDB":
 	| - change password of opencelium user for MariaDB 
+	
+	| Within section "Database configuration section of MongoDB":
+	| - change password of oc_admin user for MongoDB
+
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
@@ -486,6 +490,10 @@ Create and adjust configuration.
 	| Modify application.yml
 	| Within section "Database configuration section of MariaDB":
 	| - change password of opencelium user for MariaDB 
+	
+	| Within section "Database configuration section of MongoDB":
+	| - change password of oc_admin user for MongoDB
+
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
