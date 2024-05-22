@@ -1,5 +1,6 @@
+# operations: add, modify, delete, rename.
 versions:
-  - version: 4.0aa
+  - version: 4.0
     changes:
       - changeset: 1
         operation: add
@@ -9,3 +10,6 @@ versions:
         operation: add
         value: mongodb://oc_admin:secretsecret@localhost:27017/opencelium
         path: spring.data.mongodb.uri
+      - changeset: 3
+        operation: delete
+        path: spring.neo4j
