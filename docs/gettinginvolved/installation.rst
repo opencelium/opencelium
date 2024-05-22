@@ -40,6 +40,7 @@ Download and unzip application, and create a link for it.
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
+	chmod +x /usr/bin/oc
 		
 Configuration
 ==================
@@ -54,8 +55,9 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 .. code-block:: sh
 	:linenos:
 	
-	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
+	systemctl restart mariadb
 	systemctl enable mariadb
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	mysql_secure_installation
 	
 **2. MongoDB:**
@@ -67,15 +69,31 @@ Start and enable mongod service.
 	
 	systemctl start mongod
 	systemctl enable mongod
+	mongosh
+	
+Create a user for Opencelium.
+	
+.. code-block:: sh
+	:linenos:
+	
+	use opencelium
+	db.createUser(
+	{
+	user: "oc_admin",
+	pwd: passwordPrompt(),
+	roles: [ "readWrite", "dbAdmin" ]
+	}
+	)
 	
 **3. Nginx:**
 
-Copy the configuration file for OpenCelium.
+Remove default config and link configuration file for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
 	
-	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
+	rm /etc/nginx/sites-enabled/default
+	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/oc.conf
 	
 .. note::
 	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
@@ -83,9 +101,10 @@ Copy the configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 	
-		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+		rm /etc/nginx/sites-enabled/default
+		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
-	and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
+	and change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:	
 			
 	.. code-block:: sh
 		:linenos:	
@@ -98,7 +117,7 @@ Reload config and enable nginx.
 .. code-block:: sh
 	:linenos:
 	
-	systemctl start nginx
+	systemctl restart nginx
 	systemctl enable nginx
 	
 **4. OpenCelium:**
@@ -113,8 +132,9 @@ Create and adjust configuration.
 	
 .. note::
 	| Modify application.yml
-	| Within section "Database configuration section of MariaDB":
+	| Within section "Database configuration section of MariaDB and MongoDB":
 	| - change password of opencelium user for MariaDB
+	| - change password of oc_admin user for MongoDB in uri line
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
@@ -184,6 +204,7 @@ Download and unzip application, and create a link for it.
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
+	chmod +x /usr/bin/oc
 		
 Configuration
 ==================
@@ -198,9 +219,9 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 .. code-block:: sh
 	:linenos:
 
-	rcmysql start	
-	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
+	systemctl restart mariadb	
 	systemctl enable mariadb
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	mysql_secure_installation
 	
 **2. MongoDB:**
@@ -210,8 +231,23 @@ Start and enable mongod service.
 .. code-block:: sh
 	:linenos:
 	
-	systemctl start mongod
+	systemctl restart mongod
 	systemctl enable mongod
+	mongosh
+	
+Create a user for Opencelium.
+	
+.. code-block:: sh
+	:linenos:
+	
+	use opencelium
+	db.createUser(
+	{
+	user: "oc_admin",
+	pwd: passwordPrompt(),
+	roles: [ "readWrite", "dbAdmin" ]
+	}
+	)
 	
 **3. Nginx:**
 
@@ -220,7 +256,7 @@ Copy the configuration file for OpenCelium.
 .. code-block:: sh
 	:linenos:
 	
-	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
+	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
 	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
@@ -228,9 +264,9 @@ Copy the configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 	
-		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
-	and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
+	and change the certificates within the config (/opt/opencelium/conf/nginx.conf), with your own:	
 			
 	.. code-block:: sh
 		:linenos:	
@@ -246,7 +282,20 @@ Reload config and enable nginx.
 	systemctl restart nginx
 	systemctl enable nginx
 	
-**4. OpenCelium:**
+	
+**4. Firewall:**	
+
+Create firewall rules for Opencelium:
+
+.. code-block:: sh
+	:linenos:
+	
+	firewall-cmd --permanent --add-service=http
+	firewall-cmd --permanent --add-service=https
+	firewall-cmd --permanent --add-port=9090/tcp
+	systemctl restart firewalld.service
+	
+**5. OpenCelium:**
 
 Create and adjust configuration.
 
@@ -258,8 +307,9 @@ Create and adjust configuration.
 	
 .. note::
 	| Modify application.yml
-	| Within section "Database configuration section of MariaDB":
-	| - change password of opencelium user for MariaDB 
+	| Within section "Database configuration section of MariaDB and MongoDB":
+	| - change password of opencelium user for MariaDB
+	| - change password of oc_admin user for MongoDB in uri line
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
@@ -330,6 +380,7 @@ Download and unzip application, and create a link for it.
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
+	chmod +x /usr/bin/oc
 		
 Configuration
 ==================
@@ -344,9 +395,9 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 .. code-block:: sh
 	:linenos:
 	
-	systemctl start mariadb
-	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
+	systemctl restart mariadb
 	systemctl enable mariadb
+	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	mysql_secure_installation
 	
 **2. MongoDB:**
@@ -358,6 +409,21 @@ Start and enable mongod service.
 	
 	systemctl restart mongod
 	systemctl enable mongod
+	mongosh
+	
+Create a user for Opencelium.
+	
+.. code-block:: sh
+	:linenos:
+	
+	use opencelium
+	db.createUser(
+	{
+	user: "oc_admin",
+	pwd: passwordPrompt(),
+	roles: [ "readWrite", "dbAdmin" ]
+	}
+	)
 	
 **3. Nginx:**
 
@@ -366,18 +432,18 @@ Copy the configuration file for OpenCelium.
 .. code-block:: sh
 	:linenos:
 	
-	cp /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
+	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
-	If you like to use SSL, copy the SSL-configuration file for OpenCelium and create a link to the key-folder:
+	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
 	
 	.. code-block:: sh
 		:linenos:
 		
-		cp /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		ln -s /etc/pki/tls/private/ /etc/ssl/private
 		
-	Change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:
+	Change the certificates within the config (/opt/opencelium/conf/nginx.conf), with your own:
 	
 	.. code-block:: sh
 		:linenos:
@@ -393,7 +459,19 @@ Reload config and enable nginx.
 	systemctl restart nginx
 	systemctl enable nginx
 	
-**4. OpenCelium:**
+**4. Firewall:**	
+
+Create firewall rules for Opencelium:
+
+.. code-block:: sh
+	:linenos:
+	
+	firewall-cmd --permanent --add-service=http
+	firewall-cmd --permanent --add-service=https
+	firewall-cmd --permanent --add-port=9090/tcp
+	systemctl restart firewalld.service
+		
+**5. OpenCelium:**
 
 Create and adjust configuration.
 
@@ -405,8 +483,10 @@ Create and adjust configuration.
 	
 .. note::
 	| Modify application.yml
-	| Within section "Database configuration section of MariaDB":
-	| - change password of opencelium user for MariaDB 
+	| Within section "Database configuration section of MariaDB and MongoDB":
+	| - change password of opencelium user for MariaDB
+	| - change password of oc_admin user for MongoDB in uri line
+
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 

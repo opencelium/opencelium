@@ -26,7 +26,7 @@ import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.resource.execution.DataType;
 import com.becon.opencelium.backend.storage.StorageService;
-import com.becon.opencelium.backend.utility.ConditionUtility;
+import com.becon.opencelium.backend.utility.DirectRefUtility;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -237,8 +237,8 @@ public class InvokerServiceImp implements InvokerService {
 
         path = path.replace("@", "__oc__attributes.");
 
-        String exchangeType = ConditionUtility.getExchangeType(path);
-        String result = ConditionUtility.getResult(path);
+        String exchangeType = DirectRefUtility.getExchangeType(path);
+        String result = DirectRefUtility.getResult(path);
 
         Invoker invoker = findByName(invokerName);
         FunctionInvoker functionInvoker = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))
@@ -264,7 +264,7 @@ public class InvokerServiceImp implements InvokerService {
             }
         }
 
-        String[] valueParts = ConditionUtility.getRefValue(path).split("\\.");
+        String[] valueParts = DirectRefUtility.getReferenceParts(path);
         if (format.equals("xml")) {
             String lastElem = valueParts[valueParts.length - 1];
             if (!lastElem.contains("@")) {
