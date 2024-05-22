@@ -64,7 +64,6 @@ public class BodyExtractor implements Extractor {
             return Optional.empty();
         }
         InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder();
-        String val;
         for (String ref : extractRefs(expr)) {
             FunctionInvoker functionInvoker = getFunctionInvoker(ref);
             ResponseEntity<String> response = invokerRequestBuilder

@@ -28,6 +28,10 @@ spring:
     password: secret1234
     initialization-mode: always
     driver-class-name: org.mariadb.jdbc.Driver
+  data:
+    mongodb:
+      uri: mongodb://oc_admin:secretsecret@localhost:27017/opencelium
+  #     Example - mongodb://<username>:<password>@<host>:<port>/<database>
 ###########################################################################
 #                                                                         #
 #   Mail configuration section                                            #
@@ -76,17 +80,6 @@ spring:
 ###########################################################################
   main:
     banner-mode: "off"
-  data:
-    mongodb:
-  #  Uncomment if authentication is located in another database and don't forget to comment "uri"
-  #      authentication-database: admin
-  #      host: localhost
-  #      port: 27017
-  #      database: opencelium
-  #      username: admin
-  #      password: secretsecret
-  #     Example - mongodb://<username>:<password>@<host>:<port>/<database>
-      uri: mongodb://oc_admin:secretsecret@localhost:27017/opencelium
   jpa:
     properties:
       hibernate:

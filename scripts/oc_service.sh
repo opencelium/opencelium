@@ -13,128 +13,50 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+systemd(){
+    JAVA_BIN=$(which java)
+    $JAVA_BIN -Dserver.port=$(get_backend_port) -jar /opt/opencelium/src/backend/build/libs/opencelium.backend-$(get_version).jar --spring.config.location=/opt/opencelium/src/backend/src/main/resources/application.yml
+}
+
 get_version()
 {
-        echo $(grep 'version =' /opt/src/backend/build.gradle | awk '{print $3}') | sed s/\'//g
+	echo $(grep 'version:' /opt/opencelium/src/backend/src/main/resources/application_default.yml | awk '{print $2}')
 }
 
 get_backend_port()
 {
-        echo $(grep -A1 'server:' /opt/src/backend/src/main/resources/application.yml | awk '{print $2}')
+        echo $(grep -A1 'server:' /opt/opencelium/src/backend/src/main/resources/application_default.yml | awk '{print $2}')
 }
 
-refresh_db()
+get_http_protocol()
 {
-	if [ "$1" != "" ]
+	ssl=$(grep 'ssl:' /opt/opencelium/src/backend/src/main/resources/application_default.yml | awk '{print $1}')
+
+	if [ "$ssl" == "" ]
 	then
-		/usr/bin/mysql -u $1 -p < /opt/src/backend/database/oc_data.sql;
-		rm -rf /var/lib/neo4j/data/*
-		/etc/init.d/neo4j restart
+		echo "http"
 	else
-	    echo "please enter username as a second";
-	fi
-}
-
-rebuild_backend(){
-	cd /opt/src/backend/ && gradle build > /opt/logs/oc_backend.out &
-}
-
-stop_backend()
-{
-	kill $(pgrep -f "java -Dserver")
-}
-
-start_backend(){
-	RETRY=20
-
-	while [ $RETRY -gt 0 ]
-	do
-	    	if lsof -Pi :$(get_backend_port) -sTCP:LISTEN -t >/dev/null ;
-	    	then
-	        	echo "Port $(get_backend_port) is used. Retrying Again" >&2
-		        RETRY=$((RETRY-1))
-		        sleep 2
-	    	else
-	        	cd /opt/src/backend/ && nohup java -Dserver.port=$(get_backend_port) -jar /opt/src/backend/build/libs/opencelium.backend-$(get_version).jar --spring.config.location=/opt/src/backend/src/main/resources/application.yml > /opt/logs/oc_backend.out &
-	        	echo "backend started..."
-	        	return 1
-		fi
-	done
-
-	echo "Server couldnt be started. Port $(get_backend_port) is used."
-}
-
-restart_backend(){
-	stop_backend
-        sleep 1
-	start_backend
-}
-
-rebuild_frontend(){
-        cd /opt/src/frontend/ && nohup /usr/bin/node server.js > /opt/logs/oc_frontend.out &
-}
-
-stop_frontend()
-{
-	kill $(pgrep -f "bin/node server.js")
-	sleep 1
-}
-
-start_frontend(){
-        RETRY=20
-
-        while [ $RETRY -gt 0 ]
-        do
-		if lsof -Pi :8888 -sTCP:LISTEN -t >/dev/null ;
-        	then
-        		echo "Port 8888 is used. Retrying Again" >&2
-		        RETRY=$((RETRY-1))
-                	sleep 2
-		else
-        		cd /opt/src/frontend/ && nohup /usr/bin/node server.js > /opt/logs/oc_frontend.out &
-		        echo "frontend started..."
-                	return 1
-		fi
-	done
-
-        echo "Server couldnt be started. Port 8888 is used."
-}
-
-restart_frontend(){
-        stop_frontend
-        start_frontend
-}
-
-check_frontend(){
-
-	if lsof -Pi :8888 -sTCP:LISTEN -t >/dev/null ;
-        then echo ""
-        else
-        	cd /opt/src/frontend/ && nohup /usr/bin/node server.js > /opt/logs/oc_frontend.out &
-                echo "frontend started..."
-                return 1
+	   	    ssl=$(grep 'ssl:' /opt/opencelium/src/backend/src/main/resources/application_default.yml | awk '{print $1}')
+                    if [ "$ssl" = "ssl:" ]
+        		then
+	                	echo "https"
+        		else
+				echo "http"
+        		fi
         fi
-
-        echo "Frontend already started."
 }
 
-check_backend(){
+get_url()
+{
+	url=$(get_http_protocol)"://"$(hostname -f)":"$(get_backend_port)
+	echo $url
 
-        if lsof -Pi :$(get_backend_port) -sTCP:LISTEN -t >/dev/null ;
-        then echo ""
-        else
-        	cd /opt/src/backend/ && nohup java -Dserver.port=$(get_backend_port) -jar /opt/src/backend/build/libs/opencelium.backend-$(get_version).jar --spring.config.location=/opt/src/backend/src/main/resources/application.yml > /opt/logs/oc_backend.out &
-                echo "backend started..."
-                return 1
-        fi
-
-        echo "Backtend already started."
 }
 
 helpBackup()
 {
 	   echo ""
-	   echo "Usage: oc backup -d /backup/dir -u username -p password"
+	   echo "Usage: oc backup -d /var/backups/opencelium -u username -p password"
 	   echo ""
 	   echo -e "\t-d Set path to the backup directory"
 	   echo -e "\t-u Database username"
@@ -171,93 +93,32 @@ backup(){
            helpBackup
         fi
 
-	### clear old backups
-	rm -rf $backupdir/graph.db.dump
-	rm -rf $backupdir/oc_data.sql
-	rm -rf $backupdir/sourcecode.zip
-	rm -rf $backupdir/$name.zip
+	backupdir=$backupdir/$(date +%Y%m%d)
 
-	/usr/bin/systemctl stop neo4j
+	# Clear old Backups
+	if [ -d "$backupdir" ];then
+		echo "Backup Directory $backupdir alreay exists. Deleting...."
+		rm -rf $backupdir
+	fi
 
-	### database backup
-	/usr/bin/neo4j-admin dump --database=graph.db --to=$backupdir
+	mkdir -p $backupdir
+
+
+	echo "Backup Databases"
+	/usr/bin/mongodump --db opencelium --out=$backupdir
 	/usr/bin/mysqldump -u $username -p$password opencelium > $backupdir/oc_data.sql
 
-	/usr/bin/systemctl start neo4j
+	echo "Backup Installation Directory"
+	cp -r /opt/opencelium/ $backupdir/opt-backup/
 
-	### file system backup
-	zip -q -r $backupdir/sourcecode.zip /opt/ 2>/dev/null
+	echo "Compress Backups"
+	tar -zcf ${backupdir}.tar.gz $backupdir
 
-	### save all together in one backup file
-	zip -q -r $backupdir/$name.zip $backupdir/sourcecode.zip $backupdir/oc_data.sql $backupdir/graph.db.dump 2>/dev/null
+	echo "removing temporary backup folder"	
+	rm -r $backupdir
 
-        ### clear old backups
-        rm -rf $backupdir/graph.db.dump
-        rm -rf $backupdir/oc_data.sql
-        rm -rf $backupdir/sourcecode.zip
-}
-
-helpRestore()
-{
-	   echo ""
-	   echo "Usage: oc backup -d /backup/dir -u username -p password"
-	   echo ""
-	   echo -e "\t-d Set path from the backup directory"
-	   echo -e "\t-u Database username"
-	   echo -e "\t-p Database password"
-	   echo -e "\t-n Filename of the backup file"
-	   exit 1 # Exit script after printing help
-}
-
-restore(){
-
-	OPTIND=2
-	while getopts "d:u:p:n:" opt
-	do
-	   case "$opt" in
-	      d ) backupdir="$OPTARG" ;;
-	      u ) username="$OPTARG" ;;
-	      p ) password="$OPTARG" ;;
-	      n ) name="$OPTARG" ;;
-	      ? ) helpRestore ;; # Print helpInfo in case parameter is non-existent
-	   esac
-	done
-
-	        # Print helpInfo in case parameters are empty
-        if [ -z "$backupdir" ] || [ -z "$username" ] || [ -z "$password" ] || [ -z "$name" ]
-        then
-           echo "Some or all of the parameters are empty";
-           helpRestore
-        fi
-
-	### unzip backup file
-	unzip -qq -o $backupdir/$name.zip -d /
-
-	### stopping all services
-	/usr/bin/systemctl stop neo4j
-	/usr/bin/oc stop_backend
-	/usr/bin/oc stop_frontend
-
-	### database backup
-	/usr/bin/neo4j-admin load --database=graph.db --from=$backupdir/graph.db.dump --force
-	/usr/bin/mysql -u $username -p$password opencelium < $backupdir/oc_data.sql
-
-	### change owner rights
-	chown -R neo4j:neo4j /var/lib/neo4j/data/databases/graph.db/
-
-	### file system backup
-	unzip -qq -o $backupdir/$name.zip -d /
-
-	rm $backupdir/sourcecode.zip $backupdir/oc_data.sql $backupdir/graph.db.dump
-
-        ### starting all services
-        /usr/bin/systemctl start neo4j
-        /usr/bin/oc start_backend
-        /usr/bin/oc rebuild_frontend
-        sleep 60
-	/usr/bin/oc start_frontend
-
-	echo "[Hint] If the frontend doesnt start, please execute the commands rebuild_frontend and start_frontend."
+	echo "Cleanup backups older 14 days"
+	find $(dirname ${backupdir}) -name "*.tar.gz" -mtime +14 -delete
 }
 
 ###### MAIN
@@ -268,19 +129,7 @@ else
     echo ""
     echo "Please use one of the following commands:"
     echo ""
-    echo "get_version           - show opencelium version"
-    echo "get_backend_port      - show configured backend port"
-    echo "refresh_db		- deletes all databases"
-    echo "rebuild_backend		- rebuild backend files"
-    echo "stop_backend		- stop backend service"
-    echo "start_backend		- start backend service"
-    echo "restart_backend		- restart backend service"
-    echo "rebuild_frontend	- rebuild frontend files"
-    echo "stop_frontend		- stop frontend service"
-    echo "start_frontend		- start frontend service"
-    echo "restart_frontend	- restart frontend service"
-    echo "check_frontend		- checks if frontend is running. Otherwise the frontend will be started automatically"
-    echo "check_backend		- checks if backend is running. Otherwise the backend will be started automatically"
+    echo "get_version		- show opencelium version"
+    echo "get_backend_port	- show configured backend port"
     echo "backup			- creates a backup of the entire system"
-    echo "restore			- restores the system"
 fi

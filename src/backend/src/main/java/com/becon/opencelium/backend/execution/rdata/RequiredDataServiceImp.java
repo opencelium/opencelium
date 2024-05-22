@@ -14,10 +14,12 @@ public class RequiredDataServiceImp implements RequiredDataService {
 
     private final List<RequestData> requestData;
     private final List<FunctionInvoker> functionInvokerList;
+    private final Connector connector;
 
-    public RequiredDataServiceImp(List<RequestData> requestData, List<FunctionInvoker> functionInvokerList) {
+    public RequiredDataServiceImp(Connector connector, List<RequestData> requestData, List<FunctionInvoker> functionInvokerList) {
         this.requestData = requestData;
         this.functionInvokerList = functionInvokerList;
+        this.connector = connector;
     }
 
     @Override
@@ -30,6 +32,7 @@ public class RequiredDataServiceImp implements RequiredDataService {
         return extractor
                 .setRequestData(requestData)
                 .setFunctions(functionInvokerList)
+                .disableSslValidation(connector.isSslValidation())
                 .getValue(rqsd.getField());
     }
 

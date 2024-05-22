@@ -48,7 +48,7 @@ public class ConnectorExMapper {
             }
         });
 
-        RequiredDataService requiredDataService = new RequiredDataServiceImp(requestData, invoker.getOperations());
+        RequiredDataService requiredDataService = new RequiredDataServiceImp(connector,requestData, invoker.getOperations());
         requestData.forEach(rqsd -> {
             String value = requiredDataService.getValue(rqsd).orElse(null);
             rqsd.setValue(value);
