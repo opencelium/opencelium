@@ -258,7 +258,7 @@ Copy the configuration file for OpenCelium.
 .. code-block:: sh
 	:linenos:
 	
-	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/oc.conf
+	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
 	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
@@ -266,9 +266,9 @@ Copy the configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 	
-		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc.conf
+		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
-	and change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:	
+	and change the certificates within the config (/opt/opencelium/conf/nginx.conf), with your own:	
 			
 	.. code-block:: sh
 		:linenos:	
@@ -433,7 +433,7 @@ Copy the configuration file for OpenCelium.
 .. code-block:: sh
 	:linenos:
 	
-	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/oc.conf
+	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
 	If you like to use SSL, copy the SSL-configuration file for OpenCelium:
@@ -441,10 +441,10 @@ Copy the configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 		
-		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc.conf
+		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		ln -s /etc/pki/tls/private/ /etc/ssl/private
 		
-	Change the certificates within the config (/etc/nginx/conf.d/oc.conf), with your own:
+	Change the certificates within the config (/opt/opencelium/conf/nginx.conf), with your own:
 	
 	.. code-block:: sh
 		:linenos:
