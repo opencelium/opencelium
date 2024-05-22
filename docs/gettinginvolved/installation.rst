@@ -61,7 +61,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	
 **2. MongoDB:**
 
-Start and enable mongod service.
+Start and enable mongod service and create a user for Opencelium.
 
 .. code-block:: sh
 	:linenos:
@@ -95,6 +95,7 @@ Remove default config and link configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 	
+		rm /etc/nginx/sites-enabled/default
 		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
 	and change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:	
