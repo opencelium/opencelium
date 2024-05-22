@@ -10,7 +10,11 @@ public class Criteria<T> {
     }
 
     public boolean test(T t) {
-        return predicate.test(t);
+        try {
+            return predicate.test(t);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static <T> CriteriaBuilder<T> builder() {

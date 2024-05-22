@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.gc.base.RunGCEvent;
 import com.becon.opencelium.backend.gc.connection.ConnectionForGC;
 import org.quartz.CronExpression;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
@@ -28,6 +29,7 @@ public class CronTriggerStrategy<T> implements GCTriggerStrategy {
         taskScheduler = new ThreadPoolTaskScheduler();
         taskScheduler.setPoolSize(2);
         taskScheduler.initialize();
+        taskScheduler.setThreadFactory(new CustomizableThreadFactory("GarbageCollector[Connection]-"));
 
         applicationEventPublisher = ApplicationContextProvider.getApplicationContext();
     }

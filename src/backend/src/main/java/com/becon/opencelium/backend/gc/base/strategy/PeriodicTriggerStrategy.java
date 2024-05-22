@@ -8,6 +8,7 @@ import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebSe
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.Date;
@@ -34,6 +35,7 @@ public class PeriodicTriggerStrategy<T> implements GCTriggerStrategy {
         taskScheduler = new ThreadPoolTaskScheduler();
         taskScheduler.setPoolSize(2);
         taskScheduler.initialize();
+        taskScheduler.setThreadFactory(new CustomizableThreadFactory("GarbageCollector[Connection]-"));
 
         applicationEventPublisher = ApplicationContextProvider.getApplicationContext();
     }

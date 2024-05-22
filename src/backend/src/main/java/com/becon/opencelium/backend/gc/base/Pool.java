@@ -11,10 +11,11 @@ public abstract class Pool<T> {
     protected Map<T, PoolObj> youngPool; // stores young elements
     protected Map<T, PoolObj> oldPool; // stores old elements
     protected List<T> toDeletePool; // stores marked for deleting elements
-    protected static long NEW_POOL_LIFE_TIME = 2 * 60 * 1000; //2 minutes (but need to bo changed to 2 hours)
-    protected static long YOUNG_POOL_LIFE_TIME = 4 * 60 * 1000; //4 minutes (but need to bo changed to 4 hours)
-    protected static long OLD_POOL_LIFE_TIME = 8 * 60 * 1000; //8 minutes (but need to bo changed to 8 hours)
-    protected static int YOUNG_POOL_MAX_FAIRNESS = 2; // need to be changed to 5
+
+    protected static final long NEW_POOL_LIFE_TIME = 2 * 60 * 1000; //2 minutes (but need to bo changed to 2 hours)
+    protected static final long YOUNG_POOL_LIFE_TIME = 4 * 60 * 1000; //4 minutes (but need to bo changed to 4 hours)
+    protected static final long OLD_POOL_LIFE_TIME = 8 * 60 * 1000; //8 minutes (but need to bo changed to 8 hours)
+    protected static final int YOUNG_POOL_MAX_FAIRNESS = 2; // need to be changed to 5
 
     public Pool() {
         this.newPool = new ConcurrentHashMap<>();
