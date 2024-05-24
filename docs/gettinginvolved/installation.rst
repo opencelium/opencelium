@@ -62,29 +62,15 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	
 **2. MongoDB:**
 
-Start and enable mongod service.
+Start and enable mongod service and create a user for Opencelium.
 
 .. code-block:: sh
 	:linenos:
 	
-	systemctl start mongod
+	systemctl restart mongod
 	systemctl enable mongod
-	mongosh
-	
-Create a user for Opencelium.
-	
-.. code-block:: sh
-	:linenos:
-	
-	use opencelium
-	db.createUser(
-	{
-	user: "oc_admin",
-	pwd: passwordPrompt(),
-	roles: [ "readWrite", "dbAdmin" ]
-	}
-	)
-	
+	mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
+
 **3. Nginx:**
 
 Remove default config and link configuration file for OpenCelium.
@@ -133,8 +119,8 @@ Create and adjust configuration.
 .. note::
 	| Modify application.yml
 	| Within section "Database configuration section of MariaDB and MongoDB":
-	| - change password of opencelium user for MariaDB
-	| - change password of oc_admin user for MongoDB in uri line
+	| - change password of opencelium user for MariaDB (default "secret1234")
+	| - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
@@ -226,28 +212,14 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	
 **2. MongoDB:**
 
-Start and enable mongod service.
+Start and enable mongod service and create a user for Opencelium.
 
 .. code-block:: sh
 	:linenos:
 	
 	systemctl restart mongod
 	systemctl enable mongod
-	mongosh
-	
-Create a user for Opencelium.
-	
-.. code-block:: sh
-	:linenos:
-	
-	use opencelium
-	db.createUser(
-	{
-	user: "oc_admin",
-	pwd: passwordPrompt(),
-	roles: [ "readWrite", "dbAdmin" ]
-	}
-	)
+	mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
 	
 **3. Nginx:**
 
@@ -308,8 +280,8 @@ Create and adjust configuration.
 .. note::
 	| Modify application.yml
 	| Within section "Database configuration section of MariaDB and MongoDB":
-	| - change password of opencelium user for MariaDB
-	| - change password of oc_admin user for MongoDB in uri line
+	| - change password of opencelium user for MariaDB (default "secret1234")
+	| - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
 
 	| Just in case you are using SSL, add certs to the ssl section. 
 	| It has to be a p12 keystore file with password! 
@@ -402,28 +374,14 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	
 **2. MongoDB:**
 
-Start and enable mongod service.
+Start and enable mongod service and create a user for Opencelium.
 
 .. code-block:: sh
 	:linenos:
 	
 	systemctl restart mongod
 	systemctl enable mongod
-	mongosh
-	
-Create a user for Opencelium.
-	
-.. code-block:: sh
-	:linenos:
-	
-	use opencelium
-	db.createUser(
-	{
-	user: "oc_admin",
-	pwd: passwordPrompt(),
-	roles: [ "readWrite", "dbAdmin" ]
-	}
-	)
+	mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
 	
 **3. Nginx:**
 
@@ -484,8 +442,8 @@ Create and adjust configuration.
 .. note::
 	| Modify application.yml
 	| Within section "Database configuration section of MariaDB and MongoDB":
-	| - change password of opencelium user for MariaDB
-	| - change password of oc_admin user for MongoDB in uri line
+	| - change password of opencelium user for MariaDB (default "secret1234")
+	| - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
 
 
 	| Just in case you are using SSL, add certs to the ssl section. 
