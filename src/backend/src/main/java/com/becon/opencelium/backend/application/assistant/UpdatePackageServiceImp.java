@@ -64,8 +64,9 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         try {
             return getVersions();
         } catch (Exception e) {
-            throw  new RuntimeException(e);
+            logger.warn(e.getMessage());
         }
+        return Collections.emptyList();
     }
 
     // assistant/versions/{folder}

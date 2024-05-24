@@ -27,12 +27,8 @@ import java.util.List;
 
 @SpringBootTest
 public class ApplicationTests {
-	@Autowired
-	private UpdatePackageServiceImp updatePackageServiceImp;
 
 	@Test
 	public void contextLoads() {
-		List<PackageVersionResource> resources = updatePackageServiceImp.getOnVersions();
-		System.out.println(resources);
 	}
 }
