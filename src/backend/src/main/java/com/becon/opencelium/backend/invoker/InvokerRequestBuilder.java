@@ -121,6 +121,9 @@ public class InvokerRequestBuilder {
                 && functionInvoker.getResponse().getSuccess().getHeader() != null){
             return MediaType.valueOf(functionInvoker.getResponse().getSuccess().getHeader().get("Content-Type"));
         }
+        if (httpHeaders == null || httpHeaders.getContentType() == null) {
+            return MediaType.APPLICATION_JSON;
+        }
         return httpHeaders.getContentType();
     }
 
