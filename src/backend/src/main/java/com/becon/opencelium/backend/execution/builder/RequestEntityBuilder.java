@@ -99,19 +99,20 @@ public class RequestEntityBuilder {
             rawUrl = rawUrl.replace(ref, ParameterDTOUtil.toString(copiedParameter));
         }
 
-        // remove old query params if exists
-        if (rawUrl.indexOf('?') > 0) {
-            rawUrl = rawUrl.substring(0, rawUrl.indexOf('?'));
-        }
-
-        // add query parameters if exists
+        // construct query parameters if exists
         String query = getParamsByLocation(ParamLocation.QUERY).stream()
                 .map(ParameterDTOUtil::copy)
                 .peek(parameter -> replaceRefs(parameter.getSchema()))
                 .map(ParameterDTOUtil::toString)
                 .collect(Collectors.joining("&"));
-
+        
+        // add query parameters if exists
         if (!ObjectUtils.isEmpty(query)) {
+            // remove old query params if exists
+            if (rawUrl.indexOf('?') > 0) {
+                rawUrl = rawUrl.substring(0, rawUrl.indexOf('?'));
+            }
+
             rawUrl = rawUrl + "?" + query;
         }
 
