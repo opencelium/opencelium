@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.quartz;
 
+import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
@@ -16,7 +17,6 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 public class QuartzJobScheduler implements SchedulingStrategy {
     private final org.quartz.Scheduler quartzScheduler;
-    private static final String DEFAULT_CRON_EXP = "0 0 0 1 1 ? 2100";
 
     public QuartzJobScheduler(org.quartz.Scheduler quartzScheduler) {
         this.quartzScheduler = quartzScheduler;
@@ -28,7 +28,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
             final String jobName = getJobName(scheduler);
             final JobKey jobKey = new JobKey(jobName, "connection");
             if (scheduler.getCronExp() == null || scheduler.getCronExp().isBlank()) {
-                scheduler.setCronExp(DEFAULT_CRON_EXP);
+                scheduler.setCronExp(Constant.NEVER_TRIGGERED_CRON);
             } else {
                 validateCron(scheduler.getCronExp());
             }
@@ -92,7 +92,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         final String jobName = getJobName(updated);
         final JobKey jobKey = new JobKey(jobName, "connection");
         if (updated.getCronExp() == null || updated.getCronExp().isBlank()) {
-            updated.setCronExp(DEFAULT_CRON_EXP);
+            updated.setCronExp(Constant.NEVER_TRIGGERED_CRON);
         } else {
             validateCron(updated.getCronExp());
         }
