@@ -105,9 +105,9 @@ public class RequestEntityBuilder {
         
         // add query parameters if exists
         if (!ObjectUtils.isEmpty(query)) {
-            // remove old query params if exists
+            // append new ones to old query if exists
             if (rawUrl.indexOf('?') > 0) {
-                rawUrl = rawUrl.substring(0, rawUrl.indexOf('?'));
+                rawUrl = rawUrl + "&" + query;
             }
 
             rawUrl = rawUrl + "?" + query;
