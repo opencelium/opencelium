@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.resource.execution.ParameterDTOUtil;
 import com.becon.opencelium.backend.resource.execution.RequestBodyDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
+import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -27,10 +28,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.http.MediaType.APPLICATION_XML;
-import static org.springframework.http.MediaType.TEXT_PLAIN;
-
 
 public class RequestEntityBuilder {
     private final OperationDTO operation;
@@ -137,7 +134,7 @@ public class RequestEntityBuilder {
             return null;
         }
 
-        if (APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType) && !"CheckMK".equals(operation.getInvoker())) {
+        if (MediaTypeUtility.isFormUrlencodedCompatible(contentType) && !"CheckMK".equals(operation.getInvoker())) {
             return toFormUrlencoded(body.getSchema());
         }
 
@@ -149,16 +146,16 @@ public class RequestEntityBuilder {
 
         String requestBody;
         MediaType bodyContent = body.getContent();
-        if (TEXT_PLAIN.isCompatibleWith(bodyContent)) {
+        if (MediaTypeUtility.isTextPlainCompatible(bodyContent)) {
             requestBody = SchemaDTOUtil.toText(copiedSchema);
-        } else if (APPLICATION_XML.isCompatibleWith(bodyContent)) {
+        } else if (MediaTypeUtility.isXmlCompatible(bodyContent)) {
             requestBody = SchemaDTOUtil.toXML(copiedSchema);
         }  else {
             requestBody = SchemaDTOUtil.toJSON(copiedSchema);
         }
 
         // TODO: works only for CheckMk. Should be deleted in future releases.
-        if ("CheckMK".equals(operation.getInvoker()) && requestBody != null && !requestBody.isEmpty() && APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
+        if ("CheckMK".equals(operation.getInvoker()) && requestBody != null && !requestBody.isEmpty() && MediaTypeUtility.isFormUrlencodedCompatible(contentType)) {
             return new LinkedMultiValueMap<>(){{
                 add("request", requestBody);
             }};
