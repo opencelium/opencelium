@@ -2,12 +2,12 @@ package com.becon.opencelium.backend.invoker.entity;
 
 import com.becon.opencelium.backend.invoker.enums.PageParam;
 import com.becon.opencelium.backend.invoker.enums.PageParamAction;
+import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.w3c.dom.Document;
@@ -106,7 +106,7 @@ public class Pagination implements Cloneable {
 
     public void updateParamValues(ResponseEntity<?> response, Class<?> responseType) {
         boolean needConversion = true;
-        if (response.getHeaders().getContentType() != null && !MediaType.APPLICATION_JSON.isCompatibleWith(response.getHeaders().getContentType())) {
+        if (response.getHeaders().getContentType() != null && !MediaTypeUtility.isJsonCompatible(response.getHeaders().getContentType())) {
             needConversion = false;
         } else if (responseType.equals(String.class)) {
             needConversion = false;
@@ -231,7 +231,7 @@ public class Pagination implements Cloneable {
         }
 
         private Object getValueFromBody(String jsonPath) {
-            if (MediaType.APPLICATION_JSON.isCompatibleWith(headers.getContentType())) {
+            if (MediaTypeUtility.isJsonCompatible(headers.getContentType())) {
                 return JsonPath.read(payload, jsonPath);
             } else {
                 jsonPath = jsonPath.replaceFirst("\\$", ".");
