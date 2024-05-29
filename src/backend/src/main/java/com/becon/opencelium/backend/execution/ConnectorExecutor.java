@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
+import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
@@ -312,7 +313,7 @@ public class ConnectorExecutor {
             }
         }
 
-        return MediaType.APPLICATION_JSON.isCompatibleWith(mediaType) ? Object.class : String.class;
+        return MediaTypeUtility.isJsonCompatible(mediaType) ? Object.class : String.class;
     }
 
     private String convertToStringIfNecessary(Object body) {
