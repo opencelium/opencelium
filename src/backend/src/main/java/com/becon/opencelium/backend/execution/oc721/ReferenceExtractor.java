@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.execution.oc721;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.execution.ExecutionManager;
 import com.becon.opencelium.backend.utility.DirectRefUtility;
+import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
@@ -212,9 +213,9 @@ public class ReferenceExtractor implements Extractor {
 
         Object result;
 
-        if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
+        if (MediaTypeUtility.isJsonCompatible(mediaType)) {
             result = getFromJSON(entityBody, ref);
-        } else if (MediaType.APPLICATION_XML.isCompatibleWith(mediaType)) {
+        } else if (MediaTypeUtility.isXmlCompatible(mediaType)) {
             result = getFromXML(entityBody, ref);
         } else {
             result = bodyToString(entityBody);
