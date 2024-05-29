@@ -184,8 +184,11 @@ public class OperationExMapper {
      *
      * @return all header parameters, maybe empty but not null
      */
-    private List<ParameterDTO> getHeaderParameters(@NonNull Map<String, String> header, MediaType mediaType) {
+    private List<ParameterDTO> getHeaderParameters(Map<String, String> header, MediaType mediaType) {
         List<ParameterDTO> parameters = new ArrayList<>();
+        if (header == null) {
+            return parameters;
+        }
         for (Map.Entry<String, String> entry : header.entrySet()) {
             ParameterDTO parameterDTO = new ParameterDTO();
             //parameter's default fields are :
