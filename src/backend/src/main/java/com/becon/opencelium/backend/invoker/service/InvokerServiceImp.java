@@ -191,6 +191,9 @@ public class InvokerServiceImp implements InvokerService {
         if (field == null) {
             return null;
         }
+        if (!hierarchy.isEmpty() && !(field instanceof Map<?, ?> || field instanceof List<?>)) {
+            return DataType.UNDEFINED;
+        }
         if (hierarchy.isEmpty()) {
             if (field instanceof Map<?, ?>) {
                 return DataType.OBJECT;
