@@ -51,7 +51,11 @@ public class ConditionExMapper {
                     condition.setRight((first ? "%" : "") + rs.getColor() + ".(" + rs.getType() + ")." + rs.getField() + (last ? "%" : ""));
                 }
             }
-            case EQUAL_TO, NOT_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO,
+            case NOT_EQUAL_TO -> {
+                condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
+                condition.setRight("");
+            }
+            case EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO,
                  MATCHES, MATCHES_IN_LIST, REGEX, PROPERTY_NOT_EXISTS, PROPERTY_EXISTS -> {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
                 if (rs.getColor() == null || rs.getColor().isBlank() || rs.getType() == null || rs.getType().isBlank()) {
