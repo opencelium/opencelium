@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.application.assistant;
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.update_assistant.PackageVersionResource;
 import com.becon.opencelium.backend.utility.FileNameUtils;
@@ -45,6 +46,9 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     @Autowired
     private AssistantServiceImp assistantServiceImp;
 
+    @Autowired
+    private UserServiceImpl userService;
+
     private Logger logger = LoggerFactory.getLogger(UpdatePackageServiceImp.class);
 
     @Override
@@ -61,6 +65,9 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     @Override
     public List<PackageVersionResource> getOnVersions() {
+        if (userService.getCurrentUser().getUserDetail().isThemeSync()) {
+            return Collections.emptyList();
+        }
         try {
             return getVersions();
         } catch (Exception e) {
@@ -220,8 +227,8 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         try {
             String zipFilePath = PathConstant.ASSISTANT + PathConstant.VERSIONS + versionFolder;
             File file = findFirstZipFileFromVersionFolder(zipFilePath);
-            String folder = FileNameUtils.removeExtension(file.getName());
-            String instructionPath = folder + "/" +PathConstant.INSTRUCTION;
+//            String folder = FileNameUtils.removeExtension(file.getName());
+            String instructionPath = PathConstant.INSTRUCTION;
             // Open the zip file
             try (ZipFile zipFile = new ZipFile(file)) {
                 // Get the zip entry for the specific file

@@ -48,4 +48,6 @@ public interface UserService {
     User toEntity(UserResource resource);
 
     String encodePassword(String password);
+
+    User getCurrentUser();
 }
