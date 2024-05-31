@@ -20,6 +20,11 @@ import com.becon.opencelium.backend.utility.Neo4jDriverUtility;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
 import com.mongodb.client.MongoClient;
+import org.apache.hc.client5.http.HttpResponseException;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.GraphDatabase;
@@ -31,10 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,10 +53,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -263,120 +267,29 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public void updateOn(String version) throws Exception {
-        Path path = Paths.get("");
-        File workTree = new File(path.toUri()).toPath().getParent().getParent().toFile();
-        File gitDir = new File(workTree.getPath() + "/.git");
-        Process process = Runtime.getRuntime().exec("git"
-                + " --git-dir=" + gitDir + " --work-tree=" + workTree + " fetch --tags");
-        getText(process.getInputStream());
-        getText(process.getErrorStream());
-
-        process = Runtime.getRuntime().exec("git"
-                + " --git-dir=" + gitDir + " --work-tree=" + workTree + " checkout -f tags/" + version);
-        getText(process.getInputStream());
-        getText(process.getErrorStream());
+        String url = "https://packagecloud.io/becon/opencelium/packages/anyfile/" +
+                "oc_" + version + ".zip/download?distro_version_id=230";
+        InputStream inputStream = downloadFile(url);
+        File backendRoot = new File("");
+        Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
+        unzipFolder(inputStream, appRoot);
     }
 
-    public void updateSubsFiles() throws Exception {
-        Process process = Runtime.getRuntime().exec("git pull");
-        getText(process.getInputStream());
-        getText(process.getErrorStream());
-    }
+    private InputStream downloadFile(String url) throws IOException, ParseException {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<byte[]> response = restTemplate.getForEntity(URI.create(url), byte[].class);
 
-    public List<String> getChangedFileName() throws Exception {
-
-        Process fetch = Runtime.getRuntime().exec("git fetch");
-        getText(fetch.getInputStream());
-        getText(fetch.getErrorStream());
-
-        fetch = Runtime.getRuntime().exec("git diff origin/master --name-only --exit-code");
-        getText(fetch.getErrorStream());
-        List<String> filesName = getText(fetch.getInputStream());
-        return filesName;
-    }
-
-    public boolean repoHasChanges() throws Exception {
-
-        Process fetch = Runtime.getRuntime().exec("git fetch");
-        getText(fetch.getInputStream());
-        getText(fetch.getErrorStream());
-
-        Process diff = Runtime.getRuntime().exec("git diff origin/master --exit-code");
-        getText(diff.getErrorStream());
-        if (getText(diff.getInputStream()).isEmpty()) {
-            return false;
-        }
-        return true;
-    }
-
-    public List<String> getText(InputStream is) {
-        List<String> gitText = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is));) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                System.out.println("> " + line);
-                gitText.add(line);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            byte[] responseBody = response.getBody();
+            if (responseBody != null) {
+                return new ByteArrayInputStream(responseBody);
+            } else {
+                throw new IOException("Received empty response body");
             }
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
+        } else {
+            throw new IOException("Failed to download file: " + response.getStatusCode());
         }
-
-        return gitText;
     }
-
-//    public boolean repoVerification() {
-//        try {
-//            String url = "https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium/refs/tags";
-//            HttpMethod method = HttpMethod.GET;
-//            HttpHeaders header = new HttpHeaders();
-//            header.set("Content-Type", "application/json");
-//            HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
-//            ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
-//            return true;
-//        } catch (Exception e) {
-//            return false;
-//        }
-//    }
-
-//    @Override
-//    public void  updateOff(String dir) throws Exception { // removed version parameter
-////        System.out.println("Offline update run");
-////        Path currentRelativePath = Paths.get("");
-////        String s = currentRelativePath.toAbsolutePath().toString();
-////
-////        Path path = Paths.get("");
-////        File workTree = new File(path.toUri()).toPath().getParent().getParent().toFile();
-////        File gitDir = new File(workTree.getPath() + "/.git");
-////        Process process = Runtime.getRuntime().exec("git"
-////                + " --git-dir=" + gitDir + " --work-tree=" + workTree + " pull " + s + "/assistant/application/" + dir);
-////        getText(process.getInputStream());
-////        getText(process.getErrorStream());
-////
-////        Process process1 = Runtime.getRuntime().exec("git"
-////                + " --git-dir=" + gitDir + " --work-tree=" + workTree + "checkout " + version);
-////        getText(process1.getInputStream());
-////        getText(process1.getErrorStream());
-//        dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
-////            InputStream oc = Files.newInputStream(Paths.get(dir));
-//        File backendRoot = new File("");
-//        Path root = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
-//        ZipFile zipFile = new ZipFile(dir);
-//        Paths.get(dir);
-//        File[] files = new File(root.toString()).listFiles();
-//        final Stack<String> pathParts = new Stack<String>();
-//        {
-//            pathParts.push("assistant");
-//            pathParts.push("backend");
-//            pathParts.push("src");
-//        }
-//        String appYmlPath = PathConstant.RESOURCES + "application.yml";
-//        // move application.yml file to folder that will be not be deleted;
-//        moveFiles(appYmlPath, dir);
-////        deleteDir(files, pathParts);
-//        moveFiles(dir, root.toString());
-////            Files.copy(Paths.get(dir), root);
-////            unzipFolder(oc, target);
-//    }
 
     @Override
     public void updateOff(String dir) throws Exception { // removed version parameter
@@ -394,25 +307,6 @@ public class AssistantServiceImp implements ApplicationService {
         InputStream inputStream = Files.newInputStream(zipFile.toPath());
         Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
         unzipFolder(inputStream, appRoot);
-    }
-
-    private void deleteDir(File[] files, Stack<String> pathParts) {
-        try {
-            for (File file : files) {
-                if (file.isDirectory() && !pathParts.isEmpty() && file.getName().equals(pathParts.peek())) {
-                    pathParts.pop();
-                    deleteDir(file.listFiles(), pathParts);
-                    continue;
-                }
-                if (file.isDirectory()) {
-                    FileUtils.deleteDirectory(file);
-                } else {
-                    Files.delete(file.toPath());
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -447,20 +341,6 @@ public class AssistantServiceImp implements ApplicationService {
     @Override
     public void updateConnection(ConnectionDTO connectionDTO) {
 
-    }
-
-    public void runScript() {
-        final String scriptPath = "/path/to/sh/file";
-        String script = "clean.sh";
-        try {
-            Process awk = new ProcessBuilder("/bin/bash", scriptPath + script).start();
-            awk.waitFor();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

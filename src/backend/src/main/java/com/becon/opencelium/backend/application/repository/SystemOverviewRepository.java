@@ -9,6 +9,8 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -111,11 +113,11 @@ public class SystemOverviewRepository {
                     while ((read = zis.read(buffer, 0, 1024)) >= 0) {
                         stringBuilder.append(new String(buffer, 0, read));
                     }
-                    Properties yamlProps = yamlPropertiesFactoryBean.getObject();
-                    if (Objects.requireNonNull(yamlProps).containsKey("opencelium.version")) {
-                        return yamlProps.getProperty("opencelium.version");
+                    String version = extractValueFromYaml(stringBuilder.toString(), "opencelium.version");
+                    if (version == null || version.isEmpty()) {
+                        return "VERSION_IN_APPLICATION_DEFAULT_NOT_FOUND";
                     }
-                    return "VERSION_IN_APPLICATION_DEFAULT_NOT_FOUND";
+                    return version;
                 }
                 zipEntry = zis.getNextEntry();
             }
@@ -123,6 +125,18 @@ public class SystemOverviewRepository {
             throw new RuntimeException(e);
         }
         return "APPLICATION_DEFAULT_NOT_FOUND";
+    }
+
+    private static String extractValueFromYaml(String yamlContent, String path) {
+        YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
+        Resource resource = new ByteArrayResource(yamlContent.getBytes());
+        yamlFactory.setResources(resource);
+
+        Properties properties = yamlFactory.getObject();
+        if (properties != null) {
+            return properties.getProperty(path);
+        }
+        return null;
     }
 
     // Kibana getting request
