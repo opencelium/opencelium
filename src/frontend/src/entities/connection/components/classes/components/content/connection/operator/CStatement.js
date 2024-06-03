@@ -18,6 +18,9 @@ import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../../invoker/response/CResponse"
 import {ARRAY_SIGN} from "@entity/connection/components/classes/components/content/invoker/response/CResponseResult";
 import {markFieldNameAsArray} from "@change_component//form_elements/form_connection/form_methods/help";
 import {putAsterixInEmptyBrackets} from "@change_component/form_elements/form_connection/form_svg/utils";
+import CCondition from "@classes/content/connection/operator/CCondition";
+import CSuccess from "@classes/content/invoker/response/CSuccess";
+import CFail from "@classes/content/invoker/response/CFail";
 
 export const STATEMENT_REQUEST = 'request';
 export const STATEMENT_RESPONSE = 'response';
@@ -144,10 +147,17 @@ export default class CStatement{
 
     getObject(){
         if((this._color === DEFAULT_COLOR || this._color === '') && this.field === ''){             //for one statement operator
+            if(this._parent instanceof CCondition) {
+                return {
+                    color: '',
+                    field: '',
+                    type: '',
+                };
+            }
             return null;
         } else {
             let field = this._field;
-            if(this._parent !== null && typeof this._parent !== 'undefined'){
+            if((this._parent instanceof CSuccess || this._parent instanceof CFail) && typeof this._parent !== 'undefined'){
                 let fieldSplit = field.split('.');
                 let tmpField = '';
                 let newField = '';
