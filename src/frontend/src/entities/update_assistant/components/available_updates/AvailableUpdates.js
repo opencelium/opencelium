@@ -109,9 +109,6 @@ class AvailableUpdates extends React.Component{
     selectVersion(selectedVersionName){
         const {activeMode} = this.state;
         const {entity, updateEntity, openNextForm} = this.props;
-        if(activeMode === ONLINE_UPDATE){
-            this.props.uploadOnlineVersion(selectedVersionName.substring(1));
-        }
         let newEntity = {...entity};
         const updates = this.getUpdates();
         const selectedVersion = updates.available.find(version => version.name === selectedVersionName);
@@ -119,13 +116,8 @@ class AvailableUpdates extends React.Component{
             newEntity.availableUpdates = {...entity.availableUpdates, selectedVersion};
             updateEntity(newEntity);
             let newState = {selectedVersionName};
-            if(activeMode === ONLINE_UPDATE){
-                newState.startUploadingOnlineVersion = true;
-            }
             this.setState(newState);
-            if(activeMode === OFFLINE_UPDATE){
-                openNextForm();
-            }
+            openNextForm();
         }
     }
 
