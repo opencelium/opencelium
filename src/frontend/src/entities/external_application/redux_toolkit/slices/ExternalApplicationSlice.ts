@@ -18,23 +18,31 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import {ICommonState} from "@application/interfaces/core";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import {checkAllExternalApplications, checkElasticsearch} from "../action_creators/ExternalApplicationCreators";
+import {
+    checkAllExternalApplications,
+    checkElasticsearch,
+    checkMongoDB
+} from "../action_creators/ExternalApplicationCreators";
 import {
     ActuatorHealthResponseProps,
-    ElasticSearchResponseProps,
+    ElasticSearchResponseProps, DBResponseProps,
 } from "../../requests/interfaces/IExternalApplication";
 
 export interface ExternalApplicationSlice extends ICommonState{
     checkingElasticSearch: API_REQUEST_STATE,
+    checkingMongoDB: API_REQUEST_STATE,
     checkingAll: API_REQUEST_STATE,
     elasticSearchCheckResults: ElasticSearchResponseProps,
+    mongoDBCheckResults: DBResponseProps,
     actuatorHealth: ActuatorHealthResponseProps,
 }
 
 const initialState: ExternalApplicationSlice = {
     checkingElasticSearch: API_REQUEST_STATE.INITIAL,
+    checkingMongoDB: API_REQUEST_STATE.INITIAL,
     checkingAll: API_REQUEST_STATE.INITIAL,
     elasticSearchCheckResults: null,
+    mongoDBCheckResults: null,
     actuatorHealth: null,
     ...CommonState,
 }
@@ -55,6 +63,18 @@ export const externalApplicationSlice = createSlice({
         },
         [checkElasticsearch.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.checkingElasticSearch = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [checkMongoDB.pending.type]: (state) => {
+            state.checkingMongoDB = API_REQUEST_STATE.START;
+        },
+        [checkMongoDB.fulfilled.type]: (state, action: PayloadAction<{data: DBResponseProps}>) => {
+            state.checkingMongoDB = API_REQUEST_STATE.FINISH;
+            state.mongoDBCheckResults = action.payload.data;
+            state.error = null;
+        },
+        [checkMongoDB.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.checkingMongoDB = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [checkAllExternalApplications.pending.type]: (state) => {

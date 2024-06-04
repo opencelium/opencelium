@@ -23,6 +23,7 @@ import {getAllMetaConnections} from "@entity/connection/redux_toolkit/action_cre
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
 import { ConnectionPermissions } from '@entity/connection/constants';
+import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 
 const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
@@ -30,6 +31,7 @@ const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     useEffect(() => {
         dispatch(getAllMetaConnections());
+        dispatch(checkMongoDB());
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);

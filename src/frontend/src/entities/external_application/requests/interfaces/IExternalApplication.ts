@@ -20,28 +20,31 @@ export enum ExternalApplicationStatus{
     DOWN= 'DOWN',
 }
 
-export interface ElasticSearchResponseProps{
+export interface ElasticSearchResponseProps {
     details: {version: string, error: string},
     status: ExternalApplicationStatus,
 }
-export interface DBResponseProps{
-    details: {version: string, name: string},
+export interface DBResponseProps {
+    details: {version: string, name: string, error?: string},
     status: ExternalApplicationStatus,
 }
 
-export interface ActuatorHealthResponseProps{
+export interface ActuatorHealthResponseProps {
     components: {
-        mariaDb: DBResponseProps,
-        mongoDb: DBResponseProps,
+        mariaDB: DBResponseProps,
+        mongoDB: DBResponseProps,
     },
     status: ExternalApplicationStatus
 }
 
 
-export interface IExternalApplicationRequest{
+export interface IExternalApplicationRequest {
 
     //to check elastic search status
     checkElasticsearch(): Promise<AxiosResponse<ElasticSearchResponseProps>>,
+
+    //to check mongodb status
+    checkMongoDB(): Promise<AxiosResponse<DBResponseProps>>,
 
     //to check statuses of all external applications
     checkAll(): Promise<AxiosResponse<ActuatorHealthResponseProps>>,
