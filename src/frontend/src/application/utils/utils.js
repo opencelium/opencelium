@@ -539,6 +539,10 @@ export function componentAppear(elementId){
         }
     }, 500);
 }
+
+export function timeout(ms = 2000) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 /*
 /!**
  * to merge two objects deeply
