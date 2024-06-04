@@ -177,7 +177,8 @@ public class YAMLMigrator {
                         patched = fillUp(changeSet.getPath().replaceAll("\\.", "/"), singleJsonPatch, patched);
                     }
                     i--;
-                } else if (e.getCause() != null && e.getCause().getMessage().equals("value cannot be null")) {
+                } else if (e.getCause() != null && e.getCause().getMessage().equals("value cannot be null")
+                        || changeSet.getOperation().equals("delete") && e.getCause() != null && e.getCause().getMessage().equals("no such path in target JSON document")) {
                     changeSet.setSuccess(false);
                 } else {
                     log.warn("An error occurred while applying {} - changeset : {}", changeSet.getVersion(), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
