@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 import java.sql.*;
 
 
-@Component
+@Component("mariaDB")
 public class MariaDbHealthIndicator extends AbstractHealthIndicator {
 
     private final DataSource dataSource;
