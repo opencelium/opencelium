@@ -28,6 +28,8 @@ import Loading from "@app_component/base/loading/Loading";
  import {TextSize} from "@app_component/base/text/interfaces";
  import {ExportButtonStyled, ImportButtonStyled} from "@entity/update_assistant/components/available_updates/styles";
  import InputFile from "@app_component/base/input/file/InputFile";
+ import DownloadOnlineVersionIcon
+     from "@entity/update_assistant/components/available_updates/DownloadOnlineVersionIcon";
 
 export const ONLINE_UPDATE = 'ONLINE_UPDATE';
 export const OFFLINE_UPDATE = 'OFFLINE_UPDATE';
@@ -115,6 +117,14 @@ class AvailableUpdates extends React.Component{
         });
     }
 
+    onDownloadedOnlineVersion(version) {
+        const {entity, updateEntity, openNextForm} = this.props;
+        let newEntity = {...entity};
+        newEntity.availableUpdates = {...entity.availableUpdates, selectedVersion: version};
+        updateEntity(newEntity);
+        openNextForm();
+    }
+
     selectVersion(selectedVersionName){
         const {activeMode} = this.state;
         const {entity, updateEntity, openNextForm} = this.props;
@@ -133,21 +143,18 @@ class AvailableUpdates extends React.Component{
     selectMode(e, activeMode){
         let {startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
         let {
-            fetchOnlineUpdates, fetchOfflineUpdates, entity, updateEntity,
+            fetchOnlineUpdates, fetchOfflineUpdates, entity, updateEntity, hideNextForm,
         } = this.props;
         let newEntity = {...entity};
-        switch (activeMode){
-            case ONLINE_UPDATE:
-                fetchOnlineUpdates();
-                startFetchingOnlineUpdates = true;
-                break;
-            case OFFLINE_UPDATE:
-                fetchOfflineUpdates();
-                startFetchingOfflineUpdates = true;
-                break;
+        if (activeMode === ONLINE_UPDATE) {
+            fetchOnlineUpdates();
+            startFetchingOnlineUpdates = true;
         }
+        startFetchingOfflineUpdates = true;
+        fetchOfflineUpdates();
         newEntity.availableUpdates = {...entity.availableUpdates, mode: activeMode, selectedVersion: null};
-        updateEntity(newEntity)
+        updateEntity(newEntity);
+        hideNextForm();
         this.setState({
             selectedVersionName: '',
             activeMode,
@@ -241,7 +248,7 @@ class AvailableUpdates extends React.Component{
 
     renderUpdates(){
         const {selectedVersionName, isOldVersionsExtended, isNewVersionsExtended, activeMode, startUploadingOnlineVersion, startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
-        const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates, error, openNextForm, uploadingOnlineVersion, uploadingVersion} = this.props;
+        const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates, error, openNextForm, uploadingOnlineVersion, uploadingVersion, onlineUpdates, offlineUpdates} = this.props;
         let updates = this.getUpdates();
         if(updates.available.length === 0 && updates.old.length === 0 && updates.veryNew.length === 0){
             if(activeMode !== '' && !(fetchingOnlineUpdates === API_REQUEST_STATE.START || fetchingOfflineUpdates === API_REQUEST_STATE.START)){
@@ -296,31 +303,40 @@ class AvailableUpdates extends React.Component{
                     <Table authUser={authUser}>
                         <tbody>
                             {this.renderOldUpdates()}
-                            {updates.available.map(version => (
-                                <tr key={version.name}>
-                                    <td>{version.name}</td>
-                                    <td><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
-                                    <td>
-                                        {version.status !== VERSION_STATUS.CURRENT
-                                            ?
-                                                <RadioButtons
-                                                    label={''}
-                                                    value={selectedVersionName}
-                                                    handleChange={(a) => this.selectVersion(a)}
-                                                    style={{textAlign: 'center'}}
-                                                    radios={[{
-                                                        label: '',
-                                                        isLoading: uploadingOnlineVersion === API_REQUEST_STATE.START && startUploadingOnlineVersion && selectedVersionName === version.name,
-                                                        value: version.name,
-                                                        inputClassName: styles.radio_input,
-                                                        labelClassName: styles.radio_label,
-                                                    }]}/>
-                                            :
+                            {updates.available.map(version => {
+                                const isAlreadyDownloaded = activeMode === ONLINE_UPDATE && offlineUpdates.findIndex(u => u.name === version.name) !== -1;
+                                return (
+                                    <tr key={version.name}>
+                                        <td>{`v${version.name}`}</td>
+                                        <td><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
+                                        <td>
+                                            {version.status !== VERSION_STATUS.CURRENT
+                                                ?
+                                                !isAlreadyDownloaded
+                                                    ?
+                                                    activeMode === OFFLINE_UPDATE ?
+                                                        <RadioButtons
+                                                            label={''}
+                                                            value={selectedVersionName}
+                                                            handleChange={(a) => this.selectVersion(a)}
+                                                            style={{textAlign: 'center'}}
+                                                            radios={[{
+                                                                label: '',
+                                                                isLoading: uploadingOnlineVersion === API_REQUEST_STATE.START && startUploadingOnlineVersion && selectedVersionName === version.name,
+                                                                value: version.name,
+                                                                inputClassName: styles.radio_input,
+                                                                labelClassName: styles.radio_label,
+                                                            }]}/>
+                                                        :
+                                                        <DownloadOnlineVersionIcon version={version} callback={(v) => this.onDownloadedOnlineVersion(v)}/>
+                                                    :
+                                                    <span>{t('FORM.ALREADY_DOWNLOADED')}</span>
+                                                :
                                                 <span>{t('FORM.CURRENT_VERSION')}</span>
-                                        }
-                                    </td>
-                                </tr>
-                            ))}
+                                            }
+                                        </td>
+                                    </tr>
+                            )})}
                             {this.renderNewUpdates()}
                         </tbody>
                     </Table>
@@ -364,7 +380,7 @@ class AvailableUpdates extends React.Component{
                     }
                     return (
                         <tr key={version.name}>
-                            <td>{version.name}</td>
+                            <td>{`v${version.name}`}</td>
                             <td><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
                             <td>
                                 <RadioButtons
@@ -390,9 +406,7 @@ class AvailableUpdates extends React.Component{
     renderUploadButton(){
         const {t, uploadingVersion} = this.props;
         const {activeMode, uploadProgress} = this.state;
-        console.log(activeMode)
         if(activeMode === OFFLINE_UPDATE) {
-            console.log(uploadingVersion)
             if(uploadingVersion !== API_REQUEST_STATE.START) {
                 return (
                     <div style={{float: 'right'}}>
