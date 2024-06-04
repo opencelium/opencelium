@@ -52,7 +52,7 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);
         dispatch(checkConnection());
-        dispatch(checkMongoDB());
+        setTimeout(() => dispatch(checkMongoDB()), 1000);
     } else if (logout.match(action)) {
         const SecuredStorage = LocalStorage.getStorage(true);
         SecuredStorage.remove('authUser');
