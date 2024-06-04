@@ -85,12 +85,12 @@ export const getOfflineUpdates = createAsyncThunk(
 
 export const uploadApplicationFile = createAsyncThunk(
     'application/upload/application_file',
-    async(applicationFile: any, thunkAPI) => {
+    async({applicationFile, onUploadProgress}: any, thunkAPI) => {
         try {
             let data = new FormData();
             data.append('file', applicationFile);
             const request = new UpdateAssistantRequest({isFormData: true});
-            const response = await request.uploadApplicationFile(data);
+            const response = await request.uploadApplicationFile(data, onUploadProgress);
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

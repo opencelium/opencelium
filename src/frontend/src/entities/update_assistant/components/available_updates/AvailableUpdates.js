@@ -15,6 +15,7 @@
 
 import React from 'react';
 import {connect} from 'react-redux';
+import {Progress} from 'reactstrap';
 import {withTranslation} from "react-i18next";
 import styles from "@entity/connection/components/themes/default/content/update_assistant/main";
 import Table from "@basic_components/table/Table";
@@ -65,16 +66,22 @@ class AvailableUpdates extends React.Component{
             selectedVersionName: entity.availableUpdates.selectedVersion ? entity.availableUpdates.selectedVersion.name : '',
             isOldVersionsExtended: false,
             isNewVersionsExtended: false,
+            uploadProgress: 0,
         }
     }
 
-    componentDidUpdate(){
+    componentDidUpdate(prevProps, prevState, snapshot){
         const {startFetchingOnlineUpdates, startFetchingOfflineUpdates, startUploadingOnlineVersion} = this.state;
         if(this.props.uploadingOnlineVersion === API_REQUEST_STATE.FINISH && startUploadingOnlineVersion) {
             this.setState({
                 startUploadingOnlineVersion: false,
             })
             this.props.openNextForm();
+        }
+        if(prevProps.uploadingVersion === API_REQUEST_STATE.START && this.props.uploadingVersion === API_REQUEST_STATE.FINISH) {
+            this.setState({
+                uploadProgress: 0,
+            })
         }
         if(this.props.fetchingOnlineUpdates === API_REQUEST_STATE.FINISH && startFetchingOnlineUpdates){
             this.setState({
@@ -90,7 +97,9 @@ class AvailableUpdates extends React.Component{
 
     uploadVersion(f){
         if(f) {
-            this.props.uploadVersion(f);
+            this.props.uploadVersion({applicationFile: f, onUploadProgress: data => {
+                this.setState({uploadProgress: Math.round((100 * data.loaded) / data.total)})
+            }});
         }
     }
 
@@ -232,16 +241,16 @@ class AvailableUpdates extends React.Component{
 
     renderUpdates(){
         const {selectedVersionName, isOldVersionsExtended, isNewVersionsExtended, activeMode, startUploadingOnlineVersion, startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
-        const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates, error, openNextForm, uploadingOnlineVersion} = this.props;
+        const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates, error, openNextForm, uploadingOnlineVersion, uploadingVersion} = this.props;
         let updates = this.getUpdates();
         if(updates.available.length === 0 && updates.old.length === 0 && updates.veryNew.length === 0){
             if(activeMode !== '' && !(fetchingOnlineUpdates === API_REQUEST_STATE.START || fetchingOfflineUpdates === API_REQUEST_STATE.START)){
                 if(error === null){
                     return (
                         <div>
-                            <div className={styles.no_versions}>
+                            {uploadingVersion !== API_REQUEST_STATE.START && <div className={styles.no_versions}>
                                 <span>{"There are no updates"}</span>
-                            </div>
+                            </div>}
                             {this.renderUploadButton()}
                         </div>
                     );
@@ -380,8 +389,10 @@ class AvailableUpdates extends React.Component{
 
     renderUploadButton(){
         const {t, uploadingVersion} = this.props;
-        const {activeMode} = this.state;
+        const {activeMode, uploadProgress} = this.state;
+        console.log(activeMode)
         if(activeMode === OFFLINE_UPDATE) {
+            console.log(uploadingVersion)
             if(uploadingVersion !== API_REQUEST_STATE.START) {
                 return (
                     <div style={{float: 'right'}}>
@@ -396,7 +407,15 @@ class AvailableUpdates extends React.Component{
                     </div>
                 );
             } else{
-                return <Loading/>;
+                return (
+                    <div style={{marginTop: '30px'}}>
+                        <Progress
+                            style={{height: '25px', width: '100%'}}
+                            className="my-2"
+                            value={uploadProgress}
+                        >{`${uploadProgress}%`}</Progress>
+                    </div>
+                );
             }
         }
         return null;
