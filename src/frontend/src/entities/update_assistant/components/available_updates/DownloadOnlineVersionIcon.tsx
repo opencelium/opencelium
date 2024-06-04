@@ -29,10 +29,15 @@ const DownloadOnlineVersionIcon = ({version, callback}: {version: VersionProps, 
         }
     }, [gettingOfflineUpdates]);
     useEffect(() => {
-        if(downloadingOnlineVersion === API_REQUEST_STATE.FINISH && isDownloading) {
-            toggleDownloading(false);
-            toggleDownloaded(true);
-            callback(downloadedOnlineUpdate);
+        if (isDownloading) {
+            if (downloadingOnlineVersion === API_REQUEST_STATE.FINISH) {
+                toggleDownloading(false);
+                toggleDownloaded(true);
+                callback(downloadedOnlineUpdate);
+            }
+            if (downloadingOnlineVersion === API_REQUEST_STATE.ERROR) {
+                toggleDownloading(false);
+            }
         }
     }, [downloadingOnlineVersion]);
     if (isDownloaded) {

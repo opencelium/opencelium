@@ -61,10 +61,9 @@ export const downloadOnlineVersion = createAsyncThunk(
     'application/download/online',
     async(version: string, thunkAPI) => {
         try {
-            await timeout();
-            //const request = new UpdateAssistantRequest({endpoint: `/online/version/${version}/download`});
-            //const response = await request.downloadOnlineVersion();
-            //return response.data;
+            const request = new UpdateAssistantRequest({endpoint: `/online/version/${version}/download`});
+            const response = await request.downloadOnlineVersion();
+            return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
