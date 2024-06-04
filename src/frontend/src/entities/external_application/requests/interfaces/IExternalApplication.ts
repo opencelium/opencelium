@@ -24,12 +24,8 @@ export interface ElasticSearchResponseProps {
     details: {version: string, error: string},
     status: ExternalApplicationStatus,
 }
-export interface MongoDBResponseProps {
-    details: {version: string, name: string},
-    status: ExternalApplicationStatus,
-}
 export interface DBResponseProps {
-    details: {version: string, name: string},
+    details: {version: string, name: string, error?: string},
     status: ExternalApplicationStatus,
 }
 
@@ -48,7 +44,7 @@ export interface IExternalApplicationRequest {
     checkElasticsearch(): Promise<AxiosResponse<ElasticSearchResponseProps>>,
 
     //to check mongodb status
-    checkMongoDB(): Promise<AxiosResponse<MongoDBResponseProps>>,
+    checkMongoDB(): Promise<AxiosResponse<DBResponseProps>>,
 
     //to check statuses of all external applications
     checkAll(): Promise<AxiosResponse<ActuatorHealthResponseProps>>,

@@ -25,7 +25,7 @@ import {
 } from "../action_creators/ExternalApplicationCreators";
 import {
     ActuatorHealthResponseProps,
-    ElasticSearchResponseProps, MongoDBResponseProps,
+    ElasticSearchResponseProps, DBResponseProps,
 } from "../../requests/interfaces/IExternalApplication";
 
 export interface ExternalApplicationSlice extends ICommonState{
@@ -33,7 +33,7 @@ export interface ExternalApplicationSlice extends ICommonState{
     checkingMongoDB: API_REQUEST_STATE,
     checkingAll: API_REQUEST_STATE,
     elasticSearchCheckResults: ElasticSearchResponseProps,
-    mongoDBCheckResults: MongoDBResponseProps,
+    mongoDBCheckResults: DBResponseProps,
     actuatorHealth: ActuatorHealthResponseProps,
 }
 
@@ -68,7 +68,7 @@ export const externalApplicationSlice = createSlice({
         [checkMongoDB.pending.type]: (state) => {
             state.checkingMongoDB = API_REQUEST_STATE.START;
         },
-        [checkMongoDB.fulfilled.type]: (state, action: PayloadAction<{data: MongoDBResponseProps}>) => {
+        [checkMongoDB.fulfilled.type]: (state, action: PayloadAction<{data: DBResponseProps}>) => {
             state.checkingMongoDB = API_REQUEST_STATE.FINISH;
             state.mongoDBCheckResults = action.payload.data;
             state.error = null;
