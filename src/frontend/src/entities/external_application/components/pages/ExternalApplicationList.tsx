@@ -35,13 +35,13 @@ const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(Ext
     }, []);
     if((checkingAll === API_REQUEST_STATE.FINISH || checkingAll === API_REQUEST_STATE.ERROR) && actuatorHealth){
         externalApplications.push({
-            id: 1, name: actuatorHealth.components?.mariaDb?.details.name || 'MariaDB', icon: MariaDBImagePath, link: '', value: actuatorHealth.components?.mariaDb?.details.name || 'db',
-            status: actuatorHealth.components?.mariaDb?.status || ExternalApplicationStatus.DOWN,
-            version: actuatorHealth.components?.mariaDb?.details.version || '',
+            id: 1, name: actuatorHealth.components?.mariaDB?.details.name || 'MariaDB', icon: MariaDBImagePath, link: '', value: actuatorHealth.components?.mariaDB?.details.name || 'db',
+            status: actuatorHealth.components?.mariaDB?.status || ExternalApplicationStatus.DOWN,
+            version: actuatorHealth.components?.mariaDB?.details.version || '',
         },{
-            id: 2, name: actuatorHealth.components?.mongoDb?.details.name || 'MongoDB', icon: MariaDBImagePath, link: '', value: actuatorHealth.components?.mongoDb?.details.name || 'db',
-            status: actuatorHealth.components?.mongoDb?.status || ExternalApplicationStatus.DOWN,
-            version: actuatorHealth.components?.mongoDb?.details.version || '',
+            id: 2, name: actuatorHealth.components?.mongoDB?.details.name || 'MongoDB', icon: MariaDBImagePath, link: '', value: actuatorHealth.components?.mongoDB?.details.name || 'db',
+            status: actuatorHealth.components?.mongoDB?.status || ExternalApplicationStatus.DOWN,
+            version: actuatorHealth.components?.mongoDB?.details.version || '',
         })
     }
     const CExternalApplications = new ExternalApplications(externalApplications);

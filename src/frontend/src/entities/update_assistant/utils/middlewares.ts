@@ -20,8 +20,10 @@ import {checkForUpdates} from "../redux_toolkit/action_creators/UpdateAssistantC
 
 export const updateAssistantMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     const dispatch: AppDispatch = storeApi.dispatch;
-    if (login.fulfilled.type === action.type && action.payload.userDetail.themeSync) {
-        dispatch(checkForUpdates());
+    if (login.fulfilled.type === action.type) {
+        if (action.payload.userDetail.themeSync) {
+            dispatch(checkForUpdates());
+        }
     }
     return next(action);
 }

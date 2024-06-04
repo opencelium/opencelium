@@ -14,6 +14,7 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
+import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 
 const {
     checkElasticsearch, checkAllExternalApplications
@@ -26,6 +27,10 @@ export default {
         [checkElasticsearch.rejected.type]: {
             "DOWN": "Elasticsearch is down.",
             "__DEFAULT__": "Elasticsearch is down."
+        },
+        [checkMongoDB.rejected.type]: {
+            "DOWN": "MongoDB is down.",
+            "__DEFAULT__": "MongoDB is down."
         },
     },
 }
