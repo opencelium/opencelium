@@ -21,9 +21,11 @@ public class EmailHealthIndicator extends AbstractHealthIndicator {
     protected void doHealthCheck(Health.Builder builder) throws Exception {
         try {
             if (this.mailSender.getHost() == null || this.mailSender.getPort() == -1) {
+                builder.down().withDetail("error", "Host or Port is not set.");
                 return;
             }
         } catch (Exception e) {
+            builder.down().withDetail("error", e.getMessage());
             return;
         }
 
@@ -32,7 +34,7 @@ public class EmailHealthIndicator extends AbstractHealthIndicator {
             this.mailSender.testConnection();
             builder.up();
         } catch (Exception e) {
-            builder.down(e);
+            builder.down().withDetail("error", e.getMessage());
         }
     }
 }

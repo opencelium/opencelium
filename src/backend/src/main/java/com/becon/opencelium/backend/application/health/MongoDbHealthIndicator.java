@@ -29,8 +29,8 @@ public class MongoDbHealthIndicator extends AbstractHealthIndicator {
             builder.up()
                     .withDetail("version", mongoVersion);
         } catch (Exception e) {
-            Health.down()
-                    .withDetail("error","MongoDB is down");
+            builder.down()
+                    .withDetail("error", e.getMessage());
         }
     }
 }
