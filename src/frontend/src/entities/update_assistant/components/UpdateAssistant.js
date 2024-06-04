@@ -112,7 +112,6 @@ class UpdateAssistant extends Component{
         const {updateSystem} = this.props;
         const data = {
             folder: updateData.availableUpdates.folder ? updateData.availableUpdates.folder : '',
-            isOnline: updateData.availableUpdates.mode === ONLINE_UPDATE,
             version: updateData.availableUpdates.selectedVersion.name ? updateData.availableUpdates.selectedVersion.name : '',
             templates: updateData.templateFileUpdate.updatedTemplates.map(template => template.data),
             invokers: updateData.invokerFileUpdate.updatedInvokers.map(invoker => invoker.data),
