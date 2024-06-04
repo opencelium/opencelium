@@ -1,6 +1,6 @@
 # operations: add, modify, delete, rename.
 versions:
-  - version: 4.0
+  - version: 4.1
     changes:
       - changeset: 1
         operation: add
@@ -13,3 +13,6 @@ versions:
       - changeset: 3
         operation: delete
         path: spring.neo4j
+      - changeset: 4
+        operation: delete
+        path: opencelium.notification.tools.teams
