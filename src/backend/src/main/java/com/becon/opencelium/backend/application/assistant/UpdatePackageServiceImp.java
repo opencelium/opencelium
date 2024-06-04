@@ -65,7 +65,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     @Override
     public List<PackageVersionResource> getOnVersions() {
-        if (userService.getCurrentUser().getUserDetail().isThemeSync()) {
+        if (!userService.getCurrentUser().getUserDetail().isThemeSync()) {
             return Collections.emptyList();
         }
         try {
