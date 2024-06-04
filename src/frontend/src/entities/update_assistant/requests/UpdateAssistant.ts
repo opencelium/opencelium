@@ -42,9 +42,9 @@ export class UpdateAssistantRequest extends Request implements IUpdateAssistantR
         return super.get<OfflineUpdateProps[]>();
     }
 
-    async uploadApplicationFile(application: FormData): Promise<AxiosResponse<OfflineUpdateProps>>{
+    async uploadApplicationFile(application: FormData, onUploadProgress?: (progressEvent: any) => void): Promise<AxiosResponse<OfflineUpdateProps>>{
         this.url = 'assistant/zipfile';
-        return super.post<OfflineUpdateProps>(application);
+        return super.post<OfflineUpdateProps>(application, {onUploadProgress});
     }
 
     async deleteApplicationFile(): Promise<AxiosResponse<IResponse>>{
