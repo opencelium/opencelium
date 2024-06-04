@@ -17,6 +17,7 @@ import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.update_assistant.Neo4jConfigResource;
 import com.becon.opencelium.backend.utility.Neo4jDriverUtility;
+import com.becon.opencelium.backend.utility.ZipUtils;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
 import com.mongodb.client.MongoClient;
@@ -272,7 +273,8 @@ public class AssistantServiceImp implements ApplicationService {
         InputStream inputStream = downloadFile(url);
         File backendRoot = new File("");
         Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
-        unzipFolder(inputStream, appRoot);
+//        unzipFolder(inputStream, appRoot);
+        ZipUtils.extractZip(inputStream, appRoot);
     }
 
     private InputStream downloadFile(String url) throws IOException, ParseException {
@@ -306,7 +308,9 @@ public class AssistantServiceImp implements ApplicationService {
         }
         InputStream inputStream = Files.newInputStream(zipFile.toPath());
         Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
-        unzipFolder(inputStream, appRoot);
+        System.out.println(zipFile.toPath() + ", " + appRoot);
+//        unzipFolder(inputStream, appRoot);
+        ZipUtils.extractZip(inputStream, appRoot);
     }
 
     @Override
@@ -432,6 +436,7 @@ public class AssistantServiceImp implements ApplicationService {
                                 Files.createDirectories(newPath.getParent());
                             }
                         }
+                        System.out.println(zipEntry.getName() + ", " + newPath);
                         Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
                     }
                     zipEntry = zis.getNextEntry();
