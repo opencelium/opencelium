@@ -18,7 +18,7 @@ import {UpdateAssistantRequest} from "@entity/update_assistant/requests/UpdateAs
 import {IApplicationResponse} from "@application/requests/interfaces/IResponse";
 import {CheckForUpdateProps} from "@application/requests/interfaces/IUpdateAssistant";
 import {VERSION_STATUS} from "@application/interfaces/IApplication";
-import {errorHandler} from "@application/utils/utils";
+import {errorHandler, timeout} from "@application/utils/utils";
 
 
 export const checkForUpdates = createAsyncThunk(
