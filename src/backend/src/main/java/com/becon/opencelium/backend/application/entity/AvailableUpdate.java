@@ -1,18 +1,17 @@
 package com.becon.opencelium.backend.application.entity;
 
 public class AvailableUpdate {
-    private String folder;
     private String version;
     private String changelogLink;
     private String status;
     private String instruction;
 
-    public String getFolder() {
-        return folder;
+    public AvailableUpdate() {
     }
 
-    public void setFolder(String folder) {
-        this.folder = folder;
+    public AvailableUpdate(String version, String status) {
+        this.version = version;
+        this.status = status;
     }
 
     public String getVersion() {

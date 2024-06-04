@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.utility;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.eclipse.jgit.util.IO;
 
 import java.io.*;
 import java.nio.file.*;
@@ -35,6 +36,18 @@ public class ZipUtils {
                 zipEntry = zis.getNextEntry();
             }
         }
+    }
+
+    public static void saveZip(InputStream inputStream, String zipFileName, Path dir) throws IOException {
+
+        Path zipFilePath = dir.resolve(zipFileName + ".zip").normalize();
+
+        // Ensure the target directory exists
+        if (!Files.exists(dir)) {
+            Files.createDirectory(dir);
+        }
+        Files.copy(inputStream, zipFilePath,
+                StandardCopyOption.REPLACE_EXISTING);
     }
 
     private static void clearFolder(Path folder) throws IOException {

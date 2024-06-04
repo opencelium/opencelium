@@ -268,35 +268,22 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public void updateOn(String version) throws Exception {
-        String path = version.charAt(0) == 'v' ? version.substring(1) : version;
-        String url = "https://packagecloud.io/becon/opencelium/packages/anyfile/" +
-                "oc_" + path + ".zip/download?distro_version_id=230";
-        InputStream inputStream = downloadFile(url);
-        File backendRoot = new File("");
-        Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
-        System.out.println(appRoot);
+//        String path = version.charAt(0) == 'v' ? version.substring(1) : version;
+//        String url = "https://packagecloud.io/becon/opencelium/packages/anyfile/" +
+//                "oc_" + path + ".zip/download?distro_version_id=230";
+////        InputStream inputStream = downloadFile(url);
+//        File backendRoot = new File("");
+//        Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
+//        System.out.println(appRoot);
 //        unzipFolder(inputStream, appRoot);
 //        ZipUtils.extractZip(inputStream, appRoot);
     }
 
-    private InputStream downloadFile(String url) throws IOException, ParseException {
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<byte[]> response = restTemplate.getForEntity(URI.create(url), byte[].class);
 
-        if (response.getStatusCode().is2xxSuccessful()) {
-            byte[] responseBody = response.getBody();
-            if (responseBody != null) {
-                return new ByteArrayInputStream(responseBody);
-            } else {
-                throw new IOException("Received empty response body");
-            }
-        } else {
-            throw new IOException("Failed to download file: " + response.getStatusCode());
-        }
-    }
 
     @Override
     public void updateOff(String dir) throws Exception { // removed version parameter
+        dir = dir.replace(".", "_");
         dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
 //            InputStream oc = Files.newInputStream(Paths.get(dir));
         File backendRoot = new File("");
