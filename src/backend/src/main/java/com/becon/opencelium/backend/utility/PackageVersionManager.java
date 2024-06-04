@@ -1,9 +1,6 @@
 package com.becon.opencelium.backend.utility;
 
-import com.becon.opencelium.backend.constant.YamlPropConst;
-import com.becon.opencelium.backend.resource.update_assistant.PackageVersionResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,12 +13,12 @@ import java.util.stream.Collectors;
 public class PackageVersionManager {
 
 
-    public static List<PackageVersionResource> getPackageVersions(Set<String> packageNames, String currentVersion) {
-        List<String> versions = packageNames.stream()
+    public static List<AvailableUpdate> getPackageVersions(Set<String> packageVersions, String currentVersion) {
+        List<String> versions = packageVersions.stream()
                 .map(name -> name.replace("oc_", "").replace(".zip", ""))
                 .sorted(PackageVersionManager::compareVersions).toList();
 
-        List<PackageVersionResource> packageVersionResources = new ArrayList<>();
+        List<AvailableUpdate> packageVersionResources = new ArrayList<>();
         boolean foundHigherVersion = false;
 
         for (String version : versions) {
@@ -38,7 +35,7 @@ public class PackageVersionManager {
                     status = "not available";
                 }
             }
-            packageVersionResources.add(new PackageVersionResource("v" + version, version, status));
+            packageVersionResources.add(new AvailableUpdate(version, status));
         }
         return packageVersionResources;
     }

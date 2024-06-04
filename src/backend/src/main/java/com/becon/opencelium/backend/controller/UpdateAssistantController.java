@@ -26,15 +26,11 @@ import com.becon.opencelium.backend.resource.application.AvailableUpdateResource
 import com.becon.opencelium.backend.resource.application.MigrateDataResource;
 import com.becon.opencelium.backend.resource.update_assistant.Neo4jConfigResource;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
-import com.becon.opencelium.backend.resource.update_assistant.PackageVersionResource;
 import com.becon.opencelium.backend.resource.update_assistant.VersionDTO;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 import com.zaxxer.hikari.pool.HikariPool;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -61,8 +57,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -171,7 +165,6 @@ public class UpdateAssistantController {
     })
     @GetMapping("/oc/offline/version/all")
     public ResponseEntity<?> getOfflineVersion() {
-
         List<AvailableUpdate> offVersions = packageServiceImp.getOffVersions();
         List<AvailableUpdateResource> packageResource = offVersions.stream()
                 .map(p -> packageServiceImp.toResource(p)).collect(Collectors.toList());
@@ -191,8 +184,33 @@ public class UpdateAssistantController {
     })
     @GetMapping(value = "/oc/online/version/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getOnlineVersion() {
-        List<PackageVersionResource> onVersions_json = packageServiceImp.getOnVersions();
-        return ResponseEntity.ok(onVersions_json);
+        List<AvailableUpdate> onVersions_json = packageServiceImp.getOnVersions();
+        List<AvailableUpdateResource> versions = onVersions_json.stream()
+                .map(t -> updatePackageServiceImp.toResource(t)).toList();
+        return ResponseEntity.ok(versions);
+    }
+
+    @Operation(summary = "Downloads zip version of OC from remote repository")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "ZIP file was successfully downloaded"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(value = "/oc/online/version/{version}/download", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> downloadVersion(@PathVariable String version) {
+        try {
+            packageServiceImp.downloadPackage(version);
+            AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(version);
+            AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
+            return ResponseEntity.ok(availableUpdateResource);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Operation(summary = "Validates weather an oc_service.sh file exists or not")
@@ -293,19 +311,8 @@ public class UpdateAssistantController {
         // do backup
 //        assistantServiceImp.runScript();
         try {
-            final String dir;
-            if (migrateDataResource.getFolder() != null && !migrateDataResource.getFolder().isEmpty()) {
-                dir = migrateDataResource.getFolder();
-            } else {
-                dir = migrateDataResource.getVersion();
-            }
-
             //////test commit
-            if (migrateDataResource.isOnline()) {
-                assistantServiceImp.updateOn(migrateDataResource.getVersion());
-            } else {
-                assistantServiceImp.updateOff(dir);
-            }
+            assistantServiceImp.updateOff(migrateDataResource.getVersion());
 
             //TODO: template update and migration
             //TODO: invoker update and migration
@@ -337,7 +344,7 @@ public class UpdateAssistantController {
     @PostMapping(value = "/zipfile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
         try {
-            String zippedAppVersion = assistantServiceImp.getVersion(file.getInputStream()).replace(".", "_");
+            String zippedAppVersion = assistantServiceImp.getVersion(file.getInputStream());
             Path target = Paths.get(PathConstant.ASSISTANT + "versions/" + zippedAppVersion);
             assistantServiceImp.uploadZipFile(file, target);
             AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(zippedAppVersion);
