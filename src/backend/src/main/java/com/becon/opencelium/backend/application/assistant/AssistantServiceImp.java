@@ -268,13 +268,15 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public void updateOn(String version) throws Exception {
+        String path = version.charAt(0) == 'v' ? version.substring(1) : version;
         String url = "https://packagecloud.io/becon/opencelium/packages/anyfile/" +
-                "oc_" + version + ".zip/download?distro_version_id=230";
+                "oc_" + path + ".zip/download?distro_version_id=230";
         InputStream inputStream = downloadFile(url);
         File backendRoot = new File("");
         Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
+        System.out.println(appRoot);
 //        unzipFolder(inputStream, appRoot);
-        ZipUtils.extractZip(inputStream, appRoot);
+//        ZipUtils.extractZip(inputStream, appRoot);
     }
 
     private InputStream downloadFile(String url) throws IOException, ParseException {

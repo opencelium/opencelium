@@ -302,7 +302,7 @@ public class UpdateAssistantController {
 
             //////test commit
             if (migrateDataResource.isOnline()) {
-                assistantServiceImp.updateOn(migrateDataResource.getVersion());
+                assistantServiceImp.updateOn(dir);
             } else {
                 assistantServiceImp.updateOff(dir);
             }
