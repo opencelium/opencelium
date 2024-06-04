@@ -6,17 +6,17 @@ import jakarta.annotation.Resource;
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AvailableUpdateResource {
-    private String version;
+    private String name;
     private String changelogLink;
     private String status;
     private String instruction;
 
-    public String getVersion() {
-        return version;
+    public String getName() {
+        return name;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getChangelogLink() {

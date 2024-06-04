@@ -119,7 +119,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     public AvailableUpdateResource toResource(AvailableUpdate offVersions) {
         AvailableUpdateResource availableUpdateResource = new AvailableUpdateResource();
         availableUpdateResource.setStatus(offVersions.getStatus());
-        availableUpdateResource.setVersion(offVersions.getVersion());
+        availableUpdateResource.setName(offVersions.getVersion());
         availableUpdateResource.setChangelogLink(offVersions.getChangelogLink());
         availableUpdateResource.setInstruction(offVersions.getInstruction());
         return availableUpdateResource;
