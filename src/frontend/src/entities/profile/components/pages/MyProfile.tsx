@@ -143,7 +143,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                         />
                     </div>
                     <InputSwitch
-                        name={`Theme synchronization and Gravatar is ${themeSync ? 'enabled' : 'disabled'}`}
+                        name={`All online services are ${themeSync ? 'enabled' : 'disabled'} (Gravatar, Online Update, Theme)`}
                         icon={'corporate_fare'}
                         label={'Online Service Sync'}
                         isChecked={themeSync} onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}

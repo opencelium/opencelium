@@ -428,9 +428,11 @@ class AvailableUpdates extends React.Component{
             <div style={{margin: '20px 0 0 0'}}>
                 <div style={{textAlign: 'center'}}>
                     <ImportButtonStyled
+                        disabled={!authUser.userDetail.themeSync}
                         isActive={activeMode === ONLINE_UPDATE}
                         authUser={authUser}
-                        title={t('FORM.ONLINE')}
+                        title={!authUser.userDetail.themeSync ? 'Please, activate sync in profile settings' : 'Online'}
+                        label={'Online'}
                         onClick={(e) => this.selectMode(e, ONLINE_UPDATE)}
                         size={TextSize.Size_16}
                     />
