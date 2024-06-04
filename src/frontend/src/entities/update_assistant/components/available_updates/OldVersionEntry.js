@@ -93,7 +93,7 @@ class OldVersionEntry extends React.Component{
         }
         return(
             <tr className={styles.disable_version_entry} onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}>
-                <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}>{version.name}</td>
+                <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}>{`v${version.name}`}</td>
                 <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
                 <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)} style={{position: 'relative'}}>
                     <span>{t('FORM.OLD_VERSION')}</span>

@@ -102,12 +102,16 @@ class UpdateAssistant extends Component{
             [formSection]: true,
         })
     }
+    hideNextFormSection(formSection){
+        this.setState({
+            [formSection]: false,
+        })
+    }
 
     updateSystem(updateData){
         const {updateSystem} = this.props;
         const data = {
             folder: updateData.availableUpdates.folder ? updateData.availableUpdates.folder : '',
-            isOnline: updateData.availableUpdates.mode === ONLINE_UPDATE,
             version: updateData.availableUpdates.selectedVersion.name ? updateData.availableUpdates.selectedVersion.name : '',
             templates: updateData.templateFileUpdate.updatedTemplates.map(template => template.data),
             invokers: updateData.invokerFileUpdate.updatedInvokers.map(invoker => invoker.data),
@@ -207,55 +211,13 @@ class UpdateAssistant extends Component{
                     name: 'availableUpdates',
                     label: t('FORM.AVAILABLE_UPDATES'),
                     Component: AvailableUpdates,
-                    componentProps: {openNextForm: () => this.showNextFormSection('hasFinishUpdate')},
+                    componentProps: {openNextForm: () => this.showNextFormSection('hasFinishUpdate'),hideNextForm: () => this.hideNextFormSection('hasFinishUpdate')},
                 },
             ],
             hint: {text: t('FORM.HINT_2')},
             header: t(`FORM.PAGE_2`),
             visible: hasAvailableUpdates,
-        },/*{
-            inputs:[
-                {
-                    ...INPUTS.COMPONENT,
-                    icon: 'description',
-                    name: 'templateFileUpdate',
-                    label: t('FORM.TEMPLATE_FILE_UPDATE'),
-                    Component: TemplateFileUpdate,
-                    componentProps: {openNextForm: () => this.showNextFormSection('hasInvokerFileUpdate')},
-                },
-            ],
-            hint: {text: t('FORM.HINT_3')},
-            header: t(`FORM.PAGE_3`),
-            visible: hasAvailableUpdates && hasTemplateFileUpdate,
         },{
-            inputs:[
-                {
-                    ...INPUTS.COMPONENT,
-                    icon: 'description',
-                    name: 'invokerFileUpdate',
-                    label: t('FORM.INVOKER_FILE_UPDATE'),
-                    Component: InvokerFileUpdate,
-                    componentProps: {openNextForm: () => this.showNextFormSection('hasConnectionMigration')},
-                },
-            ],
-            hint: {text: t('FORM.HINT_4')},
-            header: t(`FORM.PAGE_4`),
-            visible: hasTemplateFileUpdate && hasInvokerFileUpdate,
-        },{
-            inputs:[
-                {
-                    ...INPUTS.COMPONENT,
-                    icon: 'description',
-                    name: 'connectionMigration',
-                    label: t('FORM.CONNECTION_MIGRATION'),
-                    Component: ConnectionFileUpdate,
-                    componentProps: {openNextForm: () => this.showNextFormSection('hasFinishUpdate')},
-                },
-            ],
-            hint: {text: t('FORM.HINT_5')},
-            header: t(`FORM.PAGE_5`),
-            visible: hasInvokerFileUpdate && hasConnectionMigration,
-        },*/{
             inputs:[
                 {
                     ...INPUTS.COMPONENT,
