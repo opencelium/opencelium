@@ -283,7 +283,6 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public void updateOff(String dir) throws Exception { // removed version parameter
-        dir = dir.replace(".", "_");
         dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
 //            InputStream oc = Files.newInputStream(Paths.get(dir));
         File backendRoot = new File("");
