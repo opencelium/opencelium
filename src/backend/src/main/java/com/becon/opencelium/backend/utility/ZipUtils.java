@@ -18,8 +18,8 @@ public class ZipUtils {
 
     public static void extractZip(InputStream zipInputStream, Path rootPath) throws IOException {
         // Removes frontend file totally and then replaces from zip file.
-//        File f = new File("../frontend");
-//        FileUtils.deleteDirectory(f);
+        File f = new File("../frontend");
+        FileUtils.deleteDirectory(f);
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(zipInputStream))) {
             ZipEntry zipEntry = zis.getNextEntry();
 
@@ -41,7 +41,7 @@ public class ZipUtils {
                     String file = targetPath.getFileName().toString();
                     // we have to escape to remove files in conf folder except opencelium.service
                     if (!parent.equals("conf") || file.equals("opencelium.service")) {
-//                        Files.copy(zis, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                        Files.copy(zis, targetPath, StandardCopyOption.REPLACE_EXISTING);
                         log.info("\"" + targetPath.normalize() + "\" has been replaced or added successfully");
                     }
                 }
