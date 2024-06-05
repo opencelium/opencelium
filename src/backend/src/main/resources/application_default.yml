@@ -182,6 +182,8 @@ opencelium:
   connector:
     security:
       key: it's secret key
+  installation:
+    type: sources
 #  rest_template:
 #    proxy:
 #      host: 127.0.0.1
