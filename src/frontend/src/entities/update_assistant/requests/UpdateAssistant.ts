@@ -31,7 +31,7 @@ export class UpdateAssistantRequest extends Request implements IUpdateAssistantR
     }
 
     async getInstallationInfo(): Promise<AxiosResponse<InstallationInfo>>{
-        this.endpoint = '/info';
+        this.endpoint = '/installation';
         return super.get<InstallationInfo>();
     }
 

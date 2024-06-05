@@ -36,7 +36,7 @@ export interface VersionProps{
 }
 
 export interface InstallationInfo {
-    type: 'sources' | string,
+    type: 'sources' | 'undefined' | string,
 }
 
 export interface CheckForUpdateProps{

@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {permission} from "@entity/application/utils/permission";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
 import AdminCards from "../../collections/AdminCards";
@@ -24,24 +24,58 @@ import {RootState, useAppDispatch, useAppSelector} from "@application/utils/stor
 import {getInstallationInfo} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
+const cards = [
+    {id: 1, name: 'Users', link: '/users'},
+    {id: 2, name: 'Groups', link: '/usergroups'},
+    {id: 3, name: 'External Applications', link: '/apps'},
+    {id: 4, name: 'Invokers', link: '/invokers'},
+    {id: 5, name: 'Templates', link: '/templates'},
+    {id: 6, name: 'Data Aggregator', link: '/data_aggregator'},
+    {id: 7, name: 'Notification Templates', link: '/notification_templates'},
+    {id: 8, name: 'Update Assistant', link: '/update_assistant', isLoading: true, isDisabled: true},
+    {id: 9, name: 'Swagger API Docs', link: `${baseUrl}docs`, isExternalHref: true},
+    {id: 10, name: 'Migration', link: `/migration`},
+]
 const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
     const {installationInfo, gettingInstallationInfo} = useAppSelector((state: RootState) => state.updateAssistantReducer);
-    const adminCards = [
-        {id: 1, name: 'Users', link: '/users'},
-        {id: 2, name: 'Groups', link: '/usergroups'},
-        {id: 3, name: 'External Applications', link: '/apps'},
-        {id: 4, name: 'Invokers', link: '/invokers'},
-        {id: 5, name: 'Templates', link: '/templates'},
-        {id: 6, name: 'Data Aggregator', link: '/data_aggregator'},
-        {id: 7, name: 'Notification Templates', link: '/notification_templates'},
-        {id: 8, name: 'Update Assistant', link: '/update_assistant', isDisabled: installationInfo.type !== 'sources', isLoading: gettingInstallationInfo === API_REQUEST_STATE.START},
-        {id: 9, name: 'Swagger API Docs', link: `${baseUrl}docs`, isExternalHref: true},
-        {id: 10, name: 'Migration', link: `/migration`},
-    ];
+    const [adminCards, setAdminCards] = useState<any>(cards);
     useEffect(() => {
         dispatch(getInstallationInfo());
     }, []);
+    useEffect(() => {
+        switch (gettingInstallationInfo) {
+            case API_REQUEST_STATE.FINISH:
+                setAdminCards([...adminCards].map((card) => {
+                    if (card.id === 8) {
+                        return {
+                            ...card,
+                            isLoading: false,
+                            isDisabled: installationInfo.type !== 'sources',
+                            title: installationInfo.type === 'undefined'
+                                ? 'Installation type is not provided in application.yml file.'
+                                : installationInfo.type !== 'sources'
+                                    ? `Update Assistant is not available for installation type: ${installationInfo.type}` : '',
+                        }
+                    } else {
+                        return card;
+                    }
+                }))
+                break;
+            case API_REQUEST_STATE.ERROR:
+                setAdminCards([...adminCards].map((card) => {
+                    if (card.id === 8) {
+                        return {
+                            ...card,
+                            isLoading: false,
+                        }
+                    } else {
+                        return card;
+                    }
+                }))
+                break;
+        }
+    }, [gettingInstallationInfo]);
     const CAdminCards = new AdminCards(adminCards);
     return (
         <CollectionView collection={CAdminCards} componentPermission={AdminCardPermissions}/>
