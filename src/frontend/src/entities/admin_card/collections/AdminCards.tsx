@@ -49,7 +49,7 @@ class AdminCards extends ListCollection<AdminCardProps>{
     getListActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
         return (
             <React.Fragment>
-                <PermissionTooltipButton target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} isExternalHref={entity.isExternalHref} href={`${entity.link}`} hasBackground={false} icon={'visibility'} size={TextSize.Size_20} permission={componentPermission.READ}/>
+                <PermissionTooltipButton isLoading={entity.isLoading} target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} isExternalHref={entity.isExternalHref} href={`${entity.link}`} hasBackground={false} icon={'visibility'} size={TextSize.Size_20} permission={componentPermission.READ}/>
             </React.Fragment>
         );
     };

@@ -44,6 +44,19 @@ export const checkForUpdates = createAsyncThunk(
     }
 )
 
+export const getInstallationInfo = createAsyncThunk(
+    'application/get/installationInfo',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new UpdateAssistantRequest();
+            const response = await request.getInstallationInfo();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const uploadOnlineVersion = createAsyncThunk(
     'application/upload/online',
     async(version: string, thunkAPI) => {
@@ -151,6 +164,7 @@ export const updateApplication = createAsyncThunk(
 )
 
 export default {
+    getInstallationInfo,
     uploadOnlineVersion,
     downloadOnlineVersion,
     getOnlineUpdates,
