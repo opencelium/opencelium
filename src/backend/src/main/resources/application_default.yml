@@ -154,12 +154,6 @@ management:
 
 opencelium:
   version: 4.0
-  reboot:
-    path: src/backend/src/main/resources/bashfile/restart.sh
-    assistant:
-      update:
-        online:
-          url: { insert url where portal service is located }
 ###########################################################################
 #                                                                         #
 #   Is customizable                                                       #
@@ -185,12 +179,6 @@ opencelium:
     tools:
       incoming_webhook:
         url: {insert you webhook url here}
-      teams:
-        grant_type: refresh_token
-        client_id:
-        client_secret:
-        refresh_token:
-        tenant:
   connector:
     security:
       key: it's secret key
