@@ -29,11 +29,20 @@ export class AdminCard implements IAdminCard{
 
     isExternalHref?: boolean = false;
 
+    isDisabled?: boolean = false;
+
+    isLoading?: boolean = false;
+
+    title?: string = '';
+
     constructor(adminCard?: IAdminCard) {
         this.id = adminCard?.id || 0;
         this.name = adminCard?.name || '';
         this.link = adminCard?.link || '';
         this.permission = adminCard?.permission || '';
         this.isExternalHref = adminCard?.isExternalHref || false;
+        this.isDisabled = adminCard?.isDisabled || false;
+        this.isLoading = adminCard?.isLoading || false;
+        this.title = adminCard?.title || '';
     }
 }

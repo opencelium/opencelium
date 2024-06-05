@@ -40,6 +40,7 @@ const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.RE
     const dispatch = useAppDispatch();
     const {installationInfo, gettingInstallationInfo} = useAppSelector((state: RootState) => state.updateAssistantReducer);
     const [adminCards, setAdminCards] = useState<any>(cards);
+    const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     useEffect(() => {
         dispatch(getInstallationInfo());
     }, []);
@@ -76,9 +77,12 @@ const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.RE
                 break;
         }
     }, [gettingInstallationInfo]);
+    useEffect(() => {
+        setShouldBeUpdated(!shouldBeUpdated);
+    }, [gettingInstallationInfo])
     const CAdminCards = new AdminCards(adminCards);
     return (
-        <CollectionView collection={CAdminCards} componentPermission={AdminCardPermissions}/>
+        <CollectionView collection={CAdminCards} shouldBeUpdated={shouldBeUpdated} componentPermission={AdminCardPermissions}/>
     )
 })
 
