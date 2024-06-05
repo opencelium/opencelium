@@ -192,8 +192,7 @@ public class YAMLMigrator {
 
     private static String getOcVersion(Map<String, Object> map) {
         var oc = (Map<String, Object>) map.get("opencelium");
-        var version = (Double) oc.getOrDefault("version", "0.0");
-        return version + ":-1";
+        return oc.getOrDefault("version", "0.0").toString() + ":-1";
     }
 
     private static void finish(Object yaml, List<ChangeSet> changeSetsForSave) {
@@ -381,14 +380,33 @@ public class YAMLMigrator {
     private static boolean isGreaterThanOrEqual(String v1, String v2) {
         String[] split1 = v1.split(":");
         String[] split2 = v2.split(":");
-        double ver1 = Double.parseDouble(split1[0]);
-        double ver2 = Double.parseDouble(split2[0]);
-        if (ver1 > ver2) {
+        int result = compareVersions(split1[0], split2[0]);
+        if (result == 1) {
             return true;
-        } else if (ver1 == ver2) {
+        } else if (result == 0) {
             return Integer.parseInt(split1[1]) >= Integer.parseInt(split2[1]);
         }
         return false;
+    }
+
+    // compares
+    public static int compareVersions(String v1, String v2) {
+        String[] v1Parts = v1.split("\\.");
+        String[] v2Parts = v2.split("\\.");
+
+        int length = Math.max(v1Parts.length, v2Parts.length);
+
+        for (int i = 0; i < length; i++) {
+            int v1Part = i < v1Parts.length ? Integer.parseInt(v1Parts[i]) : 0;
+            int v2Part = i < v2Parts.length ? Integer.parseInt(v2Parts[i]) : 0;
+
+            if (v1Part > v2Part) {
+                return 1;
+            } else if (v1Part < v2Part) {
+                return -1;
+            }
+        }
+        return 0;
     }
 
     private static ChangeSet getLastChangeSet() {
