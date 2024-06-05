@@ -12,6 +12,7 @@ import java.util.zip.ZipInputStream;
 public class ZipUtils {
 
     public static void extractZip(InputStream zipInputStream, Path rootPath) throws IOException {
+        // Removes frontend file totally and then replaces from zip file.
         File f = new File("../frontend");
         FileUtils.deleteDirectory(f);
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(zipInputStream))) {
@@ -31,7 +32,14 @@ public class ZipUtils {
                     Files.createDirectories(targetPath);
                 } else {
                     Files.createDirectories(targetPath.getParent()); // Ensure parent directories exist
-                    Files.copy(zis, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                    String parent = targetPath.getParent().getFileName().toString();
+                    String file = targetPath.getFileName().toString();
+                    // we have to escape to remove files in conf folder except opencelium.service
+                    if (!parent.equals("conf") || file.equals("opencelium.service")) {
+                        System.out.println(parent + ", " + file);
+                        System.out.println("REPLACE");
+                        Files.copy(zis, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                    }
                 }
                 zipEntry = zis.getNextEntry();
             }

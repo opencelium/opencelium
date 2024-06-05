@@ -179,8 +179,8 @@ public class AssistantServiceImp implements ApplicationService {
     @Override
     public InstallationDTO getInstallation() {
         String installType;
-        if (!env.containsProperty(YamlPropConst.INSTALLATION)
-                || !env.containsProperty(YamlPropConst.INSTALLATION + ".type")) {
+        if (!env.containsProperty(YamlPropConst.INSTALLATION) &&
+                !env.containsProperty(YamlPropConst.INSTALLATION + ".type")) {
 
             installType = "undefined";
             log.warn("Path " + YamlPropConst.INSTALLATION + ".type not found in application.yml");
