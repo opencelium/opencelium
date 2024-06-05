@@ -68,6 +68,7 @@ const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.RE
                     if (card.id === 8) {
                         return {
                             ...card,
+                            title: 'Update Assistant is not available for installation type: unknown',
                             isLoading: false,
                         }
                     } else {

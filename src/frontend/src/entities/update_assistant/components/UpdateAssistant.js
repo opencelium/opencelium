@@ -245,12 +245,20 @@ class UpdateAssistant extends Component{
         if(!installationInfo || gettingInstallationInfo === API_REQUEST_STATE.START) {
             return <Loading/>;
         }
-        if(installationInfo.type !== 'sources') {
+        let installationInfoError = '';
+        if(!installationInfo) {
+            installationInfoError = 'Update Assistant is not available for installation type: unknown';
+        } else {
+            if(installationInfo.type !== 'sources') {
+                installationInfoError = installationInfo.type === 'undefined'
+                    ? `Installation type is not provided in application.yml file.`
+                    : installationInfo.type !== 'sources' && `Update Assistant is not available for installation type: ${installationInfo.type}.`
+            }
+        }
+        if(installationInfoError) {
             return <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '500px'}}>
                 <h1>
-                    {installationInfo.type === 'undefined'
-                        ? `Installation type is not provided in application.yml file.`
-                        : installationInfo.type !== 'sources' && `Update Assistant is not available for installation type: ${installationInfo.type}.`}
+                    {installationInfoError}
                 </h1>
             </div>
         }
