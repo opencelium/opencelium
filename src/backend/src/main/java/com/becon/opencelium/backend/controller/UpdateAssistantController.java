@@ -24,6 +24,7 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.application.MigrateDataResource;
+import com.becon.opencelium.backend.resource.update_assistant.InstallationDTO;
 import com.becon.opencelium.backend.resource.update_assistant.Neo4jConfigResource;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -130,6 +131,12 @@ public class UpdateAssistantController {
         String version = assistantServiceImp.getCurrentVersion();
         String result = "{" + "\"version\": \"" + version + "\"}";
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/oc/installation")
+    public ResponseEntity<?> getInstallation() {
+        InstallationDTO installationDTO = assistantServiceImp.getInstallation();
+        return ResponseEntity.ok(installationDTO);
     }
 
     @Operation(summary = "Returns current versions of tools that are used in OpenCelium")

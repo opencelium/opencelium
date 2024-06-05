@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.application.assistant;
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.repository.SystemOverviewRepository;
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
@@ -12,24 +13,17 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.database.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.update_assistant.InstallationDTO;
 import com.becon.opencelium.backend.resource.update_assistant.Neo4jConfigResource;
 import com.becon.opencelium.backend.utility.Neo4jDriverUtility;
 import com.becon.opencelium.backend.utility.ZipUtils;
-import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
 import com.mongodb.client.MongoClient;
-import org.apache.hc.client5.http.HttpResponseException;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.GraphDatabase;
-import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.slf4j.Logger;
@@ -54,12 +48,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -178,21 +170,19 @@ public class AssistantServiceImp implements ApplicationService {
         });
     }
 
-    @Override
-    public void buildAndRestart() {
-        try {
-            String target = env.getProperty("opencelium.reboot.path");
-            Runtime rt = Runtime.getRuntime();
-            Process proc = rt.exec(target);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-    }
-
     // TODO: test
     @Override
     public String getCurrentVersion() {
         return systemOverviewRepository.getCurrentVersionFromDb();
+    }
+
+    @Override
+    public InstallationDTO getInstallation() {
+        if (!env.containsProperty(YamlPropConst.INSTALLATION)) {
+            throw new RuntimeException("Path " + YamlPropConst.INSTALLATION + ".type not found in application.yml");
+        }
+        String installType = env.getProperty(YamlPropConst.INSTALLATION + ".type");
+        return new InstallationDTO(installType);
     }
 
     // dir - assistant/version/{folder}

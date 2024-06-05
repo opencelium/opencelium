@@ -1,6 +1,6 @@
 # operations: add, modify, delete, rename.
 versions:
-  - version: 4.1
+  - version: 4.0
     changes:
       - changeset: 1
         operation: add
@@ -16,3 +16,10 @@ versions:
       - changeset: 4
         operation: delete
         path: opencelium.notification.tools.teams
+      - changeset: 5
+        operation: delete
+        path: opencelium.reboot
+      - changeset: 6
+        operation: add
+        value: sources
+        path: opencelium.installation.type

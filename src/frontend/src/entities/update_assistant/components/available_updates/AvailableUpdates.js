@@ -458,7 +458,7 @@ class AvailableUpdates extends React.Component{
                         size={TextSize.Size_16}
                     />
                     {
-                        (fetchingOnlineUpdates === API_REQUEST_STATE.START || fetchingOfflineUpdates === API_REQUEST_STATE.START) &&
+                        (fetchingOnlineUpdates === API_REQUEST_STATE.START && startFetchingOnlineUpdates || fetchingOfflineUpdates === API_REQUEST_STATE.START && startFetchingOfflineUpdates) &&
                             <Loading top={'30px'}/>
                     }
                     {

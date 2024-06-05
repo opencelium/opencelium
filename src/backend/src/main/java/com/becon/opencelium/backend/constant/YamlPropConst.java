@@ -8,6 +8,7 @@ public interface YamlPropConst {
     String PROXY_USER = "opencelium.rest_template.proxy.username";
     String PROXY_PASS = "opencelium.rest_template.proxy.password";
     String INCOMING_WEBHOOK = "opencelium.notification.tools.incoming_webhook.url";
+    String INSTALLATION = "opencelium.installation";
 
     // Indicates that the gc is enabled or not. Default: true
     String GC_CONNECTION_IS_ON = "opencelium.gc.connection.isOn";
