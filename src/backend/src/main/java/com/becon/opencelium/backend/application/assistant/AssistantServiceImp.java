@@ -178,10 +178,15 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public InstallationDTO getInstallation() {
-        if (!env.containsProperty(YamlPropConst.INSTALLATION)) {
-            throw new RuntimeException("Path " + YamlPropConst.INSTALLATION + ".type not found in application.yml");
+        String installType;
+        if (!env.containsProperty(YamlPropConst.INSTALLATION)
+                || !env.containsProperty(YamlPropConst.INSTALLATION + ".type")) {
+
+            installType = "undefined";
+            log.warn("Path " + YamlPropConst.INSTALLATION + ".type not found in application.yml");
+        } else {
+            installType = env.getProperty(YamlPropConst.INSTALLATION + ".type");
         }
-        String installType = env.getProperty(YamlPropConst.INSTALLATION + ".type");
         return new InstallationDTO(installType);
     }
 
