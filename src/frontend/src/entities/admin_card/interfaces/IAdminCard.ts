@@ -19,6 +19,9 @@ export interface IAdminCard{
     link: string,
     permission?: string,
     isExternalHref?: boolean,
+    isDisabled?: boolean,
+    isLoading?: boolean,
+    title?: string,
 }
 
 export type AdminCardProps = keyof IAdminCard;

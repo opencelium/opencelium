@@ -16,6 +16,7 @@
 import Request from "@entity/application/requests/classes/Request";
 import {AxiosResponse} from "axios";
 import {
+    InstallationInfo,
     IUpdateAssistantRequest,
     VersionProps
 } from "@application/requests/interfaces/IUpdateAssistant";
@@ -27,6 +28,11 @@ export class UpdateAssistantRequest extends Request implements IUpdateAssistantR
 
     constructor(settings?: Partial<IRequestSettings>) {
         super({url: 'assistant/oc', ...settings});
+    }
+
+    async getInstallationInfo(): Promise<AxiosResponse<InstallationInfo>>{
+        this.endpoint = '/installation';
+        return super.get<InstallationInfo>();
     }
 
     async uploadOnlineVersion(): Promise<AxiosResponse<IResponse>>{

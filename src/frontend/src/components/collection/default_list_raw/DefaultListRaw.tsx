@@ -29,8 +29,9 @@ const DefaultListRaw: FC<DefaultListRawProps> =
          entity,
      }) => {
         let navigate = useNavigate();
+        const hasDisabledStyle = entity.isDisabled || entity.isLoading;
         return (
-            <DefaultListRawStyled id={id} style={{cursor: "pointer"}} onClick={(e: any) => {
+            <DefaultListRawStyled id={id} title={entity.title || ''} style={{cursor: hasDisabledStyle ? "default" : "pointer", color: hasDisabledStyle ? '#777' : '#000', background: hasDisabledStyle ? '#eee' : 'unset'}} onClick={entity.isDisabled ? () => {} : (e: any) => {
                 if (timer) clearTimeout(timer);
                 timer = setTimeout(function() {
                     let element = e.target;
@@ -43,7 +44,9 @@ const DefaultListRaw: FC<DefaultListRawProps> =
                                     if(entity.isExternalHref) {
                                         window.open(url, '_blank').focus()
                                     } else {
-                                        navigate(url, {replace: false})
+                                        if (!entity.isDisabled && !entity.isLoading) {
+                                            navigate(url, {replace: false})
+                                        }
                                     }
                                     break;
                                 }
@@ -57,7 +60,9 @@ const DefaultListRaw: FC<DefaultListRawProps> =
                                 if(entity.isExternalHref) {
                                     window.open(url, '_blank').focus()
                                 } else {
-                                    navigate(url, {replace: false})
+                                    if (!entity.isDisabled && !entity.isLoading) {
+                                        navigate(url, {replace: false})
+                                    }
                                 }
                                 break;
                             }

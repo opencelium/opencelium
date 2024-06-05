@@ -35,12 +35,19 @@ export interface VersionProps{
     instruction: string,
 }
 
+export interface InstallationInfo {
+    type: 'sources' | 'undefined' | string,
+}
+
 export interface CheckForUpdateProps{
     version: string,
     hasUpdates: boolean,
 }
 
 export interface IUpdateAssistantRequest{
+
+    //to get installation information (if type !== sources hide update assistant)
+    getInstallationInfo(): Promise<AxiosResponse<InstallationInfo>>
 
     //to upload online version by version
     uploadOnlineVersion(): Promise<AxiosResponse<IResponse>>,

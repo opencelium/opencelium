@@ -23,9 +23,14 @@ import FinishUpdate from "@entity/update_assistant/components/FinishUpdate";
 
 import CVoiceControl from "@entity/connection/components/classes/voice_control/CVoiceControl";
 import Form from "@change_component/Form";
-import {updateApplication as updateSystem, checkApplicationBeforeUpdate as checkResetFiles} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
+import {
+    updateApplication as updateSystem,
+    checkApplicationBeforeUpdate as checkResetFiles,
+    getInstallationInfo
+} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {logout as logoutUserFulfilled} from "@application/redux_toolkit/slices/AuthSlice";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import Loading from "@components/general/app/Loading";
 
 
 function mapStateToProps(state){
@@ -34,6 +39,8 @@ function mapStateToProps(state){
     return{
         authUser,
         updatingSystem: updateAssistant.updatingApplication,
+        installationInfo: updateAssistant.installationInfo,
+        gettingInstallationInfo: updateAssistant.gettingInstallationInfo,
         checkingResetFiles: updateAssistant.checkingApplicationBeforeUpdate,
         checkResetFilesResult: updateAssistant.checkResetFiles,
     };
@@ -42,7 +49,7 @@ function mapStateToProps(state){
 /**
  * Layout for UpdateAssistant
  */
-@connect(mapStateToProps, {updateSystem, logoutUserFulfilled, checkResetFiles})
+@connect(mapStateToProps, {updateSystem, logoutUserFulfilled, checkResetFiles, getInstallationInfo})
 @withTranslation(['update_assistant', 'app'])
 class UpdateAssistant extends Component{
 
@@ -86,6 +93,10 @@ class UpdateAssistant extends Component{
             this.props.router.push(`/login`);
             CVoiceControl.removeAll();
         }
+    }
+
+    componentDidMount() {
+        this.props.getInstallationInfo();
     }
 
     setValidationMessage(param, validationMessage){
@@ -185,7 +196,7 @@ class UpdateAssistant extends Component{
 
     render(){
         const {updateData, hasAvailableUpdates, hasTemplateFileUpdate, hasInvokerFileUpdate, hasConnectionMigration, hasFinishUpdate} = this.state;
-        const {t, updatingSystem} = this.props;
+        const {t, updatingSystem, gettingInstallationInfo, installationInfo} = this.props;
         let contentTranslations = {};
         contentTranslations.header = [{name: 'Admin Panel', link: '/admin_cards'}, {name: t('FORM.HEADER')}];
         const isActionDisabled = !this.validateAvailableUpdates() || !this.validateTemplateFileUpdate() || !this.validateInvokerFileUpdate() || !this.validateConnectionMigration();
@@ -231,6 +242,18 @@ class UpdateAssistant extends Component{
             visible: hasFinishUpdate,
         },
         ];
+        if(!installationInfo || gettingInstallationInfo === API_REQUEST_STATE.START) {
+            return <Loading/>;
+        }
+        if(installationInfo.type !== 'sources') {
+            return <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '500px'}}>
+                <h1>
+                    {installationInfo.type === 'undefined'
+                        ? `Installation type is not provided in application.yml file.`
+                        : installationInfo.type !== 'sources' && `Update Assistant is not available for installation type: ${installationInfo.type}.`}
+                </h1>
+            </div>
+        }
         return (
             <div>
                 <Form

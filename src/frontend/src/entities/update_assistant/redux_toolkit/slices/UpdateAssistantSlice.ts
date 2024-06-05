@@ -26,13 +26,14 @@ import {
     updateApplication,
     uploadApplicationFile,
     getOnlineUpdates,
-    uploadOnlineVersion, downloadOnlineVersion
+    uploadOnlineVersion, downloadOnlineVersion, getInstallationInfo
 } from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {
-    CheckForUpdateProps, VersionProps,
+    CheckForUpdateProps, InstallationInfo, VersionProps,
 } from "@application/requests/interfaces/IUpdateAssistant";
 
 export interface AuthState extends ICommonState{
+    gettingInstallationInfo: API_REQUEST_STATE,
     uploadingOnlineVersion: API_REQUEST_STATE,
     downloadingOnlineVersion: API_REQUEST_STATE,
     gettingOnlineUpdates: API_REQUEST_STATE,
@@ -42,6 +43,7 @@ export interface AuthState extends ICommonState{
     checkingApplicationBeforeUpdate: API_REQUEST_STATE,
     updatingApplication: API_REQUEST_STATE,
     gettingLastAvailableVersion: API_REQUEST_STATE,
+    installationInfo: InstallationInfo,
     lastAvailableVersion: string,
     downloadedOnlineUpdate: VersionProps;
     onlineUpdates: any[],
@@ -51,6 +53,7 @@ export interface AuthState extends ICommonState{
 }
 
 const initialState: AuthState = {
+    gettingInstallationInfo: API_REQUEST_STATE.INITIAL,
     uploadingOnlineVersion: API_REQUEST_STATE.INITIAL,
     downloadingOnlineVersion: API_REQUEST_STATE.INITIAL,
     gettingOnlineUpdates: API_REQUEST_STATE.INITIAL,
@@ -60,6 +63,7 @@ const initialState: AuthState = {
     checkingApplicationBeforeUpdate: API_REQUEST_STATE.INITIAL,
     updatingApplication: API_REQUEST_STATE.INITIAL,
     gettingLastAvailableVersion: API_REQUEST_STATE.INITIAL,
+    installationInfo: null,
     downloadedOnlineUpdate: null,
     onlineUpdates: [],
     offlineUpdates: [],
@@ -75,6 +79,18 @@ export const updateAssistantSlice = createSlice({
     reducers: {
     },
     extraReducers: {
+        [getInstallationInfo.pending.type]: (state) => {
+            state.gettingInstallationInfo = API_REQUEST_STATE.START;
+        },
+        [getInstallationInfo.fulfilled.type]: (state, action: PayloadAction<InstallationInfo>) => {
+            state.gettingInstallationInfo = API_REQUEST_STATE.FINISH;
+            state.installationInfo = action.payload;
+            state.error = null;
+        },
+        [getInstallationInfo.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingInstallationInfo = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
         [uploadOnlineVersion.pending.type]: (state) => {
             state.uploadingOnlineVersion = API_REQUEST_STATE.START;
         },
