@@ -35,8 +35,7 @@ public class MariaDbHealthIndicator extends AbstractHealthIndicator {
 
     @Override
     protected void doHealthCheck(Health.Builder builder) throws Exception {
-        try {
-            Connection connection = dataSource.getConnection();//checking connectivity to db
+        try (Connection connection = dataSource.getConnection()) {
 
             builder.withDetail("version", connection.getMetaData().getDatabaseProductVersion());
             builder.up()
