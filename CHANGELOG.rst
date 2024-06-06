@@ -3,7 +3,7 @@ Changelog
 *********
 
 
-Major Relase :loudspeaker:
+Major Release :loudspeaker:
 ========
 
 
