@@ -1,7 +1,10 @@
 package com.becon.opencelium.backend.utility;
 
+import com.becon.opencelium.backend.application.assistant.AssistantServiceImp;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.eclipse.jgit.util.IO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.*;
@@ -10,6 +13,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class ZipUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(ZipUtils.class);
 
     public static void extractZip(InputStream zipInputStream, Path rootPath) throws IOException {
         // Removes frontend file totally and then replaces from zip file.
@@ -36,9 +41,8 @@ public class ZipUtils {
                     String file = targetPath.getFileName().toString();
                     // we have to escape to remove files in conf folder except opencelium.service
                     if (!parent.equals("conf") || file.equals("opencelium.service")) {
-                        System.out.println(parent + ", " + file);
-                        System.out.println("REPLACE");
                         Files.copy(zis, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                        log.info("\"" + targetPath.normalize() + "\" has been replaced or added successfully");
                     }
                 }
                 zipEntry = zis.getNextEntry();
