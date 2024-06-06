@@ -26,6 +26,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @Component
 public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
@@ -44,6 +47,11 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
         try {
             JobDataMap dataMap = context.getMergedJobDataMap();
             QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
+            // old schedulers do not have 'data' object.
+            if (data == null) {
+                data = getData(dataMap);
+                context.getMergedJobDataMap().put("data", data);
+            }
             ExecutionObj executionObj = executionObjectService.buildObj(data);
             ConnectionExecutor executor = new ConnectionExecutor(executionObj, simpMessagingTemplate);
 
@@ -61,5 +69,14 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             thread.stop();
             thread = null;
         }
+    }
+
+    private QuartzJobScheduler.ScheduleData getData(JobDataMap jobDataMap) {
+        Map<String, Object> queryParam = (Map<String, Object>) jobDataMap.getOrDefault("queryParams", null);
+        int schedulerId = jobDataMap.getIntValue("schedulerId");
+        String execType = jobDataMap.get("executionType").toString();
+        QuartzJobScheduler.TriggerType triggerType =
+                execType.equals("scheduler") ? QuartzJobScheduler.TriggerType.SCHEDULER : QuartzJobScheduler.TriggerType.WEBHOOK;
+        return new QuartzJobScheduler.ScheduleData(schedulerId, triggerType, queryParam);
     }
 }
