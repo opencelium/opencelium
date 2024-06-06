@@ -28,5 +28,4 @@ export default {
     slackReducer,
     incomingWebhookReducer,
     toolReducer,
-    incomingWebhookReducer,
 }
