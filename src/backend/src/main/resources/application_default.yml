@@ -179,9 +179,6 @@ opencelium:
     tools:
       incoming_webhook:
         url: {insert you webhook url here}
-  connector:
-    security:
-      key: it's secret key
   installation:
     type: sources
 #  rest_template:
