@@ -30,7 +30,7 @@ import Tool from "@entity/schedule/classes/Tool";
 import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/ToolCreators";
 import { clearCurrentNotification } from "@entity/schedule/redux_toolkit/slices/NotificationSlice";
 import IncomingWebhook from "@entity/schedule/classes/IncomingWebhook";
-import {getIncomingWebhook} from "@entity/schedule/redux_toolkit/action_creators/IncomingWebhookCreator";
+import {getIncomingWebhook} from "@entity/schedule/redux_toolkit/action_creators/IncomingWebhookCreators";
 import { clearWebhook } from "@entity/schedule/redux_toolkit/slices/IncomingWebhookSlice";
 
 

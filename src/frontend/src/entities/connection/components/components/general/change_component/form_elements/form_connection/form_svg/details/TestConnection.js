@@ -30,7 +30,12 @@ import {PopoverBody, PopoverHeader, UncontrolledPopover} from "reactstrap";
 import FontIcon from "@basic_components/FontIcon";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
-import {setInitialTestConnectionState, setTestingConnection, clearCurrentLogs} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {
+    setInitialTestConnectionState,
+    setTestingConnection,
+    clearCurrentLogs,
+    setButtonPanelVisibility
+} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {setInitialTestScheduleState} from "@entity/schedule/redux_toolkit/slices/ScheduleSlice";
 import Counter from "@app_component/base/counter/Counter";
 import Text from "@app_component/base/text/Text";
@@ -57,6 +62,7 @@ function mapStateToProps(state){
         startingSchedule: scheduleOverview.startingTestSchedule,
         addingSchedule: scheduleOverview.addingTestSchedule,
         deletingSchedule: scheduleOverview.deletingTestScheduleById,
+        terminatingExecution: scheduleOverview.terminatingExecution,
         scheduleError: scheduleOverview.error,
     };
 }
@@ -65,7 +71,7 @@ function mapStateToProps(state){
     setFullScreenFormSection, addTestConnection, addTestSchedule, startTestSchedule,
     deleteTestConnectionById, deleteTestScheduleById, setInitialTestScheduleState,
     setInitialTestConnectionState, getScheduleById, setTestingConnection,
-    clearCurrentLogs,
+    clearCurrentLogs, setButtonPanelVisibility,
 })
 class TestConnectionButton extends React.Component{
     constructor(props) {
@@ -99,7 +105,7 @@ class TestConnectionButton extends React.Component{
             startTestSchedule, deleteTestConnectionById, deletingConnection,
             connectionError, scheduleError, deletingSchedule, deleteTestScheduleById,
             currentSchedule, gettingScheduleById, getScheduleById, setTestingConnection,
-            isTestingConnection,
+            isTestingConnection, terminatingExecution,
         } = this.props;
         const {
             startAddingConnection, startAddingSchedule, startTriggeringSchedule,
@@ -178,20 +184,24 @@ class TestConnectionButton extends React.Component{
         const {
             connection, setInitialTestConnectionState, setInitialTestScheduleState,
             setTestingConnection, isTestingConnection, setFullScreenFormSection,
-            addTestConnection,
+            addTestConnection, setButtonPanelVisibility, data,
         } = this.props;
         const newState = {};
-        if(!isTestingConnection) {
-            setInitialTestConnectionState();
-            setInitialTestScheduleState();
-            setTimeout(() => addTestConnection(connection.getObjectForBackend()), 500);
-            setTestingConnection(true);
-            newState.startAddingConnection = true;
-            newState.isFinishedTriggering = false;
-            newState.isTriggerFailed = false;
+        const testResult = data.validateLogic(connection.getObjectForBackend());
+        if(testResult.passed) {
+            if (!isTestingConnection) {
+                setInitialTestConnectionState();
+                setInitialTestScheduleState();
+                setTimeout(() => addTestConnection(connection.getObjectForBackend()), 500);
+                setTestingConnection(true);
+                newState.startAddingConnection = true;
+                newState.isFinishedTriggering = false;
+                newState.isTriggerFailed = false;
+            }
+            setButtonPanelVisibility(false);
+            setFullScreenFormSection(true);
+            this.setState(newState);
         }
-        setFullScreenFormSection(true);
-        this.setState(newState);
     }
 
     render(){
@@ -201,12 +211,13 @@ class TestConnectionButton extends React.Component{
             isTriggerFailed, startGettingSchedule,
         } = this.state;
         const {
-            isTestingConnection, connection,
+            isTestingConnection, connection, testSchedule, terminatingExecution,
         } = this.props;
         const isCreatingConnectionLoading = startAddingConnection;
         const isCreatingScheduleLoading = isCreatingConnectionLoading || startAddingSchedule;
         const isExecutionLoading = isCreatingScheduleLoading || !isFinishedTriggering;
         const isCleaningLoading = isExecutionLoading || startDeletingConnection || startDeletingSchedule;
+        const targetElement = document.getElementById('test_execution_process');
         return(
             <React.Fragment>
                 <SyncLogs connection={connection}/>
@@ -228,50 +239,54 @@ class TestConnectionButton extends React.Component{
                     size={TextSize.Size_12}
                 />
                 {isTestingConnection && <CoverButtonStyled/>}
-                <UncontrolledPopover
-                    placement="bottom"
-                    target="test_connection_button"
-                    trigger="click"
-                    isOpen={isTestingConnection}
-                >
-                    <PopoverHeader>
-                        {"Test Connection"}
-                    </PopoverHeader>
-                    <PopoverBody>
-                        <div style={{justifyContent: 'center', display: 'grid', gridTemplateColumns: '100% auto', padding: '5px'}}>
-                            <div>
-                                <Text value={`Creating a test connection `} size={TextSize.Size_14}/>
+                {targetElement &&
+                    <UncontrolledPopover
+                        placement="top"
+                        target={targetElement}
+                        trigger="click"
+                        isOpen={isTestingConnection}
+                    >
+                        <PopoverHeader>
+                            {"Test Connection"}
+                            <span style={{fontSize: 14}}>{` (limit 60 seconds)`}</span>
+                        </PopoverHeader>
+                        <PopoverBody>
+                            <div style={{justifyContent: 'center', display: 'grid', gridTemplateColumns: '100% auto', padding: '5px'}}>
+                                <div>
+                                    <Text value={`Creating a test connection `} size={TextSize.Size_14}/>
+                                </div>
+                                <FontIcon
+                                    isLoading={isCreatingConnectionLoading}
+                                    value={isCreatingConnectionLoading ? ' ' : 'done'} size={20}/>
+                                <div>
+                                    <Text value={`Creating a test schedule `} size={TextSize.Size_14}/>
+                                </div>
+                                <FontIcon
+                                    isLoading={isCreatingScheduleLoading}
+                                    value={isCreatingScheduleLoading ? ' ' : 'done'} size={20}/>
+                                <div>
+                                    <Text value={
+                                            <div>
+                                                {"Connection Execution ("}
+                                                <Counter schedule={testSchedule} shouldStart={startTriggeringSchedule || startGettingSchedule} shouldStop={!isExecutionLoading} size={TextSize.Size_12}/>
+                                                {")"}
+                                            </div>
+                                        } size={TextSize.Size_14}/>
+                                </div>
+                                <FontIcon
+                                    iconStyles={{color: isTriggerFailed || terminatingExecution !== API_REQUEST_STATE.INITIAL ? '#8c3838' : '#000'}}
+                                    isLoading={isExecutionLoading}
+                                    value={isExecutionLoading ? ' ' : isTriggerFailed || terminatingExecution !== API_REQUEST_STATE.INITIAL ? 'close' : 'done'} size={20}/>
+                                <div>
+                                    <Text value={`Cleaning process `} size={TextSize.Size_14}/>
+                                </div>
+                                <FontIcon
+                                    isLoading={isCleaningLoading}
+                                    value={isCleaningLoading ? ' ' : 'done'} size={20}/>
                             </div>
-                            <FontIcon
-                                isLoading={isCreatingConnectionLoading}
-                                value={isCreatingConnectionLoading ? ' ' : 'done'} size={20}/>
-                            <div>
-                                <Text value={`Creating a test schedule `} size={TextSize.Size_14}/>
-                            </div>
-                            <FontIcon
-                                isLoading={isCreatingScheduleLoading}
-                                value={isCreatingScheduleLoading ? ' ' : 'done'} size={20}/>
-                            <div>
-                                <Text value={
-                                        <div>
-                                            {"Execute the connection ("}
-                                            <Counter shouldStart={startTriggeringSchedule || startGettingSchedule} shouldStop={!isExecutionLoading} size={TextSize.Size_12}/>
-                                            {")"}
-                                        </div>
-                                    } size={TextSize.Size_14}/>
-                            </div>
-                            <FontIcon
-                                isLoading={isExecutionLoading}
-                                value={isExecutionLoading ? ' ' : isTriggerFailed ? 'close' : 'done'} size={20}/>
-                            <div>
-                                <Text value={`Cleaning process `} size={TextSize.Size_14}/>
-                            </div>
-                            <FontIcon
-                                isLoading={isCleaningLoading}
-                                value={isCleaningLoading ? ' ' : 'done'} size={20}/>
-                        </div>
-                    </PopoverBody>
-                </UncontrolledPopover>
+                        </PopoverBody>
+                    </UncontrolledPopover>
+                }
             </React.Fragment>
         );
     }

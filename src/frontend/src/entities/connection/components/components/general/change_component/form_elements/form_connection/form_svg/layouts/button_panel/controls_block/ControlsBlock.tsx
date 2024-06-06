@@ -58,7 +58,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
   if(data.additionalButtonsProps){
     saveAndExit = data.additionalButtonsProps.saveAndExit.onClick;
     saveAndGoToSchedule = data.additionalButtonsProps.saveAndGoToSchedule.onClick;
-    loadTemplateData = data.additionalButtonsProps.loadTemplate.data;
+    loadTemplateData = data.additionalButtonsProps?.loadTemplate?.data || null;
   }
 
   const toggleVisibleSavePanel = () => {
@@ -140,6 +140,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
       <div className="wrapper">
         <div className="button_wrap">
           <DataAggregatorButton
+            readOnly={props.readOnly}
             tooltipButtonProps={{
               position: "bottom",
               icon: "subtitles",
@@ -163,8 +164,8 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
 
       <div className="wrapper" style={{zIndex: 10}}>
         <div className="button_wrap">
-          {!data.readOnly && (
             <TooltipButton
+              isDisabled={data.readOnly}
               size={TextSize.Size_40}
               position={"bottom"}
               icon={"text_snippet"}
@@ -176,7 +177,6 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
               padding="2px"
               handleClick={() => toggleVisibleTemplatePanel()}
             />
-          )}
           {isTemplatePanelVisible && (
             <div className="additional_panel additional_panel_template">
               {/* add template */}
@@ -216,8 +216,8 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
       <div className="wrapper">
         <div className="button_wrap">
           {/* toggle save panel */}
-          {!data.readOnly && (
-            <TooltipButton
+          <TooltipButton
+            isDisabled={data.readOnly}
             size={TextSize.Size_40}
             position={"bottom"}
             icon={"save_as"}
@@ -229,7 +229,6 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
             padding="2px"
             handleClick={() => toggleVisibleSavePanel()}
           />
-          )}
           {isSavePanelVisible && (
             <div className="additional_panel additional_panel_save">
               {/* save */}

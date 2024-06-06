@@ -40,6 +40,7 @@ const AdminMenuItem_3: FC<AdminMenuItemProps> =
                     {to: '/apps', children: 'Apps', permission: ExternalApplicationPermissions.READ},
                     {to: '/invokers', children: 'Invokers', permission: InvokerPermissions.READ},
                     {to: '/templates', children: 'Templates', permission: TemplatePermissions.READ},
+                    {to: '/admin_cards', children: <span style={{fontSize: '20px'}}>{"..."}</span>, permission: TemplatePermissions.READ},
                 ]}
                 isMainMenuExpanded={isMainMenuExpanded}
                 isReadonly={isReadonly}

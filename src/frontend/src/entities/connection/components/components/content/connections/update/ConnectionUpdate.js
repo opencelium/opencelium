@@ -17,6 +17,7 @@ import React, {Component, useEffect} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
+import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {updateConnection, checkConnectionTitle, getConnectionById as fetchConnection, testConnection} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {addTemplate, getTemplatesByConnectors as fetchTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
@@ -26,7 +27,12 @@ import {useNavigate} from "react-router";
 import {useParams} from "react-router";
  import {ConnectionPermissions} from "@entity/connection/constants";
  import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
- import {setCurrentConnection, setCurrentTechnicalItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+ import {
+    setCurrentConnection,
+    setCurrentTechnicalItem, setSavePanelVisibility,
+     setTemplatePanelVisibility
+ } from "@root/redux_toolkit/slices/ConnectionSlice";
+ import {useAppDispatch} from "@application/utils/store";
 
 /*
 * TODO: implement connection update
@@ -59,7 +65,11 @@ function mapStateToProps(state){
 /**
  * Component to Update Connection
  */
-@connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle, fetchTemplates, testConnection, setCurrentTechnicalItem, setCurrentConnection})
+@connect(mapStateToProps, {
+    updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle,
+    fetchTemplates, testConnection, setCurrentTechnicalItem, setCurrentConnection,
+    setFullScreen,
+})
 @permission(ConnectionPermissions.UPDATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @ConnectionForm('update')
@@ -69,5 +79,12 @@ class ConnectionUpdate extends Component{}
 export default function(props) {
     const navigate = useNavigate();
     let urlParams = useParams();
+    const dispatch = useAppDispatch();
+    useEffect(() => {
+        return () => {
+            dispatch(setTemplatePanelVisibility(false))
+            dispatch(setSavePanelVisibility(false))
+        }
+    }, []);
     return <ConnectionUpdate {...props} navigate={navigate} params={urlParams}/>;
 }

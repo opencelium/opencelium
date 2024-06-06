@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.mysql.entity.EventContent;
-import com.becon.opencelium.backend.mysql.service.ContentServiceImpl;
+import com.becon.opencelium.backend.database.mysql.entity.EventContent;
+import com.becon.opencelium.backend.database.mysql.service.ContentServiceImpl;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.ContentResource;
 import io.swagger.v3.oas.annotations.Operation;

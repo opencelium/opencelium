@@ -16,22 +16,15 @@
 
 package com.becon.opencelium.backend.security;
 
-import com.becon.opencelium.backend.mysql.entity.Activity;
-import com.becon.opencelium.backend.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.entity.Activity;
+import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.utility.TokenUtility;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.JWEDecryptionKeySelector;
-import com.nimbusds.jose.proc.JWEKeySelector;
-import com.nimbusds.jose.proc.SimpleSecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

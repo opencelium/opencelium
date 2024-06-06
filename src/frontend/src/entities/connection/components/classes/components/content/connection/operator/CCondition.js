@@ -18,6 +18,7 @@ import React from "react";
 import {clearFieldNameFromArraySign} from "@change_component//form_elements/form_connection/form_methods/help";
 import {consoleLog} from "@application/utils/utils";
 import {LOOP_OPERATOR} from "@classes/content/connection/operator/COperatorItem";
+import CMethodItem from "@classes/content/connection/method/CMethodItem";
 
 const OPERATOR_LABELS_FOR_IF = {
     IS_TYPE_OF: (isPlaceholder = false) => {const styles = isPlaceholder ? {fontSize: '12px', justifyContent: 'center', display: 'flex'} : {fontSize: '12px'}; return (<span style={styles}>{`<T>`}</span>);},
@@ -42,6 +43,7 @@ const OPERATOR_LABELS_FOR_IF = {
 
 const OPERATOR_LABELS_FOR_LOOP = {
     SPLIT_STRING: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{"÷ String"}</span>);},
+    FOR_IN: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{"for...in"}</span>);},
 }
 
 //value - operator name for backend
@@ -74,7 +76,8 @@ export const FUNCTIONAL_OPERATORS_FOR_IF = [
     {value: 'NotEmpty', hasValue: false}
 ].sort((f1, f2) => f1.value > f2.value ? 1 : f1.value === f2.value ? 0 : -1);
 export const FUNCTIONAL_OPERATORS_FOR_LOOP = [
-    {value: 'SplitString', label: <span>SplitString({OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING()})</span>, hasValue: true, placeholderValue: OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING(true)}
+    {value: 'SplitString', label: <span>SplitString({OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING()})</span>, hasValue: true, placeholderValue: OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING(true)},
+    {value: 'forin', hasValue: false, label: <span>{OPERATOR_LABELS_FOR_LOOP.FOR_IN()}</span>, placeholderValue: OPERATOR_LABELS_FOR_LOOP.FOR_IN(true)},
 ].sort((f1, f2) => f1.value > f2.value ? 1 : f1.value === f2.value ? 0 : -1);
 
 /**
@@ -84,9 +87,9 @@ export default class CCondition{
 
     constructor(leftStatement = null, relationalOperator = '', rightStatement = null, operatorType = ''){
         this._operatorType = operatorType;
-        this._leftStatement = CStatement.createStatement(leftStatement);
+        this._leftStatement = this.convertStatement(leftStatement);
         this._relationalOperator = this.checkRelationalOperator(relationalOperator) ? relationalOperator : '';
-        this._rightStatement = CStatement.createStatement(rightStatement);
+        this._rightStatement = this.convertStatement(rightStatement);
     }
 
     static createCondition(condition, operatorType){
@@ -94,6 +97,14 @@ export default class CCondition{
         let relationalOperator = condition && condition.hasOwnProperty('relationalOperator') ? condition.relationalOperator : '';
         let rightStatement = condition && condition.hasOwnProperty('rightStatement') ? condition.rightStatement : null;
         return new CCondition(leftStatement, relationalOperator, rightStatement, operatorType);
+    }
+
+
+    convertStatement(statement){
+        if(!(statement instanceof CStatement)) {
+            return CStatement.createStatement({...statement, parent: this});
+        }
+        return statement;
     }
 
     getStatementByType(type){
@@ -129,6 +140,18 @@ export default class CCondition{
                 rightStatementText = this.rightStatement.field;
             }
             const isLikeOperator = CCondition.isLikeOperator(this.relationalOperator);
+            /*if(isLikeOperator){
+                if(rightStatementText[rightStatementText.length - 1] === '}'){
+                    rightStatementText = rightStatementText.slice(0, rightStatementText.length - 1);
+                } else{
+                    rightStatementText = `${rightStatementText.slice(0, rightStatementText.length - 2)}${rightStatementText[rightStatementText.length - 1]}`;
+                }
+                if(rightStatementText[0] === '{'){
+                    rightStatementText = rightStatementText.slice(1);
+                } else{
+                    rightStatementText = `${rightStatementText[0]}${rightStatementText.slice(2)}`;
+                }
+            }*/
             if(leftStatementText !== '') {
                 statement = !isOnlyText ? (
                     <span>
@@ -185,6 +208,7 @@ export default class CCondition{
 
     static embraceFieldForLikeOperator(fieldValue){
         return `${fieldValue}`;
+        //return `{${fieldValue}}`;
     }
 
     static isLikeOperator(relationalOperator){

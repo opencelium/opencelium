@@ -15,11 +15,13 @@
 
 import Request from "@entity/application/requests/classes/Request";
 import {AxiosResponse} from "axios";
-import {IUpdateAssistantRequest, OnlineUpdateProps, OfflineUpdateProps} from "@application/requests/interfaces/IUpdateAssistant";
+import {
+    InstallationInfo,
+    IUpdateAssistantRequest,
+    VersionProps
+} from "@application/requests/interfaces/IUpdateAssistant";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import {onlineApiServerOpenCeliumUrl} from "@entity/application/requests/classes/url";
-import {generateSignature} from "@application/utils/utils";
 
 
 export class UpdateAssistantRequest extends Request implements IUpdateAssistantRequest{
@@ -28,27 +30,36 @@ export class UpdateAssistantRequest extends Request implements IUpdateAssistantR
         super({url: 'assistant/oc', ...settings});
     }
 
+    async getInstallationInfo(): Promise<AxiosResponse<InstallationInfo>>{
+        this.endpoint = '/installation';
+        return super.get<InstallationInfo>();
+    }
+
     async uploadOnlineVersion(): Promise<AxiosResponse<IResponse>>{
         return super.get<IResponse>();
     }
 
-    async getOnlineUpdates(): Promise<AxiosResponse<OnlineUpdateProps[]>>{
+    async downloadOnlineVersion(): Promise<AxiosResponse<VersionProps>>{
+        return super.get<VersionProps>();
+    }
+
+    async getOnlineUpdates(): Promise<AxiosResponse<VersionProps[]>>{
         this.endpoint = '/online/version/all';
-        return super.get<OnlineUpdateProps[]>();
+        return super.get<VersionProps[]>();
     }
 
-    async getOfflineUpdates(): Promise<AxiosResponse<OfflineUpdateProps[]>>{
+    async getOfflineUpdates(): Promise<AxiosResponse<VersionProps[]>>{
         this.endpoint = '/offline/version/all';
-        return super.get<OfflineUpdateProps[]>();
+        return super.get<VersionProps[]>();
     }
 
-    async uploadApplicationFile(application: FormData): Promise<AxiosResponse<IResponse>>{
-        this.url = '/assistant/zipfile';
-        return super.post<IResponse>(application);
+    async uploadApplicationFile(application: FormData, onUploadProgress?: (progressEvent: any) => void): Promise<AxiosResponse<VersionProps>>{
+        this.url = 'assistant/zipfile';
+        return super.post<VersionProps>(application, {onUploadProgress});
     }
 
     async deleteApplicationFile(): Promise<AxiosResponse<IResponse>>{
-        this.url = '/assistant/zipfile';
+        this.url = 'assistant/zipfile';
         return super.delete<IResponse>();
     }
 

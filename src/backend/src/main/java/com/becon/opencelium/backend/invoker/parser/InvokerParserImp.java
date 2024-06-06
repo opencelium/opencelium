@@ -18,10 +18,9 @@ package com.becon.opencelium.backend.invoker.parser;
 
 import com.becon.opencelium.backend.factory.InvokerParserFactory;
 import com.becon.opencelium.backend.invoker.entity.*;
-import com.becon.opencelium.backend.invoker.paginator.entity.PageParamRule;
-import com.becon.opencelium.backend.invoker.paginator.entity.Pagination;
-import com.becon.opencelium.backend.invoker.paginator.enums.PageParam;
-import com.becon.opencelium.backend.invoker.paginator.enums.PageParamAction;
+import com.becon.opencelium.backend.invoker.enums.PageParam;
+import com.becon.opencelium.backend.invoker.enums.PageParamAction;
+import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.sun.xml.messaging.saaj.soap.ver1_1.BodyElement1_1Impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +50,8 @@ public class InvokerParserImp {
         XMLParser<Node, Invoker> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
         return xmlDomParser.doAction("invoker", node -> {
             NodeList childNode = node.getChildNodes();
-            invoker.setName(getName(childNode));
+            String invokerName = getName(childNode);
+            invoker.setName(invokerName);
             invoker.setDescription(getDescription(childNode));
             invoker.setHint(getHint(childNode));
             invoker.setIcon(getIcon(childNode));
@@ -66,7 +66,11 @@ public class InvokerParserImp {
     private String getName(NodeList nodeList){
         InvokerParserFactory<String> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, String> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
-        return xmlDomParser.doAction("name", Node::getTextContent);
+        return xmlDomParser.doAction("name", node -> {
+
+            logger.info("Loading Process Started for Invoker << " + node.getTextContent() + " >>");
+            return node.getTextContent();
+        });
     }
 
     private String getDescription(NodeList nodeList){
@@ -87,12 +91,6 @@ public class InvokerParserImp {
         return xmlDomParser.doAction("hint", Node::getTextContent);
     }
 
-    private Pagination getPagination(NodeList nodeList){
-        InvokerParserFactory<Pagination> invokerParserFactory = new InvokerParserFactory<>();
-        XMLParser<Node, Pagination> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
-        return xmlDomParser.doAction("pagination", node -> new Pagination(getPageRules(node.getChildNodes())));
-    }
-
     private List<RequiredData> getRequired(NodeList nodeList){
         InvokerParserFactory< List<RequiredData>> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node,  List<RequiredData>> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
@@ -103,6 +101,12 @@ public class InvokerParserImp {
         InvokerParserFactory<String> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, String> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
         return xmlDomParser.doAction("authType", Node::getTextContent);
+    }
+
+    private Pagination getPagination(NodeList nodeList){
+        InvokerParserFactory<Pagination> invokerParserFactory = new InvokerParserFactory<>();
+        XMLParser<Node, Pagination> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
+        return xmlDomParser.doAction("pagination", node -> new Pagination(getPageRules(node.getChildNodes())));
     }
 
     private List<FunctionInvoker> getOperation(NodeList nodeList){
@@ -267,6 +271,34 @@ public class InvokerParserImp {
         });
     }
 
+    private List<PageParamRule> getPageRules(NodeList nodeList) {
+        InvokerParserFactory<PageParamRule> invokerParserFactory = new InvokerParserFactory<>();
+        XMLParser<Node, PageParamRule> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
+        LinkedList<PageParamRule> rules = new LinkedList<>();
+        for (PageParam param : PageParam.values()) {
+            PageParamRule pageParamRule = null;
+            pageParamRule = xmlDomParser.doAction(param.toString(), node -> {
+                PageParamRule rule = new PageParamRule();
+                rule.setParam(param);
+                rule.setValue(getValueOrDefault(param, node));
+
+                if (node.getAttributes().getNamedItem("action") != null) {
+                    rule.setAction(PageParamAction.fromString(node.getAttributes().getNamedItem("action").getNodeValue()));
+                }
+                if (node.getAttributes().getNamedItem("ref") != null) {
+                    rule.setRef(node.getAttributes().getNamedItem("ref").getNodeValue());
+                }
+                return rule;
+            });
+            if (pageParamRule == null) {
+                continue;
+            }
+            rules.add(pageParamRule);
+        }
+        logger.info("Following parameters from pagination was fetched: " + rules);
+        return rules;
+    }
+
     private List<RequiredData> getRequestDataItems(NodeList nodeList){
         InvokerParserFactory<List<RequiredData>> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, List<RequiredData>> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
@@ -298,34 +330,6 @@ public class InvokerParserImp {
             items.put(key,value);
             return items;
         });
-    }
-
-    private List<PageParamRule> getPageRules(NodeList nodeList) {
-        InvokerParserFactory<PageParamRule> invokerParserFactory = new InvokerParserFactory<>();
-        XMLParser<Node, PageParamRule> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
-        LinkedList<PageParamRule> rules = new LinkedList<>();
-        for (PageParam param : PageParam.values()) {
-            PageParamRule pageParamRule = null;
-            pageParamRule = xmlDomParser.doAction(param.toString(), node -> {
-                PageParamRule rule = new PageParamRule();
-                rule.setParam(param);
-                rule.setValue(getValueOrDefault(param, node));
-
-                if (node.getAttributes().getNamedItem("action") != null) {
-                    rule.setAction(PageParamAction.fromString(node.getAttributes().getNamedItem("action").getNodeValue()));
-                }
-                if (node.getAttributes().getNamedItem("ref") != null) {
-                    rule.setRef(node.getAttributes().getNamedItem("ref").getNodeValue());
-                }
-                return rule;
-            });
-            if (pageParamRule == null) {
-                continue;
-            }
-            rules.add(pageParamRule);
-        }
-        logger.info("Following parameters from pagination was fetched: " + rules);
-        return rules;
     }
 
     private String getValueOrDefault(PageParam pageParam, Node node) {

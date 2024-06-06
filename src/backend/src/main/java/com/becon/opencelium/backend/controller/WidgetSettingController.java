@@ -1,12 +1,11 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.mysql.entity.User;
-import com.becon.opencelium.backend.mysql.entity.WidgetSetting;
-import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
-import com.becon.opencelium.backend.mysql.service.WidgetSettingServiceImp;
+import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.entity.WidgetSetting;
+import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.WidgetSettingServiceImp;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.UserWidgetsResource;
-import com.becon.opencelium.backend.resource.user.WidgetResource;
 import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,7 +16,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;

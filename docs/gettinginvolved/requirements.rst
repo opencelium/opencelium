@@ -2,7 +2,7 @@
 Requirements
 ##################
 
-We recommend the use the follow setup:
+We recommend using the following setup:
 
 **Virtual Hardware:**
 
@@ -12,24 +12,20 @@ We recommend the use the follow setup:
 
 **Software:**
 
-- git 2.x https://github.com/git/git/tags (only for source installations)
-- node.js 20 (lts) https://nodejs.dev/en/about/releases/ (only for source installations)
-- yarn 1.22.x https://github.com/yarnpkg/yarn/tags (only for source installations)
-- gradle 7.4.2 https://gradle.org/releases/ (only for source installations)
-- java 17 (jdk, jre) https://www.oracle.com/technetwork/java/javase/downloads/index.html
-- neo4j 5.7 not higher https://support.neo4j.com/hc/en-us/articles/115013134648-Neo4j-Supported-Versions
+- nginx 1.26.0 https://nginx.org/en/download.html (stable version)
+- mongodb 7.0.5 https://www.mongodb.com/download-center/community/releases 
+- java 17 (jdk) https://www.oracle.com/technetwork/java/javase/downloads/index.html
 - mariadb 10 (lts) https://mariadb.com/kb/en/mariadb-server-release-dates/ 
 
 **Operating System:**
 
-- Debian GNU/Linux 11 "Bullseye"
-- Ubuntu 22.04 LTS "Jammy Jellyfish"
-- SUSE Linux Enterprise Server (SLES) 12 SP3, 12 SP4, 15, 15 SP5
-- Red Hat Enterprise Linux (RHEL) 7, 8, 9
+- Debian GNU/Linux 12 "Bookworm"
+- Ubuntu 24.04 LTS "Noble Numbat"
+- SUSE Linux Enterprise Server (SLES) 15 SP5
+- Red Hat Enterprise Linux (RHEL) 9
 
 
 **Network config:**
 
-- open frontend 8888 (for source installations) 
-- open frontend 80   (for deb/rpm package installations)
+- open frontend 80 / 443 (SSL)
 - open backend 9090

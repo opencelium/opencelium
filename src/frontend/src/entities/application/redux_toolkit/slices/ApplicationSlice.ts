@@ -17,7 +17,6 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ICommonState} from "@application/interfaces/core";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
-import {IResponse} from "@application/requests/interfaces/IResponse";
 
 export interface EntityApplicationState extends ICommonState{
     documentation: any,

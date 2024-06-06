@@ -18,6 +18,7 @@
     "OLD_VERSION": "old",
     "MORE_OLD_VERSIONS": "More Old Versions",
     "CURRENT_VERSION": "current",
+    "ALREADY_DOWNLOADED": "already downloaded",
     "MORE_NEW_VERSIONS": "More New Versions",
     "VERSION_HEADER": "Version",
     "DELETE_TOOLTIP": "Delete",

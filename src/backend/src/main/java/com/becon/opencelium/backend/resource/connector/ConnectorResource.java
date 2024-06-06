@@ -17,7 +17,6 @@
 package com.becon.opencelium.backend.resource.connector;
 
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Map;
 
@@ -28,7 +27,7 @@ public class ConnectorResource {
     private String title;
     private String description;
     private String icon;
-    private InvokerResource invoker;
+    private InvokerDTO invoker;
     private boolean sslCert;
     private int timeout;
     private Map<String, String> requestData;
@@ -65,11 +64,11 @@ public class ConnectorResource {
         this.icon = icon;
     }
 
-    public InvokerResource getInvoker() {
+    public InvokerDTO getInvoker() {
         return invoker;
     }
 
-    public void setInvoker(InvokerResource invoker) {
+    public void setInvoker(InvokerDTO invoker) {
         this.invoker = invoker;
     }
 

@@ -1,9 +1,9 @@
 package com.becon.opencelium.backend.execution.rdata.extractor;
 
 import com.becon.opencelium.backend.constant.DataRef;
+import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
-import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -64,7 +64,6 @@ public class BodyExtractor implements Extractor {
             return Optional.empty();
         }
         InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder();
-        String val;
         for (String ref : extractRefs(expr)) {
             FunctionInvoker functionInvoker = getFunctionInvoker(ref);
             ResponseEntity<String> response = invokerRequestBuilder

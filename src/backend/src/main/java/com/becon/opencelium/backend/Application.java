@@ -16,13 +16,34 @@
 
 package com.becon.opencelium.backend;
 
+import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
 
 @SpringBootApplication
+@EnableScheduling
+@EnableAsync
 public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+		SpringApplication application = new SpringApplication(Application.class);
+		prepare(application);
+		application.run(args);
+	}
+
+	private static void prepare(SpringApplication application) {
+		YAMLMigrator.run();
+
+		String configLocation = Paths.get(System.getProperty("user.dir")).resolve("src/main/resources/application.yml").toString();
+		Properties properties = new Properties();
+		properties.put("spring.config.location", configLocation);
+		application.setDefaultProperties(properties);
 	}
 }

@@ -70,7 +70,7 @@ class Name extends React.Component{
             <SelectableInput
                 ref={this.selectableInputRef}
                 id={`name_options`}
-                readOnly={readOnly}
+                readOnly={true}
                 options={invoker.getAllOperationsForSelect()}
                 changeValue={(a) => this.changeName(a)}
                 label={'Name'}

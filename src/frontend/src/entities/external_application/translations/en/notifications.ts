@@ -14,22 +14,23 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
+import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 
 const {
-    checkNeo4j, checkElasticsearch, checkAllExternalApplications
+    checkElasticsearch, checkAllExternalApplications
 } = ActionCreators;
 
 export default {
     fulfilled: {
     },
     rejected: {
-        [checkNeo4j.rejected.type]: {
-            "DOWN": "Neo4j is down.",
-            "__DEFAULT__": "Neo4j is down."
-        },
         [checkElasticsearch.rejected.type]: {
             "DOWN": "Elasticsearch is down.",
             "__DEFAULT__": "Elasticsearch is down."
+        },
+        [checkMongoDB.rejected.type]: {
+            "DOWN": "MongoDB is down.",
+            "__DEFAULT__": "MongoDB is down."
         },
     },
 }

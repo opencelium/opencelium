@@ -16,9 +16,8 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
-import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
-import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
+import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
+import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
 
@@ -27,31 +26,21 @@ import java.util.List;
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConnectionResource {
-
-    private Long nodeId;
-    private Long connectionId;
+    private Long id;
     private String title;
     private String description;
-    private ConnectorNodeResource fromConnector;
-    private ConnectorNodeResource toConnector;
-    private List<FieldBindingResource> fieldBinding;
-    private BusinessLayoutResource businessLayout;
-    private DataAggregatorDTO dataAggregator;
+    private String icon;
+    private ConnectorResource fromConnector;
+    private ConnectorResource toConnector;
+    private List<EnhancementDTO> enhancements;
+    private Integer categoryId;
 
-    public Long getNodeId() {
-        return nodeId;
+    public Long getId() {
+        return id;
     }
 
-    public void setNodeId(Long nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    public Long getConnectionId() {
-        return connectionId;
-    }
-
-    public void setConnectionId(Long connectionId) {
-        this.connectionId = connectionId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -70,43 +59,43 @@ public class ConnectionResource {
         this.description = description;
     }
 
-    public ConnectorNodeResource getFromConnector() {
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public ConnectorResource getFromConnector() {
         return fromConnector;
     }
 
-    public void setFromConnector(ConnectorNodeResource fromConnector) {
+    public void setFromConnector(ConnectorResource fromConnector) {
         this.fromConnector = fromConnector;
     }
 
-    public ConnectorNodeResource getToConnector() {
+    public ConnectorResource getToConnector() {
         return toConnector;
     }
 
-    public void setToConnector(ConnectorNodeResource toConnector) {
+    public void setToConnector(ConnectorResource toConnector) {
         this.toConnector = toConnector;
     }
 
-    public List<FieldBindingResource> getFieldBinding() {
-        return fieldBinding;
+    public List<EnhancementDTO> getEnhancements() {
+        return enhancements;
     }
 
-    public void setFieldBinding(List<FieldBindingResource> fieldBinding) {
-        this.fieldBinding = fieldBinding;
+    public void setEnhancements(List<EnhancementDTO> enhancements) {
+        this.enhancements = enhancements;
     }
 
-    public BusinessLayoutResource getBusinessLayout() {
-        return businessLayout;
+    public Integer getCategoryId() {
+        return categoryId;
     }
 
-    public void setBusinessLayout(BusinessLayoutResource businessLayout) {
-        this.businessLayout = businessLayout;
-    }
-
-    public DataAggregatorDTO getDataAggregator() {
-        return dataAggregator;
-    }
-
-    public void setDataAggregator(DataAggregatorDTO dataAggregator) {
-        this.dataAggregator = dataAggregator;
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 }

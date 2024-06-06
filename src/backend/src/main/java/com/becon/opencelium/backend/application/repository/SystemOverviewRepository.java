@@ -1,19 +1,19 @@
 package com.becon.opencelium.backend.application.repository;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
+import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.Transaction;
-import org.neo4j.driver.internal.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -28,24 +28,22 @@ import java.util.zip.ZipInputStream;
 @Component
 public class SystemOverviewRepository {
 
+    private final DataSource dataSource;
+    private final JdbcTemplate jdbcTemplate;
+    private final YamlPropertiesFactoryBean yamlPropertiesFactoryBean;
+    private final MongoClient mongoClient;
 
-    @Autowired
-    private DataSource dataSource;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private Driver neo4jDriver;
-
-    @Autowired
-    private YamlPropertiesFactoryBean yamlPropertiesFactoryBean;
+    public SystemOverviewRepository(DataSource dataSource, JdbcTemplate jdbcTemplate, YamlPropertiesFactoryBean yamlPropertiesFactoryBean, MongoClient mongoClient) {
+        this.dataSource = dataSource;
+        this.jdbcTemplate = jdbcTemplate;
+        this.yamlPropertiesFactoryBean = yamlPropertiesFactoryBean;
+        this.mongoClient = mongoClient;
+    }
 
     public SystemOverview getCurrentOverview() {
         SystemOverview systemOverview = new SystemOverview();
         systemOverview.setJava(System.getProperty("java.version"));
         systemOverview.setOs(System.getProperty("os.name"));
-
 
         // getting MariaDB version
         try {
@@ -56,27 +54,16 @@ public class SystemOverviewRepository {
             systemOverview.setMariadb("Service is down. Unable to detect version. ");
         }
 
-
-        // get neo4j version
-        try (Session session = neo4jDriver.session(); Transaction transaction = session.beginTransaction()){
-            String version = transaction
-                    .run("call dbms.components() yield versions unwind versions as version return version;")
-                    .single().get(0).asString();
-            systemOverview.setNeo4j(version);
-        } catch (Exception e) {
+        //getting mongoDB version
+        try {
+            MongoDatabase database = mongoClient.getDatabase("admin");
+            Document buildInfo = database.runCommand(new Document("buildInfo", 1));
+            String mongoVersion = buildInfo.getString("version");
+            systemOverview.setMongodb(mongoVersion);
+        }catch (Exception e){
             e.printStackTrace();
-            systemOverview.setNeo4j("Service is down. Unable to detect version. ");
+            systemOverview.setMongodb("Service is down. Unable to detect version. ");
         }
-
-        // get elasticsearch version
-//        try {
-//            NodesInfoResponse nodesInfoResponse = client.admin().cluster().prepareNodesInfo().all().execute().actionGet();
-//            NodeInfo nodeInfo = nodesInfoResponse.getNodes().stream().findFirst().orElseThrow(() -> new RuntimeException("Node not found"));
-//            systemOverview.setElasticSearch(nodeInfo.getVersion().toString());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            systemOverview.setElasticSearch("Service is down. Unable to detect version. ");
-//        }
 
         return systemOverview;
     }
@@ -84,9 +71,10 @@ public class SystemOverviewRepository {
     // return current version
     public String getCurrentVersionFromDb() {
         try {
-            return jdbcTemplate
-                    .queryForList("select AUTHOR from DATABASECHANGELOG order by AUTHOR DESC LIMIT 1", String.class)
-                    .get(0);
+//            return jdbcTemplate
+//                    .queryForList("select AUTHOR from DATABASECHANGELOG order by AUTHOR DESC LIMIT 1", String.class)
+//                    .get(0);
+            return Objects.requireNonNull(yamlPropertiesFactoryBean.getObject()).getProperty(YamlPropConst.OC_VERSION);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -123,15 +111,15 @@ public class SystemOverviewRepository {
             int read = 0;
             StringBuilder stringBuilder = new StringBuilder();
             while (zipEntry != null) {
-                if (zipEntry.getName().contains("backend/src/main/resources/application_default.yml")) {
+                if (zipEntry.getName().contains("backend/" + PathConstant.APP_DEFAULT_YML)) {
                     while ((read = zis.read(buffer, 0, 1024)) >= 0) {
                         stringBuilder.append(new String(buffer, 0, read));
                     }
-                    Properties yamlProps = yamlPropertiesFactoryBean.getObject();
-                    if (Objects.requireNonNull(yamlProps).containsKey("opencelium.version")) {
-                        return yamlProps.getProperty("opencelium.version");
+                    String version = extractValueFromYaml(stringBuilder.toString(), "opencelium.version");
+                    if (version == null || version.isEmpty()) {
+                        return "VERSION_IN_APPLICATION_DEFAULT_NOT_FOUND";
                     }
-                    return "VERSION_IN_APPLICATION_DEFAULT_NOT_FOUND";
+                    return version;
                 }
                 zipEntry = zis.getNextEntry();
             }
@@ -139,6 +127,18 @@ public class SystemOverviewRepository {
             throw new RuntimeException(e);
         }
         return "APPLICATION_DEFAULT_NOT_FOUND";
+    }
+
+    private static String extractValueFromYaml(String yamlContent, String path) {
+        YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
+        Resource resource = new ByteArrayResource(yamlContent.getBytes());
+        yamlFactory.setResources(resource);
+
+        Properties properties = yamlFactory.getObject();
+        if (properties != null) {
+            return properties.getProperty(path);
+        }
+        return null;
     }
 
     // Kibana getting request

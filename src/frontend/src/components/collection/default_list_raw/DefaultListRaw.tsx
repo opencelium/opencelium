@@ -26,10 +26,12 @@ const DefaultListRaw: FC<DefaultListRawProps> =
          children,
          url,
          id,
+         entity,
      }) => {
         let navigate = useNavigate();
+        const hasDisabledStyle = entity.isDisabled || entity.isLoading;
         return (
-            <DefaultListRawStyled id={id} style={{cursor: "pointer"}} onClick={(e: any) => {
+            <DefaultListRawStyled id={id} title={entity.title || ''} style={{cursor: hasDisabledStyle ? "default" : "pointer", color: hasDisabledStyle ? '#777' : '#000', background: hasDisabledStyle ? '#eee' : 'unset'}} onClick={entity.isDisabled ? () => {} : (e: any) => {
                 if (timer) clearTimeout(timer);
                 timer = setTimeout(function() {
                     let element = e.target;
@@ -39,7 +41,13 @@ const DefaultListRaw: FC<DefaultListRawProps> =
                                 break;
                             } else{
                                 if(element.id === id){
-                                    navigate(url, {replace: false})
+                                    if(entity.isExternalHref) {
+                                        window.open(url, '_blank').focus()
+                                    } else {
+                                        if (!entity.isDisabled && !entity.isLoading) {
+                                            navigate(url, {replace: false})
+                                        }
+                                    }
                                     break;
                                 }
                                 if(element.parentElement){
@@ -49,7 +57,13 @@ const DefaultListRaw: FC<DefaultListRawProps> =
                                 }
                             }
                             if(element.id === id){
-                                navigate(url, {replace: false})
+                                if(entity.isExternalHref) {
+                                    window.open(url, '_blank').focus()
+                                } else {
+                                    if (!entity.isDisabled && !entity.isLoading) {
+                                        navigate(url, {replace: false})
+                                    }
+                                }
                                 break;
                             }
                         }

@@ -72,6 +72,11 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
             didMount.current = true;
         }
     },[addingInvoker, updatingInvoker]);
+    useEffect(() => {
+        if (invoker.authTypeSelect) {
+            setAuthValidationMessage('');
+        }
+    }, [invoker.authTypeSelect]);
     const Icon = invoker.getFile({propertyName: "iconFile", props: {label: "Icon",}});
     const AuthTypeInput = invoker.getSelect({propertyName: "authTypeSelect", props: {
         required: true,
@@ -107,7 +112,7 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
                 isValid = false;
             }
         }
-        if(invoker.operations.length === 0){
+        if(localOperations.length === 0){
             setOperationsValidationMessage('Invoker should contain at least one operation');
             isValid = false;
         }
@@ -151,7 +156,7 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
         actions,
         formSections: [
             <FormSection label={{value: 'General Data'}}>
-                <InvokerGeneralData nameValidationMessage={nameValidationMessage} invoker={invoker} isAdd={isAdd} isView={isView} isReadonly={isView}/>
+                <InvokerGeneralData setNameValidationMessage={setNameValidationMessage} nameValidationMessage={nameValidationMessage} invoker={invoker} isAdd={isAdd} isView={isView} isReadonly={isView}/>
                 {/*!isView && Icon*/}
             </FormSection>,
             <FormSection label={{value: 'Authentication'}}>
@@ -159,7 +164,7 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
                 {RequiredDataComponent}
             </FormSection>,
             <FormSection label={{value: "Operations"}} hasFullWidthInForm={true}>
-                <OperationItems error={operationsValidationMessage} validations={isNotValidOperations} operations={localOperations} updateOperations={setLocalOperations} isReadonly={isView}/>
+                <OperationItems setOperationsValidationMessage={setOperationsValidationMessage} error={operationsValidationMessage} validations={isNotValidOperations} operations={localOperations} updateOperations={setLocalOperations} isReadonly={isView}/>
             </FormSection>,
         ]
     }

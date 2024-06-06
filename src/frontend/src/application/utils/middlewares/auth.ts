@@ -24,6 +24,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {clearCurrentPages, clearSearchFields } from '@application/redux_toolkit/slices/ApplicationSlice';
 import {clearWidgetSettings} from "@entity/dashboard/redux_toolkit/slices/WidgetSettingSlice";
 import { checkConnection } from '@application/redux_toolkit/action_creators/CheckConnectionCreators';
+import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 
 export const checkAccess = (storeApi: any, action: any) => {
     const response: IResponse = action.payload;
@@ -51,6 +52,7 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);
         dispatch(checkConnection());
+        setTimeout(() => dispatch(checkMongoDB()), 1000);
     } else if (logout.match(action)) {
         const SecuredStorage = LocalStorage.getStorage(true);
         SecuredStorage.remove('authUser');

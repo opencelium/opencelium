@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.mysql.entity.DataAggregator;
-import com.becon.opencelium.backend.mysql.service.ArgumentService;
-import com.becon.opencelium.backend.mysql.service.DataAggregatorService;
+import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
+import com.becon.opencelium.backend.database.mysql.service.ArgumentService;
+import com.becon.opencelium.backend.database.mysql.service.DataAggregatorService;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connection.aggregator.DataAggregatorDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
@@ -21,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/aggregator", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -32,12 +31,11 @@ public class AggregatorController {
     private final ArgumentService argumentService;
 
     @Autowired
-    public AggregatorController(@Qualifier("DataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
-                                @Qualifier("ArgumentServiceImp")ArgumentService argumentService) {
+    public AggregatorController(@Qualifier("dataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
+                                @Qualifier("ArgumentServiceImp") ArgumentService argumentService) {
         this.dataAggregatorService = dataAggregatorService;
         this.argumentService = argumentService;
     }
-
 
     @Operation(summary = "Retrieves a Data Aggregator by provided ID")
     @ApiResponses(value = {
@@ -139,7 +137,7 @@ public class AggregatorController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Checks whether an name of aggregator is unique or not.")
+    @Operation(summary = "Checks whether a name of aggregator is unique or not.")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Returns true if a name of aggregator is unique.",
@@ -158,7 +156,7 @@ public class AggregatorController {
         return ResponseEntity.ok(resultDTO);
     }
 
-    @Operation(summary = "Checks whether an name of aggregator is unique or not.")
+    @Operation(summary = "Checks whether an aggregator is active or not.")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Returns true if a name of aggregator is unique.",

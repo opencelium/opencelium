@@ -13,12 +13,5 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {createAsyncThunk} from "@reduxjs/toolkit";
-import {errorHandler} from "@application/utils/utils";
-import ApplicationRequest from '../../requests/classes/Application';
-import { LocalStorage } from "@application/classes/LocalStorage";
-import IAuthUser from "@entity/user/interfaces/IAuthUser";
-
-
 export default {
 }

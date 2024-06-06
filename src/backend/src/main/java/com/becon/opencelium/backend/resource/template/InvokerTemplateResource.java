@@ -1,12 +1,15 @@
 package com.becon.opencelium.backend.resource.template;
 
-import com.becon.opencelium.backend.resource.connector.FunctionResource;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InvokerTemplateResource {
+    public InvokerTemplateResource() {
+    }
+
+    public InvokerTemplateResource(String name) {
+        this.name = name;
+    }
 
     private String name;
 

@@ -22,14 +22,21 @@ import {PermissionTooltipButton} from "@app_component/base/button/PermissionButt
 import {SortType} from "@app_component/collection/collection_view/interfaces";
 import {AdminCardProps, IAdminCard} from "../interfaces/IAdminCard";
 import {AdminCard} from "../classes/AdminCard";
+import {IConnector} from "@entity/connector/interfaces/IConnector";
+import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
+import {isDev} from "@root/components/utils/constants/app";
 
 class AdminCards extends ListCollection<AdminCardProps>{
     name: string = 'adminCards';
     entities: IAdminCard[];
     title = 'Admin Panel';
+    getListRawUrl = (entity: IAdminCard) => {
+        return `${entity.link}`;
+    };
+    ListRawComponent = DefaultListRaw;
     keyPropName: AdminCardProps ='id';
     sortingProps: AdminCardProps[] = ['name'];
-    listProps: ListProp<AdminCardProps>[] = [{propertyKey: 'name', replace: true, getValue: (AdminCard: IAdminCard) => {
+    listProps: ListProp<AdminCardProps>[] = [{propertyKey: 'name', replace: true, style:{justifyContent: 'start', marginLeft: '-24px'}, getValue: (AdminCard: IAdminCard) => {
         return <td key={AdminCard.id} style={{textAlign: 'left'}}>{AdminCard.name}</td>
     }}];
     gridProps = {title: 'name'};
@@ -43,7 +50,7 @@ class AdminCards extends ListCollection<AdminCardProps>{
     getListActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
         return (
             <React.Fragment>
-                <PermissionTooltipButton target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} isExternalHref={entity.isExternalHref} href={`${entity.link}`} hasBackground={false} icon={'visibility'} size={TextSize.Size_20} permission={componentPermission.READ}/>
+                <PermissionTooltipButton isDisabled={entity.isDisabled} isLoading={entity.isLoading} target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={entity.isDisabled ? '' : 'View'} isExternalHref={entity.isExternalHref} href={`${entity.link}`} hasBackground={false} icon={'visibility'} size={TextSize.Size_20} permission={componentPermission.READ}/>
             </React.Fragment>
         );
     };

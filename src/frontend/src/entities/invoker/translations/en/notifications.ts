@@ -29,6 +29,7 @@ export default {
         [deleteInvokersByName.fulfilled.type]: "The selected invokers were successfully removed",
         [updateInvoker.fulfilled.type]: "The invoker <1><0>{{name}}</0></1> was successfully updated",
         [uploadInvokerImage.fulfilled.type]: "The image of the invoker <1><0>{{name}}</0></1> was successfully uploaded.",
+        [updateOperation.fulfilled.type]: "The response data was successfully updated."
     },
     rejected: {
         [updateOperation.rejected.type]: {

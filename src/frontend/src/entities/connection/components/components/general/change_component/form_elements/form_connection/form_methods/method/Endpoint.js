@@ -59,7 +59,7 @@ class Endpoint extends Component{
         const {caretPosition, contentEditableValue, currentKeyCode} = this.state;
         const {method} = this.props;
         let endpointDiv = this.getEndpointHtmlElement();
-        const value = e.target.value;
+        const value = e.target.innerHTML;
         let newCaretPosition = 0;
         let hasFoundNewCaretPosition = false;
         if(value) {
@@ -313,14 +313,14 @@ class Endpoint extends Component{
         return (
             <div>
                 <ToolboxThemeInput className={themeQueryInput} label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>
-                    <ContentEditable
+                    <div
                         id={this.getEndpointIdName()}
-                        innerRef={this.endpointValue}
-                        html={htmlValue}
-                        disabled={readOnly}
-                        onChange={(a) => this.onChangeEndpoint(a)}
-                        onMouseDown={(a) => this.setCaretPosition(a)}
-                        onMouseUp={(a) => this.setCaretPosition(a)}
+                        ref={this.endpointValue}
+                        dangerouslySetInnerHTML={{__html: htmlValue}}
+                        contentEditable={!readOnly}
+                        onInput={(a) => this.onChangeEndpoint(a)}
+                        onMouseDown={(a) => {this.setCaretPosition(a)}}
+                        onMouseUp={(a) => {this.setCaretPosition(a)}}
                         onKeyDown={(a) => this.setCaretPosition(a)}
                         onKeyUp={(a) => this.setCaretPosition(a)}
                         onBlur={(a) => this.saveEndpoint(a)}
@@ -329,7 +329,7 @@ class Endpoint extends Component{
                         style={contentEditableStyles}
                     />
                     <ParamGenerator
-                        updateConnection={updateEntity}
+                        updateConnection={(a) => updateEntity(a)}
                         connection={connection}
                         connector={connector}
                         method={method}

@@ -26,6 +26,7 @@ import {Schedule} from "../../classes/Schedule";
 import {getAllSchedules} from "../../redux_toolkit/action_creators/ScheduleCreators";
 import {SchedulePermissions} from '../../constants';
 import {CurrentSchedules} from "../../components/current_schedules/CurrentSchedules";
+import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 
 const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)(({hasTopBar, isReadonly, hasTitle}) => {
     const dispatch = useAppDispatch();
@@ -35,6 +36,7 @@ const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)
     const {gettingAllSchedules, schedules, deletingSchedulesById, updatingSchedule} = Schedule.getReduxState();
     useEffect(() => {
         dispatch(getAllSchedules());
+        dispatch(checkMongoDB());
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);

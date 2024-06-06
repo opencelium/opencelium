@@ -167,6 +167,7 @@ class FormConnectionSvg extends Component {
           updateConnection={(a, b) => this.updateEntity(a, b)}
         />
         <TechnicalLayout
+          formConnectionSvg={this}
           ref={this.technicalLayoutRef}
           readOnly={data.readOnly}
           setIsCreateElementPanelOpened={(a, b) =>
@@ -201,8 +202,8 @@ class FormConnectionSvg extends Component {
             updateConnection={(a, b) => this.updateEntity(a, b)}
           />
         )}
-        {!data.readOnly && <ButtonPanel data={data} entity={entity} updateEntity={updateEntity} currentTechnicalItem={currentTechnicalItem} setCurrentTechnicalItem={setCurrentTechnicalItem} />}
-        {!data.readOnly && <LogPanel />}
+        <ButtonPanel readOnly={data.readOnly} data={data} entity={entity} updateEntity={updateEntity} currentTechnicalItem={currentTechnicalItem} setCurrentTechnicalItem={setCurrentTechnicalItem} />
+        <LogPanel />
       </div>
     );
   }

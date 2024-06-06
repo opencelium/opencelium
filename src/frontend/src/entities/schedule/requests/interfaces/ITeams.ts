@@ -18,7 +18,6 @@ import {AxiosResponse} from "axios";
 export interface GetWebhookResponse {
     result: string,
 }
-
 export interface ITeams{
 
     //to get webhook

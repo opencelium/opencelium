@@ -5,36 +5,60 @@ Administration
 Services
 """""""""""""""""
 
-Run command to enable oc service.
+Commands to enable Opencelium services (already done on installation).
 
 .. code-block:: sh
 
-        root@shell> ln -s /opt/scripts/oc_service.sh /usr/bin/oc
+        ln -s /opt/scripts/oc_service.sh /usr/bin/oc
+        
+        ln -s /opt/opencelium/conf/opencelium.service /etc/systemd/system/opencelium.service 
+        systemctl daemon-reload
 
 **Available services:**
 
-- oc rebuild_frontend
-- oc start_frontend
-- oc stop_frontend
-- oc restart_frontend
-- oc check_frontend
-- oc refresh_db
-- oc rebuild_backend
-- oc start_backend
-- oc stop_backend
-- oc restart_backend
-- oc check_backend
-- oc backup
-- oc restore
+Frontend:
+
+.. code-block:: sh
+
+	systemctl start nginx
+	systemctl stop nginx
+	systemctl start nginx
+	systemctl restart nginx 
+	systemctl enable nginx
+	systemctl disable nginx 
+
+Backend:
+
+.. code-block:: sh
+
+	systemctl start opencelium
+	systemctl stop opencelium
+	systemctl start opencelium
+	systemctl restart opencelium 
+	systemctl enable opencelium
+	systemctl disable opencelium 
 
 
 Check health
 """""""""""""""""
 
-Add this to you crontab.
+Check status of opencelium service
 
-- */5 * * * * /usr/bin/oc check_frontend >/dev/null 2>&1
-- */5 * * * * /usr/bin/oc check_backend >/dev/null 2>&1
+.. code-block:: sh
+
+	systemctl status nginx
+	systemctl status opencelium
+	
+	
+Autostart
+"""""""""""""""""
+
+Start opencelium services automatically on system start
+
+.. code-block:: sh
+
+	systemctl enable nginx
+	systemctl enable opencelium
 
 
 Backup
@@ -44,14 +68,6 @@ Execute this command to create a backup.
 
 .. code-block:: sh
 
-        root@shell> oc backup -d /var/backup -u username -p password -name backupfile
+	oc backup -d /var/backups/opencelium -u username -p password
 
 
-Restore
-"""""""""""""""""
-
-Execute this command to restore from a backup.
-
-.. code-block:: sh
-
-        root@shell> oc restore -d /var/backup -u username -p password -name backupfile

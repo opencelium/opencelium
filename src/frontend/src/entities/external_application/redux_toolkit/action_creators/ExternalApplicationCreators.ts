@@ -16,19 +16,7 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import {ExternalApplicationRequest} from "../../requests/classes/ExternalApplication";
-
-export const checkNeo4j = createAsyncThunk(
-    'external_application/check/neo4j',
-    async(data: never, thunkAPI) => {
-        try {
-            const request = new ExternalApplicationRequest({isApi: false});
-            const response = await request.checkNeo4j();
-            return response.data;
-        } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
-        }
-    }
-)
+import {ExternalApplicationStatus} from "@entity/external_application/requests/interfaces/IExternalApplication";
 
 export const checkElasticsearch = createAsyncThunk(
     'external_application/check/elasticsearch',
@@ -37,6 +25,19 @@ export const checkElasticsearch = createAsyncThunk(
             const request = new ExternalApplicationRequest({isApi: false});
             const response = await request.checkElasticsearch();
             return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+export const checkMongoDB = createAsyncThunk(
+    'external_application/check/mongodb',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new ExternalApplicationRequest({isApi: false});
+            const response = await request.checkMongoDB();
+            const result = {data: response.data, settings: {withoutNotification: response.data.status === ExternalApplicationStatus.UP}}
+            return result;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -60,7 +61,7 @@ export const checkAllExternalApplications = createAsyncThunk(
 )
 
 export default {
-    checkNeo4j,
     checkElasticsearch,
+    checkMongoDB,
     checkAllExternalApplications,
 }

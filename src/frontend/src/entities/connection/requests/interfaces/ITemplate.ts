@@ -41,6 +41,9 @@ export interface ITemplateRequest{
     //to get template by id
     getTemplateById(): Promise<AxiosResponse<ITemplate>>,
 
+    //to get template by connection id
+    getTemplateByConnectionId(): Promise<AxiosResponse<ITemplate>>,
+
     //to get all template of authorized user
     getAllTemplates(): Promise<AxiosResponse<ITemplate[]>>,
 

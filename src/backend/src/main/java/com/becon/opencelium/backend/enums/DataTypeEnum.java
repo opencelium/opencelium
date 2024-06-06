@@ -7,20 +7,14 @@ public enum DataTypeEnum {
     NUM, ARR, OBJ, STR, BOOL;
 
     public static DataTypeEnum getEnumType(String type) {
-        switch (type) {
-            case "NUM":
-                return NUM;
-            case "ARR":
-                return ARR;
-            case "OBJ":
-                return OBJ;
-            case "STR":
-                return STR;
-            case "BOOL":
-                return BOOL;
-            default:
-                throw new RuntimeException("Dara type " + type + " not found");
-        }
+        return switch (type) {
+            case "NUM" -> NUM;
+            case "ARR" -> ARR;
+            case "OBJ" -> OBJ;
+            case "STR" -> STR;
+            case "BOOL" -> BOOL;
+            default -> throw new RuntimeException("Data type " + type + " not found");
+        };
     }
 
     public static Class getClass(DataTypeEnum type) {

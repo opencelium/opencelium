@@ -28,6 +28,7 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
         isView,
         isReadonly,
         nameValidationMessage,
+        setNameValidationMessage,
     }) => {
     const {
         isCurrentInvokerHasUniqueTitle, checkingInvokerTitle, currentInvoker,
@@ -48,6 +49,7 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
                 error={isCurrentInvokerHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title must be unique' : nameValidationMessage}
                 onChange={(e:ChangeEvent<HTMLInputElement>) => {
                     setName(e.target.value);
+                    setNameValidationMessage('');
                 }}
                 onBlur={() => {
                     invoker.name = name;

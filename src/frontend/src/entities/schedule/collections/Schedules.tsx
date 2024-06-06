@@ -53,7 +53,7 @@ class Schedules extends ListCollection<ScheduleProps>{
     entities: ISchedule[];
     title = 'Schedules';
     keyPropName: ScheduleProps ='id';
-    getListRawUrl = (entity: ISchedule) => `${entity.id}/update`;
+    getListRawUrl = (entity: ISchedule) => `/schedules/${entity.id}/update`;
     ListRawComponent = DefaultListRaw;
     sortingProps: ScheduleProps[] = ['title'];
     listProps: ListProp<ScheduleProps>[] = [
@@ -112,11 +112,11 @@ class Schedules extends ListCollection<ScheduleProps>{
     }, {
         propertyKey: 'debugMode',
         getValue: (schedule: ISchedule) => {
-            return  <InputSwitch 
-                        readOnly={false} 
-                        color={ColorTheme.Turquoise} 
+            return  <InputSwitch
+                        readOnly={false}
+                        color={ColorTheme.Turquoise}
                         isChecked={schedule.debugMode}
-                        position={'middle'} 
+                        position={'middle'}
                         onClick={() => this.dispatch(switchScheduleLogsStatus({
                             ...schedule.getModel(), debugMode: !schedule.debugMode
                         }))}
@@ -128,11 +128,11 @@ class Schedules extends ListCollection<ScheduleProps>{
         getValue: (schedule: ISchedule) => {
             if(schedule.webhook){
                 return (
-                    <Button 
-                        iconSize={TextSize.Size_12} 
-                        icon={'file_copy'} 
-                        hasBackground={false} 
-                        color={ColorTheme.Turquoise} 
+                    <Button
+                        iconSize={TextSize.Size_12}
+                        icon={'file_copy'}
+                        hasBackground={false}
+                        color={ColorTheme.Turquoise}
                         handleClick={() => {
                             copyStringToClipboard(schedule.webhook.url);
                             this.dispatch(copyWebhookToClipboard())
@@ -152,7 +152,7 @@ class Schedules extends ListCollection<ScheduleProps>{
         lastDuration: 'Last Duration',
         status: 'Status',
         debugMode: 'Logs',
-        webhook: 'W'
+        webhook: 'Webhook'
     };
     getTopActions = (viewType: ViewType, checkedIds: number[] = []) => {
         const hasSearch = this.hasSearch && this.entities.length > 0;

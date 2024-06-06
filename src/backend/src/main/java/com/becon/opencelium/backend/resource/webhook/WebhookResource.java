@@ -17,9 +17,8 @@
 package com.becon.opencelium.backend.resource.webhook;
 
 
-import com.becon.opencelium.backend.mysql.entity.Webhook;
+import com.becon.opencelium.backend.database.mysql.entity.Webhook;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 @Resource
 public class WebhookResource {

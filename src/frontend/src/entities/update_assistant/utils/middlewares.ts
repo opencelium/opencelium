@@ -18,10 +18,12 @@ import {AppDispatch, RootState} from "@application/utils/store";
 import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
 import {checkForUpdates} from "../redux_toolkit/action_creators/UpdateAssistantCreators";
 
-export const authMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
+export const updateAssistantMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     const dispatch: AppDispatch = storeApi.dispatch;
     if (login.fulfilled.type === action.type) {
-        dispatch(checkForUpdates());
+        if (action.payload.userDetail.themeSync) {
+            dispatch(checkForUpdates());
+        }
     }
     return next(action);
 }

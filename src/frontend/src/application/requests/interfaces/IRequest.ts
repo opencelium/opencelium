@@ -28,7 +28,6 @@ export interface IRequestSettings{
     endpoint?: string,
     //true for api request
     isApi?: boolean,
-
     //true if request contains FormData
     isFormData?: boolean,
 

@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId} from "@application/utils/utils";
+import {consoleLog, isId, replaceVariables} from "@application/utils/utils";
 import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO, OUTSIDE_ITEM} from "./CConnectorItem";
 import CFieldBinding from "./field_binding/CFieldBinding";
 import CTemplate from "./CTemplate";
@@ -23,6 +23,7 @@ import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
  import CMethodItem from "@classes/content/connection/method/CMethodItem";
  import COperatorItem from "@classes/content/connection/operator/COperatorItem";
  import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
+ import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
 
 const DEFAULT_COLOR = '#ffffff';
 
@@ -605,11 +606,24 @@ export default class CConnection{
                 return;
         }
         let color = method.color;
+        let references = [];
         this.addRestColor(color);
+        const filteredFieldBinding = this.fieldBinding.filter(item => {
+            const fromHasColor = item.from.some(el => {
+                if(el.color === color) {
+                    references.push(el.getReference());
+                }
+                return el.color === color
+            });
+            //const toHasColor = item.to.some(el => el.color === color);
+            return fromHasColor/* || toHasColor*/;
+        })
         if(withCleanFieldBinding){
             this.cleanFieldBinding(connectorType, bindingItem);
         }
         connector.removeMethod(method, withRefactorIndexes);
+        this._fromConnector.cleanFromReference(filteredFieldBinding, color, references);
+        this._toConnector.cleanFromReference(filteredFieldBinding, color, references);
     }
 
     removeConnectorOperator(connectorType, operator, withCleanFieldBinding){
@@ -737,12 +751,23 @@ export default class CConnection{
             if(item !== null) {
                 for (let j = connectorTypeBinding.length - 1; j >= 0; j--) {
                     if (CFieldBinding.compareTwoBindingItems(item, connectorTypeBinding[j])) {
+                        for(let k = j; k < connectorTypeBinding.length; k++){
+                            if(k === j){
+                                this._fieldBinding[i].enhancement.expertCode = replaceVariables(this._fieldBinding[i].enhancement.expertCode, {[`VAR_${k}`]: CEnhancement.generateNotExistVar()});
+                            } else{
+                                this._fieldBinding[i].enhancement.expertCode = replaceVariables(this._fieldBinding[i].enhancement.expertCode, {[`VAR_${k}`]: `VAR_${k - 1}`});
+                            }
+                        }
                         connectorTypeBinding.splice(j, 1);
+                        break;
                     }
                 }
                 if ((connectorType === CONNECTOR_FROM && connectorTypeBinding.length === 0)
                 ||(this._fieldBinding[i].from.length === 0 && this._fieldBinding[i].to.length === 0)) {
                     this._fieldBinding.splice(i, 1);
+                } else {
+                    this._fieldBinding[i].enhancement.updateExpertVar();
+
                 }
             }
         }

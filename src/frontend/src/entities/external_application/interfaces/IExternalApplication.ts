@@ -22,6 +22,7 @@ export interface IExternalApplication{
     icon: string,
     value: string,
     status?: ExternalApplicationStatus,
+    version?: string,
 }
 
 export type ExternalApplicationProps = keyof IExternalApplication;

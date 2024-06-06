@@ -38,7 +38,14 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
     } = Schedule.getReduxState();
     const dispatch = useAppDispatch();
     const {gettingConnections, metaConnections} = Connection.getReduxState()
-    const connectionOptions: OptionProps[] = metaConnections.map(connection => {return {label: connection.title, value: connection.connectionId.toString(), data: connection.description}});
+    const connectionOptions: OptionProps[] = metaConnections.map(connection => {
+        const id = connection.id ? connection.id : connection.connectionId;
+        return {
+            label: connection.title,
+            value: id.toString(),
+            data: connection.description
+        };
+    });
     const didMount = useRef(false);
     let navigate = useNavigate();
     let urlParams = useParams();
@@ -68,6 +75,11 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
             didMount.current = true;
         }
     },[addingSchedule, updatingSchedule]);
+    useEffect(() => {
+        if(gettingScheduleById === API_REQUEST_STATE.ERROR && error) {
+            navigate('/schedules', { replace: false });
+        }
+    }, [gettingScheduleById])
     const TitleInput = schedule.getText({
         propertyName: "title", props: {autoFocus: !isView, icon: 'title', label: 'Title', required: true}
     })

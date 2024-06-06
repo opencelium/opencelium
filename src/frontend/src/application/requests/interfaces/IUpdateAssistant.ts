@@ -22,17 +22,21 @@ export enum UpdateStatus{
     Available= 'available',
 }
 
-export interface OnlineUpdateProps{
+export interface VersionProps{
     name: string,
-    version: string,
     status: UpdateStatus,
+    instruction: string,
 }
 
-export interface OfflineUpdateProps{
+export interface VersionProps{
     name: string,
     status: UpdateStatus,
-    folder: string,
-    changelogLing: string,
+    changelogLink: string,
+    instruction: string,
+}
+
+export interface InstallationInfo {
+    type: 'sources' | 'undefined' | string,
 }
 
 export interface CheckForUpdateProps{
@@ -42,17 +46,23 @@ export interface CheckForUpdateProps{
 
 export interface IUpdateAssistantRequest{
 
+    //to get installation information (if type !== sources hide update assistant)
+    getInstallationInfo(): Promise<AxiosResponse<InstallationInfo>>
+
     //to upload online version by version
     uploadOnlineVersion(): Promise<AxiosResponse<IResponse>>,
 
+    //to download online version
+    downloadOnlineVersion(): Promise<AxiosResponse<VersionProps>>,
+
     //to get git versions of application based on tags
-    getOnlineUpdates(): Promise<AxiosResponse<OnlineUpdateProps[]>>,
+    getOnlineUpdates(): Promise<AxiosResponse<VersionProps[]>>,
 
     //to get application versions stored locally as zip files
-    getOfflineUpdates(): Promise<AxiosResponse<OfflineUpdateProps[]>>,
+    getOfflineUpdates(): Promise<AxiosResponse<VersionProps[]>>,
 
     //to upload an application as zip file
-    uploadApplicationFile(application: FormData): Promise<AxiosResponse<IResponse>>,
+    uploadApplicationFile(application: FormData): Promise<AxiosResponse<VersionProps>>,
 
     //to delete local application (zip file)
     deleteApplicationFile(): Promise<AxiosResponse<IResponse>>,

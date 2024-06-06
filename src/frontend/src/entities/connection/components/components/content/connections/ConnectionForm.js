@@ -107,6 +107,11 @@ export function ConnectionForm(type) {
                         }
                     }
                 }
+                if(this.props.fetchingConnection && prevProps.fetchingConnection === API_REQUEST_STATE.START && this.props.fetchingConnection === API_REQUEST_STATE.ERROR) {
+                    if(error) {
+                        navigate(this.redirectUrl, { replace: false });
+                    }
+                }
                 if((this.props.fetchingConnection && prevProps.fetchingConnection === API_REQUEST_STATE.START && this.props.fetchingConnection === API_REQUEST_STATE.FINISH)
                 || (prevProps.connection === null && this.props.connection !== null)){
                     this.isFetchedConnection = true;
@@ -125,6 +130,8 @@ export function ConnectionForm(type) {
 
             componentWillUnmount(){
                 this.props.setCurrentConnection(null);
+                this.props.setFullScreen(false);
+
             }
 
             setMode(mode, callback = null){
@@ -245,6 +252,21 @@ export function ConnectionForm(type) {
 
             getMethodsFormSection(){
                 const {t, connectors, checkingConnectionTitle} = this.props;
+                const additionalButtonsProps = {
+                    saveAndExit: {
+                        isLoading: !this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START),
+                        onClick: (a) => this.doAction(a)
+                    },
+                    saveAndGoToSchedule:{
+                        isLoading: this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START),
+                        onClick: (a) => this.doActionAndGoToScheduler(a)
+                    },
+                };
+                if(!this.isView) {
+                    additionalButtonsProps.loadTemplate = {
+                        data: this.getSecondFormSection().inputs[1]
+                    };
+                }
                 return {
                     ...INPUTS.CONNECTION_SVG,
                     label: t(`${this.translationKey}.FORM.METHODS`),
@@ -255,19 +277,8 @@ export function ConnectionForm(type) {
                     errors: this.state.validateLogicResult,
                     justUpdate: (entity) => this.justUpdate(entity),
                     testConnection: (entity) => this.testConnection(entity),
-                    additionalButtonsProps: this.isView ? null : {
-                        saveAndExit: {
-                            isLoading: !this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START),
-                            onClick: (a) => this.doAction(a)
-                        },
-                        saveAndGoToSchedule:{
-                            isLoading: this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START),
-                            onClick: (a) => this.doActionAndGoToScheduler(a)
-                        },
-                        loadTemplate: {
-                            data: this.getSecondFormSection().inputs[1]
-                        }
-                    }
+                    validateLogic: (entity) => this.validateLogic(entity),
+                    additionalButtonsProps,
                 };
             }
 
@@ -371,7 +382,7 @@ export function ConnectionForm(type) {
                     connector.forEach((operator) => {
                         const condition = operator.condition;
                         let operatorErrors = [];
-                        if(!condition.leftStatement || !condition.leftStatement.color){
+                        if(!condition.leftStatement || !condition.leftStatement.color || !condition.leftStatement.field){
                             operatorErrors.push('Left Statement is missing');
                         }
                         if(operator.type === IF_OPERATOR && !condition.relationalOperator){
@@ -416,6 +427,11 @@ export function ConnectionForm(type) {
                 checkOperator(toConnectorOperators, CONNECTOR_TO);
                 checkFieldBinding();
                 const hasErrors = errors.operators[CONNECTOR_FROM].length > 0 || errors.operators[CONNECTOR_TO].length > 0 || errors.methods[CONNECTOR_FROM].length > 0 || errors.methods[CONNECTOR_TO].length > 0;
+                if(hasErrors) {
+                    this.setState({
+                        validateLogicResult: {toggleFlag: !this.state.validateLogicResult.toggleFlag, ...errors},
+                    })
+                }
                 return {passed: !hasErrors, result: errors};
             }
 
@@ -431,36 +447,34 @@ export function ConnectionForm(type) {
                 const {hasModeInputsSection, validationMessages, hasMethodsInputsSection, mode} = this.state;
                 const {t, connectors, checkingConnectionTitle} = this.props;
                 let connectorMenuItems = this.getConnectorMenuItems();
-                if(!this.isView){
-                    return {
-                        inputs: [
-                            {
-                                ...INPUTS.CONNECTOR_READONLY,
-                                label: t(`${this.translationKey}.FORM.CONNECTORS`),
-                                placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
-                                source: connectorMenuItems,
-                                connectors,
-                                hasApiDocs: true,
-                                readOnly: true,
-                                style: {margin: '0 65px'},
-                            },{
-                                ...INPUTS.MODE,
-                                error: validationMessages.template,
-                                label: t(`${this.translationKey}.FORM.MODE`),
-                                confirmationLabels:{title: t(`${this.translationKey}.CONFIRMATION.TITLE`), message: t(`${this.translationKey}.CONFIRMATION.MESSAGE`)},
-                                modeLabels: {expert: t(`${this.translationKey}.FORM.EXPERT_MODE`), template: t(`${this.translationKey}.FORM.TEMPLATE_MODE`)},
-                                required: true,
-                                readOnly: false,
-                                connectors: connectors,
-                                mode,
-                                setMode: (a, b = null) => this.setMode(a, b),
-                            },
-                        ],
-                        formClassName: styles.mode_form,
-                        hint: {text: t(`${this.translationKey}.FORM.HINT_2`)},
-                        header: t(`${this.translationKey}.FORM.PAGE_2`),
-                        visible: (hasModeInputsSection && this.isAdd) || this.isView,
-                    }
+                return {
+                    inputs: [
+                        {
+                            ...INPUTS.CONNECTOR_READONLY,
+                            label: t(`${this.translationKey}.FORM.CONNECTORS`),
+                            placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
+                            source: connectorMenuItems,
+                            connectors,
+                            hasApiDocs: true,
+                            readOnly: true,
+                            style: {margin: '0 65px'},
+                        },{
+                            ...INPUTS.MODE,
+                            error: validationMessages.template,
+                            label: t(`${this.translationKey}.FORM.MODE`),
+                            confirmationLabels:{title: t(`${this.translationKey}.CONFIRMATION.TITLE`), message: t(`${this.translationKey}.CONFIRMATION.MESSAGE`)},
+                            modeLabels: {expert: t(`${this.translationKey}.FORM.EXPERT_MODE`), template: t(`${this.translationKey}.FORM.TEMPLATE_MODE`)},
+                            required: true,
+                            readOnly: false,
+                            connectors: connectors,
+                            mode,
+                            setMode: (a, b = null) => this.setMode(a, b),
+                        },
+                    ],
+                    formClassName: styles.mode_form,
+                    hint: {text: t(`${this.translationKey}.FORM.HINT_2`)},
+                    header: t(`${this.translationKey}.FORM.PAGE_2`),
+                    visible: (hasModeInputsSection && this.isAdd) || this.isView,
                 }
             }
 
@@ -545,7 +559,7 @@ export function ConnectionForm(type) {
                     let newState = {
                         validationMessages: allValidations,
                         entity: Object.assign({}, convertedObject),
-                        validateLogicResult: {toggleFlag: !this.state.validateLogicResult.toggleFlag, ...logicValidation.result},
+                        //validateLogicResult: {toggleFlag: !this.state.validateLogicResult.toggleFlag, ...logicValidation.result},
                     }
                     if(hasErrorMessage){
                         newState.runTest = false;
@@ -607,35 +621,32 @@ export function ConnectionForm(type) {
                 contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.redirectUrl};
 
                 let contents = [
-                    this.getThirdFormSection()
+                    {
+                        inputs: [
+                            {
+                                ...INPUTS.CONNECTION_TITLE,
+                                error: validationMessages.title,
+                                label: t(`${this.translationKey}.FORM.TITLE`),
+                                maxLength: 256,
+                                required: true,
+                                readOnly: this.isView,
+                            },
+                            {...INPUTS.DESCRIPTION,
+                                label: t(`${this.translationKey}.FORM.DESCRIPTION`),
+                                readOnly: this.isView,
+                            },
+                            this.getFirstConnectorFormSection(),
+                        ],
+                        formClassName: this.isView ? styles.direction_form : '',
+                        hint: {text: t(`${this.translationKey}.FORM.HINT_1`)},
+                        header: t(`${this.translationKey}.FORM.PAGE_1`),
+                        visible: this.isAdd || this.isView,
+                    },
                 ];
-                if(this.isAdd || this.isUpdate){
-                    contents = [
-                        {
-                            inputs: [
-                                {
-                                    ...INPUTS.CONNECTION_TITLE,
-                                    error: validationMessages.title,
-                                    label: t(`${this.translationKey}.FORM.TITLE`),
-                                    maxLength: 256,
-                                    required: true,
-                                    readOnly: this.isView,
-                                },
-                                {...INPUTS.DESCRIPTION,
-                                    label: t(`${this.translationKey}.FORM.DESCRIPTION`),
-                                    readOnly: this.isView,
-                                },
-                                this.getFirstConnectorFormSection(),
-                            ],
-                            formClassName: this.isView ? styles.direction_form : '',
-                            hint: {text: t(`${this.translationKey}.FORM.HINT_1`)},
-                            header: t(`${this.translationKey}.FORM.PAGE_1`),
-                            visible: this.isAdd || this.isView,
-                        },
-                        this.getSecondFormSection(),
-                        ...contents,
-                    ]
+                if (!this.isView) {
+                    contents.push(this.getSecondFormSection());
                 }
+                contents.push(this.getThirdFormSection());
                 const additionalButtons = (entity, updateEntity) => {
                     if(this.isView || contents.length < 2){
                         return null;

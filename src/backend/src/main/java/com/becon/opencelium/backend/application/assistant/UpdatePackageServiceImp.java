@@ -2,31 +2,39 @@ package com.becon.opencelium.backend.application.assistant;
 
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
+import com.becon.opencelium.backend.utility.PackageVersionManager;
+import com.becon.opencelium.backend.utility.ZipUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import static com.becon.opencelium.backend.utility.PackageVersionManager.compareVersions;
 
 @Service
 public class UpdatePackageServiceImp implements UpdatePackageService {
@@ -43,6 +51,11 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     @Autowired
     private AssistantServiceImp assistantServiceImp;
 
+    @Autowired
+    private UserServiceImpl userService;
+
+    private Logger logger = LoggerFactory.getLogger(UpdatePackageServiceImp.class);
+
     @Override
     public List<AvailableUpdate> getOffVersions() {
 
@@ -52,34 +65,31 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         if (directories == null) {
             return null;
         }
-        List<AvailableUpdate> versions;
-        try {
-            versions = getAllAvailableUpdates(directories);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return versions;
+        return getAllAvailableUpdates(directories);
     }
 
     @Override
-    public String getOnVersions() {
+    public List<AvailableUpdate> getOnVersions() {
+        if (!userService.getCurrentUser().getUserDetail().isThemeSync()) {
+            return Collections.emptyList();
+        }
         try {
             return getVersions();
         } catch (Exception e) {
-            throw  new RuntimeException(e);
+            logger.warn(e.getMessage());
         }
+        return Collections.emptyList();
     }
 
     // assistant/versions/{folder}
     @Override
-    public AvailableUpdate getAvailableUpdate(String version) throws Exception {
+    public AvailableUpdate getAvailableUpdate(String version) {
         String status = getVersionStatus(version);
-        version = version.replace(".", "_");
         AvailableUpdate availableUpdate = new AvailableUpdate();
-        availableUpdate.setFolder(version);
         availableUpdate.setStatus(status);
         availableUpdate.setChangelogLink(getChangelogLink(version));
         availableUpdate.setVersion(version);
+        availableUpdate.setInstruction(extractInstruction(version));
         return availableUpdate;
     }
 
@@ -96,19 +106,46 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     }
 
     @Override
+    public void downloadPackage(String version) throws Exception {
+        String name = version.charAt(0) == 'v' ? version.substring(1) : version;
+        String url = "https://packagecloud.io/becon/opencelium/packages/anyfile/" +
+                "oc_" + name + ".zip/download?distro_version_id=230";
+        InputStream inputStream = downloadFile(url);
+        Path target = Paths.get(PathConstant.ASSISTANT + "versions/" + version);
+        ZipUtils.saveZip(inputStream, name, target);
+    }
+
+    @Override
     public AvailableUpdateResource toResource(AvailableUpdate offVersions) {
         AvailableUpdateResource availableUpdateResource = new AvailableUpdateResource();
-        availableUpdateResource.setFolder(offVersions.getFolder());
         availableUpdateResource.setStatus(offVersions.getStatus());
         availableUpdateResource.setName(offVersions.getVersion());
         availableUpdateResource.setChangelogLink(offVersions.getChangelogLink());
+        availableUpdateResource.setInstruction(offVersions.getInstruction());
         return availableUpdateResource;
     }
 
-    private List<AvailableUpdate> getAllAvailableUpdates(String[] appDirectories) throws Exception {
+    private InputStream downloadFile(String url) throws IOException, ParseException {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<byte[]> response = restTemplate.getForEntity(URI.create(url), byte[].class);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            byte[] responseBody = response.getBody();
+            if (responseBody != null) {
+                return new ByteArrayInputStream(responseBody);
+            } else {
+                throw new IOException("Received empty response body");
+            }
+        } else {
+            throw new IOException("Failed to download file: " + response.getStatusCode());
+        }
+    }
+
+    private List<AvailableUpdate> getAllAvailableUpdates(String[] appDirectories) {
         List<AvailableUpdate> packages = new LinkedList<>();
         for (String appDir : appDirectories) {
-            AvailableUpdate availableUpdate = getAvailableUpdate(appDir);
+            String version = appDir.replace("_", ".");
+            AvailableUpdate availableUpdate = getAvailableUpdate(version);
             packages.add(availableUpdate);
         }
         return packages;
@@ -123,42 +160,70 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     // [1.2, 1.3] :  1.3 - current
     private String getVersionStatus(String version) {
         String currentVersion = assistantServiceImp.getCurrentVersion();
-        ArrayList<String> versions = new ArrayList<>();
-        versions.add(currentVersion);
-        versions.add(version);
-        Collections.sort(versions);
-        boolean isCurrent = versions.get(1).equalsIgnoreCase(versions.get(0));
-        boolean isOld = versions.get(0).equals(version);
-        boolean isParent = version.contains(currentVersion);
-        if (isCurrent) {
-            return "current";
-        } else if(isOld) {
+
+        if (compareVersions(version, currentVersion) < 0) {
             return "old";
-        } else if(isParent){
-            return "available";
+        } else if (compareVersions(version, currentVersion) == 0) {
+            return  "current";
         } else {
-            return "available";
+            return  "available";
         }
+//        ArrayList<String> versions = new ArrayList<>();
+//        versions.add(currentVersion);
+//        versions.add(version);
+//        Collections.sort(versions);
+//        boolean isCurrent = versions.get(1).equalsIgnoreCase(versions.get(0));
+//        boolean isOld = versions.get(0).equals(version);
+//        boolean isParent = version.contains(currentVersion);
+//        if (isCurrent) {
+//            return "current";
+//        } else if(isOld) {
+//            return "old";
+//        } else if(isParent){
+//            return "available";
+//        } else {
+//            return "available";
+//        }
     }
 
-    private String getVersions() throws Exception {
-        String version  = assistantServiceImp.getCurrentVersion();
-        String endpoint = "p984zhugh3443g8-438ghi4uh34g83-03ugoigh498t53y-" +
-                "483hy4pgh438ty3948gh34p8g-34ug394gheklrghdgopwuew09327-89f/" + version;
-        long date = new Date().getTime();
-        String url = "https://service.opencelium.io:443/api/" + endpoint;
+    private List<AvailableUpdate> getVersions() throws Exception {
+        String packageCloudUrl = "https://packagecloud.io/becon/opencelium";
+        String htmlResponse = restTemplate.getForObject(packageCloudUrl, String.class);
+        String currentVersion = env.getProperty(YamlPropConst.OC_VERSION);
 
-        HttpMethod method = HttpMethod.GET;
-        HttpHeaders header = new HttpHeaders();
-        header.set("x-access-token", "qpoeqavncbms09248527qrkazmvbgw9328uq0akzvzncbjgwh3pw09r0iavlhgwe98y349t8ghergiueh49230ur29ut3hg9");
-        header.set("x-sp-timestamp", String.valueOf(date));
+        Set<String> packVersion = new HashSet<>();
+        Document doc = Jsoup.parse(htmlResponse);
+        Elements titles = doc.select("a[title*=.zip]");  // Selects all <a> elements with href ending in .zip
 
-        String signature = generateSignature("tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv", "GET", "/api/" + endpoint, String.valueOf(date)).toLowerCase();
-        header.set("x-sp-signature", signature);
-        HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
-        ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
-        return response.getBody();
+        Pattern pattern = Pattern.compile("^oc_\\d+(\\.\\d+)*\\.zip$");
+        for (Element title : titles) {
+            String version = title.attr("title");
+            if (pattern.matcher(version).matches()) {
+                packVersion.add(version);
+            }
+        }
+
+        return PackageVersionManager.getPackageVersions(packVersion, currentVersion);
     }
+
+//    private String getVersions() throws Exception {
+//        String version  = assistantServiceImp.getCurrentVersion();
+//        String endpoint = "p984zhugh3443g8-438ghi4uh34g83-03ugoigh498t53y-" +
+//                "483hy4pgh438ty3948gh34p8g-34ug394gheklrghdgopwuew09327-89f/" + version;
+//        long date = new Date().getTime();
+//        String url = "https://service.opencelium.io:443/api/" + endpoint;
+//
+//        HttpMethod method = HttpMethod.GET;
+//        HttpHeaders header = new HttpHeaders();
+//        header.set("x-access-token", "qpoeqavncbms09248527qrkazmvbgw9328uq0akzvzncbjgwh3pw09r0iavlhgwe98y349t8ghergiueh49230ur29ut3hg9");
+//        header.set("x-sp-timestamp", String.valueOf(date));
+//
+//        String signature = generateSignature("tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv", "GET", "/api/" + endpoint, String.valueOf(date)).toLowerCase();
+//        header.set("x-sp-signature", signature);
+//        HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
+//        ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
+//        return response.getBody();
+//    }
 
     //'tp2wwig91eo7kh2sa3rgsas3apw81uw3sdw9t8wigjvmdvcv', 'GET', `/api/${endpoint}`, currentDate
     private String generateSignature(String key, String httpMethod, String url, String currentDate) {
@@ -186,5 +251,63 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
             hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
         return new String(hexChars, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Reads the content of a specified file inside a zip archive into a single string.
+     * @param version Path to the zip file.
+     * @return The content of the file as a string.
+     * @throws IOException If an I/O error occurs reading from the zip file or if the file is not found.
+     */
+    // version = 1.2 or 2.3
+    private String extractInstruction(String version) {
+        try {
+            String zipFilePath = PathConstant.ASSISTANT + PathConstant.VERSIONS + version;
+            File file = findFirstZipFileFromVersionFolder(zipFilePath);
+//            String folder = FileNameUtils.removeExtension(file.getName());
+            String instructionPath = PathConstant.INSTRUCTION;
+            // Open the zip file
+            try (ZipFile zipFile = new ZipFile(file)) {
+                // Get the zip entry for the specific file
+                ZipEntry entry = zipFile.getEntry(instructionPath);
+                if (entry == null) {
+                    logger.warn("File " + instructionPath + " not found in the zip archive. Folder: " + version);
+                    return "";
+                }
+
+                // Read the content of the file
+                try (InputStream stream = zipFile.getInputStream(entry);
+                     BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+                    StringBuilder contentBuilder = new StringBuilder();
+                    String line;
+
+                    // Read each line from the BufferedReader and append it to the StringBuilder
+                    while ((line = reader.readLine()) != null) {
+                        contentBuilder.append(line).append(System.lineSeparator());
+                    }
+
+                    // Return the string content of the file
+                    return contentBuilder.toString();
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private File findFirstZipFileFromVersionFolder(String directoryPath) throws IOException {
+        File dir = new File(directoryPath);
+
+        // Ensure the directory path is valid and it is a directory
+        if (!dir.exists() || !dir.isDirectory()) {
+            throw new IOException("Provided path is not a directory.");
+        }
+
+        // Find the first zip file in the directory
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".zip"));
+        if (files == null || files.length == 0) {
+            throw new IOException("No zip files found in the directory.");
+        }
+        return files[0];
     }
 }

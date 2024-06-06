@@ -6,18 +6,10 @@ import jakarta.annotation.Resource;
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AvailableUpdateResource {
-    private String folder;
     private String name;
     private String changelogLink;
     private String status;
-
-    public String getFolder() {
-        return folder;
-    }
-
-    public void setFolder(String folder) {
-        this.folder = folder;
-    }
+    private String instruction;
 
     public String getName() {
         return name;
@@ -41,5 +33,13 @@ public class AvailableUpdateResource {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getInstruction() {
+        return instruction;
+    }
+
+    public void setInstruction(String instruction) {
+        this.instruction = instruction;
     }
 }

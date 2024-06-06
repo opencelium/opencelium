@@ -26,16 +26,16 @@ import {
     updateApplication,
     uploadApplicationFile,
     getOnlineUpdates,
-    uploadOnlineVersion
+    uploadOnlineVersion, downloadOnlineVersion, getInstallationInfo
 } from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {
-    CheckForUpdateProps,
-    OfflineUpdateProps,
-    OnlineUpdateProps
+    CheckForUpdateProps, InstallationInfo, VersionProps,
 } from "@application/requests/interfaces/IUpdateAssistant";
 
 export interface AuthState extends ICommonState{
+    gettingInstallationInfo: API_REQUEST_STATE,
     uploadingOnlineVersion: API_REQUEST_STATE,
+    downloadingOnlineVersion: API_REQUEST_STATE,
     gettingOnlineUpdates: API_REQUEST_STATE,
     gettingOfflineUpdates: API_REQUEST_STATE,
     uploadingApplicationFile: API_REQUEST_STATE,
@@ -43,7 +43,9 @@ export interface AuthState extends ICommonState{
     checkingApplicationBeforeUpdate: API_REQUEST_STATE,
     updatingApplication: API_REQUEST_STATE,
     gettingLastAvailableVersion: API_REQUEST_STATE,
+    installationInfo: InstallationInfo,
     lastAvailableVersion: string,
+    downloadedOnlineUpdate: VersionProps;
     onlineUpdates: any[],
     offlineUpdates: any[],
     checkResetFiles: any,
@@ -51,7 +53,9 @@ export interface AuthState extends ICommonState{
 }
 
 const initialState: AuthState = {
+    gettingInstallationInfo: API_REQUEST_STATE.INITIAL,
     uploadingOnlineVersion: API_REQUEST_STATE.INITIAL,
+    downloadingOnlineVersion: API_REQUEST_STATE.INITIAL,
     gettingOnlineUpdates: API_REQUEST_STATE.INITIAL,
     gettingOfflineUpdates: API_REQUEST_STATE.INITIAL,
     uploadingApplicationFile: API_REQUEST_STATE.INITIAL,
@@ -59,6 +63,8 @@ const initialState: AuthState = {
     checkingApplicationBeforeUpdate: API_REQUEST_STATE.INITIAL,
     updatingApplication: API_REQUEST_STATE.INITIAL,
     gettingLastAvailableVersion: API_REQUEST_STATE.INITIAL,
+    installationInfo: null,
+    downloadedOnlineUpdate: null,
     onlineUpdates: [],
     offlineUpdates: [],
     checkResetFiles: null,
@@ -73,6 +79,18 @@ export const updateAssistantSlice = createSlice({
     reducers: {
     },
     extraReducers: {
+        [getInstallationInfo.pending.type]: (state) => {
+            state.gettingInstallationInfo = API_REQUEST_STATE.START;
+        },
+        [getInstallationInfo.fulfilled.type]: (state, action: PayloadAction<InstallationInfo>) => {
+            state.gettingInstallationInfo = API_REQUEST_STATE.FINISH;
+            state.installationInfo = action.payload;
+            state.error = null;
+        },
+        [getInstallationInfo.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingInstallationInfo = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
         [uploadOnlineVersion.pending.type]: (state) => {
             state.uploadingOnlineVersion = API_REQUEST_STATE.START;
         },
@@ -82,6 +100,18 @@ export const updateAssistantSlice = createSlice({
         },
         [uploadOnlineVersion.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.uploadingOnlineVersion = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [downloadOnlineVersion.pending.type]: (state) => {
+            state.downloadingOnlineVersion = API_REQUEST_STATE.START;
+        },
+        [downloadOnlineVersion.fulfilled.type]: (state, action: PayloadAction<VersionProps>) => {
+            state.downloadingOnlineVersion = API_REQUEST_STATE.FINISH;
+            state.downloadedOnlineUpdate = action.payload;
+            state.error = null;
+        },
+        [downloadOnlineVersion.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.downloadingOnlineVersion = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [checkForUpdates.pending.type]: (state) => {
@@ -100,7 +130,7 @@ export const updateAssistantSlice = createSlice({
         [getOnlineUpdates.pending.type]: (state) => {
             state.gettingOnlineUpdates = API_REQUEST_STATE.START;
         },
-        [getOnlineUpdates.fulfilled.type]: (state, action: PayloadAction<OnlineUpdateProps[]>) => {
+        [getOnlineUpdates.fulfilled.type]: (state, action: PayloadAction<VersionProps[]>) => {
             state.gettingOnlineUpdates = API_REQUEST_STATE.FINISH;
             state.onlineUpdates = action.payload;
             state.error = null;
@@ -112,7 +142,7 @@ export const updateAssistantSlice = createSlice({
         [getOfflineUpdates.pending.type]: (state) => {
             state.gettingOfflineUpdates = API_REQUEST_STATE.START;
         },
-        [getOfflineUpdates.fulfilled.type]: (state, action: PayloadAction<OfflineUpdateProps[]>) => {
+        [getOfflineUpdates.fulfilled.type]: (state, action: PayloadAction<VersionProps[]>) => {
             state.gettingOfflineUpdates = API_REQUEST_STATE.FINISH;
             state.offlineUpdates = action.payload;
             state.error = null;
@@ -126,6 +156,7 @@ export const updateAssistantSlice = createSlice({
         },
         [uploadApplicationFile.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
             state.uploadingApplicationFile = API_REQUEST_STATE.FINISH;
+            state.offlineUpdates.push(action.payload);
             state.error = null;
         },
         [uploadApplicationFile.rejected.type]: (state, action: PayloadAction<IResponse>) => {

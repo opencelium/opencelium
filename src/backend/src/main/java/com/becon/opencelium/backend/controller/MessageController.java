@@ -3,10 +3,8 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.constant.YamlPropConst;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
-import com.becon.opencelium.backend.mysql.entity.EventContent;
-import com.becon.opencelium.backend.mysql.entity.EventMessage;
-import com.becon.opencelium.backend.mysql.service.ContentServiceImpl;
-import com.becon.opencelium.backend.mysql.service.MessageServiceImpl;
+import com.becon.opencelium.backend.database.mysql.entity.*;
+import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -245,7 +243,7 @@ public class MessageController {
 //        TeamsDto teams = teamsService.getAllTeams();
 //        return ResponseEntity.ok(teams);
 //    }
-
+//
 //    @GetMapping("/tools/teams/team/{teamId}/channel/all")
 //    public ResponseEntity<?> getAllTeamChannels(@PathVariable String teamId) throws Exception {
 //        TeamsDto channels = teamsService.getAllChannels(teamId);
@@ -253,7 +251,7 @@ public class MessageController {
 //    }
 
     @GetMapping("/tools/incoming_webhook")
-    public ResponseEntity<?> getIncomeWebhook() throws Exception {
+    public ResponseEntity<?> getSlackWebhook() throws Exception {
         String webhook = env.getProperty(YamlPropConst.INCOMING_WEBHOOK);
         ResultDTO<String> webhookDto = new ResultDTO<>(webhook);
         return ResponseEntity.ok(webhookDto);

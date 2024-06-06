@@ -43,10 +43,10 @@ export default {
         },
         [getResources.rejected.type]: {
             "__DEFAULT__": "The request of getting resources was rejected."
-        },
+        },/*
         [requestRemoteApi.rejected.type]: {
             "__DEFAULT__": "The request was rejected."
-        },
+        },*/
         [updateResources.rejected.type]: {
             "__DEFAULT__": ""
         },

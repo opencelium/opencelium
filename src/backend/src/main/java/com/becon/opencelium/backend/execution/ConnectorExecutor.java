@@ -1,273 +1,246 @@
-/*
- * // Copyright (C) <2020> <becon GmbH>
- * //
- * // This program is free software: you can redistribute it and/or modify
- * // it under the terms of the GNU General Public License as published by
- * // the Free Software Foundation, version 3 of the License.
- * //
- * // This program is distributed in the hope that it will be useful,
- * // but WITHOUT ANY WARRANTY; without even the implied warranty of
- * // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * // GNU General Public License for more details.
- * //
- * // You should have received a copy of the GNU General Public License
- * // along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 package com.becon.opencelium.backend.execution;
 
-import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
-import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.LogType;
+import com.becon.opencelium.backend.enums.OpType;
 import com.becon.opencelium.backend.enums.OperatorType;
-import com.becon.opencelium.backend.execution.log.msg.ConnectorLog;
-import com.becon.opencelium.backend.execution.log.msg.ExecutionLog;
-import com.becon.opencelium.backend.execution.log.msg.MethodData;
-import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorAbstractFactory;
-import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
-import com.becon.opencelium.backend.invoker.entity.Body;
-import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
-import com.becon.opencelium.backend.invoker.entity.Invoker;
-import com.becon.opencelium.backend.invoker.paginator.entity.Pagination;
-import com.becon.opencelium.backend.invoker.paginator.enums.PageParam;
-import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
-import com.becon.opencelium.backend.logger.OcLogger;
-import com.becon.opencelium.backend.mysql.entity.Connector;
-import com.becon.opencelium.backend.mysql.entity.RequestData;
-import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
-import com.becon.opencelium.backend.neo4j.entity.*;
-import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
-import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
-import com.becon.opencelium.backend.neo4j.service.VariableNodeServiceImp;
-import com.becon.opencelium.backend.execution.statement.operator.Operator;
-import com.becon.opencelium.backend.utility.Xml;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.becon.opencelium.backend.enums.RelationalOperator;
+import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
+import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
+import com.becon.opencelium.backend.execution.logger.msg.MethodData;
+import com.becon.opencelium.backend.execution.oc721.Connector;
+import com.becon.opencelium.backend.execution.oc721.Loop;
+import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
+import com.becon.opencelium.backend.execution.operator.Operator;
+import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
+import com.becon.opencelium.backend.invoker.entity.Pagination;
+import com.becon.opencelium.backend.invoker.enums.PageParam;
+import com.becon.opencelium.backend.resource.execution.ConditionEx;
+import com.becon.opencelium.backend.resource.execution.ConnectorEx;
+import com.becon.opencelium.backend.resource.execution.OperationDTO;
+import com.becon.opencelium.backend.resource.execution.OperatorEx;
+import com.becon.opencelium.backend.resource.execution.ResponseDTO;
+import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.*;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.w3c.dom.Document;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Duration;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.becon.opencelium.backend.execution.ExecutionContainer.buildSeqIndexes;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 public class ConnectorExecutor {
-
-
-
-    private Invoker invoker;
-
-    private final InvokerServiceImp invokerService;
-    private RestTemplate restTemplate;
-    private final ExecutionContainer executionContainer;
-    private final FieldNodeServiceImp fieldNodeService;
-    private final MethodNodeServiceImp methodNodeServiceImp;
-    private final ConnectorServiceImp connectorService;
-    private final VariableNodeServiceImp statementNodeService;
+    private final Connector connector;
+    private final ExecutionManager executionManager;
+    private final RestTemplate restTemplate;
+    private final List<Object> executables;
     private final OcLogger<ExecutionLog> logger;
-    private final String proxyHost;
-    private final String proxyPort;
-    private final String proxyPass;
-    private final String proxyUser;
+    private final String direction;
+    private static final String BREAK = "======================= %s %s -- INDEX: %s =======================";
 
-    public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
-                             FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeServiceImp,
-                             ConnectorServiceImp connectorService, VariableNodeServiceImp statementNodeService,
-                             OcLogger<ExecutionLog> logger, String proxyHost, String proxyPort,
-                             String proxyUser, String proxyPass) {
-        this.invokerService = invokerService;
-        this.executionContainer = executionContainer;
-        this.fieldNodeService = fieldNodeService;
-        this.methodNodeServiceImp = methodNodeServiceImp;
-        this.connectorService = connectorService;
-        this.statementNodeService = statementNodeService;
+    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, String direction) {
+        this.executionManager = executionManager;
+        this.restTemplate = restTemplate;
         this.logger = logger;
-        this.proxyHost = proxyHost;
-        this.proxyPort = proxyPort;
-        this.proxyUser = proxyUser;
-        this.proxyPass = proxyPass;
+        this.direction = direction;
+
+        this.executables = new ArrayList<>();
+        if (Objects.nonNull(connectorEx.getMethods())) {
+            connectorEx.getMethods().forEach(o -> {
+                o.setInvoker(connectorEx.getInvoker());
+                executables.add(o);
+            });
+        }
+        if (Objects.nonNull(connectorEx.getOperators())) {
+            this.executables.addAll(connectorEx.getOperators());
+        }
+        this.executables.sort(getComparator());
+
+        this.connector = Connector.fromEx(connectorEx);
     }
 
-    public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
-                      String conn) {
-        this.restTemplate = createRestTemplate(currentConnector);
-        this.invoker = invokerService.findByName(currentConnector.getInvoker());
-        List<RequestData> requestData = connectorService.buildRequestData(currentConnector);
-        List<RequestData> supportRequestData = connectorService.buildRequestData(supportConnector);
-        executionContainer.setConn(conn);
-        executionContainer.setSupportRequestData(supportRequestData);
-        executionContainer.setRequestData(requestData);
-        executionContainer.setLoopIterators(new LinkedHashMap<>());
-
+    public void start() {
         logger.getLogEntity().setType(LogType.INFO);
-        logger.getLogEntity().setConnector(getConnectorInfo(currentConnector, conn));
-        try {
-            executeMethod(connectorNode.getStartMethod());
-            executeDecisionStatement(connectorNode.getStartOperator());
-        } catch (Exception e) {
-            logger.logAndSend(e, LogType.ERROR);
+        logger.getLogEntity().setConnector(new ConnectorLog(connector.getName(), direction));
+
+        // set id of currently executing connector
+        executionManager.setCurrentCtorId(connector.getId());
+
+        int headPointer = 0;
+
+        while (headPointer < executables.size()) {
+            int tailPointer = getTailPointer(headPointer);
+
+            execute(headPointer, tailPointer, false, -1, -1);
+
+            headPointer = tailPointer + 1;
         }
     }
 
-    private ConnectorLog getConnectorInfo(Connector connector, String dir) {
-        return new ConnectorLog(connector.getTitle(), dir);
-    }
-
-    private void executeMethod(MethodNode methodNode) throws Exception {
-        if (methodNode == null){
+    private void execute(int headPointer, int tailPointer, boolean hasCircle, int loopHead, int loopTail) {
+        if (headPointer > tailPointer) {
             return;
         }
-// ================================= remove =========================================
-        MethodResponse methodResponse;
-        HashMap<String, String> responseContainer;
-        LinkedList<ResponseEntity<String>> respEnts;
-        Map<String, Integer> loopsWithCurrIndex = executionContainer.getLoopIterators();
-        logger.getLogEntity().setMethodData(new MethodData(methodNode.getColor()));
-// ==================================================================================
-        ResponseEntity<String> responseEntity = sendRequest(methodNode);
 
-        methodResponse = executionContainer.getMethodResponses().stream()
-                .filter(m -> m.getMethodKey().equals(methodNode.getColor()))
-                .findFirst()
-                .orElse(null);
+        // points to the end of the operator body
+        int tail = getTailPointer(headPointer);
+        // holds index of current executable
+        String index = getIndex(executables.get(headPointer));
+        // holds [next function index, next operator index] for current executable
+        String[] next = getNextIndex(headPointer, hasCircle, loopHead, loopTail);
 
-        int loopDepth = loopsWithCurrIndex.size();
-        String responseIndex = buildSeqIndexes(loopsWithCurrIndex, loopDepth);
-        if(methodResponse != null){
-            if(methodResponse.getData().containsKey("null")) {
-                responseIndex = null;
+        if (executables.get(headPointer) instanceof OperationDTO operation) {
+            if (headPointer != tail) {
+                throw new RuntimeException("Methods cannot have body");
             }
-            // adding new response message into existing data.
-            methodResponse.getData().put(responseIndex, responseEntity.getBody());
-            methodResponse.getResponseEntities().add(responseEntity);
-        }
-        else {
-            methodResponse = new MethodResponse();
-            responseContainer = new LinkedHashMap<>();
-            respEnts = new LinkedList<>();
-            responseContainer.put(responseIndex,responseEntity.getBody());
-            respEnts.add(responseEntity);
 
-            methodResponse.setMethodKey(methodNode.getColor());
-            methodResponse.setResponseFormat(methodNode.getResponseNode().getSuccess().getBody().getFormat());
-            methodResponse.setExchangeType("response");
-            methodResponse.setResult("success");
-            methodResponse.setData(responseContainer);
-            methodResponse.setLoopDepth(loopDepth);
-            methodResponse.setAggregatorId(methodNode.getAggregatorId());
-            methodResponse.setResponseEntities(respEnts);
+            // set up logger for the current operation
+            logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
+            logger.logAndSend(String.format(BREAK, "API OPERATION", "START", index));
+            logger.logAndSend(String.format(
+                    "Function: %s -- next function: %s -- next operator: %s -- index: %s",
+                    operation.getName(), next[0], next[1], index
+            ));
 
-            List<MethodResponse> list = executionContainer.getMethodResponses();
-            list.add(methodResponse);
+            executeOperation(operation);
+
+            logger.logAndSend(String.format(BREAK, "API OPERATION", "END", index));
+            // clean up after operation execution
+            logger.getLogEntity().setMethodData(null);
+        } else if (executables.get(headPointer) instanceof OperatorEx operator) {
+            if (Objects.equals(operator.getType(), "if")) {
+                logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "START", index));
+                logger.logAndSend(String.format(
+                        "=============== %s =============== -- next function: %s -- next operator: %s -- index: %s",
+                        operator.getCondition().getRelationalOperator(), next[0], next[1], index
+                ));
+
+                boolean result = executeIfOperator(operator);
+                logger.logAndSend("OPERATOR_RESULT: " + (result ? "TRUE" : "FALSE") + " -- index: " + index);
+
+                if (result) {
+                    // if result is true, then execute if operators' body
+                    execute(headPointer + 1, tail, hasCircle, loopHead, loopTail);
+                }
+            } else {
+                Loop loop = Loop.fromEx(operator);
+                Object referencedList = executionManager.getValue(loop.getRef());
+                List<String> list = new ArrayList<>();
+
+                logger.logAndSend(String.format(BREAK, loop.getOperator().toString().toUpperCase(), "START", index));
+
+                if (ObjectUtils.isEmpty(referencedList)) {
+                    // if list empty just do nothing
+                } else if (loop.getOperator() == RelationalOperator.FOR) {
+                    int length = ((List<Object>) referencedList).size();
+
+                    for (int i = 0; i < length; i++) {
+                        list.add(String.valueOf(i));
+                    }
+
+                } else if (loop.getOperator() == RelationalOperator.FOR_IN) {
+                    list = (List<String>) referencedList;
+                } else {
+                    String[] strs = ((String) referencedList).split(loop.getDelimiter());
+
+                    Collections.addAll(list, strs);
+                }
+
+                int length = list.size();
+                logger.logAndSend("LOOP_OPERATOR_RESULT: " + (length == 0 ? "EMPTY" : "NOT_EMPTY") + " -- index: " + index);
+
+                executionManager.getLoops().add(loop);
+                for (int i = 0; i < length; i++) {
+                    logger.logAndSend("Loop: " + loop.getRef() + " -------- index: " + i);
+
+                    // update currently executing loops' data
+                    loop.setIndex(i);
+                    loop.setValue(list.get(i));
+
+                    // if length !=0, then execute loop operators' body,
+                    // there will be a circle if current run is not last one
+                    execute(headPointer + 1, tail, i < length - 1, headPointer, tail);
+                }
+
+                // remove executed loops' data
+                executionManager.getLoops().remove(loop);
+            }
+
+            // log after executing operator
+            next = getNextIndex(tail, hasCircle, loopHead, loopTail);
+            logger.logAndSend("============================================================================");
+            logger.logAndSend(String.format(
+                    "Operator: -- next function: %s -- next operator: %s -- type: %s -- index: %s",
+                    next[0], next[1], operator.getType(), index)
+            );
+            logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "END", index));
+        } else {
+            throw new RuntimeException("Wrong type is supplied");
         }
-        logger.getLogEntity().setMethodData(null);
-        executeMethod(methodNode.getNextFunction());
-        executeDecisionStatement(methodNode.getNextOperator());
+
+        // we already executed operations'/operators' body, now start executing next body'
+        execute(tail + 1, tailPointer, hasCircle, loopHead, loopTail);
     }
 
-    private ResponseEntity<String> sendRequest(MethodNode methodNode) throws URISyntaxException{
-        String nextFunctionIndex = methodNode.getNextFunction() != null ? methodNode.getNextFunction().getIndex() : "null";
-        String nextOperatorIndex = methodNode.getNextOperator() != null ? methodNode.getNextOperator().getIndex() : "null";
-        logger.logAndSend("============================================================================");
-        logger.logAndSend("Function: " + methodNode.getName()
-                + " -- next function: " + nextFunctionIndex
-                + " -- next operator: " + nextOperatorIndex
-                + " -- index: " + methodNode.getIndex()
-        );
+    private void executeOperation(OperationDTO dto) {
+        Pagination pagination = null;
+        if (dto.getOperationType() == OpType.PAGINATION) {
+            pagination = dto.getPagination() != null ? dto.getPagination() : connector.getPagination();
 
-        FunctionInvoker functionInvoker = invoker.getOperations().stream()
-                .filter(m -> m.getName().equals(methodNode.getName())).findFirst()
-                .orElseThrow(() -> new RuntimeException("Method \"" + methodNode.getName() + "\" not found in Invoker"));
-
-        Pagination pagination = invoker.getPagination();
-        if (functionInvoker.getPagination() != null) {
-            pagination = functionInvoker.getPagination();
+            if (pagination != null) {
+                pagination = pagination.clone();
+            }
         }
+        executionManager.setPagination(pagination);
 
-        if (pagination != null) {
-            pagination = pagination.clone();
-            executionContainer.setPagination(pagination);
-        }
-        if (!functionInvoker.getType().equals("page")) {
-            pagination = null;
-        }
-
-        boolean has_more = false;
-        ResponseEntity<String> responseEntity;
+        boolean hasMore = false;
+        RequestEntity<?> requestEntity;
+        ResponseEntity<?> responseEntity;
         do {
-            HttpMethod method = getMethod(methodNode); // done
-            URI uri = buildUrl(methodNode); // done
-            HttpHeaders header = buildHeader(functionInvoker); // done
-            String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
-            logger.logAndSend("============================================================");
+            requestEntity = RequestEntityBuilder.start()
+                    .forOperation(dto)
+                    .usingReferences(executionManager::getValue)
+                    .createRequest();
 
-            // TODO: added application/x-www-form-urlencoded support: need to refactor.
-            Object data;
-            MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
-            String contentType = header.get("Content-Type") != null ? header.get("Content-Type").get(0) : null;
-            if (contentType != null && header.containsKey("Content-Type")
-                    && contentType.equals("application/x-www-form-urlencoded")
-                    && !invoker.getName().equals("CheckMK")){
-                try {
-                    HashMap<String, Object> mapData = new ObjectMapper().readValue(body, HashMap.class);
-                    mapData.forEach(formData::add);
-                    data = formData;
-                } catch (Exception e){
-                    throw new RuntimeException(e);
-                }
-            } else {
-                data = body;
-            }
-
-            // TODO: works only for CheckMk. Should be deleted in future.
-            if (invoker.getName().equals("CheckMK") && body != null && !body.isEmpty()){
-                if (contentType.equals("application/x-www-form-urlencoded")) {
-                    formData.add("request", body);
-                    data = formData;
-                } else {
-                    data = body;
-                }
-
-                logger.logAndSend("Inside CheckMK body: " + data);
-            }
-
-            // TODO: Changed string to object in httpEntity;
-            HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
-            if (body.equals("null")){
-                httpEntity = new HttpEntity <Object> (header);
-            }
-
+            URI uri = requestEntity.getUrl();
             if (pagination != null && pagination.existsParam(PageParam.LINK)) {
                 String nextElemLink = pagination.findParam(PageParam.LINK).getValue();
-                if (nextElemLink != null && !nextElemLink.isEmpty()){
-                    uri = new URI(nextElemLink);
+                if (nextElemLink != null && !nextElemLink.isEmpty()) {
+                    try {
+                        uri = new URI(nextElemLink);
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
-            if (getResponseContentType(header, functionInvoker).toString().contains("json")) {
-                ResponseEntity o = this.restTemplate.exchange(uri, method ,httpEntity, Object.class);
-                responseEntity = InvokerRequestBuilder
-                        .convertToStringResponse(o);
-            } else {
-                responseEntity = this.restTemplate.exchange(uri, method ,httpEntity, String.class);
-            }
+
+            logger.logAndSend("Http Method: " + requestEntity.getMethod());
+            logger.logAndSend("URL: " + uri);
+            logger.logAndSend("Header: " + requestEntity.getHeaders());
+            logger.logAndSend("Body: " + requestEntity.getBody());
+            logger.logAndSend("============================================================================");
+
+            HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
+            Class<?> responseType = getResponseType(dto);
+
+            responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
+
             if (pagination != null) {
-                pagination.updateParamValues(responseEntity);
-                has_more = pagination.hasMore();
+                pagination.updateParamValues(responseEntity, responseType);
+                hasMore = pagination.hasMore();
             }
-        } while (has_more);
+        } while (hasMore);
 
         if (pagination != null) {
             String paginatedBody = pagination.findParam(PageParam.RESULT).getValue();
@@ -275,524 +248,148 @@ public class ConnectorExecutor {
                     responseEntity.getHeaders(),
                     responseEntity.getStatusCode());
         }
-        logger.logAndSend("Response : " + responseEntity.getBody());
-        return responseEntity;
+        logger.logAndSend("Response : " + convertToStringIfNecessary(responseEntity.getBody()));
+
+        Operation operation = executionManager.findOperationByColor(dto.getOperationId())
+                .orElseGet(() -> {
+                    int loopDepth = executionManager.getLoops().size(); // in which depth the operation is executed
+
+                    Operation newOperation = Operation.fromDTO(dto, loopDepth);
+                    executionManager.addOperation(newOperation);
+
+                    return newOperation;
+                });
+
+        String key = executionManager.generateKey(operation.getLoopDepth());
+
+        operation.addRequest(key, requestEntity);
+        operation.addResponse(key, responseEntity);
     }
 
-    public static MediaType getResponseContentType(HttpHeaders httpHeaders, FunctionInvoker functionInvoker) {
-        if (functionInvoker.getResponse() != null && functionInvoker.getResponse().getSuccess() != null
-            && functionInvoker.getResponse().getSuccess().getHeader() != null){
-            return MediaType.valueOf(functionInvoker.getResponse().getSuccess().getHeader().get("Content-Type"));
-        }
-        if (httpHeaders.getContentType() != null) {
-            return httpHeaders.getContentType();
-        }
-        return MediaType.APPLICATION_JSON;
-    }
-
-    private HttpMethod getMethod(MethodNode methodNode){
-        HttpMethod httpMethodType;
-        switch (methodNode.getRequestNode().getMethod()){
-            case "POST":
-                httpMethodType = HttpMethod.POST;
-                break;
-            case "DELETE":
-                httpMethodType = HttpMethod.DELETE;
-                break;
-            case "PUT":
-                httpMethodType = HttpMethod.PUT;
-                break;
-            case "GET":
-                httpMethodType = HttpMethod.GET;
-                break;
-            case "PATCH":
-                httpMethodType = HttpMethod.PATCH;
-                break;
-            case "OPTIONS":
-                httpMethodType = HttpMethod.OPTIONS;
-                break;
-            case "TRACE":
-                httpMethodType = HttpMethod.TRACE;
-                break;
-            case "HEAD":
-                httpMethodType = HttpMethod.HEAD;
-                break;
-            default:
-                throw new RuntimeException("Http method not found");
+    private boolean executeIfOperator(OperatorEx operatorDTO) {
+        ConditionEx condition = operatorDTO.getCondition();
+        Object leftValue = executionManager.getValue(condition.getLeft());
+        if (leftValue != null) {
+            logger.logAndSend("Left Statement: " + leftValue);
         }
 
-        logger.logAndSend("Http Method: " + httpMethodType.name());
-        return httpMethodType;
-    }
+        Object rightValue;
+        String likeValueRef = condition.getRight();
+        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
+            int beginIndex = likeValueRef.startsWith("%") ? 1 : 0;
+            int endIndex = likeValueRef.length() - (likeValueRef.endsWith("%") ? 1 : 0);
 
-    public URI buildUrl(MethodNode methodNode) throws URISyntaxException {
-        String endpoint = methodNode.getRequestNode().getEndpoint();
-        BodyNode b = methodNode.getRequestNode().getBodyNode();
-        String format = b == null ? "json" : b.getFormat();
-        String refRegex = "\\{(.*?)\\}";
-        Pattern pattern = Pattern.compile(refRegex);
-        Matcher matcher = pattern.matcher(endpoint);
-        if(matcher.find()) {
-            endpoint = replaceRefValue(endpoint, format);
+            likeValueRef = likeValueRef.substring(beginIndex, endIndex);
         }
-        endpoint = endpoint.replace(" ", "+");
-        URI uri = new URI(endpoint);
-        String strictlyEscapedQuery = StringUtils.replace(uri.getRawQuery(), "+", "%2B");
-        uri = UriComponentsBuilder.fromUri(uri).replaceQuery(strictlyEscapedQuery).build(true).toUri();
 
-        if (executionContainer.getPagination() != null) {
-            executionContainer.getPagination().insertPageValue(uri);
-        }
-        logger.logAndSend("URL: " + uri);
-        return uri;
-    }
-
-    public String buildBody(BodyNode bodyNode){
-        if (bodyNode == null){
-            logger.logAndSend("Body: " + "null");
-            return "null";
-        }
-        Map<String, Object> fields = replaceValues(bodyNode.getFields());
-        Object content = null;
-        if (bodyNode.getType() != null && bodyNode.getType().equals("array")){
-            List<Object> c = new ArrayList<>();
-            c.add(fields);
-            content = c;
+        if (ReferenceExtractor.isReference(likeValueRef)) {
+            rightValue = executionManager.getValue(likeValueRef);
         } else {
-            content = fields;
-        }
-        String result = "";
-        try {
-            switch (bodyNode.getFormat()) {
-                case "xml" :
-                    Document document = createDocument();
-                    Xml transformer = new Xml(document);
-                    result = transformer.toString(content);
-                    break;
-                case "json":
-                    result = new ObjectMapper().writeValueAsString(content);
-                    break;
-                default:
-            }
-        } catch (JsonProcessingException e){
-            throw new RuntimeException(e);
+            rightValue = likeValueRef;
         }
 
-        if (executionContainer.getPagination() != null) {
-            executionContainer.getPagination().insertPageValue(result);
+        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
+            rightValue = condition.getRight().replace(likeValueRef, (String) rightValue);
         }
-        logger.logAndSend("Body: " + result);
-        return result;
-    }
 
-    private Document createDocument() {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            return builder.newDocument();
-        }catch (ParserConfigurationException parserException) {
-            parserException.printStackTrace();
-            throw new RuntimeException(parserException);
-        }
-    }
-
-    public HttpHeaders buildHeader(FunctionInvoker functionInvoker){
-        HttpHeaders httpHeaders = new HttpHeaders();
-        final Map<String, String> header = functionInvoker.getRequest().getHeader();
-        Map<String, String> headerItem = new HashMap<>();
-
-        Body b = functionInvoker.getRequest().getBody();
-        String format = b == null ? "json" : b.getFormat();
-
-        header.forEach((k,v) -> {
-            String refRegex = "\\{(.*?)\\}";
-            Pattern pattern = Pattern.compile(refRegex);
-            Matcher matcher = pattern.matcher(v);
-            if(matcher.find()) {
-                String exp = replaceRefValue(v, format);
-                headerItem.put(k, exp);
-                return;
-            }
-            headerItem.put(k, v);
-        });
-        httpHeaders.setAll(headerItem);
-
-        // Jakob's request to solve lansweeper and to support old connection that doesn't have header info.
-        if (!httpHeaders.containsKey("Content-Type")) {
-            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        }
-        if (executionContainer.getPagination() != null) {
-            executionContainer.getPagination().insertPageValue(httpHeaders);
-        }
-        logger.logAndSend("Header: " + httpHeaders);
-        return httpHeaders;
-    }
-
-    private static String incrementIndexes(String path){
-        String result = "";
-        List<String> pathParts = Arrays.asList( path.split("\\."));
-
-        for (String part : pathParts) {
-            final Pattern pattern = Pattern.compile(RegExpression.arrayWithNumberIndex, Pattern.MULTILINE);
-            final Matcher matcher = pattern.matcher(part);
-
-            int intIndex = 0;
-            while (matcher.find()) {
-                String index = matcher.group(1);
-                intIndex = Integer.parseInt(index) + 1;
-                part = part.replaceFirst("\\[" + index + "\\]", "[" + intIndex + "]");
-            }
-
-            if (!result.isEmpty()) {
-                result = result + "." + part;
+        if (rightValue != null) {
+            if (rightValue.getClass().isArray()) {
+                logger.logAndSend("Right Statement: " + Arrays.toString((String[]) rightValue));
             } else {
-                result = result + part;
+                logger.logAndSend("Right Statement: " + rightValue);
             }
         }
-        return result;
+
+        Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(condition.getRelationalOperator());
+
+        return operator.apply(leftValue, rightValue);
     }
 
-    private String replaceRefValue(String url, String format) {
-        String result = url;
-        String refRegex = "(\\{(.*?)\\}|\\$\\{(.*?)\\}|@\\{(.*?)\\})";
-        String refResRegex = RegExpression.responsePointer;
-        Pattern pattern = Pattern.compile(refRegex);
-        Matcher matcher = pattern.matcher(url);
-        List<String> refParts = new ArrayList<>();
-        while (matcher.find()){
-            refParts.add(matcher.group());
-        }
-
-        for (String pointer : refParts) {
-            if (pointer.matches(refResRegex)) {
-                String ref = pointer.replace("{%", "").replace("%}", "");
-                if (format.equals("xml")) {
-                    ref = incrementIndexes(ref);
-                }
-                Object responseValue = executionContainer.getValueFromResponseData(ref);
-                String value = "";
-                if (responseValue instanceof Integer) {
-                    value = Integer.toString((int) responseValue);
-                } else if(responseValue instanceof Double) {
-                    value = Double.toString((double) responseValue);
-                }
-                else {
-                    value = executionContainer.getValueFromResponseData(ref).toString();
-                }
-
-                result = result.replace(pointer, value);
-            } else if(pointer.matches("\\$\\{(.*?)\\}")) {
-                String value = executionContainer.getValueWebhookParams(pointer).toString();
-                result = result.replace(pointer, value);
-            } else if(pointer.matches("@\\{([^}]+)\\}")) { //gets value from pagination object
-                String value = executionContainer.getValueFromPagination(pointer);
-                result = result.replace(pointer, value);
-            } else {
-                // replace from request data
-                String v = executionContainer.getValueFromRequestData(pointer);
-                result = result.replace(pointer, v);
+    private Class<?> getResponseType(OperationDTO dto) {
+        MediaType mediaType = MediaType.APPLICATION_JSON;
+        for (ResponseDTO response : dto.getResponses()) {
+            if ("success".equals(response.getStatus())) {
+                mediaType = response.getContent();
             }
         }
 
-        return result;
+        return MediaTypeUtility.isJsonCompatible(mediaType) ? Object.class : String.class;
     }
 
-    private boolean responseHasError(ResponseEntity<String> responseEntity){
-
-        return true;
-    }
-
-    private Map<String, Object> replaceValues(List<FieldNode> fieldNodes){
-        Map<String, Object> item = new HashMap<>();
-        fieldNodes.forEach(f -> {
-            boolean isObject = f.getType().equals("object");
-            boolean isArray = f.getType().equals("array");
-
-            if ((f.getValue() == null || f.getValue().equals("")) && (!isObject && !isArray)) {
-//                item.put(f.getName(), f.getValue()); // uncomment if you want to add empty and null values to request
-                return;
-            }
-
-            // replace value from pagination
-            if ((f.getValue() != null) && f.getValue().contains("@{") && f.getValue().contains("}") && !isObject){
-                item.put (f.getName(), executionContainer.getValueFromPagination(f.getValue()));
-                return;
-            }
-            // replace from request_data
-            if ((f.getValue() != null) && !f.getValue().contains("${") && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
-
-                item.put (f.getName(), executionContainer.getValueFromRequestData(f.getValue()));
-                return;
-            }
-            // from enhancement
-            if (fieldNodeService.hasEnhancement(f.getId())){
-                MethodNode methodNode = methodNodeServiceImp.getByFieldNodeId(f.getId())
-                        .orElseThrow(() -> new RuntimeException("Method not found for field: " + f.getId()));
-                item.put(f.getName(), executionContainer.getValueFromEnhancementData(f));
-                return;
-            }
-            // from response data;
-            if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && FieldNodeServiceImp.hasReference(f.getValue())){
-                item.put(f.getName(), executionContainer.getValueFromResponseData(f.getValue()));
-                return;
-            }
-            // from url query data;
-            if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && fieldNodeService.hasQueryParams(f.getValue())){
-                item.put(f.getName(), executionContainer.getValueWebhookParams(f.getValue()));
-                return;
-            }
-
-            if (f.getChild() != null && !f.getChild().isEmpty()){
-                Object value;
-                if (f.getType().equals("array")){
-                    value = Collections.singletonList(replaceValues(f.getChild()));
-                } else {
-                    value = replaceValues(f.getChild());
-                }
-                item.put(f.getName(), value);
-                return;
-            }
-
-            if (isArray && (f.getValue() instanceof String)){
-                ArrayList<String> value;
-                if (f.getValue().length() == 0){
-                    value = new ArrayList<>();
-                } else {
-                    String stringedArray = f.getValue().replace("[", "").replace("]","");
-                    String[] elements = stringedArray.split(",");
-                    value = new ArrayList<>(Arrays.asList(elements));
-                }
-
-                item.put(f.getName(), value);
-                return;
-            }
-            Object value = getEmptyValueByType(f.getValue(), f.getType());
-            item.put(f.getName(), value);
-        });
-        return item;
-    }
-
-    private static Object getEmptyValueByType(Object value, String type) {
-        if (type.equals("string") || type.equals("plaintext")) {
-            if (value instanceof HashMap<?,?> && ((HashMap<?,?>)value).isEmpty()) {
-                return null;
-            } else if (value instanceof List<?> && ((List<?>)value).isEmpty()) {
-                return null;
-            } else if (value instanceof String && ((String) value).isEmpty()) {
-                return null;
-            }
-        }
-        return value;
-    }
-// ======================================= OPERATOR =================================================== //
-    private void executeDecisionStatement(StatementNode statementNode) throws Exception {
-        if (statementNode == null){
-            return;
-        }
-
-        switch (statementNode.getType()){
-            case "if":
-                executeIfStatement(statementNode);
-                break;
-            case "loop":
-                executeLoopStatement(statementNode);
-                break;
-            default:
-        }
-
-        String nextFunctionIndex = statementNode.getNextFunction() != null ? statementNode.getNextFunction().getIndex() : "null";
-        String nextOperatorIndex = statementNode.getNextOperator() != null ? statementNode.getNextOperator().getIndex() : "null";
-        logger.logAndSend("============================================================================");
-        logger.logAndSend("Operator:"
-                + " -- next function: " + nextFunctionIndex
-                + " -- next operator: " + nextOperatorIndex
-                + " -- type: " + statementNode.getType()
-                + " -- index: " + statementNode.getIndex()
-        );
-
-        executeMethod(statementNode.getNextFunction());
-        executeDecisionStatement(statementNode.getNextOperator());
-    }
-
-    private void executeIfStatement(StatementNode ifStatement) throws Exception{
-        String nextFunctionIndex = ifStatement.getNextFunction() != null ? ifStatement.getNextFunction().getIndex() : "null";
-        String nextOperatorIndex = ifStatement.getNextOperator() != null ? ifStatement.getNextOperator().getIndex() : "null";
-
-        logger.logAndSend("============================================================================");
-        logger.logAndSend("=============== " + ifStatement.getOperand() + " ================="
-                + " -- next function: " + nextFunctionIndex
-                + " -- next operator: " + nextOperatorIndex
-                + " -- index: " + ifStatement.getIndex()
-        );
-
-        OperatorAbstractFactory factory = new OperatorAbstractFactory();
-        Operator operator = factory.generateFactory(OperatorType.COMPARISON).getOperator(ifStatement.getOperand());
-        Object leftVariable = getValue(ifStatement.getLeftStatementVariable(), "");
-
-        if(leftVariable != null){
-            logger.logAndSend("Left Statement: " + leftVariable);
-        }
-
-        String ref = statementNodeService.convertToRef(ifStatement.getLeftStatementVariable());
-        Object rightStatement = null;
-        if (ifStatement.getOperand().equals("AllowList") || ifStatement.getOperand().equals("DenyList") ) {
-            rightStatement = ifStatement.getRightStatementVariable().getFiled()
-                    .replace("\n", ",").split(",");
-        } else if(ifStatement.getOperand().equals("Like") || ifStatement.getOperand().equals("NotLike")) {
-            rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
-            rightStatement = addPercentForLikeValues(ifStatement.getRightStatementVariable(), rightStatement.toString());
-        }else {
-            rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
-        }
-
-        if (rightStatement != null){
-            if (rightStatement.getClass().isArray()) {
-                logger.logAndSend("Right Statement: " + Arrays.toString((String[])rightStatement));
-            } else {
-                logger.logAndSend("Right Statement: " + rightStatement);
-            }
-
-        }
-//        if (leftVariable instanceof NodeList)
-
-        boolean result = operator.compare(leftVariable, rightStatement);
-        if (ifStatement.getOperand().equals("DenyList")) {
-            result = !result;
-        }
-
-        String msg = createOperatorResultMessage(result, ifStatement.getIndex());
-        logger.logAndSend(msg);
-
-        if (result){
-            executeMethod(ifStatement.getBodyFunction());
-            executeDecisionStatement(ifStatement.getBodyOperator());
-        }
-    }
-
-    private String addPercentForLikeValues(StatementVariable statementVariable, String value) {
-        String ref =  statementNodeService.convertToRef(statementVariable);
-        if (!FieldNodeServiceImp.hasReference(ref)) {
-            return value;
-        }
-        String fieldRef = statementVariable.getFiled();
-        String[] refParts = fieldRef.split("\\.");
-        if (refParts.length == 0) {
-            return value;
-        }
-        if (refParts[1].startsWith("%")) {
-            value = "%" + value;
-        }
-        if (refParts[refParts.length - 1].endsWith("%")) {
-            value = value + "%";
-        }
-
-        return value;
-    }
-
-    private String createOperatorResultMessage(boolean conditionResult, String executionIndexOrder) {
-        String result = conditionResult ? "TRUE" : "FALSE";
-
-        return "OPERATOR_RESULT: " + result + " -- index: " + executionIndexOrder;
-    }
-
-//    private String[] getArrayForAllowList(String s) {
-//        String refRegex = "(\\s?(\"[\\w\\s]*\"|\\d*)\\s?(,|$)){16}";
-//        Pattern pattern = Pattern.compile(refRegex);
-//        Matcher matcher = pattern.matcher(s);
-//
-//        while (matcher.find()) {
-//            return s.split(",");
-//        }
-//
-//        return s.split("\n");
-//    }
-
-    private Object getValue(StatementVariable statementVariable, String leftVariableRef) {
-        if (statementVariable == null) {
-            return null;
-        }
-
-        if (statementVariable.getRightPropertyValue() != null && !statementVariable.getRightPropertyValue().isEmpty()) {
-            List<Object> result = new ArrayList<>();
-            String ref = statementNodeService.convertToRef(statementVariable);
-            String rightPropertyValueRef = leftVariableRef + "." + statementVariable.getRightPropertyValue();
-            Object value;
-            if (FieldNodeServiceImp.hasReference(ref)){
-                value = executionContainer.getValueFromResponseData(ref);
-                result.add(value);
-            } else {
-                if (FieldNodeServiceImp.hasQueryParams(statementVariable.getFiled())) {
-                    result.add(executionContainer.getValueWebhookParams(statementVariable.getFiled()));
-                } else {
-                    result.add(statementVariable.getFiled());
-                }
-            }
-            value = executionContainer.getValueFromResponseData(rightPropertyValueRef);
-            result.add(value);
+    private String convertToStringIfNecessary(Object body) {
+        if (body == null) {
+            return "";
+        } else if (body instanceof String result) {
             return result;
         }
 
-        String ref = statementNodeService.convertToRef(statementVariable);
-        if (!FieldNodeServiceImp.hasReference(ref)){
-            if (FieldNodeServiceImp.hasQueryParams(statementVariable.getFiled())) {
-                return executionContainer.getValueWebhookParams(statementVariable.getFiled());
-            } else {
-                return statementVariable.getFiled();
+        try {
+            return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private int getTailPointer(int headPointer) {
+        String index = getIndex(executables.get(headPointer));
+
+        for (headPointer++; headPointer < executables.size(); headPointer++) {
+            if (!getIndex(executables.get(headPointer)).startsWith(index)) {
+                break;
             }
         }
-        return executionContainer.getValueFromResponseData(ref);
+
+        return headPointer - 1;
     }
 
-    private void executeLoopStatement(StatementNode statementNode) throws Exception{
-        StatementVariable leftStatement = statementNode.getLeftStatementVariable();
-        String methodKey = leftStatement.getColor();
-        String condition = leftStatement.getColor() + ".(" + leftStatement.getType() + ")." + leftStatement.getFiled();
-//        // TODO: Need to rework for "request" types too.
-//        String exchangeType = ConditionUtility.getExchangeType(condition);
-
-        // getting iterators of loops;
-        Map<String, Integer> loopIterators = executionContainer.getLoopIterators();
-        MethodResponse message = executionContainer.getMethodResponses().stream()
-                .filter(m -> m.getMethodKey().equals(methodKey))
-                .findFirst()
-                .orElse(null);
-        List<Object> array;
-        if (statementNode.getOperand().equals("SplitString")) {
-            Object leftVariable = getValue(statementNode.getLeftStatementVariable(), "");
-            String[] stringParts = leftVariable.toString().split(statementNode.getRightStatementVariable().getFiled());
-            array = new ArrayList<>(Arrays.asList(stringParts));
-            executionContainer.setIterableArray(condition, stringParts);
+    private String[] getNextIndex(int lastExecuted, boolean hasCircle, int loopHead, int loopTail) {
+        String[] result = {"null", "null"};
+        Object next;
+        if (hasCircle && lastExecuted == loopTail) {
+            next = executables.get(loopHead + 1);
+        } else if (lastExecuted + 1 < executables.size()) {
+            next = executables.get(lastExecuted + 1);
         } else {
-            array = (List<Object>) message.getValue(condition, loopIterators, null);
+            return result;
         }
 
-        logger.logAndSend("============================= LOOP ======================== ");
-        logger.logAndSend(createLoopMsgForLog(array.isEmpty(), statementNode.getIndex()));
+        String index = getIndex(next);
 
-        for (int i = 0; i < array.size(); i++) {
-            logger.logAndSend("Loop " + condition + "-------- index : " + i);
-
-            loopIterators.put(statementNode.getIterator(), i);
-            executeMethod(statementNode.getBodyFunction());
-            executeDecisionStatement(statementNode.getBodyOperator());
+        if (next instanceof OperationDTO) {
+            result[0] = index;
+        } else {
+            result[1] = index;
         }
-        loopIterators.remove(statementNode.getIterator());
-        executeMethod(statementNode.getNextFunction());
-        executeDecisionStatement(statementNode.getNextOperator());
+
+        return result;
     }
 
-    private String createLoopMsgForLog(boolean isEmpty, String executionOrderIndex) {
-        String loopSize = isEmpty ? "EMPTY" : "NOT_EMPTY";
-        return  "LOOP_OPERATOR_RESULT: " + loopSize + " -- index: " + executionOrderIndex;
+    private static Comparator<Object> getComparator() {
+        return (o1, o2) -> {
+            String[] arr1 = getIndex(o1).split("_");
+            String[] arr2 = getIndex(o2).split("_");
+
+            for (int i = 0; i < arr1.length && i < arr2.length; i++) {
+                // skip equal elements until there is a difference found
+                if (Objects.equals(arr1[i], arr2[i])) continue;
+
+                // if there is an unequal elements then return their difference
+                return arr1[i].compareTo(arr2[i]);
+            }
+
+            // at this point one array contains the other one
+            // so array with greater length is greater
+            return arr1.length - arr2.length;
+        };
     }
 
-    public RestTemplate createRestTemplate(Connector connector) {
-        int timeout = connector.getTimeout();
-        RestTemplateBuilder restTemplateBuilder =
-                new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, proxyUser, proxyPass, connector.isSslValidation(), timeout));
-        if (timeout > 0) {
-            restTemplateBuilder.setReadTimeout(Duration.ofMillis(timeout));
+    private static String getIndex(Object o) {
+        if (o instanceof OperationDTO) {
+            return ((OperationDTO) o).getExecOrder();
+        } else if (o instanceof OperatorEx) {
+            return ((OperatorEx) o).getIndex();
+        } else {
+            throw new RuntimeException("getIndex() is only applicable to OperationDTO and OperatorEX");
         }
-        return restTemplateBuilder.build();
     }
- }
+}

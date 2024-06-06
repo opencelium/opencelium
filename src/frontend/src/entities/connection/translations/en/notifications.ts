@@ -32,10 +32,10 @@ export default {
         [syncInvokers.type]: "Synchronized successfully",
         [requestRemoteApi.fulfilled.type]: "The test request was successfully fulfilled",
     },
-    rejected: {
+    rejected: {/*
         [requestRemoteApi.rejected.type]: {
             "__DEFAULT__": "There is an error during the test of the method"
-        },
+        },*/
         [testConnection.rejected.type]: {
             "__DEFAULT__": "There is an error in during the test of the connection"
         },

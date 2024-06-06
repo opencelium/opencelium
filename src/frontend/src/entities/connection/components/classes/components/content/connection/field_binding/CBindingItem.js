@@ -57,6 +57,10 @@ export default class CBindingItem{
         this._type = type;
     }
 
+    getReference() {
+        return `${this.color}.(${this.type}).${this.field}`;
+    }
+
     getObject(){
         let obj = {
             color: this._color,

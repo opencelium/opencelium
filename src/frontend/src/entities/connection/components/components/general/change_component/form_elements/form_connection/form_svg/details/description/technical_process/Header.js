@@ -82,7 +82,7 @@ class Header extends React.Component{
             <React.Fragment>
                 <Col id='header_label' xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Header`}</Col>
                 <Col id='header_option' xs={8} className={`${styles.col}`}>
-                    <TooltipFontIcon onClick={() => this.toggleHeaderVisible()} size={14} value={<span className={styles.more_details}>{`H`}</span>} tooltip={'Show'}/>
+                    <TooltipFontIcon tooltipPosition={'right'} onClick={() => this.toggleHeaderVisible()} size={14} value={<span className={styles.more_details}>{`H`}</span>} tooltip={'Show'}/>
                 </Col>
                 {isExtended && isCurrentInfo &&
                     ReactDOM.createPortal(

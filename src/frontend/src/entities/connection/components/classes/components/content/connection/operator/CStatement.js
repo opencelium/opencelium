@@ -18,6 +18,9 @@ import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../../invoker/response/CResponse"
 import {ARRAY_SIGN} from "@entity/connection/components/classes/components/content/invoker/response/CResponseResult";
 import {markFieldNameAsArray} from "@change_component//form_elements/form_connection/form_methods/help";
 import {putAsterixInEmptyBrackets} from "@change_component/form_elements/form_connection/form_svg/utils";
+import CCondition from "@classes/content/connection/operator/CCondition";
+import CSuccess from "@classes/content/invoker/response/CSuccess";
+import CFail from "@classes/content/invoker/response/CFail";
 
 export const STATEMENT_REQUEST = 'request';
 export const STATEMENT_RESPONSE = 'response';
@@ -40,7 +43,7 @@ export default class CStatement{
 
     static createStatement(statement = null){
         let color = statement && statement.hasOwnProperty('color') && statement.color ? statement.color : '';
-        let field = statement && statement.hasOwnProperty('field') && statement.field ? statement.field : '';
+        let field = statement && statement.hasOwnProperty('field') ? statement.field : '';
         let rightPropertyValue = statement && statement.hasOwnProperty('rightPropertyValue') && statement.rightPropertyValue ? statement.rightPropertyValue : '';
         let parent = statement && statement.hasOwnProperty('parent') ? statement.parent : null;
         let type = statement && statement.hasOwnProperty('type') && statement.type ? statement.type : '';
@@ -91,6 +94,7 @@ export default class CStatement{
         this._color = this.checkColor(color) ? color : DEFAULT_COLOR;
         this._field = '';
         this._responseType = RESPONSE_SUCCESS;
+        this._rightPropertyValue = '';
     }
 
     get responseType(){
@@ -143,10 +147,17 @@ export default class CStatement{
 
     getObject(){
         if((this._color === DEFAULT_COLOR || this._color === '') && this.field === ''){             //for one statement operator
+            if(this._parent instanceof CCondition) {
+                return {
+                    color: '',
+                    field: '',
+                    type: '',
+                };
+            }
             return null;
         } else {
             let field = this._field;
-            if(this._parent !== null && typeof this._parent !== 'undefined'){
+            if((this._parent instanceof CSuccess || this._parent instanceof CFail) && typeof this._parent !== 'undefined'){
                 let fieldSplit = field.split('.');
                 let tmpField = '';
                 let newField = '';

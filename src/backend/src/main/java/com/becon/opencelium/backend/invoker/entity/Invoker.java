@@ -16,11 +16,6 @@
 
 package com.becon.opencelium.backend.invoker.entity;
 
-import com.becon.opencelium.backend.invoker.paginator.entity.Pagination;
-import com.becon.opencelium.backend.invoker.service.OperationService;
-import com.becon.opencelium.backend.invoker.service.OperationServiceImp;
-import com.becon.opencelium.backend.resource.connector.InvokerResource;
-
 import java.util.List;
 
 public class Invoker {

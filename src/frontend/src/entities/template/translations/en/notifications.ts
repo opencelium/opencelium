@@ -14,6 +14,7 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
+import {getTemplateByConnectionId} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 
 const {
     deleteTemplateById, updateTemplate, importTemplate, exportTemplate, updateTemplates,
@@ -29,6 +30,7 @@ export default {
         [updateTemplates.fulfilled.type]: "The templates were successfully updated",
         [importTemplate.fulfilled.type]: "The Template <1><0>{{name}}</0></1> was successfully imported",
         [exportTemplate.fulfilled.type]: "The Template <1><0>{{name}}</0></1> was successfully downloaded",
+        [getTemplateByConnectionId.fulfilled.type]: "The template was successfully downloaded",
     },
     rejected: {
         [deleteTemplateById.rejected.type]: {
@@ -39,6 +41,9 @@ export default {
         },
         [getTemplateById.rejected.type]: {
             "__DEFAULT__": "There is an error fetching template."
+        },
+        [getTemplateByConnectionId.rejected.type]: {
+            "__DEFAULT__": "There is an error downloading a template by connection."
         },
         [getAllTemplates.rejected.type]: {
             "__DEFAULT__": "There is an error fetching templates."

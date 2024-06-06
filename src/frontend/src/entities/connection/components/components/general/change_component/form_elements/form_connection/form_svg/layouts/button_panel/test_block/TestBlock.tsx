@@ -20,14 +20,14 @@ import { TestBlockProps } from "./interfaces";
 import { TestBlockStyled } from "./styles";
 import { useAppSelector } from "@application/utils/store";
 
-const TestBlock = () => {
+const TestBlock = ({data, theme}:{data?: any, theme: any}) => {
   const { isButtonPanelOpened } = useAppSelector(
     (state) => state.connectionReducer
   );
 
   return (
     <TestBlockStyled isButtonPanelOpened={isButtonPanelOpened}>
-      <TestConnectionButton />
+      <TestConnectionButton data={data}/>
     </TestBlockStyled>
   );
 };

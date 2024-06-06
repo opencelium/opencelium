@@ -2,8 +2,37 @@
 Changelog
 *********
 
-|
-|
+
+Major Release :loudspeaker:
+========
+
+
+4.0
+========
+
+:Date: June 05, 2024
+
+Features
+--------
+
+* MongoDB support
+* Redesign of Update Assistant
+* Quick connection generator
+* Extend installation types to DEB, RPM, Docker and Ansible
+* Data encryption of connector informations
+
+
+Fixes
+--------
+
+* Error appears when i tried to add an invoker (OC-631)
+* operator regex is not supported (OC-796)
+* Cant add a slack notification (OC-782)
+* When we build payload we need take to account type and format of the fields and correspondently create fields (OC-646)
+* If an endpoint does not exist then throw corresponding exception (OC-712)
+* Converter Add MimeType (OC-805)
+
+
 3.2.1
 ========
 
@@ -24,7 +53,7 @@ Fixes
 * operator regex is not supported (OC -559)
 * Converter Add MimeType (OC-805)
 
-|
+
 3.2
 ========
 
@@ -405,4 +434,3 @@ Connector
 * Zabbix
 * Icinga2
 * OTRS/Znuny/OTOBO
-

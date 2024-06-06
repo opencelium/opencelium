@@ -17,23 +17,32 @@
 package com.becon.opencelium.backend.aspect;
 
 
+import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.database.mysql.entity.*;
+import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.LangEnum;
+import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
-import com.becon.opencelium.backend.mysql.entity.*;
-import com.becon.opencelium.backend.mysql.service.*;
+import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.quartz.JobExecutor;
+import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.annotation.*;
+import org.openjdk.nashorn.api.scripting.JSObject;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,99 +53,176 @@ import java.util.stream.Collectors;
 public class ExecutionAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
+    private final SchedulerService schedulerService;
+    private final UserService userService;
+    private final IncomingWebhookService incomingWebhookService;
+    private final ExecutionService executionService;
+    private final EmailServiceImpl emailService;
+    private final Environment env;
+    private final LastExecutionService lastExecutionService;
+    private final DataAggregatorService dataAggregatorService;
 
-    @Autowired
-    private SchedulerServiceImp schedulerServiceImp;
-
-    @Autowired
-    private UserServiceImpl userService;
-
-    @Autowired
-    private EmailServiceImpl emailService;
-
-    @Autowired
-    private IncomingWebhookService slackService;
-
-    @Autowired
-    private ExecutionServiceImp executionServiceImp;
-
-    @Autowired
-    private ArgumentServiceImp argumentServiceImp;
-
-    @Autowired
-    private Environment env;
-
+    public ExecutionAspect(
+            @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
+            @Qualifier("userServiceImpl") UserService userService,
+            @Qualifier("executionServiceImp") ExecutionService executionService,
+            @Qualifier("lastExecutionServiceImp") LastExecutionService lastExecutionService,
+            @Qualifier("dataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
+            IncomingWebhookService incomingWebhookService,
+            EmailServiceImpl emailService,
+            Environment env
+    ) {
+        this.schedulerService = schedulerService;
+        this.userService = userService;
+        this.incomingWebhookService = incomingWebhookService;
+        this.executionService = executionService;
+        this.emailService = emailService;
+        this.env = env;
+        this.lastExecutionService = lastExecutionService;
+        this.dataAggregatorService = dataAggregatorService;
+    }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
-    public void sendBefore(JobExecutionContext context){
+    public void sendBefore(JobExecutionContext context) {
         logger.info("------------------- PRE --------------------");
+
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        int schedulerId = jobDataMap.getIntValue("schedulerId");
-        List<EventNotification> eventNotifications = schedulerServiceImp.getAllNotifications(schedulerId);
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        int schedulerId = data != null ? data.getScheduleId() : jobDataMap.getIntValue("schedulerId");
+        long execId = initExecutionObj(schedulerId);
+        jobDataMap.put("execId", execId);
+
+        List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(eventNotifications, "pre", null);
     }
 
-    @After("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
-    public void sendAfter(JobExecutionContext context){
+    @AfterReturning("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
+    public void sendAfter(JobExecutionContext context) {
         logger.info("------------------- POST --------------------");
+
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        int schedulerId = jobDataMap.getIntValue("schedulerId");
-        List<EventNotification> en = schedulerServiceImp.getAllNotifications(schedulerId);
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        int schedulerId = data.getScheduleId();
+
+        long execId = jobDataMap.getLong("execId");
+        updateExecutionObj(execId, true);
+        List<Operation> operations = (List<Operation>) context.get("operationsEx");
+        executeAggregator(operations, execId);
+        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
     }
 
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
-                   throwing="ex")
-    public void sendAlert(JobExecutionContext context, Exception ex){
+            throwing = "ex")
+    public void sendAlert(JobExecutionContext context, Exception ex) {
         logger.info("------------------- EXCEPTION --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        int schedulerId = jobDataMap.getIntValue("schedulerId");
-        List<EventNotification> en = schedulerServiceImp.getAllNotifications(schedulerId);
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        int schedulerId = data.getScheduleId();
+
+        long execId = jobDataMap.getLong("execId");
+        updateExecutionObj(execId, false);
+        List<Operation> operations = (List<Operation>) context.get("operationsEx");
+        executeAggregator(operations, execId);
+        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
+    }
+
+    private long initExecutionObj(int schedulerId) {
+        Execution execution = new Execution();
+        Scheduler scheduler = new Scheduler();
+        scheduler.setId(schedulerId);
+        execution.setScheduler(scheduler);
+        execution.setStartTime(new Date());
+        return executionService.save(execution)
+                .getId();
+    }
+
+    private void updateExecutionObj(long execId, boolean success) {
+        Execution execution = executionService.getById(execId);
+        execution.setEndTime(new Date());
+        execution.setStatus(success ? "S" : "F");
+        executionService.save(execution);
+
+        LastExecution le;
+        if (lastExecutionService.existsBySchedulerId(execution.getScheduler().getId())) {
+            le = lastExecutionService.findBySchedulerId(execution.getScheduler().getId());
+        } else {
+            le = new LastExecution();
+        }
+        if (success) {
+            le.setSuccessDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
+            le.setSuccessStartTime(execution.getStartTime());
+            le.setSuccessEndTime(execution.getEndTime());
+            le.setSuccessExecutionId(execution.getId());
+        } else {
+            le.setFailDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
+            le.setFailStartTime(execution.getStartTime());
+            le.setFailEndTime(execution.getEndTime());
+            le.setFailExecutionId(execution.getId());
+        }
+        if (le.getScheduler() == null) {
+            le.setScheduler(execution.getScheduler());
+        }
+        lastExecutionService.save(le);
     }
 
     private void triggerNotifications(List<EventNotification> eventNotifications, String eventType, Exception ex) {
         String to, subject, message;
-        for (EventNotification evtn : eventNotifications) {
-            if (!evtn.getEventType().equals(eventType)){
+        for (EventNotification en : eventNotifications) {
+            if (!en.getEventType().equals(eventType)) {
                 continue;
             }
-            if (evtn.getEventRecipients() == null || evtn.getEventRecipients().isEmpty()) {
-                if (evtn.getEventMessage().getType().equalsIgnoreCase("incoming_webhook")) {
-                    String[] defaultRecipients = env.getProperty(YamlPropConst.INCOMING_WEBHOOK, String[].class);
-                    if (defaultRecipients != null) {
-                        for (String defaultRecipient : defaultRecipients) {
-                            evtn.getEventRecipients().add(new EventRecipient(defaultRecipient));
-                        }
-                    }
-                }
+            if (en.getEventRecipients().isEmpty()) {
+                fillDefaultRecipients(en.getEventRecipients(), en.getEventMessage().getType());
             }
-            for (EventRecipient er : evtn.getEventRecipients()) {
+            for (EventRecipient er : en.getEventRecipients()) {
                 User user = userService.findByEmail(er.getDestination()).orElse(null);
-                String lang =  user == null ? "en" : user.getUserDetail().getLang();
-                EventContent content = evtn.getEventMessage().getEventContents().stream()
+                String lang = user == null ? "en" : user.getUserDetail().getLang();
+                EventContent content = en.getEventMessage().getEventContents().stream()
                         .filter(c -> c.getLanguage().equalsIgnoreCase(lang)).findFirst().orElse(null);
                 if (content == null) {
                     String defaultLang = LangEnum.EN.getCode();
-                    content = evtn.getEventMessage().getEventContents().stream()
+                    content = en.getEventMessage().getEventContents().stream()
                             .filter(c -> c.getLanguage().equals(defaultLang)).findFirst()
                             .orElseThrow(() -> new RuntimeException("Default language(" + defaultLang + ") of content not found"));
                 }
 
-                message = replaceConstants(content.getBody(), user, ex, evtn);
-                subject = replaceConstants(content.getSubject(), user, ex, evtn);
+                message = replaceConstants(content.getBody(), user, ex, en);
+                subject = replaceConstants(content.getSubject(), user, ex, en);
                 to = er.getDestination();
-                String type = evtn.getEventMessage().getType();// email, income_webhook etc
+                String type = en.getEventMessage().getType();// email, incoming_webhook
                 try {
-                    if (type.equals("email")) {
-                        emailService.sendMessage(to, subject, message);
-                    } else if (type.equals("slack") || type.equalsIgnoreCase("incoming_webhook")) {
-                        slackService.sendMessage(to, subject, message);
+                    switch (type) {
+                        case "incoming_webhook" -> incomingWebhookService.sendMessage(to, subject, message);
+                        case "email" -> emailService.sendMessage(to, subject, message);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    // type: email, incoming_webhook
+    private void fillDefaultRecipients(Set<EventRecipient> recipients, String type) {
+        String destination;
+        switch (type) {
+            case "email" -> {
+                destination = SecurityContextHolder.getContext().getAuthentication().getName();
+                recipients.add(new EventRecipient(destination));
+            }
+            case "incoming_webhook" -> {
+                String[] webhooks = env.getProperty(YamlPropConst.INCOMING_WEBHOOK, String[].class);
+                if (webhooks == null) {
+                    return;
+                }
+                for (String url : webhooks) {
+                    recipients.add(new EventRecipient(url));
+                }
+            }
+            default ->
+                    throw new RuntimeException("Couldn't find tool type: " + type + ". Check application.yaml file;");
         }
     }
 
@@ -188,13 +274,13 @@ public class ExecutionAspect {
     }
 
     private Map<String, String> getArgsValues(List<Long> indexes, EventNotification en) {
-        LastExecution le = schedulerServiceImp.findById(en.getScheduler().getId()).get().getLastExecution();
+        LastExecution le = schedulerService.findById(en.getScheduler().getId()).get().getLastExecution();
         long exId = Math.max(le.getFailExecutionId(), le.getSuccessExecutionId());
-        Execution execution = executionServiceImp.findById(exId).orElse(null);
+        Execution execution = executionService.findById(exId).orElse(null);
         Objects.requireNonNull(execution);
         Map<String, String> resultMap = execution.getExecutionArguments().stream()
-                    .filter(ea -> indexes.contains(ea.getArgument().getId()))
-                    .collect(Collectors.toMap(ea -> Long.toString(ea.getArgument().getId()), ExecutionArgument::getValue));
+                .filter(ea -> indexes.contains(ea.getArgument().getId()))
+                .collect(Collectors.toMap(ea -> Long.toString(ea.getArgument().getId()), ExecutionArgument::getValue));
 
         indexes.stream()
                 .filter(id -> !resultMap.containsKey(Long.toString(id)))
@@ -207,7 +293,7 @@ public class ExecutionAspect {
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(text);
 
-        while (m.find()){
+        while (m.find()) {
             constants.add(m.group(1));
         }
         return constants;
@@ -215,11 +301,12 @@ public class ExecutionAspect {
 
     @Autowired
     private ConnectionServiceImp connectionServiceImp;
+
     private Map<String, String> getConstantValues(List<String> constants, User user, Exception ex, EventNotification en) {
         if (constants == null || constants.isEmpty()) {
             return null;
         }
-        Scheduler scheduler = schedulerServiceImp.findById(en.getScheduler()
+        Scheduler scheduler = schedulerService.findById(en.getScheduler()
                 .getId()).orElseThrow(() -> new RuntimeException("SCHEDULER_NOT_FOUND"));
         Connection connection = connectionServiceImp.findById(scheduler.getConnection().getId())
                 .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
@@ -246,7 +333,7 @@ public class ExecutionAspect {
                     cValues.put(c, Long.toString(connection.getId()));
                     break;
                 case "CONNECTION_NAME":
-                    cValues.put(c, connection.getName());
+                    cValues.put(c, connection.getTitle());
                     break;
                 case "SCHEDULER_ID":
                     cValues.put(c, Integer.toString(scheduler.getId()));
@@ -258,5 +345,66 @@ public class ExecutionAspect {
             }
         });
         return cValues;
+    }
+
+    // TODO: Refactor so that Execution of aggregator should be in separate class;
+    private void executeAggregator(List<Operation> operations, long execId) {
+        Execution execution = executionService.getById(execId);
+        if (operations == null) {
+            return;
+        }
+        operations.stream()
+                .filter(op -> (op.getAggregatorId() != null) && (op.getAggregatorId() != 0))
+                .forEach(op -> {
+                    DataAggregator da = dataAggregatorService.getById(op.getAggregatorId());
+                    if (!da.isActive()) {
+                        return;
+                    }
+                    List<JSHttpObject> responseObjects = op.getResponses().values()
+                            .stream()
+                            .map(JSHttpObject::new).toList();
+
+                    List<JSHttpObject> requestObjects = op.getRequests().values()
+                            .stream()
+                            .map(JSHttpObject::new).toList();
+                    List<ExecutionArgument> exarg = getExecutionArgs(da.getScript(), responseObjects, requestObjects, da.getArgs(), execution);
+                    execution.setExecutionArguments(exarg);
+                    if (execution.getExecutionArguments() != null && !execution.getExecutionArguments().isEmpty()) {
+                        executionService.save(execution);
+                    }
+                });
+    }
+
+    private List<ExecutionArgument> getExecutionArgs(String script, List<JSHttpObject> responses, List<JSHttpObject> requests, Set<Argument> args, Execution execution) {
+        try {
+            ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+            String stringifiedResponses = new ObjectMapper().writeValueAsString(responses);
+            engine.put("dataModel", stringifiedResponses);
+            JSObject objRes = (JSObject)engine.eval("JSON.parse(dataModel)");
+            engine.put(AggrConst.RESPONSES, objRes);
+
+            String stringifiedRequests = new ObjectMapper().writeValueAsString(responses);
+            engine.put("dataModel", stringifiedRequests);
+            JSObject objReq = (JSObject)engine.eval("JSON.parse(dataModel)");
+            engine.put(AggrConst.REQUESTS, objReq);
+            engine.eval(script);
+
+            List<ExecutionArgument> executionArguments = new ArrayList<>();
+            args.forEach(arg -> {
+                Object value = engine.get(arg.getName());
+                if (value == null) {
+                    return;
+                }
+                ExecutionArgument executionArgument = new ExecutionArgument();
+                executionArgument.setExecution(execution);
+                executionArgument.setArgument(arg);
+                executionArgument.setValue(value.toString());
+                executionArguments.add(executionArgument);
+            });
+            return executionArguments;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

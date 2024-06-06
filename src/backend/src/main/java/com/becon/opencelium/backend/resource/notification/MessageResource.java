@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.resource.notification;
 
-import com.becon.opencelium.backend.mysql.entity.EventMessage;
-import org.springframework.hateoas.RepresentationModel;
+import com.becon.opencelium.backend.database.mysql.entity.EventMessage;
 
 import java.util.ArrayList;
 import java.util.List;

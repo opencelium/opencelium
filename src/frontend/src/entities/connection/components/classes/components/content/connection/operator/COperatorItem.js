@@ -15,6 +15,7 @@
 
 import CCondition from "./CCondition";
 import CStatement, {DEFAULT_COLOR} from "./CStatement";
+import {RESPONSE_SUCCESS} from "@classes/content/invoker/response/CResponse";
 
 export const IF_OPERATOR = 'if';
 export const LOOP_OPERATOR = 'loop';
@@ -48,6 +49,21 @@ export default class COperatorItem{
         let iterator = operatorItem && operatorItem.hasOwnProperty('iterator') ? operatorItem.iterator : '';
         let dataAggregator = operatorItem && operatorItem.hasOwnProperty('dataAggregator') ? operatorItem.dataAggregator : null;
         return new COperatorItem(index, type, condition, error, isMinimized, isToggled, iterator, dataAggregator);
+    }
+
+    cleanConditionFromReference(methodColor) {
+        if(this.condition.leftStatement.color === methodColor) {
+            this.condition.leftStatement.color = DEFAULT_COLOR;
+            this.condition.relationalOperator = '';
+            this.condition.rightStatement.color = DEFAULT_COLOR;
+        }
+        if(this.condition.rightStatement.color === methodColor) {
+            this.condition.rightStatement.color = DEFAULT_COLOR;
+        }
+    }
+
+    cleanFromReference(methodColor) {
+        this.cleanConditionFromReference(methodColor);
     }
 
     static getOperatorTypesForSelect(){

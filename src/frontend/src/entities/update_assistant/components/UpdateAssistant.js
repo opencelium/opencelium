@@ -19,18 +19,18 @@ import {withTranslation} from "react-i18next";
 import {INPUTS} from "@entity/connection/components/utils/constants/inputs";
 import SystemOverview from "@entity/update_assistant/components/system_overview/SystemOverview";
 import AvailableUpdates, {ONLINE_UPDATE} from "@entity/update_assistant/components/available_updates/AvailableUpdates";
-import TemplateFileUpdate from "@entity/update_assistant/components/file_update/TemplateFileUpdate";
-import {permission} from "@entity/connection/components/decorators/permission";
-import InvokerFileUpdate from "@entity/update_assistant/components/file_update/InvokerFileUpdate";
-import ConnectionFileUpdate from "@entity/update_assistant/components/migration/ConnectionFileUpdate";
 import FinishUpdate from "@entity/update_assistant/components/FinishUpdate";
 
 import CVoiceControl from "@entity/connection/components/classes/voice_control/CVoiceControl";
 import Form from "@change_component/Form";
-import {updateApplication as updateSystem, checkApplicationBeforeUpdate as checkResetFiles} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
+import {
+    updateApplication as updateSystem,
+    checkApplicationBeforeUpdate as checkResetFiles,
+    getInstallationInfo
+} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {logout as logoutUserFulfilled} from "@application/redux_toolkit/slices/AuthSlice";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {UpdateAssistantPermissions} from "../constants";
+import Loading from "@components/general/app/Loading";
 
 
 function mapStateToProps(state){
@@ -39,6 +39,8 @@ function mapStateToProps(state){
     return{
         authUser,
         updatingSystem: updateAssistant.updatingApplication,
+        installationInfo: updateAssistant.installationInfo,
+        gettingInstallationInfo: updateAssistant.gettingInstallationInfo,
         checkingResetFiles: updateAssistant.checkingApplicationBeforeUpdate,
         checkResetFilesResult: updateAssistant.checkResetFiles,
     };
@@ -47,7 +49,7 @@ function mapStateToProps(state){
 /**
  * Layout for UpdateAssistant
  */
-@connect(mapStateToProps, {updateSystem, logoutUserFulfilled, checkResetFiles})
+@connect(mapStateToProps, {updateSystem, logoutUserFulfilled, checkResetFiles, getInstallationInfo})
 @withTranslation(['update_assistant', 'app'])
 class UpdateAssistant extends Component{
 
@@ -93,6 +95,10 @@ class UpdateAssistant extends Component{
         }
     }
 
+    componentDidMount() {
+        this.props.getInstallationInfo();
+    }
+
     setValidationMessage(param, validationMessage){
         this.setState({
             validationMessages:{
@@ -107,12 +113,16 @@ class UpdateAssistant extends Component{
             [formSection]: true,
         })
     }
+    hideNextFormSection(formSection){
+        this.setState({
+            [formSection]: false,
+        })
+    }
 
     updateSystem(updateData){
         const {updateSystem} = this.props;
         const data = {
             folder: updateData.availableUpdates.folder ? updateData.availableUpdates.folder : '',
-            isOnline: updateData.availableUpdates.mode === ONLINE_UPDATE,
             version: updateData.availableUpdates.selectedVersion.name ? updateData.availableUpdates.selectedVersion.name : '',
             templates: updateData.templateFileUpdate.updatedTemplates.map(template => template.data),
             invokers: updateData.invokerFileUpdate.updatedInvokers.map(invoker => invoker.data),
@@ -186,11 +196,10 @@ class UpdateAssistant extends Component{
 
     render(){
         const {updateData, hasAvailableUpdates, hasTemplateFileUpdate, hasInvokerFileUpdate, hasConnectionMigration, hasFinishUpdate} = this.state;
-        const {t, updatingSystem} = this.props;
+        const {t, updatingSystem, gettingInstallationInfo, installationInfo} = this.props;
         let contentTranslations = {};
         contentTranslations.header = [{name: 'Admin Panel', link: '/admin_cards'}, {name: t('FORM.HEADER')}];
         const isActionDisabled = !this.validateAvailableUpdates() || !this.validateTemplateFileUpdate() || !this.validateInvokerFileUpdate() || !this.validateConnectionMigration();
-        contentTranslations.action_button = {title: `${t('FORM.UPDATE_OC')}`, isDisabled: isActionDisabled};
         let contents = [{
             inputs: [
                 {
@@ -213,54 +222,12 @@ class UpdateAssistant extends Component{
                     name: 'availableUpdates',
                     label: t('FORM.AVAILABLE_UPDATES'),
                     Component: AvailableUpdates,
-                    componentProps: {openNextForm: () => this.showNextFormSection('hasTemplateFileUpdate')},
+                    componentProps: {openNextForm: () => this.showNextFormSection('hasFinishUpdate'),hideNextForm: () => this.hideNextFormSection('hasFinishUpdate')},
                 },
             ],
             hint: {text: t('FORM.HINT_2')},
             header: t(`FORM.PAGE_2`),
             visible: hasAvailableUpdates,
-        },{
-            inputs:[
-                {
-                    ...INPUTS.COMPONENT,
-                    icon: 'description',
-                    name: 'templateFileUpdate',
-                    label: t('FORM.TEMPLATE_FILE_UPDATE'),
-                    Component: TemplateFileUpdate,
-                    componentProps: {openNextForm: () => this.showNextFormSection('hasInvokerFileUpdate')},
-                },
-            ],
-            hint: {text: t('FORM.HINT_3')},
-            header: t(`FORM.PAGE_3`),
-            visible: hasAvailableUpdates && hasTemplateFileUpdate,
-        },{
-            inputs:[
-                {
-                    ...INPUTS.COMPONENT,
-                    icon: 'description',
-                    name: 'invokerFileUpdate',
-                    label: t('FORM.INVOKER_FILE_UPDATE'),
-                    Component: InvokerFileUpdate,
-                    componentProps: {openNextForm: () => this.showNextFormSection('hasConnectionMigration')},
-                },
-            ],
-            hint: {text: t('FORM.HINT_4')},
-            header: t(`FORM.PAGE_4`),
-            visible: hasTemplateFileUpdate && hasInvokerFileUpdate,
-        },{
-            inputs:[
-                {
-                    ...INPUTS.COMPONENT,
-                    icon: 'description',
-                    name: 'connectionMigration',
-                    label: t('FORM.CONNECTION_MIGRATION'),
-                    Component: ConnectionFileUpdate,
-                    componentProps: {openNextForm: () => this.showNextFormSection('hasFinishUpdate')},
-                },
-            ],
-            hint: {text: t('FORM.HINT_5')},
-            header: t(`FORM.PAGE_5`),
-            visible: hasInvokerFileUpdate && hasConnectionMigration,
         },{
             inputs:[
                 {
@@ -272,9 +239,29 @@ class UpdateAssistant extends Component{
                 },
             ],
             header: t(`FORM.PAGE_6`),
-            visible: hasConnectionMigration && hasFinishUpdate,
+            visible: hasFinishUpdate,
         },
         ];
+        if(!installationInfo || gettingInstallationInfo === API_REQUEST_STATE.START) {
+            return <Loading/>;
+        }
+        let installationInfoError = '';
+        if(!installationInfo) {
+            installationInfoError = 'Update Assistant is not available for installation type: unknown';
+        } else {
+            if(installationInfo.type !== 'sources') {
+                installationInfoError = installationInfo.type === 'undefined'
+                    ? `Installation type is not provided in application.yml file.`
+                    : installationInfo.type !== 'sources' && `Update Assistant is not available for installation type: ${installationInfo.type}.`
+            }
+        }
+        if(installationInfoError) {
+            return <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '500px'}}>
+                <h1>
+                    {installationInfoError}
+                </h1>
+            </div>
+        }
         return (
             <div>
                 <Form

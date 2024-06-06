@@ -1,10 +1,9 @@
 package com.becon.opencelium.backend.resource.notification;
 
+import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
+import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
 import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
-import com.becon.opencelium.backend.mysql.entity.EventNotification;
-import com.becon.opencelium.backend.mysql.entity.EventRecipient;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +35,6 @@ public class NotificationResource {
         this.recipients = eventNotification.getEventRecipients().stream()
                 .map(EventRecipient::getDestination)
                 .collect(Collectors.toList());
-        if (!recipients.isEmpty()) {
-            recipients.clear();
-        }
     }
 
     public NotificationResource() {

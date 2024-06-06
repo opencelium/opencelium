@@ -1,0 +1,25 @@
+# operations: add, modify, delete, rename.
+versions:
+  - version: 4.0
+    changes:
+      - changeset: 1
+        operation: add
+        value: 4.0
+        path: opencelium.version
+      - changeset: 2
+        operation: add
+        value: mongodb://oc_admin:secretsecret@localhost:27017/opencelium
+        path: spring.data.mongodb.uri
+      - changeset: 3
+        operation: delete
+        path: spring.neo4j
+      - changeset: 4
+        operation: delete
+        path: opencelium.notification.tools.teams
+      - changeset: 5
+        operation: delete
+        path: opencelium.reboot
+      - changeset: 6
+        operation: add
+        value: sources
+        path: opencelium.installation.type

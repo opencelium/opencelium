@@ -18,10 +18,9 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
-import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
-import com.becon.opencelium.backend.mysql.entity.Connector;
-import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
@@ -45,7 +44,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -83,6 +81,41 @@ public class TemplateController {
                 .orElseThrow(() -> new RuntimeException("TEMPLATE_NOT_FOUND"));
         TemplateResource templateResource = templateService.toResource(template);
         return ResponseEntity.ok().body(templateResource);
+    }
+
+    @Operation(summary = "Retrieves a template from the database based on the provided connectionId")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Template has been retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = TemplateResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/connection/{connectionId}")
+    public ResponseEntity<?> getByConnectionId(@PathVariable Long connectionId){
+        TemplateResource resource = templateService.getByConnectionId(connectionId);
+        return ResponseEntity.ok().body(resource);
+    }
+
+    @Operation(summary = "Checks if a template with given id is exists or not")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Exists or not ",
+                    content = @Content(schema = @Schema(implementation = Boolean.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/check/{id}")
+    public ResponseEntity<Boolean> exists(@PathVariable String id){
+        return ResponseEntity.ok(templateService.existsById(id));
     }
 
 

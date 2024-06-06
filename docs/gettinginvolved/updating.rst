@@ -2,25 +2,128 @@
 Updating
 ##################
 
-Till OC 2.0
+
+From OC 3.x to OC 4.0
 """""""""""""""""
+
+
+Prepare Update
+==================
+
+
+**1. Stop Services:**
 
 .. code-block:: sh
-	:linenos:
-	
-	root@shell> cd /opt
-	root@shell> git fetch
-	root@shell> git checkout tags/<version> // e.g 1.1 
-	root@shell> cd /opt/src/frontend
-	root@shell> yarn
-	root@shell> oc restart_frontend
-	root@shell> cd /opt/src/backend
-	root@shell> gradle build
-	root@shell> oc restart_backend
+        :linenos:
 
-From OC 2.0
-"""""""""""""""""
+        oc stop_backend
+        service nginx stop
 
-Please use Update Assistant to update OpenCelium from version 2.0. You can find
-more in the documentation of `Usage/Admin Panel
-<https://docs.opencelium.io/en/dev/usage/admin.html#update-assistant>`_ chapter.
+
+**2. Install MongoDB:**
+
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+
+
+**3. Backup current installation**
+
+.. code-block:: sh
+        :linenos:
+        
+        mkdir /opt/opencelium
+        mv /opt/* /opt/openceliumOld
+
+
+Install Application
+==================
+
+Download and unzip application, and create a link for it.
+
+.. code-block:: sh
+        :linenos:
+
+        wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
+        unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
+        rm /opt/opencelium/oc_latest.zip
+        ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
+        chmod +x /usr/bin/oc
+
+
+Configuration
+==================
+
+**1. MariaDB:**
+
+Create mysql user for OpenCelium. Older versions always used the MySQL root user, but now we are able to use a separate openlium db user.
+After the creation of a new user, please also change the password in the application.yml file.
+
+.. code-block:: sh
+        :linenos:
+        mysql -u root -e "GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
+
+
+**2. MongoDB:**
+
+Start and enable mongod service and create a user for Opencelium.
+
+.. code-block:: sh
+        :linenos:
+
+        systemctl restart mongod
+        systemctl enable mongod
+        mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
+
+
+**3. OpenCelium:**
+
+Create and adjust configuration.
+
+.. code-block:: sh
+        :linenos:
+
+        cp /opt/openceliumOld/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
+        mkdir /opt/opencelium/src/backend/src/main/resources/invoker/ && /opt/opencelium/src/backend/src/main/resources/template
+        cp /opt/openceliumOld/src/backend/src/main/resources/invoker/* /opt/opencelium/src/backend/src/main/resources/invoker/
+        cp /opt/openceliumOld/src/backend/src/main/resources/invoker/* /opt/opencelium/src/backend/src/main/resources/template/
+
+
+.. note::
+        | Modify application.yml
+        | Within section "Database configuration section of MariaDB and MongoDB":
+        | - change password of opencelium user for MariaDB (default "secret1234")
+        | - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
+
+        | Just in case you are using SSL, add certs to the ssl section. 
+        | It has to be a p12 keystore file with password! 
+        | If you just have key and pem you can create a p12 as follows:
+
+        
+        .. code-block:: sh
+                :linenos:
+                
+                openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/ssl/certs/opencelium.pem -inkey /etc/ssl/private/opencelium.key
+        
+Finally start OpenCelium backend.
+
+.. code-block:: sh
+        :linenos:
+
+        ln -s /opt/opencelium/conf/opencelium.service /etc/systemd/system/opencelium.service
+        systemctl daemon-reload
+        systemctl enable opencelium
+        systemctl start opencelium
+
+.. note::
+        | Afterwards you can connect to `http://localhost`      
+        | Default User and Password is:
+        
+        | admin@opencelium.io
+        | 1234
+        
+        | If you want to have a look into OpenCelium Logs please use:
+        
+        .. code-block:: sh
+                :linenos:
+                
+                journalctl -xe -u opencelium -f

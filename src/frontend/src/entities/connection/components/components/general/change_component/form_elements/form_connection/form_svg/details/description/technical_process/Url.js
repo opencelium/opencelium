@@ -44,9 +44,10 @@ class Url extends React.Component{
         this.toggleUrlVisibleIcon();
     }
 
-    updateConnection(){
+    updateConnection(entity = null){
         const {connection, updateConnection} = this.props;
-        updateConnection(connection);
+        let currentEntity = entity === null ? connection : entity;
+        updateConnection(currentEntity);
     }
 
     renderInfo(){
@@ -58,7 +59,7 @@ class Url extends React.Component{
                     method={connector.getMethodByIndex(method.index)}
                     connector={connector}
                     connection={connection}
-                    updateEntity={() => this.updateConnection()}
+                    updateEntity={(a) => this.updateConnection(a)}
                     theme={{
                         queryInput: styles.url_endpoint_query_input,
                         paramGenerator: styles.url_endpoint_param_generator,
@@ -89,7 +90,7 @@ class Url extends React.Component{
             <React.Fragment>
                 <Col id="url_label" xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Endpoint`}</Col>
                 <Col id="url_option" xs={8} className={`${styles.col}`}>
-                    <TooltipFontIcon onClick={() => this.toggleUrlVisibleIcon()} size={14} value={<span className={styles.more_details}>{`URL`}</span>} tooltip={'Show'}/>
+                    <TooltipFontIcon tooltipPosition={'right'} onClick={() => this.toggleUrlVisibleIcon()} size={14} value={<span className={styles.more_details}>{`URL`}</span>} tooltip={'Show'}/>
                 </Col>
                 {isExtended && isCurrentInfo &&
                     ReactDOM.createPortal(

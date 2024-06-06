@@ -18,11 +18,10 @@ import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {
     ElasticSearchResponseProps,
-    IExternalApplicationRequest
+    IExternalApplicationRequest, DBResponseProps
 } from "../interfaces/IExternalApplication";
 import {
     ActuatorHealthResponseProps,
-    Neo4jResponseProps
 } from "../interfaces/IExternalApplication";
 
 
@@ -32,14 +31,14 @@ export class ExternalApplicationRequest extends Request implements IExternalAppl
         super({url: 'actuator/health', ...settings});
     }
 
-    async checkNeo4j(): Promise<AxiosResponse<Neo4jResponseProps>>{
-        this.endpoint = '/neo4j';
-        return super.get<Neo4jResponseProps>();
-    }
-
     async checkElasticsearch(): Promise<AxiosResponse<ElasticSearchResponseProps>>{
         this.endpoint = '/elasticsearch';
         return super.get<ElasticSearchResponseProps>();
+    }
+
+    async checkMongoDB(): Promise<AxiosResponse<DBResponseProps>>{
+        this.endpoint = '/mongoDB';
+        return super.get<DBResponseProps>();
     }
 
     async checkAll(): Promise<AxiosResponse<ActuatorHealthResponseProps>>{

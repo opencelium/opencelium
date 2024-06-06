@@ -24,12 +24,12 @@ export const getTeamsWebhook = createAsyncThunk(
             const request = new TeamsRequest();
             const response = await request.getWebhook();
             return response.data.result;
-        } catch(e){
+        } catch (e) {
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
     }
-)
+);
 
 export default {
-    getTeamsWebhook,
+    getTeamsWebhook
 }

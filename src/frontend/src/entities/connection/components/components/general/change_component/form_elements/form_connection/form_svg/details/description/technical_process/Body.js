@@ -165,6 +165,7 @@ class Body extends React.Component{
             );
         }
         switch(method.bodyFormat){
+            case BODY_FORMAT.X_WWW_URL_ENCODED:
             case BODY_FORMAT.JSON:
                 return (
                     <JsonBody
@@ -287,7 +288,7 @@ class Body extends React.Component{
             <React.Fragment>
                 <Col id='body_label' xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
                 <Col id='body_option' xs={8} className={`${styles.col}`}>
-                    <TooltipFontIcon onClick={(a) => this.toggleBodyVisible(a)} size={14} value={<span className={styles.more_details}>{`...`}</span>} tooltip={'Show'}/>
+                    <TooltipFontIcon tooltipPosition={'right'} onClick={(a) => this.toggleBodyVisible(a)} size={14} value={<span className={styles.more_details}>{`...`}</span>} tooltip={'Show'}/>
                 </Col>
                 {isExtended && isCurrentInfo &&
                     ReactDOM.createPortal(

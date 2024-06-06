@@ -18,8 +18,23 @@ import {withTranslation} from "react-i18next";
 import styles from "@entity/connection/components/themes/default/content/update_assistant/main";
 import Button from "@basic_components/buttons/Button";
 import Translate from "@entity/connection/components/components/general/app/Translate";
+import {connect} from "react-redux";
+import {logout as logoutUserFulfilled} from "@application/redux_toolkit/slices/AuthSlice";
+import {
+    checkApplicationBeforeUpdate as checkResetFiles
+} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 
+function mapStateToProps(state){
+    const authUser = state.authReducer.authUser;
+    const updateAssistant = state.updateAssistantReducer;
+    return{
+        authUser,
+        updatingSystem: updateAssistant.updatingApplication,
+    };
+}
+@connect(mapStateToProps, {})
 @withTranslation('update_assistant')
 class FinishUpdate extends React.Component{
     constructor(props) {
@@ -27,24 +42,19 @@ class FinishUpdate extends React.Component{
     }
 
     render(){
-        const {t, updateSystem, entity} = this.props;
-        const updateLogLink = 'https://docs.opencelium.io/en/prod/gettinginvolved/administration.html';
-        const restoreLinkText = t('FORM.FINISH.RESTORE_LINK_TEXT');
+        const {t, updateSystem, entity, updatingSystem} = this.props;
         return(
             <div className={styles.finish_update}>
                 <div className={styles.header}>{t('FORM.FINISH.HEADER')}</div>
-                <div>{t('FORM.FINISH.NEW_VERSION')}</div>
-                <Translate i18nKey="update_assistant:FORM.FINISH.LOG_MESSAGE"
-                           values={{restoreLinkText}}
-                           components={[
-                               <a href={updateLogLink} target={'_blank'} children={restoreLinkText}/>
-                           ]}/>
+                <div dangerouslySetInnerHTML={{__html: entity.availableUpdates.selectedVersion?.instruction || ''}} style={{overflow: 'hidden'}}/>
                 <div className={styles.hint}><span>{t('FORM.FINISH.HINT')}</span>: {t('FORM.FINISH.CLEAR_CACHE')}</div>
-                <Button
-                    style={{float: 'right'}}
-                    onClick={() => updateSystem(entity)}
-                    title={t('FORM.UPDATE_OC')}
-                />
+                <div style={{display: 'flex', justifyContent: 'center'}}>
+                    <Button
+                        isLoading={updatingSystem === API_REQUEST_STATE.START}
+                        onClick={() => updateSystem(entity)}
+                        title={t('FORM.UPDATE_OC')}
+                    />
+                </div>
             </div>
         );
     }

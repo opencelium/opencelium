@@ -16,8 +16,6 @@
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import Request from "./Request";
 import IApplicationRequest from "../interfaces/IApplication";
-import {AxiosResponse} from "axios";
-import {IResponse} from "@application/requests/interfaces/IResponse";
 
 export default class ApplicationRequest extends Request implements IApplicationRequest {
 

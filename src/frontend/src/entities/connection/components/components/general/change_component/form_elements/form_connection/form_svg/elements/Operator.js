@@ -35,6 +35,8 @@ import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {toggleConditionDialog} from "@root/redux_toolkit/slices/EditorSlice";
 import {setModalJustDeletedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import DetailsForProcess
+    from "@change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/DetailsForProcess";
 
 
 function mapStateToProps(state, props){
@@ -238,7 +240,8 @@ class Operator extends React.Component{
 
     onDoubleClick(){
         this.onClick();
-        this.props.toggleConditionDialog();
+        this.props.formConnectionSvg.detailsRef.current.descriptionRef.current.conditionRef.current.toggleEdit();
+        //this.props.toggleConditionDialog();
     }
 
     deleteOperator(e){

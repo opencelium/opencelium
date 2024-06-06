@@ -13,19 +13,30 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {createSlice, PayloadAction, current} from "@reduxjs/toolkit";
+import {createSlice, current, PayloadAction} from "@reduxjs/toolkit";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {ICommonState} from "@application/interfaces/core";
 import {CommonState} from "@application/utils/store";
 import {SchedulesIdRequestProps} from "../../requests/interfaces/ISchedule";
 import {
-    addSchedule, addTestSchedule,
+    addSchedule,
+    addTestSchedule,
     checkScheduleTitle,
     deleteScheduleById,
-    deleteSchedulesById, deleteTestScheduleById, disableSchedules, enableSchedules,
-    getAllSchedules, getCurrentSchedules,
-    getScheduleById, getSchedulesById, startSchedule, startSchedules, startTestSchedule, switchScheduleStatus,
+    deleteSchedulesById,
+    deleteTestScheduleById,
+    disableSchedules,
+    enableSchedules,
+    getAllSchedules,
+    getCurrentSchedules,
+    getScheduleById,
+    getSchedulesById,
+    startSchedule,
+    startSchedules,
+    startTestSchedule,
+    switchScheduleStatus,
+    terminateExecution,
     updateSchedule,
 } from "../action_creators/ScheduleCreators";
 import {deleteWebhook, getWebhook} from "../action_creators/WebhookCreators";
@@ -53,6 +64,7 @@ export interface ScheduleState extends ICommonState{
     deletingScheduleById: API_REQUEST_STATE,
     deletingTestScheduleById: API_REQUEST_STATE,
     deletingSchedulesById: API_REQUEST_STATE,
+    terminatingExecution: API_REQUEST_STATE,
     gettingWebhook: API_REQUEST_STATE,
     deletingWebhook: API_REQUEST_STATE,
     currentSchedule: ModelSchedule,
@@ -82,6 +94,7 @@ const initialState: ScheduleState = {
     deletingSchedulesById: API_REQUEST_STATE.INITIAL,
     gettingWebhook: API_REQUEST_STATE.INITIAL,
     deletingWebhook: API_REQUEST_STATE.INITIAL,
+    terminatingExecution: API_REQUEST_STATE.INITIAL,
     currentSchedule: null,
     testSchedule: null,
     ...CommonState,
@@ -144,6 +157,7 @@ export const scheduleSlice = createSlice({
         },
         [startTestSchedule.pending.type]: (state) => {
             state.startingTestSchedule = API_REQUEST_STATE.START;
+            state.terminatingExecution = API_REQUEST_STATE.INITIAL;
         },
         [startTestSchedule.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
             state.startingTestSchedule = API_REQUEST_STATE.FINISH;
@@ -362,6 +376,18 @@ export const scheduleSlice = createSlice({
         },
         [deleteWebhook.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.deletingWebhook = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [terminateExecution.pending.type]: (state) => {
+            state.terminatingExecution = API_REQUEST_STATE.START;
+        },
+        [terminateExecution.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
+            state.terminatingExecution = API_REQUEST_STATE.FINISH;
+            state.startingSchedule = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [terminateExecution.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.terminatingExecution = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }
