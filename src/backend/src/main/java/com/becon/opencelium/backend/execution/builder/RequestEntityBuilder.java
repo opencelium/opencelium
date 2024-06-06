@@ -106,11 +106,7 @@ public class RequestEntityBuilder {
         // add query parameters if exists
         if (!ObjectUtils.isEmpty(query)) {
             // append new ones to old query if exists
-            if (rawUrl.indexOf('?') > 0) {
-                rawUrl = rawUrl + "&" + query;
-            }
-
-            rawUrl = rawUrl + "?" + query;
+            rawUrl = rawUrl + (rawUrl.contains("?") ? "&" : "?") + query;
         }
 
         return URI.create(rawUrl);

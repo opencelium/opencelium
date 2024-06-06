@@ -88,8 +88,7 @@ public class ExecutionAspect {
 
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
-        int schedulerId = data.getScheduleId();
-
+        int schedulerId = data != null ? data.getScheduleId() : jobDataMap.getIntValue("schedulerId");
         long execId = initExecutionObj(schedulerId);
         jobDataMap.put("execId", execId);
 
