@@ -264,7 +264,7 @@ public class YAMLMigrator {
         }
         var lastVersion = versions.get(versions.size() - 1);
         try {
-            Double version = (Double) lastVersion.get("version");
+            String version = lastVersion.get("version").toString();
             var changes = (ArrayList<Map<String, Object>>) lastVersion.get("changes");
             Map<String, Object> lastChaneSet = changes.get(changes.size() - 1);
             var changeset = (Integer) lastChaneSet.get("changeset");
@@ -319,19 +319,20 @@ public class YAMLMigrator {
     }
 
     private static List<ChangeSet> validateAndConvert(ArrayList<Map<String, Object>> versions) {
+        String regex = "^[0-9]+(?:\\.[0-9]+)*$";
         List<ChangeSet> res = new ArrayList<>();
         for (Map<String, Object> version : versions) {
             if (!version.containsKey("version") || !version.containsKey("changes")) {
                 log.warn("Version does not contain 'version' and|or 'changes' field. All the rest changesets are ignored");
                 return res;
             }
-            Double versionVal;
-            try {
-                versionVal = (Double) version.get("version");
-            } catch (Exception e) {
-                log.warn("{} is not a number. All the rest changesets are ignored", version.get("version"));
+
+            String versionVal = version.getOrDefault("version", "").toString();
+            if (versionVal == null || !versionVal.matches(regex)) {
+                log.warn("{} is not valid version. All the rest changesets are ignored", version.get("version"));
                 return res;
             }
+
             try {
                 List<Object> changes = (List<Object>) version.get("changes");
                 if (changes == null || changes.isEmpty()) continue;
