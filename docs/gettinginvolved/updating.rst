@@ -62,6 +62,10 @@ Configuration
 
 Create mysql user for OpenCelium. Older versions always used the MySQL root user, but now we are able to use a separate openlium db user.
 
+.. note::
+	| Please change the password (secret1234) in the following command line!
+	| After running the command enter your root password to create opencelium user.
+
 .. code-block:: sh
         :linenos:
 
@@ -88,9 +92,9 @@ Create and adjust configuration.
         :linenos:
 
         cp /opt/openceliumOld/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
-        mkdir /opt/opencelium/src/backend/src/main/resources/template
+        mkdir /opt/opencelium/src/backend/src/main/resources/templates
         cp /opt/openceliumOld/src/backend/src/main/resources/invoker/* /opt/opencelium/src/backend/src/main/resources/invoker/
-        cp /opt/openceliumOld/src/backend/src/main/resources/template/* /opt/opencelium/src/backend/src/main/resources/template/
+        cp /opt/openceliumOld/src/backend/src/main/resources/templates/* /opt/opencelium/src/backend/src/main/resources/templates/
 
 
 .. note::
