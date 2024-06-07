@@ -7,7 +7,7 @@ From OC 3.x to OC 4.0
 """""""""""""""""
 
 .. note::
-        | This update guide is intended for zip file installations. 
+        | This update guide is intended for existing zip file 3.x installations. 
         | For all other installations, please send us an email to : support@opencelium.io
 
 Prepare Update
@@ -64,7 +64,7 @@ Create mysql user for OpenCelium. Older versions always used the MySQL root user
 
 .. note::
 	| Please change the password (secret1234) in the following command line!
-	| After running the command enter your root password to create opencelium user.
+	| After running the command, enter your root password at password prompt, to create opencelium user.
 
 .. code-block:: sh
         :linenos:
