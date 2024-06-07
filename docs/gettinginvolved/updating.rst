@@ -84,7 +84,21 @@ Start and enable mongod service and create a user for Opencelium.
         mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
 
 
-**3. OpenCelium:**
+**3. Nginx:**
+
+Remove old config and link new configuration file for OpenCelium.
+
+.. code-block:: sh
+	:linenos:
+	
+	rm /etc/nginx/sites-enabled/oc
+	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/oc.conf
+	
+.. note::
+        | For SSL, use /opt/opencelium/conf/nginx-ssl.conf file and add your certificates.
+	
+
+**4. OpenCelium:**
 
 Create and adjust configuration.
 
@@ -92,7 +106,6 @@ Create and adjust configuration.
         :linenos:
 
         cp /opt/openceliumOld/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
-        mkdir /opt/opencelium/src/backend/src/main/resources/templates
         cp /opt/openceliumOld/src/backend/src/main/resources/invoker/* /opt/opencelium/src/backend/src/main/resources/invoker/
         cp /opt/openceliumOld/src/backend/src/main/resources/templates/* /opt/opencelium/src/backend/src/main/resources/templates/
 
