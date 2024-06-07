@@ -6,6 +6,9 @@ Updating
 From OC 3.x to OC 4.0
 """""""""""""""""
 
+.. note::
+        | This update guide is intended for zip file installations. 
+        | For all other installations, please send us an email to : support@opencelium.io
 
 Prepare Update
 ==================
@@ -31,8 +34,9 @@ Prepare Update
 .. code-block:: sh
         :linenos:
         
-        mkdir /opt/opencelium
-        mv /opt/* /opt/openceliumOld
+        mkdir /opt/opencelium /opt/openceliumOld
+        mv -t /opt/openceliumOld /opt/conf /opt/logs /opt/scripts /opt/src /opt/tools /opt/CHANGELOG.rst /opt/LICENSE.md /opt/README.md
+
 
 
 Install Application
@@ -46,6 +50,7 @@ Download and unzip application, and create a link for it.
         wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
         unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
         rm /opt/opencelium/oc_latest.zip
+        rm /usr/bin/oc
         ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
         chmod +x /usr/bin/oc
 
@@ -56,11 +61,11 @@ Configuration
 **1. MariaDB:**
 
 Create mysql user for OpenCelium. Older versions always used the MySQL root user, but now we are able to use a separate openlium db user.
-After the creation of a new user, please also change the password in the application.yml file.
 
 .. code-block:: sh
         :linenos:
-        mysql -u root -e "GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
+
+        mysql -u root -p -e "GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 
 
 **2. MongoDB:**
@@ -83,9 +88,9 @@ Create and adjust configuration.
         :linenos:
 
         cp /opt/openceliumOld/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
-        mkdir /opt/opencelium/src/backend/src/main/resources/invoker/ && /opt/opencelium/src/backend/src/main/resources/template
+        mkdir /opt/opencelium/src/backend/src/main/resources/template
         cp /opt/openceliumOld/src/backend/src/main/resources/invoker/* /opt/opencelium/src/backend/src/main/resources/invoker/
-        cp /opt/openceliumOld/src/backend/src/main/resources/invoker/* /opt/opencelium/src/backend/src/main/resources/template/
+        cp /opt/openceliumOld/src/backend/src/main/resources/template/* /opt/opencelium/src/backend/src/main/resources/template/
 
 
 .. note::
@@ -104,7 +109,7 @@ Create and adjust configuration.
                 
                 openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/ssl/certs/opencelium.pem -inkey /etc/ssl/private/opencelium.key
         
-Finally start OpenCelium backend.
+Finally start OpenCelium backend and frontend.
 
 .. code-block:: sh
         :linenos:
@@ -113,6 +118,7 @@ Finally start OpenCelium backend.
         systemctl daemon-reload
         systemctl enable opencelium
         systemctl start opencelium
+        systemctl start nginx
 
 .. note::
         | Afterwards you can connect to `http://localhost`      
