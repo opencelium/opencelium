@@ -29,12 +29,3 @@ html_js_files = [
 html_css_files = [
     'css/custom.css',
 ]
-def setup(app):
-    app.add_js_file(None, body="""
-    document.addEventListener('DOMContentLoaded', function () {
-        let meta = document.createElement('meta');
-        meta.httpEquiv = 'Content-Security-Policy';
-        meta.content = "frame-src 'self' https://service.opencelium.io/;";
-        document.getElementsByTagName('head')[0].appendChild(meta);
-    });
-    """)
