@@ -34,7 +34,7 @@ def setup(app):
     document.addEventListener('DOMContentLoaded', function () {
         let meta = document.createElement('meta');
         meta.httpEquiv = 'Content-Security-Policy';
-        meta.content = "default-src 'self'; frame-src 'self' docs.opencelium.io;";
+        meta.content = "default-src 'self'; frame-src 'self' https://service.opencelium.io/;";
         document.getElementsByTagName('head')[0].appendChild(meta);
     });
     """)
