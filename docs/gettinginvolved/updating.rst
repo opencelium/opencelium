@@ -86,8 +86,8 @@ Start and enable mongod service and create a user for Opencelium.
 
 **3. Nginx:**
 
-Remove old config and link new configuration file for OpenCelium.
-Debian/Ubuntu:
+| Remove old config and link new configuration file for OpenCelium.
+| Debian/Ubuntu:
 
 .. code-block:: sh
 	:linenos:
