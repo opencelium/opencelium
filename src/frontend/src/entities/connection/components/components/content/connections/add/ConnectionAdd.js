@@ -21,7 +21,7 @@ import {
     addConnection,
     checkConnectionTitle,
     updateConnection,
-    testConnection,
+    testConnection, getConnectionWebhooks,
 } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {
     setCurrentTechnicalItem,
