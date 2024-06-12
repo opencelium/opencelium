@@ -88,7 +88,7 @@ Remove default config and link configuration file for OpenCelium.
 		:linenos:
 	
 		rm /etc/nginx/sites-enabled/default
-		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
+		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc.conf
 		
 	and change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:	
 			
