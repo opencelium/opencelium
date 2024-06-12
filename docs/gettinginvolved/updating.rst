@@ -87,6 +87,7 @@ Start and enable mongod service and create a user for Opencelium.
 **3. Nginx:**
 
 Remove old config and link new configuration file for OpenCelium.
+Debian/Ubuntu:
 
 .. code-block:: sh
 	:linenos:
@@ -94,8 +95,18 @@ Remove old config and link new configuration file for OpenCelium.
 	rm /etc/nginx/sites-enabled/oc
 	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/oc.conf
 	
+SUSE Linux Enterprise/RedHat:
+
+.. code-block:: sh
+	:linenos:
+	
+	rm /etc/nginx/conf.d/oc
+	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
+	
 .. note::
+
         | For SSL, use /opt/opencelium/conf/nginx-ssl.conf file and add your certificates.
+
 	
 
 **4. OpenCelium:**
