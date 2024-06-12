@@ -30,11 +30,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.*;
 
-public class AuthorizationFilter extends BasicAuthenticationFilter {
+@Component
+public class AuthorizationFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
@@ -47,10 +50,6 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 
     private final static List<String> ignorList = Arrays.asList("api/webhook/execute", "api/storage/files",
             "api/webhook/health", "/swagger-ui", "/v3/api-docs", "/docs");
-
-    public AuthorizationFilter(AuthenticationManager authenticationManager) {
-        super(authenticationManager);
-    }
 
     @Override
     protected void doFilterInternal( HttpServletRequest request,
