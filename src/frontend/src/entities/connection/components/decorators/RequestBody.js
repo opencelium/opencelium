@@ -305,6 +305,13 @@ export function RequestBody(CRequestType){
                                         );},
                                     id: `${id}_pointer_component`,
                                 }}
+                                WebhookComponent={{
+                                    getComponent: (params) => {
+                                        return (
+                                            <span style={{padding: '2px 5px', borderRadius: 3, color: '#000', background: '#eee'}} title={params.webhook}>{params.webhook}</span>
+                                        )
+                                    }
+                                }}
                                 ReferenceComponent={hasReferenceComponent ? {
                                     getComponent: (params) => {
                                         const {submitEdit, textarea, selectId} = params;
