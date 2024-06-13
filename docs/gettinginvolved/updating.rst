@@ -128,7 +128,7 @@ Create and adjust configuration.
         | - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
         | - Just in case you had special settings in application.yml, copy these settings to the new application.yml
         |   (See old application.yml in /opt/openceliumOld/src/backend/src/main/resources)
-
+        |  
         | Just in case you are using SSL, add certs to the ssl section. 
         | It has to be a p12 keystore file with password! 
         | If you just have key and pem you can create a p12 as follows:
