@@ -82,6 +82,7 @@ export function ConnectionForm(type) {
                 let { params } = this.props;
                 if(params){
                     this.props.fetchConnection(params.id);
+                    this.props.getConnectionWebhooks(params.id);
                 }
                 if(this.props.fetchConnectors){
                     this.props.fetchConnectors();

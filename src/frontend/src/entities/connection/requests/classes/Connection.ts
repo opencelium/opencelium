@@ -27,6 +27,9 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
         super({url: 'connection', ...settings});
     }
 
+    async getConnectionWebhooks(): Promise<AxiosResponse<string[]>> {
+        return super.get<string[]>();
+    }
     async checkConnectionTitle(): Promise<AxiosResponse<IResponse>>{
         return super.get<IResponse>();
     }
