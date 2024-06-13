@@ -174,3 +174,4 @@ Finally start OpenCelium backend and frontend.
 | - Enter predefined Neo4j URL and add Neo4j credentials 
 |   (See old application.yml in /opt/openceliumOld/...)
 | - Click on "Migrate" to start migration
+
