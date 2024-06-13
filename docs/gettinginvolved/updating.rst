@@ -116,7 +116,7 @@ Create and adjust configuration.
 .. code-block:: sh
         :linenos:
 
-        cp /opt/openceliumOld/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
+        cp /opt/opencelium/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
         cp /opt/openceliumOld/src/backend/src/main/resources/invoker/* /opt/opencelium/src/backend/src/main/resources/invoker/
         cp /opt/openceliumOld/src/backend/src/main/resources/templates/* /opt/opencelium/src/backend/src/main/resources/templates/
 
@@ -161,3 +161,12 @@ Finally start OpenCelium backend and frontend.
                 :linenos:
                 
                 journalctl -xe -u opencelium -f
+                
+              
+**5. Migration from Neo4j to MongoDB:**
+
+| Log in to OpenCelium
+| Click on "Admin Panel"
+| Click on "Migration"
+| Enter URL, User and Password
+| Click on "Migrate" to start migration
