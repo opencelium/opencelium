@@ -13,26 +13,28 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AxiosResponse} from "axios";
-import IUser from "@entity/user/interfaces/IUser";
-import {ICredentials} from "../../interfaces/IAuth";
 
-export interface NoLicenseResponse {
-    hasLicense: false,
+import {IForm} from "../interfaces/core";
+
+export enum UploadType {
+    String= 'string',
+    File= 'file',
+}
+export interface IUploadTokenRadios{
+    type: UploadType;
 }
 
-interface IAuth{
-
-    //to login into the application
-    login(credentials: ICredentials): Promise<AxiosResponse<IUser & NoLicenseResponse>>,
-
-    //to upload license token
-    uploadToken(token: string): Promise<AxiosResponse<IUser>>
-
-    //to logout from the application
-    logout(): void,
+export interface IUploadTokenTextarea{
+    token: string;
 }
 
-export {
-    IAuth,
+export interface IUploadTokenFile {
+    tokenFile: FileList;
+}
+
+export interface IUploadTokenForm extends IUploadTokenRadios, IUploadTokenTextarea, IUploadTokenFile, IForm<{}, {}, IUploadTokenRadios, IUploadTokenFile, IUploadTokenTextarea, {}>{
+    upload: () => boolean;
+}
+
+export interface IUploadToken extends IUploadTokenForm{
 }

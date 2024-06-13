@@ -16,6 +16,7 @@
 import React, {InputHTMLAttributes} from "react";
 import {ITheme} from "@style/Theme";
 import {ElementProps, InputElementProps} from "../interfaces";
+import {ButtonProps} from "@app_component/base/button/interfaces";
 
 interface InputFileProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "value">, Omit<InputElementProps, "value">{
     value?: readonly string[],
@@ -25,6 +26,7 @@ interface InputFileProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "va
     hasCrop?: boolean,
     theme?: ITheme,
     showOnlyButton?: boolean,
+    buttonProps?: ButtonProps,
 }
 
 interface InputProps extends ElementProps{

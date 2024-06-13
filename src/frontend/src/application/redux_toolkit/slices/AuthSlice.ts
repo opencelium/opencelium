@@ -15,10 +15,10 @@
 
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
-import {API_REQUEST_STATE} from "../../interfaces/IApplication";
+import {API_REQUEST_STATE, TRIPLET_STATE} from "../../interfaces/IApplication";
 import {CommonState} from "../../utils/store";
 import {ICommonState} from "../../interfaces/core";
-import {login} from "../action_creators/AuthCreators";
+import {login, uploadToken} from "../action_creators/AuthCreators";
 import {LocalStorage} from "../../classes/LocalStorage";
 import {IResponse} from "../../requests/interfaces/IResponse";
 import {LogoutProps} from "../../interfaces/IAuth";
@@ -27,7 +27,9 @@ export interface AuthState extends ICommonState{
     authUser: IAuthUser,
     isAuth: boolean,
     expTime: number,
+    hasLicense: TRIPLET_STATE,
     logining: API_REQUEST_STATE,
+    uploadingToken: API_REQUEST_STATE,
     logouting: API_REQUEST_STATE,
     isSessionExpired: boolean,
     wasAccessDenied: boolean,
@@ -38,7 +40,9 @@ const initialState: AuthState = {
     authUser: authUser || null,
     isAuth: !!authUser,
     expTime: authUser ? authUser.expTime : 0,
+    hasLicense: TRIPLET_STATE.INITIAL,
     logining: API_REQUEST_STATE.INITIAL,
+    uploadingToken: API_REQUEST_STATE.INITIAL,
     logouting: API_REQUEST_STATE.INITIAL,
     isSessionExpired: true,
     wasAccessDenied: false,
@@ -56,6 +60,7 @@ export const authSlice = createSlice({
             state.authUser = null;
             state.wasAccessDenied = action.payload?.wasAccessDenied || false;
             state.message = action.payload?.message || '';
+            state.hasLicense = TRIPLET_STATE.INITIAL;
         },
         updateAuthUser: (state, action: PayloadAction<IAuthUser>) => {
             state.authUser = action.payload;
@@ -67,6 +72,7 @@ export const authSlice = createSlice({
             state.message = '';
         },
         [login.fulfilled.type]: (state, action: PayloadAction<IAuthUser>) => {
+            state.hasLicense = TRIPLET_STATE.TRUE;
             state.logining = API_REQUEST_STATE.FINISH;
             state.error = null;
             state.isAuth = true;
@@ -75,6 +81,26 @@ export const authSlice = createSlice({
         },
         [login.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.logining = API_REQUEST_STATE.ERROR;
+            if(action.payload.message === 'NO_LICENSE') {
+                state.hasLicense = TRIPLET_STATE.FALSE;
+            }
+            state.error = action.payload;
+        },
+        [uploadToken.pending.type]: (state, action: PayloadAction<any>) => {
+            state.uploadingToken = API_REQUEST_STATE.START;
+            state.message = '';
+        },
+        [uploadToken.fulfilled.type]: (state, action: PayloadAction<IAuthUser>) => {
+            state.uploadingToken = API_REQUEST_STATE.FINISH;
+            state.hasLicense = TRIPLET_STATE.TRUE;
+            //todo: uncomment when backend will be ready
+            state.error = null;
+            state.isAuth = true;
+            state.authUser = action.payload;
+            state.wasAccessDenied = false;
+        },
+        [uploadToken.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.uploadingToken = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }
