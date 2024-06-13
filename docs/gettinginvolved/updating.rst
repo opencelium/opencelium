@@ -126,6 +126,8 @@ Create and adjust configuration.
         | Within section "Database configuration section of MariaDB and MongoDB":
         | - change password of opencelium user for MariaDB (default "secret1234")
         | - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
+        | - Just in case you had special settings in application.yml, copy these settings to the new application.yml
+        |   (See old application.yml in /opt/openceliumOld/src/backend/src/main/resources)
 
         | Just in case you are using SSL, add certs to the ssl section. 
         | It has to be a p12 keystore file with password! 
@@ -168,5 +170,5 @@ Finally start OpenCelium backend and frontend.
 | Log in to OpenCelium
 | Click on "Admin Panel"
 | Click on "Migration"
-| Enter URL, User and Password
+| Enter predefined neo4j URL and add neo4j credentials (See old application.yml in /opt/openceliumOld/...)
 | Click on "Migrate" to start migration
