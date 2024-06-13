@@ -23,6 +23,8 @@ import com.becon.opencelium.backend.resource.user.UserResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,12 +58,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         try {
-            User credentials = new ObjectMapper()
+            User user = new ObjectMapper()
                     .readValue(request.getInputStream(), User.class);
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            credentials.getEmail(),
-                            credentials.getPassword(),
+                            user.getEmail(),
+                            user.getPassword(),
                             new ArrayList<>()));
         }
         catch (IOException e){

@@ -57,17 +57,16 @@ public class SecurityConfiguration {
     @Autowired
     private AuthenticationFilter authenticationFilter;
 
+    @Lazy
+    @Autowired
+    private  AuthorizationFilter authorizationFilter;
+
     @Autowired
     private AuthExceptionHandler authExceptionHandler;
 
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception{
         return new ProviderManager(authenticationProvider());
-    }
-
-    @Bean
-    public AuthorizationFilter getAuthorizationFilter() throws Exception{
-        return new AuthorizationFilter(authenticationManagerBean());
     }
 
     @Bean
@@ -99,8 +98,6 @@ public class SecurityConfiguration {
                 .cors()
                 .and()
                 .csrf().disable()
-//                .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
-//                .addFilterBefore(getAuthorizationFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest()
                         .authenticated())
@@ -108,7 +105,7 @@ public class SecurityConfiguration {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilter(authenticationFilter)
-                .addFilter(getAuthorizationFilter())
+                .addFilterAfter(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(authExceptionHandler)
                 .and().build();
@@ -120,22 +117,4 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/storage/files/**", "/api/webhook/execute/**", "/api/webhook/health",
                         "/v3/api-docs", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/docs");
     }
-
-
-//    @Bean
-//    public RestTemplate getRestTemplate() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
-//        TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-//            @Override
-//            public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-//                return true;
-//            }
-//        };
-//        SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
-//        SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
-//        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
-//        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-//        requestFactory.setHttpClient(httpClient);
-//        RestTemplate restTemplate = new RestTemplate(requestFactory);
-//        return restTemplate;
-//    }
 }
