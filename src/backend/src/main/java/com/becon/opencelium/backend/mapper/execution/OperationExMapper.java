@@ -79,10 +79,14 @@ public class OperationExMapper {
             return mediaType;
         }
 
-        if (methodMng.getRequest().getBody() != null && (mediaType = getMediaTypeFromBody(methodMng.getRequest().getBody().getFormat())) != null) {
+        if (methodMng.getRequest().getBody() != null
+                && methodMng.getRequest().getBody().getFormat() != null
+                && (mediaType = getMediaTypeFromBody(methodMng.getRequest().getBody().getFormat())) != null) {
             return mediaType;
         }
-        return fiv.getRequest().getBody() == null || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null
+        return fiv.getRequest().getBody() == null
+                || methodMng.getRequest().getBody().getFormat() == null
+                || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null
                 ? MediaType.APPLICATION_JSON
                 : mediaType;
     }

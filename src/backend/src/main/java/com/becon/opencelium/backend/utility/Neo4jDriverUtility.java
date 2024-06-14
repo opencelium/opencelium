@@ -383,13 +383,13 @@ public class Neo4jDriverUtility {
         String name = (String) fields.get("name");
         String index = (String) fields.get("index");
         String label = (String) fields.get("label");
-        int aggregatorId = (Integer) fields.getOrDefault("aggregatorId", 0);
+        long aggregatorId = (Long) fields.getOrDefault("aggregatorId", 0);
         MethodMng methodMng = new MethodMng();
         methodMng.setColor(color);
         methodMng.setName(name);
         methodMng.setIndex(index);
         methodMng.setLabel(label);
-        methodMng.setDataAggregator(aggregatorId);
+        methodMng.setDataAggregator((int) aggregatorId);
         return methodMng;
     }
 
