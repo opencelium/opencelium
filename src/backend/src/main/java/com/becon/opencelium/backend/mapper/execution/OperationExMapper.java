@@ -195,7 +195,10 @@ public class OperationExMapper {
         }
         for (Map.Entry<String, String> entry : header.entrySet()) {
             ParameterDTO parameterDTO = new ParameterDTO();
-            //parameter's default fields are :
+            if (entry.getKey().equals("Cookie")) {
+                addCookieParams(entry.getValue(), parameters);
+                continue;
+            }
             parameterDTO.setName(entry.getKey());
             parameterDTO.setIn(ParamLocation.HEADER);
             parameterDTO.setStyle(ParamStyle.SIMPLE);
@@ -230,6 +233,43 @@ public class OperationExMapper {
             parameters.add(parameterDTO);
         }
         return parameters;
+    }
+
+    public void addCookieParams(String value, List<ParameterDTO> parameters) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        value = value.trim();
+        String[] split = value.split(";");
+
+        for (String kv : split) {
+            if (kv.contains("=")) {
+                String[] pairs = kv.split("=");
+                if (pairs.length == 2) {
+                    SchemaDTO schemaDTO = new SchemaDTO();
+                    schemaDTO.setType(DataType.STRING);
+                    schemaDTO.setValue(pairs[1].trim());
+
+                    ParameterDTO parameterDTO = new ParameterDTO();
+                    parameterDTO.setSchema(schemaDTO);
+                    parameterDTO.setIn(ParamLocation.COOKIE);
+                    parameterDTO.setStyle(ParamStyle.SIMPLE);
+                    parameterDTO.setName(pairs[0].trim());
+                    parameters.add(parameterDTO);
+                }
+            } else if (kv.contains("Secure") || kv.contains("HttpOnly")) {
+                SchemaDTO schemaDTO = new SchemaDTO();
+                schemaDTO.setType(DataType.BOOLEAN);
+                schemaDTO.setValue("true");
+
+                ParameterDTO parameterDTO = new ParameterDTO();
+                parameterDTO.setSchema(schemaDTO);
+                parameterDTO.setIn(ParamLocation.COOKIE);
+                parameterDTO.setStyle(ParamStyle.SIMPLE);
+                parameterDTO.setName(kv.trim());
+                parameters.add(parameterDTO);
+            }
+        }
     }
 
     /**
