@@ -120,6 +120,17 @@ public class RequestEntityBuilder {
                 .peek(parameter -> replaceRefs(parameter.getSchema()))
                 .forEach(parameter -> headers.put(parameter.getName(), List.of(ParameterDTOUtil.toString(parameter))));
 
+        // add Cookie parameter(s) if exists
+        List<String> cookies = getParamsByLocation(ParamLocation.COOKIE).stream()
+                .map(ParameterDTOUtil::copy)
+                .peek(parameter -> replaceRefs(parameter.getSchema()))
+                .map(ParameterDTOUtil::toString)
+                .toList();
+
+        if (!cookies.isEmpty()) {
+            headers.put("Cookie", cookies);
+        }
+
         return headers;
     }
 
