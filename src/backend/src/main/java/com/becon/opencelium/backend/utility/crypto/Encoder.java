@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.utility.crypto;
 
 import com.becon.opencelium.backend.constant.YamlPropConst;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +23,27 @@ public class Encoder {
     private final SecretKeySpec secretKeySpec;
     private final Cipher cipher;
     private final SecureRandom secureRandom;
+    private final String secretKey;
 
+    @Autowired
     public Encoder(Environment environment) {
-        String secretKey = environment.getProperty(YamlPropConst.CONNECTOR_SECRET_KEY, DEFAULT_SECRET_KEY);
+        secretKey = environment.getProperty(YamlPropConst.CONNECTOR_SECRET_KEY, DEFAULT_SECRET_KEY);
 
+        try {
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            KeySpec spec = new PBEKeySpec(secretKey.toCharArray(), SALT.getBytes(), ITERATION_COUNT, KEY_LENGTH);
+            SecretKey tmp = factory.generateSecret(spec);
+            secretKeySpec = new SecretKeySpec(tmp.getEncoded(), "AES");
+
+            cipher = Cipher.getInstance(ALGORITHM);
+            secureRandom = new SecureRandom();
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException e) {
+            throw new RuntimeException("Error initializing encoder", e);
+        }
+    }
+
+    public Encoder(String secretKey) {
+        this.secretKey = secretKey;
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             KeySpec spec = new PBEKeySpec(secretKey.toCharArray(), SALT.getBytes(), ITERATION_COUNT, KEY_LENGTH);
@@ -69,5 +87,9 @@ public class Encoder {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String getSecretKey() {
+        return secretKey;
     }
 }
