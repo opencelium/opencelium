@@ -113,8 +113,16 @@ public class SecurityConfiguration {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
+        String[] enpoints = new String[] {
+                "/api/storage/files/**",
+                "/api/webhook/execute/**",
+                "/api/webhook/health",
+                "/v3/api-docs",
+                "/swagger-ui.html",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/docs"};
         return (web) -> web.ignoring()
-                .requestMatchers("/api/storage/files/**", "/api/webhook/execute/**", "/api/webhook/health",
-                        "/v3/api-docs", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/docs");
+                .requestMatchers(enpoints);
     }
 }
