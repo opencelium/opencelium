@@ -253,7 +253,7 @@ public class OperationExMapper {
                     ParameterDTO parameterDTO = new ParameterDTO();
                     parameterDTO.setSchema(schemaDTO);
                     parameterDTO.setIn(ParamLocation.COOKIE);
-                    parameterDTO.setStyle(ParamStyle.SIMPLE);
+                    parameterDTO.setStyle(ParamStyle.FORM);
                     parameterDTO.setName(pairs[0].trim());
                     parameters.add(parameterDTO);
                 }
@@ -266,7 +266,7 @@ public class OperationExMapper {
 //                ParameterDTO parameterDTO = new ParameterDTO();
 //                parameterDTO.setSchema(schemaDTO);
 //                parameterDTO.setIn(ParamLocation.COOKIE);
-//                parameterDTO.setStyle(ParamStyle.SIMPLE);
+//                parameterDTO.setStyle(ParamStyle.FORM);
 //                parameterDTO.setName(kv.trim());
 //                parameters.add(parameterDTO);
 //            }
