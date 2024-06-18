@@ -116,7 +116,7 @@ Create and adjust configuration.
 .. code-block:: sh
         :linenos:
 
-        cp /opt/openceliumOld/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
+        cp /opt/opencelium/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
         cp /opt/openceliumOld/src/backend/src/main/resources/invoker/* /opt/opencelium/src/backend/src/main/resources/invoker/
         cp /opt/openceliumOld/src/backend/src/main/resources/templates/* /opt/opencelium/src/backend/src/main/resources/templates/
 
@@ -126,7 +126,9 @@ Create and adjust configuration.
         | Within section "Database configuration section of MariaDB and MongoDB":
         | - change password of opencelium user for MariaDB (default "secret1234")
         | - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
-
+        | - Just in case you had special settings in application.yml, copy these settings to the new application.yml
+        |   (See old application.yml in /opt/openceliumOld/src/backend/src/main/resources)
+        |  
         | Just in case you are using SSL, add certs to the ssl section. 
         | It has to be a p12 keystore file with password! 
         | If you just have key and pem you can create a p12 as follows:
@@ -161,3 +163,12 @@ Finally start OpenCelium backend and frontend.
                 :linenos:
                 
                 journalctl -xe -u opencelium -f
+                
+              
+**5. Migration from Neo4j to MongoDB:**
+
+| Log in to OpenCelium
+| Click on "Admin Panel"
+| Click on "Migration"
+| Enter predefined neo4j URL and add neo4j credentials (See old application.yml in /opt/openceliumOld/...)
+| Click on "Migrate" to start migration
