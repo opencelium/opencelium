@@ -96,7 +96,7 @@ public class WebhookServiceImp implements WebhookService {
                 .jwtID(Long.toString(schedulerId))
                 .build();
 
-        return jwtTokenUtil.doGenerateToken(claimsSet);
+        return jwtTokenUtil.generateToken(claimsSet);
     }
 
     @Override

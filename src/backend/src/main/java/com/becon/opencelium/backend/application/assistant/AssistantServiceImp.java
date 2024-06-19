@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.application.assistant;
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.repository.SystemOverviewRepository;
 import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
@@ -179,13 +179,13 @@ public class AssistantServiceImp implements ApplicationService {
     @Override
     public InstallationDTO getInstallation() {
         String installType;
-        if (!env.containsProperty(YamlPropConst.INSTALLATION) &&
-                !env.containsProperty(YamlPropConst.INSTALLATION + ".type")) {
+        if (!env.containsProperty(AppYamlPath.INSTALLATION) &&
+                !env.containsProperty(AppYamlPath.INSTALLATION + ".type")) {
 
             installType = "undefined";
-            log.warn("Path " + YamlPropConst.INSTALLATION + ".type not found in application.yml");
+            log.warn("Path " + AppYamlPath.INSTALLATION + ".type not found in application.yml");
         } else {
-            installType = env.getProperty(YamlPropConst.INSTALLATION + ".type");
+            installType = env.getProperty(AppYamlPath.INSTALLATION + ".type");
         }
         return new InstallationDTO(installType);
     }

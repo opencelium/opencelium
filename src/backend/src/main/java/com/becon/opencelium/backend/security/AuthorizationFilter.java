@@ -93,8 +93,12 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String email = jwtTokenUtil.getEmailFromToken(token);
         UserPrincipals userDetail = (UserPrincipals) userDetailsService.loadUserByUsername(email);
 
-        if (!jwtTokenUtil.validateToken(token, userDetail)){
-            return null;
+        try {
+            if (!jwtTokenUtil.validateToken(token, userDetail)){
+                return null;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         activityService.registerTokenActivity(userDetail);

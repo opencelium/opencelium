@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.utility;
 
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -12,7 +13,7 @@ public class TokenUtility {
     private Environment env;
 
     public String getSecret() {
-        String secret = env.getProperty("secret");
+        String secret = env.getProperty(AppYamlPath.TOKEN_SECRET);
         if (secret == null) {
             secret = SecurityConstant.SECRET;
         }
@@ -20,7 +21,7 @@ public class TokenUtility {
     }
 
     public long getActivityTime() {
-        Long activityTime = env.getProperty("opencelium.token.activity-time", Long.class);
+        Long activityTime = env.getProperty(AppYamlPath.TOKEN_ACTIVITY_TIME, Long.class);
         if (activityTime == null) {
             activityTime = SecurityConstant.ACTIVITY_TIME;
         }
@@ -28,7 +29,7 @@ public class TokenUtility {
     }
 
     public long getExpirationTime() {
-        Long expirationTime = env.getProperty("opencelium.token.expiration-time", Long.class);
+        Long expirationTime = env.getProperty(AppYamlPath.TOKEN_EXPIRE_TIME, Long.class);
         if (expirationTime == null) {
             expirationTime = SecurityConstant.EXPIRATION_TIME;
         }

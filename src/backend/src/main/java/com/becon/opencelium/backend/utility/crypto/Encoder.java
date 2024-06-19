@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.utility.crypto;
 
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class Encoder {
 
     @Autowired
     public Encoder(Environment environment) {
-        secretKey = environment.getProperty(YamlPropConst.CONNECTOR_SECRET_KEY, DEFAULT_SECRET_KEY);
+        secretKey = environment.getProperty(AppYamlPath.CONNECTOR_SECRET_KEY, DEFAULT_SECRET_KEY);
 
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
