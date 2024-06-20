@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
 import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngServiceImp;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
@@ -13,6 +14,9 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
+import com.becon.opencelium.backend.invoker.entity.Invoker;
+import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.update_assistant.InstallationDTO;
@@ -84,6 +88,8 @@ public class AssistantServiceImp implements ApplicationService {
     private ConnectionMngServiceImp connectionMngServiceImp;
     @Autowired
     private FieldBindingMngServiceImp fieldBindingMngServiceImp;
+    @Autowired
+    private InvokerServiceImp invokerServiceImp;
 
     @Override
     public SystemOverview getSystemOverview() {
@@ -273,7 +279,6 @@ public class AssistantServiceImp implements ApplicationService {
 //        unzipFolder(inputStream, appRoot);
 //        ZipUtils.extractZip(inputStream, appRoot);
     }
-
 
 
     @Override
@@ -512,6 +517,8 @@ public class AssistantServiceImp implements ApplicationService {
                         continue;
                     }
 
+                    addHeaderFromInvoker(connectionMng, from.getInvoker(), to.getInvoker());
+
                     //setting fieldBindings
                     connectionMng.setFieldBindings(fieldBindingMngServiceImp.getAllByConnectionId(connection.getId()));
 
@@ -526,6 +533,42 @@ public class AssistantServiceImp implements ApplicationService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private void addHeaderFromInvoker(ConnectionMng connectionMng, String fromInvokerStr, String toInvokerStr) {
+        Invoker fromInvoker = invokerServiceImp.findByName(fromInvokerStr);
+        Invoker toInvoker = invokerServiceImp.findByName(toInvokerStr);
+
+        addHeaderFromInvokerHelper(connectionMng.getFromConnector().getMethods(), fromInvoker);
+        addHeaderFromInvokerHelper(connectionMng.getToConnector().getMethods(), toInvoker);
+    }
+
+    private void addHeaderFromInvokerHelper(List<MethodMng> methods, Invoker invoker) {
+        for (MethodMng method : methods) {
+            if (method.getRequest() != null) {
+                Map<String, String> header = method.getRequest().getHeader();
+
+                FunctionInvoker fv = invoker.getOperations()
+                        .stream()
+                        .filter(o -> o.getName().equals(method.getName()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (fv != null && fv.getRequest() != null && fv.getRequest().getHeader() != null) {
+                    Map<String, String> header1 = fv.getRequest().getHeader();
+                    if (header == null) {
+                        header = new HashMap<>();
+                    }
+
+                    for (Map.Entry<String, String> entry : header1.entrySet()) {
+                        if (!header.containsKey(entry.getKey())) {
+                            header.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    method.getRequest().setHeader(header);
+                }
+            }
         }
     }
 }
