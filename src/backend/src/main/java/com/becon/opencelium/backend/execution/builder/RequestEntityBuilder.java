@@ -96,17 +96,20 @@ public class RequestEntityBuilder {
             rawUrl = rawUrl.replace(ref, ParameterDTOUtil.toString(copiedParameter));
         }
 
-        // construct query parameters if exists
-        String query = getParamsByLocation(ParamLocation.QUERY).stream()
-                .map(ParameterDTOUtil::copy)
-                .peek(parameter -> replaceRefs(parameter.getSchema()))
-                .map(ParameterDTOUtil::toString)
-                .collect(Collectors.joining("&"));
-        
-        // add query parameters if exists
-        if (!ObjectUtils.isEmpty(query)) {
-            // append new ones to old query if exists
-            rawUrl = rawUrl + (rawUrl.contains("?") ? "&" : "?") + query;
+        // replace query parameters
+        for (ParameterDTO parameter : getParamsByLocation(ParamLocation.QUERY)) {
+            // reconstruct existing query without resolving references;
+            String rawQuery = ParameterDTOUtil.toString(parameter);
+
+            // replace referenced schema
+            ParameterDTO copiedParameter = ParameterDTOUtil.copy(parameter);
+            replaceRefs(copiedParameter.getSchema());
+
+            // construct correct query parameter
+            String query = ParameterDTOUtil.toString(copiedParameter);
+
+            // replace raw query parameter with correct one
+            rawUrl = rawUrl.replace(rawQuery, query);
         }
 
         return URI.create(rawUrl);
