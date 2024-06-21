@@ -3,7 +3,7 @@ Installation
 ##################
 
 .. note::
-	Please check the software requirements, before installing OC. 
+	Please check the software requirements, before installing OC.
 
 Debian/Ubuntu (example for 24.04 LTS)
 """""""""""""""""
