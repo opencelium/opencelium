@@ -580,26 +580,11 @@ DEB package for Ubuntu 22.04 LTS
 	apt update
 	apt install curl gnupg
 
-2. Install java:
+**2. Install MongoDB:**
 
-.. code-block:: sh
-	:linenos:
-
-	apt install openjdk-17-jdk
-
-3. Install neo4j:
-
-.. code-block:: sh
-	:linenos:
-
-	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
-	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
-	apt update
-	apt install neo4j=1:5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 	
-.. note::
-	Change password (secret1234) if you want.
 
 **Install Application:**
 
