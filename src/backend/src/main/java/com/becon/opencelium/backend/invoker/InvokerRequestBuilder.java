@@ -119,7 +119,14 @@ public class InvokerRequestBuilder {
     private MediaType getResponseContentType(HttpHeaders httpHeaders, FunctionInvoker functionInvoker) {
         if (functionInvoker.getResponse() != null && functionInvoker.getResponse().getSuccess() != null
                 && functionInvoker.getResponse().getSuccess().getHeader() != null){
-            return MediaType.valueOf(functionInvoker.getResponse().getSuccess().getHeader().get("Content-Type"));
+            String mimeType = functionInvoker.getResponse().getSuccess().getHeader().get("Content-Type");
+            try {
+                return MediaType.valueOf(mimeType);
+            } catch (InvalidMediaTypeException e) {
+                String message = " in method " + functionInvoker.getName() +
+                        ". Please set proper Content-Type in response.header";
+                throw new InvalidMediaTypeException(mimeType, message);
+            }
         }
         if (httpHeaders == null || httpHeaders.getContentType() == null) {
             return MediaType.APPLICATION_JSON;
