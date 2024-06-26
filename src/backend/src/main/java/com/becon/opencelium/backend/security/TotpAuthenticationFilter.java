@@ -19,6 +19,7 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
         if (!request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
+        // TODO: Extract user session that contains secret
 
         // Extract the TOTP code from the request
         String totpCode = obtainTotpCode(request);
