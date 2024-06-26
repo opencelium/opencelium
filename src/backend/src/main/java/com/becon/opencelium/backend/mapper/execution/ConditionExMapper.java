@@ -52,7 +52,7 @@ public class ConditionExMapper {
                 }
             }
             case EQUAL_TO, NOT_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO,
-                 MATCHES, MATCHES_IN_LIST, REGEX, PROPERTY_NOT_EXISTS, PROPERTY_EXISTS -> {
+                 MATCHES, MATCHES_IN_LIST, REGEX, PROPERTY_NOT_EXISTS, PROPERTY_EXISTS, DENY_LIST -> {
                 condition.setLeft(ls.getColor() + ".(" + ls.getType() + ")." + ls.getField());
                 if (rs == null) {
                     condition.setRight("");
