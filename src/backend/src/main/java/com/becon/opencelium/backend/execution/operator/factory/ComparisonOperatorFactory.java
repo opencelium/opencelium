@@ -52,7 +52,7 @@ public class ComparisonOperatorFactory implements OperatorFactory {
             case NOT_EQUAL_TO -> new NotEqualTo();
             case CONTAINS_SUB_STR -> new ContainsSubStr();
             case NOT_CONTAINS_SUB_STR -> new NotContainsSubStr();
-            case DENYLIST -> new DenyList();
+            case DENY_LIST -> new DenyList();
             case DEFAULT -> throw new RuntimeException("Operator '" + operator.name() + "' is not supported");
             default -> null;
         };
