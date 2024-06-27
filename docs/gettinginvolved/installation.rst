@@ -568,7 +568,7 @@ Use default Docker installation guide.
 	docker-compose up -d
 
 
-DEB package for Ubuntu 22.04 LTS
+DEB package for Ubuntu 24.04 LTS
 """""""""""""""""
 **Prepare environment:**
 
@@ -594,11 +594,19 @@ DEB package for Ubuntu 22.04 LTS
 	:linenos:
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.deb.sh | sudo bash
-	sed -i 's!deb .*!deb [signed-by=/etc/apt/keyrings/becon_opencelium-archive-keyring.gpg] https://packagecloud.io/becon/opencelium/ubuntu jammy main!' /etc/apt/sources.list.d/becon_opencelium.list
+	sed -i 's!deb .*!deb [signed-by=/etc/apt/keyrings/becon_opencelium-archive-keyring.gpg] https://packagecloud.io/becon/opencelium/ubuntu noble main!' /etc/apt/sources.list.d/becon_opencelium.list
 	apt update
 	apt install opencelium
 
-**Configure environment:**
+2. Welcome to OC:
+
+.. code-block:: sh
+	:linenos:
+	
+	Visit opencelium http://SERVERIP
+
+
+**Configure environment (optional):**
 
 1. Secure MySql and set root password (required for new MySql installations):
 
@@ -607,24 +615,18 @@ DEB package for Ubuntu 22.04 LTS
 
 	mysql_secure_installation
 	
+2. Change user passwords for MySQL and MongoDB:
+
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root
-		
-	If this works (without your password), please set your password again with this command:
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
-		
-	Change password (root) if you want.
-	
-2. Modify application.yml file for backend:
+	Please change the passwords (secret1234, secretsecret) in the following command lines!
+
+.. code-block:: sh
+	:linenos:
+
+	mysql -u root -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
+	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword({user: 'oc_admin', pwd: 'secretsecret'})"
+
+3. Modify application.yml file for backend:
 
 .. code-block:: sh
 	:linenos:
@@ -633,21 +635,14 @@ DEB package for Ubuntu 22.04 LTS
 
 .. note::
 	Make changes inside the file application.yml! 
-	Change neo4j and mysql database password.
+	Change MongoDB and MySQL database password.
 
-3. Restart backend:
-
-.. code-block:: sh
-	:linenos:
-
-	oc restart_backend
-
-4. Welcome to OC:
+4. Restart Opencelium Backend:
 
 .. code-block:: sh
 	:linenos:
 	
-	Visit opencelium http://SERVERIP
+	systemctl restart opencelium
 
 
 
