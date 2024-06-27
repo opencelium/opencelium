@@ -14,4 +14,6 @@ public interface CategoryService {
     void delete(Integer id);
     void deleteAll(List<Integer> ids);
     boolean exists(Integer id);
+
+    boolean existsByName(String name);
 }

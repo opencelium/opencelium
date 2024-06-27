@@ -30,7 +30,7 @@ public class CategoryServiceImp implements CategoryService {
             throw new RuntimeException("CATEGORY_IS_NULL");
         }
 
-        checkTitle(categoryDTO.getName());
+        checkName(categoryDTO.getName());
 
         Category curr = new Category();
         curr.setName(categoryDTO.getName());
@@ -73,7 +73,7 @@ public class CategoryServiceImp implements CategoryService {
         Category old = get(categoryDTO.getId());
 
         if (!Objects.equals(categoryDTO.getName(), old.getName())) {
-            checkTitle(categoryDTO.getName());
+            checkName(categoryDTO.getName());
         }
 
         Category category = new Category(categoryDTO.getId());
@@ -193,7 +193,7 @@ public class CategoryServiceImp implements CategoryService {
         repository.deleteById(category.getId());
     }
 
-    private void checkTitle(String name) {
+    private void checkName(String name) {
         if (name == null || name.isBlank()) {
             throw new RuntimeException("INVALID_CATEGORY_NAME");
         }
@@ -231,5 +231,10 @@ public class CategoryServiceImp implements CategoryService {
             }
             throw new RuntimeException("CYCLE_HAS_FOUND : " + sb);
         }
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return repository.existsByNameEqualsIgnoreCase(name);
     }
 }
