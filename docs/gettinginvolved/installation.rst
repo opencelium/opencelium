@@ -571,6 +571,11 @@ Use default Docker installation guide.
 DEB package for Ubuntu 24.04 LTS
 """""""""""""""""
 
+.. warning:: 
+
+	We currently do not support deb package installations in productive use. 
+	We recommend using it for use in a test phase!
+
 Prepare environment:
 ==================
 
@@ -620,7 +625,7 @@ Install Application:
 Configure environment (optional):
 ==================
 
-**1. Secure MySql and set root password (required for new MySql installations):**
+**1. Secure MySql and set root password:**
 
 .. code-block:: sh
 	:linenos:
@@ -646,8 +651,8 @@ Configure environment (optional):
 	cd /opt/opencelium/src/backend/src/main/resources
 
 .. note::
-	Make changes inside the file application.yml! 
-	Change MongoDB and MySQL database passwords.
+	| Make changes inside the file application.yml! 
+	| Change your MongoDB and MySQL database passwords.
 
 **4. Restart Opencelium Backend:**
 
