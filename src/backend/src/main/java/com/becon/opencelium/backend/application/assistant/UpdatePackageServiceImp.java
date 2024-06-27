@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.application.assistant;
 
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.utility.PackageVersionManager;
@@ -189,7 +189,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     private List<AvailableUpdate> getVersions() throws Exception {
         String packageCloudUrl = "https://packagecloud.io/becon/opencelium";
         String htmlResponse = restTemplate.getForObject(packageCloudUrl, String.class);
-        String currentVersion = env.getProperty(YamlPropConst.OC_VERSION);
+        String currentVersion = env.getProperty(AppYamlPath.OC_VERSION);
 
         Set<String> packVersion = new HashSet<>();
         Document doc = Jsoup.parse(htmlResponse);

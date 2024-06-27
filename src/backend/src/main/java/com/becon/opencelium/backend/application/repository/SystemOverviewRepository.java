@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.application.repository;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
@@ -74,7 +74,7 @@ public class SystemOverviewRepository {
 //            return jdbcTemplate
 //                    .queryForList("select AUTHOR from DATABASECHANGELOG order by AUTHOR DESC LIMIT 1", String.class)
 //                    .get(0);
-            return Objects.requireNonNull(yamlPropertiesFactoryBean.getObject()).getProperty(YamlPropConst.OC_VERSION);
+            return Objects.requireNonNull(yamlPropertiesFactoryBean.getObject()).getProperty(AppYamlPath.OC_VERSION);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

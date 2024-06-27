@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.database.mysql.entity.Category;
 import com.becon.opencelium.backend.database.mysql.service.CategoryService;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.schedule.CategoryDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,11 +14,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -144,9 +148,36 @@ public class CategoryController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping("/delete/all")
-    public ResponseEntity<?> delete(@RequestBody List<Integer> ids) {
-        categoryService.deleteAll(ids);
+    @DeleteMapping("/list/delete")
+    public ResponseEntity<?> deleteFromList(@RequestBody IdentifiersDTO<Integer> ids) {
+        categoryService.deleteAll(ids.getIdentifiers());
         return ResponseEntity.noContent().build();
+    }
+
+
+    @Operation(summary = "Validates name of category for uniqueness")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Category Name has been successfully validate. Return EXISTS or NOT_EXISTS values in 'message' property.",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/check/{name}")
+    public ResponseEntity<?> existsByName(@PathVariable("name") String name) throws IOException {
+        RuntimeException ex;
+        if (categoryService.existsByName(name)) {
+            ex = new RuntimeException("EXISTS");
+        } else {
+            ex = new RuntimeException("NOT_EXISTS");
+        }
+
+        String uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri().toString();
+        ErrorResource errorResource = new ErrorResource(ex, HttpStatus.OK, uri);
+        return ResponseEntity.ok().body(errorResource);
     }
 }

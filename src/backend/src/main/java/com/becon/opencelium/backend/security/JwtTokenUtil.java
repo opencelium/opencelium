@@ -20,9 +20,8 @@ import com.becon.opencelium.backend.database.mysql.entity.Activity;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.utility.TokenUtility;
 import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,10 +72,18 @@ public class JwtTokenUtil {
             .jwtID(token)
             .build();
 
-        return doGenerateToken(claimsSet);
+        return generateToken(claimsSet);
     }
 
-    public Boolean validateToken(String token, UserPrincipals userDetails) {
+    public Boolean validateToken(String token, UserPrincipals userDetails) throws Exception {
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        // Create HMAC verifier
+        JWSVerifier verifier = new MACVerifier(tokenUtility.getSecret());
+        if (!signedJWT.verify(verifier)) {
+            return false;
+        }
+
         Activity activity = userDetails.getUser().getActivity();
         String tokenId = getTokenId(token);
         if (activity.isLocked()){
@@ -100,8 +107,6 @@ public class JwtTokenUtil {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
     private Boolean isTokenExpired(String token) {
@@ -110,17 +115,11 @@ public class JwtTokenUtil {
     }
 
 
-    public String doGenerateToken(JWTClaimsSet claims) {
+    public String generateToken(JWTClaimsSet claims) {
             try {
-                RSAKey rsaJWK = new RSAKeyGenerator(2048)
-                        .keyID("123")
-                        .generate();
-                // Create RSA-signer with the private key
-                JWSSigner signer = new RSASSASigner(rsaJWK);
-                SignedJWT signedJWT = new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaJWK.getKeyID()).build(),
-                        claims);
-                signedJWT.sign(signer);
+                MACSigner signer = new MACSigner(tokenUtility.getSecret());
+                SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims); // Create signed JWT
+                signedJWT.sign(signer); // Sign the JWT
 
                 return signedJWT.serialize();
             } catch (Exception e) {
