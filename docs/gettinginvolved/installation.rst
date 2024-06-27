@@ -573,8 +573,8 @@ DEB package for Ubuntu 24.04 LTS
 
 .. warning:: 
 
-	We currently do not support deb package installations in productive use. 
-	We recommend using it for use in a test phase!
+	| We currently do not support deb package installations in productive use. 
+	| We recommend using it for use in a test phase on a clean system!
 
 Prepare environment:
 ==================
@@ -625,7 +625,7 @@ Install Application:
 Configure environment (optional):
 ==================
 
-**1. Secure MySql and set root password:**
+**1. Secure MySql and set root password (only for new MySql installations):**
 
 .. code-block:: sh
 	:linenos:
@@ -640,7 +640,7 @@ Configure environment (optional):
 .. code-block:: sh
 	:linenos:
 
-	mysql -u root -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
+	mysql -u root -p -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
 	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword('oc_admin', 'secretsecret')"
 
 **3. Modify application.yml file for backend:**
@@ -668,8 +668,8 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 
 .. warning:: 
 
-	We currently do not support rpm package installations in productive use. 
-	We recommend using it for use in a test phase!
+	| We currently do not support deb package installations in productive use. 
+	| We recommend using it for use in a test phase on a clean system!
 
 Prepare environment:
 ==================
@@ -703,7 +703,7 @@ Install Application:
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
 	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/sles/15.5/x86_64!' /etc/zypp/repos.d/becon_opencelium.repo
-	zypper install OpenCelium
+	zypper install -y OpenCelium
 	
 .. note::
 	| Afterwards you can connect to `http://localhost`	
@@ -723,7 +723,7 @@ Install Application:
 Configure environment (optional):
 ==================
 
-**1. Secure MySql and set root password:**
+**1. Secure MySql and set root password (only for new MySql installations):**
 
 .. code-block:: sh
 	:linenos:
@@ -738,7 +738,7 @@ Configure environment (optional):
 .. code-block:: sh
 	:linenos:
 
-	mysql -u root -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
+	mysql -u root -p -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
 	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword('oc_admin', 'secretsecret')"
 
 **3. Modify application.yml file for backend:**
@@ -765,8 +765,8 @@ RPM package for RedHat 9.2
 
 .. warning:: 
 
-	We currently do not support rpm package installations in productive use. 
-	We recommend using it for use in a test phase!
+	| We currently do not support deb package installations in productive use. 
+	| We recommend using it for use in a test phase on a clean system!
 
 Prepare environment:
 ==================
@@ -820,7 +820,7 @@ Install Application:
 Configure environment (optional):
 ==================
 
-**1. Secure MySql and set root password:**
+**1. Secure MySql and set root password (only for new MySql installations):**
 
 .. code-block:: sh
 	:linenos:
@@ -835,7 +835,7 @@ Configure environment (optional):
 .. code-block:: sh
 	:linenos:
 
-	mysql -u root -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
+	mysql -u root -p -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
 	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword('oc_admin', 'secretsecret')"
 
 **3. Modify application.yml file for backend:**
