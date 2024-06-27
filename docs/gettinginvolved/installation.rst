@@ -570,14 +570,17 @@ Use default Docker installation guide.
 
 DEB package for Ubuntu 24.04 LTS
 """""""""""""""""
-**Prepare environment:**
 
-1. Update Ubuntu system:
+Prepare environment:
+==================
+
+**1. Update Ubuntu system:**
 
 .. code-block:: sh
 	:linenos:
 
 	apt update
+	apt dist-upgrade
 	apt install curl gnupg
 
 **2. Install MongoDB:**
@@ -586,9 +589,10 @@ DEB package for Ubuntu 24.04 LTS
 | You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 	
 
-**Install Application:**
+Install Application:
+==================
 
-1. Install deb package for OpenCelium:
+**1. Install deb package for OpenCelium:**
 
 .. code-block:: sh
 	:linenos:
@@ -596,7 +600,7 @@ DEB package for Ubuntu 24.04 LTS
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.deb.sh | sudo bash
 	sed -i 's!deb .*!deb [signed-by=/etc/apt/keyrings/becon_opencelium-archive-keyring.gpg] https://packagecloud.io/becon/opencelium/ubuntu noble main!' /etc/apt/sources.list.d/becon_opencelium.list
 	apt update
-	apt install opencelium
+	apt install -y opencelium
 	
 .. note::
 	| Afterwards you can connect to `http://localhost`	
@@ -613,16 +617,17 @@ DEB package for Ubuntu 24.04 LTS
 		journalctl -xe -u opencelium -f
 		
 
-**Configure environment (optional):**
+Configure environment (optional):
+==================
 
-1. Secure MySql and set root password (required for new MySql installations):
+**1. Secure MySql and set root password (required for new MySql installations):**
 
 .. code-block:: sh
 	:linenos:
 
 	mysql_secure_installation
 	
-2. Change user passwords for MySQL and MongoDB:
+**2. Change user passwords for MySQL and MongoDB:**
 
 .. note::
 	Please change the passwords (secret1234, secretsecret) in the following command lines!
@@ -633,7 +638,7 @@ DEB package for Ubuntu 24.04 LTS
 	mysql -u root -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
 	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword('oc_admin', 'secretsecret')"
 
-3. Modify application.yml file for backend:
+**3. Modify application.yml file for backend:**
 
 .. code-block:: sh
 	:linenos:
@@ -644,7 +649,7 @@ DEB package for Ubuntu 24.04 LTS
 	Make changes inside the file application.yml! 
 	Change MongoDB and MySQL database passwords.
 
-4. Restart Opencelium Backend:
+**4. Restart Opencelium Backend:**
 
 .. code-block:: sh
 	:linenos:
