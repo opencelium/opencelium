@@ -19,6 +19,7 @@ import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IConnection} from "../../interfaces/IConnection";
 import {IConnectionRequest} from "../interfaces/IConnection";
+import category from "@entity/category/translations/interpolations/category";
 
 
 export class ConnectionRequest extends Request implements IConnectionRequest{
@@ -63,13 +64,16 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
     }
 
     backendMap(connection: IConnection){
-        let mappedConnection = {
+        let mappedConnection: any = {
             title: connection.title,
             description: connection.description,
             fromConnector: {...connection.fromConnector, invoker: {name: connection.fromConnector.invoker.name}},
             toConnector: {...connection.toConnector, invoker: {name: connection.toConnector.invoker.name}},
             fieldBinding: connection.fieldBinding,
         };
+        if(connection.categoryId) {
+            mappedConnection.categoryId = connection.categoryId;
+        }
         if(connection.id !== 0){
             return {
                 connectionId: connection.id,
