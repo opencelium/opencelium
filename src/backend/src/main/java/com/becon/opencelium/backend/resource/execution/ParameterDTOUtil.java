@@ -209,7 +209,7 @@ public class ParameterDTOUtil {
             Map<String, SchemaDTO> properties = schema.getProperties();
 
             // for empty or null object: ... => n/a
-            validateNotEmptyValue(parameter);
+            validateNotEmptyValue(parameter, CollectionUtils.isEmpty(properties), "properties", properties);
 
             // for paramName = color, paramValue = {"R": 100, "G": 200, "B": 150}
             // if 'explode' = false: ... => R,100,G,200,B,150
@@ -223,7 +223,7 @@ public class ParameterDTOUtil {
             List<SchemaDTO> items = schema.getItems();
 
             // for empty or null array: ... => n/a
-            validateNotEmptyValue(parameter);
+            validateNotEmptyValue(parameter, CollectionUtils.isEmpty(items), "items", items);
 
             // for paramName = color, paramValue = ["blue","black","brown"]
             // if 'explode' = false: ... => blue,black,brown
@@ -237,7 +237,7 @@ public class ParameterDTOUtil {
         // for primitive types (value of 'explode' does not have any effect):
         // if paramValue is empty    : ... => n/a
         // if paramValue is not empty: ... => paramValue
-        validateNotEmptyValue(parameter);
+        validateNotEmptyValue(parameter, ObjectUtils.isEmpty(value), "value", value);
 
         return value;
     }
@@ -263,7 +263,7 @@ public class ParameterDTOUtil {
             List<SchemaDTO> items = schema.getItems();
 
             // for empty or null array: ... => n/a
-            validateNotEmptyValue(parameter);
+            validateNotEmptyValue(parameter, CollectionUtils.isEmpty(items), "items", items);
 
             // for paramName = color, paramValue = ["blue","black","brown"]
             // if 'explode' = false: ... => blue%20black%20brown
@@ -276,7 +276,7 @@ public class ParameterDTOUtil {
         Map<String, SchemaDTO> properties = schema.getProperties();
 
         // for empty or null object: ... => n/a
-        validateNotEmptyValue(parameter);
+        validateNotEmptyValue(parameter, CollectionUtils.isEmpty(properties), "properties", properties);
 
         // for paramName = color, paramValue = {"R": 100, "G": 200, "B": 150}
         // if 'explode' = false: ... => R%20100%20G%20200%20B%20150
@@ -306,7 +306,7 @@ public class ParameterDTOUtil {
             List<SchemaDTO> items = schema.getItems();
 
             // for empty or null array: ... => n/a
-            validateNotEmptyValue(parameter);
+            validateNotEmptyValue(parameter, CollectionUtils.isEmpty(items), "items", items);
 
             // for paramName = color, paramValue = ["blue","black","brown"]
             // if 'explode' = false: ... => blue|black|brown
@@ -319,7 +319,7 @@ public class ParameterDTOUtil {
         Map<String, SchemaDTO> properties = schema.getProperties();
 
         // for empty or null object: ... => n/a
-        validateNotEmptyValue(parameter);
+        validateNotEmptyValue(parameter, CollectionUtils.isEmpty(properties), "properties", properties);
 
         // for paramName = color, paramValue = {"R": 100, "G": 200, "B": 150}
         // if 'explode' = false: ... => R|100|G|200|B|150
@@ -345,7 +345,7 @@ public class ParameterDTOUtil {
         Map<String, SchemaDTO> properties = schema.getProperties();
 
         // for empty or null object: ... => n/a
-        validateNotEmptyValue(parameter);
+        validateNotEmptyValue(parameter, CollectionUtils.isEmpty(properties), "properties", properties);
 
         // for paramName = color, paramValue = {"F1": 100, "F2": [200, 300], "F3": {"F31": 400}}
         // if 'explode' = false: ... => n/a
@@ -433,22 +433,12 @@ public class ParameterDTOUtil {
         throw new IllegalArgumentException(String.format("DataType of '%s' is wrong for parameter.name = '%s' and style = '%s'. DataType should be in [%s]", currentType.getType(), name, currentStyle.getStyle(), dataTypes));
     }
 
-    private static void validateNotEmptyValue(ParameterDTO p) {
+    private static void validateNotEmptyValue(ParameterDTO p, boolean invalid, String field, Object value) {
         SchemaDTO schema = p.getSchema();
         String message = "Parameter should have not empty value, parameter = { name = '%s', location = '%s', style = '%s', schema = { type = '%s', %s = %s}}";
 
-        if (schema.getType() == DataType.OBJECT && CollectionUtils.isEmpty(schema.getProperties())) {
-            message = String.format(message, p.getName(), p.getIn().getLocation(), p.getStyle().getStyle(), schema.getType().getType(), "properties", schema.getProperties());
-            throw new IllegalArgumentException(message);
-        }
-
-        if (schema.getType() == DataType.ARRAY && CollectionUtils.isEmpty(schema.getItems())) {
-            message = String.format(message, p.getName(), p.getIn().getLocation(), p.getStyle().getStyle(), schema.getType().getType(), "items", schema.getItems());
-            throw new IllegalArgumentException(message);
-        }
-
-        if (ObjectUtils.isEmpty(schema.getValue())) {
-            message = String.format(message, p.getName(), p.getIn().getLocation(), p.getStyle().getStyle(), schema.getType().getType(), "value", schema.getValue());
+        if (invalid) {
+            message = String.format(message, p.getName(), p.getIn().getLocation(), p.getStyle().getStyle(), schema.getType().getType(), field, value == null ? "null" : value.toString());
             throw new IllegalArgumentException(message);
         }
     }
