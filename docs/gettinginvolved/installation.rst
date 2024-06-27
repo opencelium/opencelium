@@ -702,7 +702,7 @@ Install Application:
 	:linenos:
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
-	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/sles/15.5/x86_64!' /etc/yum.repos.d/becon_opencelium.repo
+	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/sles/15.5/x86_64!' /etc/zypp/repos.d/becon_opencelium.repo
 	zypper install OpenCelium
 	
 .. note::
