@@ -597,14 +597,21 @@ DEB package for Ubuntu 24.04 LTS
 	sed -i 's!deb .*!deb [signed-by=/etc/apt/keyrings/becon_opencelium-archive-keyring.gpg] https://packagecloud.io/becon/opencelium/ubuntu noble main!' /etc/apt/sources.list.d/becon_opencelium.list
 	apt update
 	apt install opencelium
-
-2. Welcome to OC:
-
-.. code-block:: sh
-	:linenos:
 	
-	Visit opencelium http://SERVERIP
-
+.. note::
+	| Afterwards you can connect to `http://localhost`	
+	| Default User and Password is:
+	
+	| admin@opencelium.io
+	| 1234
+	
+	| If you want to have a look into OpenCelium Logs please use:
+	
+	.. code-block:: sh
+		:linenos:
+		
+		journalctl -xe -u opencelium -f
+		
 
 **Configure environment (optional):**
 
@@ -624,7 +631,7 @@ DEB package for Ubuntu 24.04 LTS
 	:linenos:
 
 	mysql -u root -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
-	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword({user: 'oc_admin', pwd: 'secretsecret'})"
+	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword('oc_admin', 'secretsecret')"
 
 3. Modify application.yml file for backend:
 
@@ -635,7 +642,7 @@ DEB package for Ubuntu 24.04 LTS
 
 .. note::
 	Make changes inside the file application.yml! 
-	Change MongoDB and MySQL database password.
+	Change MongoDB and MySQL database passwords.
 
 4. Restart Opencelium Backend:
 
