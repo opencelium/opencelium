@@ -49,6 +49,9 @@ export class Connection extends HookStateClass implements IConnection{
     @App.inputType
     toConnector: OptionProps;
 
+    @App.inputType
+    categoryId: OptionProps;
+
     mode: any;
 
     fieldBinding: any;
@@ -62,6 +65,7 @@ export class Connection extends HookStateClass implements IConnection{
         this.description = connection?.description || '';
         this.fromConnector = connection?.fromConnector || null;
         this.toConnector = connection?.toConnector || null;
+        this.categoryId = connection?.categoryId || null;
         // @ts-ignore
         this.dispatch = connection.dispatch ? connection.dispatch : useAppDispatch();
     }

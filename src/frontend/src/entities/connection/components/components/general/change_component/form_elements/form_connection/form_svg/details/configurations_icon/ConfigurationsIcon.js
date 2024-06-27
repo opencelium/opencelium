@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {ChangeEvent} from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import Dialog from "@entity/connection/components/components/general/basic_components/Dialog";
@@ -34,7 +34,7 @@ import {
   getAndUpdateConnectionDescription,
   getAndUpdateConnectionTitle
 } from "@root/redux_toolkit/action_creators/ConnectionCreators";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import { ResponseMessages } from "@application/requests/interfaces/IResponse";
 
 function mapStateToProps(state, props) {
   const { connectionOverview, connection } = mapItemsToClasses(state, props.isModal);
@@ -62,27 +62,40 @@ class ConfigurationsIcon extends React.Component {
       description: props?.connection ? props.connection.description: '',
       validationMessageTitle: '',
       validationMessageDescription: '',
+      errorMessage: ''
     };
+    this.flag = true;
+  }
+
+  componentDidUpdate(){
+    if(this.props.errorAction.error && this.flag){
+      this.flag = false;
+      this.setState({errorMessage: this.props.errorAction.message})
+      this.toggleIsVisibleSettingsWindow();
+    }
   }
 
   setTitle(title){
+    const {getTitle} = this.props;
+    getTitle(title)
     this.setState({title, validationMessageTitle: ''});
   }
 
-  setDescription(newDescription){
-    this.setState({description: newDescription, validationMessageDescription: ''});
+  setDescription(description){
+    const {getDescription} = this.props;
+    getDescription(description);
+    this.setState({description, validationMessageDescription: ''});
   }
 
   toggleIsVisibleSettingsWindow() {
     if(!this.state.isVisibleSettingsWindow){
       setFocusById('settings_input_title', 500);
-      this.setState({
-        title: this.props.connection.title,
-        description: this.props.connection.description,
-        validationMessageTitle: '',
-        validationMessageDescription: '',
-
-      })
+      if(!this.state.title || this.props.errorAction.message){
+        this.setState({title: this.state.title ? this.state.title : this.props.connection.title, validationMessageTitle: this.props.errorAction.message ? this.props.errorAction.message : ''})
+      }
+      if(!this.state.description){
+        this.setState({description: this.props.connection.description})
+      }
     }
     this.setState(
       {
@@ -94,6 +107,10 @@ class ConfigurationsIcon extends React.Component {
         }
       }
     );
+    if(this.flag === false && this.props.errorAction.error && this.state.isVisibleSettingsWindow){
+      this.flag = true;
+      this.props.errorAction.error = '';
+    }
   }
 
   onChangeColorMode(colorMode) {
@@ -115,23 +132,6 @@ class ConfigurationsIcon extends React.Component {
       isModal, getAndUpdateConnectionDescription, getAndUpdateConnectionTitle,
       updateConnection,
     } = this.props;
-    if(connection.id) {
-      const connectionObj = connection.getObject();
-      if (title === '') {
-        this.setState({validationMessageTitle: 'Title is a required field'});
-        setFocusById('settings_input_title');
-        return;
-      }
-      if (title !== connection.title) {
-        connection.title = title;
-        connection.description = description;
-        getAndUpdateConnectionTitle({...connectionObj, title, description});
-      } else if (description !== connection.description) {
-        connection.description = description;
-        getAndUpdateConnectionDescription({...connectionObj, description});
-      }
-      updateConnection(connection);
-    }
     if(isModal){
       setModalPanelConfigurations({
         colorMode,
@@ -143,11 +143,53 @@ class ConfigurationsIcon extends React.Component {
         processTextSize,
       });
     }
-    this.setState({
-      title: '',
-      description: '',
-    })
-    this.toggleIsVisibleSettingsWindow();
+    const specialCharacters = /[\/\\]/;
+    if(connection.id) {
+      const connectionObj = connection.getObject();
+      if (title === '') {
+        this.setState({validationMessageTitle: 'Title is a required field'});
+        setFocusById('settings_input_title');
+        return;
+      }
+      else if(specialCharacters.test(title)){
+        this.setState({validationMessageTitle: 'Title cannot contain \"/\" and \"\\\" characters'})
+        setFocusById('settings_input_title');
+        return;
+      }
+      else if (title !== connection.title) {
+        connection.title = title;
+        connection.description = description;
+        
+        getAndUpdateConnectionTitle({...connectionObj, title, description}).then((data) => {
+          if(data.payload.message === ResponseMessages.CONNECTOR_EXISTS){
+            this.setState({validationMessageTitle: 'Connection with such title already exist'});
+            return
+          }
+          else{
+            this.setState({
+              title: '',
+              description: '',
+            })
+            this.toggleIsVisibleSettingsWindow();
+          }
+          updateConnection(connection);
+        });
+
+      } else if (description !== connection.description) {
+        connection.description = description;
+        getAndUpdateConnectionDescription({...connectionObj, description});
+        updateConnection(connection);
+        this.setState({
+          title: '',
+          description: '',
+        })
+        this.toggleIsVisibleSettingsWindow();
+      }
+      else if(title === connection.title){
+        this.toggleIsVisibleSettingsWindow();
+        updateConnection(connection);
+      }
+    }
   }
 
   render() {

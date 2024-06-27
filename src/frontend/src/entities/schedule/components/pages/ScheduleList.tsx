@@ -27,6 +27,7 @@ import {getAllSchedules} from "../../redux_toolkit/action_creators/ScheduleCreat
 import {SchedulePermissions} from '../../constants';
 import {CurrentSchedules} from "../../components/current_schedules/CurrentSchedules";
 import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
+import { Category } from '@entity/category/classes/Category';
 
 const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)(({hasTopBar, isReadonly, hasTitle}) => {
     const dispatch = useAppDispatch();
@@ -34,14 +35,26 @@ const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)
     const {elasticSearchCheckResults} = ExternalApplication.getReduxState();
     const hasElasticSearch = elasticSearchCheckResults && elasticSearchCheckResults.status === APP_STATUS_UP;
     const {gettingAllSchedules, schedules, deletingSchedulesById, updatingSchedule} = Schedule.getReduxState();
+    const { activeCategory } = Category.getReduxState();
+
     useEffect(() => {
         dispatch(getAllSchedules());
         dispatch(checkMongoDB());
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
-    }, [schedules])
-    const CSchedules = new Schedules(schedules, dispatch, deletingSchedulesById, isReadonly, hasElasticSearch, updatingSchedule);
+    }, [schedules]);
+
+    let filteredSchedules;
+    if(activeCategory){
+        filteredSchedules = schedules.filter(c => c.connection.title === activeCategory || activeCategory === 'All')
+    }
+    else{
+        filteredSchedules = schedules;
+    }
+
+
+    const CSchedules = new Schedules(filteredSchedules, dispatch, deletingSchedulesById, isReadonly, hasElasticSearch, updatingSchedule);
     return (
         <React.Fragment>
             <CollectionView defaultViewType={ViewType.LIST} hasViewSection={false} hasTopBar={hasTopBar} hasTitle={hasTitle} shouldBeUpdated={shouldBeUpdated} collection={CSchedules} isLoading={gettingAllSchedules === API_REQUEST_STATE.START} componentPermission={SchedulePermissions}/>

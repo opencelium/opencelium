@@ -53,6 +53,7 @@ export const LogPanelHeight = {
 };
 
 export interface ConnectionState extends ICommonState {
+  categoryId: number;
   isAnimationForcedToStop: boolean,
   isAnimationNotFound: boolean;
   animationSpeed: number;
@@ -100,6 +101,7 @@ export interface ConnectionState extends ICommonState {
 }
 
 let initialState: ConnectionState = {
+  categoryId: null,
   isAnimationForcedToStop: false,
   isAnimationNotFound: false,
   animationSpeed: AnimationFunctionSteps.DefaultSpeed,

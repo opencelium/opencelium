@@ -24,11 +24,13 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
 import { ConnectionPermissions } from '@entity/connection/constants';
 import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
+import { Category } from '@entity/category/classes/Category';
 
 const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
     const {gettingMetaConnections, metaConnections, deletingConnectionsById, updatingConnection} = Connection.getReduxState();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
+    const { activeCategory } = Category.getReduxState();
     useEffect(() => {
         dispatch(getAllMetaConnections());
         dispatch(checkMongoDB());
@@ -36,7 +38,14 @@ const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
     }, [metaConnections])
-    const CConnections = new Connections(metaConnections, dispatch, deletingConnectionsById, updatingConnection);
+    let filteredConnections;
+    if(activeCategory){
+        filteredConnections = metaConnections.filter(c => c.title === activeCategory || activeCategory === 'All')
+    }
+    else{
+        filteredConnections = metaConnections;
+    }
+    const CConnections = new Connections(filteredConnections, dispatch, deletingConnectionsById, updatingConnection);
     return (
         <CollectionView collection={CConnections} shouldBeUpdated={shouldBeUpdated} isLoading={gettingMetaConnections === API_REQUEST_STATE.START} componentPermission={ConnectionPermissions}/>
     )

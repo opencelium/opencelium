@@ -34,6 +34,7 @@ const CONNECTOR_READONLY = {name: 'connectors_readonly', type: 'connectors', ico
 const MODE = {name: 'mode', type: 'connection_mode'};
 const METHODS = {name: 'methods', type: 'methods', icon: 'device_hub'};
 const CONNECTION_SVG = {name: 'methods', type: 'connection_svg', icon: 'device_hub'};
+const CATEGORY = {name: 'categoryId', type: 'category', icon: 'category'};
 const ICONNECTION = {
     CONNECTION_TITLE,
     CONNECTOR,
@@ -41,6 +42,7 @@ const ICONNECTION = {
     MODE,
     METHODS,
     CONNECTION_SVG,
+    CATEGORY,
 };
 
 //CONNECTOR

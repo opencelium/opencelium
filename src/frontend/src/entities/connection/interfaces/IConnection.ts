@@ -43,6 +43,7 @@ export interface IConnection extends IConnectionForm{
     mode?: boolean;
     fieldBinding?: any;
     dataAggregator?: any,
+    categoryId?: OptionProps;
     getObjectForBackend?(): any;
 }
 
