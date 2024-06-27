@@ -7,6 +7,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.service.*;
+import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.mongo.FieldBindingMngMapper;
@@ -22,6 +23,7 @@ import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
+import com.becon.opencelium.backend.utility.StringUtility;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -148,6 +150,20 @@ public abstract class HelperMapper {
     public InvokerDTO getInvokerDTO(String invoker) {
         try {
             return invokerMapper.toDTO(invokerService.findByName(invoker));
+        } catch (Exception e) {
+            return new InvokerDTO();
+        }
+    }
+
+    @Named("getInvokerMeta")
+    public InvokerDTO getInvokerMeta(String invoker) {
+        try {
+            Invoker inv = invokerService.findByName(invoker);
+            InvokerDTO invokerDTO = new InvokerDTO();
+            invokerDTO.setName(inv.getName());
+            invokerDTO.setDescription(inv.getDescription());
+            invokerDTO.setIcon(StringUtility.resolveImagePath(inv.getIcon()));
+            return invokerDTO;
         } catch (Exception e) {
             return new InvokerDTO();
         }
