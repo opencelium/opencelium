@@ -30,7 +30,7 @@ const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions
     const dispatch = useAppDispatch();
     const {gettingMetaConnections, metaConnections, deletingConnectionsById, updatingConnection} = Connection.getReduxState();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
-    const { activeCategory } = Category.getReduxState();
+    const { activeCategory, categories } = Category.getReduxState();
     useEffect(() => {
         dispatch(getAllMetaConnections());
         dispatch(checkMongoDB());
@@ -40,7 +40,7 @@ const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions
     }, [metaConnections])
     let filteredConnections;
     if(activeCategory){
-        filteredConnections = metaConnections.filter(c => c.title === activeCategory || activeCategory === 'All')
+        filteredConnections = Category.getRecursivelyConnectionsByCategory(metaConnections, categories, activeCategory.id);
     }
     else{
         filteredConnections = metaConnections;

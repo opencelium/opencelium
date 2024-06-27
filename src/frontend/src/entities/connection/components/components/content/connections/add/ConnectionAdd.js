@@ -37,6 +37,7 @@ import {useNavigate} from "react-router";
 import {ConnectionPermissions} from "@entity/connection/constants";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {useAppDispatch} from "@application/utils/store";
+import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 
 
 function mapStateToProps(state){
@@ -87,6 +88,7 @@ export default function(props) {
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
+            dispatch(getAllCategories());
         }
     }, []);
     return <ConnectionAdd {...props} navigate={navigate} />;

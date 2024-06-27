@@ -19,7 +19,7 @@ export interface CategoryModel{
   id?: number;
   name: string;
   parentCategory?: string | number | OptionProps;
-  subCategories?: CategoryModel[] | string[] | number[];
+  subCategories?: number[];
 }
 
 // export interface SubCategoryModel{

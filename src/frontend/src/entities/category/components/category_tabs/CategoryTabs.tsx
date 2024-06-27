@@ -23,28 +23,26 @@ import { ICategory } from "@entity/category/interfaces/ICategory";
 import { API_REQUEST_STATE, TRIPLET_STATE } from "@application/interfaces/IApplication";
 import { useAppDispatch } from "@application/utils/store";
 import { getAllCategories, addCategory, deleteCategoryById, deleteCategoriesById, getCategoryById, updateCategory } from '@entity/category/redux_toolkit/action_creators/CategoryCreators';
-import { setActiveCategory } from "@entity/category/redux_toolkit/slices/CategorySlice";
+import {setActiveCategory, setActiveTab} from "@entity/category/redux_toolkit/slices/CategorySlice";
 import { CategoryModel } from "@entity/category/requests/models/CategoryModel";
 import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
 import { CategoryTabsProps } from "./interfaces";
 import Checkbox from "@entity/connection/components/components/general/basic_components/inputs/Checkbox";
+import {add} from "lodash";
 
 const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
 
   const [tabs, setTabs] = useState<CategoryModel[]>([]);
-  const [activeTab, setActiveTab] = useState('All');
   const [visibleAddCategoryDialog, setVisibleAddCategoryDialog] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [tabForRemove, setTabForRemove] = useState<any>({});
   const [breadcrumbs, setBreadcrumbs] = useState([{name: 'All'}]);
   const [removeRecursively, setRemoveRecursively] = useState(false);
 
-
   const {
     checkingCategoryName, isCurrentCategoryHasUniqueName, categories, activeCategory,
-    gettingCategories,
+    gettingCategories, addingCategory, deletingCategoryById, activeTab,
   } = Category.getReduxState();
-
 
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -53,10 +51,14 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
     setTabs([{name: 'All'}, ...categoriesWithNullParent])*/
   }, [])
   useEffect(() => {
-    if(gettingCategories === API_REQUEST_STATE.FINISH) {
+    if(gettingCategories === API_REQUEST_STATE.FINISH || addingCategory === API_REQUEST_STATE.FINISH || deletingCategoryById === API_REQUEST_STATE.FINISH) {
       setTabs([{name: 'All'}, ...categories]);
     }
-  }, [gettingCategories]);
+    if (addingCategory === API_REQUEST_STATE.FINISH) {
+      category.name = '';
+      category.parentSelect = null;
+    }
+  }, [gettingCategories, addingCategory, deletingCategoryById]);
 
   const category = Category.createState<ICategory>();
 
@@ -112,12 +114,9 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
       });
       dispatch(deleteCategoryById(data.id))
     }
-
-    setActiveTab(activeTab);
-    dispatch(setActiveCategory(activeTab))
     if(activeTab === removedTab){
-      setActiveTab('All');
-      dispatch(setActiveCategory('All'))
+      dispatch(setActiveTab('All'));
+      dispatch(setActiveCategory(null))
     }
     setShowConfirmDelete(false);
     setRemoveRecursively(false);
@@ -129,19 +128,20 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
       if(tab.subCategories){
         const matchedCategories = categories.filter(category => tab.subCategories.includes(category.id));
         setTabs([{name: 'All'}, ...matchedCategories])
-        setActiveTab('All');
+        dispatch(setActiveTab('All'));
       }
       else{
-        setActiveTab(tabName);
+        dispatch(setActiveTab(tabName));
       }
+      dispatch(setActiveCategory(categories.find(c => c.name === tabName)));
     }
     else{
       const categoriesWithNullParent = categories.filter(category => category.parentCategory === null);
       setTabs([{name: 'All'}, ...categoriesWithNullParent])
-      setActiveTab('All');
+      dispatch(setActiveTab('All'));
+      dispatch(setActiveCategory(activeCategory.parentCategory ? categories.find(c => c.id === activeCategory.parentCategory) : null));
     }
 
-    dispatch(setActiveCategory(tabName));
     bc(tab)
   };
 
@@ -191,10 +191,6 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
     }
     dispatch(addCategory(data));
     setVisibleAddCategoryDialog(!visibleAddCategoryDialog);
-    category.name = '';
-    category.parentSelect = null;
-    setActiveTab(activeTab);
-    dispatch(setActiveCategory(activeTab))
   }
 
   return (

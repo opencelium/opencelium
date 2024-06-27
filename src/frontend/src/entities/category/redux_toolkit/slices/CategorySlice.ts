@@ -44,7 +44,8 @@ export interface CategoryState extends ICommonState{
   deletingCategoryById: API_REQUEST_STATE,
   deletingCategoriesById: API_REQUEST_STATE,
   currentCategory: CategoryModel,
-  activeCategory: string,
+  activeCategory: CategoryModel,
+  activeTab: string,
 }
 
 const initialState: CategoryState = {
@@ -62,6 +63,7 @@ const initialState: CategoryState = {
   deletingCategoriesById: API_REQUEST_STATE.INITIAL,
   currentCategory: null,
   activeCategory: null,
+  activeTab: '',
   ...CommonState,
 }
 
@@ -71,6 +73,9 @@ export const categorySlice = createSlice({
     reducers: {
       setActiveCategory: (state, action: PayloadAction<any>) => {
         state.activeCategory = action.payload;
+      },
+      setActiveTab: (state, action: PayloadAction<string>) => {
+        state.activeTab = action.payload;
       },
     },
     extraReducers: {
@@ -199,7 +204,7 @@ export const categorySlice = createSlice({
 })
 
 export const {
-  setActiveCategory
+  setActiveCategory, setActiveTab
 } = categorySlice.actions;
 
 export default categorySlice.reducer;

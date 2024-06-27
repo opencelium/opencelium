@@ -47,7 +47,7 @@ const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)
 
     let filteredSchedules;
     if(activeCategory){
-        filteredSchedules = schedules.filter(c => c.connection.title === activeCategory || activeCategory === 'All')
+        //filteredSchedules = schedules.filter(c => c.connection.title === activeCategory || activeCategory === 'All')
     }
     else{
         filteredSchedules = schedules;

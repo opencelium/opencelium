@@ -26,6 +26,8 @@ import Tool from "@entity/schedule/classes/Tool";
 import { Category } from "@entity/category/classes/Category";
 import { ICategory } from "@entity/category/interfaces/ICategory";
 import { capitalize } from "@application/utils/utils";
+import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
+import {useAppDispatch} from "@application/utils/store";
 
 const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const {
@@ -34,7 +36,8 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         gettingCategory,
         categories
     } = Category.getReduxState();
-    const {gettingAllTools, tools} = Tool.getReduxState();    
+    const dispatch = useAppDispatch();
+    const {gettingAllTools, tools} = Tool.getReduxState();
     const didMount = useRef(false);
     let navigate = useNavigate();
     let urlParams = useParams();
@@ -45,7 +48,7 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     if(shouldFetchCategory){
         categoryId = parseInt(urlParams.id);
     }
-    
+
 
     const initialCategory = useMemo(() => {
         if(!currentCategory){
@@ -61,6 +64,7 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         if(shouldFetchCategory){
             category.getById()
         }
+        dispatch(getAllCategories());
     },[]);
 
     useEffect(() => {
@@ -102,7 +106,7 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             isLoading={addingCategory === API_REQUEST_STATE.START || updatingCategory === API_REQUEST_STATE.START}
         />);
     }
-    
+
     const data = {
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: formData.formTitle}],
         actions,

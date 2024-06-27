@@ -64,7 +64,7 @@ export interface ConnectionState extends ICommonState {
   isButtonPanelOpened: boolean;
   moveTestButton: number;
   connections: IConnection[];
-  metaConnections: IConnection[];
+  metaConnections: any[];
   isCurrentConnectionHasUniqueTitle: TRIPLET_STATE;
   checkingConnectionTitle: API_REQUEST_STATE;
   testingConnection: API_REQUEST_STATE;

@@ -21,16 +21,16 @@ import {RootState} from "@application/utils/store";
 import {useAppSelector} from "@application/utils/store";
 import {InputTextProps} from "@app_component/base/input/text/interfaces";
 import {InputSelectProps, OptionProps} from "@app_component/base/input/select/interfaces";
-import { 
-    ICategory, 
-    ICategoryText, 
-    ICategorySelect 
+import {
+    ICategory,
+    ICategoryText,
+    ICategorySelect
 } from "@entity/category/interfaces/ICategory";
-import { 
-    addCategory, 
-    getCategoryById, 
-    updateCategory, 
-    deleteCategoryById 
+import {
+    addCategory,
+    getCategoryById,
+    updateCategory,
+    deleteCategoryById
 } from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 import { CategoryModel } from "@entity/category/requests/models/CategoryModel";
 import { capitalize } from "@application/utils/utils";
@@ -81,9 +81,9 @@ export class Category extends HookStateClass implements ICategory{
                 };
             }
         }
-            
+
         const transformedCategories = categories
-        .filter(category => category.parentCategory === null)
+        .filter(category => !category.parentCategory)
         .map(transformCategory);
 
         return transformedCategories;
@@ -101,6 +101,22 @@ export class Category extends HookStateClass implements ICategory{
 
     static getReduxState(){
         return useAppSelector((state: RootState) => state.categoryReducer);
+    }
+
+    static getRecursivelyConnectionsByCategory(connections: any[], categories: CategoryModel[], categoryId: number) {
+        let result: any[] = [];
+        const getSubCategoriesByCategory = (id: number) => {
+            let ids: any[] = [];
+            const category = categories.find(c => c.id === id);
+            if (category) {
+                for (let i = 0; i < category?.subCategories?.length; i++) {
+                    ids = [...ids, ...getSubCategoriesByCategory(category.subCategories[i])];
+                }
+            }
+            return category.subCategories;
+        }
+        const categoryIds = getSubCategoriesByCategory(categoryId);
+        return connections.filter(c => categoryIds.indexOf(c.categoryId) !== -1);
     }
 
     getText(data: IInput<ICategoryText, InputTextProps>):ReactElement{
