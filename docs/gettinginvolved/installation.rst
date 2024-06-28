@@ -682,11 +682,6 @@ Prepare environment:
 	zypper refresh
 	zypper update
 	
-.. note::
-	You may need to install the EPEL repository for your system to install these packages. 
-	If you do not install pygpgme, GPG verification will not work.
-	In this case, you can install OpenCelium without GPG verification (see note at installation section).
-
 **2. Install MongoDB:**
 
 | Use default MongoDB installation guide.
@@ -801,6 +796,27 @@ Install Application:
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
 	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/fedora/40/x86_64!' /etc/yum.repos.d/becon_opencelium.repo
 	yum install -y OpenCelium
+	
+.. note::
+	**Install Application without pygpgme:**
+
+	1. Install rpm package for OpenCelium:
+
+	.. code-block:: sh
+		:linenos:
+	
+		cat << EOF >  /etc/yum.repos.d/becon_opencelium.repo
+		[becon_opencelium]
+		name=becon_opencelium
+		baseurl=https://packagecloud.io/becon/opencelium/fedora/40/x86_64
+		repo_gpgcheck=0
+		gpgcheck=0
+		enabled=1
+		sslverify=1
+		sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+		metadata_expire=300
+		EOF
+		yum install OpenCelium
 	
 .. note::
 	| Afterwards you can connect to `http://localhost`	
