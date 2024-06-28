@@ -25,15 +25,15 @@ import Tool from "@entity/schedule/classes/Tool";
 
 import { Category } from "@entity/category/classes/Category";
 import { ICategory } from "@entity/category/interfaces/ICategory";
-import { capitalize } from "@application/utils/utils";
 import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 import {useAppDispatch} from "@application/utils/store";
+import {setCurrentCategory} from "@entity/category/redux_toolkit/slices/CategorySlice";
 
 const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const {
         addingCategory, currentCategory, updatingCategory,
         checkingCategoryName, isCurrentCategoryHasUniqueName, error,
-        gettingCategory,
+        gettingCategory, gettingCategories,
         categories
     } = Category.getReduxState();
     const dispatch = useAppDispatch();
@@ -48,8 +48,6 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     if(shouldFetchCategory){
         categoryId = parseInt(urlParams.id);
     }
-
-
     const initialCategory = useMemo(() => {
         if(!currentCategory){
             return null;
@@ -59,13 +57,20 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         };
     }, [currentCategory]);
 
-    const category = Category.createState<ICategory>({id: categoryId, _readOnly: isView}, isAdd ? null : initialCategory);
+    const category = Category.createState<ICategory>({id: categoryId, _readOnly: isView}, !isAdd ? initialCategory : null);
     useEffect(() => {
         if(shouldFetchCategory){
             category.getById()
         }
         dispatch(getAllCategories());
     },[]);
+    useEffect(() => {
+        if(gettingCategories === API_REQUEST_STATE.FINISH) {
+            if(currentCategory && currentCategory.parentCategory) {
+                setCurrentCategory({...currentCategory, parentCategory: categories.find(c => c.id === currentCategory.parentCategory)});
+            }
+        }
+    }, [gettingCategories]);
 
     useEffect(() => {
         if (didMount.current) {

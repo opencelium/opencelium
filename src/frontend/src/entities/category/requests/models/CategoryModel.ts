@@ -18,7 +18,7 @@ import { OptionProps } from "@app_component/base/input/select/interfaces";
 export interface CategoryModel{
   id?: number;
   name: string;
-  parentCategory?: string | number | OptionProps;
+  parentCategory?: string | number | CategoryModel;
   subCategories?: number[];
 }
 

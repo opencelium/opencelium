@@ -72,7 +72,7 @@ export const updateCategory = createAsyncThunk(
                 }
             } */
 
-            const request = new CategoryRequest();
+            const request = new CategoryRequest({endpoint: `/${category.id}`});
             const response = await request.updateCategory(category);
             return response.data;
         } catch(e){

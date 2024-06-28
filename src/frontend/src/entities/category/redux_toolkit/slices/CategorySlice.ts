@@ -77,6 +77,9 @@ export const categorySlice = createSlice({
       setActiveTab: (state, action: PayloadAction<string>) => {
         state.activeTab = action.payload;
       },
+      setCurrentCategory: (state, action:PayloadAction<CategoryModel>) => {
+        state.currentCategory = action.payload;
+      }
     },
     extraReducers: {
       [checkCategoryName.pending.type]: (state) => {
@@ -207,7 +210,7 @@ export const categorySlice = createSlice({
 })
 
 export const {
-  setActiveCategory, setActiveTab
+  setActiveCategory, setActiveTab, setCurrentCategory
 } = categorySlice.actions;
 
 export default categorySlice.reducer;
