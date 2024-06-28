@@ -123,6 +123,16 @@ public class ConnectionController {
     public ResponseEntity<?> getAllMeta() {
         List<Connection> connections = connectionService.findAll();
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
+        //unnecessary fields
+        connectionResources.forEach(c->{
+            c.getFromConnector().setRequestData(null);
+            c.getFromConnector().getInvoker().setOperations(null);
+            c.getFromConnector().getInvoker().setRequiredData(null);
+
+            c.getToConnector().setRequestData(null);
+            c.getToConnector().getInvoker().setOperations(null);
+            c.getToConnector().getInvoker().setRequiredData(null);
+        });
         return ResponseEntity.ok(connectionResources);
     }
 
