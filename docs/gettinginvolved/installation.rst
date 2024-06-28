@@ -484,40 +484,8 @@ Ansible
 """""""""""""""""
 
 .. note::
-	Only available for Ubuntu systems (tested on 22.04 LTS)!
-
-**Prepare environment:**
-
-1. Install Ansible:
-
-.. code-block:: sh
-	:linenos:
+	Currently in rework.
 	
-	add-apt-repository ppa:ansible/ansible
-	apt install ansible
-
-2. Get oc playbook:
-
-.. code-block:: sh
-	:linenos:
-
-	mkdir /etc/ansible
-	git clone https://github.com/opencelium/ansible.git /etc/ansible/
-
-3. Download application files
-
-.. code-block:: sh
-	:linenos:
-
-	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /etc/ansible/opencelium/files/
-
-4. Run playbook
-
-.. code-block:: sh
-	:linenos:
-
-	ansible-playbook --connection=local /etc/ansible/install_oc.yml
-
 
 Docker Compose
 """""""""""""""""
@@ -816,7 +784,7 @@ Install Application:
 		sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 		metadata_expire=300
 		EOF
-		yum install OpenCelium
+		yum install -y OpenCelium
 	
 .. note::
 	| Afterwards you can connect to `http://localhost`	
