@@ -112,6 +112,9 @@ export const categorySlice = createSlice({
           }
         }
 
+        if (state.activeCategory) {
+          state.activeCategory = state.categories.find(c => c.id === state.activeCategory.id) || state.activeCategory;
+        }
         state.error = null;
       },
       [addCategory.rejected.type]: (state, action: PayloadAction<IResponse>) => {

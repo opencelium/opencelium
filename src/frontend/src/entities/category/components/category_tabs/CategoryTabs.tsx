@@ -48,17 +48,25 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
   useEffect(() => {
     dispatch(getAllCategories());/*
     const categoriesWithNullParent = categories.filter(category => category.parentCategory === null);
-    setTabs([{name: 'All'}, ...categoriesWithNullParent])*/
+    setTabs([{name: 'All'} , ...categoriesWithNullParent])*/
   }, [])
   useEffect(() => {
     if(gettingCategories === API_REQUEST_STATE.FINISH || addingCategory === API_REQUEST_STATE.FINISH || deletingCategoryById === API_REQUEST_STATE.FINISH) {
-      setTabs([{name: 'All'}, ...categories]);
+      const newTabs = activeCategory ? categories.filter(c => activeCategory.subCategories.indexOf(c.id) !== -1) : categories.filter(category => !category.parentCategory);
+      setTabs([{name: 'All'}, ...newTabs]);
     }
     if (addingCategory === API_REQUEST_STATE.FINISH) {
       category.name = '';
       category.parentSelect = null;
     }
   }, [gettingCategories, addingCategory, deletingCategoryById]);
+
+  useEffect(() => {
+    bc()
+    if(activeCategory){
+      category.parentSelect = categoriesOptions.find(c => c.value === activeCategory.id);
+    }
+  }, [activeCategory]);
 
   const category = Category.createState<ICategory>();
 
@@ -73,14 +81,13 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
 
     }
   })
-
+  const categoriesOptions = Category.getOptionsForCategorySelect(categories);
   const ParentCategory = category.getSelect({propertyName: 'parentSelect', props: {
     icon: 'category',
     label: 'Parent Category',
-    options: Category.getOptionsForCategorySelect(categories),
+    options: categoriesOptions,
     required: false,
     categoryList: true,
-
   }})
 
   const removeTab = (data: any, removeRecursively = false) => {
@@ -136,13 +143,14 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
       dispatch(setActiveCategory(categories.find(c => c.name === tabName)));
     }
     else{
-      const categoriesWithNullParent = categories.filter(category => category.parentCategory === null);
-      setTabs([{name: 'All'}, ...categoriesWithNullParent])
+      const newActiveCategory = activeCategory.parentCategory ? categories.find(c => c.id === activeCategory.parentCategory) : null;
+      const categoriesWithNullParent = categories.filter(category => !category.parentCategory);
+      const newTabs = !newActiveCategory ? categoriesWithNullParent : categories.filter(c => newActiveCategory.subCategories.indexOf(c.id) !== -1)
+      setTabs([{name: 'All'}, ...newTabs])
       dispatch(setActiveTab('All'));
-      dispatch(setActiveCategory(activeCategory.parentCategory ? categories.find(c => c.id === activeCategory.parentCategory) : null));
+      dispatch(setActiveCategory(newActiveCategory));
     }
 
-    bc(tab)
   };
 
   const findParentCategories: any = (categories: any, id: any) => {
@@ -159,19 +167,16 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
     return result;
   };
 
-  const bc = (tab: any) => {
+  const bc = () => {
     let breadcrumbs = [{name: 'All'}];
-    if(tab){
-      if(tab.name !== 'All'){
-        if(tab.parentCategory){
-          const category = findParentCategories(categories, tab.id)
-          category.reverse().forEach((element: any) => {
-            breadcrumbs.push({name: element.name})
-          });
-        }
-        else{
-          breadcrumbs.push({name: tab.name})
-        }
+    if(activeCategory){
+      if(activeCategory.parentCategory){
+        const category = findParentCategories(categories, activeCategory.id)
+        category.reverse().forEach((element: any) => {
+          breadcrumbs.push({name: element.name})
+        });
+      } else{
+        breadcrumbs.push({name: activeCategory.name})
       }
     }
     setBreadcrumbs(breadcrumbs)

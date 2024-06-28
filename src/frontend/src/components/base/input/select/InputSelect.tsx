@@ -207,20 +207,22 @@ const InputSelect: FC<InputSelectProps> = ({
         const flattenedCategories: any = [];
 
         const flattenCategories = (category: any, indentLevel = 0) => {
-            const { label, value, subCategories } = category;
-            flattenedCategories.push({ label, value, indentLevel, subCategories });
+            if (category) {
+                const {label, value, subCategories} = category;
+                flattenedCategories.push({label, value, indentLevel, subCategories});
 
-            if (subCategories) {
-            subCategories.forEach((subCategory: any) => {
-                flattenCategories(subCategory, indentLevel + 1 );
-            });
+                if (subCategories) {
+                    subCategories.forEach((subCategory: any) => {
+                        flattenCategories(subCategory, indentLevel + 1);
+                    });
+                }
             }
         };
 
         categories.forEach((category: any) => {
             flattenCategories(category);
         });
-      
+
         return flattenedCategories
     };
     const hasIcon = !!icon;
@@ -245,7 +247,7 @@ const InputSelect: FC<InputSelectProps> = ({
     const hasSearchInput = isSearchable && (!readOnly || !isMultiple);
 
 
-    
+
 
     return(
         <Input checkboxProps={checkboxProps} className={className} paddingLeft={hasIcon && isIconInside ? '30px' : '0'} componentRef={inputRef} noIcon={!hasIcon} hasUnderline={false} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
@@ -306,7 +308,7 @@ const InputSelect: FC<InputSelectProps> = ({
             </OptionsStyled>}
             {categoryList && <OptionsStyled categoryList={categoryList} ref={selectRef} isVisible={isHidden} height={height} color={ColorTheme.DarkBlue}>
                 {
-                    
+
                     localOptions.length > 0 ? CategoryList(localOptions).map((option:any, key:any) => {
                         return (
                             <Option key={option.value}

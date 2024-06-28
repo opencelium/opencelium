@@ -35,6 +35,7 @@ import {
 import { CategoryModel } from "@entity/category/requests/models/CategoryModel";
 import { capitalize } from "@application/utils/utils";
 import { useAppDispatch } from "@application/utils/store";
+import category from "@entity/category/translations/interpolations/category";
 
 
 export class Category extends HookStateClass implements ICategory{
@@ -106,14 +107,14 @@ export class Category extends HookStateClass implements ICategory{
     static getRecursivelyConnectionsByCategory(connections: any[], categories: CategoryModel[], categoryId: number) {
         let result: any[] = [];
         const getSubCategoriesByCategory = (id: number) => {
-            let ids: any[] = [];
+            let ids: any[] = [id];
             const category = categories.find(c => c.id === id);
             if (category) {
                 for (let i = 0; i < category?.subCategories?.length; i++) {
                     ids = [...ids, ...getSubCategoriesByCategory(category.subCategories[i])];
                 }
             }
-            return category.subCategories;
+            return ids;
         }
         const categoryIds = getSubCategoriesByCategory(categoryId);
         return connections.filter(c => categoryIds.indexOf(c.categoryId) !== -1);
