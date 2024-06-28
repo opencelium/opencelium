@@ -16,8 +16,7 @@ import org.mapstruct.ReportingPolicy;
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
         uses = {
-                HelperMapper.class,
-                RequestDataMapper.class
+                HelperMapper.class
         },
         imports = {
                 StringUtility.class
@@ -29,9 +28,9 @@ public interface ConnectorResourceMapper extends Mapper<Connector, ConnectorReso
     @Mappings({
             @Mapping(target = "connectorId", source = "id"),
             @Mapping(target = "icon", expression = "java(StringUtility.resolveImagePath(entity.getIcon()))"),
-            @Mapping(target = "invoker", qualifiedByName = {"helperMapper", "getInvokerDTO"}),
-            @Mapping(target = "requestData", qualifiedByName = {"requestDataMapper", "toDTO"}),
-            @Mapping(target = "sslCert", source = "sslValidation")
+            @Mapping(target = "invoker", qualifiedByName = {"helperMapper", "getInvokerMeta"}),
+            @Mapping(target = "sslCert", source = "sslValidation"),
+            @Mapping(target = "requestData", ignore = true)
     })
     ConnectorResource toDTO(Connector entity);
 
@@ -39,9 +38,8 @@ public interface ConnectorResourceMapper extends Mapper<Connector, ConnectorReso
             @Mapping(target = "id", source = "connectorId"),
             @Mapping(target = "invoker", source = "invoker.name"),
             @Mapping(target = "icon", expression = "java(StringUtility.findImageFromUrl(dto.getIcon()))"),
-            @Mapping(target = "requestData", expression = "java(helperMapper.processRequestData(dto))"),
-            @Mapping(target = "sslValidation", source = "sslCert")
+            @Mapping(target = "sslValidation", source = "sslCert"),
+            @Mapping(target = "requestData", ignore = true)
     })
     Connector toEntity(ConnectorResource dto);
-
 }
