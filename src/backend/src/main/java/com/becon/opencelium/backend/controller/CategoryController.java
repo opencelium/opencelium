@@ -148,7 +148,7 @@ public class CategoryController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping("/list/delete")
+    @PutMapping("/list/delete")
     public ResponseEntity<?> deleteFromList(@RequestBody IdentifiersDTO<Integer> ids) {
         categoryService.deleteAll(ids.getIdentifiers());
         return ResponseEntity.noContent().build();
