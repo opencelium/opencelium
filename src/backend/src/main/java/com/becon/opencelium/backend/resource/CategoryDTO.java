@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.resource.schedule;
+package com.becon.opencelium.backend.resource;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;

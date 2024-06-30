@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.database.mysql.entity.Category;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.repository.CategoryRepository;
-import com.becon.opencelium.backend.resource.schedule.CategoryDTO;
+import com.becon.opencelium.backend.resource.CategoryDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
