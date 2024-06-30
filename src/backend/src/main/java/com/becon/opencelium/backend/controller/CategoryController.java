@@ -3,9 +3,10 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.database.mysql.entity.Category;
 import com.becon.opencelium.backend.database.mysql.service.CategoryService;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.CategoryResponseDTO;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.resource.schedule.CategoryDTO;
+import com.becon.opencelium.backend.resource.CategoryDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,14 +31,14 @@ import java.util.List;
 @Tag(name = "Category", description = "Manages operations related to Category management")
 public class CategoryController {
     private final CategoryService categoryService;
-    private final Mapper<Category, CategoryDTO> categoryMapper;
+    private final Mapper<Category, CategoryResponseDTO> categoryResponseMapper;
 
     public CategoryController(
             @Qualifier("categoryServiceImp") CategoryService categoryService,
-            Mapper<Category, CategoryDTO> categoryMapper
+            Mapper<Category, CategoryResponseDTO> categoryResponseMapper
     ) {
         this.categoryService = categoryService;
-        this.categoryMapper = categoryMapper;
+        this.categoryResponseMapper = categoryResponseMapper;
     }
 
     @Operation(summary = "Retrieves a category from database by provided category ID")
@@ -55,7 +56,7 @@ public class CategoryController {
     @GetMapping(path = "/{id}")
     public ResponseEntity<?> get(@PathVariable Integer id) {
         Category category = categoryService.get(id);
-        return ResponseEntity.ok(categoryMapper.toDTO(category));
+        return ResponseEntity.ok(categoryResponseMapper.toDTO(category));
     }
 
     @Operation(summary = "Retrieves all categories from database")
@@ -73,7 +74,7 @@ public class CategoryController {
     @GetMapping(path = "/all")
     public ResponseEntity<?> getAll() {
         List<Category> categories = categoryService.getAll();
-        return ResponseEntity.ok(categoryMapper.toDTOAll(categories));
+        return ResponseEntity.ok(categoryResponseMapper.toDTOAll(categories));
     }
 
     @Operation(summary = "Creates a category")
@@ -96,7 +97,7 @@ public class CategoryController {
                 .fromController(getClass())
                 .buildAndExpand().toUri();
         return ResponseEntity.created(uri)
-                .body(categoryMapper.toDTO(categoryService.get(id)));
+                .body(categoryResponseMapper.toDTO(categoryService.get(id)));
     }
 
     @Operation(summary = "Modifies a category by provided category ID and accepting category data in request body.")
@@ -115,7 +116,7 @@ public class CategoryController {
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody CategoryDTO dto) {
         dto.setId(id);
         categoryService.update(dto);
-        return ResponseEntity.ok(categoryMapper.toDTO(categoryService.get(id)));
+        return ResponseEntity.ok(categoryResponseMapper.toDTO(categoryService.get(id)));
     }
 
     @Operation(summary = "Deletes: a category with given ID; connections related to this category; sub categories and connections related to them")
