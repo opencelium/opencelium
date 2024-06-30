@@ -68,4 +68,6 @@ public interface ConnectionService {
     List<ConnectionDTO> getAllFullConnection();
 
     List<Connection> findAllNotCompleted();
+
+    void updateCategory(Connection connection, Integer newCategory);
 }
