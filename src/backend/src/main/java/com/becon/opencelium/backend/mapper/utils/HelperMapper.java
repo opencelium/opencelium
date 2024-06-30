@@ -197,14 +197,6 @@ public abstract class HelperMapper {
         return categories.stream().map(Category::getId).collect(Collectors.toSet());
     }
 
-    @Named("getCategoryById")
-    public Category getCategoryById(Integer id) {
-        if (id == null) {
-            return new Category();
-        }
-        return categoryService.get(id);
-    }
-
     @Named("mapParentCategory")
     public CategoryResponseDTO mapParentCategory(Category parent) {
         CategoryResponseDTO category = new CategoryResponseDTO();
@@ -214,14 +206,6 @@ public abstract class HelperMapper {
         category.setId(parent.getId());
         category.setName(parent.getName());
         return category;
-    }
-
-    @Named("getCategoriesByIds")
-    public Set<Category> getCategoriesByIds(Set<Integer> ids) {
-        if (ids == null) {
-            return new HashSet<>();
-        }
-        return new HashSet<>(categoryService.getAllByIds(ids));
     }
 
 }
