@@ -11,9 +11,10 @@ public interface CategoryService {
     Category get(Integer id);
     List<Category> getAll();
     List<Category> getAllByIds(Iterable<Integer> ids);
-    void delete(Integer id);
-    void deleteAll(List<Integer> ids);
+    void cascadeDelete(Integer id);
+    void cascadeDeleteAll(List<Integer> ids);
     boolean exists(Integer id);
-
     boolean existsByName(String name);
+    void deleteOnly(Integer id);
+    void deleteAllOnly(List<Integer> ids);
 }

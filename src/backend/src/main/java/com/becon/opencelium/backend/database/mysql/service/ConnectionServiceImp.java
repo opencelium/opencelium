@@ -384,6 +384,12 @@ public class ConnectionServiceImp implements ConnectionService {
         return res;
     }
 
+    @Override
+    public void updateCategory(Connection connection, Integer newCategory) {
+        connection.setCategoryId(newCategory);
+        connectionRepository.save(connection);
+    }
+
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods

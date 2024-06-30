@@ -118,7 +118,7 @@ public class CategoryController {
         return ResponseEntity.ok(categoryMapper.toDTO(categoryService.get(id)));
     }
 
-    @Operation(summary = "Deletes a category by provided category ID")
+    @Operation(summary = "Deletes: a category with given ID; connections related to this category; sub categories and connections related to them")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204",
                     description = "Category has been successfully deleted.",
@@ -130,13 +130,13 @@ public class CategoryController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Integer id) {
-        categoryService.delete(id);
+    @DeleteMapping("/cascade-delete/{id}")
+    public ResponseEntity<?> cascadeDelete(@PathVariable Integer id) {
+        categoryService.cascadeDelete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Deletes a list of categories based on the provided list of their corresponding IDs")
+    @Operation(summary = "For each id, it deletes: a category with given ID; connections related to this category; sub categories and connections related to them")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204",
                     description = "List of categories have been deleted",
@@ -148,12 +148,47 @@ public class CategoryController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/list/delete")
-    public ResponseEntity<?> deleteFromList(@RequestBody IdentifiersDTO<Integer> ids) {
-        categoryService.deleteAll(ids.getIdentifiers());
+    @DeleteMapping("/list/cascade-delete")
+    public ResponseEntity<?> cascadeDeleteFromList(@RequestBody IdentifiersDTO<Integer> ids) {
+        categoryService.cascadeDeleteAll(ids.getIdentifiers());
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Deletes only category with given ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Category has been successfully deleted.",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        categoryService.deleteOnly(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Deletes list of categories with given ids")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "List of categories have been deleted",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping("/list/delete")
+    public ResponseEntity<?> deleteFromList(@RequestBody IdentifiersDTO<Integer> ids) {
+        categoryService.deleteAllOnly(ids.getIdentifiers());
+        return ResponseEntity.noContent().build();
+    }
 
     @Operation(summary = "Validates name of category for uniqueness")
     @ApiResponses(value = {
