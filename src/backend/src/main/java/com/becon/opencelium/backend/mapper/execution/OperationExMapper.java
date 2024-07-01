@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -79,10 +80,14 @@ public class OperationExMapper {
             return mediaType;
         }
 
-        if (methodMng.getRequest().getBody() != null && (mediaType = getMediaTypeFromBody(methodMng.getRequest().getBody().getFormat())) != null) {
+        if (methodMng.getRequest().getBody() != null
+                && methodMng.getRequest().getBody().getFormat() != null
+                && (mediaType = getMediaTypeFromBody(methodMng.getRequest().getBody().getFormat())) != null) {
             return mediaType;
         }
-        return fiv.getRequest().getBody() == null || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null
+        return fiv.getRequest().getBody() == null
+                || methodMng.getRequest().getBody().getFormat() == null
+                || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null
                 ? MediaType.APPLICATION_JSON
                 : mediaType;
     }
@@ -191,7 +196,10 @@ public class OperationExMapper {
         }
         for (Map.Entry<String, String> entry : header.entrySet()) {
             ParameterDTO parameterDTO = new ParameterDTO();
-            //parameter's default fields are :
+            if (entry.getKey().equals("Cookie")) {
+                addCookieParams(entry.getValue(), parameters);
+                continue;
+            }
             parameterDTO.setName(entry.getKey());
             parameterDTO.setIn(ParamLocation.HEADER);
             parameterDTO.setStyle(ParamStyle.SIMPLE);
@@ -228,6 +236,32 @@ public class OperationExMapper {
         return parameters;
     }
 
+    private void addCookieParams(String value, List<ParameterDTO> parameters) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        value = value.trim();
+        String[] split = value.split(";");
+
+        for (String kv : split) {
+            if (kv.contains("=")) {
+                String[] pairs = kv.split("=");
+                if (pairs.length == 2) {
+                    SchemaDTO schemaDTO = new SchemaDTO();
+                    schemaDTO.setType(DataType.STRING);
+                    schemaDTO.setValue(pairs[1].trim());
+
+                    ParameterDTO parameterDTO = new ParameterDTO();
+                    parameterDTO.setSchema(schemaDTO);
+                    parameterDTO.setIn(ParamLocation.COOKIE);
+                    parameterDTO.setStyle(ParamStyle.FORM);
+                    parameterDTO.setName(pairs[0].trim());
+                    parameters.add(parameterDTO);
+                }
+            }
+        }
+    }
+
     /**
      * returning parameter's fields :
      * - in always will be PATH
@@ -245,21 +279,38 @@ public class OperationExMapper {
             List<ParameterDTO> list = new ArrayList<>();
             String[] split = path.split("/");
             for (String subPath : split) {
-                String subPathName;
-                if (subPath.matches(RegExpression.enhancement)) {
-                    subPathName = subPath.substring(3, subPath.length() - 2);
-                } else if (subPath.matches(RegExpression.requestData)) {
-                    subPathName = subPath.substring(1, subPath.length() - 1);
-                } else {
+                if (!subPath.contains("{") || !subPath.contains("}")) {
                     continue;
                 }
-                ParameterDTO parameterDTO = new ParameterDTO();
-                parameterDTO.setIn(ParamLocation.PATH);
-                parameterDTO.setName(subPathName);
-                parameterDTO.setStyle(ParamStyle.SIMPLE);
-                parameterDTO.setContent(mediaType);
-                parameterDTO.setSchema(getSchema(subPath, DataType.STRING));
-                list.add(parameterDTO);
+                ArrayList<String> params = new ArrayList<>();
+                char[] chars = subPath.toCharArray();
+                int startIdx = -1;
+                for (int i = 0; i < chars.length; i++) {
+                    if (chars[i] == '{') {
+                        startIdx = i;
+                    } else if (chars[i] == '}' && startIdx != -1) {
+                        params.add(subPath.substring(startIdx, i + 1));
+                        startIdx = -1;
+                    }
+                }
+
+                for (String param : params) {
+                    String paramName = null;
+                    if (param.matches(RegExpression.wrappedDirectRef)) {
+                        paramName = param.substring(2, param.length() - 2);
+                    }else if (param.matches(RegExpression.enhancement)) {
+                        paramName = param.substring(3, param.length() - 2);
+                    } else if (param.matches(RegExpression.requestData)) {
+                        paramName = param.substring(1, param.length() - 1);
+                    }
+                    ParameterDTO parameterDTO = new ParameterDTO();
+                    parameterDTO.setIn(ParamLocation.PATH);
+                    parameterDTO.setName(paramName);
+                    parameterDTO.setStyle(ParamStyle.SIMPLE);
+                    parameterDTO.setContent(mediaType);
+                    parameterDTO.setSchema(getSchema(param, DataType.STRING));
+                    list.add(parameterDTO);
+                }
             }
             return list;
         }

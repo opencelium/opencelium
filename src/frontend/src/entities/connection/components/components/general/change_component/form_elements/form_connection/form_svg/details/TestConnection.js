@@ -21,7 +21,7 @@ import {
     addTestConnection, deleteTestConnectionById,
 } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {
-    addTestSchedule, startTestSchedule, deleteTestScheduleById, getScheduleById,
+    addTestSchedule, startTestSchedule, deleteTestScheduleById, getScheduleById, terminateExecution,
 } from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 import {setFullScreen as setFullScreenFormSection} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
@@ -71,7 +71,7 @@ function mapStateToProps(state){
     setFullScreenFormSection, addTestConnection, addTestSchedule, startTestSchedule,
     deleteTestConnectionById, deleteTestScheduleById, setInitialTestScheduleState,
     setInitialTestConnectionState, getScheduleById, setTestingConnection,
-    clearCurrentLogs, setButtonPanelVisibility,
+    clearCurrentLogs, setButtonPanelVisibility, terminateExecution,
 })
 class TestConnectionButton extends React.Component{
     constructor(props) {
@@ -212,6 +212,7 @@ class TestConnectionButton extends React.Component{
         } = this.state;
         const {
             isTestingConnection, connection, testSchedule, terminatingExecution,
+            terminateExecution,
         } = this.props;
         const isCreatingConnectionLoading = startAddingConnection;
         const isCreatingScheduleLoading = isCreatingConnectionLoading || startAddingSchedule;
@@ -250,7 +251,7 @@ class TestConnectionButton extends React.Component{
                             {"Test Connection"}
                             <span style={{fontSize: 14}}>{` (limit 60 seconds)`}</span>
                         </PopoverHeader>
-                        <PopoverBody>
+                        <PopoverBody style={{minWidth: '274px'}}>
                             <div style={{justifyContent: 'center', display: 'grid', gridTemplateColumns: '100% auto', padding: '5px'}}>
                                 <div>
                                     <Text value={`Creating a test connection `} size={TextSize.Size_14}/>
@@ -264,7 +265,11 @@ class TestConnectionButton extends React.Component{
                                 <FontIcon
                                     isLoading={isCreatingScheduleLoading}
                                     value={isCreatingScheduleLoading ? ' ' : 'done'} size={20}/>
-                                <div>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                }}>
                                     <Text value={
                                             <div>
                                                 {"Connection Execution ("}
@@ -272,11 +277,23 @@ class TestConnectionButton extends React.Component{
                                                 {")"}
                                             </div>
                                         } size={TextSize.Size_14}/>
+                                    {(!isCreatingConnectionLoading && !isCreatingScheduleLoading && isExecutionLoading) && <TooltipButton
+                                            target={`terminate_test_schedule`}
+                                            position={'bottom'}
+                                            tooltip={'Terminate'}
+                                            handleClick={() => terminateExecution(testSchedule.schedulerId)}
+                                            hasBackground={false}
+                                            icon={'close'}
+                                            size={TextSize.Size_20}
+                                            style={{minWidth: '20px'}}
+                                        />
+                                    }
                                 </div>
                                 <FontIcon
                                     iconStyles={{color: isTriggerFailed || terminatingExecution !== API_REQUEST_STATE.INITIAL ? '#8c3838' : '#000'}}
                                     isLoading={isExecutionLoading}
-                                    value={isExecutionLoading ? ' ' : isTriggerFailed || terminatingExecution !== API_REQUEST_STATE.INITIAL ? 'close' : 'done'} size={20}/>
+                                    value={isExecutionLoading ? ' ' : isTriggerFailed || terminatingExecution !== API_REQUEST_STATE.INITIAL ? 'close' : 'done'} size={20}
+                                />
                                 <div>
                                     <Text value={`Cleaning process `} size={TextSize.Size_14}/>
                                 </div>

@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
 import com.becon.opencelium.backend.database.mysql.entity.*;
@@ -252,7 +252,7 @@ public class MessageController {
 
     @GetMapping("/tools/incoming_webhook")
     public ResponseEntity<?> getSlackWebhook() throws Exception {
-        String webhook = env.getProperty(YamlPropConst.INCOMING_WEBHOOK);
+        String webhook = env.getProperty(AppYamlPath.INCOMING_WEBHOOK);
         ResultDTO<String> webhookDto = new ResultDTO<>(webhook);
         return ResponseEntity.ok(webhookDto);
     }

@@ -17,7 +17,7 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
@@ -123,6 +123,16 @@ public class ConnectionController {
     public ResponseEntity<?> getAllMeta() {
         List<Connection> connections = connectionService.findAll();
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
+        //unnecessary fields
+        connectionResources.forEach(c->{
+            c.getFromConnector().setRequestData(null);
+            c.getFromConnector().getInvoker().setOperations(null);
+            c.getFromConnector().getInvoker().setRequiredData(null);
+
+            c.getToConnector().setRequestData(null);
+            c.getToConnector().getInvoker().setOperations(null);
+            c.getToConnector().getInvoker().setRequiredData(null);
+        });
         return ResponseEntity.ok(connectionResources);
     }
 
@@ -446,8 +456,8 @@ public class ConnectionController {
 
         HttpEntity<Object> requestEntity = new HttpEntity<>(apiDataResource.getBody(), headers);
 
-        String proxyHost = environment.getProperty(YamlPropConst.PROXY_HOST, "");
-        String proxyPort = environment.getProperty(YamlPropConst.PROXY_PORT, "");
+        String proxyHost = environment.getProperty(AppYamlPath.PROXY_HOST, "");
+        String proxyPort = environment.getProperty(AppYamlPath.PROXY_PORT, "");
         RestTemplateBuilder restTemplateBuilder =
                 new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, apiDataResource.isSslOn()));
         RestTemplate restTemplate = restTemplateBuilder.build();

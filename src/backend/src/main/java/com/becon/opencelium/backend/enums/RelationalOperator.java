@@ -23,7 +23,7 @@ public enum RelationalOperator {
     IS_TYPE_OF("IsTypeOf"),
     MATCHES_IN_LIST("AllowList"),
     REGEX("RegExp"),
-    DENYLIST("DenyList"),
+    DENY_LIST("DenyList"),
     FOR("for"),
     FOR_IN("forin"),
     SPLIT_STRING("SplitString"),

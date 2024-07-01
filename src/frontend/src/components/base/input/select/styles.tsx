@@ -35,17 +35,18 @@ const OptionsStyled = styled.div<OptionsStyledProps | HTMLDivElement>`
     transition: height 0.3s;
     user-select: none;
     position: absolute;
-    z-index: 1000;
+    z-index: ${({categoryList}) => categoryList ? '1001' : '1000'};
     border-bottom-left-radius: ${({height}) => height !== 0 ? `5px` : '0'};
     border-bottom-right-radius: ${({height}) => height !== 0 ? `5px` : '0'};
     border: ${({isVisible}) => isVisible ? `1px solid #c1c1c1` : 'none'};
     border-top: none;
     height: ${({height}) => `${height}px` || 0};
     max-height: 200px;
-    overflow-x: hidden;
-    overflow-y: ${({height}) => height > 200 ? `auto` : 'hidden'};
+    overflow-x: auto;
+    overflow-y: ${({height}) => height > '200' ? `auto` : 'hidden'};
     margin-left: ${({hasIcon, isIconInside, theme}) => !hasIcon || isIconInside ? 0 : theme.input.iconInputDistance};
     width: ${({width, isIconInside, hasIcon, theme}) => width || isIconInside || !hasIcon ? '100%' : `calc(100% - ${theme.input.iconInputDistance})`};
+    background-color: #fff;
     
     &::-webkit-scrollbar {
       width: 5px;
@@ -161,6 +162,47 @@ const MultipleValuesStyled = styled.div`
     }
 `;
 
+const OptionContainerStyled = styled.div<OptionStyledProps>`
+    position: relative;
+    background-color: #fff;
+    padding-left: ${({indentLevel}) => indentLevel > 1 ? `${indentLevel * 25 - 25}px` : '0'};
+    margin-left: ${({indentLevel}) => indentLevel ? `5px` : '0'};
+    display: flex;
+    align-items: center;
+
+    ${({indentLevel}) => {
+        if(indentLevel > 0){
+            return `
+                &::before{
+                    content: "";
+                    display: block;
+                    flex-shrink: 0;
+                    width: 15px;
+                    height: 0;
+                    border-bottom: 1px solid #333;
+                    margin-top: -2px;
+                }
+            `
+        }
+    }}
+    
+    ${({indentLevel}) => {
+        if(indentLevel > 0){
+            return `
+                &::after{
+                    content: "";
+                    display: block;
+                    height: ${indentLevel ? `10px` : ''};
+                    border: ${indentLevel ? `1px solid #333` : ''};
+                    border-width: ${indentLevel ? `0 0 1px 1px` : ''};
+                    order: -1;
+                    margin-top: -10px;
+                }
+            `
+        }
+    }}
+`
+
 
 export {
     EmptyOptionsStyled,
@@ -174,4 +216,5 @@ export {
     TextStyled,
     ToggleStyled,
     MultipleValuesStyled,
+    OptionContainerStyled
 }

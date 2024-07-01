@@ -50,6 +50,7 @@ export const LogPanelHeight = {
 
 export interface ConnectionState extends ICommonState {
   webhooks: string[],
+  categoryId: number;
   isAnimationForcedToStop: boolean,
   isAnimationNotFound: boolean;
   animationSpeed: number;
@@ -60,7 +61,7 @@ export interface ConnectionState extends ICommonState {
   isButtonPanelOpened: boolean;
   moveTestButton: number;
   connections: IConnection[];
-  metaConnections: IConnection[];
+  metaConnections: any[];
   isCurrentConnectionHasUniqueTitle: TRIPLET_STATE;
   checkingConnectionTitle: API_REQUEST_STATE;
   testingConnection: API_REQUEST_STATE;
@@ -99,6 +100,7 @@ export interface ConnectionState extends ICommonState {
 
 let initialState: ConnectionState = {
   webhooks: [],
+  categoryId: null,
   isAnimationForcedToStop: false,
   isAnimationNotFound: false,
   animationSpeed: AnimationFunctionSteps.DefaultSpeed,

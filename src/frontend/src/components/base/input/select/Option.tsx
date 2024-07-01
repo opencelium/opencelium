@@ -16,7 +16,7 @@
 import React, {FC} from 'react';
 import {withTheme} from 'styled-components';
 import { OptionProps } from './interfaces';
-import { OptionStyled } from './styles';
+import { OptionStyled, OptionContainerStyled } from './styles';
 import { capitalize } from '@application/utils/utils';
 
 const Option: FC<OptionProps> =
@@ -27,10 +27,10 @@ const Option: FC<OptionProps> =
         const OptionRightComponent = getOptionRightComponent ? getOptionRightComponent({...props}) : null;
         return (
             <React.Fragment>
-                <div style={{position: 'relative'}}>
+                <OptionContainerStyled {...props}>
                     <OptionStyled readOnly={true} {...props} value={capitalize(props.value)}/>
                     {OptionRightComponent}
-                </div>
+                </OptionContainerStyled>
             </React.Fragment>
         )
     }
