@@ -17,6 +17,7 @@ import com.becon.opencelium.backend.mapper.mysql.ConnectorResourceMapper;
 import com.becon.opencelium.backend.mapper.mysql.EnhancementMapper;
 import com.becon.opencelium.backend.mapper.mysql.RequestDataMapper;
 import com.becon.opencelium.backend.mapper.mysql.invoker.InvokerMapper;
+import com.becon.opencelium.backend.resource.CategoryResponseDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
@@ -196,20 +197,15 @@ public abstract class HelperMapper {
         return categories.stream().map(Category::getId).collect(Collectors.toSet());
     }
 
-    @Named("getCategoryById")
-    public Category getCategoryById(Integer id) {
-        if (id == null) {
-            return new Category();
+    @Named("mapParentCategory")
+    public CategoryResponseDTO mapParentCategory(Category parent) {
+        CategoryResponseDTO category = new CategoryResponseDTO();
+        if (parent == null) {
+            return category;
         }
-        return categoryService.get(id);
-    }
-
-    @Named("getCategoriesByIds")
-    public Set<Category> getCategoriesByIds(Set<Integer> ids) {
-        if (ids == null) {
-            return new HashSet<>();
-        }
-        return new HashSet<>(categoryService.getAllByIds(ids));
+        category.setId(parent.getId());
+        category.setName(parent.getName());
+        return category;
     }
 
 }
