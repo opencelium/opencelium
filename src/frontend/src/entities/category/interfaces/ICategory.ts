@@ -34,7 +34,6 @@ export interface ICategoryForm extends ICategoryText, ICategorySelect, IForm<ICa
 
 export interface ICategory extends CategoryModel, ICategoryForm {
     id?: number;
-    parent: string;
 }
 
 export type CategoryProps = keyof ICategory;

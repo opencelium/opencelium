@@ -32,7 +32,12 @@ import {
     updateCategory,
     deleteCategoryById
 } from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
-import {CategoryModel, CategoryModelCreate, ParentCategoryModel} from "@entity/category/requests/models/CategoryModel";
+import {
+    CategoryModel,
+    CategoryModelCreate,
+    CategoryModelUpdate,
+    ParentCategoryModel
+} from "@entity/category/requests/models/CategoryModel";
 import { capitalize } from "@application/utils/utils";
 import { useAppDispatch } from "@application/utils/store";
 import category from "@entity/category/translations/interpolations/category";
@@ -53,8 +58,6 @@ export class Category extends HookStateClass implements ICategory{
 
     parentCategory: ParentCategoryModel | null = null;
 
-    parent: string;
-
     subcategories: CategoryModel[] | string[];
 
     constructor(category?: Partial<ICategory> | null) {
@@ -63,9 +66,9 @@ export class Category extends HookStateClass implements ICategory{
         this.id = category?.id || 0;
         this.name = category?.name || '';
         this.parentSelect = category?.parentSelect || null;
-        this.parent = category?.parent || null;
-        if(!this.parentSelect && this.parent){
-            this.parentSelect = {label: this.parent, value: this.parent};
+        this.parentCategory = category?.parentCategory || null;
+        if(!this.parentSelect && this.parentCategory){
+            this.parentSelect = {label: this.parentCategory.name, value: this.parentCategory.id};
         }
         // @ts-ignore
         this.dispatch = category?.dispatch ? category?.dispatch : useAppDispatch();
@@ -179,12 +182,11 @@ export class Category extends HookStateClass implements ICategory{
     }
 
     @App.dispatch(updateCategory, {
-        mapping: (category: ICategory): CategoryModel => {
+        mapping: (category: ICategory): CategoryModelUpdate => {
             return {
-                name: category.name,
                 id: category.id,
-                parentCategory: category.parentCategory,
-                subCategories: category.subCategories,
+                name: category.name,
+                parentCategory: (+category.parentSelect.value),
             }}, hasNoValidation: false})
     update(): boolean{
         return this.validateId(this.id) && this.validateAdd();

@@ -31,6 +31,9 @@ export interface CategoryModelCreate {
   name: string,
   parentCategory: number | null,
 }
+export interface CategoryModelUpdate extends CategoryModelCreate {
+  id: number;
+}
 
 // export interface SubCategoryModel{
 //   id?: string;

@@ -63,6 +63,9 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             category.getById()
         }
         dispatch(getAllCategories());
+        return () => {
+            dispatch(setCurrentCategory(null));
+        }
     },[]);
     useEffect(() => {
         if(gettingCategories === API_REQUEST_STATE.FINISH) {
