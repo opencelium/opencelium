@@ -155,7 +155,7 @@ public class CategoryController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Deletes only category with given ID")
+    @Operation(summary = "Deletes only category with given ID ")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204",
                     description = "Category has been successfully deleted.",
@@ -167,7 +167,7 @@ public class CategoryController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
         categoryService.deleteOnly(id);
         return ResponseEntity.noContent().build();
