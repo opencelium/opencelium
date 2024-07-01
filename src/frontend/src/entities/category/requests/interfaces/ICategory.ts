@@ -44,6 +44,12 @@ export interface ICategoryRequest{
     //to delete category by id
     deleteCategoryById(): Promise<AxiosResponse<IResponse>>,
 
+    //to delete category with subcategories and connections by id
+    deleteCategoryCascadeById(): Promise<AxiosResponse<IResponse>>,
+
     //to delete categories by id
     deleteCategoriesById(args: DeleteCategoriesByIdRequestProps): Promise<AxiosResponse<IResponse>>,
+
+    //to delete categories with subcategories and connections by id
+    deleteCategoriesCascadeById(args: DeleteCategoriesByIdRequestProps): Promise<AxiosResponse<IResponse>>,
 }

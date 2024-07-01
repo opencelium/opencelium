@@ -22,7 +22,15 @@ import { Category } from "@entity/category/classes/Category";
 import { ICategory } from "@entity/category/interfaces/ICategory";
 import { API_REQUEST_STATE, TRIPLET_STATE } from "@application/interfaces/IApplication";
 import { useAppDispatch } from "@application/utils/store";
-import { getAllCategories, addCategory, deleteCategoryById, deleteCategoriesById, getCategoryById, updateCategory } from '@entity/category/redux_toolkit/action_creators/CategoryCreators';
+import {
+  getAllCategories,
+  addCategory,
+  deleteCategoryById,
+  deleteCategoriesById,
+  getCategoryById,
+  updateCategory,
+  deleteCategoryCascadeById
+} from '@entity/category/redux_toolkit/action_creators/CategoryCreators';
 import {setActiveCategory, setActiveTab} from "@entity/category/redux_toolkit/slices/CategorySlice";
 import {CategoryModel, CategoryModelCreate} from "@entity/category/requests/models/CategoryModel";
 import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
@@ -54,7 +62,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
   }, [])
   useEffect(() => {
     if(gettingCategories === API_REQUEST_STATE.FINISH || addingCategory === API_REQUEST_STATE.FINISH || deletingCategoryById === API_REQUEST_STATE.FINISH) {
-      const newTabs = activeCategory ? categories.filter(c => activeCategory.subCategories.indexOf(c.id) !== -1) : categories.filter(category => !category.parentCategory);
+      const newTabs = activeCategory ? categories.filter((c: CategoryModel) => activeCategory.subCategories.indexOf(c.id) !== -1) : categories.filter((category: CategoryModel) => !category.parentCategory);
       setTabs([AllCategoriesTab, ...newTabs]);
     }
     if (addingCategory === API_REQUEST_STATE.FINISH) {
@@ -93,39 +101,16 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
   }})
 
   const removeTab = (data: any, removeRecursively = false) => {
-
     const removedTab = tabs[data.index].name;
     if(removeRecursively){
-      const result = [];
-      const stack = [data.id];
-
-      while (stack.length > 0) {
-        const currentCategoryId = stack.pop();
-        result.push(currentCategoryId);
-
-        const currentCategory = categories.find((cat) => cat.id === currentCategoryId);
-        if (currentCategory && currentCategory.subCategories) {
-          stack.push(...currentCategory.subCategories);
-        }
-      }
-      // @ts-ignore
-      dispatch(deleteCategoriesById(result))
+      dispatch(deleteCategoryCascadeById(data.id))
     }
     else{
-      const result = categories.filter(category => category.parentCategory.id === data.id);
-      result.forEach((qwe: any) => {
-        if(qwe !== data.id){
-          // @ts-ignore
-          const category = Object.assign({}, categories.find(data => qwe.id === data.id));
-          category.parentCategory = null;
-          dispatch(updateCategory(category))
-        }
-      });
       dispatch(deleteCategoryById(data.id))
     }
     if(activeTab === removedTab){
-      dispatch(setActiveTab('All'));
-      dispatch(setActiveCategory(null))
+      //dispatch(setActiveTab('All'));
+      //dispatch(setActiveCategory(null))
     }
     setShowConfirmDelete(false);
     setRemoveRecursively(false);
@@ -135,19 +120,19 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
 
     if(tabName !== 'All'){
       if(tab.subCategories){
-        const matchedCategories = categories.filter(category => tab.subCategories.includes(category.id));
+        const matchedCategories = categories.filter((category: CategoryModel) => tab.subCategories.includes(category.id));
         setTabs([AllCategoriesTab, ...matchedCategories])
         dispatch(setActiveTab('All'));
       }
       else{
         dispatch(setActiveTab(tabName));
       }
-      dispatch(setActiveCategory(categories.find(c => c.name === tabName)));
+      dispatch(setActiveCategory(categories.find((c: CategoryModel) => c.name === tabName)));
     }
     else{
-      const newActiveCategory = activeCategory && activeCategory.parentCategory ? categories.find(c => c.id === activeCategory.parentCategory.id) : null;
-      const categoriesWithNullParent = categories.filter(category => !category.parentCategory);
-      const newTabs = !newActiveCategory ? categoriesWithNullParent : categories.filter(c => newActiveCategory.subCategories.indexOf(c.id) !== -1)
+      const newActiveCategory = activeCategory && activeCategory.parentCategory ? categories.find((c: CategoryModel) => c.id === activeCategory.parentCategory.id) : null;
+      const categoriesWithNullParent = categories.filter((category: CategoryModel) => !category.parentCategory);
+      const newTabs = !newActiveCategory ? categoriesWithNullParent : categories.filter((c: CategoryModel) => newActiveCategory.subCategories.indexOf(c.id) !== -1)
       setTabs([AllCategoriesTab, ...newTabs])
       dispatch(setActiveTab('All'));
       dispatch(setActiveCategory(newActiveCategory));
@@ -185,7 +170,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
   }
 
   const handleBreadcrumbClick = (breadcrumb: any) => {
-    const tab = categories.find(category => category.name === breadcrumb);
+    const tab = categories.find((category: CategoryModel) => category.name === breadcrumb);
     handleTabClick(breadcrumb, tab);
   }
 

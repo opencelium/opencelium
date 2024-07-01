@@ -27,7 +27,7 @@ import {
   getAllCategories,
   getAllSubCategories,
   getCategoryById,
-  updateCategory,
+  updateCategory, deleteCategoryCascadeById, deleteCategoriesCascadeById,
 } from "../action_creators/CategoryCreators";
 
 export interface CategoryState extends ICommonState{
@@ -191,6 +191,21 @@ export const categorySlice = createSlice({
         state.deletingCategoryById = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },
+      [deleteCategoryCascadeById.pending.type]: (state) => {
+        state.deletingCategoryById = API_REQUEST_STATE.START;
+      },
+      [deleteCategoryCascadeById.fulfilled.type]: (state, action: PayloadAction<number>) => {
+        state.deletingCategoryById = API_REQUEST_STATE.FINISH;
+        state.categories = state.categories.filter(category => category.id !== action.payload);
+        if(state.currentCategory && state.currentCategory.id === action.payload){
+          state.currentCategory = null;
+        }
+        state.error = null;
+      },
+      [deleteCategoryCascadeById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.deletingCategoryById = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
       [deleteCategoriesById.pending.type]: (state) => {
         state.deletingCategoriesById = API_REQUEST_STATE.START;
       },
@@ -203,6 +218,21 @@ export const categorySlice = createSlice({
         state.error = null;
       },
       [deleteCategoriesById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.deletingCategoriesById = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [deleteCategoriesCascadeById.pending.type]: (state) => {
+        state.deletingCategoriesById = API_REQUEST_STATE.START;
+      },
+      [deleteCategoriesCascadeById.fulfilled.type]: (state, action: PayloadAction<number[]>) => {
+        state.deletingCategoriesById = API_REQUEST_STATE.FINISH;
+        state.categories = state.categories.filter(category => action.payload.findIndex(id => `${id}` === `${category.id}`) === -1);
+        if(state.currentCategory && action.payload.findIndex(id => `${id}` === `${state.currentCategory.id}`) !== -1){
+          state.currentCategory = null;
+        }
+        state.error = null;
+      },
+      [deleteCategoriesCascadeById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
         state.deletingCategoriesById = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },

@@ -135,12 +135,38 @@ export const deleteCategoryById = createAsyncThunk(
     }
 )
 
+export const deleteCategoryCascadeById = createAsyncThunk(
+    'category/cascade-delete/byId',
+    async(id: number, thunkAPI) => {
+        try {
+            const request = new CategoryRequest({endpoint: `/cascade-delete/${id}`});
+            await request.deleteCategoryCascadeById();
+            return id;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const deleteCategoriesById = createAsyncThunk(
     'category/delete/selected/byId',
     async(identifiers: number[], thunkAPI) => {
         try {
             const request = new CategoryRequest();
             await request.deleteCategoriesById({identifiers});
+            return identifiers;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const deleteCategoriesCascadeById = createAsyncThunk(
+    'category/cascade-delete/selected/byId',
+    async(identifiers: number[], thunkAPI) => {
+        try {
+            const request = new CategoryRequest();
+            await request.deleteCategoriesCascadeById({identifiers});
             return identifiers;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -156,5 +182,7 @@ export default {
     getAllCategories,
     getAllSubCategories,
     deleteCategoryById,
+    deleteCategoryCascadeById,
     deleteCategoriesById,
+    deleteCategoriesCascadeById,
 }

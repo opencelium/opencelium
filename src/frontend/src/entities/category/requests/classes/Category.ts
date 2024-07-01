@@ -57,8 +57,17 @@ export class CategoryRequest extends Request implements ICategoryRequest{
     return super.delete<IResponse>();
   }
 
+  async deleteCategoryCascadeById(): Promise<AxiosResponse<IResponse>>{
+    return super.delete<IResponse>();
+  }
+
   async deleteCategoriesById(data: DeleteCategoriesByIdRequestProps): Promise<AxiosResponse<IResponse>>{
     this.endpoint = '/list/delete';
+    return super.put<IResponse>(data);
+  }
+
+  async deleteCategoriesCascadeById(data: DeleteCategoriesByIdRequestProps): Promise<AxiosResponse<IResponse>>{
+    this.endpoint = '/list/cascade-delete';
     return super.put<IResponse>(data);
   }
 }

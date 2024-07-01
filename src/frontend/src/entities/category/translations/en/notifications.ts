@@ -14,6 +14,10 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
+import {
+  deleteCategoriesCascadeById,
+  deleteCategoryCascadeById
+} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 
 const {
   addCategory, updateCategory, deleteCategoryById,
@@ -25,7 +29,9 @@ export default {
     [addCategory.fulfilled.type]: "The category <1><0>{{name}}</0></1> was successfully added",
     [updateCategory.fulfilled.type]: "The category <1><0>{{name}}</0></1> was successfully updated",
     [deleteCategoryById.fulfilled.type]: "The category <1><0>{{name}}</0></1> was successfully removed",
+    [deleteCategoryCascadeById.fulfilled.type]: "The category <1><0>{{name}}</0></1> was successfully removed with subcategories and connections",
     [deleteCategoriesById.fulfilled.type]: "The selected categories were successfully removed",
+    [deleteCategoriesCascadeById.fulfilled.type]: "The selected categories were successfully removed with subcategories and connections",
   },
   rejected: {
     [getCategoryById.rejected.type]: {
@@ -43,7 +49,13 @@ export default {
     [deleteCategoryById.rejected.type]: {
       "__DEFAULT__": "The category was not removed"
     },
+    [deleteCategoryCascadeById.rejected.type]: {
+      "__DEFAULT__": "The category was not removed"
+    },
     [deleteCategoriesById.rejected.type]: {
+      "__DEFAULT__": "The selected categories were not removed"
+    },
+    [deleteCategoriesCascadeById.rejected.type]: {
       "__DEFAULT__": "The selected categories were not removed"
     },
   },

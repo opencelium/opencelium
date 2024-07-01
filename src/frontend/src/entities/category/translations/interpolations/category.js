@@ -17,7 +17,12 @@ import React from "react";
 import {getActionWithoutType} from "@application/utils/utils";
 import {InterpolateTranslation} from "@app_component/base/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@app_component/base/link_message/LinkMessage";
-import { addCategory, deleteCategoryById, updateCategory } from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
+import {
+    addCategory,
+    deleteCategoryById,
+    deleteCategoryCascadeById,
+    updateCategory
+} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 
 import Categories from "@entity/category/collections/Categories";
 
@@ -48,9 +53,19 @@ const DELETE_CATEGORY = (responseType, dispatch, navigate, params) => {
         </InterpolateTranslation>
     );
 }
+const CASCADE_DELETE_CATEGORY = (responseType, dispatch, navigate, params) => {
+    const {name} = params;
+    const categories = new Categories([], null);
+    return (
+        <InterpolateTranslation i18nKey={`notifications.${responseType}.${deleteCategoryCascadeById[responseType].type}`}>
+            The category <LinkMessage collectionName={categories.name} dispatch={dispatch} navigate={navigate} message={name}/> was successfully removed with subcategories and connections.
+        </InterpolateTranslation>
+    );
+}
 
 export default {
     [getActionWithoutType(addCategory.fulfilled.type)]: ADD_CATEGORY,
     [getActionWithoutType(updateCategory.fulfilled.type)]: UPDATE_CATEGORY,
     [getActionWithoutType(deleteCategoryById.fulfilled.type)]: DELETE_CATEGORY,
+    [getActionWithoutType(deleteCategoryCascadeById.fulfilled.type)]: CASCADE_DELETE_CATEGORY,
 }
