@@ -149,7 +149,7 @@ public class CategoryController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping("/list/cascade-delete")
+    @PutMapping("/list/cascade-delete")
     public ResponseEntity<?> cascadeDeleteFromList(@RequestBody IdentifiersDTO<Integer> ids) {
         categoryService.cascadeDeleteAll(ids.getIdentifiers());
         return ResponseEntity.noContent().build();
@@ -185,7 +185,7 @@ public class CategoryController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping("/list/delete")
+    @PutMapping("/list/delete")
     public ResponseEntity<?> deleteFromList(@RequestBody IdentifiersDTO<Integer> ids) {
         categoryService.deleteAllOnly(ids.getIdentifiers());
         return ResponseEntity.noContent().build();
