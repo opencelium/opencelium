@@ -167,7 +167,7 @@ public class CategoryController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
         categoryService.deleteOnly(id);
         return ResponseEntity.noContent().build();
