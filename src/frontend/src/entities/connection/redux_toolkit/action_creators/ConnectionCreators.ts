@@ -188,7 +188,7 @@ export const getConnectionWebhooks = createAsyncThunk(
             //const request = new ConnectionRequest({endpoint: `/${connectionId}/webhooks`});
             //const response = await request.getConnectionWebhooks();
             //return response.data;
-            return ['test_param', 'name', 'id'];
+            return [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

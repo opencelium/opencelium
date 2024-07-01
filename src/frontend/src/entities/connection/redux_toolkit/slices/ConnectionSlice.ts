@@ -49,7 +49,7 @@ export const LogPanelHeight = {
 };
 
 export interface ConnectionState extends ICommonState {
-  webhooks: string[],
+  webhooks: any[],
   categoryId: number;
   isAnimationForcedToStop: boolean,
   isAnimationNotFound: boolean;
