@@ -37,6 +37,7 @@ import {useNavigate} from "react-router";
 import {ConnectionPermissions} from "@entity/connection/constants";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {useAppDispatch} from "@application/utils/store";
+import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 
 
 function mapStateToProps(state){
@@ -44,6 +45,7 @@ function mapStateToProps(state){
     const template = state.templateReducer
     const connector = state.connectorReducer;
     const connection = state.connectionReducer;
+    const category = state.categoryReducer;
     const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
         authUser,
@@ -60,6 +62,7 @@ function mapStateToProps(state){
         checkTitleResult: connection.isCurrentConnectionHasUniqueTitle,
         validatingFormMethods: connection.validatingFormMethods,
         validateFormMethodsResult: connection.validateFormMethodsResult,
+        categories: category.categories
     };
 }
 
@@ -85,6 +88,7 @@ export default function(props) {
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
+            dispatch(getAllCategories());
         }
     }, []);
     return <ConnectionAdd {...props} navigate={navigate} />;

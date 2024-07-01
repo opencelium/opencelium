@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.constant;
 
-public interface YamlPropConst {
+public interface AppYamlPath {
     String OC_VERSION = "opencelium.version";
     String CONNECTOR_SECRET_KEY = "opencelium.connector.security.key";
     String PROXY_HOST = "opencelium.rest_template.proxy.host";
@@ -9,6 +9,10 @@ public interface YamlPropConst {
     String PROXY_PASS = "opencelium.rest_template.proxy.password";
     String INCOMING_WEBHOOK = "opencelium.notification.tools.incoming_webhook.url";
     String INSTALLATION = "opencelium.installation";
+
+    String TOKEN_EXPIRE_TIME = "opencelium.token.expiration-time";
+    String TOKEN_ACTIVITY_TIME = "opencelium.token.activity-time";
+    String TOKEN_SECRET = "opencelium.token.secret";
 
     // Indicates that the gc is enabled or not. Default: true
     String GC_CONNECTION_IS_ON = "opencelium.gc.connection.isOn";

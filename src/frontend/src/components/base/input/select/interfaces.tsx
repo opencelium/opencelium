@@ -38,6 +38,7 @@ interface InputContainerStyledProps extends ElementProps{
 
 interface OptionStyledProps{
     isCurrent?: boolean,
+    indentLevel?: number,
 }
 
 interface OptionProps extends OptionStyledProps{
@@ -72,12 +73,14 @@ interface InputSelectProps extends InputElementProps{
     className?: string,
     maxMultiValues?: number,
     checkboxProps?: any,
+    categoryList?: boolean,
 }
 
 interface OptionsStyledProps extends ElementProps{
     isVisible?: boolean | undefined,
     height?: string | number,
     top?: number,
+    categoryList?: boolean
 }
 
 interface ToggleStyledProps extends ElementProps{
