@@ -104,7 +104,7 @@ export const categorySlice = createSlice({
 
         if (newCategory.parentCategory) {
           const existingCategory = state.categories.find(
-            (item) => item.id === newCategory.parentCategory
+            (item) => item.id === newCategory.parentCategory.id
           );
           if (existingCategory) {
             if (!existingCategory.subCategories) {

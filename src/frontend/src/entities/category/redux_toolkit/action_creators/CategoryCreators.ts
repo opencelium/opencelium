@@ -16,7 +16,7 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import { CategoryRequest } from "@entity/category/requests/classes/Category";
-import { CategoryModel } from "@entity/category/requests/models/CategoryModel";
+import {CategoryModel, CategoryModelCreate} from "@entity/category/requests/models/CategoryModel";
 
 
 export const checkCategoryName = createAsyncThunk(
@@ -34,7 +34,7 @@ export const checkCategoryName = createAsyncThunk(
 
 export const addCategory = createAsyncThunk(
     'category/add',
-    async(category: CategoryModel, thunkAPI) => {
+    async(category: CategoryModelCreate, thunkAPI) => {
         try {
             /*
             * TODO: uncomment when backend has check name method

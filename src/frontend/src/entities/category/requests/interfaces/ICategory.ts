@@ -15,7 +15,7 @@
 
 import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import {CategoryModel} from "../models/CategoryModel";
+import {CategoryModel, CategoryModelCreate} from "../models/CategoryModel";
 
 export interface DeleteCategoriesByIdRequestProps{
     identifiers: number[],
@@ -36,7 +36,7 @@ export interface ICategoryRequest{
     getAllSubCategories(): Promise<AxiosResponse<CategoryModel[]>>,
 
     //to add category
-    addCategory(category: CategoryModel): Promise<AxiosResponse<CategoryModel>>,
+    addCategory(category: CategoryModelCreate): Promise<AxiosResponse<CategoryModel>>,
 
     //to update category
     updateCategory(category: CategoryModel): Promise<AxiosResponse<CategoryModel>>,

@@ -18,8 +18,18 @@ import { OptionProps } from "@app_component/base/input/select/interfaces";
 export interface CategoryModel{
   id?: number;
   name: string;
-  parentCategory?: string | number | CategoryModel;
-  subCategories?: number[];
+  parentCategory: ParentCategoryModel | null;
+  subCategories: number[];
+}
+
+export interface ParentCategoryModel {
+  id: number,
+  name: string,
+}
+
+export interface CategoryModelCreate {
+  name: string,
+  parentCategory: number | null,
 }
 
 // export interface SubCategoryModel{

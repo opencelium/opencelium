@@ -17,7 +17,7 @@ import {AxiosResponse} from "axios";
 import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import {CategoryModel} from "../models/CategoryModel";
+import {CategoryModel, CategoryModelCreate} from "../models/CategoryModel";
 import { DeleteCategoriesByIdRequestProps, ICategoryRequest } from "../interfaces/ICategory";
 
 
@@ -45,7 +45,7 @@ export class CategoryRequest extends Request implements ICategoryRequest{
     return super.get<CategoryModel[]>();
   }
 
-  async addCategory(category: CategoryModel): Promise<AxiosResponse<CategoryModel>>{
+  async addCategory(category: CategoryModelCreate): Promise<AxiosResponse<CategoryModel>>{
     return super.post<CategoryModel>(category);
   }
 

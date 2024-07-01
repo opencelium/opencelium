@@ -24,11 +24,13 @@ import { API_REQUEST_STATE, TRIPLET_STATE } from "@application/interfaces/IAppli
 import { useAppDispatch } from "@application/utils/store";
 import { getAllCategories, addCategory, deleteCategoryById, deleteCategoriesById, getCategoryById, updateCategory } from '@entity/category/redux_toolkit/action_creators/CategoryCreators';
 import {setActiveCategory, setActiveTab} from "@entity/category/redux_toolkit/slices/CategorySlice";
-import { CategoryModel } from "@entity/category/requests/models/CategoryModel";
+import {CategoryModel, CategoryModelCreate} from "@entity/category/requests/models/CategoryModel";
 import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
 import { CategoryTabsProps } from "./interfaces";
 import Checkbox from "@entity/connection/components/components/general/basic_components/inputs/Checkbox";
 import {add} from "lodash";
+
+const AllCategoriesTab: any = {name: 'All', parentCategory: null, subCategories: []};
 
 const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
 
@@ -53,7 +55,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
   useEffect(() => {
     if(gettingCategories === API_REQUEST_STATE.FINISH || addingCategory === API_REQUEST_STATE.FINISH || deletingCategoryById === API_REQUEST_STATE.FINISH) {
       const newTabs = activeCategory ? categories.filter(c => activeCategory.subCategories.indexOf(c.id) !== -1) : categories.filter(category => !category.parentCategory);
-      setTabs([{name: 'All'}, ...newTabs]);
+      setTabs([AllCategoriesTab, ...newTabs]);
     }
     if (addingCategory === API_REQUEST_STATE.FINISH) {
       category.name = '';
@@ -110,7 +112,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
       dispatch(deleteCategoriesById(result))
     }
     else{
-      const result = categories.filter(category => category.parentCategory === data.id);
+      const result = categories.filter(category => category.parentCategory.id === data.id);
       result.forEach((qwe: any) => {
         if(qwe !== data.id){
           // @ts-ignore
@@ -134,7 +136,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
     if(tabName !== 'All'){
       if(tab.subCategories){
         const matchedCategories = categories.filter(category => tab.subCategories.includes(category.id));
-        setTabs([{name: 'All'}, ...matchedCategories])
+        setTabs([AllCategoriesTab, ...matchedCategories])
         dispatch(setActiveTab('All'));
       }
       else{
@@ -143,10 +145,10 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
       dispatch(setActiveCategory(categories.find(c => c.name === tabName)));
     }
     else{
-      const newActiveCategory = activeCategory.parentCategory ? categories.find(c => c.id === activeCategory.parentCategory) : null;
+      const newActiveCategory = activeCategory && activeCategory.parentCategory ? categories.find(c => c.id === activeCategory.parentCategory.id) : null;
       const categoriesWithNullParent = categories.filter(category => !category.parentCategory);
       const newTabs = !newActiveCategory ? categoriesWithNullParent : categories.filter(c => newActiveCategory.subCategories.indexOf(c.id) !== -1)
-      setTabs([{name: 'All'}, ...newTabs])
+      setTabs([AllCategoriesTab, ...newTabs])
       dispatch(setActiveTab('All'));
       dispatch(setActiveCategory(newActiveCategory));
     }
@@ -158,9 +160,9 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
     const category = categories.find((category: any) => category.id === id);
     if (category) {
       result.push(category);
-      if (category.parentCategory !== null) {
+      if (category.parentCategory) {
         result.push(
-          ...findParentCategories(categories, category.parentCategory)
+          ...findParentCategories(categories, category.parentCategory.id)
         );
       }
     }
@@ -188,11 +190,12 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
   }
 
   const addCategoryName = () => {
-    const data: CategoryModel = {
-      name: category.name
+    const data: CategoryModelCreate = {
+      name: category.name,
+      parentCategory: null,
     }
     if(category.parentSelect){
-      data.parentCategory = category.parentSelect.value;
+      data.parentCategory = (+category.parentSelect.value);
     }
     dispatch(addCategory(data));
     setVisibleAddCategoryDialog(!visibleAddCategoryDialog);

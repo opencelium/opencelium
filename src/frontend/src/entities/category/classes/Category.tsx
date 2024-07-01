@@ -32,7 +32,7 @@ import {
     updateCategory,
     deleteCategoryById
 } from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
-import { CategoryModel } from "@entity/category/requests/models/CategoryModel";
+import {CategoryModel, CategoryModelCreate, ParentCategoryModel} from "@entity/category/requests/models/CategoryModel";
 import { capitalize } from "@application/utils/utils";
 import { useAppDispatch } from "@application/utils/store";
 import category from "@entity/category/translations/interpolations/category";
@@ -48,6 +48,10 @@ export class Category extends HookStateClass implements ICategory{
     parentSelect: OptionProps;
 
     categories: CategoryModel[];
+
+    subCategories: number[] = [];
+
+    parentCategory: ParentCategoryModel | null = null;
 
     parent: string;
 
@@ -163,10 +167,10 @@ export class Category extends HookStateClass implements ICategory{
     }
 
     @App.dispatch(addCategory, {
-        mapping: (category: ICategory): CategoryModel => {
-            const data: CategoryModel = {name: category.name}
+        mapping: (category: ICategory): CategoryModelCreate => {
+            const data: CategoryModelCreate = {name: category.name, parentCategory: null}
             if(category.parentSelect){
-                data.parentCategory = category.parentSelect.value;
+                data.parentCategory = (+category.parentSelect.value);
             }
             return data;
         }, hasNoValidation: false})
@@ -178,7 +182,9 @@ export class Category extends HookStateClass implements ICategory{
         mapping: (category: ICategory): CategoryModel => {
             return {
                 name: category.name,
-                id: category.id
+                id: category.id,
+                parentCategory: category.parentCategory,
+                subCategories: category.subCategories,
             }}, hasNoValidation: false})
     update(): boolean{
         return this.validateId(this.id) && this.validateAdd();

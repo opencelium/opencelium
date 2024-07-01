@@ -67,7 +67,7 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     useEffect(() => {
         if(gettingCategories === API_REQUEST_STATE.FINISH) {
             if(currentCategory && currentCategory.parentCategory) {
-                setCurrentCategory({...currentCategory, parentCategory: categories.find(c => c.id === currentCategory.parentCategory)});
+                setCurrentCategory(currentCategory);
             }
         }
     }, [gettingCategories]);
