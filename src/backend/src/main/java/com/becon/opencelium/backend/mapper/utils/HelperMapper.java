@@ -199,10 +199,10 @@ public abstract class HelperMapper {
 
     @Named("mapParentCategory")
     public CategoryResponseDTO mapParentCategory(Category parent) {
-        CategoryResponseDTO category = new CategoryResponseDTO();
         if (parent == null) {
-            return category;
+            return null;
         }
+        CategoryResponseDTO category = new CategoryResponseDTO();
         category.setId(parent.getId());
         category.setName(parent.getName());
         return category;
