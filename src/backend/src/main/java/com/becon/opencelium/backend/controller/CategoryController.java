@@ -155,7 +155,7 @@ public class CategoryController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Deletes only category with given ID")
+    @Operation(summary = "Deletes only category with given ID ")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204",
                     description = "Category has been successfully deleted.",
