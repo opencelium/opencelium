@@ -162,6 +162,9 @@ const connectionReducers = (isModal: boolean = false) => {
     setCurrentConnection: (state, action: PayloadAction<any>) => {
       state.currentConnection = action.payload;
     },
+    setConnection: (state, action: PayloadAction<any>) => {
+      state.connection = action.payload;
+    },
     setJustCreatedItem: (state, action: PayloadAction<any>) => {
       state.justCreatedItem = action.payload;
     },
@@ -690,6 +693,7 @@ export const {
   addWebhook,
   setIsAnimationForcedToStop,
   setCurrentConnection,
+  setConnection,
   addCurrentLog,
   shouldNotDrawLogMessage,
   addLogMessage,

@@ -19,7 +19,7 @@ import {AuthRequest} from "../../requests/classes/Auth";
 import {errorHandler, timeout} from "../../utils/utils";
 import User from "@entity/user/classes/User";
 
-const HasLicenseCheck = true;
+const HasLicenseCheck = false;
 export let AuthUser:any = null;
 export const login = createAsyncThunk(
     'login',

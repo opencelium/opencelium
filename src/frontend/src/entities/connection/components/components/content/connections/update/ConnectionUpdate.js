@@ -36,7 +36,7 @@ import {useParams} from "react-router";
  import {
     setCurrentConnection,
     setCurrentTechnicalItem, setSavePanelVisibility,
-     setTemplatePanelVisibility
+     setTemplatePanelVisibility, setConnection,
  } from "@root/redux_toolkit/slices/ConnectionSlice";
  import {useAppDispatch} from "@application/utils/store";
  import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
@@ -75,7 +75,7 @@ function mapStateToProps(state){
 @connect(mapStateToProps, {
     updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle,
     fetchTemplates, testConnection, setCurrentTechnicalItem, setCurrentConnection,
-    setFullScreen, getConnectionWebhooks,
+    setFullScreen, getConnectionWebhooks, setConnection,
 })
 @permission(ConnectionPermissions.UPDATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])

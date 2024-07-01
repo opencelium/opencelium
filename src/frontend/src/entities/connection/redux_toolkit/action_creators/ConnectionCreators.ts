@@ -128,7 +128,7 @@ export const getAndUpdateConnectionTitle = createAsyncThunk(
             }
             getConnection.fieldBinding = fieldBinding;
             const UpdateConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
-            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection, id: connection.id, title: connection.title, description: connection.description});
+            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection, id: connection.id, title: connection.title, description: connection.description, categoryId: connection.categoryId || getConnection.categoryId});
             return UpdateConnectionResponse.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -160,7 +160,7 @@ export const getAndUpdateConnectionDescription = createAsyncThunk(
             }
             getConnection.fieldBinding = fieldBinding;
             const UpdateConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
-            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection, id: connection.id, title: connection.title, description: connection.description});
+            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection, id: connection.id, title: connection.title, description: connection.description, categoryId: connection.categoryId || getConnection.categoryId});
             return UpdateConnectionResponse.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

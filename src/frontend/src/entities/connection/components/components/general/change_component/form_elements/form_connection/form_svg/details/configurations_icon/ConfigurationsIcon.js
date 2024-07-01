@@ -35,20 +35,27 @@ import {
   getAndUpdateConnectionTitle
 } from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import { ResponseMessages } from "@application/requests/interfaces/IResponse";
+import InputSelect from "@app_component/base/input/select/InputSelect";
+import {Category} from "@entity/category/classes/Category";
+import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 function mapStateToProps(state, props) {
   const { connectionOverview, connection } = mapItemsToClasses(state, props.isModal);
+  const {gettingCategories, categories} = state.categoryReducer;
   return {
     colorMode: connectionOverview.colorMode,
     processTextSize: connectionOverview.processTextSize,
     connection,
+    gettingAllCategories: gettingCategories,
+    categories,
   };
 }
 
 @GetModalProp()
 @connect(mapStateToProps, {
   setPanelConfigurations, setModalPanelConfigurations, getAndUpdateConnectionDescription,
-  getAndUpdateConnectionTitle,
+  getAndUpdateConnectionTitle, getAllCategories,
 })
 class ConfigurationsIcon extends React.Component {
   constructor(props) {
@@ -62,17 +69,37 @@ class ConfigurationsIcon extends React.Component {
       description: props?.connection ? props.connection.description: '',
       validationMessageTitle: '',
       validationMessageDescription: '',
-      errorMessage: ''
+      errorMessage: '',
+      category: Category.getOptionsForCategorySelect(props.categories).find(c => c.value === props.connection.categoryId) || null,
+      categoryOptions: [],
     };
     this.flag = true;
   }
 
-  componentDidUpdate(){
+  componentDidMount() {
+    this.props.getAllCategories();
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot){
+    const {connection, categories, gettingAllCategories} = this.props;
+    if(gettingAllCategories === API_REQUEST_STATE.FINISH && prevProps.gettingAllCategories === API_REQUEST_STATE.START) {
+      const newCategory = connection.categoryId ? categories.find(c => c.id === connection.categoryId) : null;
+      this.setState({
+        categoryOptions: Category.getOptionsForCategorySelect(categories),
+        category: newCategory ? {label: newCategory.name, value: newCategory.id} : null,
+      });
+    }
     if(this.props.errorAction.error && this.flag){
       this.flag = false;
       this.setState({errorMessage: this.props.errorAction.message})
       this.toggleIsVisibleSettingsWindow();
     }
+  }
+
+  handleChangeCategory(newCategory) {
+    this.setState({
+      category: newCategory,
+    })
   }
 
   setTitle(title){
@@ -95,6 +122,9 @@ class ConfigurationsIcon extends React.Component {
       }
       if(!this.state.description){
         this.setState({description: this.props.connection.description})
+      }
+      if(!this.state.category) {
+        this.setState({category: Category.getOptionsForCategorySelect(this.props.categories, false).find(c => c.value === this.props.connection.categoryId) || null})
       }
     }
     this.setState(
@@ -126,7 +156,7 @@ class ConfigurationsIcon extends React.Component {
   }
 
   save() {
-    const { colorMode, processTextSize, title, description } = this.state;
+    const { colorMode, processTextSize, title, description, category } = this.state;
     const {
       connection, setPanelConfigurations, setModalPanelConfigurations,
       isModal, getAndUpdateConnectionDescription, getAndUpdateConnectionTitle,
@@ -159,8 +189,10 @@ class ConfigurationsIcon extends React.Component {
       else if (title !== connection.title) {
         connection.title = title;
         connection.description = description;
-        
-        getAndUpdateConnectionTitle({...connectionObj, title, description}).then((data) => {
+        if (category) {
+          connection.categoryId = category.value;
+        }
+        getAndUpdateConnectionTitle({...connectionObj, title, description, categoryId: category ? category.value : null}).then((data) => {
           if(data.payload.message === ResponseMessages.CONNECTOR_EXISTS){
             this.setState({validationMessageTitle: 'Connection with such title already exist'});
             return
@@ -169,19 +201,24 @@ class ConfigurationsIcon extends React.Component {
             this.setState({
               title: '',
               description: '',
+              category: null,
             })
             this.toggleIsVisibleSettingsWindow();
           }
           updateConnection(connection);
         });
 
-      } else if (description !== connection.description) {
+      } else if (description !== connection.description || category.value !== connection.categoryId) {
         connection.description = description;
-        getAndUpdateConnectionDescription({...connectionObj, description});
+        if (category) {
+          connection.categoryId = category.value;
+        }
+        getAndUpdateConnectionDescription({...connectionObj, description, categoryId: category ? category.value : null});
         updateConnection(connection);
         this.setState({
           title: '',
           description: '',
+          category: null,
         })
         this.toggleIsVisibleSettingsWindow();
       }
@@ -193,7 +230,10 @@ class ConfigurationsIcon extends React.Component {
   }
 
   render() {
-    const { isVisibleSettingsWindow, colorMode, title, validationMessageTitle, validationMessageDescription, description, processTextSize } = this.state;
+    const {
+      isVisibleSettingsWindow, colorMode, title, validationMessageTitle, validationMessageDescription,
+      description, processTextSize, category, categoryOptions,
+    } = this.state;
     const { disabled, readOnly, connection } = this.props;
     return (
       <React.Fragment>
@@ -248,6 +288,18 @@ class ConfigurationsIcon extends React.Component {
                       onChange={(e) => this.setDescription(e.target.value)}
                       value={description}
                       readOnly={readOnly}
+                  />
+
+                  <InputSelect
+                      id={'settings_input_category'}
+                      value={category}
+                      onChange={(a) => this.handleChangeCategory(a)}
+                      options={categoryOptions}
+                      placeholder={'Choose category'}
+                      isDisabled={readOnly}
+                      icon={'category'}
+                      label={'Category'}
+                      categoryList={true}
                   />
                 </React.Fragment>
             }

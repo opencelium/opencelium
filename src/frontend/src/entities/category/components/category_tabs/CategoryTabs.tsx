@@ -26,17 +26,13 @@ import {
   getAllCategories,
   addCategory,
   deleteCategoryById,
-  deleteCategoriesById,
-  getCategoryById,
-  updateCategory,
   deleteCategoryCascadeById
 } from '@entity/category/redux_toolkit/action_creators/CategoryCreators';
 import {setActiveCategory, setActiveTab} from "@entity/category/redux_toolkit/slices/CategorySlice";
 import {CategoryModel, CategoryModelCreate} from "@entity/category/requests/models/CategoryModel";
-import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
 import { CategoryTabsProps } from "./interfaces";
 import Checkbox from "@entity/connection/components/components/general/basic_components/inputs/Checkbox";
-import {add} from "lodash";
+import {getAllMetaConnections} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 
 const AllCategoriesTab: any = {name: 'All', parentCategory: null, subCategories: []};
 
@@ -48,10 +44,12 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
   const [tabForRemove, setTabForRemove] = useState<any>({});
   const [breadcrumbs, setBreadcrumbs] = useState([{name: 'All'}]);
   const [removeRecursively, setRemoveRecursively] = useState(false);
-
+  const [categoriesOptions, setCategoriesOptions] = useState([]);
+  const [startDeleting, setStartDeleting] = useState<boolean>(false);
   const {
     checkingCategoryName, isCurrentCategoryHasUniqueName, categories, activeCategory,
     gettingCategories, addingCategory, deletingCategoryById, activeTab,
+      deletingCategoriesById,
   } = Category.getReduxState();
 
   const dispatch = useAppDispatch();
@@ -72,12 +70,29 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
   }, [gettingCategories, addingCategory, deletingCategoryById]);
 
   useEffect(() => {
-    bc()
-    if(activeCategory){
-      category.parentSelect = categoriesOptions.find(c => c.value === activeCategory.id);
+    if (deletingCategoryById === API_REQUEST_STATE.FINISH && startDeleting) {
+      dispatch(getAllCategories());
+      dispatch(getAllMetaConnections());
+      setStartDeleting(false);
     }
-  }, [activeCategory]);
+  }, [deletingCategoryById]);
 
+  useEffect(() => {
+    bc()
+  }, [activeCategory]);
+  useEffect(() => {
+    if (!visibleAddCategoryDialog) {
+      category.parentSelect = null;
+    } else {
+      if(activeCategory){
+        //@ts-ignore
+        category.updateParentSelect(category, Category.getOptionsForCategorySelect(categories, false).find(c => c.value === activeCategory.id));
+      }
+    }
+  }, [visibleAddCategoryDialog]);
+  useEffect(() => {
+    setCategoriesOptions(Category.getOptionsForCategorySelect(categories));
+  }, [categories]);
   const category = Category.createState<ICategory>();
 
   const NameInput = category.getText({
@@ -91,7 +106,6 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
 
     }
   })
-  const categoriesOptions = Category.getOptionsForCategorySelect(categories);
   const ParentCategory = category.getSelect({propertyName: 'parentSelect', props: {
     icon: 'category',
     label: 'Parent Category',
@@ -114,10 +128,10 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
     }
     setShowConfirmDelete(false);
     setRemoveRecursively(false);
+    setStartDeleting(true);
   };
 
   const handleTabClick = (tabName: any, tab: any) => {
-
     if(tabName !== 'All'){
       if(tab.subCategories){
         const matchedCategories = categories.filter((category: CategoryModel) => tab.subCategories.includes(category.id));
@@ -171,7 +185,23 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
 
   const handleBreadcrumbClick = (breadcrumb: any) => {
     const tab = categories.find((category: CategoryModel) => category.name === breadcrumb);
-    handleTabClick(breadcrumb, tab);
+    if(breadcrumb !== 'All'){
+      if(tab.subCategories){
+        const matchedCategories = categories.filter((category: CategoryModel) => tab.subCategories.includes(category.id));
+        setTabs([AllCategoriesTab, ...matchedCategories])
+        dispatch(setActiveTab('All'));
+      }
+      else{
+        dispatch(setActiveTab(breadcrumb));
+      }
+      dispatch(setActiveCategory(categories.find((c: CategoryModel) => c.name === breadcrumb)));
+    }
+    else{
+      const categoriesWithNullParent = categories.filter((category: CategoryModel) => !category.parentCategory);
+      setTabs([AllCategoriesTab, ...categoriesWithNullParent])
+      dispatch(setActiveTab('All'));
+      dispatch(setActiveCategory(null));
+    }
   }
 
   const addCategoryName = () => {
@@ -202,15 +232,19 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
       </div>
       <div className={styles.tab_panel}>
         {tabs.map((tab, index) => (
-          <div className={`${styles.tab} ${activeTab === tab.name ? `${styles.active_tab}` : ''}`} key={index} onClick={() => handleTabClick(tab.name, tab)}>
+          <div className={`${styles.tab} ${activeTab === tab.name ? `${styles.active_tab}` : ''}`} key={index} onClick={() => {
+            if(tab.name !== activeTab) {
+              handleTabClick(tab.name, tab);
+            }
+          }}>
             {!readOnly && tab.name !== 'All' && (
               <span
               className={styles.close_icon}
-                onClick={(e) => (
-                  e.stopPropagation(),
-                  setShowConfirmDelete(true),
-                  setTabForRemove({index, id: tab.id})
-                )}
+                onClick={(e) => {
+                    e.stopPropagation(),
+                    setShowConfirmDelete(true),
+                    setTabForRemove({index, id: tab.id})
+                }}
               >
                 &times;
               </span>

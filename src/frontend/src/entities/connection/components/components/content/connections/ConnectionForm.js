@@ -128,11 +128,19 @@ export function ConnectionForm(type) {
                         connection: CConnection.createConnection({...this.props.connection, error}),
                     })
                 }
+                if (this.isAdd && this.props.gettingCategories === API_REQUEST_STATE.FINISH && prevProps.gettingCategories === API_REQUEST_STATE.START) {
+                    if (this.props.activeCategory) {
+                        this.setState({
+                            connection: CConnection.createConnection({categoryId: this.props.activeCategory.id}),
+                        })
+                    }
+                }
             }
 
             componentWillUnmount(){
                 this.props.setCurrentConnection(null);
                 this.props.setFullScreen(false);
+                this.props.setConnection(null);
 
             }
 
@@ -607,7 +615,7 @@ export function ConnectionForm(type) {
 
             render(){
                 const {validationMessages, connection} = this.state;
-                const {t, error, checkingConnectionTitle, fetchingConnectors, setCurrentTechnicalItem, currentTechnicalItem, categories} = this.props;
+                const {t, error, checkingConnectionTitle, fetchingConnectors, setCurrentTechnicalItem, currentTechnicalItem, categories, connectors} = this.props;
                 if((!this.isView && fetchingConnectors !== API_REQUEST_STATE.FINISH) || (!this.isAdd && !this.isFetchedConnection)){
                     return <ContentLoading/>;
                 }

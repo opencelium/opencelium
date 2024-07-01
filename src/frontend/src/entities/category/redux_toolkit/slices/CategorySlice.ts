@@ -63,7 +63,7 @@ const initialState: CategoryState = {
   deletingCategoriesById: API_REQUEST_STATE.INITIAL,
   currentCategory: null,
   activeCategory: null,
-  activeTab: '',
+  activeTab: 'All',
   ...CommonState,
 }
 
