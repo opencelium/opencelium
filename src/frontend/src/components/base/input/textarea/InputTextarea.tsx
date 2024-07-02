@@ -45,7 +45,7 @@ const InputTextarea: FC<InputTextareaProps> =
         }
         return (
             <Input isTextarea readOnly={readOnly} value={value} maxLength={maxLength} placeholder={placeholder} required={required}
-                   label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside} minHeight={minHeight} height={height}>
+                   label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside} minHeight={props.minHeight || minHeight} height={height}>
                 <TextareaStyled
                     isTextarea
                     emphasizeColor={color}

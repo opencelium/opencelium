@@ -438,3 +438,7 @@ CREATE TABLE change_set_yml (
     timestamp BIGINT NOT NULL,
     success bool default false
 );
+--changeset 4.0:18 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE secret_key_for_encoder (
+    secret_key VARCHAR(1000) NOT NULL
+);

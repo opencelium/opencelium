@@ -31,6 +31,7 @@ import UserGroupToolkit from './user_group/redux_toolkit';
 import UpdateAssistantToolkit from './update_assistant/redux_toolkit'
 import DataAggregatorToolkit from './data_aggregator/redux_toolkit'
 import MigrationToolkit from './migrate/redux_toolkit';
+import CategoryToolkit from './category/redux_toolkit';
 
 const ActionCreators = {
     ...ConnectionToolkit.actionCreators,
@@ -46,6 +47,7 @@ const ActionCreators = {
     ...UpdateAssistantToolkit.actionCreators,
     ...DataAggregatorToolkit.actionCreators,
     ...MigrationToolkit.actionCreators,
+    ...CategoryToolkit.actionCreators
 }
 
 const reducers = {
@@ -63,6 +65,7 @@ const reducers = {
     ...UpdateAssistantToolkit.reducers,
     ...DataAggregatorToolkit.reducers,
     ...MigrationToolkit.reducers,
+    ...CategoryToolkit.reducers
 }
 
 const entitiesTranslations = require.context('.', true, /\/\w+\/translations\/index.ts$/);

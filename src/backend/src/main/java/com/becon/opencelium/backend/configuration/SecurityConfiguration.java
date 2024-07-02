@@ -16,10 +16,7 @@
 
 package com.becon.opencelium.backend.configuration;
 
-import com.becon.opencelium.backend.security.AuthExceptionHandler;
-import com.becon.opencelium.backend.security.AuthenticationFilter;
-import com.becon.opencelium.backend.security.AuthorizationFilter;
-import com.becon.opencelium.backend.security.JwtUserDetailsService;
+import com.becon.opencelium.backend.security.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,6 +57,10 @@ public class SecurityConfiguration {
     @Lazy
     @Autowired
     private  AuthorizationFilter authorizationFilter;
+
+    @Lazy
+    @Autowired
+    private  TotpAuthenticationFilter totpAuthenticationFilter;
 
     @Autowired
     private AuthExceptionHandler authExceptionHandler;
@@ -105,6 +106,7 @@ public class SecurityConfiguration {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilter(authenticationFilter)
+                .addFilterBefore(totpAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(authExceptionHandler)
@@ -113,8 +115,16 @@ public class SecurityConfiguration {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
+        String[] enpoints = new String[] {
+                "/api/storage/files/**",
+                "/api/webhook/execute/**",
+                "/api/webhook/health",
+                "/v3/api-docs",
+                "/swagger-ui.html",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/docs"};
         return (web) -> web.ignoring()
-                .requestMatchers("/api/storage/files/**", "/api/webhook/execute/**", "/api/webhook/health",
-                        "/v3/api-docs", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/docs");
+                .requestMatchers(enpoints);
     }
 }

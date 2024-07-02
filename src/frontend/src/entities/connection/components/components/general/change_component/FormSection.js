@@ -42,6 +42,7 @@ import FormNotificationTemplateType from "./form_elements/form_notification_temp
 import FormContent from "./form_elements/form_notification_template/FormContent";
 import FormComponent from "@change_component/form_elements/FormComponent";
 import FormConnectionSvg from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import FormCategory from "./form_elements/FormCategory";
 
 import styles from "@entity/connection/components/themes/default/general/form_component.scss";
 import TestButton from "@change_component/form_elements/TestButton";
@@ -177,6 +178,15 @@ class FormSection extends Component {
       case "connectors":
         return (
           <FormConnectors
+            key={key}
+            entity={entity}
+            updateEntity={updateEntity}
+            data={data}
+          />
+        );
+      case "category":
+        return (
+          <FormCategory
             key={key}
             entity={entity}
             updateEntity={updateEntity}

@@ -1,0 +1,92 @@
+.tab_panel {
+  display: flex;
+  align-items: center;
+}
+
+.tab {
+  padding: 12px 30px;
+  margin-right: 8px;
+  cursor: pointer;
+  position: relative;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  background-color: #fff;
+  font-weight: 500;
+  box-shadow: 0 0px 5px rgb(0 0 0 / 12%), 0 1px 2px rgb(0 0 0 / 24%);
+}
+
+.active_tab {
+  background-color: #2372BA;
+  color: #fff;
+  border-color: #2372BA;
+  box-shadow: 0px 0px 5px 0px #2372BA;
+  padding-top: 15px;
+  cursor: default;
+}
+
+.tab:not(.active_tab):hover{
+  box-shadow: 0px 0px 5px 0px #2372BA inset;
+}
+
+.tab:hover .close_icon {
+  display: block;
+  font-size: 20px;
+}
+
+.close_icon {
+  display: none;
+  position: absolute;
+  top: -8px;
+  right: 2px;
+  cursor: pointer;
+  color: red;
+}
+
+.add_tab {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+
+.breadcrumbs{
+  display: flex;
+  margin-bottom: 20px;
+  font-family: "Open Sans","Arial",sans-serif;
+  font-size: 18px;
+  gap: 15px;
+}
+
+.breadcrumb {
+  position: relative;
+}
+
+.breadcrumb:not(:first-child)::before{
+  content: " / ";
+  position: absolute;
+  left: -13px;
+  margin: 0 3px;
+  color: #000;
+}
+
+.breadcrumb_disabled{
+  color: #777;
+}
+
+.breadcrumb:not(.breadcrumb_disabled){
+  cursor: pointer;
+  color: #000;
+}
+
+.breadcrumb:not(.breadcrumb_disabled):hover{
+  text-decoration: underline;
+}
+
+.category_remove_checkbox {
+  position: static !important;
+  margin: 0 !important;
+
+  input{
+    @extend .category_remove_checkbox;
+    margin-right: 6px !important;
+  }
+}

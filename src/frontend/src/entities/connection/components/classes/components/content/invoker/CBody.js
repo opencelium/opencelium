@@ -57,6 +57,10 @@ export default class CBody{
         return new CBody(type, format, data, fields);
     }
 
+    static webhookSnippet(webhook) {
+        return "${" + webhook + "}";
+    }
+
     checkType(bodyType){
         return true;
         if(bodyType === FIELD_TYPE_STRING || bodyType === FIELD_TYPE_OBJECT || bodyType === FIELD_TYPE_ARRAY){

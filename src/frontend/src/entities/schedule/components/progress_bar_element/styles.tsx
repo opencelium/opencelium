@@ -41,6 +41,7 @@ const ProgressBarFromStyled = styled.div`
     position: absolute;
     z-index: 1;
     color: #000000;
+    left: 0;
     padding-left: 10px;
     font-size: 16px;
     & span{
@@ -60,13 +61,20 @@ const ProgressBarTitleStyled = styled.div`
     font-size: 16px;
 `;
 
+const BarSectionStyled = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 10px;
+`;
+
 const ProgressBarToStyled = styled.div`
     line-height: 33px;
     position: absolute;
     z-index: 1;
     color: #000000;
     padding-right: 10px;
-    right: 0;
+    right: 25px;
     text-align: right;
     font-size: 16px;
     span{
@@ -78,7 +86,6 @@ const ProgressBarToStyled = styled.div`
 
 const ProgressBarStyled = styled(ProgressBar)`
     height: 33px !important;
-    margin-bottom: 10px;
     border-radius: 0.25rem;
     float: left;
     &> div{
@@ -100,4 +107,5 @@ export {
     ProgressBarTitleStyled,
     ProgressBarToStyled,
     ProgressBarStyled,
+    BarSectionStyled,
 }
