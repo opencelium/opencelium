@@ -53,7 +53,12 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public ConnectionMng save(ConnectionMng connectionMng) {
-        if (connectionMng == null) return null;
+        if (connectionMng == null){
+            return null;
+        }
+        if (connectionMng.getConnectionId() != null && existsByConnectionId(connectionMng.getConnectionId())) {
+            throw new RuntimeException("CONNECTION_ALREADY_EXISTS");
+        }
         try {
             fieldBindingMngService.bind(connectionMng); // also saves to db
             if (connectionMng.getFromConnector() != null) {
@@ -81,6 +86,12 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public ConnectionMng saveDirectly(ConnectionMng connectionMng) {
+        if (connectionMng == null){
+            return null;
+        }
+        if (connectionMng.getConnectionId() != null && existsByConnectionId(connectionMng.getConnectionId())) {
+            throw new RuntimeException("CONNECTION_ALREADY_EXISTS");
+        }
         return connectionMngRepository.save(connectionMng);
     }
 
