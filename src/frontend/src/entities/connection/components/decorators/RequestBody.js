@@ -27,6 +27,7 @@ import CRequest from "@entity/connection/components/classes/components/content/i
 import ToolboxThemeInput from "../hocs/ToolboxThemeInput";
 import {markFieldNameAsArray} from "@change_component//form_elements/form_connection/form_methods/help";
 import Pointer from "@change_component/form_elements/form_connection/form_methods/method/Pointer";
+import Webhook from '@entity/connection/classes/Webhook';
 
 
 export function RequestBody(CRequestType){
@@ -307,8 +308,9 @@ export function RequestBody(CRequestType){
                                 }}
                                 WebhookComponent={{
                                     getComponent: (params) => {
+                                        const webhook = new Webhook(params.webhook);
                                         return (
-                                            <span style={{padding: '2px 5px', borderRadius: 3, color: '#000', background: '#eee'}} title={params.webhook}>{params.webhook}</span>
+                                            <span style={{padding: '2px 5px', borderRadius: 3, color: '#000', background: '#eee'}} title={webhook.label}>{webhook.name}</span>
                                         )
                                     }
                                 }}

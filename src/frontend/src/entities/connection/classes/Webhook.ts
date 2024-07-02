@@ -40,7 +40,7 @@ export default class Webhook implements WebhookProps{
         if (lastColonIndex === -1) {
             throw new Error("No colon found in the webhookValue string");
         }
-        this.value = this.value.slice(0, lastColonIndex);
+        this.name = this.value.slice(0, lastColonIndex);
         this.type = this.value.slice(lastColonIndex + 1);
     }
 

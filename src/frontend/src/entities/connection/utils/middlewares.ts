@@ -37,8 +37,8 @@ export const connectionMiddleware: Middleware<{}, RootState> = storeApi => next 
     if(getConnectionWebhooks.fulfilled.type === action.type) {
         const dispatch: AppDispatch = storeApi.dispatch;
         let webhooks = [];
-        for(let i = 0; i < action.payload; i++) {
-            webhooks.push((new Webhook(action.payload.name, action.payload.type)).serialize());
+        for(let i = 0; i < action.payload.length; i++) {
+            webhooks.push((new Webhook(action.payload[i].name, action.payload[i].type)).serialize());
         }
         dispatch(setWebhooks(webhooks));
     }
