@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Webhook;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.WebhookServiceImp;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.execution.QueryParamDataType;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,11 +32,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 
 @RestController
@@ -188,6 +196,23 @@ public class WebhookController {
         WebhookResource resource = webhookService.toResource(webhook);
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         return ResponseEntity.created(uri).body(resource);
+    }
+
+    @Operation(summary = "Returns supported data types for query parameters")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Data types successfully returned",
+                    content = @Content(schema = @Schema(implementation = WebhookResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(value = "/supported/types")
+    public ResponseEntity<?> generateSupportedDataTypes(){
+        return ResponseEntity.ok(QueryParamDataType.getTypes());
     }
 
     @Operation(summary = "Removes webhook")
