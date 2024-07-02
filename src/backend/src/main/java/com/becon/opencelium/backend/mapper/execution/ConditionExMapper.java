@@ -52,7 +52,7 @@ public class ConditionExMapper {
             throw new RuntimeException("Invalid leftStatement[color: %s, type: %s, field: %s]".formatted(ls.getColor(), ls.getType(), ls.getField()));
         }
 
-        String res = stringify(rs);
+        String res = stringify(ls);
 
         if (ro == RelationalOperator.CONTAINS || ro == RelationalOperator.NOT_CONTAINS) {
             return res + "." + rs.getRightPropertyValue();
