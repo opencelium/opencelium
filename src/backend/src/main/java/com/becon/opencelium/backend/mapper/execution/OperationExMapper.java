@@ -86,7 +86,7 @@ public class OperationExMapper {
             return mediaType;
         }
         return fiv.getRequest().getBody() == null
-                || methodMng.getRequest().getBody().getFormat() == null
+                || fiv.getRequest().getBody().getFormat() == null
                 || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null
                 ? MediaType.APPLICATION_JSON
                 : mediaType;
