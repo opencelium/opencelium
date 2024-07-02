@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -202,7 +202,7 @@ public class WebhookController {
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "Data types successfully returned",
-                    content = @Content(schema = @Schema(implementation = WebhookResource.class))),
+                    content = @Content(schema = @Schema(implementation = List.class))),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
