@@ -31,7 +31,9 @@
       "PAGE_3": "Methods",
       "ADD_TEMPLATE": "Add Template",
       "ADD_TEMPLATE_TITLE": "Add Template",
-      "HINT_3": "Add methods"
+      "HINT_3": "Add methods",
+      "CATEGORY": "Category",
+      "NEW_CATEGORY": "New category"
     },
     "LIST_BUTTON": "Connections",
     "ADD_BUTTON": "Add & Close",

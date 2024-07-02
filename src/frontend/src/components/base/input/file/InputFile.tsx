@@ -42,6 +42,7 @@ const InputFile: FC<InputFileProps> = ({
     hasCrop,
     theme,
     showOnlyButton,
+    buttonProps,
     ...props
 }) => {
     const [fileName, setFileName] = useState('');
@@ -98,7 +99,7 @@ const InputFile: FC<InputFileProps> = ({
             <TextStyled hasCheckbox={hasCheckbox} hasBorder={!hasNoImage && !hasValue} color={textColor} paddingLeft={hasIcon ? '30px' : '0'} value={placeholder} display={'inline-block'}/>
             {!hasNoImage && <FileStyled accept={accept} hasCheckbox={hasCheckbox} onChange={(e) => onChooseImage(e)} ref={inputFile} tabIndex={-1} type={'file'} color={color}/>}
             {hasCrop && <ReactCrop src={src} setImage={onChange}/>}
-            {!hasNoImage && <ButtonStyled hasCheckbox={hasCheckbox} id={id} isLoading={!hasIcon && isLoading} emphasizeColor={color} background={theme.button.background.quite || ColorTheme.Blue} label={'Choose'} icon={'upload'} handleClick={() => {inputFile.current.click()}} position={'absolute'} right={0} top={`-5px`}/>}
+            {!hasNoImage && <ButtonStyled hasCheckbox={hasCheckbox} id={id} isLoading={!hasIcon && isLoading} emphasizeColor={color} background={theme.button.background.quite || ColorTheme.Blue} label={'Choose'} icon={'upload'} handleClick={() => {inputFile.current.click()}} position={'absolute'} right={0} top={`-5px`} {...buttonProps}/>}
         </Input>
     )
 }
@@ -113,6 +114,7 @@ InputFile.defaultProps = {
     hasNoImage: true,
     hasCheckbox: false,
     showOnlyButton: false,
+    buttonProps: {},
 }
 
 export default withTheme(InputFile);

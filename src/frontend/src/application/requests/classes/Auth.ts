@@ -16,7 +16,7 @@
 import {AxiosResponse} from "axios";
 import Request from "@entity/application/requests/classes/Request";
 import IUser from "@entity/user/interfaces/IUser";
-import { IAuth } from "../interfaces/IAuth";
+import {IAuth, NoLicenseResponse} from "../interfaces/IAuth";
 import {ICredentials} from "../../interfaces/IAuth";
 import {IRequestSettings} from "../interfaces/IRequest";
 import {LocalStorage} from "../../classes/LocalStorage";
@@ -28,9 +28,14 @@ export class AuthRequest extends Request implements IAuth{
         super({url: '', ...settings});
     }
 
-    async login(credentials: ICredentials): Promise<AxiosResponse<IUser>>{
+    async login(credentials: ICredentials): Promise<AxiosResponse<IUser & NoLicenseResponse>>{
         this.url = 'login';
-        return super.post<IUser>(credentials);
+        return super.post<IUser & NoLicenseResponse>(credentials);
+    }
+
+    async uploadToken(token: string): Promise<AxiosResponse<IUser>> {
+        this.url = 'upload-token';
+        return super.post<IUser>({token});
     }
 
     logout():void{

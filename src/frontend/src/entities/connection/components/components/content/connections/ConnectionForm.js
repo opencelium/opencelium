@@ -40,6 +40,7 @@ import CEnhancement from "@classes/content/connection/field_binding/CEnhancement
 import DataAggregatorButton
     from "@entity/data_aggregator/components/dialog_button/DataAggregatorButton";
 import SyncInvokers from "@change_component/form_elements/form_connection/form_methods/SyncInvokers";
+import { Category } from "@entity/category/classes/Category";
 
 /**
  * common component to add and update Connection
@@ -82,6 +83,7 @@ export function ConnectionForm(type) {
                 let { params } = this.props;
                 if(params){
                     this.props.fetchConnection(params.id);
+                    this.props.getConnectionWebhooks(params.id);
                 }
                 if(this.props.fetchConnectors){
                     this.props.fetchConnectors();
@@ -126,11 +128,19 @@ export function ConnectionForm(type) {
                         connection: CConnection.createConnection({...this.props.connection, error}),
                     })
                 }
+                if (this.isAdd && this.props.gettingCategories === API_REQUEST_STATE.FINISH && prevProps.gettingCategories === API_REQUEST_STATE.START) {
+                    if (this.props.activeCategory) {
+                        this.setState({
+                            connection: CConnection.createConnection({categoryId: this.props.activeCategory.id}),
+                        })
+                    }
+                }
             }
 
             componentWillUnmount(){
                 this.props.setCurrentConnection(null);
                 this.props.setFullScreen(false);
+                this.props.setConnection(null);
 
             }
 
@@ -482,7 +492,6 @@ export function ConnectionForm(type) {
                 const {hasMethodsInputsSection} = this.state;
                 const {t} = this.props;
                 let connectorMenuItems = this.getConnectorMenuItems();
-
                 return {
                     inputs: [
                         {
@@ -606,7 +615,7 @@ export function ConnectionForm(type) {
 
             render(){
                 const {validationMessages, connection} = this.state;
-                const {t, error, checkingConnectionTitle, fetchingConnectors, setCurrentTechnicalItem, currentTechnicalItem} = this.props;
+                const {t, error, checkingConnectionTitle, fetchingConnectors, setCurrentTechnicalItem, currentTechnicalItem, categories, connectors} = this.props;
                 if((!this.isView && fetchingConnectors !== API_REQUEST_STATE.FINISH) || (!this.isAdd && !this.isFetchedConnection)){
                     return <ContentLoading/>;
                 }
@@ -619,7 +628,20 @@ export function ConnectionForm(type) {
                     contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.redirectUrl};
                 }
                 contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.redirectUrl};
+                let categoryMenuItems;
+                let categorySelect;
+                if(this.isAdd){
+                    categoryMenuItems = Category.getOptionsForCategorySelect(categories)
 
+                    categorySelect = {
+                        ...INPUTS.CATEGORY,
+                        label: t(`${this.translationKey}.FORM.CATEGORY`),
+                        readOnly: this.isView,
+                        source: categoryMenuItems,
+                        placeholder: 'Choose category',
+                        categoryList: true,
+                    }
+                }
                 let contents = [
                     {
                         inputs: [
@@ -647,6 +669,9 @@ export function ConnectionForm(type) {
                     contents.push(this.getSecondFormSection());
                 }
                 contents.push(this.getThirdFormSection());
+                if(this.isAdd){
+                    contents[0].inputs.splice(2, 0, categorySelect)
+                }
                 const additionalButtons = (entity, updateEntity) => {
                     if(this.isView || contents.length < 2){
                         return null;
@@ -722,7 +747,7 @@ export function ConnectionForm(type) {
                         isActionInProcess={!this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)}
                         permissions={ConnectionPermissions}
                         clearValidationMessage={(a) => this.clearValidationMessage(a)}
-                        action={(a) => this.doAction(a)}
+                        action={(a) => {this.doAction(a)}}
                         entity={connection}
                         type={this.type}
                         additionalButtons={additionalButtons}
