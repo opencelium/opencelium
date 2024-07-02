@@ -79,7 +79,7 @@ RadioButtons.propTypes = {
     handleChange: PropTypes.func.isRequired,
     radios: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.string,
-        label: PropTypes.string.isRequired,
+        label: PropTypes.any,
         value: PropTypes.string.isRequired,
         inputStyle: PropTypes.object,
         labelStyle: PropTypes.object,

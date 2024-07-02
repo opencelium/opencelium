@@ -13,17 +13,11 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSlice, PayloadAction, current, SliceCaseReducers, CaseReducers } from "@reduxjs/toolkit";
-import {
-  API_REQUEST_STATE,
-  TRIPLET_STATE,
-} from "@application/interfaces/IApplication";
-import {
-  IResponse,
-  ResponseMessages,
-} from "@application/requests/interfaces/IResponse";
-import { CommonState } from "@application/utils/store";
-import { ICommonState } from "@application/interfaces/core";
+import {CaseReducers, createSlice, current, PayloadAction, SliceCaseReducers} from "@reduxjs/toolkit";
+import {API_REQUEST_STATE, TRIPLET_STATE,} from "@application/interfaces/IApplication";
+import {IResponse, ResponseMessages,} from "@application/requests/interfaces/IResponse";
+import {CommonState} from "@application/utils/store";
+import {ICommonState} from "@application/interfaces/core";
 import {
   addConnection,
   addTestConnection,
@@ -33,18 +27,20 @@ import {
   deleteTestConnectionById,
   getAllConnections,
   getAllMetaConnections,
+  getAndUpdateConnectionDescription,
   getAndUpdateConnectionTitle,
-    getAndUpdateConnectionDescription,
   getConnectionById,
+  getConnectionWebhooks,
   testConnection,
   updateConnection,
 } from "../action_creators/ConnectionCreators";
-import { ConnectionLogProps, IConnection } from "../../interfaces/IConnection";
-import { PANEL_LOCATION } from "../../components/utils/constants/app";
+import {ConnectionLogProps, IConnection} from "../../interfaces/IConnection";
+import {PANEL_LOCATION} from "../../components/utils/constants/app";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
-import { NoInfer } from "@reduxjs/toolkit/dist/tsHelpers";
+import {NoInfer} from "@reduxjs/toolkit/dist/tsHelpers";
 import {COLOR_MODE} from "@classes/content/connection_overview_2/CSvg";
-import AnimationFunctionSteps from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/AnimationFunctionSteps";
+import AnimationFunctionSteps
+  from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/AnimationFunctionSteps";
 
 
 export const LogPanelHeight = {
@@ -53,6 +49,8 @@ export const LogPanelHeight = {
 };
 
 export interface ConnectionState extends ICommonState {
+  webhooks: any[],
+  categoryId: number;
   isAnimationForcedToStop: boolean,
   isAnimationNotFound: boolean;
   animationSpeed: number;
@@ -63,7 +61,7 @@ export interface ConnectionState extends ICommonState {
   isButtonPanelOpened: boolean;
   moveTestButton: number;
   connections: IConnection[];
-  metaConnections: IConnection[];
+  metaConnections: any[];
   isCurrentConnectionHasUniqueTitle: TRIPLET_STATE;
   checkingConnectionTitle: API_REQUEST_STATE;
   testingConnection: API_REQUEST_STATE;
@@ -76,6 +74,7 @@ export interface ConnectionState extends ICommonState {
   deletingConnectionById: API_REQUEST_STATE;
   deletingTestConnectionById: API_REQUEST_STATE;
   deletingConnectionsById: API_REQUEST_STATE;
+  gettingConnectionWebhooks: API_REQUEST_STATE;
   currentConnection: IConnection;
   /*
    * TODO: rework during the the connection cleaning
@@ -100,6 +99,8 @@ export interface ConnectionState extends ICommonState {
 }
 
 let initialState: ConnectionState = {
+  webhooks: [],
+  categoryId: null,
   isAnimationForcedToStop: false,
   isAnimationNotFound: false,
   animationSpeed: AnimationFunctionSteps.DefaultSpeed,
@@ -123,6 +124,7 @@ let initialState: ConnectionState = {
   deletingConnectionById: API_REQUEST_STATE.INITIAL,
   deletingTestConnectionById: API_REQUEST_STATE.INITIAL,
   deletingConnectionsById: API_REQUEST_STATE.INITIAL,
+  gettingConnectionWebhooks: API_REQUEST_STATE.INITIAL,
   currentConnection: null,
   currentTechnicalItem: null,
   connection: null,
@@ -154,8 +156,14 @@ const connectionReducers = (isModal: boolean = false) => {
         //state.animationSpeed = AnimationFunctionSteps.DefaultSpeed;
       }
     },
+    addWebhook: (state, action: PayloadAction<string>) => {
+      state.webhooks.push(action.payload);
+    },
     setCurrentConnection: (state, action: PayloadAction<any>) => {
       state.currentConnection = action.payload;
+    },
+    setConnection: (state, action: PayloadAction<any>) => {
+      state.connection = action.payload;
     },
     setJustCreatedItem: (state, action: PayloadAction<any>) => {
       state.justCreatedItem = action.payload;
@@ -524,6 +532,24 @@ const connectionReducers = (isModal: boolean = false) => {
         state.gettingConnection = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },
+      [getConnectionWebhooks.pending.type]: (state) => {
+        state.gettingConnectionWebhooks = API_REQUEST_STATE.START;
+      },
+      [getConnectionWebhooks.fulfilled.type]: (
+          state,
+          action: PayloadAction<string[]>
+      ) => {
+        state.gettingConnectionWebhooks = API_REQUEST_STATE.FINISH;
+        state.webhooks = action.payload;
+        state.error = null;
+      },
+      [getConnectionWebhooks.rejected.type]: (
+          state,
+          action: PayloadAction<IResponse>
+      ) => {
+        state.gettingConnectionWebhooks = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
       [getAllConnections.pending.type]: (state) => {
         state.gettingConnections = API_REQUEST_STATE.START;
       },
@@ -664,8 +690,10 @@ export const connectionSlice = createSlice({
 
 
 export const {
+  addWebhook,
   setIsAnimationForcedToStop,
   setCurrentConnection,
+  setConnection,
   addCurrentLog,
   shouldNotDrawLogMessage,
   addLogMessage,

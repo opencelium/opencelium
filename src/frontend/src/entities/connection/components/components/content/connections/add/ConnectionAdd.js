@@ -21,11 +21,11 @@ import {
     addConnection,
     checkConnectionTitle,
     updateConnection,
-    testConnection,
+    testConnection, getConnectionWebhooks,
 } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {
     setCurrentTechnicalItem,
-    setCurrentConnection,
+    setCurrentConnection, setConnection,
     setTemplatePanelVisibility, setSavePanelVisibility
 } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
@@ -37,6 +37,9 @@ import {useNavigate} from "react-router";
 import {ConnectionPermissions} from "@entity/connection/constants";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {useAppDispatch} from "@application/utils/store";
+import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
+import {Category} from "@entity/category/classes/Category";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 
 function mapStateToProps(state){
@@ -44,6 +47,7 @@ function mapStateToProps(state){
     const template = state.templateReducer
     const connector = state.connectorReducer;
     const connection = state.connectionReducer;
+    const category = state.categoryReducer;
     const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
         authUser,
@@ -60,6 +64,9 @@ function mapStateToProps(state){
         checkTitleResult: connection.isCurrentConnectionHasUniqueTitle,
         validatingFormMethods: connection.validatingFormMethods,
         validateFormMethodsResult: connection.validateFormMethodsResult,
+        categories: category.categories,
+        gettingCategories: category.gettingCategories,
+        activeCategory: category.activeCategory,
     };
 }
 
@@ -70,7 +77,7 @@ function mapStateToProps(state){
 @connect(mapStateToProps, {
     updateConnection, addConnection, addTemplate, fetchConnectors, checkConnectionTitle,
     fetchTemplates, testConnection, setCurrentTechnicalItem, setCurrentConnection,
-    setFullScreen,
+    setFullScreen, setConnection,
 })
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
@@ -85,6 +92,7 @@ export default function(props) {
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
+            dispatch(getAllCategories());
         }
     }, []);
     return <ConnectionAdd {...props} navigate={navigate} />;
