@@ -34,13 +34,11 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
+import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +47,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class ConnectionServiceImp implements ConnectionService {
@@ -398,10 +397,12 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
-    public List<String> extractVarsFromJson(String json) throws IOException {
+    public List<WebhookParamDTO> extractVarsFromJson(String json) throws IOException {
         ArrayList<String> webhookVarList = new ArrayList<>();
         extractVars(json, webhookVarList);
-        return webhookVarList;
+        return  webhookVarList.stream()
+                .map(webhookService::toParamResource)
+                .collect(Collectors.toList());
     }
 
     private void extractVars(Object json, List<String> varList) {
