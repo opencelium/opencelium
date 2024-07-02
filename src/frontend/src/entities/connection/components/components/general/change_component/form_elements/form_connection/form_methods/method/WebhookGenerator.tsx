@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {components} from 'react-select';
 import { Connection } from '@entity/connection/classes/Connection';
 //@ts-ignore
@@ -9,13 +9,17 @@ import Button from "@basic_components/buttons/Button";
 import {setWebhook} from "@root/redux_toolkit/slices/ConnectionSlice";
 import Input from "@basic_components/inputs/Input";
 import Dialog from "@basic_components/Dialog";
-import {FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT, FIELD_TYPE_STRING} from "@classes/content/connection/method/CMethodItem";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import Webhook from '@entity/connection/classes/Webhook';
+import {getWebhookTypes} from "@root/redux_toolkit/action_creators/ConnectionCreators";
+import {capitalize} from "@application/utils/utils";
 
 const WebhookGenerator = ({value, onSelect}: {value: string, onSelect: (webhook: string) => void}) => {
     const dispatch = useAppDispatch();
-    const {webhooks} = Connection.getReduxState();
+    const {webhooks, webhookTypes} = Connection.getReduxState();
+    const typeOptions = useMemo(() => {
+        return webhookTypes.map(type => {return {label: capitalize(type), value: type, id: type};});
+    }, [webhookTypes]);
     const [showDialog, toggleDialog] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>('');
     const [name, setName] = useState<string>('');
@@ -38,6 +42,9 @@ const WebhookGenerator = ({value, onSelect}: {value: string, onSelect: (webhook:
             }
         }
     }
+    useEffect(() => {
+        dispatch(getWebhookTypes());
+    }, [])
     useEffect(() => {
         if (isAdded) {
             setCurrentWebhook(webhooks.find(w => Webhook.compareTwoWebhooks(w, {name, type})) || null);
@@ -139,13 +146,14 @@ const WebhookGenerator = ({value, onSelect}: {value: string, onSelect: (webhook:
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
                                     textAlign: 'left'
-                                }}>
-                                <span>{props.data.label}</span>
-                                <Button icon={'create'} iconSize={'13px'} handleClick={() => {
-                                    setName(props.data.name);
-                                    setType(props.data.type);
-                                    toggleDialog(true);
-                                }}/>
+                                }}
+                                title={props.data.label}
+                            >
+                                <span style={{
+                                    textOverflow: 'ellipsis',
+                                    overflow: 'hidden',
+                                    whiteSpace: 'nowrap'
+                                }}>{props.data.label}</span>
                             </div>
                         </Component>;
                     },
@@ -170,6 +178,7 @@ const WebhookGenerator = ({value, onSelect}: {value: string, onSelect: (webhook:
                         label={'Name'}
                         name={'webhook_name'}
                         id={'webhook_name'}
+                        icon={'perm_identity'}
                         autoFocus
                     />
                     <RadioButtons
@@ -179,19 +188,7 @@ const WebhookGenerator = ({value, onSelect}: {value: string, onSelect: (webhook:
                         icon={'text_format'}
                         value={type}
                         handleChange={onChangeType}
-                        radios={[
-                            {
-                                id: 'add_param_input_type',
-                                label: 'String',
-                                value: FIELD_TYPE_STRING,
-                            },{
-                                label: 'Array',
-                                value: FIELD_TYPE_ARRAY,
-                            },{
-                                label: 'Object',
-                                value: FIELD_TYPE_OBJECT,
-                            }
-                        ]}/>
+                        radios={typeOptions}/>
                 </div>
             </Dialog>
         </div>

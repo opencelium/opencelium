@@ -31,6 +31,7 @@ import {
   getAndUpdateConnectionTitle,
   getConnectionById,
   getConnectionWebhooks,
+  getWebhookTypes,
   testConnection,
   updateConnection,
 } from "../action_creators/ConnectionCreators";
@@ -41,7 +42,7 @@ import {NoInfer} from "@reduxjs/toolkit/dist/tsHelpers";
 import {COLOR_MODE} from "@classes/content/connection_overview_2/CSvg";
 import AnimationFunctionSteps
   from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/AnimationFunctionSteps";
-import { WebhookProps } from "@entity/connection/classes/Webhook";
+import {WebhookProps} from "@entity/connection/classes/Webhook";
 
 
 export const LogPanelHeight = {
@@ -76,6 +77,8 @@ export interface ConnectionState extends ICommonState {
   deletingTestConnectionById: API_REQUEST_STATE;
   deletingConnectionsById: API_REQUEST_STATE;
   gettingConnectionWebhooks: API_REQUEST_STATE;
+  gettingWebhookTypes: API_REQUEST_STATE;
+  webhookTypes: string[],
   currentConnection: IConnection;
   /*
    * TODO: rework during the the connection cleaning
@@ -126,6 +129,8 @@ let initialState: ConnectionState = {
   deletingTestConnectionById: API_REQUEST_STATE.INITIAL,
   deletingConnectionsById: API_REQUEST_STATE.INITIAL,
   gettingConnectionWebhooks: API_REQUEST_STATE.INITIAL,
+  gettingWebhookTypes: API_REQUEST_STATE.INITIAL,
+  webhookTypes: [],
   currentConnection: null,
   currentTechnicalItem: null,
   connection: null,
@@ -555,6 +560,24 @@ const connectionReducers = (isModal: boolean = false) => {
           action: PayloadAction<IResponse>
       ) => {
         state.gettingConnectionWebhooks = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [getWebhookTypes.pending.type]: (state) => {
+        state.gettingWebhookTypes = API_REQUEST_STATE.START;
+      },
+      [getWebhookTypes.fulfilled.type]: (
+          state,
+          action: PayloadAction<string[]>
+      ) => {
+        state.gettingWebhookTypes = API_REQUEST_STATE.FINISH;
+        state.webhookTypes = action.payload;
+        state.error = null;
+      },
+      [getWebhookTypes.rejected.type]: (
+          state,
+          action: PayloadAction<IResponse>
+      ) => {
+        state.gettingWebhookTypes = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },
       [getAllConnections.pending.type]: (state) => {
