@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
@@ -33,16 +34,20 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
+import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.github.fge.jsonpatch.JsonPatch;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class ConnectionServiceImp implements ConnectionService {
@@ -59,6 +64,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ConnectionUpdateTracker updateTracker;
     private final PatchHelper patchHelper;
+    private final WebhookService webhookService;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -69,6 +75,7 @@ public class ConnectionServiceImp implements ConnectionService {
             @Qualifier("categoryServiceImp") CategoryService categoryService,
             @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService connectionHistoryService,
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
+            @Qualifier("webhookServiceImp") WebhookService webhookService,
             PatchHelper patchHelper,
             Mapper<Connector, ConnectorDTO> connectorMapper,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
@@ -87,14 +94,13 @@ public class ConnectionServiceImp implements ConnectionService {
         this.updateTracker = updateTracker;
         this.connectionHistoryService = connectionHistoryService;
         this.schedulerService = schedulerService;
+        this.webhookService = webhookService;
     }
 
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // public methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
     @Override
     @Transactional
     public ConnectionMng save(Connection connection, ConnectionMng connectionMng) {
@@ -388,6 +394,33 @@ public class ConnectionServiceImp implements ConnectionService {
     public void updateCategory(Connection connection, Integer newCategory) {
         connection.setCategoryId(newCategory);
         connectionRepository.save(connection);
+    }
+
+    @Override
+    public List<WebhookParamDTO> extractVarsFromJson(String json) throws IOException {
+        ArrayList<String> webhookVarList = new ArrayList<>();
+        extractVars(json, webhookVarList);
+        return  webhookVarList.stream()
+                .map(webhookService::toParamResource)
+                .collect(Collectors.toList());
+    }
+
+    private void extractVars(Object json, List<String> varList) {
+        if (json instanceof JSONObject jsonObject) {
+            for (String key : jsonObject.keySet()) {
+                extractVars(jsonObject.get(key), varList);
+            }
+        } else if (json instanceof JSONArray jsonArray) {
+            for (Object o : jsonArray) {
+                extractVars(o, varList);
+            }
+        } else if (json instanceof String str) {
+            Pattern pattern = Pattern.compile(RegExpression.webhook);
+            Matcher matcher = pattern.matcher(str);
+            while (matcher.find()) {
+                varList.add(matcher.group(1));
+            }
+        }
     }
 
 

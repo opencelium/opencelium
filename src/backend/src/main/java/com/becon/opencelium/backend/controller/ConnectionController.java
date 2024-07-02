@@ -31,7 +31,10 @@ import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -489,4 +492,32 @@ public class ConnectionController {
         ids.getIdentifiers().forEach(connectionService::deleteById);
         return ResponseEntity.noContent().build();
     }
+
+
+    @Operation(summary = "Removes webhook")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "204",
+                    description = "Webhook has been successfully deleted",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/{connectionId}/webhook/vars")
+    public ResponseEntity<?> getVariablesFromConnection(@PathVariable long connectionId) {
+        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            // Convert the Java object to a JSON string
+            String json = objectMapper.writeValueAsString(connectionMng);
+            List<WebhookParamDTO> webhookParams = connectionService.extractVarsFromJson(json);
+            return ResponseEntity.ok(webhookParams);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

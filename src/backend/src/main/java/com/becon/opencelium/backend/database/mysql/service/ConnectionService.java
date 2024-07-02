@@ -20,8 +20,10 @@ import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.github.fge.jsonpatch.JsonPatch;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,4 +72,5 @@ public interface ConnectionService {
     List<Connection> findAllNotCompleted();
 
     void updateCategory(Connection connection, Integer newCategory);
+    List<WebhookParamDTO> extractVarsFromJson(String json) throws IOException;
 }
