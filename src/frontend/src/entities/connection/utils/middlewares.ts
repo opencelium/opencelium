@@ -14,10 +14,13 @@
  */
 
 import { Middleware } from 'redux'
-import {RootState} from "@application/utils/store";
+import {AppDispatch, RootState} from "@application/utils/store";
 import {setAnimationPaused} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import AdditionalFunctions
     from "@change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/AdditionalFunctions";
+import {getConnectionWebhooks} from "@root/redux_toolkit/action_creators/ConnectionCreators";
+import Webhook from '../classes/Webhook';
+import {setWebhooks} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 export const connectionMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (setAnimationPaused.type === action.type) {
@@ -30,6 +33,14 @@ export const connectionMiddleware: Middleware<{}, RootState> = storeApi => next 
                 }
             }
         }
+    }
+    if(getConnectionWebhooks.fulfilled.type === action.type) {
+        const dispatch: AppDispatch = storeApi.dispatch;
+        let webhooks = [];
+        for(let i = 0; i < action.payload; i++) {
+            webhooks.push((new Webhook(action.payload.name, action.payload.type)).serialize());
+        }
+        dispatch(setWebhooks(webhooks));
     }
     return next(action);
 }
