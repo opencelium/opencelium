@@ -124,8 +124,7 @@ public class ReferenceExtractor implements Extractor {
             // get requiredType if specified, then update reference
             QueryParamDataType type = null;
             if (ref.contains(":")) {
-                String typeString = ref.split(":")[1].replace("}", "");
-                type = QueryParamDataType.fromString(typeString);
+                type = QueryParamDataType.fromString(ref.split(":")[1].replace("}", ""));
 
                 ref = ref.split(":")[0].concat("}");
             }
@@ -170,11 +169,11 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return switch (type) {
+            case INT -> Long.parseLong(stringValue);
+            case BOOLEAN -> Boolean.parseBoolean(stringValue);
+            case DOUBLE -> Double.parseDouble(stringValue);
             case STRING -> stringValue.replace("[", "").replace("]", "")
                     .replace("'", "");
-            case INT -> Long.parseLong(stringValue);
-            case DOUBLE -> Double.parseDouble(stringValue);
-            case BOOLEAN -> Boolean.getBoolean(stringValue);
             case ARRAY -> stringValue.replace("[", "").replace("]", "")
                     .replace("\"", "").replace("'", "").split(",");
         };

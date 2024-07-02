@@ -4,9 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 
 public enum QueryParamDataType {
     INT("int"),
-    STRING("string"),
-    DOUBLE("double"),
     BOOLEAN("boolean"),
+    DOUBLE("double"),
+    STRING("string"),
     ARRAY("array");
 
     private final String type;
