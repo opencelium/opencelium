@@ -57,6 +57,7 @@ const InputSelect: FC<InputSelectProps> = ({
     autoFocus,
     checkboxProps,
     categoryList,
+    currentCategory,
     ...props
 }) => {
     let source: OptionProps[];
@@ -209,7 +210,9 @@ const InputSelect: FC<InputSelectProps> = ({
         const flattenCategories = (category: any, indentLevel = 0) => {
             if (category) {
                 const {label, value, subCategories} = category;
-                flattenedCategories.push({label, value, indentLevel, subCategories});
+                if(!(currentCategory && currentCategory.id === value)) {
+                    flattenedCategories.push({label, value, indentLevel, subCategories});
+                }
 
                 if (subCategories) {
                     subCategories.forEach((subCategory: any) => {
@@ -245,9 +248,6 @@ const InputSelect: FC<InputSelectProps> = ({
     }
     const searchPlaceholder = !!placeholder ? placeholder : "Please type to search...";
     const hasSearchInput = isSearchable && (!readOnly || !isMultiple);
-
-
-
 
     return(
         <Input checkboxProps={checkboxProps} className={className} paddingLeft={hasIcon && isIconInside ? '30px' : '0'} componentRef={inputRef} noIcon={!hasIcon} hasUnderline={false} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
@@ -342,6 +342,7 @@ InputSelect.defaultProps = {
     getOptionRightComponent: null,
     maxMultiValues: Infinity,
     autoFocus: false,
+    currentCategory: null,
 }
 
 export default InputSelect;

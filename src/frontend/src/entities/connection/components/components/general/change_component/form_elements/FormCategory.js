@@ -17,11 +17,22 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import InputSelect from "@app_component/base/input/select/InputSelect";
 import {FormElement} from "@entity/connection/components/decorators/FormElement";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import {connect} from "react-redux";
+import {setConnectionData, setCurrentTechnicalItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {setModalConnectionData, setModalCurrentTechnicalItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 
 
+function mapStateToProps(state, props){
+    const {activeCategory} = state.categoryReducer;
+    return {
+        activeCategory,
+    }
+}
 /**
  * Component for Form Category Select
 */
+@connect(mapStateToProps, {})
 @FormElement()
 class FormCategory extends Component{
 
@@ -77,19 +88,20 @@ class FormCategory extends Component{
                 }
             }
         }
-    
+
         return null;
     }
 
     getValue(){
         const {source, name} = this.props.data;
-        const {entity, value} = this.props;
+        const {entity, value, activeCategory} = this.props;
         if(value && value.hasOwnProperty('label') && value.hasOwnProperty('value')){
             console.log(value)
             return value;
         }
-        
-        return this.findObjectByValue(source, entity[name]);
+        const selectedCategory = entity[name] || activeCategory?.id || null;
+
+        return this.findObjectByValue(source, selectedCategory);
     }
 
     render(){

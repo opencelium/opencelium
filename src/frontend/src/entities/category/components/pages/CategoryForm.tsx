@@ -90,10 +90,11 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const ParentCategory = category.getSelect({propertyName: 'parentSelect', props: {
         icon: 'category',
         label: 'Parent Category',
-        options: Category.getOptionsForCategorySelect(categories),
+        options: Category.getOptionsForCategorySelect(categories, true, currentCategory),
         required: false,
         isLoading: gettingAllTools === API_REQUEST_STATE.START,
-        categoryList: true
+        categoryList: true,
+        currentCategory,
     }})
 
     let actions = [<Button
