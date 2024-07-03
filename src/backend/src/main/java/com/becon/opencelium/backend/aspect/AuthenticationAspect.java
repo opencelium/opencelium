@@ -40,7 +40,7 @@ public class AuthenticationAspect {
     @Autowired
     private UserServiceImpl userService;
 
-    @AfterReturning(pointcut = "execution(* com.becon.opencelium.backend.security.JwtTokenUtil.generateToken(..))",
+    @AfterReturning(pointcut = "execution(* com.becon.opencelium.backend.security.JwtTokenUtil.generateToken(com.becon.opencelium.backend.security.UserPrincipals))",
                     returning = "token")
     public void afterTokenGeneration(String token){
         String tokenId = jwtTokenUtil.getTokenId(token);
