@@ -29,7 +29,7 @@ import {markFieldNameAsArray} from "@change_component//form_elements/form_connec
 import Pointer from "@change_component/form_elements/form_connection/form_methods/method/Pointer";
 import Webhook from '@entity/connection/classes/Webhook';
 
-
+//[POST params|header|GET params].$.result:array
 export function RequestBody(CRequestType){
     return function (Component) {
         return (
@@ -316,7 +316,7 @@ export function RequestBody(CRequestType){
                                 }}
                                 ReferenceComponent={hasReferenceComponent ? {
                                     getComponent: (params) => {
-                                        const {submitEdit, textarea, selectId} = params;
+                                        const {submitEdit, textarea, selectId, editCancel} = params;
                                         return (
                                             <ParamGenerator
                                                 ref={this.paramGenerator}
@@ -328,6 +328,7 @@ export function RequestBody(CRequestType){
                                                 addParam={(a) => this.updateBody(a)}
                                                 isVisible={true}
                                                 submitEdit={submitEdit}
+                                                editCancel={editCancel}
                                                 id={`${id}_reference_component`}
                                                 isAbsolute={CRequestType.isAbsolute()}
                                                 parent={CRequestType.getParent(textarea)}
