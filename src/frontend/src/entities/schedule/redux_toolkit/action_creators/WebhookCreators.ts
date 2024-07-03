@@ -17,6 +17,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import {WebhookRequest} from "../../requests/classes/Webhook";
 import ModelSchedule from "../../requests/models/Schedule";
+import {ConnectionRequest} from "@root/requests/classes/Connection";
 
 
 export const getWebhook = createAsyncThunk(
@@ -48,7 +49,22 @@ export const deleteWebhook = createAsyncThunk(
     }
 )
 
+export const getWebhookTypes = createAsyncThunk(
+    'schedule/webhook/types',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new WebhookRequest();
+            const response = await request.getWebhookTypes();
+            console.log(response.data);
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export default {
     getWebhook,
     deleteWebhook,
+    getWebhookTypes,
 }

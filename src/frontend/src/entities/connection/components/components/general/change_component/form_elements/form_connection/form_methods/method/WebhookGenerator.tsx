@@ -10,13 +10,13 @@ import {setWebhook} from "@root/redux_toolkit/slices/ConnectionSlice";
 import Dialog from "@basic_components/Dialog";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import Webhook from '@entity/connection/classes/Webhook';
-import {getWebhookTypes} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import {capitalize} from "@application/utils/utils";
 import InputSelect from "@app_component/base/input/select/InputSelect";
 import InputText from "@app_component/base/input/text/InputText";
 import {
     TypeSelectStyled
 } from "@change_component/form_elements/form_connection/form_methods/method/WebhookGeneratorStyles";
+import {getWebhookTypes} from "@entity/schedule/redux_toolkit/action_creators/WebhookCreators";
 
 const sources = ['GET params', 'POST params'];
 
