@@ -1,9 +1,9 @@
 package com.becon.opencelium.backend.execution.builder;
 
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
-import com.becon.opencelium.backend.resource.execution.DataType;
+import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
-import com.becon.opencelium.backend.resource.execution.ParamLocation;
+import com.becon.opencelium.backend.enums.execution.ParamLocation;
 import com.becon.opencelium.backend.resource.execution.ParameterDTO;
 import com.becon.opencelium.backend.resource.execution.ParameterDTOUtil;
 import com.becon.opencelium.backend.resource.execution.RequestBodyDTO;

@@ -24,7 +24,7 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
-import com.becon.opencelium.backend.resource.execution.DataType;
+import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.DirectRefUtility;
 import com.becon.opencelium.backend.utility.FileNameUtils;

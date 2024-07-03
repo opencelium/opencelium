@@ -1,5 +1,8 @@
 package com.becon.opencelium.backend.resource.execution;
 
+import com.becon.opencelium.backend.enums.execution.DataType;
+import com.becon.opencelium.backend.enums.execution.ParamLocation;
+import com.becon.opencelium.backend.enums.execution.ParamStyle;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -8,13 +11,13 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import static com.becon.opencelium.backend.resource.execution.ParamStyle.DEEP_OBJECT;
-import static com.becon.opencelium.backend.resource.execution.ParamStyle.FORM;
-import static com.becon.opencelium.backend.resource.execution.ParamStyle.LABEL;
-import static com.becon.opencelium.backend.resource.execution.ParamStyle.MATRIX;
-import static com.becon.opencelium.backend.resource.execution.ParamStyle.PIPE_DELIMITED;
-import static com.becon.opencelium.backend.resource.execution.ParamStyle.SIMPLE;
-import static com.becon.opencelium.backend.resource.execution.ParamStyle.SPACE_DELIMITED;
+import static com.becon.opencelium.backend.enums.execution.ParamStyle.DEEP_OBJECT;
+import static com.becon.opencelium.backend.enums.execution.ParamStyle.FORM;
+import static com.becon.opencelium.backend.enums.execution.ParamStyle.LABEL;
+import static com.becon.opencelium.backend.enums.execution.ParamStyle.MATRIX;
+import static com.becon.opencelium.backend.enums.execution.ParamStyle.PIPE_DELIMITED;
+import static com.becon.opencelium.backend.enums.execution.ParamStyle.SIMPLE;
+import static com.becon.opencelium.backend.enums.execution.ParamStyle.SPACE_DELIMITED;
 
 public class ParameterDTOUtil {
 

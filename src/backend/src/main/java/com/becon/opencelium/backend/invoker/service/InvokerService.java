@@ -19,7 +19,7 @@ package com.becon.opencelium.backend.invoker.service;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
-import com.becon.opencelium.backend.resource.execution.DataType;
+import com.becon.opencelium.backend.enums.execution.DataType;
 import org.w3c.dom.Document;
 
 import javax.xml.xpath.XPathExpressionException;

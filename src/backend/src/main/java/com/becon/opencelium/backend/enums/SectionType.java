@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.resource.notification.tool.teams;
+package com.becon.opencelium.backend.enums;
 
 public enum SectionType {
     CHANNEL("channel"), TEAM("team");

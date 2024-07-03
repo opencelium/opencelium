@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.enums.LangEnum;
-import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
+import com.becon.opencelium.backend.enums.execution.NotifyTool;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
