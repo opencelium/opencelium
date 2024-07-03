@@ -201,6 +201,7 @@ export const getWebhookTypes = createAsyncThunk(
             return ['string', 'int', 'array', 'object']
             const request = new ConnectionRequest();
             const response = await request.getWebhookTypes();
+            console.log(response.data);
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

@@ -21,12 +21,14 @@ import {mapItemsToClasses} from "@change_component/form_elements/form_connection
 import {connect} from "react-redux";
 import {setConnectionData, setCurrentTechnicalItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {setModalConnectionData, setModalCurrentTechnicalItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 
 function mapStateToProps(state, props){
-    const {activeCategory} = state.categoryReducer;
+    const {activeCategory, gettingCategories} = state.categoryReducer;
     return {
         activeCategory,
+        gettingCategories,
     }
 }
 /**
@@ -41,6 +43,18 @@ class FormCategory extends Component{
         this.state = {
             focused: false,
         };
+    }
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(prevProps.gettingCategories === API_REQUEST_STATE.START && this.props.gettingCategories === API_REQUEST_STATE.FINISH) {
+            const {source, name} = this.props.data;
+            const {entity, activeCategory} = this.props;
+            if (!entity[name] && activeCategory) {
+                this.handleChange(this.findObjectByValue(source, activeCategory.id));
+            }
+        }
+    }
+
+    componentDidMount() {
     }
 
     /**
@@ -99,7 +113,7 @@ class FormCategory extends Component{
             console.log(value)
             return value;
         }
-        const selectedCategory = entity[name] || activeCategory?.id || null;
+        const selectedCategory = entity[name] || null;
 
         return this.findObjectByValue(source, selectedCategory);
     }

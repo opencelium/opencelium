@@ -424,7 +424,7 @@ class ParamGenerator extends Component {
     renderGenerator(){
         const {showGenerator, color, field, referenceType} = this.state;
         const hasMethod = color !== '' && field !== '';
-        const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue, readOnly} = this.props;
+        const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue, readOnly, hasNotType} = this.props;
         if(this.getOptionsForMethods().length === 0){
             return null;
         }
@@ -441,7 +441,7 @@ class ParamGenerator extends Component {
                     showGenerator || isVisible || isAlwaysVisible
                         ?
                         <div key={2} className={`${isAbsolute ? styles.param_generator_form : ''} ${themeParamGeneratorForm}`}>
-                            {this.renderType()}
+                            {!hasNotType && this.renderType()}
                             {referenceType === 'method' && <React.Fragment>
                                 {this.renderMethodSelect()}
                                 {this.renderParamInput()}

@@ -32,7 +32,7 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
         return super.get<string[]>();
     }
     async getWebhookTypes(): Promise<AxiosResponse<string[]>> {
-        this.endpoint = '/webhook/types';
+        this.endpoint = '/webhook/supported/types';
         return super.get<string[]>();
     }
     async checkConnectionTitle(): Promise<AxiosResponse<IResponse>>{
