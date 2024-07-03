@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.execution.ExecutionManager;
+import com.becon.opencelium.backend.resource.execution.QueryParamDataType;
 import com.becon.opencelium.backend.utility.DirectRefUtility;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,10 +35,13 @@ import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
+import static com.becon.opencelium.backend.constant.RegExpression.isNumber;
 import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
+import static com.becon.opencelium.backend.resource.execution.QueryParamDataType.DOUBLE;
+import static com.becon.opencelium.backend.resource.execution.QueryParamDataType.INT;
 import static com.becon.opencelium.backend.utility.DirectRefUtility.ARRAY_LETTER_INDEX;
 import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_KEY_TYPE;
 import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_VALUE_TYPE;
@@ -118,9 +122,10 @@ public class ReferenceExtractor implements Extractor {
 
         try {
             // get requiredType if specified, then update reference
-            String type = "";
+            QueryParamDataType type = null;
             if (ref.contains(":")) {
-                type = ref.split(":")[1].replace("}", "");
+                type = QueryParamDataType.fromString(ref.split(":")[1].replace("}", ""));
+
                 ref = ref.split(":")[0].concat("}");
             }
 
@@ -138,51 +143,40 @@ public class ReferenceExtractor implements Extractor {
                 value = JsonPath.read(message, jsonPath);
             }
 
-            if (value == null) {
-                return null;
-            }
-
             return mapToType(value, type);
         } catch (JsonProcessingException ex) {
             throw new RuntimeException();
         }
     }
 
-    private Object mapToType(Object value, String type) {
-        Object result;
-        String stringValue = value.toString();
-
-        if (type.isBlank()) {
-            // map to number [int, double] if possible
-            final Pattern pattern = Pattern.compile(RegExpression.isNumber, Pattern.MULTILINE);
-            final Matcher matcher = pattern.matcher(stringValue);
-
-            boolean isNumber = false;
-            while (matcher.find()) {
-                isNumber = true;
-            }
-
-            String optionalType = isNumber ? (stringValue.contains(".") ? "double" : "int") : "none";
-
-            result = mapToType(value, optionalType);
-        } else if ("string".equalsIgnoreCase(type)) {
-            result = stringValue.replace("[", "").replace("]", "").replace("'", "");
-        } else if ("int".equalsIgnoreCase(type)) {
-            result = Long.parseLong(stringValue);
-        } else if ("double".equalsIgnoreCase(type)) {
-            result = Double.parseDouble(stringValue);
-        } else if ("boolean".equalsIgnoreCase(type)) {
-            result = Boolean.getBoolean(stringValue);
-        } else if ("array".equalsIgnoreCase(type)) {
-            result = stringValue.replace("[", "")
-                    .replace("]", "")
-                    .replace("\"", "")
-                    .replace("'", "").split(",");
-        } else {
-            result = value;
+    private Object mapToType(Object value, QueryParamDataType type) {
+        if (value == null) {
+            return null;
         }
 
-        return result;
+        String stringValue = value.toString();
+
+        if (type == null) {
+            // map to 'int' or 'double' if possible
+            final Pattern pattern = Pattern.compile(isNumber, Pattern.MULTILINE);
+            final Matcher matcher = pattern.matcher(stringValue);
+
+            if (matcher.find()) {
+                type = stringValue.contains(".") ? DOUBLE : INT;
+            } else {
+                return value;
+            }
+        }
+
+        return switch (type) {
+            case INT -> Long.parseLong(stringValue);
+            case BOOLEAN -> Boolean.parseBoolean(stringValue);
+            case DOUBLE -> Double.parseDouble(stringValue);
+            case STRING -> stringValue.replace("[", "").replace("]", "")
+                    .replace("'", "");
+            case ARRAY -> stringValue.replace("[", "").replace("]", "")
+                    .replace("\"", "").replace("'", "").split(",");
+        };
     }
 
     private Object extractFromOperation(String ref) {
