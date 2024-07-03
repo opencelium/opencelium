@@ -17,7 +17,6 @@ import org.springframework.http.RequestEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -28,6 +27,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
+import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
 
 public class RequestEntityBuilder {
     private final OperationDTO operation;
@@ -216,7 +216,7 @@ public class RequestEntityBuilder {
 
             if (referencedSchema == null) {
                 schema.setValue(null);
-            } else if (schema.getType() == DataType.UNDEFINED || schema.getType() == referencedSchema.getType() || value.matches(directRef)) {
+            } else if (schema.getType() == DataType.UNDEFINED || schema.getType() == referencedSchema.getType() || value.matches(directRef) || value.matches(enhancement)) {
                 // if type of schema is UNDEFINED or the same as referencedSchema then
                 // replace all values of this schema with referenced schema
                 schema.setType(referencedSchema.getType());
