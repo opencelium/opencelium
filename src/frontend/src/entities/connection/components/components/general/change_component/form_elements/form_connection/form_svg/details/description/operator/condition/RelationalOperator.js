@@ -30,7 +30,7 @@ class RelationalOperator extends React.Component{
     getStyles(){
         const {isOperatorHasThreeParams, isOperatorHasValue} = this.props;
         let {hasValue} = isOperatorHasValue();
-        return {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '14%' : '10%' : '25%', transition: 'width 0.3s ease 0s',};
+        return {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '11%' : '7%' : '27%', transition: 'width 0.3s ease 0s',};
     }
 
     getOptions(){

@@ -110,7 +110,6 @@ class FormCategory extends Component{
         const {source, name} = this.props.data;
         const {entity, value, activeCategory} = this.props;
         if(value && value.hasOwnProperty('label') && value.hasOwnProperty('value')){
-            console.log(value)
             return value;
         }
         const selectedCategory = entity[name] || null;

@@ -38,10 +38,12 @@ export default class Webhook implements WebhookProps{
         const lastColonIndex = this.value.lastIndexOf(':');
         // If no colon is found, return an empty object or handle as needed
         if (lastColonIndex === -1) {
-            throw new Error("No colon found in the webhookValue string");
+            this.name = this.value;
+            this.type = 'string';
+        } else {
+            this.name = this.value.slice(0, lastColonIndex);
+            this.type = this.value.slice(lastColonIndex + 1);
         }
-        this.name = this.value.slice(0, lastColonIndex);
-        this.type = this.value.slice(lastColonIndex + 1);
     }
 
     setLabel() {

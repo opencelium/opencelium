@@ -16,7 +16,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Select from "@entity/connection/components/components/general/basic_components/inputs/Select";
+import {components} from "react-select";
 
+const CustomSingleValue = (props) => {
+    const Component = components.SingleValue;
+    console.log(props);
+    return <Component {...props}  style={{...props.style, backgroundColor: props.data.color, borderRadius: '3px', padding: '2px'}}/>
+};
 class MethodSelect extends React.Component{
     constructor(props) {
         super(props);
@@ -101,6 +107,12 @@ class MethodSelect extends React.Component{
                                 width: '70%',
                             };
                         }
+                    }}
+                    components={{
+                        SingleValue: (props) => {
+                            const Component = components.SingleValue;
+                            return <Component {...props}><div title={props.data.label} style={{...props.style, backgroundColor: props.data.color, color: props.data.color, borderRadius: '3px', padding: '2px'}}>{props.data.label}</div></Component>
+                        },
                     }}
                 />
             </div>

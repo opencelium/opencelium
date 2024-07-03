@@ -44,9 +44,9 @@ class LeftStatement extends React.Component{
     getMethodStyles(){
         const {isOperatorHasValue, isLoopOperator} = this.props;
         let {hasValue} = isOperatorHasValue();
-        let width = hasValue ? '10%' : '20%';
+        let width = hasValue ? '6%' : '16%';
         if(isLoopOperator){
-            width = '30%';
+            width = '26%';
         }
         return {width, padding: 0, float: 'left', transition: 'width 0.3s ease 0s',};
     }
@@ -54,7 +54,7 @@ class LeftStatement extends React.Component{
     getParamStyles(){
         const {isOperatorHasThreeParams, isOperatorHasValue, isLoopOperator} = this.props;
         let {hasValue} = isOperatorHasValue();
-        let width = hasValue ? isOperatorHasThreeParams ? '28%' : '35%' : '55%';
+        let width = hasValue ? isOperatorHasThreeParams ? '28%' : '35%' : '52%';
         if(isLoopOperator){
             width = '70%';
         }

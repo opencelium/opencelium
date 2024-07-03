@@ -55,6 +55,7 @@ class Condition extends React.Component{
         super(props);
         this.state = {
             isMouseOver: false,
+            referenceType: 'method',
             condition: {
                 ...this.getConditionFromProps(props),
             }
@@ -267,6 +268,35 @@ class Condition extends React.Component{
         }
         return {hasValue, isRightStatementText, isRightStatementOption, options, isMultiline, popupInputStyles} ;
     }
+    onChangeReferenceType(referenceType) {
+        this.setState({
+            referenceType,
+        })
+    }
+    renderType(isHidden) {
+        const {referenceType} = this.state;
+        return (
+            <div style={{
+                float: 'left',
+                display: 'grid',
+                height: '39px',
+                marginTop: '-1px',
+                width: isHidden ? '0' : '4%',
+                borderBottom: '1px solid #2121211f',
+                paddingBottom: '9px',
+                overflow: 'hidden',
+            }}>
+                <div style={{height: '14px'}} title={'method'}>
+                    <span style={{fontSize: '14px'}} className="mdi mdi-vector-radius"></span>
+                    <input style={{height: '10px'}} type={'radio'} checked={referenceType === 'method'} onChange={() => this.onChangeReferenceType('method')}/>
+                </div>
+                <div style={{height: '14px'}} title={'webhook'}>
+                    <span style={{fontSize: '14px'}} className="mdi mdi-webhook"></span>
+                    <input style={{height: '10px'}} type={'radio'} checked={referenceType === 'webhook'} onChange={() => this.onChangeReferenceType('webhook')}/>
+                </div>
+            </div>
+        )
+    }
 
     renderInfo(){
         const {condition} = this.state;
@@ -282,6 +312,7 @@ class Condition extends React.Component{
         const placeholder = functionalOperator?.placeholder || '';
         return(
             <React.Fragment>
+                {this.renderType()}
                 <LeftStatement
                     ref={this.leftStatementRef}
                     {...this.props}
@@ -308,6 +339,7 @@ class Condition extends React.Component{
                         updateRelationalOperator={(a) => this.updateRelationalOperator(a)}
                         isOperatorHasValue={() => this.isOperatorHasValue(isLoopOperator)}
                     />
+                    {this.renderType(!this.isOperatorHasValue(isLoopOperator).hasValue)}
                     <RightStatement
                         ref={this.rightStatementRef}
                         {...this.props}
