@@ -8,9 +8,15 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-public class ParameterDTOUtil {
+import static com.becon.opencelium.backend.resource.execution.ParamStyle.DEEP_OBJECT;
+import static com.becon.opencelium.backend.resource.execution.ParamStyle.FORM;
+import static com.becon.opencelium.backend.resource.execution.ParamStyle.LABEL;
+import static com.becon.opencelium.backend.resource.execution.ParamStyle.MATRIX;
+import static com.becon.opencelium.backend.resource.execution.ParamStyle.PIPE_DELIMITED;
+import static com.becon.opencelium.backend.resource.execution.ParamStyle.SIMPLE;
+import static com.becon.opencelium.backend.resource.execution.ParamStyle.SPACE_DELIMITED;
 
-    private final static String EMPTY_STYLE_VALUE_ERROR = "PramStyle of %s should not be empty";
+public class ParameterDTOUtil {
 
     public static ParameterDTO copy(ParameterDTO parameter) {
         ParameterDTO result = new ParameterDTO();
@@ -29,7 +35,7 @@ public class ParameterDTOUtil {
         if (parameter == null) {
             return null;
         } else if (parameter.getStyle() == null) {
-            throw new IllegalStateException("Param style must be supplied to ParameterDTO");
+            throw new IllegalArgumentException("Param style must be supplied to ParameterDTO, parameter.name = " + parameter.getName());
         }
 
         return switch (parameter.getStyle()) {
@@ -45,7 +51,7 @@ public class ParameterDTOUtil {
 
     private static String constructMatrix(ParameterDTO parameter) {
         // parameter with style MATRIX comes in [PATH] location
-        validateParamStyleAndLocationsPair(ParamStyle.MATRIX, parameter.getIn(), List.of(ParamLocation.PATH));
+        validateParamStyleAndLocationsPair(parameter.getName(), MATRIX, parameter.getIn(), List.of(ParamLocation.PATH));
 
         SchemaDTO schema = parameter.getSchema();
 
@@ -97,7 +103,7 @@ public class ParameterDTOUtil {
 
     private static String constructLabel(ParameterDTO parameter) {
         // parameter with style LABEL comes in [PATH] location
-        validateParamStyleAndLocationsPair(ParamStyle.LABEL, parameter.getIn(), List.of(ParamLocation.PATH));
+        validateParamStyleAndLocationsPair(parameter.getName(), LABEL, parameter.getIn(), List.of(ParamLocation.PATH));
 
         SchemaDTO schema = parameter.getSchema();
 
@@ -144,7 +150,7 @@ public class ParameterDTOUtil {
 
     private static String constructForm(ParameterDTO parameter) {
         // parameter with style FORM comes in [QUERY, COOKIE] location
-        validateParamStyleAndLocationsPair(ParamStyle.FORM, parameter.getIn(), List.of(ParamLocation.QUERY, ParamLocation.COOKIE));
+        validateParamStyleAndLocationsPair(parameter.getName(), FORM, parameter.getIn(), List.of(ParamLocation.QUERY, ParamLocation.COOKIE));
 
         SchemaDTO schema = parameter.getSchema();
 
@@ -194,7 +200,7 @@ public class ParameterDTOUtil {
 
     private static String constructSimple(ParameterDTO parameter) {
         // parameter with style SIMPLE comes in [PATH, HEADER] location
-        validateParamStyleAndLocationsPair(ParamStyle.SIMPLE, parameter.getIn(), List.of(ParamLocation.PATH, ParamLocation.HEADER));
+        validateParamStyleAndLocationsPair(parameter.getName(), SIMPLE, parameter.getIn(), List.of(ParamLocation.PATH, ParamLocation.HEADER));
 
         SchemaDTO schema = parameter.getSchema();
 
@@ -203,9 +209,7 @@ public class ParameterDTOUtil {
             Map<String, SchemaDTO> properties = schema.getProperties();
 
             // for empty or null object: ... => n/a
-            if (CollectionUtils.isEmpty(properties)) {
-                throw new IllegalStateException(String.format(EMPTY_STYLE_VALUE_ERROR, ParamStyle.SIMPLE.getStyle()));
-            }
+            validateNotEmptyValue(parameter, CollectionUtils.isEmpty(properties), "properties", properties);
 
             // for paramName = color, paramValue = {"R": 100, "G": 200, "B": 150}
             // if 'explode' = false: ... => R,100,G,200,B,150
@@ -219,9 +223,7 @@ public class ParameterDTOUtil {
             List<SchemaDTO> items = schema.getItems();
 
             // for empty or null array: ... => n/a
-            if (CollectionUtils.isEmpty(items)) {
-                throw new IllegalStateException(String.format(EMPTY_STYLE_VALUE_ERROR, ParamStyle.SIMPLE.getStyle()));
-            }
+            validateNotEmptyValue(parameter, CollectionUtils.isEmpty(items), "items", items);
 
             // for paramName = color, paramValue = ["blue","black","brown"]
             // if 'explode' = false: ... => blue,black,brown
@@ -235,26 +237,24 @@ public class ParameterDTOUtil {
         // for primitive types (value of 'explode' does not have any effect):
         // if paramValue is empty    : ... => n/a
         // if paramValue is not empty: ... => paramValue
-        if (ObjectUtils.isEmpty(value)) {
-            throw new IllegalStateException(String.format(EMPTY_STYLE_VALUE_ERROR, ParamStyle.SIMPLE.getStyle()));
-        }
+        validateNotEmptyValue(parameter, ObjectUtils.isEmpty(value), "value", value);
 
         return value;
     }
 
     private static String constructSpaceDelimited(ParameterDTO parameter) {
         // parameter with style SPACE_DELIMITED comes in [QUERY] location
-        validateParamStyleAndLocationsPair(ParamStyle.SPACE_DELIMITED, parameter.getIn(), List.of(ParamLocation.QUERY));
+        validateParamStyleAndLocationsPair(parameter.getName(), SPACE_DELIMITED, parameter.getIn(), List.of(ParamLocation.QUERY));
 
         // parameter with style SPACE_DELIMITED could not have 'explode'=true
         if (parameter.isExplode()) {
-            throw new IllegalStateException("explode must be false for parameter with type " + ParamStyle.SPACE_DELIMITED.getStyle());
+            throw new IllegalArgumentException("For parameter.name = '" + parameter.getName() + "' with type = '" + SPACE_DELIMITED.getStyle() + "' explode must be false");
         }
 
         SchemaDTO schema = parameter.getSchema();
 
         // parameter with style SPACE_DELIMITED can have [array, object] type
-        validateParamStyleAndDataTypesPair(ParamStyle.SPACE_DELIMITED, schema.getType(), List.of(DataType.OBJECT, DataType.ARRAY));
+        validateParamStyleAndDataTypesPair(parameter.getName(), SPACE_DELIMITED, schema.getType(), List.of(DataType.OBJECT, DataType.ARRAY));
 
         // define delimiter (= space)
         final String SPACE = "%20";
@@ -263,9 +263,7 @@ public class ParameterDTOUtil {
             List<SchemaDTO> items = schema.getItems();
 
             // for empty or null array: ... => n/a
-            if (CollectionUtils.isEmpty(items)) {
-                throw new IllegalStateException(String.format(EMPTY_STYLE_VALUE_ERROR, ParamStyle.SPACE_DELIMITED.getStyle()));
-            }
+            validateNotEmptyValue(parameter, CollectionUtils.isEmpty(items), "items", items);
 
             // for paramName = color, paramValue = ["blue","black","brown"]
             // if 'explode' = false: ... => blue%20black%20brown
@@ -278,9 +276,7 @@ public class ParameterDTOUtil {
         Map<String, SchemaDTO> properties = schema.getProperties();
 
         // for empty or null object: ... => n/a
-        if (CollectionUtils.isEmpty(properties)) {
-            throw new IllegalStateException(String.format(EMPTY_STYLE_VALUE_ERROR, ParamStyle.SPACE_DELIMITED.getStyle()));
-        }
+        validateNotEmptyValue(parameter, CollectionUtils.isEmpty(properties), "properties", properties);
 
         // for paramName = color, paramValue = {"R": 100, "G": 200, "B": 150}
         // if 'explode' = false: ... => R%20100%20G%20200%20B%20150
@@ -291,17 +287,17 @@ public class ParameterDTOUtil {
 
     private static String constructPipeDelimited(ParameterDTO parameter) {
         // parameter with style PIPE_DELIMITED comes in [QUERY] location
-        validateParamStyleAndLocationsPair(ParamStyle.PIPE_DELIMITED, parameter.getIn(), List.of(ParamLocation.QUERY));
+        validateParamStyleAndLocationsPair(parameter.getName(), PIPE_DELIMITED, parameter.getIn(), List.of(ParamLocation.QUERY));
 
         // parameter with style PIPE_DELIMITED could not have 'explode'=true
         if (parameter.isExplode()) {
-            throw new IllegalStateException("explode must be false for parameter with type " + ParamStyle.PIPE_DELIMITED.getStyle());
+            throw new IllegalArgumentException("For parameter.name = '" + parameter.getName() + "' with type = '" + PIPE_DELIMITED.getStyle() + "' explode must be false");
         }
 
         SchemaDTO schema = parameter.getSchema();
 
         // parameter with style PIPE_DELIMITED can have [array, object] type
-        validateParamStyleAndDataTypesPair(ParamStyle.PIPE_DELIMITED, schema.getType(), List.of(DataType.OBJECT, DataType.ARRAY));
+        validateParamStyleAndDataTypesPair(parameter.getName(), PIPE_DELIMITED, schema.getType(), List.of(DataType.OBJECT, DataType.ARRAY));
 
         // define delimiter (= pipe )
         final String PIPE = "|";
@@ -310,9 +306,7 @@ public class ParameterDTOUtil {
             List<SchemaDTO> items = schema.getItems();
 
             // for empty or null array: ... => n/a
-            if (CollectionUtils.isEmpty(items)) {
-                throw new IllegalStateException(String.format(EMPTY_STYLE_VALUE_ERROR, ParamStyle.PIPE_DELIMITED.getStyle()));
-            }
+            validateNotEmptyValue(parameter, CollectionUtils.isEmpty(items), "items", items);
 
             // for paramName = color, paramValue = ["blue","black","brown"]
             // if 'explode' = false: ... => blue|black|brown
@@ -325,9 +319,7 @@ public class ParameterDTOUtil {
         Map<String, SchemaDTO> properties = schema.getProperties();
 
         // for empty or null object: ... => n/a
-        if (CollectionUtils.isEmpty(properties)) {
-            throw new IllegalStateException(String.format(EMPTY_STYLE_VALUE_ERROR, ParamStyle.PIPE_DELIMITED.getStyle()));
-        }
+        validateNotEmptyValue(parameter, CollectionUtils.isEmpty(properties), "properties", properties);
 
         // for paramName = color, paramValue = {"R": 100, "G": 200, "B": 150}
         // if 'explode' = false: ... => R|100|G|200|B|150
@@ -338,24 +330,22 @@ public class ParameterDTOUtil {
 
     private static String constructDeepObject(ParameterDTO parameter) {
         // parameter with style DEEP_OBJECT comes in [QUERY] location
-        validateParamStyleAndLocationsPair(ParamStyle.DEEP_OBJECT, parameter.getIn(), List.of(ParamLocation.QUERY));
+        validateParamStyleAndLocationsPair(parameter.getName(), DEEP_OBJECT, parameter.getIn(), List.of(ParamLocation.QUERY));
 
         // parameter with style DEEP_OBJECT could not have 'explode'=false
         if (!parameter.isExplode()) {
-            throw new IllegalStateException("explode must be true for parameter with type " + ParamStyle.DEEP_OBJECT.getStyle());
+            throw new IllegalArgumentException("For parameter.name = '" + parameter.getName() + "' with type = '" + SPACE_DELIMITED.getStyle() + "' explode must be true");
         }
 
         SchemaDTO schema = parameter.getSchema();
 
         // parameter with style DEEP_OBJECT can have [object] type
-        validateParamStyleAndDataTypesPair(ParamStyle.DEEP_OBJECT, schema.getType(), List.of(DataType.OBJECT));
+        validateParamStyleAndDataTypesPair(parameter.getName(), DEEP_OBJECT, schema.getType(), List.of(DataType.OBJECT));
 
         Map<String, SchemaDTO> properties = schema.getProperties();
 
         // for empty or null object: ... => n/a
-        if (CollectionUtils.isEmpty(properties)) {
-            throw new IllegalStateException("Empty object could not be converted using ParamStyle of DEEP_OBJECT");
-        }
+        validateNotEmptyValue(parameter, CollectionUtils.isEmpty(properties), "properties", properties);
 
         // for paramName = color, paramValue = {"F1": 100, "F2": [200, 300], "F3": {"F31": 400}}
         // if 'explode' = false: ... => n/a
@@ -374,7 +364,7 @@ public class ParameterDTOUtil {
 
             // for empty or null object: ... => n/a
             if (CollectionUtils.isEmpty(properties)) {
-                throw new IllegalStateException("Empty object could not be converted using ParamStyle of DEEP_OBJECT");
+                throw new IllegalArgumentException("ParameterDTO could not be converted if ParamStyle is DEEP_OBJECT ans properties is empty/null, pointer = '" + pointer + "'");
             }
 
             StringJoiner object = new StringJoiner("&");
@@ -391,7 +381,7 @@ public class ParameterDTOUtil {
 
             // for empty or null array: ... => n/a
             if (CollectionUtils.isEmpty(items)) {
-                throw new IllegalStateException("Empty array could not be converted using ParamStyle of DEEP_OBJECT");
+                throw new IllegalArgumentException("ParameterDTO could not be converted if ParamStyle is DEEP_OBJECT ans items is empty/null, pointer = '" + pointer + "'");
             }
 
             StringJoiner array = new StringJoiner("&");
@@ -407,7 +397,7 @@ public class ParameterDTOUtil {
 
         // at this point we have only primitives, stop recursion by returning pointer=schemaValue
         if (schema.getValue() == null) {
-            throw new IllegalStateException("Null value could not be used in ParamStyle of DEEP_OBJECT");
+            throw new IllegalArgumentException("ParameterDTO could not be converted if ParamStyle is DEEP_OBJECT ans value is null, pointer = '" + pointer + "'");
         }
 
         return pointer + "=" + schema.getValue();
@@ -425,21 +415,31 @@ public class ParameterDTOUtil {
                 .collect(Collectors.joining(delimiter));
     }
 
-    private static void validateParamStyleAndLocationsPair(ParamStyle currentStyle, ParamLocation currentLocation, List<ParamLocation> validLocations) {
+    private static void validateParamStyleAndLocationsPair(String name, ParamStyle currentStyle, ParamLocation currentLocation, List<ParamLocation> validLocations) {
         if(validLocations.contains(currentLocation)) {
             return;
         }
 
         String locations = validLocations.stream().map(ParamLocation::getLocation).collect(Collectors.joining(", "));
-        throw new IllegalStateException(String.format("ParamStyle of '%s' is used only in [%s]", currentStyle.getStyle(), locations));
+        throw new IllegalArgumentException(String.format("ParamStyle of '%s' is wrong for parameter.name = '%s'. ParamStyle should be in [%s]", currentStyle.getStyle(), name, locations));
     }
 
-    private static void validateParamStyleAndDataTypesPair(ParamStyle currentStyle, DataType currentType, List<DataType> validTypes) {
+    private static void validateParamStyleAndDataTypesPair(String name, ParamStyle currentStyle, DataType currentType, List<DataType> validTypes) {
         if(validTypes.contains(currentType)) {
             return;
         }
 
         String dataTypes = validTypes.stream().map(DataType::getType).collect(Collectors.joining(", "));
-        throw new IllegalStateException(String.format("ParamStyle of '%s' is used only with [%s] types", currentStyle.getStyle(), dataTypes));
+        throw new IllegalArgumentException(String.format("DataType of '%s' is wrong for parameter.name = '%s' and style = '%s'. DataType should be in [%s]", currentType.getType(), name, currentStyle.getStyle(), dataTypes));
+    }
+
+    private static void validateNotEmptyValue(ParameterDTO p, boolean invalid, String field, Object value) {
+        SchemaDTO schema = p.getSchema();
+        String message = "Parameter should have not empty value, parameter = { name = '%s', location = '%s', style = '%s', schema = { type = '%s', %s = %s}}";
+
+        if (invalid) {
+            message = String.format(message, p.getName(), p.getIn().getLocation(), p.getStyle().getStyle(), schema.getType().getType(), field, value == null ? "null" : value.toString());
+            throw new IllegalArgumentException(message);
+        }
     }
 }
