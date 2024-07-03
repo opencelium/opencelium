@@ -16,6 +16,7 @@
 import React, {Ref} from "react";
 import {ColorTheme, ITheme} from "@style/Theme";
 import {ElementProps, InputElementProps} from "../interfaces";
+import {CategoryModel} from "@entity/category/requests/models/CategoryModel";
 
 interface OptionsProps{
     currentOption?: OptionProps,
@@ -74,6 +75,7 @@ interface InputSelectProps extends InputElementProps{
     maxMultiValues?: number,
     checkboxProps?: any,
     categoryList?: boolean,
+    currentCategory?: CategoryModel | null,
 }
 
 interface OptionsStyledProps extends ElementProps{

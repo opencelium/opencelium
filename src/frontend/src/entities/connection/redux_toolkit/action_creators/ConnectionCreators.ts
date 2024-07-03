@@ -185,10 +185,23 @@ export const getConnectionWebhooks = createAsyncThunk(
     'connection/webhooks',
     async(connectionId: number, thunkAPI) => {
         try {
-            //const request = new ConnectionRequest({endpoint: `/${connectionId}/webhooks`});
-            //const response = await request.getConnectionWebhooks();
-            //return response.data;
-            return [];
+            const request = new ConnectionRequest({endpoint: `/${connectionId}/webhook/vars`});
+            const response = await request.getConnectionWebhooks();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const getWebhookTypes = createAsyncThunk(
+    'connection/webhook/types',
+    async(data: never, thunkAPI) => {
+        try {
+            return ['string', 'int', 'array', 'object']
+            const request = new ConnectionRequest();
+            const response = await request.getWebhookTypes();
+            return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -299,6 +312,7 @@ export const deleteConnectionsById = createAsyncThunk(
 
 export default {
     getConnectionWebhooks,
+    getWebhookTypes,
     testConnection,
     checkConnectionTitle,
     addConnection,

@@ -74,7 +74,7 @@ export class Category extends HookStateClass implements ICategory{
         this.dispatch = category?.dispatch ? category?.dispatch : useAppDispatch();
     }
 
-    static getOptionsForCategorySelect(categories: CategoryModel[], hasFilter: boolean = true) {
+    static getOptionsForCategorySelect(categories: CategoryModel[], hasFilter: boolean = true, currentCategory: CategoryModel = null) {
         function transformCategory(category: any) {
             if(category){
                 return {
@@ -93,6 +93,9 @@ export class Category extends HookStateClass implements ICategory{
         let transformedCategories: any = categories;
         if(hasFilter) {
             transformedCategories = transformedCategories.filter((category: CategoryModel) => !category.parentCategory)
+        }
+        if(currentCategory) {
+            transformedCategories = transformedCategories.filter((category: CategoryModel) => category.id !== currentCategory.id);
         }
         transformedCategories = transformedCategories.map(transformCategory);
 
@@ -188,7 +191,7 @@ export class Category extends HookStateClass implements ICategory{
             return {
                 id: category.id,
                 name: category.name,
-                parentCategory: (+category.parentSelect.value),
+                parentCategory: category.parentSelect ? (+category.parentSelect.value) : null,
             }}, hasNoValidation: false})
     update(): boolean{
         return this.validateId(this.id) && this.validateAdd();

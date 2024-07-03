@@ -31,6 +31,7 @@ import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -512,7 +513,7 @@ public class ConnectionController {
         try {
             // Convert the Java object to a JSON string
             String json = objectMapper.writeValueAsString(connectionMng);
-            List<String> webhookParams = connectionService.extractVarsFromJson(json);
+            List<WebhookParamDTO> webhookParams = connectionService.extractVarsFromJson(json);
             return ResponseEntity.ok(webhookParams);
         } catch (Exception e) {
             throw new RuntimeException(e);

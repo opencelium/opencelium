@@ -4,7 +4,7 @@
 }
 
 .tab {
-  padding: 12px 30px;
+  padding: 5px 25px;
   margin-right: 8px;
   cursor: pointer;
   position: relative;
@@ -12,20 +12,20 @@
   border-top-right-radius: 8px;
   background-color: #fff;
   font-weight: 500;
-  box-shadow: 0 0px 5px rgb(0 0 0 / 12%), 0 1px 2px rgb(0 0 0 / 24%);
+  box-shadow: 0 0px 2px rgb(0 0 0 / 12%), 0 1px 2px rgb(0 0 0 / 24%);
 }
 
 .active_tab {
   background-color: #2372BA;
   color: #fff;
   border-color: #2372BA;
-  box-shadow: 0px 0px 5px 0px #2372BA;
-  padding-top: 15px;
+  box-shadow: 0px 0px 2px 0px #2372BA;
+  padding-top: 5px;
   cursor: default;
 }
 
 .tab:not(.active_tab):hover{
-  box-shadow: 0px 0px 5px 0px #2372BA inset;
+  box-shadow: 0px 0px 2px 0px #2372BA inset;
 }
 
 .tab:hover .close_icon {

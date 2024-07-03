@@ -16,27 +16,21 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.entity.Webhook;
 import com.becon.opencelium.backend.database.mysql.repository.WebhookRepository;
+import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
-import org.openjdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class WebhookServiceImp implements WebhookService {
@@ -155,5 +149,21 @@ public class WebhookServiceImp implements WebhookService {
     @Override
     public boolean existsBySchedulerId(int id) {
         return webhookRepository.existsBySchedulerId(id);
+    }
+
+    @Override
+    public WebhookParamDTO toParamResource(String param) { // param = val:type; type = [string, int, double, boolean, array]
+        WebhookParamDTO webhookParamDTO = new WebhookParamDTO();
+        String[] var = param.split(":");
+        if (var.length == 0) {
+            throw new RuntimeException("One of webhook parameters is empty");
+        }
+        webhookParamDTO.setName(var[0]);
+        if (var.length == 1) {
+            webhookParamDTO.setType("string");
+        } else {
+            webhookParamDTO.setType(var[1]);
+        }
+        return webhookParamDTO;
     }
 }

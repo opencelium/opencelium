@@ -128,13 +128,6 @@ export function ConnectionForm(type) {
                         connection: CConnection.createConnection({...this.props.connection, error}),
                     })
                 }
-                if (this.isAdd && this.props.gettingCategories === API_REQUEST_STATE.FINISH && prevProps.gettingCategories === API_REQUEST_STATE.START) {
-                    if (this.props.activeCategory) {
-                        this.setState({
-                            connection: CConnection.createConnection({categoryId: this.props.activeCategory.id}),
-                        })
-                    }
-                }
             }
 
             componentWillUnmount(){

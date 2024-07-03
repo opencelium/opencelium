@@ -22,6 +22,9 @@ export interface IConnectionRequest {
     //to get webhooks params of the connection
     getConnectionWebhooks(): Promise<AxiosResponse<string[]>>,
 
+    //to get webhook types of the connection
+    getWebhookTypes(): Promise<AxiosResponse<string[]>>,
+
     //to check if connection with such title already exists
     checkConnectionTitle(): Promise<AxiosResponse<IResponse>>,
 
