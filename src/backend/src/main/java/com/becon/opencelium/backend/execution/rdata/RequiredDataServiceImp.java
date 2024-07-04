@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.rdata;
 
-import com.becon.opencelium.backend.constant.DataRef;
+import com.becon.opencelium.backend.enums.DataRef;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.execution.rdata.extractor.Extractor;

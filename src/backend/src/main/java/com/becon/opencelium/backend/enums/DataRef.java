@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.constant;
+package com.becon.opencelium.backend.enums;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

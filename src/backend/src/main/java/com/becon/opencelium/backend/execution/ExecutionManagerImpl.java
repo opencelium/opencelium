@@ -11,7 +11,7 @@ import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
-import com.becon.opencelium.backend.invoker.enums.PageParam;
+import com.becon.opencelium.backend.enums.PageParam;
 
 import java.util.ArrayList;
 import java.util.List;
