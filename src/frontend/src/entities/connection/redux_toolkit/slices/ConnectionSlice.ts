@@ -31,7 +31,6 @@ import {
   getAndUpdateConnectionTitle,
   getConnectionById,
   getConnectionWebhooks,
-  getWebhookTypes,
   testConnection,
   updateConnection,
 } from "../action_creators/ConnectionCreators";
@@ -43,6 +42,7 @@ import {COLOR_MODE} from "@classes/content/connection_overview_2/CSvg";
 import AnimationFunctionSteps
   from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/AnimationFunctionSteps";
 import {WebhookProps} from "@entity/connection/classes/Webhook";
+import {getWebhookTypes} from "@entity/schedule/redux_toolkit/action_creators/WebhookCreators";
 
 
 export const LogPanelHeight = {

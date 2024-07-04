@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 
 public class ExecutionManagerImpl implements ExecutionManager {
-    private final Map<String, Object> queryParams;
+    private final Map<String, Object> webhookVars;
     private final Extractor refExtractor;
     private final EnhancementService enhancementService;
     private final List<Loop> loops = new ArrayList<>();
@@ -34,8 +34,8 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private Integer currentCtorId;
     private Pagination pagination;
 
-    public ExecutionManagerImpl(Map<String, Object> queryParams, Connector connectorFrom, Connector connectorTo, List<FieldBind> fieldBind) {
-        this.queryParams = queryParams;
+    public ExecutionManagerImpl(Map<String, Object> webhookVars, Connector connectorFrom, Connector connectorTo, List<FieldBind> fieldBind) {
+        this.webhookVars = webhookVars;
         this.connectorFrom = connectorFrom;
         this.connectorTo = connectorTo;
         this.fieldBind = fieldBind;
@@ -45,8 +45,8 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public Map<String, Object> getQueryParams() {
-        return queryParams;
+    public Map<String, Object> getWebhookVars() {
+        return webhookVars;
     }
 
     @Override

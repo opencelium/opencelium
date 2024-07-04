@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useMemo, useState} from 'react';
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
@@ -28,32 +28,36 @@ import {SchedulePermissions} from '../../constants';
 import {CurrentSchedules} from "../../components/current_schedules/CurrentSchedules";
 import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 import { Category } from '@entity/category/classes/Category';
+import {getAllMetaConnections} from "@root/redux_toolkit/action_creators/ConnectionCreators";
+import { Connection } from '@entity/connection/classes/Connection';
+import connections from "@root/collections/Connections";
+import {capitalize} from "@application/utils/utils";
 
 const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)(({hasTopBar, isReadonly, hasTitle}) => {
     const dispatch = useAppDispatch();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
+    const {metaConnections} = Connection.getReduxState();
     const {elasticSearchCheckResults} = ExternalApplication.getReduxState();
     const hasElasticSearch = elasticSearchCheckResults && elasticSearchCheckResults.status === APP_STATUS_UP;
     const {gettingAllSchedules, schedules, deletingSchedulesById, updatingSchedule} = Schedule.getReduxState();
-    const { activeCategory } = Category.getReduxState();
+    const { activeCategory, categories } = Category.getReduxState();
 
+    const filteredSchedules = useMemo(() => {
+        if (activeCategory) {
+            const filteredConnections = Category.getRecursivelyConnectionsByCategory(metaConnections, categories, activeCategory.id);
+            return schedules.filter(s => filteredConnections.findIndex(c => c.id === s.connection.connectionId) !== -1);
+        } else {
+            return schedules;
+        }
+    }, [metaConnections, categories, schedules, activeCategory]);
     useEffect(() => {
+        dispatch(getAllMetaConnections());
         dispatch(getAllSchedules());
         dispatch(checkMongoDB());
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
     }, [schedules]);
-
-    let filteredSchedules;
-    if(activeCategory){
-        //filteredSchedules = schedules.filter(c => c.connection.title === activeCategory || activeCategory === 'All')
-    }
-    else{
-        filteredSchedules = schedules;
-    }
-
-
     const CSchedules = new Schedules(filteredSchedules, dispatch, deletingSchedulesById, isReadonly, hasElasticSearch, updatingSchedule);
     return (
         <React.Fragment>

@@ -18,7 +18,7 @@ import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IConnection} from "../../interfaces/IConnection";
-import {IConnectionRequest} from "../interfaces/IConnection";
+import {GetConnectionWebhooksResponse, IConnectionRequest} from "../interfaces/IConnection";
 import category from "@entity/category/translations/interpolations/category";
 
 
@@ -28,12 +28,8 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
         super({url: 'connection', ...settings});
     }
 
-    async getConnectionWebhooks(): Promise<AxiosResponse<string[]>> {
-        return super.get<string[]>();
-    }
-    async getWebhookTypes(): Promise<AxiosResponse<string[]>> {
-        this.endpoint = '/webhook/types';
-        return super.get<string[]>();
+    async getConnectionWebhooks(): Promise<AxiosResponse<GetConnectionWebhooksResponse[]>> {
+        return super.get<GetConnectionWebhooksResponse[]>();
     }
     async checkConnectionTitle(): Promise<AxiosResponse<IResponse>>{
         return super.get<IResponse>();

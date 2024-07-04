@@ -49,12 +49,17 @@ class ParamGenerator extends Component {
         const {top, left} = findTopLeft(props.parent);
         this.top = top;
         this.left = left;
-
+        this.paramGeneratorRef = React.createRef();
         this.selectRef = React.createRef();
+        this.webhookRef = React.createRef();
+        this.handleClickOutside = this.handleClickOutside.bind(this);
+        this.handleEscKey = this.handleEscKey.bind(this);
     }
 
     componentDidMount(){
         addCloseParamGeneratorNavigation(this);
+        document.addEventListener('mousedown',  this.handleClickOutside);
+        document.addEventListener('keydown',this.handleEscKey);
     }
 
     componentWillUnmount(){
@@ -64,6 +69,33 @@ class ParamGenerator extends Component {
             elem.innerText = '';
         }
         removeCloseParamGeneratorNavigation(this);
+        document.removeEventListener('mousedown', this.handleClickOutside);
+        document.removeEventListener('keydown',this.handleEscKey);
+    }
+
+    handleEscKey(event) {
+        if (event.key === 'Escape' || event.keyCode === 27) {
+            this.props.editCancel();
+        }
+    }
+
+    handleClickOutside(event){
+        const webhookGeneratorElem = document.getElementById('webhook_generator_dialog');
+        const webhookGeneratorFade = webhookGeneratorElem ? webhookGeneratorElem.parentElement : null;
+        const selectSearch = document.getElementById(`param_generator_${this.props.method.index}`);
+        if (selectSearch) {
+            if (document.activeElement?.id === selectSearch.id){
+                return;
+            }
+        }
+        if (this.paramGeneratorRef.current && !this.paramGeneratorRef.current.contains(event.target)
+            && (!this.webhookRef.current || !this.webhookRef.current.contains(event.target))
+            && (!webhookGeneratorElem || !webhookGeneratorElem.contains(event.target))
+            && (!webhookGeneratorFade || !webhookGeneratorFade.contains(event.target))) {
+            if(this.props.editCancel) {
+                this.props.editCancel();
+            }
+        }
     }
 
     /**
@@ -392,7 +424,7 @@ class ParamGenerator extends Component {
     renderGenerator(){
         const {showGenerator, color, field, referenceType} = this.state;
         const hasMethod = color !== '' && field !== '';
-        const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue} = this.props;
+        const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue, readOnly, hasNotType} = this.props;
         if(this.getOptionsForMethods().length === 0){
             return null;
         }
@@ -403,19 +435,24 @@ class ParamGenerator extends Component {
             if(theme.hasOwnProperty('paramGeneratorForm')) themeParamGeneratorForm = theme.paramGeneratorForm;
         }
         return(
-            <div className={`${isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} ${themeParamGenerator}`} style={parent ? {left: this.left, top: this.top} : {}}>
+            <div ref={this.paramGeneratorRef} className={`${isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} ${themeParamGenerator}`} style={parent ? {left: this.left, top: this.top} : {}}>
                 {this.renderArrowIcon()}
                 {
                     showGenerator || isVisible || isAlwaysVisible
                         ?
                         <div key={2} className={`${isAbsolute ? styles.param_generator_form : ''} ${themeParamGeneratorForm}`}>
-                            {this.renderType()}
+                            {!hasNotType && this.renderType()}
                             {referenceType === 'method' && <React.Fragment>
                                 {this.renderMethodSelect()}
                                 {this.renderParamInput()}
                             </React.Fragment>
                             }
-                            {referenceType === 'webhook' && <WebhookGenerator onSelect={(webhook) => this.onChangeWebhook(webhook)}/>}
+                            {referenceType === 'webhook' && <WebhookGenerator
+                                ref={this.webhookRef}
+                                readOnly={readOnly}
+                                onSelect={(webhook) => this.onChangeWebhook(webhook)}
+                                style={{float: 'left', width: 'calc(100% - 70px)'}}
+                            />}
                             <TooltipFontIcon
                                 id={`param_generator_add_${connector.getConnectorType()}_${method.index}`}
                                 isButton={true}

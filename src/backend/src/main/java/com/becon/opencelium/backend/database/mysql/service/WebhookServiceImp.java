@@ -166,4 +166,85 @@ public class WebhookServiceImp implements WebhookService {
         }
         return webhookParamDTO;
     }
+
+    public Map<String, Object> convertToArrayList(Map<String, Object> inputMap) {
+        Map<String, Object> result = new HashMap<>();
+
+        for (Map.Entry<String, Object> entry : inputMap.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            if (value instanceof String) {
+                String strValue = (String) value;
+
+                if (strValue.startsWith("[") && strValue.endsWith("]")) {
+                    result.put(key, parseStringToArrayList(strValue));
+                } else {
+                    result.put(key, value);
+                }
+            } else {
+                result.put(key, value);
+            }
+        }
+
+        return result;
+    }
+
+    private static Object parseStringToArrayList(String strValue) {
+        strValue = strValue.substring(1, strValue.length() - 1); // Remove the brackets
+
+        if (strValue.contains("[")) {
+            // This is a nested array
+            return parseNestedArray(strValue);
+        } else {
+            // This is a simple array
+            return parseSimpleArray(strValue);
+        }
+    }
+
+    private static ArrayList<Object> parseSimpleArray(String strValue) {
+        ArrayList<Object> list = new ArrayList<>();
+
+        String[] values = strValue.split(",");
+        for (String val : values) {
+            val = val.trim();
+            if (val.matches("-?\\d+(\\.\\d+)?")) {
+                // Check if it's a number
+                if (val.contains(".")) {
+                    list.add(Double.parseDouble(val));
+                } else {
+                    list.add(Integer.parseInt(val));
+                }
+            } else {
+                // Assume it's a string
+                list.add(val);
+            }
+        }
+
+        return list;
+    }
+
+    private static ArrayList<Object> parseNestedArray(String strValue) {
+        ArrayList<Object> outerList = new ArrayList<>();
+        int level = 0;
+        StringBuilder sb = new StringBuilder();
+
+        for (char ch : strValue.toCharArray()) {
+            if (ch == '[') {
+                if (level > 0) sb.append(ch);
+                level++;
+            } else if (ch == ']') {
+                level--;
+                if (level > 0) sb.append(ch);
+                if (level == 0) {
+                    outerList.add(parseStringToArrayList("[" + sb.toString() + "]"));
+                    sb.setLength(0);
+                }
+            } else {
+                if (level > 0) sb.append(ch);
+            }
+        }
+
+        return outerList;
+    }
 }

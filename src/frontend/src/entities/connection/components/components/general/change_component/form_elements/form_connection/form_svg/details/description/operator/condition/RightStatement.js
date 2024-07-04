@@ -97,7 +97,7 @@ class RightStatement extends React.Component{
 
     getMethodStyles(){
         const isMethodVisible = this.isMethodVisible();
-        return  {width: isMethodVisible ? '10%' : '0', float: 'left', maxHeight: '38px', transition: isMethodVisible ? 'width 0.3s ease 0s' : 'none', padding: 0};
+        return  {width: isMethodVisible ? '7%' : '0', float: 'left', maxHeight: '38px', transition: isMethodVisible ? 'width 0.3s ease 0s' : 'none', padding: 0};
     }
 
     getParamStyles(){
@@ -105,7 +105,7 @@ class RightStatement extends React.Component{
         let {hasValue, isRightStatementText, isRightStatementOption} = isOperatorHasValue();
         const isLikeOperator = this.isLikeOperator();
         let isMethodSelectRightInvisible = !hasRightMethod && hasRightParam || isRightStatementText;
-        let width = hasValue && !isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '25.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0';
+        let width = hasValue && !isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '25.5%' : '42%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0';
         if(isLikeOperator){
             width = '25%';
         }
@@ -116,7 +116,7 @@ class RightStatement extends React.Component{
         const {isOperatorHasThreeParams, isOperatorHasValue, hasRightMethod, hasRightParam} = this.props;
         let {hasValue, isRightStatementOption} = isOperatorHasValue();
         let isMethodSelectRightInvisible = !hasRightMethod && hasRightParam || isRightStatementOption;
-        return {transition: hasValue && isRightStatementOption ? 'width 0.3s ease 0s' : 'none', width: hasValue && isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '45%' : '0', float: 'left'};
+        return {transition: hasValue && isRightStatementOption ? 'width 0.3s ease 0s' : 'none', width: hasValue && isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '42%' : isOperatorHasThreeParams ? '15.5%' : '42%' : '0', float: 'left'};
     }
 
     isLikeOperator(){

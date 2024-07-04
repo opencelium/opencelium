@@ -20,8 +20,8 @@ import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.entity.Webhook;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.WebhookServiceImp;
+import com.becon.opencelium.backend.enums.execution.WebhookDataType;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.enums.execution.QueryParamDataType;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -93,7 +93,7 @@ public class WebhookController {
             if (queryParam.isEmpty()) {
                 schedulerService.startNow(scheduler);
             } else {
-                schedulerService.startNow(scheduler, queryParam);
+                schedulerService.startNow(scheduler, webhookService.convertToArrayList(queryParam));
             }
         }
         catch (Exception e){
@@ -140,7 +140,7 @@ public class WebhookController {
             if (queryParam.isEmpty()) {
                 schedulerService.startNow(scheduler);
             } else {
-                schedulerService.startNow(scheduler, queryParam);
+                schedulerService.startNow(scheduler, webhookService.convertToArrayList(queryParam));
             }
         }
         catch (Exception e){
@@ -212,7 +212,7 @@ public class WebhookController {
     })
     @GetMapping(value = "/supported/types")
     public ResponseEntity<?> generateSupportedDataTypes(){
-        return ResponseEntity.ok(QueryParamDataType.getTypes());
+        return ResponseEntity.ok(WebhookDataType.getTypes());
     }
 
     @Operation(summary = "Removes webhook")

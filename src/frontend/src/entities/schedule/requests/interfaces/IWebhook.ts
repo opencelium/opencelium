@@ -24,4 +24,7 @@ export interface IWebhookRequest{
 
     //to delete webhook by id
     deleteWebhookById(): Promise<AxiosResponse<IResponse>>,
+
+    //to get webhook types
+    getWebhookTypes(): Promise<AxiosResponse<string[]>>,
 }
