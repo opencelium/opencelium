@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.resource.execution;
+package com.becon.opencelium.backend.enums.execution;
 
 
 public enum DataType {

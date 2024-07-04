@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.execution.notification;
 
-import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
 import org.springframework.stereotype.Service;
 
 @Service

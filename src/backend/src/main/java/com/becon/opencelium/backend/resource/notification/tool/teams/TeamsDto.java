@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.resource.notification.tool.teams;
 
+import com.becon.opencelium.backend.enums.SectionType;
+
 import java.util.List;
 
 public class TeamsDto {

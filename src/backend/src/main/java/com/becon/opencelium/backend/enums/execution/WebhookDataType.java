@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.resource.execution;
+package com.becon.opencelium.backend.enums.execution;
 
 import org.apache.commons.lang3.StringUtils;
 
