@@ -33,19 +33,11 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.becon.opencelium.backend.constant.RegExpression.directRef;
-import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
-import static com.becon.opencelium.backend.constant.RegExpression.isNumber;
-import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
-import static com.becon.opencelium.backend.constant.RegExpression.requestData;
-import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
+
 import static com.becon.opencelium.backend.constant.RegExpression.*;
 import static com.becon.opencelium.backend.enums.execution.WebhookDataType.DOUBLE;
 import static com.becon.opencelium.backend.enums.execution.WebhookDataType.INT;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.ARRAY_LETTER_INDEX;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_KEY_TYPE;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_VALUE_TYPE;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_SPLIT_STRING_TYPE;
+import static com.becon.opencelium.backend.utility.DirectRefUtility.*;
 
 public class ReferenceExtractor implements Extractor {
     private final ExecutionManager executionManager;
