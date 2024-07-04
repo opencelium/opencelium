@@ -40,6 +40,8 @@ import CProcess from "@entity/connection/components/classes/components/content/c
 import COperator from "@entity/connection/components/classes/components/content/connection_overview_2/operator/COperator";
 import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import WebhookGenerator from "@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator";
+import Webhook from "@root/classes/Webhook";
 
 function mapStateToProps(state){
     const editor = state.connectionEditorReducer;
@@ -55,6 +57,8 @@ class Condition extends React.Component{
         super(props);
         this.state = {
             isMouseOver: false,
+            referenceTypeLeft: 'method',
+            referenceTypeRight: 'method',
             condition: {
                 ...this.getConditionFromProps(props),
             }
@@ -65,9 +69,19 @@ class Condition extends React.Component{
         this.rightStatementRef = React.createRef();
     }
 
+    componentDidMount() {
+        const {condition} = this.state;
+        const referenceTypeLeft = Webhook.isWebhookSnippet(condition.leftParam) && !condition.leftMethod ? 'webhook' : 'method';
+        const referenceTypeRight = Webhook.isWebhookSnippet(condition.rightParam) && !condition.rightMethod ? 'webhook' : 'method';
+        this.setState({
+            referenceTypeLeft,
+            referenceTypeRight,
+        })
+    }
+
     hasLeftMethod(){
         const {condition} = this.state;
-        return condition.leftMethod !== null && condition.leftMethod.color !== '' && condition.leftMethod.color !== DEFAULT_COLOR;
+        return condition.leftMethod !== null && !condition.leftMethod.color !== '' && condition.leftMethod.color !== DEFAULT_COLOR;
     }
 
     hasRightMethod(){
@@ -182,6 +196,12 @@ class Condition extends React.Component{
         }
         if(!isConditionDialogOpened){
             newState.condition = this.getConditionFromProps(this.props);
+            const referenceTypeLeft = Webhook.isWebhookSnippet(newState.condition.leftParam) && !newState.condition.leftMethod ? 'webhook' : 'method';
+            const referenceTypeRight = Webhook.isWebhookSnippet(newState.condition.rightParam) && !newState.condition.rightMethod ? 'webhook' : 'method';
+            this.setState({
+                referenceTypeLeft,
+                referenceTypeRight,
+            })
         }
         if(setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
         toggleConditionDialog()
@@ -199,16 +219,32 @@ class Condition extends React.Component{
         const connector = connection.getConnectorByType(details.connectorType);
         const operatorItem = connector.getOperatorByIndex(operator.index);
         const {leftParam, leftMethod, rightMethod, relationalOperator, rightParam, property} = condition;
-        if(leftMethod) operatorItem.setLeftStatementColor(leftMethod.color);
+        if(leftMethod) {
+            operatorItem.setLeftStatementColor(leftMethod.color);
+        } else {
+            operatorItem.setLeftStatementColor('');
+        }
         if(leftParam){
             operatorItem.setLeftStatementField(leftParam);
-            if(leftMethod) operatorItem.setLeftStatementParent(connection.getMethodByColor(leftMethod.color).response.success);
+            if(leftMethod) {
+                operatorItem.setLeftStatementParent(connection.getMethodByColor(leftMethod.color).response.success);
+            } else {
+                operatorItem.setLeftStatementParent(null);
+            }
         }
         if(relationalOperator) operatorItem.setRelationalOperator(relationalOperator.value);
-        if(rightMethod) operatorItem.setRightStatementColor(rightMethod.color);
+        if(rightMethod) {
+            operatorItem.setRightStatementColor(rightMethod.color);
+        } else {
+            operatorItem.setRightStatementColor('');
+        }
         if(rightParam){
             operatorItem.setRightStatementField(rightParam?.value || rightParam);
-            if(rightMethod) operatorItem.setRightStatementParent(connection.getMethodByColor(rightMethod.color).response.success);
+            if(rightMethod) {
+                operatorItem.setRightStatementParent(connection.getMethodByColor(rightMethod.color).response.success);
+            } else {
+                operatorItem.setRightStatementParent(null);
+            }
         }
         if(property) operatorItem.setRightStatementRightPropertyValue(property);
         operatorItem.error = null;
@@ -267,9 +303,104 @@ class Condition extends React.Component{
         }
         return {hasValue, isRightStatementText, isRightStatementOption, options, isMultiline, popupInputStyles} ;
     }
+    onChangeReferenceTypeLeft(referenceTypeLeft) {
+        const {condition} = this.state;
+        this.updateCondition({
+            ...condition,
+            leftMethod: null,
+            leftParam: '',
+            property: '',
+        });
+        this.setState({
+            referenceTypeLeft,
+        })
+    }
+    onChangeReferenceTypeRight(referenceTypeRight) {
+        const {condition} = this.state;
+        this.updateCondition({
+            ...condition,
+            property: '',
+            rightMethod: null,
+            rightParam: '',
+        });
+        this.setState({
+            referenceTypeRight,
+        })
+    }
+
+    updateLeftWebhook(webhookValue) {
+        const {condition} = this.state;
+        this.updateCondition({
+            ...condition,
+            leftMethod: null,
+            leftParam: Webhook.embraceWithSnippet(webhookValue),
+        });
+    }
+    updateRightWebhook(webhookValue) {
+        const {condition} = this.state;
+        this.updateCondition({
+            ...condition,
+            rightMethod: null,
+            property: '',
+            rightParam: Webhook.embraceWithSnippet(webhookValue),
+        });
+    }
+    renderType(side, isHidden) {
+        const {referenceTypeLeft, referenceTypeRight} = this.state;
+        const referenceType = side === 'left' ? referenceTypeLeft : referenceTypeRight;
+        const changeReferenceType = side === 'left' ? (a) => this.onChangeReferenceTypeLeft(a) : (a) => this.onChangeReferenceTypeRight(a);
+        return (
+            <div style={{
+                float: 'left',
+                display: 'grid',
+                height: '39px',
+                marginTop: '-1px',
+                width: isHidden ? '0' : '4%',
+                borderBottom: '1px solid #2121211f',
+                paddingBottom: '9px',
+                overflow: 'hidden',
+                transition: 'width 0.3s ease 0s',
+            }}>
+                <div style={{height: '14px'}} title={'method'} onClick={() => changeReferenceType('method')}>
+                    <span style={{fontSize: '14px'}} className="mdi mdi-vector-radius"></span>
+                    <input style={{height: '10px'}} type={'radio'} checked={referenceType === 'method'} onChange={() => changeReferenceType('method')}/>
+                </div>
+                <div style={{height: '14px'}} title={'webhook'} onClick={() => changeReferenceType('webhook')}>
+                    <span style={{fontSize: '14px'}} className="mdi mdi-webhook"></span>
+                    <input style={{height: '10px'}} type={'radio'} checked={referenceType === 'webhook'} onChange={() => changeReferenceType('webhook')}/>
+                </div>
+            </div>
+        )
+    }
+
+    getWebhookLeftStyle() {
+        const {referenceTypeRight} = this.state;
+        let {hasValue} = this.isOperatorHasValue();
+        const isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams(false);
+        //let width = hasValue ? '6%' : '16%';
+        let width = hasValue ? isOperatorHasThreeParams ? referenceTypeRight === 'webhook' ? '41%' : '34%' : '41%' : '68%';
+        return {
+            float: 'left',
+            width,
+            transition: 'width 0.3s ease 0s',
+        }
+    }
+
+    getWebhookRightStyle() {
+        let {hasValue} = this.isOperatorHasValue();
+        let styles = {float: 'left'};
+        if (hasValue) {
+            styles.width = '40%';
+            styles.transition = 'width 0.3s ease 0s';
+        } else {
+            styles.width = '0';
+            styles.overflow = 'hidden';
+        }
+        return styles;
+    }
 
     renderInfo(){
-        const {condition} = this.state;
+        const {condition, referenceTypeLeft, referenceTypeRight} = this.state;
         const {connection, details, readOnly, isExtended} = this.props;
         const operator = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
@@ -282,19 +413,26 @@ class Condition extends React.Component{
         const placeholder = functionalOperator?.placeholder || '';
         return(
             <React.Fragment>
-                <LeftStatement
-                    ref={this.leftStatementRef}
-                    {...this.props}
-                    operator={operator}
-                    condition={condition}
-                    connector={connector}
-                    isLoopOperator={false}
-                    hasLeftMethod={this.hasLeftMethod()}
-                    isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams(isLoopOperator)}
-                    updateCondition={(a) => this.updateCondition(a)}
-                    getConditionFromProps={(a) => this.getConditionFromProps(a)}
-                    isOperatorHasValue={() => this.isOperatorHasValue(isLoopOperator)}
-                />
+                {this.renderType('left')}
+                {referenceTypeLeft === 'method' &&
+                    <LeftStatement
+                        ref={this.leftStatementRef}
+                        {...this.props}
+                        operator={operator}
+                        condition={condition}
+                        connector={connector}
+                        isLoopOperator={false}
+                        referenceTypeRight={referenceTypeRight}
+                        hasLeftMethod={this.hasLeftMethod()}
+                        isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams(isLoopOperator)}
+                        updateCondition={(a) => this.updateCondition(a)}
+                        getConditionFromProps={(a) => this.getConditionFromProps(a)}
+                        isOperatorHasValue={() => this.isOperatorHasValue(isLoopOperator)}
+                    />
+                }
+                {referenceTypeLeft === 'webhook' &&
+                    <WebhookGenerator value={Webhook.extractFromSnippet(condition.leftParam)} style={this.getWebhookLeftStyle()} readOnly={readOnly} onSelect={(a) => this.updateLeftWebhook(a)}/>
+                }
                 {(isIfOperator || isLeftInputStringForLoopOperator) &&
                 <React.Fragment>
                     <RelationalOperator
@@ -303,12 +441,15 @@ class Condition extends React.Component{
                         isIfOperator={isIfOperator}
                         relationalOperator={condition.relationalOperator}
                         readOnly={readOnly}
+                        referenceTypeLeft={referenceTypeLeft}
+                        referenceTypeRight={referenceTypeRight}
                         hasMethod={this.hasLeftMethod()}
                         isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams(isLoopOperator)}
                         updateRelationalOperator={(a) => this.updateRelationalOperator(a)}
                         isOperatorHasValue={() => this.isOperatorHasValue(isLoopOperator)}
                     />
-                    <RightStatement
+                    {this.renderType('right', !this.isOperatorHasValue(isLoopOperator).hasValue)}
+                    {referenceTypeRight === 'method' && <RightStatement
                         ref={this.rightStatementRef}
                         {...this.props}
                         placeholder={placeholder}
@@ -322,7 +463,10 @@ class Condition extends React.Component{
                         updateCondition={(a) => this.updateCondition(a)}
                         getConditionFromProps={(a) => this.getConditionFromProps(a)}
                         isOperatorHasValue={() => this.isOperatorHasValue(isLoopOperator)}
-                    />
+                    />}
+                    {referenceTypeRight === 'webhook' &&
+                        <WebhookGenerator value={Webhook.extractFromSnippet(condition.rightParam)} style={this.getWebhookRightStyle()} readOnly={readOnly} onSelect={(a) => this.updateRightWebhook(a)}/>
+                    }
                 </React.Fragment>
                 }
                 {isExtended &&
@@ -363,7 +507,11 @@ class Condition extends React.Component{
                         active={isConditionDialogOpened && !isExtended}
                         toggle={(a) => this.toggleEdit(a)}
                         title={'Condition'}
-                        theme={{dialog: styles.condition_dialog}}
+                        theme={{
+                            dialog: styles.condition_dialog,
+                            content: styles.condition_content,
+                            body: styles.condition_body,
+                        }}
                     >
                         {this.renderInfo()}
                     </Dialog>

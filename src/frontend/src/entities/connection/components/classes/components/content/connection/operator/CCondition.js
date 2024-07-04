@@ -19,6 +19,7 @@ import {clearFieldNameFromArraySign} from "@change_component//form_elements/form
 import {consoleLog} from "@application/utils/utils";
 import {LOOP_OPERATOR} from "@classes/content/connection/operator/COperatorItem";
 import CMethodItem from "@classes/content/connection/method/CMethodItem";
+import Webhook from "@root/classes/Webhook";
 
 const OPERATOR_LABELS_FOR_IF = {
     IS_TYPE_OF: (isPlaceholder = false) => {const styles = isPlaceholder ? {fontSize: '12px', justifyContent: 'center', display: 'flex'} : {fontSize: '12px'}; return (<span style={styles}>{`<T>`}</span>);},
@@ -118,26 +119,39 @@ export default class CCondition{
         return null;
     }
 
-    generateStatementText(isOnlyText = false){
+    getWebhookComponent(webhookSnippet, isOnlyText = false) {
+        const webhook = new Webhook(Webhook.extractFromSnippet(webhookSnippet));
+        if(isOnlyText) {
+            return webhook.label;
+        }
+        return <span style={{padding: '2px 5px', borderRadius: 3, color: '#000', background: '#eee'}}
+                     title={webhook.label}>{webhook.label}</span>;
+    }
+
+    generateStatementText(isOnlyText = false) {
         let statement = '';
-        if(this._operatorType === LOOP_OPERATOR){
-            if(this.leftStatement && this.leftStatement.field !== '') {
+        if (this._operatorType === LOOP_OPERATOR) {
+            if (this.leftStatement && this.leftStatement.field !== '') {
+                let leftStatementText = clearFieldNameFromArraySign(this.leftStatement.field);
+                leftStatementText = Webhook.isWebhookSnippet(leftStatementText) ? this.getWebhookComponent(leftStatementText, isOnlyText) : leftStatementText
                 statement = !isOnlyText ? (
                     <span>
                         <span>{`For each element of the `}</span>
                         {this.relationalOperator === 'SplitString' ? <span>{`split `}</span> : ''}
-                        <b>{clearFieldNameFromArraySign(this.leftStatement.field)}</b>
+                        <b>{Webhook.isWebhookSnippet(leftStatementText) ? this.getWebhookComponent(leftStatementText) : leftStatementText}</b>
                     </span>
-                ) : `For each element of the ${this.relationalOperator === 'SplitString' ? `split` : ''} ${clearFieldNameFromArraySign(this.leftStatement.field)}`;
+                ) : `For each element of the ${this.relationalOperator === 'SplitString' ? `split` : ''} ${leftStatementText}`;
             }
         } else {
             let leftStatementText = '';
             if (this.leftStatement && this.leftStatement.field !== '') {
-                leftStatementText = this.leftStatement.field;
+                leftStatementText = clearFieldNameFromArraySign(this.leftStatement.field);
+                leftStatementText = Webhook.isWebhookSnippet(leftStatementText) ? this.getWebhookComponent(leftStatementText, isOnlyText) : leftStatementText
             }
             let rightStatementText = '';
             if (this.rightStatement && this.rightStatement.field !== '') {
-                rightStatementText = this.rightStatement.field;
+                rightStatementText = clearFieldNameFromArraySign(this.rightStatement.field);
+                rightStatementText = Webhook.isWebhookSnippet(rightStatementText) ? this.getWebhookComponent(rightStatementText, isOnlyText) : rightStatementText;
             }
             const isLikeOperator = CCondition.isLikeOperator(this.relationalOperator);
             /*if(isLikeOperator){
@@ -156,11 +170,11 @@ export default class CCondition{
                 statement = !isOnlyText ? (
                     <span>
                         {`If `}
-                        <b>{clearFieldNameFromArraySign(leftStatementText)}</b>
+                        <b>{leftStatementText}</b>
                         <span>{` ${this.relationalOperator} `}</span>
-                        <b>{clearFieldNameFromArraySign(rightStatementText)}</b>
+                        <b>{rightStatementText}</b>
                     </span>
-                ) : `If ${clearFieldNameFromArraySign(leftStatementText)} ${this.relationalOperator} ${clearFieldNameFromArraySign(rightStatementText)}`;
+                ) : `If ${leftStatementText} ${this.relationalOperator} ${rightStatementText}`;
             }
         }
         if(statement === ''){

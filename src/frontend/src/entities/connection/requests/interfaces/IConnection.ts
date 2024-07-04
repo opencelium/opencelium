@@ -17,10 +17,15 @@ import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import { IConnection } from "../../interfaces/IConnection";
 
+export interface GetConnectionWebhooksResponse {
+    name: string,
+    type: string,
+}
+
 export interface IConnectionRequest {
 
     //to get webhooks params of the connection
-    getConnectionWebhooks(): Promise<AxiosResponse<string[]>>,
+    getConnectionWebhooks(): Promise<AxiosResponse<GetConnectionWebhooksResponse[]>>,
 
     //to check if connection with such title already exists
     checkConnectionTitle(): Promise<AxiosResponse<IResponse>>,

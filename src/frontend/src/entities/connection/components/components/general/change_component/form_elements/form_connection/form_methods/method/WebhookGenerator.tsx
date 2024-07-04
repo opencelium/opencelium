@@ -8,7 +8,6 @@ import Select from "@basic_components/inputs/Select";
 import Button from "@basic_components/buttons/Button";
 import {setWebhook} from "@root/redux_toolkit/slices/ConnectionSlice";
 import Dialog from "@basic_components/Dialog";
-import RadioButtons from "@basic_components/inputs/RadioButtons";
 import Webhook from '@entity/connection/classes/Webhook';
 import {capitalize} from "@application/utils/utils";
 import InputSelect from "@app_component/base/input/select/InputSelect";
@@ -20,7 +19,7 @@ import {getWebhookTypes} from "@entity/schedule/redux_toolkit/action_creators/We
 
 const sources = ['GET params', 'POST params'];
 
-const WebhookGenerator = forwardRef(({onSelect, readOnly}: {onSelect: (webhook: string) => void, readOnly?: boolean}, ref) => {
+const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSelect: (webhook: string) => void, readOnly?: boolean, style: any, value?: string}, ref) => {
     const dispatch = useAppDispatch();
     const {webhooks, webhookTypes} = Connection.getReduxState();
     const typeOptions = useMemo(() => {
@@ -38,10 +37,15 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly}: {onSelect: (webhook: 
     const [typeError, setTypeError] = useState('');
     const [sourceError, setSourceError] = useState<string>('');
     const [isAdded, setIsAdded] = useState<boolean>(false);
-    const [currentWebhook, setCurrentWebhook] = useState(null);
+    const [currentWebhook, setCurrentWebhook] = useState(value ? webhooks.find(w => w.value === value) : null);
     useEffect(() => {
         dispatch(getWebhookTypes());
     }, [])
+    useEffect(() => {
+        if((value === undefined && !!currentWebhook) || currentWebhook?.value !== value) {
+            setCurrentWebhook(value ? webhooks.find(w => w.value === value) : null);
+        }
+    }, [value])
     useEffect(() => {
         if (isAdded) {
             setCurrentWebhook(webhooks.find(w => Webhook.compareTwoWebhooks(w, {name, type: type.value})) || null);
@@ -129,7 +133,7 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly}: {onSelect: (webhook: 
         //options.unshift({label: 'add', value: 'add_webhook', component: AddComponent});
     }
     return (
-        <div style={{float: 'left', width: 'calc(100% - 70px)'}}>
+        <div style={style}>
             <Select
                 id={`param_generator_select_webhook`}
                 name={'...'}

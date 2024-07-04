@@ -41,7 +41,6 @@ export const graphQLSlice = createSlice({
             state.logining = API_REQUEST_STATE.START;
         },
         [graphQLLogin.fulfilled.type]: (state, action: PayloadAction<string>) => {
-            console.log(action.payload);
             state.logining = API_REQUEST_STATE.FINISH;
             state.error = null;
             state.accessToken = action.payload;

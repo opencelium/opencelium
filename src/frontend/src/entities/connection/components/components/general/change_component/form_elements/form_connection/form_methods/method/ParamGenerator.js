@@ -447,7 +447,12 @@ class ParamGenerator extends Component {
                                 {this.renderParamInput()}
                             </React.Fragment>
                             }
-                            {referenceType === 'webhook' && <WebhookGenerator ref={this.webhookRef} readOnly={readOnly} onSelect={(webhook) => this.onChangeWebhook(webhook)}/>}
+                            {referenceType === 'webhook' && <WebhookGenerator
+                                ref={this.webhookRef}
+                                readOnly={readOnly}
+                                onSelect={(webhook) => this.onChangeWebhook(webhook)}
+                                style={{float: 'left', width: 'calc(100% - 70px)'}}
+                            />}
                             <TooltipFontIcon
                                 id={`param_generator_add_${connector.getConnectorType()}_${method.index}`}
                                 isButton={true}
