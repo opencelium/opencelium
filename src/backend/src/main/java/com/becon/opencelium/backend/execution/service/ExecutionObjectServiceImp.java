@@ -43,7 +43,7 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
         ExecutionObj executionObj = new ExecutionObj();
         executionObj.setConnection(connectionMapper.toEntity(connectionMng));
 
-        executionObj.setQueryParams(data.getQueryParams());
+        executionObj.setWebhookVars(data.getQueryParams());
 
         String host = env.getProperty(AppYamlPath.PROXY_HOST, "");
         String port = env.getProperty(AppYamlPath.PROXY_PORT, "");

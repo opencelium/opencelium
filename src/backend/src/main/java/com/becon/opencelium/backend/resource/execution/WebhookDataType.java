@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public enum QueryParamDataType {
+public enum WebhookDataType {
     INT("int"),
     BOOLEAN("boolean"),
     DOUBLE("double"),
@@ -15,16 +15,16 @@ public enum QueryParamDataType {
 
     private final String type;
 
-    QueryParamDataType(String type) {
+    WebhookDataType(String type) {
         this.type = type;
     }
 
     public static List<String> getTypes() {
-        return Arrays.stream(QueryParamDataType.values()).map(dt -> dt.type).collect(Collectors.toList());
+        return Arrays.stream(WebhookDataType.values()).map(dt -> dt.type).collect(Collectors.toList());
     }
 
-    public static QueryParamDataType fromString(String type) {
-        for (QueryParamDataType dt : QueryParamDataType.values()) {
+    public static WebhookDataType fromString(String type) {
+        for (WebhookDataType dt : WebhookDataType.values()) {
             if (StringUtils.equalsIgnoreCase(type, dt.type)) {
                 return dt;
             }

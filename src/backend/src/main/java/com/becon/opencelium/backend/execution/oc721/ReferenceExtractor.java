@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.execution.ExecutionManager;
-import com.becon.opencelium.backend.resource.execution.QueryParamDataType;
+import com.becon.opencelium.backend.resource.execution.WebhookDataType;
 import com.becon.opencelium.backend.utility.DirectRefUtility;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,15 +33,9 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.becon.opencelium.backend.constant.RegExpression.directRef;
-import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
-import static com.becon.opencelium.backend.constant.RegExpression.isNumber;
-import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
-import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
-import static com.becon.opencelium.backend.constant.RegExpression.requestData;
-import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
-import static com.becon.opencelium.backend.resource.execution.QueryParamDataType.DOUBLE;
-import static com.becon.opencelium.backend.resource.execution.QueryParamDataType.INT;
+import static com.becon.opencelium.backend.constant.RegExpression.*;
+import static com.becon.opencelium.backend.resource.execution.WebhookDataType.DOUBLE;
+import static com.becon.opencelium.backend.resource.execution.WebhookDataType.INT;
 import static com.becon.opencelium.backend.utility.DirectRefUtility.ARRAY_LETTER_INDEX;
 import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_KEY_TYPE;
 import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_VALUE_TYPE;
@@ -66,12 +60,12 @@ public class ReferenceExtractor implements Extractor {
             ref = DirectRefUtility.extractRef(ref);
 
             result = extractFromOperation(ref);
-        } else if (ref.matches(queryParams)) {
+        } else if (ref.matches(webhook)) {
             // '${key}'
             // '${key:type}'
             // '${key.field[*]}'
             // '${key.field[*]:type}'
-            result = extractFromQueryParams(ref);
+            result = extractFromWebhook(ref);
         } else if (ref.matches(requestData)) {
             // '{key}'
             // '{#ctorId.key}'
@@ -86,7 +80,7 @@ public class ReferenceExtractor implements Extractor {
 
     public static boolean isReference(String ref) {
         return ref != null && (
-            ref.matches(directRef) || ref.matches(responsePointer) || ref.matches(queryParams) ||
+            ref.matches(directRef) || ref.matches(responsePointer) || ref.matches(webhook) ||
             ref.matches(requestData) || ref.matches(enhancement) || ref.matches(pageRef)
         );
     }
@@ -110,21 +104,21 @@ public class ReferenceExtractor implements Extractor {
         return executionManager.getRequestData(ctorId).get(refValue);
     }
 
-    private Object extractFromQueryParams(String ref) {
+    private Object extractFromWebhook(String ref) {
         if (ObjectUtils.isEmpty(ref)) {
             return "";
         }
 
-        Map<String, Object> queryParams = executionManager.getQueryParams();
+        Map<String, Object> queryParams = executionManager.getWebhookVars();
         if (queryParams.isEmpty()) {
             return null;
         }
 
         try {
             // get requiredType if specified, then update reference
-            QueryParamDataType type = null;
+            WebhookDataType type = null;
             if (ref.contains(":")) {
-                type = QueryParamDataType.fromString(ref.split(":")[1].replace("}", ""));
+                type = WebhookDataType.fromString(ref.split(":")[1].replace("}", ""));
 
                 ref = ref.split(":")[0].concat("}");
             }
@@ -132,14 +126,13 @@ public class ReferenceExtractor implements Extractor {
             // convert 'queryParams' to jsonString to work with both
             // single value and jsonObject cases at the same time
             String message = new ObjectMapper().writeValueAsString(queryParams);
-            Pattern r = Pattern.compile(RegExpression.queryParams);
+            Pattern r = Pattern.compile(webhook);
             Matcher m = r.matcher(ref);
 
             Object value = null;
             while (m.find()) {
                 // convert 'queryParams' reference to jsonPath
                 String jsonPath = "$." + m.group().replace("${", "").replace("}", "");
-
                 value = JsonPath.read(message, jsonPath);
             }
 
@@ -149,7 +142,7 @@ public class ReferenceExtractor implements Extractor {
         }
     }
 
-    private Object mapToType(Object value, QueryParamDataType type) {
+    private Object mapToType(Object value, WebhookDataType type) {
         if (value == null) {
             return null;
         }
@@ -174,8 +167,8 @@ public class ReferenceExtractor implements Extractor {
             case DOUBLE -> Double.parseDouble(stringValue);
             case STRING -> stringValue.replace("[", "").replace("]", "")
                     .replace("'", "");
-            case ARRAY -> stringValue.replace("[", "").replace("]", "")
-                    .replace("\"", "").replace("'", "").split(",");
+            case ARRAY -> Arrays.asList(stringValue.replace("[", "").replace("]", "")
+                    .replace("\"", "").replace("'", "").split(","));
         };
     }
 

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface ExecutionManager {
-    Map<String, Object> getQueryParams();
+    Map<String, Object> getWebhookVars();
     List<Loop> getLoops();
     String generateKey(int loopDepth);
     Map<String, String> getRequestData(Integer ctorId);
