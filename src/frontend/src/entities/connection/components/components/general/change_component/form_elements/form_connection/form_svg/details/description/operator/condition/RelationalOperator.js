@@ -28,9 +28,13 @@ class RelationalOperator extends React.Component{
     }
 
     getStyles(){
-        const {isOperatorHasThreeParams, isOperatorHasValue} = this.props;
+        const {isOperatorHasThreeParams, isOperatorHasValue, referenceTypeRight} = this.props;
         let {hasValue} = isOperatorHasValue();
-        return {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '11%' : '7%' : '27%', transition: 'width 0.3s ease 0s',};
+        if (referenceTypeRight === 'webhook') {
+            return {float: 'left', width: hasValue ? '11%' : '27%', transition: 'width 0.3s ease 0s',};
+        } else {
+            return {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '11%' : '7%' : '27%', transition: 'width 0.3s ease 0s',};
+        }
     }
 
     getOptions(){
@@ -53,7 +57,7 @@ class RelationalOperator extends React.Component{
     }
 
     render(){
-        const {readOnly, relationalOperator, hasMethod, updateRelationalOperator} = this.props;
+        const {readOnly, relationalOperator, hasMethod, updateRelationalOperator, referenceTypeLeft} = this.props;
         let inputTheme = {inputElement: styles.input_element_pointer_compare_statement_visible};
         let options = this.getOptions();
         inputTheme.input = styles.input_pointer_compare_statement;
@@ -68,7 +72,7 @@ class RelationalOperator extends React.Component{
                     options={options}
                     closeOnSelect={false}
                     placeholder={`...`}
-                    isDisabled={readOnly || !hasMethod}
+                    isDisabled={(readOnly || !hasMethod) && referenceTypeLeft === 'method'}
                     isSearchable={true}
                     openMenuOnClick={true}
                     maxMenuHeight={200}

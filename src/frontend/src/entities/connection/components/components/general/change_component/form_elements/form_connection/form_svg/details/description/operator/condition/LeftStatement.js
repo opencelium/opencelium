@@ -52,9 +52,22 @@ class LeftStatement extends React.Component{
     }
 
     getParamStyles(){
-        const {isOperatorHasThreeParams, isOperatorHasValue, isLoopOperator} = this.props;
+        const {isOperatorHasThreeParams, isOperatorHasValue, isLoopOperator, referenceTypeRight} = this.props;
         let {hasValue} = isOperatorHasValue();
-        let width = hasValue ? isOperatorHasThreeParams ? '28%' : '35%' : '52%';
+        let width = hasValue
+            ?
+                isOperatorHasThreeParams
+                    ?
+                        referenceTypeRight === 'webhook'
+                            ?
+                                '35%'
+                            :
+                                '28%'
+                    :
+                        '35%'
+            :
+                '52%'
+        ;
         if(isLoopOperator){
             width = '70%';
         }

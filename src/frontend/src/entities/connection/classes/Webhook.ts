@@ -30,6 +30,23 @@ export default class Webhook implements WebhookProps{
         return webhookInstance1.value === webhookInstance2.value;
     }
 
+    static isWebhookSnippet(webhookSnippet: string): boolean {
+        if(webhookSnippet.length > 2) {
+            return webhookSnippet[0] === '$' && webhookSnippet[1] === '{' && webhookSnippet[webhookSnippet.length - 1] === '}';
+        }
+        return false;
+    }
+
+    static embraceWithSnippet (webhookValue: string): string {
+        return "${" + webhookValue + "}";
+    }
+
+    static extractFromSnippet(webhookSnippet: string): string {
+        if (this.isWebhookSnippet(webhookSnippet)) {
+            return webhookSnippet.substring(2, webhookSnippet.length - 1);
+        }
+        return webhookSnippet;
+    }
     setWebhookValue() {
         this.value = `${this.name}:${this.type}`
     }
