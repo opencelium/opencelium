@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.execution.DataType;
-import com.becon.opencelium.backend.enums.execution.WebhookDataType;
 import com.becon.opencelium.backend.execution.ExecutionManager;
 import com.becon.opencelium.backend.utility.DirectRefUtility;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
@@ -12,7 +11,6 @@ import com.jayway.jsonpath.JsonPath;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -35,10 +33,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-import static com.becon.opencelium.backend.constant.RegExpression.*;
-import static com.becon.opencelium.backend.enums.execution.WebhookDataType.DOUBLE;
-import static com.becon.opencelium.backend.enums.execution.WebhookDataType.INT;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.*;
+import static com.becon.opencelium.backend.constant.RegExpression.directRef;
+import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
+import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
+import static com.becon.opencelium.backend.constant.RegExpression.requestData;
+import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
+import static com.becon.opencelium.backend.constant.RegExpression.webhook;
+import static com.becon.opencelium.backend.enums.execution.DataType.UNDEFINED;
+import static com.becon.opencelium.backend.utility.DirectRefUtility.ARRAY_LETTER_INDEX;
+import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_KEY_TYPE;
+import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_VALUE_TYPE;
+import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_SPLIT_STRING_TYPE;
 
 public class ReferenceExtractor implements Extractor {
     private final ExecutionManager executionManager;
@@ -104,18 +109,14 @@ public class ReferenceExtractor implements Extractor {
     }
 
     private Object extractFromWebhook(String ref) {
-        if (ObjectUtils.isEmpty(ref)) {
-            return "";
-        }
-
-        Map<String, Object> queryParams = executionManager.getWebhookVars();
-        if (queryParams.isEmpty()) {
+        Map<String, Object> webhookVars = executionManager.getWebhookVars();
+        if (webhookVars.isEmpty()) {
             return null;
         }
 
         try {
             // get requiredType if specified, then update reference
-            DataType type = null;
+            DataType type = UNDEFINED;
             if (ref.contains(":")) {
                 type = DataType.fromString(ref.split(":")[1].replace("}", ""));
 
@@ -124,7 +125,7 @@ public class ReferenceExtractor implements Extractor {
 
             // convert 'queryParams' to jsonString to work with both
             // single value and jsonObject cases at the same time
-            String message = new ObjectMapper().writeValueAsString(queryParams);
+            String message = new ObjectMapper().writeValueAsString(webhookVars);
             Pattern r = Pattern.compile(webhook);
             Matcher m = r.matcher(ref);
 
@@ -144,10 +145,6 @@ public class ReferenceExtractor implements Extractor {
     private Object mapToType(Object value, DataType type) {
         if (value == null) {
             return null;
-        }
-
-        if (type == null) {
-            return value;
         }
 
         String stringValue = value.toString();
