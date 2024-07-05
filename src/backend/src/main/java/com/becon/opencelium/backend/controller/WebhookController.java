@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.entity.Webhook;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.WebhookServiceImp;
+import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.enums.execution.WebhookDataType;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
@@ -212,7 +213,7 @@ public class WebhookController {
     })
     @GetMapping(value = "/supported/types")
     public ResponseEntity<?> generateSupportedDataTypes(){
-        return ResponseEntity.ok(WebhookDataType.getTypes());
+        return ResponseEntity.ok(DataType.getTypes());
     }
 
     @Operation(summary = "Removes webhook")
