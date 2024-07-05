@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.invoker.enums;
+package com.becon.opencelium.backend.enums;
 
 import java.util.Arrays;
 import java.util.HashMap;

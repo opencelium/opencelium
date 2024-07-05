@@ -566,7 +566,8 @@ public class OperationExMapper {
     private DataType findTypeOfReference(String value, Long connectionId, String methodName, LinkedList<String> hierarchy) {
         if (value.matches(RegExpression.requiredData)
                 || value.matches(RegExpression.enhancement)
-                || value.matches(RegExpression.directRef)) {
+                || value.matches(RegExpression.directRef)
+                || value.matches(RegExpression.webhook)) {
 
             ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
             Connector fromConnector = connectorService.getById(connectionMng.getFromConnector().getConnectorId());
