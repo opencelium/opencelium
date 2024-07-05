@@ -135,7 +135,6 @@ public class ReferenceExtractor implements Extractor {
                 String jsonPath = "$." + m.group().replace("${", "").replace("}", "");
                 value = JsonPath.read(message, jsonPath);
             }
-
             return mapToType(value, type);
         } catch (JsonProcessingException ex) {
             throw new RuntimeException();
@@ -154,8 +153,15 @@ public class ReferenceExtractor implements Extractor {
             case NUMBER  -> Double.parseDouble(stringValue);
             case STRING -> stringValue.replace("[", "").replace("]", "")
                     .replace("'", "");
-            case ARRAY -> Arrays.asList(stringValue.replace("[", "").replace("]", "")
-                    .replace("\"", "").replace("'", "").split(","));
+            case ARRAY -> {
+                String cleanedString = stringValue.replace("[", "").replace("]", "")
+                        .replace("\"", "").replace("'", "").trim();
+                if (cleanedString.isEmpty()) {
+                    yield Collections.emptyList();
+                } else {
+                    yield Arrays.asList(cleanedString.split("\\s*,\\s*"));
+                }
+            }
             case UNDEFINED, OBJECT -> value;
         };
     }
