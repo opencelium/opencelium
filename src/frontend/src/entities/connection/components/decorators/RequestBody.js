@@ -15,7 +15,6 @@
 
 import React from 'react';
 import {isJsonString, subArrayToString, isString, isNumber} from "@application/utils/utils";
-import {CONNECTOR_FROM} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import Dialog from "@entity/connection/components/components/general/basic_components/Dialog";
 import Enhancement from "@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Enhancement";
@@ -28,6 +27,7 @@ import ToolboxThemeInput from "../hocs/ToolboxThemeInput";
 import {markFieldNameAsArray} from "@change_component//form_elements/form_connection/form_methods/help";
 import Pointer from "@change_component/form_elements/form_connection/form_methods/method/Pointer";
 import Webhook from '@entity/connection/classes/Webhook';
+import WebhookElement from "@change_component/form_elements/form_connection/form_methods/method/WebhookElement";
 
 //[POST params|header|GET params].$.result:array
 export function RequestBody(CRequestType){
@@ -283,7 +283,7 @@ export function RequestBody(CRequestType){
                         return this.renderPlaceholder();
                     }
                     let ownBodyStyles = {left: '-20px'};
-                    let hasReferenceComponent = !(method.index === '0' && connector.getConnectorType() === CONNECTOR_FROM);
+                    let hasReferenceComponent = true;
                     if(bodyStyles){
                         ownBodyStyles = bodyStyles;
                     }
@@ -310,8 +310,12 @@ export function RequestBody(CRequestType){
                                     getComponent: (params) => {
                                         const webhook = new Webhook(params.webhook);
                                         return (
-                                            <span style={{padding: '2px 5px', borderRadius: 3, color: '#000', background: '#eee'}} title={webhook.label}>{webhook.name}</span>
-                                        )
+                                            <WebhookElement
+                                                {...params}
+                                                webhook={webhook}
+                                                connection={connection}
+                                            />
+                                        );
                                     }
                                 }}
                                 ReferenceComponent={hasReferenceComponent ? {
