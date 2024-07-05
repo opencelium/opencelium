@@ -113,7 +113,6 @@ public class ExecutionManagerImpl implements ExecutionManager {
             String param = ref.replace("@{", "").replace("}","");
             return pagination.getParamValue(PageParam.fromString(param));
         }
-
         return refExtractor.extractValue(ref);
     }
 

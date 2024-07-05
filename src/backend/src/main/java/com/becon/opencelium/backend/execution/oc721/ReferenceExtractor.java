@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
+import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.enums.execution.WebhookDataType;
 import com.becon.opencelium.backend.execution.ExecutionManager;
 import com.becon.opencelium.backend.utility.DirectRefUtility;
@@ -114,9 +115,9 @@ public class ReferenceExtractor implements Extractor {
 
         try {
             // get requiredType if specified, then update reference
-            WebhookDataType type = null;
+            DataType type = null;
             if (ref.contains(":")) {
-                type = WebhookDataType.fromString(ref.split(":")[1].replace("}", ""));
+                type = DataType.fromString(ref.split(":")[1].replace("}", ""));
 
                 ref = ref.split(":")[0].concat("}");
             }
@@ -140,33 +141,25 @@ public class ReferenceExtractor implements Extractor {
         }
     }
 
-    private Object mapToType(Object value, WebhookDataType type) {
+    private Object mapToType(Object value, DataType type) {
         if (value == null) {
             return null;
         }
 
-        String stringValue = value.toString();
-
         if (type == null) {
-            // map to 'int' or 'double' if possible
-            final Pattern pattern = Pattern.compile(isNumber, Pattern.MULTILINE);
-            final Matcher matcher = pattern.matcher(stringValue);
-
-            if (matcher.find()) {
-                type = stringValue.contains(".") ? DOUBLE : INT;
-            } else {
-                return value;
-            }
+            return value;
         }
 
+        String stringValue = value.toString();
         return switch (type) {
-            case INT -> Long.parseLong(stringValue);
+            case INTEGER -> Long.parseLong(stringValue);
             case BOOLEAN -> Boolean.parseBoolean(stringValue);
-            case DOUBLE -> Double.parseDouble(stringValue);
+            case NUMBER  -> Double.parseDouble(stringValue);
             case STRING -> stringValue.replace("[", "").replace("]", "")
                     .replace("'", "");
             case ARRAY -> Arrays.asList(stringValue.replace("[", "").replace("]", "")
                     .replace("\"", "").replace("'", "").split(","));
+            case UNDEFINED, OBJECT -> value;
         };
     }
 
