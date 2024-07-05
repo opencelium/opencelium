@@ -135,7 +135,6 @@ public class ReferenceExtractor implements Extractor {
                 String jsonPath = "$." + m.group().replace("${", "").replace("}", "");
                 value = JsonPath.read(message, jsonPath);
             }
-
             return mapToType(value, type);
         } catch (JsonProcessingException ex) {
             throw new RuntimeException();
