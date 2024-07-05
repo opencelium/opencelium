@@ -77,6 +77,9 @@ export default class Webhook implements WebhookProps{
             case 'object':
                 this.label = `${this.name} (Object)`;
                 break;
+            default:
+                this.label = `${this.name}`;
+                break;
         }
     }
 
