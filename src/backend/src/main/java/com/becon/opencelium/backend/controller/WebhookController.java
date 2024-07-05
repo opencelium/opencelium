@@ -117,7 +117,7 @@ public class WebhookController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping("execute/{token}")
-    public ResponseEntity<?> executeConn(@PathVariable("token") String token, @RequestBody Map<String, Object> queryParam) {
+    public ResponseEntity<?> executeConn(@PathVariable("token") String token, @RequestBody Map<String, Object> payload, @RequestParam Map<String, Object> queryParam) {
         WebhookTokenResource webhookToken = webhookService.getTokenObject(token).orElse(null);
         if (webhookToken == null){
             throw new RuntimeException("TOKEN_NOT_FOUND");
@@ -136,12 +136,12 @@ public class WebhookController {
         if (scheduler == null){
             throw new RuntimeException("SCHEDULER_NOT_FOUND");
         }
-
+        payload.putAll(queryParam);
         try {
             if (queryParam.isEmpty()) {
                 schedulerService.startNow(scheduler);
             } else {
-                schedulerService.startNow(scheduler, webhookService.convertToArrayList(queryParam));
+                schedulerService.startNow(scheduler, webhookService.convertToArrayList(payload));
             }
         }
         catch (Exception e){
