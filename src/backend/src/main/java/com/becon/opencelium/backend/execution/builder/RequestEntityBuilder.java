@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
+import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 
 public class RequestEntityBuilder {
     private final OperationDTO operation;
@@ -216,9 +217,8 @@ public class RequestEntityBuilder {
 
             if (referencedSchema == null) {
                 schema.setValue(null);
-            } else if (schema.getType() == DataType.UNDEFINED || schema.getType() == referencedSchema.getType() || value.matches(directRef) || value.matches(enhancement)) {
-                // if type of schema is UNDEFINED or the same as referencedSchema then
-                // replace all values of this schema with referenced schema
+            } else if (isReferencedPrimary(schema.getType(), referencedSchema.getType(), value)) {
+                // if 'reference' schema is primary then replace all values of this 'schema' with 'referenced' schema
                 schema.setType(referencedSchema.getType());
                 schema.setValue(referencedSchema.getValue());
                 schema.setItems(referencedSchema.getItems());
@@ -260,6 +260,27 @@ public class RequestEntityBuilder {
             // loop through all 'properties' to replace referenced ones
             properties.forEach((name, schemaDTO) -> replaceRefs(schemaDTO));
         }
+    }
+
+    private boolean isReferencedPrimary(DataType actual, DataType referenced, String ref) {
+        // if 'actual' type is UNDEFINED or equal to 'resolved' then 'referenced' should be primary
+        if (actual == DataType.UNDEFINED || actual == referenced) {
+            return true;
+        }
+
+        // if 'ref' is a direct reference or enhancement type then 'referenced' should be primary
+        if (ref.matches(directRef) || ref.matches(enhancement)) {
+            return true;
+        }
+
+        // if 'ref' type webhook and variable type is defined explicitly then 'referenced' should be primary
+        if (ref.matches(webhook) && ref.contains(":")) {
+            // validation of DataType is done when resolving this 'ref'
+            // in ReferenceExtractor.class (line 117) so just check if 'ref' contains :
+            return true;
+        }
+
+        return false;
     }
 
     private List<ParameterDTO> getParamsByLocation(ParamLocation location) {
