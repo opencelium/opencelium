@@ -3,6 +3,5 @@
 /.idea
 src/backend/src/main/resources/invoker/baramundi.xml
 /.vscode
-src/backend/src/main/resources/invoker/fake_invoker (1).xml
 src/backend/src/main/resources/invoker/fake_invoker.xml
 src/backend/src/main/resources/invoker/page_test.xml
