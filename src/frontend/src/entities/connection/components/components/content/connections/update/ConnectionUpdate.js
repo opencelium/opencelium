@@ -36,8 +36,8 @@ import {useParams} from "react-router";
  import {
     setCurrentConnection,
     setCurrentTechnicalItem, setSavePanelVisibility,
-     setTemplatePanelVisibility, setConnection,
- } from "@root/redux_toolkit/slices/ConnectionSlice";
+    setTemplatePanelVisibility, setConnection, setWebhooks,
+} from "@root/redux_toolkit/slices/ConnectionSlice";
  import {useAppDispatch} from "@application/utils/store";
  import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 
@@ -92,6 +92,7 @@ export default function(props) {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
             dispatch(getAllCategories());
+            dispatch(setWebhooks([]));
         }
     }, []);
     return <ConnectionUpdate {...props} navigate={navigate} params={urlParams}/>;

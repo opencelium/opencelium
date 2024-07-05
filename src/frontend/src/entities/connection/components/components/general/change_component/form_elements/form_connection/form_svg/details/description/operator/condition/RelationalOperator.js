@@ -20,6 +20,9 @@ import {
     FUNCTIONAL_OPERATORS_FOR_IF,
     FUNCTIONAL_OPERATORS_FOR_LOOP
 } from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
+import {
+    TransitionEffect
+} from "@change_component/form_elements/form_connection/form_svg/details/description/operator/Condition";
 
 
 class RelationalOperator extends React.Component{
@@ -31,9 +34,9 @@ class RelationalOperator extends React.Component{
         const {isOperatorHasThreeParams, isOperatorHasValue, referenceTypeRight} = this.props;
         let {hasValue} = isOperatorHasValue();
         if (referenceTypeRight === 'webhook') {
-            return {float: 'left', width: hasValue ? '11%' : '27%', transition: 'width 0.3s ease 0s',};
+            return {float: 'left', width: hasValue ? '11%' : '27%', transition: TransitionEffect,};
         } else {
-            return {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '11%' : '7%' : '27%', transition: 'width 0.3s ease 0s',};
+            return {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '11%' : '7%' : '27%', transition: TransitionEffect,};
         }
     }
 

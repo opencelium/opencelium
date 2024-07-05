@@ -41,6 +41,7 @@ import DataAggregatorButton
     from "@entity/data_aggregator/components/dialog_button/DataAggregatorButton";
 import SyncInvokers from "@change_component/form_elements/form_connection/form_methods/SyncInvokers";
 import { Category } from "@entity/category/classes/Category";
+import Webhook from "@root/classes/Webhook";
 
 /**
  * common component to add and update Connection
@@ -386,7 +387,9 @@ export function ConnectionForm(type) {
                         const condition = operator.condition;
                         let operatorErrors = [];
                         if(!condition.leftStatement || !condition.leftStatement.color || !condition.leftStatement.field){
-                            operatorErrors.push('Left Statement is missing');
+                            if (!Webhook.isWebhookSnippet(condition.leftStatement.field)){
+                                operatorErrors.push('Left Statement is missing');
+                            }
                         }
                         if(operator.type === IF_OPERATOR && !condition.relationalOperator){
                             operatorErrors.push('Relational Operator is missing');

@@ -26,7 +26,7 @@ import {
 import {
     setCurrentTechnicalItem,
     setCurrentConnection, setConnection,
-    setTemplatePanelVisibility, setSavePanelVisibility
+    setTemplatePanelVisibility, setSavePanelVisibility, setWebhooks
 } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {addTemplate, getTemplatesByConnectors as fetchTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
@@ -38,8 +38,6 @@ import {ConnectionPermissions} from "@entity/connection/constants";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {useAppDispatch} from "@application/utils/store";
 import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
-import {Category} from "@entity/category/classes/Category";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 
 function mapStateToProps(state){
@@ -93,6 +91,7 @@ export default function(props) {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
             dispatch(getAllCategories());
+            dispatch(setWebhooks([]));
         }
     }, []);
     return <ConnectionAdd {...props} navigate={navigate} />;

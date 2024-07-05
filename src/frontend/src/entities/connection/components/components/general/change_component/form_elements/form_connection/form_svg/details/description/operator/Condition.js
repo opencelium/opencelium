@@ -43,6 +43,8 @@ import GetModalProp from '@entity/connection/components/decorators/GetModalProp'
 import WebhookGenerator from "@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator";
 import Webhook from "@root/classes/Webhook";
 
+export const TransitionEffect = 'width 0.3s ease 0s';
+
 function mapStateToProps(state){
     const editor = state.connectionEditorReducer;
     return{
@@ -359,7 +361,7 @@ class Condition extends React.Component{
                 borderBottom: '1px solid #2121211f',
                 paddingBottom: '9px',
                 overflow: 'hidden',
-                transition: 'width 0.3s ease 0s',
+                transition: TransitionEffect,
             }}>
                 <div style={{height: '14px'}} title={'method'} onClick={() => changeReferenceType('method')}>
                     <span style={{fontSize: '14px'}} className="mdi mdi-vector-radius"></span>
@@ -382,7 +384,7 @@ class Condition extends React.Component{
         return {
             float: 'left',
             width,
-            transition: 'width 0.3s ease 0s',
+            //transition: TransitionEffect,
         }
     }
 
@@ -391,7 +393,7 @@ class Condition extends React.Component{
         let styles = {float: 'left'};
         if (hasValue) {
             styles.width = '40%';
-            styles.transition = 'width 0.3s ease 0s';
+            styles.transition = TransitionEffect;
         } else {
             styles.width = '0';
             styles.overflow = 'hidden';

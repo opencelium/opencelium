@@ -16,6 +16,9 @@
 import React from 'react';
 import MethodSelect from "./MethodSelect";
 import ParamInput from "./ParamInput";
+import {
+    TransitionEffect
+} from "@change_component/form_elements/form_connection/form_svg/details/description/operator/Condition";
 
 class LeftStatement extends React.Component{
     constructor(props) {
@@ -48,7 +51,7 @@ class LeftStatement extends React.Component{
         if(isLoopOperator){
             width = '26%';
         }
-        return {width, padding: 0, float: 'left', transition: 'width 0.3s ease 0s',};
+        return {width, padding: 0, float: 'left'};
     }
 
     getParamStyles(){

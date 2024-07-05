@@ -9,15 +9,13 @@ import Button from "@basic_components/buttons/Button";
 import {setWebhook} from "@root/redux_toolkit/slices/ConnectionSlice";
 import Dialog from "@basic_components/Dialog";
 import Webhook from '@entity/connection/classes/Webhook';
-import {capitalize} from "@application/utils/utils";
-import InputSelect from "@app_component/base/input/select/InputSelect";
+import {capitalize, setFocusById} from "@application/utils/utils";
 import InputText from "@app_component/base/input/text/InputText";
 import {
     TypeSelectStyled
 } from "@change_component/form_elements/form_connection/form_methods/method/WebhookGeneratorStyles";
 import {getWebhookTypes} from "@entity/schedule/redux_toolkit/action_creators/WebhookCreators";
 
-const sources = ['GET params', 'POST params'];
 
 const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSelect: (webhook: string) => void, readOnly?: boolean, style: any, value?: string}, ref) => {
     const dispatch = useAppDispatch();
@@ -25,22 +23,22 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
     const typeOptions = useMemo(() => {
         return webhookTypes.map(type => {return {label: capitalize(type), value: type, id: type};});
     }, [webhookTypes]);
-    const sourceOptions = useMemo(() => {
-        return sources.map(type => {return {label: capitalize(type), value: type, id: type};});
-    }, [sources]);
     const [showDialog, toggleDialog] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [type, setType] = useState<any>(null);
-    const [source, setSource] = useState<any>(null);
     const [nameError, setNameError] = useState('');
     const [typeError, setTypeError] = useState('');
-    const [sourceError, setSourceError] = useState<string>('');
     const [isAdded, setIsAdded] = useState<boolean>(false);
     const [currentWebhook, setCurrentWebhook] = useState(value ? webhooks.find(w => w.value === value) : null);
     useEffect(() => {
         dispatch(getWebhookTypes());
     }, [])
+    useEffect(() => {
+        if (showDialog) {
+            setFocusById('webhook_name');
+        }
+    }, [showDialog]);
     useEffect(() => {
         if((value === undefined && !!currentWebhook) || currentWebhook?.value !== value) {
             setCurrentWebhook(value ? webhooks.find(w => w.value === value) : null);
@@ -84,10 +82,6 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
         setType(newType);
         setTypeError('');
     }
-    const onChangeSource = (newSource: any) => {
-        setSource(newSource);
-        setSourceError('');
-    }
     const add = () => {
         if(!name) {
             setNameError('Name is a required field');
@@ -95,10 +89,6 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
         }
         if(!type) {
             setTypeError('Type is a required field');
-            return;
-        }
-        if(!source) {
-            setSourceError('Source is a required field');
             return;
         }
         const newWebhook = new Webhook(name, type.value);
@@ -129,9 +119,6 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
         );
     };
     const options: any[] = [...webhooks];
-    if (!readOnly) {
-        //options.unshift({label: 'add', value: 'add_webhook', component: AddComponent});
-    }
     return (
         <div style={style}>
             <Select
@@ -207,7 +194,6 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
                         name={'webhook_name'}
                         id={'webhook_name'}
                         icon={'perm_identity'}
-                        autoFocus
                     />
 
                     <TypeSelectStyled
@@ -219,23 +205,6 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
                         value={type}
                         options={typeOptions}
                     />
-                    <InputSelect
-                        error={sourceError}
-                        required={true}
-                        label={'Source'}
-                        icon={'source'}
-                        onChange={onChangeSource}
-                        value={source}
-                        options={sourceOptions}
-                    />
-                    {/*<RadioButtons
-                        error={typeError}
-                        required={true}
-                        label={'Type'}
-                        icon={'text_format'}
-                        value={type}
-                        handleChange={onChangeType}
-                        radios={typeOptions}/>*/}
                 </div>
             </Dialog>
         </div>
