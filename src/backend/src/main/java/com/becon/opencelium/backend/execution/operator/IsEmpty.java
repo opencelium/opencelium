@@ -10,7 +10,6 @@ public class IsEmpty implements Operator {
         if (!(o1 instanceof List)) {
             throw new RuntimeException("IsEmpty() operator only supports List type");
         }
-
-        return ((ArrayList) o1).isEmpty();
+        return ((List<?>) o1).isEmpty();
     }
 }
