@@ -78,6 +78,9 @@ public class ReferenceUtility {
             result.add(matcher.group());
             value = value.replace(matcher.group(), "");
         }
+        if (value.isBlank()) {
+            return result;
+        }
 
         // extract all direct references:
         // '#ababab.(response).success.field[*]
@@ -88,6 +91,9 @@ public class ReferenceUtility {
             result.add(matcher.group());
             value = value.replace(matcher.group(), "");
         }
+        if (value.isBlank()) {
+            return result;
+        }
 
         // extract all enhancements:
         // '#{%bindId%}'
@@ -96,6 +102,9 @@ public class ReferenceUtility {
         while (matcher.find()) {
             result.add(matcher.group());
             value = value.replace(matcher.group(), "");
+        }
+        if (value.isBlank()) {
+            return result;
         }
 
         // extract all enhancements:
@@ -109,6 +118,9 @@ public class ReferenceUtility {
             result.add(matcher.group());
             value = value.replace(matcher.group(), "");
         }
+        if (value.isBlank()) {
+            return result;
+        }
 
         // extract all pagination references:
         // '@{limit}'
@@ -118,6 +130,9 @@ public class ReferenceUtility {
         while (matcher.find()) {
             result.add(matcher.group());
             value = value.replace(matcher.group(), "");
+        }
+        if (value.isBlank()) {
+            return result;
         }
 
         // extract all request data:

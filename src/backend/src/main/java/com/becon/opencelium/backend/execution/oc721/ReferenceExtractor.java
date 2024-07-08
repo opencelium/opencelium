@@ -55,49 +55,45 @@ public class ReferenceExtractor implements Extractor {
 
     @Override
     public Object extractValue(String value) {
-        if (value.matches(directRef) || value.matches(wrappedDirectRef)) {
+        List<String> references = ReferenceUtility.extractRefs(value);
+
+        if (references.size() != 1 || !Objects.equals(value, references.get(0))) {
+            for (String ref : references) {
+                Object val = extractValue(ref);
+                val = val == null ? "" : val.toString();
+                value = value.replace(ref, (String) val);
+            }
+
+            return value;
+        } else if (value.matches(directRef) || value.matches(wrappedDirectRef)) {
             // extract direct reference if necessary
             // '{%#ababab.(response).success.field[*]%}'
             // '#ababab.(response).success.field[*]
             // '#ababab.(request).field[*]
             value = ReferenceUtility.extractDirectRef(value);
-
             return extractFromOperation(value);
+        } else if (value.matches(enhancement)) {
+            // '#{%bindId%}'
+            String bindId = value.replace("#{%", "").replace("%}", "");
+            return executionManager.executeScript(bindId);
         } else if (value.matches(webhook)) {
             // '${key}'
             // '${key:type}'
             // '${key.field[*]}'
             // '${key.field[*]:type}'
             return extractFromWebhook(value);
-        } else if (value.matches(requestData)) {
-            // '{key}'
-            // '{#ctorId.key}'
-            return extractFromRequestData(value);
-        } else if (value.matches(enhancement)) {
-            // '#{%bindId%}'
-            return extractFromEnhancement(value);
         } else if (value.matches(pageRef)) {
             // '@{limit}'
             // '@{size}'
             String param = value.replace("@{", "").replace("}","");
             return executionManager.getPaginationParamValue(PageParam.fromString(param));
-        }
-
-        // If none of the above matched then it si a complex ref
-        List<String> references = ReferenceUtility.extractRefs(value);
-        for (String ref : references) {
-            Object val = extractValue(ref);
-            val = val == null ? "" : val.toString();
-            value = value.replace(ref, (String) val);
+        } else if (value.matches(requestData)) {
+            // '{key}'
+            // '{#ctorId.key}'
+            return extractFromRequestData(value);
         }
 
         return value;
-    }
-
-    private Object extractFromEnhancement(String ref) {
-        String bindId = ref.replace("#{%", "").replace("%}", "");
-
-        return executionManager.executeScript(bindId);
     }
 
     private Object extractFromRequestData(String ref) {
