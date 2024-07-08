@@ -78,10 +78,8 @@ You choose method, fill out the parameter and click plus button. The parameter
 comes from the invoker. If it exists there, you will see it after typing the
 third symbol in the input field as a select popup block.
 
-*Body* can also contain references from the previous methods. Type **#** as
-the first character and you will see another popup.
-
-|image5|
+*Body* can also contain references from the previous methods. Select reference icon
+|image46| to open the reference generator.
 
 You can handle with that in the same principe as for the *Query*.
 When you finish with editing click on the apply icon |image6|.
@@ -170,7 +168,21 @@ On the left side in the *methods* section you can see the zoom in and zoom out a
 Webhooks
 """""""""""""""""
 
+The connection editor provides an opportunity to use webhook parameters inside of the connection.
+If you want to deliver query parameters (using GET) or payload (POST), you need to click on the
+reference icon |image46| and select the webhook option. Here you will see the list of existing
+webhook parameters in the connection and a possibility to create a new one.
 
+|image43|
+
+When you click on the plus icon, a dialog will pop up where you need to enter the name of the parameter
+and choose its type.
+
+|image44|
+
+The webhook is also could be used in operators. For *IF* operator you can apply it on both sides.
+
+|image45|
 
 Pagination
 """""""""""""""""
@@ -349,8 +361,6 @@ Response:
 .. |image4| image:: ../img/connection/4.png
    :align: middle
    :width: 200
-.. |image5| image:: ../img/connection/5.png
-   :align: middle
 .. |image6| image:: ../img/connection/6.png
 .. |image7| image:: ../img/connection/7.png
    :align: middle
@@ -417,7 +427,12 @@ Response:
    :width: 30
 .. |image43| image:: ../img/connection/43.png
    :width: 200
+   :align: middle
 .. |image44| image:: ../img/connection/44.png
    :width: 200
+   :align: middle
 .. |image45| image:: ../img/connection/45.png
    :width: 400
+   :align: middle
+.. |image46| image:: ../img/connection/46.png
+   :width: 40
