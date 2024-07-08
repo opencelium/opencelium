@@ -108,7 +108,7 @@ class RightStatement extends React.Component{
         let {hasValue, isRightStatementText, isRightStatementOption} = isOperatorHasValue();
         const isLikeOperator = this.isLikeOperator();
         let isMethodSelectRightInvisible = !hasRightMethod && hasRightParam || isRightStatementText;
-        let width = hasValue && !isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '25.5%' : '42%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0';
+        let width = hasValue && !isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '24.5%' : '42%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0';
         if(isLikeOperator){
             width = '25%';
         }

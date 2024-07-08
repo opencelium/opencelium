@@ -31,19 +31,21 @@ import Select from "@entity/connection/components/components/general/basic_compo
 import {addCloseParamGeneratorNavigation, removeCloseParamGeneratorNavigation} from "@entity/connection/components/utils/key_navigation";
 import WebhookGenerator from "@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator";
 import CBody from "@classes/content/invoker/CBody";
+import {CONNECTOR_FROM} from "@classes/content/connection/CConnectorItem";
 
 
 class ParamGenerator extends Component {
 
     constructor(props) {
         super(props);
+        const referenceType = this.hasNotMethodReference(props) ? 'webhook' : 'method';
         this.state = {
             showGenerator: false,
             color: '',
             field: '',
             responseType: RESPONSE_SUCCESS,
             shouldClose: false,
-            referenceType: 'method',
+            referenceType,
             webhook: '',
         };
         const {top, left} = findTopLeft(props.parent);
@@ -71,6 +73,10 @@ class ParamGenerator extends Component {
         removeCloseParamGeneratorNavigation(this);
         document.removeEventListener('mousedown', this.handleClickOutside);
         document.removeEventListener('keydown',this.handleEscKey);
+    }
+
+    hasNotMethodReference(props) {
+        return props.method.index === '0' && props.connector.getConnectorType() === CONNECTOR_FROM;
     }
 
     handleEscKey(event) {
@@ -425,9 +431,6 @@ class ParamGenerator extends Component {
         const {showGenerator, color, field, referenceType} = this.state;
         const hasMethod = color !== '' && field !== '';
         const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue, readOnly, hasNotType} = this.props;
-        if(this.getOptionsForMethods().length === 0){
-            return null;
-        }
         let themeParamGenerator = '';
         let themeParamGeneratorForm = '';
         if(theme){
@@ -441,7 +444,7 @@ class ParamGenerator extends Component {
                     showGenerator || isVisible || isAlwaysVisible
                         ?
                         <div key={2} className={`${isAbsolute ? styles.param_generator_form : ''} ${themeParamGeneratorForm}`}>
-                            {!hasNotType && this.renderType()}
+                            {!hasNotType && !this.hasNotMethodReference(this.props) && this.renderType()}
                             {referenceType === 'method' && <React.Fragment>
                                 {this.renderMethodSelect()}
                                 {this.renderParamInput()}
