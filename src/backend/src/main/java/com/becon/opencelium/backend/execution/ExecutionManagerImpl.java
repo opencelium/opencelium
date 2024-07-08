@@ -109,10 +109,8 @@ public class ExecutionManagerImpl implements ExecutionManager {
     public Object getValue(String ref) {
         if (ref == null) {
             return null;
-        } else if (ref.matches(pageRef)) {
-            String param = ref.replace("@{", "").replace("}","");
-            return pagination.getParamValue(PageParam.fromString(param));
         }
+
         return refExtractor.extractValue(ref);
     }
 
@@ -134,5 +132,10 @@ public class ExecutionManagerImpl implements ExecutionManager {
     @Override
     public void setPagination(Pagination pagination) {
         this.pagination = pagination;
+    }
+
+    @Override
+    public String getPaginationParamValue(PageParam pageParam) {
+        return pagination.getParamValue(pageParam);
     }
 }

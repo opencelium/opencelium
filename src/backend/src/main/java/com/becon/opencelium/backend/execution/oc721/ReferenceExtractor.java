@@ -1,9 +1,10 @@
 package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
+import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.execution.ExecutionManager;
-import com.becon.opencelium.backend.utility.DirectRefUtility;
+import com.becon.opencelium.backend.utility.ReferenceUtility;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,10 +41,10 @@ import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
 import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 import static com.becon.opencelium.backend.enums.execution.DataType.UNDEFINED;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.ARRAY_LETTER_INDEX;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_KEY_TYPE;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_VALUE_TYPE;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_SPLIT_STRING_TYPE;
+import static com.becon.opencelium.backend.utility.ReferenceUtility.ARRAY_LETTER_INDEX;
+import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_KEY_TYPE;
+import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_VALUE_TYPE;
+import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_SPLIT_STRING_TYPE;
 
 public class ReferenceExtractor implements Extractor {
     private final ExecutionManager executionManager;
@@ -61,7 +62,7 @@ public class ReferenceExtractor implements Extractor {
             // '{%#ababab.(response).success.field[*]%}'
             // '#ababab.(response).success.field[*]
             // '#ababab.(request).field[*]
-            ref = DirectRefUtility.extractRef(ref);
+            ref = ReferenceUtility.extractDirectRef(ref);
 
             result = extractFromOperation(ref);
         } else if (ref.matches(webhook)) {
@@ -77,20 +78,21 @@ public class ReferenceExtractor implements Extractor {
         } else if (ref.matches(enhancement)) {
             // '#{%bindId%}'
             result = extractFromEnhancement(ref);
+        } else if (ref.matches(pageRef)) {
+            // '@{limit}'
+            // '@{size}'
+            String param = ref.replace("@{", "").replace("}","");
+            return executionManager.getPaginationParamValue(PageParam.fromString(param));
         }
+
+        // TODO: handle complex reference here
 
         return result;
     }
 
-    public static boolean isReference(String ref) {
-        return ref != null && (
-            ref.matches(directRef) || ref.matches(responsePointer) || ref.matches(webhook) ||
-            ref.matches(requestData) || ref.matches(enhancement) || ref.matches(pageRef)
-        );
-    }
-
     private Object extractFromEnhancement(String ref) {
         String bindId = ref.replace("#{%", "").replace("%}", "");
+
         return executionManager.executeScript(bindId);
     }
 
@@ -114,31 +116,24 @@ public class ReferenceExtractor implements Extractor {
             return null;
         }
 
-        try {
-            // get requiredType if specified, then update reference
-            DataType type = UNDEFINED;
-            if (ref.contains(":")) {
-                type = DataType.fromString(ref.split(":")[1].replace("}", ""));
+        // get requiredType if specified, then update reference
+        DataType type = UNDEFINED;
+        if (ref.contains(":")) {
+            type = DataType.fromString(ref.split(":")[1].replace("}", ""));
 
-                ref = ref.split(":")[0].concat("}");
-            }
-
-            // convert 'queryParams' to jsonString to work with both
-            // single value and jsonObject cases at the same time
-            String message = new ObjectMapper().writeValueAsString(webhookVars);
-            Pattern r = Pattern.compile(webhook);
-            Matcher m = r.matcher(ref);
-
-            Object value = null;
-            while (m.find()) {
-                // convert 'queryParams' reference to jsonPath
-                String jsonPath = "$." + m.group().replace("${", "").replace("}", "");
-                value = JsonPath.read(message, jsonPath);
-            }
-            return mapToType(value, type);
-        } catch (JsonProcessingException ex) {
-            throw new RuntimeException();
+            ref = ref.split(":")[0].concat("}");
         }
+
+        Object value = null;
+        Pattern pattern = Pattern.compile(webhook);
+        Matcher matcher = pattern.matcher(ref);
+
+        if (matcher.find()) {
+            String paths = matcher.group().replace("${", "").replace("}", "");
+            value = getFromJSON(webhookVars, paths);
+        }
+
+        return mapToType(value, type);
     }
 
     private Object mapToType(Object value, DataType type) {
@@ -168,13 +163,13 @@ public class ReferenceExtractor implements Extractor {
 
     private Object extractFromOperation(String ref) {
         // find operation by color
-        String color = DirectRefUtility.getColor(ref);
+        String color = ReferenceUtility.getColor(ref);
 
         Operation operation = executionManager.findOperationByColor(color)
                 .orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
 
         // extract value
-        String exchangeType = DirectRefUtility.getExchangeType(ref);
+        String exchangeType = ReferenceUtility.getExchangeType(ref);
         String key = executionManager.generateKey(operation.getLoopDepth());
 
         Object entityBody;
@@ -193,11 +188,12 @@ public class ReferenceExtractor implements Extractor {
         }
 
         Object result;
+        String paths = ReferenceUtility.extractPaths(ref);
 
         if (MediaTypeUtility.isJsonCompatible(mediaType)) {
-            result = getFromJSON(entityBody, ref);
+            result = getFromJSON(entityBody, paths);
         } else if (MediaTypeUtility.isXmlCompatible(mediaType)) {
-            result = getFromXML(entityBody, ref);
+            result = getFromXML(entityBody, paths);
         } else {
             result = bodyToString(entityBody);
         }
@@ -217,12 +213,12 @@ public class ReferenceExtractor implements Extractor {
         }
     }
 
-    private Object getFromJSON(Object body, String ref) {
+    private Object getFromJSON(Object body, String paths) {
         Object result = body;
         int partCount = 0;
 
         // creating json path query
-        for (String path : DirectRefUtility.getReferenceParts(ref)) {
+        for (String path : ReferenceUtility.splitPaths(paths)) {
             partCount++;
             if (path.isEmpty()) {
                 continue;
@@ -259,7 +255,7 @@ public class ReferenceExtractor implements Extractor {
                 } else if ("*".equals(match)) {
                     // case 1.1.2: obj['*']~
                     // return all field names of the current object
-                    Object currentBody = getFromJSON(body, DirectRefUtility.getPointerToBody(ref, partCount, matcher.group(0)));
+                    Object currentBody = getFromJSON(body, ReferenceUtility.getPointerToBody(paths, partCount, matcher.group(0)));
                     return getFieldNames(currentBody);
                 } else {
                     // case 1.1.3: obj['field_name']~
@@ -315,7 +311,7 @@ public class ReferenceExtractor implements Extractor {
                 } else if ("*".equals(match)) {
                     // case 2.3: field[*]~
                     // find loop by reference
-                    Loop loop = getLoopByReference(ref);
+                    Loop loop = getLoopByReference(paths);
 
                     // recreate list of strings split by delimiter
                     List<String> strs = new ArrayList<>();
@@ -332,7 +328,7 @@ public class ReferenceExtractor implements Extractor {
                     }
 
                     // find loop by reference
-                    Loop loop = getLoopByReference(ref);
+                    Loop loop = getLoopByReference(paths);
 
                     // it is a primitive value just return string on the specified index
                     return ((String) result).split(loop.getDelimiter())[index];
@@ -364,13 +360,13 @@ public class ReferenceExtractor implements Extractor {
         return result;
     }
 
-    private Object getFromXML(Object body, String ref) {
-        ref = ref.replaceFirst("\\$", "");
+    private Object getFromXML(Object body, String paths) {
+        paths = paths.replaceFirst("\\$", "");
         String xpathQuery = "/";
 
         boolean hasLoop = !executionManager.getLoops().isEmpty();
 
-        for (String part : DirectRefUtility.getReferenceParts(ref)) {
+        for (String part : ReferenceUtility.splitPaths(paths)) {
             if (part.isEmpty()) {
                 continue;
             }
@@ -448,7 +444,7 @@ public class ReferenceExtractor implements Extractor {
 
     private Loop getLoopByReference(String reference) {
         return executionManager.getLoops().stream()
-                .filter(loop -> DirectRefUtility.equals(loop.getRef(), reference))
+                .filter(loop -> ReferenceUtility.equals(loop.getRef(), reference))
                 .findFirst().orElseThrow(() -> new RuntimeException("Wrong 'reference' value is supplied"));
     }
 

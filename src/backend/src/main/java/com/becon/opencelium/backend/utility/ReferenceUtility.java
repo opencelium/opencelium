@@ -1,26 +1,86 @@
 package com.becon.opencelium.backend.utility;
 
-import org.mariadb.jdbc.type.LineString;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.becon.opencelium.backend.constant.RegExpression.directRef;
+import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
+import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
+import static com.becon.opencelium.backend.constant.RegExpression.requestData;
+import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
+import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 
 
-public class DirectRefUtility {
+public class ReferenceUtility {
 
     public static final String IS_FOR_IN_KEY_TYPE = "\\['(.*?)\\']~";
     public static final String IS_FOR_IN_VALUE_TYPE = "\\['(.*?)\\']";
     public static final String IS_SPLIT_STRING_TYPE = "\\[([a-z0-9*]+)\\]~";
     public static final String ARRAY_LETTER_INDEX = "\\[([a-z])\\]";
 
+    public static boolean containsRef(String value) {
+        if (value == null) {
+            return false;
+        }
 
-    public static String extractRef(String ref) {
+        Pattern pattern;
+        Matcher matcher;
+
+        pattern = Pattern.compile(directRef);
+        matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            return true;
+        }
+
+        pattern = Pattern.compile(responsePointer);
+        matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            return true;
+        }
+
+        pattern = Pattern.compile(webhook);
+        matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            return true;
+        }
+
+        pattern = Pattern.compile(requestData);
+        matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            return true;
+        }
+
+        pattern = Pattern.compile(enhancement);
+        matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            return true;
+        }
+
+        pattern = Pattern.compile(pageRef);
+        matcher = pattern.matcher(value);
+        return matcher.find();
+    }
+
+    public static String extractPaths(String ref) {
+        String[] refParts = ref.split("\\.");
+        String exchangeType = getExchangeType(ref);
+
+        // remove method color and exchange type
+        ref = ref.replace(refParts[0] + ".", "")
+                .replace(refParts[1] + ".", "");
+
+        if ("response".equals(exchangeType)) {
+            // remove 'fail' or 'success' for 'response' type
+            ref = ref.replace(refParts[2] + ".", "");
+        }
+
+        return ref;
+    }
+
+    public static String extractDirectRef(String ref) {
         // '{%#ababab.(response).success.field[*]%}'
         if (ref.startsWith("{%") && ref.endsWith("%}")) {
             ref = ref.substring(2, ref.length() - 2);
@@ -51,30 +111,18 @@ public class DirectRefUtility {
         return res;
     }
 
-    public static String[] getReferenceParts(String ref) {
-        if (ref.isEmpty()) {
+    public static String[] splitPaths(String paths) {
+        if (paths.isEmpty()) {
             return new String[]{""};
         }
 
-        String[] refParts = ref.split("\\.");
-        String exchangeType = getExchangeType(ref);
-
-        // remove method color and exchange type
-        ref = ref.replace(refParts[0] + ".", "")
-                .replace(refParts[1] + ".", "");
-
-        if ("response".equals(exchangeType)) {
-            // remove 'fail' or 'success' for 'response' type
-            ref = ref.replace(refParts[2] + ".", "");
-        }
-
-        ref += ".";
+        paths += ".";
 
         List<String> parts = new ArrayList<>();
         StringBuilder holder = new StringBuilder();
         Stack<Character> braces = new Stack<>();
 
-        for (char current : ref.toCharArray()) {
+        for (char current : paths.toCharArray()) {
             if (current == '.' && braces.isEmpty()) {
                 parts.add(holder.toString());
 
@@ -105,7 +153,7 @@ public class DirectRefUtility {
     }
 
     public static String getPointerToBody(String ref, int partCount, String remove) {
-        String[] refParts = getReferenceParts(ref);
+        String[] refParts = splitPaths(ref);
         partCount = partCount + (getExchangeType(ref).equals("response") ? 2 : 1);
 
         String result = "";

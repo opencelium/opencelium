@@ -10,6 +10,7 @@ import com.becon.opencelium.backend.resource.execution.RequestBodyDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
+import com.becon.opencelium.backend.utility.ReferenceUtility;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -192,7 +193,7 @@ public class RequestEntityBuilder {
             for (Map.Entry<String, SchemaDTO> property : properties.entrySet()) {
                 value = property.getValue() == null ? null : property.getValue().getValue();
 
-                if (value != null && ReferenceExtractor.isReference((String) value)) {
+                if (value != null && ReferenceUtility.containsRef((String) value)) {
                     value = references.apply((String) value);
                 }
 
@@ -212,7 +213,7 @@ public class RequestEntityBuilder {
 
         String value = schema.getValue();
 
-        if (ReferenceExtractor.isReference(value)) {
+        if (ReferenceUtility.containsRef(value)) {
             SchemaDTO referencedSchema = SchemaDTOUtil.fromObject(references.apply(value));
 
             if (referencedSchema == null) {
