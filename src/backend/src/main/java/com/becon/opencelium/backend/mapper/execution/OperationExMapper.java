@@ -284,27 +284,10 @@ public class OperationExMapper {
                 if (!subPath.contains("{") || !subPath.contains("}")) {
                     continue;
                 }
-                ArrayList<String> params = new ArrayList<>();
-                char[] chars = subPath.toCharArray();
-                int startIdx = -1;
-                for (int i = 0; i < chars.length; i++) {
-                    if (chars[i] == '{') {
-                        startIdx = i;
-                    } else if (chars[i] == '}' && startIdx != -1) {
-                        params.add(subPath.substring(startIdx, i + 1));
-                        startIdx = -1;
-                    }
-                }
+                ArrayList<String> params = getSubPathParameters(subPath);
 
                 for (String param : params) {
-                    String paramName = null;
-                    if (param.matches(RegExpression.wrappedDirectRef)) {
-                        paramName = param.substring(2, param.length() - 2);
-                    }else if (param.matches(RegExpression.enhancement)) {
-                        paramName = param.substring(3, param.length() - 2);
-                    } else if (param.matches(RegExpression.requestData)) {
-                        paramName = param.substring(1, param.length() - 1);
-                    }
+                    String paramName = extractNameOfRef(param);
                     ParameterDTO parameterDTO = new ParameterDTO();
                     parameterDTO.setIn(ParamLocation.PATH);
                     parameterDTO.setName(paramName);
@@ -667,6 +650,37 @@ public class OperationExMapper {
             return DataType.OBJECT;
         }
         return null;
+    }
+
+    private ArrayList<String> getSubPathParameters(String subPath) {
+        ArrayList<String> params = new ArrayList<>();
+        char[] chars = subPath.toCharArray();
+        int startIdx = -1;
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == '{') {
+                startIdx = i;
+            } else if (chars[i] == '$' && i + 1 < chars.length && chars[i + 1] == '{') {
+                startIdx = i;
+                i++;
+            } else if (chars[i] == '}' && startIdx != -1) {
+                params.add(subPath.substring(startIdx, i + 1));
+                startIdx = -1;
+            }
+        }
+        return params;
+    }
+
+    private String extractNameOfRef(String param) {
+        if (param.matches(RegExpression.wrappedDirectRef)) {
+            return param.substring(2, param.length() - 2);
+        } else if (param.matches(RegExpression.enhancement)) {
+            return param.substring(3, param.length() - 2);
+        } else if (param.matches(RegExpression.requestData)) {
+            return param.substring(1, param.length() - 1);
+        } else if (param.matches(RegExpression.webhook)) {
+            return param.substring(2, param.length() - 1);
+        }
+        return param;
     }
 
     private static class Tree {
