@@ -38,8 +38,8 @@ import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
 import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
-import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
 import static com.becon.opencelium.backend.constant.RegExpression.webhook;
+import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
 import static com.becon.opencelium.backend.enums.execution.DataType.UNDEFINED;
 import static com.becon.opencelium.backend.utility.ReferenceUtility.ARRAY_LETTER_INDEX;
 import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_KEY_TYPE;
@@ -57,7 +57,7 @@ public class ReferenceExtractor implements Extractor {
     public Object extractValue(String ref) {
         Object result = null;
 
-        if (ref.matches(directRef) || ref.matches(responsePointer)) {
+        if (ref.matches(directRef) || ref.matches(wrappedDirectRef)) {
             // extract direct reference if necessary
             // '{%#ababab.(response).success.field[*]%}'
             // '#ababab.(response).success.field[*]

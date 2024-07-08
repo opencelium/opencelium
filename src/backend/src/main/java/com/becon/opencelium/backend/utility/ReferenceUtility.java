@@ -10,8 +10,8 @@ import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
 import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
-import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
 import static com.becon.opencelium.backend.constant.RegExpression.webhook;
+import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
 
 
 public class ReferenceUtility {
@@ -35,7 +35,7 @@ public class ReferenceUtility {
             return true;
         }
 
-        pattern = Pattern.compile(responsePointer);
+        pattern = Pattern.compile(wrappedDirectRef);
         matcher = pattern.matcher(value);
         if (matcher.find()) {
             return true;
@@ -154,7 +154,6 @@ public class ReferenceUtility {
 
     public static String getPointerToBody(String ref, int partCount, String remove) {
         String[] refParts = splitPaths(ref);
-        partCount = partCount + (getExchangeType(ref).equals("response") ? 2 : 1);
 
         String result = "";
         for (int i = 0; i < partCount; i++) {
