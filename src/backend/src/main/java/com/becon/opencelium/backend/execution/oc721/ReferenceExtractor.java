@@ -54,40 +54,44 @@ public class ReferenceExtractor implements Extractor {
     }
 
     @Override
-    public Object extractValue(String ref) {
-        Object result = null;
-
-        if (ref.matches(directRef) || ref.matches(wrappedDirectRef)) {
+    public Object extractValue(String value) {
+        if (value.matches(directRef) || value.matches(wrappedDirectRef)) {
             // extract direct reference if necessary
             // '{%#ababab.(response).success.field[*]%}'
             // '#ababab.(response).success.field[*]
             // '#ababab.(request).field[*]
-            ref = ReferenceUtility.extractDirectRef(ref);
+            value = ReferenceUtility.extractDirectRef(value);
 
-            result = extractFromOperation(ref);
-        } else if (ref.matches(webhook)) {
+            return extractFromOperation(value);
+        } else if (value.matches(webhook)) {
             // '${key}'
             // '${key:type}'
             // '${key.field[*]}'
             // '${key.field[*]:type}'
-            result = extractFromWebhook(ref);
-        } else if (ref.matches(requestData)) {
+            return extractFromWebhook(value);
+        } else if (value.matches(requestData)) {
             // '{key}'
             // '{#ctorId.key}'
-            result = extractFromRequestData(ref);
-        } else if (ref.matches(enhancement)) {
+            return extractFromRequestData(value);
+        } else if (value.matches(enhancement)) {
             // '#{%bindId%}'
-            result = extractFromEnhancement(ref);
-        } else if (ref.matches(pageRef)) {
+            return extractFromEnhancement(value);
+        } else if (value.matches(pageRef)) {
             // '@{limit}'
             // '@{size}'
-            String param = ref.replace("@{", "").replace("}","");
+            String param = value.replace("@{", "").replace("}","");
             return executionManager.getPaginationParamValue(PageParam.fromString(param));
         }
 
-        // TODO: handle complex reference here
+        // If none of the above matched then it si a complex ref
+        List<String> references = ReferenceUtility.extractRefs(value);
+        for (String ref : references) {
+            Object val = extractValue(ref);
+            val = val == null ? "" : val.toString();
+            value = value.replace(ref, (String) val);
+        }
 
-        return result;
+        return value;
     }
 
     private Object extractFromEnhancement(String ref) {
@@ -188,7 +192,7 @@ public class ReferenceExtractor implements Extractor {
         }
 
         Object result;
-        String paths = ReferenceUtility.extractPaths(ref);
+        String paths = ReferenceUtility.removeOperationInfo(ref);
 
         if (MediaTypeUtility.isJsonCompatible(mediaType)) {
             result = getFromJSON(entityBody, paths);

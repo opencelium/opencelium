@@ -29,25 +29,13 @@ public class ReferenceUtility {
         Pattern pattern;
         Matcher matcher;
 
-        pattern = Pattern.compile(directRef);
-        matcher = pattern.matcher(value);
-        if (matcher.find()) {
-            return true;
-        }
-
         pattern = Pattern.compile(wrappedDirectRef);
         matcher = pattern.matcher(value);
         if (matcher.find()) {
             return true;
         }
 
-        pattern = Pattern.compile(webhook);
-        matcher = pattern.matcher(value);
-        if (matcher.find()) {
-            return true;
-        }
-
-        pattern = Pattern.compile(requestData);
+        pattern = Pattern.compile(directRef);
         matcher = pattern.matcher(value);
         if (matcher.find()) {
             return true;
@@ -59,12 +47,93 @@ public class ReferenceUtility {
             return true;
         }
 
+        pattern = Pattern.compile(webhook);
+        matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            return true;
+        }
+
         pattern = Pattern.compile(pageRef);
+        matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            return true;
+        }
+
+        pattern = Pattern.compile(requestData);
         matcher = pattern.matcher(value);
         return matcher.find();
     }
 
-    public static String extractPaths(String ref) {
+    public static List<String> extractRefs(String value) {
+        List<String> result = new ArrayList<>();
+
+        Pattern pattern;
+        Matcher matcher;
+
+        // extract all wrapped direct references:
+        // '{%#ababab.(response).success.field[*]%}'
+        pattern = Pattern.compile(wrappedDirectRef);
+        matcher = pattern.matcher(value);
+        while (matcher.find()) {
+            result.add(matcher.group());
+            value = value.replace(matcher.group(), "");
+        }
+
+        // extract all direct references:
+        // '#ababab.(response).success.field[*]
+        // '#ababab.(request).field[*]
+        pattern = Pattern.compile(directRef);
+        matcher = pattern.matcher(value);
+        while (matcher.find()) {
+            result.add(matcher.group());
+            value = value.replace(matcher.group(), "");
+        }
+
+        // extract all enhancements:
+        // '#{%bindId%}'
+        pattern = Pattern.compile(enhancement);
+        matcher = pattern.matcher(value);
+        while (matcher.find()) {
+            result.add(matcher.group());
+            value = value.replace(matcher.group(), "");
+        }
+
+        // extract all enhancements:
+        // '${key}'
+        // '${key:type}'
+        // '${key.field[*]}'
+        // '${key.field[*]:type}'
+        pattern = Pattern.compile(webhook);
+        matcher = pattern.matcher(value);
+        while (matcher.find()) {
+            result.add(matcher.group());
+            value = value.replace(matcher.group(), "");
+        }
+
+        // extract all pagination references:
+        // '@{limit}'
+        // '@{size}'
+        pattern = Pattern.compile(pageRef);
+        matcher = pattern.matcher(value);
+        while (matcher.find()) {
+            result.add(matcher.group());
+            value = value.replace(matcher.group(), "");
+        }
+
+        // extract all request data:
+        // '{key}'
+        // '{#ctorId.key}'
+        pattern = Pattern.compile(requestData);
+        matcher = pattern.matcher(value);
+        while (matcher.find()) {
+            result.add(matcher.group());
+            value = value.replace(matcher.group(), "");
+        }
+
+        return result;
+    }
+
+    public static String removeOperationInfo(String ref) {
         String[] refParts = ref.split("\\.");
         String exchangeType = getExchangeType(ref);
 
