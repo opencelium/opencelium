@@ -54,60 +54,50 @@ public class ReferenceExtractor implements Extractor {
     }
 
     @Override
-    public Object extractValue(String value) {
-        List<String> references = ReferenceUtility.extractRefs(value);
+    public Object extractValue(String ref) {
+        Object result = null;
 
-        if (references.size() != 1 || !Objects.equals(value, references.get(0))) {
-            for (String ref : references) {
-                Object val = extractValue(ref);
-                val = val == null ? "" : val.toString();
-                value = value.replace(ref, (String) val);
-            }
-
-            return value;
-        } else if (value.matches(directRef) || value.matches(wrappedDirectRef)) {
+        if (ref.matches(directRef) || ref.matches(wrappedDirectRef)) {
             // extract direct reference if necessary
             // '{%#ababab.(response).success.field[*]%}'
             // '#ababab.(response).success.field[*]
             // '#ababab.(request).field[*]
-            value = ReferenceUtility.extractDirectRef(value);
-            return extractFromOperation(value);
-        } else if (value.matches(enhancement)) {
+            ref = ReferenceUtility.extractDirectRef(ref);
+
+            result = extractFromOperation(ref);
+        } else if (ref.matches(enhancement)) {
             // '#{%bindId%}'
-            String bindId = value.replace("#{%", "").replace("%}", "");
-            return executionManager.executeScript(bindId);
-        } else if (value.matches(webhook)) {
+            String bindId = ref.replace("#{%", "").replace("%}", "");
+
+            result = executionManager.executeScript(bindId);
+        } else if (ref.matches(webhook)) {
             // '${key}'
             // '${key:type}'
             // '${key.field[*]}'
             // '${key.field[*]:type}'
-            return extractFromWebhook(value);
-        } else if (value.matches(pageRef)) {
+            result = extractFromWebhook(ref);
+        } else if (ref.matches(pageRef)) {
             // '@{limit}'
             // '@{size}'
-            String param = value.replace("@{", "").replace("}","");
-            return executionManager.getPaginationParamValue(PageParam.fromString(param));
-        } else if (value.matches(requestData)) {
+            String param = ref.replace("@{", "").replace("}","");
+
+            result = executionManager.getPaginationParamValue(PageParam.fromString(param));
+        } else if (ref.matches(requestData)) {
             // '{key}'
             // '{#ctorId.key}'
-            return extractFromRequestData(value);
+            String refValue = ref.replace("{", "").replace("}", "");
+
+            // set id of required connector if exists
+            Integer ctorId = null;
+            if (refValue.startsWith("#")) {
+                ctorId = Integer.valueOf(refValue.substring(1, refValue.indexOf(".")));
+                refValue = refValue.substring(refValue.indexOf(".") + 1);
+            }
+
+            result = executionManager.getRequestData(ctorId).get(refValue);
         }
 
-        return value;
-    }
-
-    private Object extractFromRequestData(String ref) {
-        // remove curly braces
-        String refValue = ref.replace("{", "").replace("}", "");
-
-        // set id of required connector if exists
-        Integer ctorId = null;
-        if (refValue.startsWith("#")) {
-            ctorId = Integer.valueOf(refValue.substring(1, refValue.indexOf(".")));
-            refValue = refValue.substring(refValue.indexOf(".") + 1);
-        }
-
-        return executionManager.getRequestData(ctorId).get(refValue);
+        return result;
     }
 
     private Object extractFromWebhook(String ref) {

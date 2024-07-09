@@ -26,123 +26,21 @@ public class ReferenceUtility {
             return false;
         }
 
-        Pattern pattern;
-        Matcher matcher;
+        Pattern pattern = Pattern.compile(directRef + "|" + wrappedDirectRef + "|" + enhancement + "|" + webhook + "|" + pageRef + "|" + requestData);
+        Matcher matcher = pattern.matcher(value);
 
-        pattern = Pattern.compile(wrappedDirectRef);
-        matcher = pattern.matcher(value);
-        if (matcher.find()) {
-            return true;
-        }
-
-        pattern = Pattern.compile(directRef);
-        matcher = pattern.matcher(value);
-        if (matcher.find()) {
-            return true;
-        }
-
-        pattern = Pattern.compile(enhancement);
-        matcher = pattern.matcher(value);
-        if (matcher.find()) {
-            return true;
-        }
-
-        pattern = Pattern.compile(webhook);
-        matcher = pattern.matcher(value);
-        if (matcher.find()) {
-            return true;
-        }
-
-        pattern = Pattern.compile(pageRef);
-        matcher = pattern.matcher(value);
-        if (matcher.find()) {
-            return true;
-        }
-
-        pattern = Pattern.compile(requestData);
-        matcher = pattern.matcher(value);
         return matcher.find();
     }
 
     public static List<String> extractRefs(String value) {
         List<String> result = new ArrayList<>();
 
-        Pattern pattern;
-        Matcher matcher;
+        // 'directRef' cannot be in complex reference
+        Pattern pattern = Pattern.compile(wrappedDirectRef + "|" + enhancement + "|" + webhook + "|" + pageRef + "|" + requestData);
+        Matcher matcher = pattern.matcher(value);
 
-        // extract all wrapped direct references:
-        // '{%#ababab.(response).success.field[*]%}'
-        pattern = Pattern.compile(wrappedDirectRef);
-        matcher = pattern.matcher(value);
         while (matcher.find()) {
             result.add(matcher.group());
-            value = value.replace(matcher.group(), "");
-        }
-        if (value.isBlank()) {
-            return result;
-        }
-
-        // extract all direct references:
-        // '#ababab.(response).success.field[*]
-        // '#ababab.(request).field[*]
-        pattern = Pattern.compile(directRef);
-        matcher = pattern.matcher(value);
-        while (matcher.find()) {
-            result.add(matcher.group());
-            value = value.replace(matcher.group(), "");
-        }
-        if (value.isBlank()) {
-            return result;
-        }
-
-        // extract all enhancements:
-        // '#{%bindId%}'
-        pattern = Pattern.compile(enhancement);
-        matcher = pattern.matcher(value);
-        while (matcher.find()) {
-            result.add(matcher.group());
-            value = value.replace(matcher.group(), "");
-        }
-        if (value.isBlank()) {
-            return result;
-        }
-
-        // extract all enhancements:
-        // '${key}'
-        // '${key:type}'
-        // '${key.field[*]}'
-        // '${key.field[*]:type}'
-        pattern = Pattern.compile(webhook);
-        matcher = pattern.matcher(value);
-        while (matcher.find()) {
-            result.add(matcher.group());
-            value = value.replace(matcher.group(), "");
-        }
-        if (value.isBlank()) {
-            return result;
-        }
-
-        // extract all pagination references:
-        // '@{limit}'
-        // '@{size}'
-        pattern = Pattern.compile(pageRef);
-        matcher = pattern.matcher(value);
-        while (matcher.find()) {
-            result.add(matcher.group());
-            value = value.replace(matcher.group(), "");
-        }
-        if (value.isBlank()) {
-            return result;
-        }
-
-        // extract all request data:
-        // '{key}'
-        // '{#ctorId.key}'
-        pattern = Pattern.compile(requestData);
-        matcher = pattern.matcher(value);
-        while (matcher.find()) {
-            result.add(matcher.group());
-            value = value.replace(matcher.group(), "");
         }
 
         return result;
@@ -240,11 +138,11 @@ public class ReferenceUtility {
         String[] refParts = splitPaths(ref);
 
         String result = "";
-        for (int i = 0; i < partCount; i++) {
+        for (int i = 0; i < partCount - 1 ; i++) {
             result += refParts[i] + ".";
         }
 
-        result += refParts[partCount].replace(remove, "");
+        result += refParts[partCount - 1].replace(remove, "");
 
         return result;
     }
