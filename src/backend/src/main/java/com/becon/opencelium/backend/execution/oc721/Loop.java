@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.oc721;
 
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 
@@ -13,17 +14,24 @@ public class Loop {
     private RelationalOperator operator;
 
     public static Loop fromEx(OperatorEx operatorEx) {
-        Loop result = new Loop();
+        String ref = operatorEx.getCondition().getLeft();
 
-        result.setRef(operatorEx.getCondition().getLeft());
+        Loop result = new Loop();
         result.setDelimiter(operatorEx.getCondition().getRight());
         result.setIterator(operatorEx.getIterator());
         result.setOperator(operatorEx.getCondition().getRelationalOperator());
 
         // if loops' type is FOR_IN then add indicator
         if (result.getOperator() == RelationalOperator.FOR_IN) {
-            result.setRef(result.getRef() + "['*']~");
+            if (ref.matches(RegExpression.webhook)) {
+                int index = ref.contains(":") ? ref.indexOf(":") : ref.length() - 1;
+
+                ref = ref.substring(0, index) + "['*']~" + ref.substring(index);
+            } else {
+                ref = ref + "['*']~";
+            }
         }
+        result.setRef(ref);
 
         return result;
     }
