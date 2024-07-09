@@ -44,23 +44,23 @@ public class ConditionExMapper {
             throw new RuntimeException("leftStatement can't be null");
         }
 
-        if (isWebHookParam(ls)) {
+        boolean webHook = isWebHookParam(ls);
+        boolean containsRelated = ro == RelationalOperator.CONTAINS || ro == RelationalOperator.NOT_CONTAINS || ro == RelationalOperator.CONTAINS_SUB_STR || ro == RelationalOperator.NOT_CONTAINS_SUB_STR;
+        if (webHook && !containsRelated) {
             return ls.getField();
+        }
+        if (containsRelated && !webHook) {
+            return stringify(ls) + "." + rs.getRightPropertyValue();
+        }
+        if (webHook) {
+            return stringify(ls.getField(), rs.getRightPropertyValue());
         }
 
         if (areColorAndOrTypeNullOrEmpty(ls)) {
             throw new RuntimeException("Invalid leftStatement[color: %s, type: %s, field: %s]".formatted(ls.getColor(), ls.getType(), ls.getField()));
         }
 
-        String res = stringify(ls);
-
-        if (ro == RelationalOperator.CONTAINS
-                || ro == RelationalOperator.NOT_CONTAINS
-                || ro== RelationalOperator.CONTAINS_SUB_STR
-                || ro == RelationalOperator.NOT_CONTAINS_SUB_STR) {
-            return res + "." + rs.getRightPropertyValue();
-        }
-        return res;
+        return stringify(ls);
     }
 
     private String composeRight(StatementMng rs, RelationalOperator ro) {
@@ -89,9 +89,9 @@ public class ConditionExMapper {
                 !(ro == RelationalOperator.CONTAINS
                         || ro == RelationalOperator.NOT_CONTAINS
                         || ro == RelationalOperator.LIKE
-                        || ro == RelationalOperator.NOT_LIKE)
+                        || ro == RelationalOperator.NOT_LIKE
                         || ro == RelationalOperator.CONTAINS_SUB_STR
-                        || ro == RelationalOperator.NOT_CONTAINS_SUB_STR) {
+                        || ro == RelationalOperator.NOT_CONTAINS_SUB_STR)) {
             return "";
         } else if (rs == null) {
             throw new RuntimeException("rightStatement can't be null for " + ro.name() + " relational operator");
@@ -127,6 +127,19 @@ public class ConditionExMapper {
 
     private String stringify(StatementMng st) {
         return st.getColor() + ".(" + st.getType() + ")." + st.getField();
+    }
+
+    private String stringify(String field, String rpv) {
+        if (field.matches(RegExpression.webhook)) {
+            boolean array = field.contains(":array");
+            int index = field.indexOf(':');
+            if (array) {
+                return field.substring(0, index) + "[*]." + rpv + ":array}";
+            } else {
+                return field.substring(0, index) + "." + rpv + field.substring(index);
+            }
+        }
+        return field + rpv;
     }
 
     private boolean areColorAndOrTypeNullOrEmpty(StatementMng st) {
