@@ -54,12 +54,11 @@ public class ConditionExMapper {
 
         String res = stringify(ls);
 
-        if (ro == RelationalOperator.CONTAINS || ro == RelationalOperator.NOT_CONTAINS) {
+        if (ro == RelationalOperator.CONTAINS
+                || ro == RelationalOperator.NOT_CONTAINS
+                || ro== RelationalOperator.CONTAINS_SUB_STR
+                || ro == RelationalOperator.NOT_CONTAINS_SUB_STR) {
             return res + "." + rs.getRightPropertyValue();
-        }
-
-        if (ro == RelationalOperator.CONTAINS_SUB_STR || ro == RelationalOperator.NOT_CONTAINS_SUB_STR) {
-            //TODO: ???
         }
         return res;
     }
@@ -79,11 +78,6 @@ public class ConditionExMapper {
             return null;
         }
 
-        if (ro == RelationalOperator.CONTAINS_SUB_STR || ro == RelationalOperator.NOT_CONTAINS_SUB_STR) {
-            //TODO ???
-            return null;
-        }
-
         if (ro == RelationalOperator.IS_TYPE_OF) {
             try {
                 return DataTypeEnum.getEnumType(rs.getField()).name();
@@ -95,7 +89,9 @@ public class ConditionExMapper {
                 !(ro == RelationalOperator.CONTAINS
                         || ro == RelationalOperator.NOT_CONTAINS
                         || ro == RelationalOperator.LIKE
-                        || ro == RelationalOperator.NOT_LIKE)) {
+                        || ro == RelationalOperator.NOT_LIKE)
+                        || ro == RelationalOperator.CONTAINS_SUB_STR
+                        || ro == RelationalOperator.NOT_CONTAINS_SUB_STR) {
             return "";
         } else if (rs == null) {
             throw new RuntimeException("rightStatement can't be null for " + ro.name() + " relational operator");
