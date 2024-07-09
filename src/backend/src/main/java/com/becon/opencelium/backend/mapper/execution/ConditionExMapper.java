@@ -79,10 +79,6 @@ public class ConditionExMapper {
             return null;
         }
 
-        if (ro == RelationalOperator.SPLIT_STRING) {
-            return ";";
-        }
-
         if (ro == RelationalOperator.CONTAINS_SUB_STR || ro == RelationalOperator.NOT_CONTAINS_SUB_STR) {
             //TODO ???
             return null;
