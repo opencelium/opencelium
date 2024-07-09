@@ -80,7 +80,7 @@ public class ConditionExMapper {
         }
 
         if (ro == RelationalOperator.SPLIT_STRING) {
-            return ",";
+            return ";";
         }
 
         if (ro == RelationalOperator.CONTAINS_SUB_STR || ro == RelationalOperator.NOT_CONTAINS_SUB_STR) {
