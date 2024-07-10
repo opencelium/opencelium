@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.ConditionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.StatementMng;
 import com.becon.opencelium.backend.enums.DataTypeEnum;
 import com.becon.opencelium.backend.enums.RelationalOperator;
+import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import org.springframework.stereotype.Component;
 
@@ -135,10 +136,10 @@ public class ConditionExMapper {
 
     private String stringify(String field, String rpv) {
         if (field.matches(RegExpression.webhook)) {
-            boolean array = field.endsWith(":array}");
             int index = field.indexOf(':');
+            boolean array = field.substring(index + 1).startsWith(DataType.ARRAY.getType());
             if (array) {
-                return field.substring(0, index) + "[*]." + rpv + ":array}";
+                return field.substring(0, index) + "[*]." + rpv + ":" + DataType.ARRAY.getType() + "}";
             } else {
                 return field.substring(0, index) + "." + rpv + field.substring(index);
             }
