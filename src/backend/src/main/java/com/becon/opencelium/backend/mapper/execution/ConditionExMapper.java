@@ -45,7 +45,11 @@ public class ConditionExMapper {
         }
 
         boolean webHook = isWebHookParam(ls);
-        boolean containsRelated = ro == RelationalOperator.CONTAINS || ro == RelationalOperator.NOT_CONTAINS || ro == RelationalOperator.CONTAINS_SUB_STR || ro == RelationalOperator.NOT_CONTAINS_SUB_STR;
+        boolean containsRelated = ro == RelationalOperator.CONTAINS
+                || ro == RelationalOperator.NOT_CONTAINS
+                || ro == RelationalOperator.CONTAINS_SUB_STR
+                || ro == RelationalOperator.NOT_CONTAINS_SUB_STR;
+
         if (webHook && !containsRelated) {
             return ls.getField();
         }
@@ -131,7 +135,7 @@ public class ConditionExMapper {
 
     private String stringify(String field, String rpv) {
         if (field.matches(RegExpression.webhook)) {
-            boolean array = field.contains(":array");
+            boolean array = field.endsWith(":array}");
             int index = field.indexOf(':');
             if (array) {
                 return field.substring(0, index) + "[*]." + rpv + ":array}";
@@ -139,7 +143,7 @@ public class ConditionExMapper {
                 return field.substring(0, index) + "." + rpv + field.substring(index);
             }
         }
-        return field + rpv;
+        return field + "." + rpv;
     }
 
     private boolean areColorAndOrTypeNullOrEmpty(StatementMng st) {
