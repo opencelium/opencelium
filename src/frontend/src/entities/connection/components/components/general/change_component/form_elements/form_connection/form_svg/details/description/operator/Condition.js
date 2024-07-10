@@ -377,10 +377,20 @@ class Condition extends React.Component{
 
     getWebhookLeftStyle() {
         const {referenceTypeRight} = this.state;
-        let {hasValue} = this.isOperatorHasValue();
-        const isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams(false);
+        const {details} = this.props;
+        const operator = details.entity;
+        const isLoopOperator = operator.type === LOOP_OPERATOR;
+        let {hasValue} = this.isOperatorHasValue(isLoopOperator);
+        const isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams(isLoopOperator);
         //let width = hasValue ? '6%' : '16%';
         let width = hasValue ? isOperatorHasThreeParams ? referenceTypeRight === 'webhook' ? '41%' : '34%' : '41%' : '68%';
+        if (isLoopOperator) {
+            if (hasValue) {
+                width = '43%';
+            } else {
+                width = '68%';
+            }
+        }
         return {
             float: 'left',
             width,
@@ -389,10 +399,13 @@ class Condition extends React.Component{
     }
 
     getWebhookRightStyle() {
-        let {hasValue} = this.isOperatorHasValue();
+        const {details} = this.props;
+        const operator = details.entity;
+        const isLoopOperator = operator.type === LOOP_OPERATOR;
+        let {hasValue} = this.isOperatorHasValue(isLoopOperator);
         let styles = {float: 'left'};
         if (hasValue) {
-            styles.width = '40%';
+            styles.width = isLoopOperator ? '42%' : '40%';
             styles.transition = TransitionEffect;
         } else {
             styles.width = '0';
@@ -405,8 +418,8 @@ class Condition extends React.Component{
         const {condition, referenceTypeLeft, referenceTypeRight} = this.state;
         const {connection, details, readOnly, isExtended} = this.props;
         const operator = details.entity;
-        const connector = connection.getConnectorByType(details.connectorType);
         const isLoopOperator = operator.type === LOOP_OPERATOR;
+        const connector = connection.getConnectorByType(details.connectorType);
         const isLeftInputStringForLoopOperator = true;
         const isIfOperator = operator.type === IF_OPERATOR;
         let relationalOperatorValue = condition.relationalOperator ? condition.relationalOperator.value : null;
