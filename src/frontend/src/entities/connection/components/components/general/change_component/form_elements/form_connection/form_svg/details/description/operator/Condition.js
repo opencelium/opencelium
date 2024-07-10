@@ -42,6 +42,7 @@ import Button from "@entity/connection/components/components/general/basic_compo
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 import WebhookGenerator from "@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator";
 import Webhook from "@root/classes/Webhook";
+import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
 
 export const TransitionEffect = 'width 0.3s ease 0s';
 
@@ -73,8 +74,8 @@ class Condition extends React.Component{
 
     componentDidMount() {
         const {condition} = this.state;
-        const referenceTypeLeft = Webhook.isWebhookSnippet(condition.leftParam) && !condition.leftMethod ? 'webhook' : 'method';
-        const referenceTypeRight = Webhook.isWebhookSnippet(condition.rightParam) && !condition.rightMethod ? 'webhook' : 'method';
+        let referenceTypeLeft = Webhook.isWebhookSnippet(condition.leftParam) && !condition.leftMethod ? 'webhook' : 'method';
+        let referenceTypeRight = Webhook.isWebhookSnippet(condition.rightParam) && !condition.rightMethod ? 'webhook' : 'method';
         this.setState({
             referenceTypeLeft,
             referenceTypeRight,
@@ -193,13 +194,13 @@ class Condition extends React.Component{
     }
 
     toggleEdit(){
-        const {setCurrentInfo, nameOfCurrentInfo, isConditionDialogOpened, toggleConditionDialog} = this.props;
+        const {setCurrentInfo, nameOfCurrentInfo, isConditionDialogOpened, toggleConditionDialog, connection, details} = this.props;
         let newState = {
         }
         if(!isConditionDialogOpened){
             newState.condition = this.getConditionFromProps(this.props);
-            const referenceTypeLeft = Webhook.isWebhookSnippet(newState.condition.leftParam) && !newState.condition.leftMethod ? 'webhook' : 'method';
-            const referenceTypeRight = Webhook.isWebhookSnippet(newState.condition.rightParam) && !newState.condition.rightMethod ? 'webhook' : 'method';
+            let referenceTypeLeft = Webhook.isWebhookSnippet(newState.condition.leftParam) && !newState.condition.leftMethod ? 'webhook' : 'method';
+            let referenceTypeRight = Webhook.isWebhookSnippet(newState.condition.rightParam) && !newState.condition.rightMethod ? 'webhook' : 'method';
             this.setState({
                 referenceTypeLeft,
                 referenceTypeRight,

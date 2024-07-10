@@ -25,6 +25,7 @@ import CCondition from "@classes/content/connection/operator/CCondition";
 import {
     TransitionEffect
 } from "@change_component/form_elements/form_connection/form_svg/details/description/operator/Condition";
+import {DEFAULT_COLOR} from "@classes/content/connection/operator/CStatement";
 
 class RightStatement extends React.Component{
     constructor(props) {
@@ -181,6 +182,10 @@ class RightStatement extends React.Component{
         }
     }
 
+    hasMethodOptions(options) {
+        return options.length === 0 ? false : options.length === 1 && options[0].hasOwnProperty('options') && options[0].options.length === 0 ? false : true;
+    }
+
     render(){
         let {placeholder, condition, connection, connector, operator, readOnly, isOperatorHasValue, isOperatorHasThreeParams, hasLeftMethod, hasRightMethod, hasRightParam, updateConnection} = this.props;
         let {hasValue, isMultiline, isRightStatementOption, options} = isOperatorHasValue();
@@ -188,9 +193,6 @@ class RightStatement extends React.Component{
         const propertyItems = hasLeftMethod ? connection.getConnectorMethodByColor(condition.leftMethod.color).response.success : [];
         const isPropertyDisabled = !isOperatorHasThreeParams;
         let methodSource = connection.getOptionsForMethods(connector, operator, {statement: 'rightStatement', isKeyConsidered: false, exceptCurrent: false});
-        if(methodSource.length === 0) {
-            methodSource = [{label: 'No params', value: 0, color: 'white'}];
-        }
         const methodPlaceholder = !hasRightMethod && hasRightParam ? '' : '...';
         const isMethodVisible = this.isMethodVisible();
         const isMethodDisabled = readOnly || !isMethodVisible;
@@ -273,6 +275,7 @@ class RightStatement extends React.Component{
                         style={this.getParamStyles()}
                         isMultiline={isMultiline}
                         placeholder={placeholder}
+                        hasParamEditor={this.hasMethodOptions(methodSource) && condition.rightMethod && condition.rightMethod.color && condition.rightMethod.color !== DEFAULT_COLOR}
                         fromStatement="right"
                     />
                 <LikePercentageStyled isLikeOperator={isLikeOperator} hasSign={hasRightLikeSign}>
