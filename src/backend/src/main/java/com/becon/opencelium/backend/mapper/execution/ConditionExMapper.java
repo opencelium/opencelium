@@ -137,12 +137,14 @@ public class ConditionExMapper {
     private String stringify(String field, String rpv) {
         if (field.matches(RegExpression.webhook)) {
             int index = field.indexOf(':');
-            boolean array = field.substring(index + 1).startsWith(DataType.ARRAY.getType());
-            if (array) {
-                return field.substring(0, index) + "[*]." + rpv + ":" + DataType.ARRAY.getType() + "}";
-            } else {
+            int array = field.indexOf(DataType.ARRAY.getType());
+            if (index == -1) {
+                return field.substring(0, field.length() - 1) + "." + rpv + "}";
+            }
+            if (array == -1 || array < index) {
                 return field.substring(0, index) + "." + rpv + field.substring(index);
             }
+            return field.substring(0, index) + "[*]." + rpv + ":" + DataType.ARRAY.getType() + "}";
         }
         return field + "." + rpv;
     }
