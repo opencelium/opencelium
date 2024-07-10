@@ -31,12 +31,12 @@ class RelationalOperator extends React.Component{
     }
 
     getStyles(){
-        const {isOperatorHasThreeParams, isOperatorHasValue, referenceTypeRight} = this.props;
+        const {isOperatorHasThreeParams, isOperatorHasValue, referenceTypeRight, isLoopOperator} = this.props;
         let {hasValue} = isOperatorHasValue();
         if (referenceTypeRight === 'webhook') {
-            return {float: 'left', width: hasValue ? '11%' : '27%', transition: TransitionEffect,};
+            return {float: 'left', width: hasValue ? isLoopOperator ? '7%' : '7%' : '27%', transition: TransitionEffect,};
         } else {
-            return {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '11%' : '7%' : '27%', transition: TransitionEffect,};
+            return {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '7%' : '7%' : '27%', transition: TransitionEffect,};
         }
     }
 
