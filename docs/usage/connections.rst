@@ -170,7 +170,7 @@ Webhooks
 
 The connection editor provides an opportunity to use webhook parameters inside of the connection.
 If you want to deliver query parameters (using GET) or payload (POST), you need to click on the
-reference icon |image46| and select the webhook option. Here you will see the list of existing
+reference icon in body of the method |image46| and select the webhook option. Here you will see the list of existing
 webhook parameters in the connection and a possibility to create a new one.
 
 |image43|
@@ -184,10 +184,27 @@ The webhook is also could be used in operators. For *IF* operator you can apply 
 
 |image45|
 
+If the process is located inside of the loop, your webhook parameter can also go throw it.
+You just need to add *[iterator]* in the end of the parameter.
+
+Example:
+
+You have a loop operator with *i* iterator and you want to have a webhook reference on parameter
+*result* and go throw it. Then your webhook parameter will look like that: ``result[i]``.
+
+Or if you want to take just the first element of the array: ``result[1]``.
+
+The webhook parameters can also be used in endpoints. Right now, there is no UI for this (coming in
+next version), so you need to add it manually. It has the next format: ``${[name]:[type]}``
+
+Example:
+You have the endpoint: ``{url}/api/`` and you want to add the webhook parameter *methodName* with type *string*
+it will be: ``{url}/api/${methodName:string}``
+
 Pagination
 """""""""""""""""
 
-Some APIs fetch data with pagination. You define the amount and specific page and the system
+Some APIs fetch data with pagination. You define the amount of data and specific page so the system
 responses with a bunch of data. To make clear for the connection how much data should it
 handle, you need to describe the pagination inside of the invoker file.
 There is a new xml-tag on the same level with authType or operations - *pagination*.
