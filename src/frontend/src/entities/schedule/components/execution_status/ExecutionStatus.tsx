@@ -30,7 +30,7 @@ const ExecutionStatus: FC<ExecutionStatusProps> =
             if (lastExecutionSuccessTime === 0 && lastExecutionFailTime === 0) {
                 newLastStatusColor = 'unset';
             }
-            if (!schedule.status) {
+            if (!schedule.cronExp) {
                 newLastStatusColor = '#cccccc';
             }
             setLastStatusColor(newLastStatusColor);
