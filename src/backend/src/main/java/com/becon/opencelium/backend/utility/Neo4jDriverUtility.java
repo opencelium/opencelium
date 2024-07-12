@@ -41,6 +41,30 @@ public class Neo4jDriverUtility {
 
         //adds all methods and operators to the methods and the operators lists
         crawlMethodAndOperators(connectorMng.getMethods(), connectorMng.getOperators(), 0, records);
+        clearEmptyBodies(connectorMng.getMethods());
+        correctOperators(connectorMng.getOperators());
+    }
+
+    private static void correctOperators(List<OperatorMng> operators) {
+        operators.forEach(o -> {
+            if (o.getType().equals("loop") && (o.getCondition().getRelationalOperator() == null || o.getCondition().getRelationalOperator().isBlank())) {
+                o.getCondition().setRelationalOperator("for");
+            }
+        });
+    }
+
+    private static void clearEmptyBodies(List<MethodMng> methods) {
+        methods.forEach(m -> {
+            if (m.getRequest().getBody().getFields() == null || m.getRequest().getBody().getFormat() == null) {
+                m.getRequest().setBody(null);
+            }
+            if (m.getResponse().getFail().getBody().getFields() == null || m.getResponse().getFail().getBody().getFormat() == null) {
+                m.getResponse().getFail().setBody(null);
+            }
+            if (m.getResponse().getSuccess().getBody().getFields() == null || m.getResponse().getSuccess().getBody().getFormat() == null) {
+                m.getResponse().getSuccess().setBody(null);
+            }
+        });
     }
 
     private static int crawlMethodAndOperators(List<MethodMng> methods, List<OperatorMng> operators, int y, List<Record> records) {

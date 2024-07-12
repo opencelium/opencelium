@@ -30,7 +30,7 @@ public interface ConditionMngMapper extends Mapper<ConditionMng, ConditionDTO> {
 
     @BeforeMapping
     default void preToEntity(@MappingTarget ConditionMng conditionMng, ConditionDTO conditionDTO) {
-        if (conditionDTO.getRightStatement() == null && (conditionDTO.getRelationalOperator().equals("!=") || conditionDTO.getRelationalOperator().equals("="))) {
+        if (conditionDTO.getRightStatement() == null && conditionDTO.getRelationalOperator() != null && (conditionDTO.getRelationalOperator().equals("!=") || conditionDTO.getRelationalOperator().equals("="))) {
             StatementDTO right = new StatementDTO();
             right.setColor("");
             right.setField("");
