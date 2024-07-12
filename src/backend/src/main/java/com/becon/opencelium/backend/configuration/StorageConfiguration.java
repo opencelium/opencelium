@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.env.Environment;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -37,66 +38,90 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Configuration
 public class StorageConfiguration {
 
     private final UserStorageService userStorageService;
-
     private final ConnectorService connectorService;
     private final InvokerContainer invokerContainer;
     private final RequestDataService requestDataService;
     private final ChangeSetDao changeSetDao;
+    private final Environment environment;
+
+    private static final String ZIP_EXTENSION = ".zip";
+    private static final String JAR_PREFIX = "opencelium.backend-";
+    private static final String JAR_EXTENSION = ".jar";
 
     public StorageConfiguration(
             UserStorageService userStorageService,
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("requestDataServiceImp") RequestDataService requestDataService,
             InvokerContainer invokerContainer,
-            DataSource dataSource
+            DataSource dataSource,
+            Environment environment
     ) {
         this.userStorageService = userStorageService;
         this.connectorService = connectorService;
         this.invokerContainer = invokerContainer;
         this.requestDataService = requestDataService;
         this.changeSetDao = new ChangeSetDao(dataSource);
+        this.environment = environment;
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void createStorageAfterStartup() {
-        Path filePath = Paths.get(PathConstant.TEMPLATE);
-        if (Files.notExists(filePath)) {
-            File directory = new File(PathConstant.TEMPLATE);
-            directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.TEMPLATE);
-        }
 
-        filePath = Paths.get(PathConstant.ASSISTANT);
-        if (Files.notExists(filePath)) {
-            File directory = new File(PathConstant.ASSISTANT);
-            directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.ASSISTANT);
-        }
-        filePath = Paths.get(PathConstant.ASSISTANT + "versions/");
-        if (Files.notExists(filePath)) {
-            File directory = new File(PathConstant.ASSISTANT + "versions/");
-            directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "versions/");
-        }
-        filePath = Paths.get(PathConstant.ASSISTANT + "temporary/");
-        if (Files.notExists(filePath)) {
-            File directory = new File(PathConstant.ASSISTANT + "temporary/");
-            directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "temporary/");
-        }
-//        filePath = Paths.get(PathConstant.ASSISTANT + "zipfile/");
-//        if (Files.notExists(filePath)){
-//            File directory = new File(PathConstant.ASSISTANT + "zipfile/");
-//            directory.mkdir();
-//            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "zipfile/");
-//        }
+        // creating 'src/main/resources/templates/' directory
+        createDirectory(PathConstant.TEMPLATE);
+        // creating 'src/main/resources/assistant/' directory
+        createDirectory(PathConstant.ASSISTANT);
+        // creating 'src/main/resources/assistant/versions/' directory
+        createDirectory(PathConstant.ASSISTANT + PathConstant.VERSIONS);
+        // creating 'src/main/resources/assistant/temporary/' directory
+        createDirectory(PathConstant.ASSISTANT + "temporary/");
+//        createDirectory(PathConstant.ASSISTANT + "zipfile/");
 
+        // encryptes raw requestData in db
         requestDataService.prepare();
+
+        // updates requestData's visibility based on required data
+        updateVisibility();
+
+        // creates storage for files
+        userStorageService.init();
+
+        // saves new changesets
+        if (YAMLMigrator.getChangeSetsToSave() != null) {
+            changeSetDao.createAll(YAMLMigrator.getChangeSetsToSave());
+        }
+
+        // deleting old version zip and jar files
+        cleanOldFiles(PathConstant.LIBS, JAR_EXTENSION, JAR_PREFIX);
+        cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, ZIP_EXTENSION, "");
+    }
+
+    private void cleanOldFiles(String folderPath, String extension, String prefix) {
+        try (Stream<File> files = Files.list(Paths.get(folderPath)).map(Path::toFile).filter(File::isFile)
+                .filter(file -> file.getName().endsWith(extension))) {
+
+            Double ocVersion = environment.getProperty("opencelium.version", Double.class, 0.0);
+            int intValue = ocVersion.intValue();
+
+            files.filter(f -> !f.getName().startsWith(prefix + intValue) || !f.getName().endsWith(extension)).forEach(f -> {
+                if (f.delete()) {
+                    System.out.println(f.getName() + " file is deleted");
+                } else {
+                    System.out.println(f.getName() + " file cannot be deleted");
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateVisibility() {
         List<Connector> connectors = connectorService.findAll();
         connectors.forEach(c -> {
             List<RequestData> requestData = c.getRequestData();
@@ -113,12 +138,17 @@ public class StorageConfiguration {
         });
 
         connectorService.saveAll(connectors);
-        // creates storage for files
-        userStorageService.init();
-        // create defou
+    }
 
-        if (YAMLMigrator.getChangeSetsToSave() != null) {
-            changeSetDao.createAll(YAMLMigrator.getChangeSetsToSave());
+    private void createDirectory(String name) {
+        Path filePath = Paths.get(name);
+        if (Files.notExists(filePath)) {
+            File directory = new File(name);
+            if (directory.mkdir()) {
+                System.out.println("Directory has been created: " + name);
+            } else {
+                System.out.println("Failed to create directory: " + name);
+            }
         }
     }
 }
