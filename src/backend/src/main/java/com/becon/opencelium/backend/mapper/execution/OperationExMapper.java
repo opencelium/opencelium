@@ -370,7 +370,7 @@ public class OperationExMapper {
     }
 
     private RequestBodyDTO getRequestBody(BodyMng body, Long connectionId, String methodName, MediaType mediaType) {
-        if (body == null) {
+        if (body == null || body.getFormat()==null || body.getFields()==null) {
             return null;
         }
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
