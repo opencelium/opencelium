@@ -18,7 +18,13 @@ import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
 import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
-import {updateConnection, checkConnectionTitle, getConnectionById as fetchConnection, testConnection} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
+import {
+    updateConnection,
+    checkConnectionTitle,
+    getConnectionById as fetchConnection,
+    testConnection,
+    getConnectionWebhooks
+} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {addTemplate, getTemplatesByConnectors as fetchTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {permission} from "@entity/application/utils/permission";
@@ -30,9 +36,10 @@ import {useParams} from "react-router";
  import {
     setCurrentConnection,
     setCurrentTechnicalItem, setSavePanelVisibility,
-     setTemplatePanelVisibility
- } from "@root/redux_toolkit/slices/ConnectionSlice";
+    setTemplatePanelVisibility, setConnection, setWebhooks,
+} from "@root/redux_toolkit/slices/ConnectionSlice";
  import {useAppDispatch} from "@application/utils/store";
+ import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 
 /*
 * TODO: implement connection update
@@ -68,7 +75,7 @@ function mapStateToProps(state){
 @connect(mapStateToProps, {
     updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle,
     fetchTemplates, testConnection, setCurrentTechnicalItem, setCurrentConnection,
-    setFullScreen,
+    setFullScreen, getConnectionWebhooks, setConnection,
 })
 @permission(ConnectionPermissions.UPDATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
@@ -84,6 +91,8 @@ export default function(props) {
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
+            dispatch(getAllCategories());
+            dispatch(setWebhooks([]));
         }
     }, []);
     return <ConnectionUpdate {...props} navigate={navigate} params={urlParams}/>;

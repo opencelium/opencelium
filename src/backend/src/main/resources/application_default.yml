@@ -153,7 +153,7 @@ management:
       show-details: always
 
 opencelium:
-  version: 4.0
+  version: 4.1
 ###########################################################################
 #                                                                         #
 #   Is customizable                                                       #
@@ -161,7 +161,7 @@ opencelium:
 ###########################################################################
   debug_mode: true
   token:
-    secret: becon.opencelium
+    secret: 84bbce3d33de467b47b7e76c2563769!3f9aff968def8ef2674856f67ae8a93f
     activity-time: 18000
     experation-time: 86400
   ###########################################################################

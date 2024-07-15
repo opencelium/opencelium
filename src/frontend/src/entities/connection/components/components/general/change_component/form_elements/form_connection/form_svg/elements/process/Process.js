@@ -115,9 +115,7 @@ class Process extends React.Component{
         const {currentTechnicalItem, connection, process, isItemDraggable, isCreateElementPanelOpened, readOnly} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
         const isItemOver = isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== process.entity.index;
-        if(readOnly){
-            return;
-        }
+        if (readOnly) return;
         if(!this.state.isMouseOver){
             this.setState({
                 isMouseOver: true,

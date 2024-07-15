@@ -19,10 +19,14 @@ import {withTranslation} from 'react-i18next';
 
 import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {
+    setConnection,
     setCurrentConnection, setSavePanelVisibility,
-    setTemplatePanelVisibility
+    setTemplatePanelVisibility, setWebhooks
 } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
-import {getConnectionById as fetchConnection} from '@entity/connection/redux_toolkit/action_creators/ConnectionCreators';
+import {
+    getConnectionById as fetchConnection,
+    getConnectionWebhooks
+} from '@entity/connection/redux_toolkit/action_creators/ConnectionCreators';
 import {permission} from "@entity/application/utils/permission";
 import {ConnectionForm} from "@entity/connection/components/components/content/connections/ConnectionForm";
 import {useNavigate, useParams} from "react-router";
@@ -47,7 +51,10 @@ function mapStateToProps(state){
 /**
  * Component to View Connection
  */
-@connect(mapStateToProps, {fetchConnection, setFullScreen, setCurrentConnection})
+@connect(mapStateToProps, {
+    fetchConnection, setFullScreen, getConnectionWebhooks, setCurrentConnection,
+    setConnection,
+})
 @permission(ConnectionPermissions.READ, true)
 @withTranslation(['connections', 'app'])
 @ConnectionForm('view')
@@ -60,6 +67,7 @@ export default function(props) {
     useEffect(() => {
         dispatch(setTemplatePanelVisibility(false))
         dispatch(setSavePanelVisibility(false))
+        dispatch(setWebhooks([]));
     }, []);
     return <ConnectionView {...props} navigate={navigate} params={urlParams} />;
 }

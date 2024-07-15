@@ -30,5 +30,6 @@ public class AuthExceptionHandler implements AuthenticationEntryPoint {
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(responseStream, errorResource);
         responseStream.flush();
+        responseStream.close();
     }
 }

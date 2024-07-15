@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.resource.execution;
 import java.util.Map;
 
 public class ExecutionObj {
-    private Map<String, Object> queryParams;
+    private Map<String, Object> webhookVars;
     private ConnectionEx connection;
     private ProxyEx proxy;
     private Logger logger;
@@ -11,12 +11,12 @@ public class ExecutionObj {
     public ExecutionObj() {
     }
 
-    public Map<String, Object> getQueryParams() {
-        return queryParams;
+    public Map<String, Object> getWebhookVars() {
+        return webhookVars;
     }
 
-    public void setQueryParams(Map<String, Object> queryParams) {
-        this.queryParams = queryParams;
+    public void setWebhookVars(Map<String, Object> webhookVars) {
+        this.webhookVars = webhookVars;
     }
 
     public ProxyEx getProxy() {

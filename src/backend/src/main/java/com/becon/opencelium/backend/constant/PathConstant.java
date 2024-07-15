@@ -21,13 +21,15 @@ public interface PathConstant {
     String MONGODB = "com.becon.opencelium.backend.database.mongodb";
     String MYSQl = "com.becon.opencelium.backend.database.mysql";
     String ELASTICSEARCH = "com.becon.opencelium.backend.elasticsearch";
-    String INVOKER = "src/main/resources/invoker/";
-    String IMAGES = "/api/storage/files/";
-    String TEMPLATE = "src/main/resources/templates/";
-    String VERSIONS = "versions/";
-    String ASSISTANT = "assistant/";
-    String INSTRUCTION = "src/backend/assistant/instruction/update_instruction.html";
+
     String RESOURCES = "src/main/resources/";
+    String INVOKER = "src/main/resources/invoker/";
+    String TEMPLATE = "src/main/resources/templates/";
     String ICONS = "src/main/resources/icon/";
     String APP_DEFAULT_YML = "src/main/resources/application_default.yml";
+    String INSTRUCTION = "src/backend/assistant/instruction/update_instruction.html";
+    String IMAGES = "/api/storage/files/";
+    String VERSIONS = "versions/";
+    String ASSISTANT = "assistant/";
+    String LIBS = "build/libs/";
 }

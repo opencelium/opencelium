@@ -18,10 +18,8 @@ package com.becon.opencelium.backend.invoker.parser;
 
 import com.becon.opencelium.backend.factory.InvokerParserFactory;
 import com.becon.opencelium.backend.invoker.entity.*;
-import com.becon.opencelium.backend.invoker.enums.PageParam;
-import com.becon.opencelium.backend.invoker.enums.PageParamAction;
-import com.becon.opencelium.backend.quartz.JobExecutor;
-import com.sun.xml.messaging.saaj.soap.ver1_1.BodyElement1_1Impl;
+import com.becon.opencelium.backend.enums.PageParam;
+import com.becon.opencelium.backend.enums.PageParamAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -187,21 +185,16 @@ public class InvokerParserImp {
         InvokerParserFactory<Body> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, Body> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
         return xmlDomParser.doAction("body", node -> {
-            if (!node.hasAttributes() && !node.hasChildNodes()) {
+            if (!node.hasAttributes() || !node.hasChildNodes()) {
                 return null;
             }
-            Body body = new Body();
 
-            String format = "";
-            String type = "";
-            String data = "";
-            if (node.hasAttributes()) {
-                 format= node.getAttributes().getNamedItem("format").getNodeValue();
-                 type = node.getAttributes().getNamedItem("type").getNodeValue();
-                 data = node.getAttributes().getNamedItem("data").getNodeValue();
-            }
-
+            String format= node.getAttributes().getNamedItem("format").getNodeValue();
+            String type = node.getAttributes().getNamedItem("type").getNodeValue();
+            String data = node.getAttributes().getNamedItem("data").getNodeValue();
             Map<String, Object> fields = getFields(node.getChildNodes());
+
+            Body body = new Body();
             body.setFields(fields);
             body.setData(data);
             body.setFormat(format);

@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.entity.Webhook;
+import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
 
@@ -49,4 +50,5 @@ public interface WebhookService {
 
     boolean existsBySchedulerId(int id);
 
+    WebhookParamDTO toParamResource(String param);
 }

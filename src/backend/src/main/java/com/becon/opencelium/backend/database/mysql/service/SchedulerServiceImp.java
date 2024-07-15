@@ -216,13 +216,12 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public synchronized void startNow(Scheduler scheduler) {
-//        schedulerRepository.save(scheduler);
         schedulingStrategy.runJob(scheduler);
     }
 
     @Override
-    public void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception {
-        //TODO skip it
+    public void startNow(Scheduler scheduler, Map<String, Object> webhook) throws Exception {
+        schedulingStrategy.runJob(scheduler, webhook);
     }
 
     @Override

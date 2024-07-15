@@ -30,12 +30,15 @@ const ExecutionStatus: FC<ExecutionStatusProps> =
             if (lastExecutionSuccessTime === 0 && lastExecutionFailTime === 0) {
                 newLastStatusColor = 'unset';
             }
-            if (!schedule.status) {
+            if (!schedule.cronExp) {
                 newLastStatusColor = '#cccccc';
             }
             setLastStatusColor(newLastStatusColor);
         }, [schedule?.lastExecution, schedule.status])
-
+        /*if(!hasActions){
+            let status = schedule.status ? 'on' : 'off';
+            return <td key={'status'} title={status}>{status}</td>;
+        }*/
         return (
             <td key={'status'} style={{background: lastStatusColor}}></td>
         );

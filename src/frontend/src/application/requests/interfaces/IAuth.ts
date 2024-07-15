@@ -17,10 +17,17 @@ import {AxiosResponse} from "axios";
 import IUser from "@entity/user/interfaces/IUser";
 import {ICredentials} from "../../interfaces/IAuth";
 
+export interface NoLicenseResponse {
+    hasLicense: false,
+}
+
 interface IAuth{
 
     //to login into the application
-    login(credentials: ICredentials): Promise<AxiosResponse<IUser>>,
+    login(credentials: ICredentials): Promise<AxiosResponse<IUser & NoLicenseResponse>>,
+
+    //to upload license token
+    uploadToken(token: string): Promise<AxiosResponse<IUser>>
 
     //to logout from the application
     logout(): void,

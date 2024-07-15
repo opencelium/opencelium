@@ -30,6 +30,7 @@ import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -46,10 +47,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @Tag(name = "Connector", description = "Manages operations related to Connector management")
@@ -238,24 +236,23 @@ public class ConnectorController {
             throw new CommunicationFailedException();
         }
 
-        ObjectMapper mapper = new ObjectMapper();
         FunctionInvoker functionInvoker = invokerService.getTestFunction(connector.getInvoker());
 
         Map<String, Object> failBody = null;
         String formatType = "";
-        String type = "";
         if (functionInvoker.getResponse().getFail() != null && functionInvoker.getResponse().getFail().getBody() != null) {
             formatType = functionInvoker.getResponse().getFail().getBody().getFormat();
             failBody = functionInvoker.getResponse().getFail().getBody().getFields();
         }
 
-        Map<String, Object> response = new LinkedHashMap<>();
+        String response = "";
+        String fail = convertMapToJson(failBody);
         if (formatType.equals("json")) {
             System.out.println(responseEntity.getBody());
-            response = mapper.readValue(responseEntity.getBody().toString(), Map.class);
+            response = responseEntity.getBody().toString();
         }
 
-        if ((responseEntity.getStatusCode() == HttpStatus.OK) && hasError(failBody, response)) {
+        if ((responseEntity.getStatusCode() == HttpStatus.OK) && hasError(fail, response)) {
             return ResponseEntity.ok().body("{\"status\":\"401\", \"error\":\"401\"}");
         }
 
@@ -265,24 +262,59 @@ public class ConnectorController {
         return ResponseEntity.ok().body("{\"status\":\"200\"}");
     }
 
-    private boolean hasError(Map<String, Object> failBody, Map<String, Object> response) {
+    public static String convertMapToJson(Map<String, Object> map) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(map);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-        if (failBody == null) {
+    private boolean hasError(String failBody, String response) {
+        if (failBody == null || failBody.isEmpty()) {
             return false;
         }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode invFailNode = objectMapper.readTree(failBody);
+            JsonNode responseNode = objectMapper.readTree(response);
 
-        for (Map.Entry<String, Object> failEntry : failBody.entrySet()) {
-            if (!response.containsKey(failEntry.getKey())) {
-                return false;
-            }
+            return containsProperties(responseNode, invFailNode);
 
-            if (failEntry.getValue() instanceof Map) {
-                if (!hasError((Map<String, Object>) failEntry.getValue(), (Map<String, Object>) response.get(failEntry.getKey()))) {
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private boolean containsProperties(JsonNode jsonNode1, JsonNode jsonNode2) {
+        if (jsonNode2.isObject()) {
+            for (String key : iterable(jsonNode2.fieldNames())) {
+                if (!jsonNode1.has(key)) {
+                    return false;
+                }
+                if (!containsProperties(jsonNode1.get(key), jsonNode2.get(key))) {
                     return false;
                 }
             }
+        } else if (jsonNode2.isArray()) {
+            if (!jsonNode1.isArray() || jsonNode1.size() < jsonNode2.size()) {
+                return false;
+            }
+            for (int i = 0; i < jsonNode2.size(); i++) {
+                if (!containsProperties(jsonNode1.get(i), jsonNode2.get(i))) {
+                    return false;
+                }
+            }
+        } else {
+            return jsonNode1.isValueNode() && jsonNode2.isValueNode();
         }
         return true;
+    }
+
+    private <T> Iterable<T> iterable(final java.util.Iterator<T> iterator) {
+        return () -> iterator;
     }
 
     @Operation(summary = "Verifies uniqueness of connector title")

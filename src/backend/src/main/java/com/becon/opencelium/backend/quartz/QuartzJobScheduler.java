@@ -150,6 +150,32 @@ public class QuartzJobScheduler implements SchedulingStrategy {
     }
 
     @Override
+    public void runJob(Scheduler scheduler, Map<String, Object> webhookVars) {
+        final String jobName = getJobName(scheduler);
+        final JobKey jobKey = new JobKey(jobName, "connection");
+
+        ScheduleData data = new ScheduleData(scheduler.getId(), TriggerType.WEBHOOK, webhookVars);
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("data", data);
+
+        TriggerKey triggerKey = new TriggerKey("FIRES_ONCE-" + System.currentTimeMillis() + "-" + scheduler.getId(),
+                String.valueOf(scheduler.getConnection().getId()));
+
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .forJob(jobKey)
+                .withIdentity(triggerKey)
+                .usingJobData(jobDataMap)
+                .startNow()
+                .build();
+
+        try {
+            quartzScheduler.scheduleJob(trigger);
+        } catch (SchedulerException e) {
+            throw new RuntimeException("Error scheduling job", e);
+        }
+    }
+
+    @Override
     public void resumeJob(Scheduler scheduler) {
         final String jobName = getJobName(scheduler);
         JobKey jobKey = new JobKey(jobName, "connection");
@@ -235,8 +261,8 @@ public class QuartzJobScheduler implements SchedulingStrategy {
             this(scheduleId, execType, new HashMap<>());
         }
 
-        public ScheduleData(int scheduleId, TriggerType execType, Map<String, Object> queryParams) {
-            this.queryParams = queryParams;
+        public ScheduleData(int scheduleId, TriggerType execType, Map<String, Object> webhookVars) {
+            this.queryParams = webhookVars;
             this.scheduleId = scheduleId;
             this.execType = execType;
         }

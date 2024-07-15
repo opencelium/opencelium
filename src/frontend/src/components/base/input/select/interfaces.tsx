@@ -16,6 +16,7 @@
 import React, {Ref} from "react";
 import {ColorTheme, ITheme} from "@style/Theme";
 import {ElementProps, InputElementProps} from "../interfaces";
+import {CategoryModel} from "@entity/category/requests/models/CategoryModel";
 
 interface OptionsProps{
     currentOption?: OptionProps,
@@ -38,6 +39,7 @@ interface InputContainerStyledProps extends ElementProps{
 
 interface OptionStyledProps{
     isCurrent?: boolean,
+    indentLevel?: number,
 }
 
 interface OptionProps extends OptionStyledProps{
@@ -72,12 +74,15 @@ interface InputSelectProps extends InputElementProps{
     className?: string,
     maxMultiValues?: number,
     checkboxProps?: any,
+    categoryList?: boolean,
+    currentCategory?: CategoryModel | null,
 }
 
 interface OptionsStyledProps extends ElementProps{
     isVisible?: boolean | undefined,
     height?: string | number,
     top?: number,
+    categoryList?: boolean
 }
 
 interface ToggleStyledProps extends ElementProps{

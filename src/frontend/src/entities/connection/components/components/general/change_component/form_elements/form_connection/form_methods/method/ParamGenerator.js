@@ -29,28 +29,39 @@ import ReactDOM from "react-dom";
 import RadioButtons from "@entity/connection/components/components/general/basic_components/inputs/RadioButtons";
 import Select from "@entity/connection/components/components/general/basic_components/inputs/Select";
 import {addCloseParamGeneratorNavigation, removeCloseParamGeneratorNavigation} from "@entity/connection/components/utils/key_navigation";
+import WebhookGenerator from "@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator";
+import CBody from "@classes/content/invoker/CBody";
+import {CONNECTOR_FROM} from "@classes/content/connection/CConnectorItem";
 
 
 class ParamGenerator extends Component {
 
     constructor(props) {
         super(props);
+        const referenceType = this.hasNotMethodReference(props) ? 'webhook' : 'method';
         this.state = {
             showGenerator: false,
             color: '',
             field: '',
             responseType: RESPONSE_SUCCESS,
             shouldClose: false,
+            referenceType,
+            webhook: '',
         };
         const {top, left} = findTopLeft(props.parent);
         this.top = top;
         this.left = left;
-
+        this.paramGeneratorRef = React.createRef();
         this.selectRef = React.createRef();
+        this.webhookRef = React.createRef();
+        this.handleClickOutside = this.handleClickOutside.bind(this);
+        this.handleEscKey = this.handleEscKey.bind(this);
     }
 
     componentDidMount(){
         addCloseParamGeneratorNavigation(this);
+        document.addEventListener('mousedown',  this.handleClickOutside);
+        document.addEventListener('keydown',this.handleEscKey);
     }
 
     componentWillUnmount(){
@@ -60,6 +71,37 @@ class ParamGenerator extends Component {
             elem.innerText = '';
         }
         removeCloseParamGeneratorNavigation(this);
+        document.removeEventListener('mousedown', this.handleClickOutside);
+        document.removeEventListener('keydown',this.handleEscKey);
+    }
+
+    hasNotMethodReference(props) {
+        return props.method.index === '0' && props.connector.getConnectorType() === CONNECTOR_FROM;
+    }
+
+    handleEscKey(event) {
+        if (event.key === 'Escape' || event.keyCode === 27) {
+            this.props.editCancel();
+        }
+    }
+
+    handleClickOutside(event){
+        const webhookGeneratorElem = document.getElementById('webhook_generator_dialog');
+        const webhookGeneratorFade = webhookGeneratorElem ? webhookGeneratorElem.parentElement : null;
+        const selectSearch = document.getElementById(`param_generator_${this.props.method.index}`);
+        if (selectSearch) {
+            if (document.activeElement?.id === selectSearch.id){
+                return;
+            }
+        }
+        if (this.paramGeneratorRef.current && !this.paramGeneratorRef.current.contains(event.target)
+            && (!this.webhookRef.current || !this.webhookRef.current.contains(event.target))
+            && (!webhookGeneratorElem || !webhookGeneratorElem.contains(event.target))
+            && (!webhookGeneratorFade || !webhookGeneratorFade.contains(event.target))) {
+            if(this.props.editCancel) {
+                this.props.editCancel();
+            }
+        }
     }
 
     /**
@@ -75,7 +117,7 @@ class ParamGenerator extends Component {
         });
     }
 
-    setIdValue(){
+    setIdValueForMethod(){
         const {color, responseType, field} = this.state;
         const {id} = this.props;
         let elem = document.getElementById(id);
@@ -93,11 +135,26 @@ class ParamGenerator extends Component {
         }
     }
 
+    setIdValueForWebhook() {
+        const {webhook} = this.state;
+        const {id} = this.props;
+        let elem = document.getElementById(id);
+        if(webhook !== '') {
+            if (elem) {
+                elem.innerText = CBody.webhookSnippet(webhook);
+            }
+        }
+    }
+
+    onChangeWebhook(webhook) {
+        this.setState({webhook}, () => this.setIdValueForWebhook());
+    }
+
     /**
      * to change field value
      */
     onChangeField(field){
-        this.setState({field}, () => this.setIdValue());
+        this.setState({field}, () => this.setIdValueForMethod());
     }
 
     /**
@@ -159,6 +216,43 @@ class ParamGenerator extends Component {
         if(!isVisible) {
             this.setState({showGenerator: !this.state.showGenerator});
         }
+    }
+
+    setWebhook() {
+        const {webhook} = this.state;
+        const {addParam, isVisible} = this.props;
+        addParam(CBody.webhookSnippet(webhook));
+        if(!isVisible) {
+            this.setState({showGenerator: !this.state.showGenerator});
+        }
+    }
+
+    onChangeReferenceType(referenceType) {
+        this.setState({
+            referenceType,
+        })
+    }
+
+    renderType() {
+        const {referenceType} = this.state;
+        return (
+            <div style={{
+                float: 'left',
+                display: 'grid',
+                height: '38px',
+                marginRight: '8px',
+                marginTop: '-1px',
+            }}>
+                <div style={{height: '19px'}} title={'method'}>
+                    <span style={{fontSize: '18px'}} className="mdi mdi-vector-radius"></span>
+                    <input type={'radio'} checked={referenceType === 'method'} onChange={() => this.onChangeReferenceType('method')}/>
+                </div>
+                <div style={{height: '19px'}} title={'webhook'}>
+                    <span style={{fontSize: '18px'}} className="mdi mdi-webhook"></span>
+                    <input type={'radio'} checked={referenceType === 'webhook'} onChange={() => this.onChangeReferenceType('webhook')}/>
+                </div>
+            </div>
+        )
     }
 
     renderMethodSelect(){
@@ -334,12 +428,9 @@ class ParamGenerator extends Component {
     }
 
     renderGenerator(){
-        const {showGenerator, color, field} = this.state;
+        const {showGenerator, color, field, referenceType} = this.state;
         const hasMethod = color !== '' && field !== '';
-        const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue} = this.props;
-        if(this.getOptionsForMethods().length === 0){
-            return null;
-        }
+        const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue, readOnly, hasNotType} = this.props;
         let themeParamGenerator = '';
         let themeParamGeneratorForm = '';
         if(theme){
@@ -347,27 +438,49 @@ class ParamGenerator extends Component {
             if(theme.hasOwnProperty('paramGeneratorForm')) themeParamGeneratorForm = theme.paramGeneratorForm;
         }
         return(
-            <div className={`${isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} ${themeParamGenerator}`} style={parent ? {left: this.left, top: this.top} : {}}>
+            <div ref={this.paramGeneratorRef} className={`${isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} ${themeParamGenerator}`} style={parent ? {left: this.left, top: this.top} : {}}>
                 {this.renderArrowIcon()}
                 {
                     showGenerator || isVisible || isAlwaysVisible
                         ?
                         <div key={2} className={`${isAbsolute ? styles.param_generator_form : ''} ${themeParamGeneratorForm}`}>
-                            {this.renderMethodSelect()}
-                            {this.renderParamInput()}
+                            {!hasNotType && !this.hasNotMethodReference(this.props) && this.renderType()}
+                            {referenceType === 'method' && <React.Fragment>
+                                {this.renderMethodSelect()}
+                                {this.renderParamInput()}
+                            </React.Fragment>
+                            }
+                            {referenceType === 'webhook' && <WebhookGenerator
+                                ref={this.webhookRef}
+                                readOnly={readOnly}
+                                onSelect={(webhook) => this.onChangeWebhook(webhook)}
+                                style={{float: 'left', width: 'calc(100% - 70px)'}}
+                            />}
                             <TooltipFontIcon
                                 id={`param_generator_add_${connector.getConnectorType()}_${method.index}`}
                                 isButton={true}
                                 tooltip={actionButtonTooltip}
                                 value={actionButtonValue}
                                 className={styles.param_generator_form_add}
-                                onClick={(e) => {if(hasMethod){
-                                    if(submitEdit){
-                                         submitEdit(e);
-                                    } else{
-                                        this.addParam(e)
+                                onClick={(e) => {
+                                    if(hasMethod){
+                                        if(submitEdit){
+                                             submitEdit(e);
+                                        } else{
+                                            if (referenceType === 'method') {
+                                                this.addParam(e);
+                                            }
+                                        }
+                                    } else {
+                                        if(submitEdit){
+                                            submitEdit(e);
+                                        } else {
+                                            if (referenceType === 'webhook') {
+                                                this.setWebhook()
+                                            }
+                                        }
                                     }
-                                } }}
+                                }}
                             />
                         </div>
                         :

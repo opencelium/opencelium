@@ -15,7 +15,6 @@ import org.mapstruct.ReportingPolicy;
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
         uses = {
-                EnhancementMapper.class,
                 HelperMapper.class
         },
         imports = {
@@ -28,7 +27,7 @@ public interface ConnectionResourceMapper extends Mapper<Connection, ConnectionR
             @Mapping(target = "fromConnector", source = "fromConnector.connectorId"),
             @Mapping(target = "toConnector", source = "toConnector.connectorId"),
             @Mapping(target = "icon", expression = "java(StringUtility.findImageFromUrl(dto.getIcon()))"),
-            @Mapping(target = "enhancements",qualifiedByName = {"enhancementMapper", "toEntityAll"})
+            @Mapping(target = "enhancements", ignore = true)
     })
     Connection toEntity(ConnectionResource dto);
 
@@ -37,7 +36,7 @@ public interface ConnectionResourceMapper extends Mapper<Connection, ConnectionR
             @Mapping(target = "fromConnector", qualifiedByName = {"helperMapper","getConnectorResourceById"}),
             @Mapping(target = "toConnector", qualifiedByName = {"helperMapper","getConnectorResourceById"}),
             @Mapping(target = "icon", expression = "java(StringUtility.resolveImagePath(entity.getIcon()))"),
-            @Mapping(target = "enhancements", qualifiedByName = {"enhancementMapper", "toDTOAll"})
+            @Mapping(target = "enhancements", ignore = true)
     })
     ConnectionResource toDTO(Connection entity);
 

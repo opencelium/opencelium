@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.ConnectionHistory;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionHistoryRepository;
@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 public class ConnectionHistoryServiceImp implements ConnectionHistoryService {
-    @Value("${" + YamlPropConst.OC_VERSION + "}")
+    @Value("${" + AppYamlPath.OC_VERSION + "}")
     private String ocVersion;
     private final ObjectMapper mapper;
     private final ConnectionHistoryRepository connectionHistoryRepository;

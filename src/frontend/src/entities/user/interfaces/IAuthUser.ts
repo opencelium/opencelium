@@ -33,4 +33,5 @@ export default interface IAuthUser{
     dashboard?: any,
     themes?: string,
     logoName?: string,
+    hasLicense?: boolean,
 }

@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.entity.Webhook;
 import com.becon.opencelium.backend.database.mysql.repository.WebhookRepository;
+import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
@@ -29,8 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class WebhookServiceImp implements WebhookService {
@@ -96,7 +96,7 @@ public class WebhookServiceImp implements WebhookService {
                 .jwtID(Long.toString(schedulerId))
                 .build();
 
-        return jwtTokenUtil.doGenerateToken(claimsSet);
+        return jwtTokenUtil.generateToken(claimsSet);
     }
 
     @Override
@@ -149,5 +149,102 @@ public class WebhookServiceImp implements WebhookService {
     @Override
     public boolean existsBySchedulerId(int id) {
         return webhookRepository.existsBySchedulerId(id);
+    }
+
+    @Override
+    public WebhookParamDTO toParamResource(String param) { // param = val:type; type = [string, int, double, boolean, array]
+        WebhookParamDTO webhookParamDTO = new WebhookParamDTO();
+        String[] var = param.split(":");
+        if (var.length == 0) {
+            throw new RuntimeException("One of webhook parameters is empty");
+        }
+        webhookParamDTO.setName(var[0]);
+        if (var.length == 1) {
+            webhookParamDTO.setType("string");
+        } else {
+            webhookParamDTO.setType(var[1]);
+        }
+        return webhookParamDTO;
+    }
+
+    public Map<String, Object> convertToArrayList(Map<String, Object> inputMap) {
+        Map<String, Object> result = new HashMap<>();
+
+        for (Map.Entry<String, Object> entry : inputMap.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            if (value instanceof String) {
+                String strValue = (String) value;
+
+                if (strValue.startsWith("[") && strValue.endsWith("]")) {
+                    result.put(key, parseStringToArrayList(strValue));
+                } else {
+                    result.put(key, value);
+                }
+            } else {
+                result.put(key, value);
+            }
+        }
+
+        return result;
+    }
+
+    private static Object parseStringToArrayList(String strValue) {
+        strValue = strValue.substring(1, strValue.length() - 1); // Remove the brackets
+
+        if (strValue.contains("[")) {
+            // This is a nested array
+            return parseNestedArray(strValue);
+        } else {
+            // This is a simple array
+            return parseSimpleArray(strValue);
+        }
+    }
+
+    private static ArrayList<Object> parseSimpleArray(String strValue) {
+        ArrayList<Object> list = new ArrayList<>();
+
+        String[] values = strValue.split(",");
+        for (String val : values) {
+            val = val.trim();
+            if (val.matches("-?\\d+(\\.\\d+)?")) {
+                // Check if it's a number
+                if (val.contains(".")) {
+                    list.add(Double.parseDouble(val));
+                } else {
+                    list.add(Integer.parseInt(val));
+                }
+            } else {
+                // Assume it's a string
+                list.add(val);
+            }
+        }
+
+        return list;
+    }
+
+    private static ArrayList<Object> parseNestedArray(String strValue) {
+        ArrayList<Object> outerList = new ArrayList<>();
+        int level = 0;
+        StringBuilder sb = new StringBuilder();
+
+        for (char ch : strValue.toCharArray()) {
+            if (ch == '[') {
+                if (level > 0) sb.append(ch);
+                level++;
+            } else if (ch == ']') {
+                level--;
+                if (level > 0) sb.append(ch);
+                if (level == 0) {
+                    outerList.add(parseStringToArrayList("[" + sb.toString() + "]"));
+                    sb.setLength(0);
+                }
+            } else {
+                if (level > 0) sb.append(ch);
+            }
+        }
+
+        return outerList;
     }
 }

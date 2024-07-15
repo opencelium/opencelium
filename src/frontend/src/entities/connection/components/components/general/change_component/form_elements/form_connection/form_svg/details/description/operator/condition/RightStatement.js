@@ -22,6 +22,10 @@ import ParamSelect
     from "@change_component/form_elements/form_connection/form_svg/details/description/operator/condition/ParamSelect";
 import {LikePercentageStyled} from "./styles";
 import CCondition from "@classes/content/connection/operator/CCondition";
+import {
+    TransitionEffect
+} from "@change_component/form_elements/form_connection/form_svg/details/description/operator/Condition";
+import {DEFAULT_COLOR} from "@classes/content/connection/operator/CStatement";
 
 class RightStatement extends React.Component{
     constructor(props) {
@@ -90,14 +94,14 @@ class RightStatement extends React.Component{
 
     getPropertyStyles(){
         const {isOperatorHasThreeParams} = this.props;
-        let style = {transition: isOperatorHasThreeParams ? 'width 0.3s ease 0s' : 'none', width: isOperatorHasThreeParams ? '17.5%' : '0', float: 'left'};
-        let equalStyle = {transition: isOperatorHasThreeParams ? 'width 0.3s ease 0s' : 'none', width: isOperatorHasThreeParams ? '5%' : '0'};
+        let style = {transition: isOperatorHasThreeParams ? TransitionEffect : 'none', width: isOperatorHasThreeParams ? '17.5%' : '0', float: 'left'};
+        let equalStyle = {transition: isOperatorHasThreeParams ? TransitionEffect : 'none', width: isOperatorHasThreeParams ? '5%' : '0'};
         return {style, equalStyle}
     }
 
     getMethodStyles(){
         const isMethodVisible = this.isMethodVisible();
-        return  {width: isMethodVisible ? '10%' : '0', float: 'left', maxHeight: '38px', transition: isMethodVisible ? 'width 0.3s ease 0s' : 'none', padding: 0};
+        return  {width: isMethodVisible ? '7%' : '0', float: 'left', maxHeight: '38px', transition: isMethodVisible ? TransitionEffect : 'none', padding: 0};
     }
 
     getParamStyles(){
@@ -105,18 +109,18 @@ class RightStatement extends React.Component{
         let {hasValue, isRightStatementText, isRightStatementOption} = isOperatorHasValue();
         const isLikeOperator = this.isLikeOperator();
         let isMethodSelectRightInvisible = !hasRightMethod && hasRightParam || isRightStatementText;
-        let width = hasValue && !isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '25.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0';
+        let width = hasValue && !isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '24.5%' : '42%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0';
         if(isLikeOperator){
             width = '25%';
         }
-        return {transition: hasValue && !isRightStatementOption ? 'width 0.3s ease 0s' : 'none', width, float: 'left'};
+        return {transition: hasValue && !isRightStatementOption ? TransitionEffect : 'none', width, float: 'left'};
     }
 
     getParamSelectStyles(){
         const {isOperatorHasThreeParams, isOperatorHasValue, hasRightMethod, hasRightParam} = this.props;
         let {hasValue, isRightStatementOption} = isOperatorHasValue();
         let isMethodSelectRightInvisible = !hasRightMethod && hasRightParam || isRightStatementOption;
-        return {transition: hasValue && isRightStatementOption ? 'width 0.3s ease 0s' : 'none', width: hasValue && isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '45%' : '0', float: 'left'};
+        return {transition: hasValue && isRightStatementOption ? TransitionEffect : 'none', width: hasValue && isRightStatementOption ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '42%' : isOperatorHasThreeParams ? '15.5%' : '42%' : '0', float: 'left'};
     }
 
     isLikeOperator(){
@@ -178,6 +182,10 @@ class RightStatement extends React.Component{
         }
     }
 
+    hasMethodOptions(options) {
+        return options.length === 0 ? false : options.length === 1 && options[0].hasOwnProperty('options') && options[0].options.length === 0 ? false : true;
+    }
+
     render(){
         let {placeholder, condition, connection, connector, operator, readOnly, isOperatorHasValue, isOperatorHasThreeParams, hasLeftMethod, hasRightMethod, hasRightParam, updateConnection} = this.props;
         let {hasValue, isMultiline, isRightStatementOption, options} = isOperatorHasValue();
@@ -185,9 +193,6 @@ class RightStatement extends React.Component{
         const propertyItems = hasLeftMethod ? connection.getConnectorMethodByColor(condition.leftMethod.color).response.success : [];
         const isPropertyDisabled = !isOperatorHasThreeParams;
         let methodSource = connection.getOptionsForMethods(connector, operator, {statement: 'rightStatement', isKeyConsidered: false, exceptCurrent: false});
-        if(methodSource.length === 0) {
-            methodSource = [{label: 'No params', value: 0, color: 'white'}];
-        }
         const methodPlaceholder = !hasRightMethod && hasRightParam ? '' : '...';
         const isMethodVisible = this.isMethodVisible();
         const isMethodDisabled = readOnly || !isMethodVisible;
@@ -270,6 +275,7 @@ class RightStatement extends React.Component{
                         style={this.getParamStyles()}
                         isMultiline={isMultiline}
                         placeholder={placeholder}
+                        hasParamEditor={this.hasMethodOptions(methodSource) && condition.rightMethod && condition.rightMethod.color && condition.rightMethod.color !== DEFAULT_COLOR}
                         fromStatement="right"
                     />
                 <LikePercentageStyled isLikeOperator={isLikeOperator} hasSign={hasRightLikeSign}>

@@ -127,10 +127,6 @@ class CreateElementPanel extends React.Component{
 
         const hasItemPositionPanel = isForCreateTechnicalItem && isSelectedItemOperator && !itemPosition;
         let hasItemTypePanel = isForCreateTechnicalItem && !type;
-        let isFromConnectorEmpty = connection.fromConnector.svgItems.length === 0;
-        if(isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout && isFromConnectorEmpty){
-            hasItemTypePanel = false;
-        }
         const hasCreateProcess = isForCreateTechnicalItem && isTypeCreateProcess;
         const hasCreateOperator = isForCreateTechnicalItem && isTypeCreateOperator;
         const hasLineBeforeItemTypePanel = hasItemPositionPanel;
@@ -151,7 +147,7 @@ class CreateElementPanel extends React.Component{
                             type={localType}
                             changeType={(a) => this.changeType(a)}
                             selectedItem={selectedItem}
-                            noOperatorType={noOperatorType}
+                            noOperatorType={false}
                             hasBeforeLine={hasLineBeforeItemTypePanel}
                         />
                     }

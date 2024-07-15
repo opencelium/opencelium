@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.rdata.extractor;
 
-import com.becon.opencelium.backend.constant.DataRef;
+import com.becon.opencelium.backend.enums.DataRef;
 
 public class ExtractorFactory {
 

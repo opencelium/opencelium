@@ -341,6 +341,7 @@ class Endpoint extends Component{
                         isArrowVisible={isParamGeneratorArrowVisible}
                         isAlwaysVisible={isParamGeneratorAlwaysVisible}
                         ref={this.paramGeneratorRef}
+                        hasNotType={true}
                     />
                 </ToolboxThemeInput>
             </div>

@@ -35,6 +35,7 @@ const cards = [
     {id: 8, name: 'Update Assistant', link: '/update_assistant', isLoading: true, isDisabled: true},
     {id: 9, name: 'Swagger API Docs', link: `${baseUrl}docs`, isExternalHref: true},
     {id: 10, name: 'Migration', link: `/migration`},
+    {id: 11, name: 'Categories', link: `/categories`},
 ]
 const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();

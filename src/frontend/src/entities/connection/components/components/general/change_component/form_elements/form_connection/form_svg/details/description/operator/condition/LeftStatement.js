@@ -16,6 +16,10 @@
 import React from 'react';
 import MethodSelect from "./MethodSelect";
 import ParamInput from "./ParamInput";
+import {
+    TransitionEffect
+} from "@change_component/form_elements/form_connection/form_svg/details/description/operator/Condition";
+import {DEFAULT_COLOR} from "@classes/content/connection/operator/CStatement";
 
 class LeftStatement extends React.Component{
     constructor(props) {
@@ -44,30 +48,44 @@ class LeftStatement extends React.Component{
     getMethodStyles(){
         const {isOperatorHasValue, isLoopOperator} = this.props;
         let {hasValue} = isOperatorHasValue();
-        let width = hasValue ? '10%' : '20%';
+        let width = hasValue ? '6%' : '16%';
         if(isLoopOperator){
-            width = '30%';
+            width = '26%';
         }
-        return {width, padding: 0, float: 'left', transition: 'width 0.3s ease 0s',};
+        return {width, padding: 0, float: 'left'};
     }
 
     getParamStyles(){
-        const {isOperatorHasThreeParams, isOperatorHasValue, isLoopOperator} = this.props;
+        const {isOperatorHasThreeParams, isOperatorHasValue, isLoopOperator, referenceTypeRight} = this.props;
         let {hasValue} = isOperatorHasValue();
-        let width = hasValue ? isOperatorHasThreeParams ? '28%' : '35%' : '55%';
+        let width = hasValue
+            ?
+                isOperatorHasThreeParams
+                    ?
+                        referenceTypeRight === 'webhook'
+                            ?
+                                '35%'
+                            :
+                                '28%'
+                    :
+                        '35%'
+            :
+                '52%'
+        ;
         if(isLoopOperator){
             width = '70%';
         }
         return {float: 'left', width};
     }
 
+    hasMethodOptions(options) {
+        return options.length === 0 ? false : options.length === 1 && options[0].hasOwnProperty('options') && options[0].options.length === 0 ? false : true;
+    }
+
     render(){
         let {condition, connection, connector, operator, readOnly, isOperatorHasValue, hasLeftMethod, updateConnection} = this.props;
         let {hasValue} = isOperatorHasValue();
         let methodSource = connection.getOptionsForMethods(connector, operator, {statement: 'leftStatement', isKeyConsidered: false, exceptCurrent: false});
-        if(methodSource.length === 0) {
-            methodSource = [{label: 'No params', value: 0, color: 'white'}];
-        }
         const methodPlaceholder = '...';
         const isMethodDisabled = readOnly;
         const isMethodSearchable = !readOnly;
@@ -103,6 +121,7 @@ class LeftStatement extends React.Component{
                     updateParam={(a) => this.updateParam(a)}
                     style={this.getParamStyles()}
                     fromStatement="left"
+                    hasParamEditor={this.hasMethodOptions(methodSource) && condition.leftMethod && condition.leftMethod.color && condition.leftMethod.color !== DEFAULT_COLOR}
                 />
             </React.Fragment>
         );

@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.resource.notification;
 
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
-import com.becon.opencelium.backend.execution.notification.enums.NotifyTool;
 import jakarta.annotation.Resource;
 
 import java.util.ArrayList;

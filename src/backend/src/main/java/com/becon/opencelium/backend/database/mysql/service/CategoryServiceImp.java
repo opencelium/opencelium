@@ -3,7 +3,9 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.database.mysql.entity.Category;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.repository.CategoryRepository;
-import com.becon.opencelium.backend.resource.schedule.CategoryDTO;
+import com.becon.opencelium.backend.resource.CategoryDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import java.util.*;
 
 @Service
 public class CategoryServiceImp implements CategoryService {
+    private static final Logger log = LoggerFactory.getLogger(CategoryServiceImp.class);
     private final CategoryRepository repository;
     private final ConnectionService connectionService;
 
@@ -30,7 +33,7 @@ public class CategoryServiceImp implements CategoryService {
             throw new RuntimeException("CATEGORY_IS_NULL");
         }
 
-        checkTitle(categoryDTO.getName());
+        checkName(categoryDTO.getName());
 
         Category curr = new Category();
         curr.setName(categoryDTO.getName());
@@ -73,7 +76,7 @@ public class CategoryServiceImp implements CategoryService {
         Category old = get(categoryDTO.getId());
 
         if (!Objects.equals(categoryDTO.getName(), old.getName())) {
-            checkTitle(categoryDTO.getName());
+            checkName(categoryDTO.getName());
         }
 
         Category category = new Category(categoryDTO.getId());
@@ -142,19 +145,23 @@ public class CategoryServiceImp implements CategoryService {
 
     @Override
     @Transactional
-    public void delete(Integer id) {
+    public void deleteOnly(Integer id) {
         Category category = get(id);
         List<Connection> connections = connectionService.getAllByCategoryId(category.getId());
-        connectionService.deleteAll(connections); //delete all related connections
-        if (category.getSubCategories() != null) {
-            category.getSubCategories().forEach(c -> delete(c.getId()));
+        connections.forEach(c -> connectionService.updateCategory(c, null)); //savepoint 1
+        Set<Category> subCategories = category.getSubCategories();
+        if (subCategories != null) {
+            subCategories.forEach(c -> {
+                c.setParentCategory(null);
+                repository.save(c); //savepoint 2
+            });
         }
         repository.deleteById(category.getId());
     }
 
     @Override
     @Transactional
-    public void deleteAll(List<Integer> ids) {
+    public void deleteAllOnly(List<Integer> ids) {
         if (ids == null) {
             return;
         }
@@ -163,14 +170,48 @@ public class CategoryServiceImp implements CategoryService {
                 throw new RuntimeException("CATEGORY_NOT_FOUND");
             }
         });
+
+        for (Integer id : ids) {
+            try {
+                deleteOnly(id);
+            } catch (Exception e) {
+                log.warn("Can't delete Category[id={}] or it has been already deleted", id);
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void cascadeDelete(Integer id) {
+        Category category = get(id);
+        List<Connection> connections = connectionService.getAllByCategoryId(category.getId());
+        connectionService.deleteAll(connections); //delete all related connections
+        if (category.getSubCategories() != null) {
+            category.getSubCategories().forEach(c -> cascadeDelete(c.getId()));
+        }
+        repository.deleteById(category.getId());
+    }
+
+    @Override
+    @Transactional
+    public void cascadeDeleteAll(List<Integer> ids) {
+        if (ids == null) {
+            return;
+        }
+        ids.forEach(c -> {
+            if (!exists(c)) {
+                throw new RuntimeException("CATEGORY_NOT_FOUND(" + c + ")");
+            }
+        });
         for (Integer id : ids) {
             Category category;
             try {
                 category = get(id);
             } catch (RuntimeException e) {
+                log.warn("Can't delete Category[id={}] or it has been already deleted", id);
                 continue;
             }
-            delete(category);
+            cascadeDelete(category);
         }
     }
 
@@ -179,21 +220,26 @@ public class CategoryServiceImp implements CategoryService {
         return repository.existsById(id);
     }
 
+    @Override
+    public boolean existsByName(String name) {
+        return repository.existsByNameEqualsIgnoreCase(name);
+    }
+
     @Transactional
-    protected void delete(Category category) {    //exception free
+    protected void cascadeDelete(Category category) {    //exception free
         List<Connection> connections = connectionService.getAllByCategoryId(category.getId());
         connectionService.deleteAll(connections); //delete all related connections
         if (category.getSubCategories() != null) {
             for (Category sub : category.getSubCategories()) {
                 if (exists(sub.getId())) {
-                    delete(sub);
+                    cascadeDelete(sub);
                 }
             }
         }
         repository.deleteById(category.getId());
     }
 
-    private void checkTitle(String name) {
+    private void checkName(String name) {
         if (name == null || name.isBlank()) {
             throw new RuntimeException("INVALID_CATEGORY_NAME");
         }

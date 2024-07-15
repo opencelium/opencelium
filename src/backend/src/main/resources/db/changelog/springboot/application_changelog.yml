@@ -23,3 +23,9 @@ versions:
         operation: add
         value: sources
         path: opencelium.installation.type
+  - version: 4.1
+    changes:
+      - changeset: 1
+        operation: add
+        value: 4.1
+        path: opencelium.version
