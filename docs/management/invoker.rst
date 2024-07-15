@@ -1,5 +1,5 @@
 ##################
-Invoker (only for subscribers)
+Invoker
 ##################
 
 

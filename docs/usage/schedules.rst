@@ -15,30 +15,30 @@ be triggered. Setting all data, you will see a list of the nearest triggering ti
 
 |image11|
 
-The list of schedules displays next information: *title, connection, cron*,
-time of *last success* trigger, time of *last failed* trigger, *duration* time, *status*
-and *logs*.
+The list of schedules displays next information: *status, connection title, cron*,
+time of *last success* trigger, time of *last failed* trigger, *duration* time, *logs*
+and *webhook*. Above the list you can see the categories. These are categories defined
+on the `connection page
+<https://docs.opencelium.io/en/prod/usage/connections.html>`_. You cannot modify them
+here. All displayed schedules are filtered by the corresponded connection category.
 
 |image0|
 
-The *title* you can change directly inline double clicking on its text.
-
-|image15|
-
-If the background of status is grey, it means that job was not still triggered,
+If the background of status is grey, it means that job does not have cron expression,
 if green - last performance was successful and red, if it was failed.
-There is also a switcher that gives you an ability to enable or disable schedule.
-If the cron job of the schedule was not set, then you cannot change the status.
 
 |image13|
+
+The logs could be enabled/disabled directly here clicking on the switcher.
+
+If the schedule contains webhook, it could be copied clicking on the icon: |image4|.
+The url is stored in the buffer. Now you can paste it where you need.
 
 The *Action* column has five additional icons: |image10| - *edit*, |image3|- *start* job (immediately),
 |image1| - *webhook*, |image2| - *notifications*, |image14| - *delete*.
 
 Clicking on the *webhook* the application creates a webhook for the specific connection.
-Due to it the user can trigger this connection using only url. To get
-this url, just click on the |image4|. The url is stored in the
-buffer. Now you can paste it where you need.
+Due to it the user can trigger this connection using only url.
 
 *Notification* is such a feature that allows you to be notified via emails, slack or teams when
 pre, post or alert event happens.
@@ -51,6 +51,8 @@ press on the notification button |image24|
 
 |image5|
 
+Before you create a notification, you need to create a template that is described `here
+<https://docs.opencelium.io/en/prod/management/notification_template.html>`_.
 After clicking on add, provide *name*, *event*, *notification type* and after *template*.
 
 |image6|
@@ -63,10 +65,6 @@ For Slack type you need to provide the webhook of the channel.
 
 |image18|
 
-For Teams type your need to select the team and its channel.
-
-|image19|
-
 After creating the notification you will see a list of notifications and search to look for them
 by name, event or notification type. Also, you can update or delete the corresponding notification,
 if you mouse over on one of them and click on the icon.
@@ -75,6 +73,7 @@ Current triggering schedules are displayed down after the list. You can follow t
 
 |image17|
 
+If you click on the *x* icon, you will interrupt the current job.
 
 
 .. |image_1| image:: ../img/schedule/-1.png
@@ -105,13 +104,10 @@ Current triggering schedules are displayed down after the list. You can follow t
    :align: middle
 .. |image14| image:: ../img/schedule/14.png
    :width: 30
-.. |image15| image:: ../img/schedule/15.png
-   :width: 300
    :align: middle
 .. |image17| image:: ../img/schedule/17.png
    :align: middle
 .. |image18| image:: ../img/schedule/18.png
-.. |image19| image:: ../img/schedule/19.png
 .. |image20| image:: ../img/schedule/20.png
 .. |image24| image:: ../img/schedule/24.png
    :width: 120
