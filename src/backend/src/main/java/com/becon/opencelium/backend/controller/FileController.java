@@ -194,10 +194,11 @@ public class FileController {
         }
 
         // Get userGroup data from database
-        UserRole userRole = userRoleService.getOne(userGroupId);
+        UserRole userRole = userRoleService.findById(userGroupId)
+                .orElseThrow(() -> new RuntimeException("Role doesn't exist"));
 
         //Generate new file name
-        String newFilename = UUID.randomUUID().toString() + "." + extension;
+        String newFilename = UUID.randomUUID() + "." + extension;
 
         // If user group has an old image, delete the picture from files
         if (userRole.getIcon() != null){

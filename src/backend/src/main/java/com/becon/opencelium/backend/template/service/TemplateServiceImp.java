@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.exception.WrongEncode;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
@@ -46,12 +47,14 @@ import java.util.stream.Stream;
 @Service
 public class TemplateServiceImp implements TemplateService {
     private final ConnectionService connectionService;
-    private final Mapper<ConnectionDTO, CtionTemplateResource> mapper;
+    private final Mapper<ConnectionOldDTO, CtionTemplateResource> mapper;
+    private final Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper;
     private final Environment environment;
 
-    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionDTO, CtionTemplateResource> mapper, Environment environment) {
+    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionOldDTO, CtionTemplateResource> mapper, Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper, Environment environment) {
         this.connectionService = connectionService;
         this.mapper = mapper;
+        this.oldDTOMapper = oldDTOMapper;
         this.environment = environment;
     }
 
@@ -132,7 +135,8 @@ public class TemplateServiceImp implements TemplateService {
     @Override
     public TemplateResource getByConnectionId(Long connectionId) {
         ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId);
-        CtionTemplateResource connectionRes = mapper.toDTO(connectionDTO);
+        ConnectionOldDTO oldDTO = oldDTOMapper.toDTO(connectionDTO);
+        CtionTemplateResource connectionRes = mapper.toDTO(oldDTO);
 
         TemplateResource templateResource = new TemplateResource();
         templateResource.setConnection(connectionRes);
