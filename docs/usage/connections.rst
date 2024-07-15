@@ -2,15 +2,42 @@
 Connections
 ##################
 
-General Information
+Connection List
 """""""""""""""""
 
-Connection defines between which connectors do we want to do requests,
+Connection defines between which connectors we want to do requests,
 what kind of requests and to specify mapping between them. This is a core
-element of the application. The list of connections displays a title, a description,
-and connectors' titles.
+element of the application. The list of connections displays a *title*, a *description*,
+and *connectors' titles*.
 
 |image0|
+
+If you double click on the *title* or on the *description*, you can modify
+it inline.
+
+|image49|
+
+There are also categories above the list. The category collects a set of connections.
+It can be very helpful to divide connections. As an example, you can have a *demo* category for your demo installations.
+
+|image47|
+
+You can create a category clicking on the *+* icon. Each category can have subcategories.
+The path to the parent category will be displayed above as breadcrumb.
+
+|image48|
+
+Each breadcrumb header is a link to the previous category. To delete the category, just
+put your mouse over the category title and click on the *x* icon. The dialog will pop up
+that suggests you to delete recursively.
+
+.. warning::
+    If you delete the category recursively, all subcategories and assigned connections will
+    be removed.
+
+
+General Information
+"""""""""""""""""
 
 Adding connection has three steps: *direction*, *mode*, and
 *methods*. Updating connection has just one *methods*.
@@ -54,12 +81,70 @@ information about the selected element.
 If you want to set or to change the *Label* of the connection, just move your mouse
 over it in *Details* and click on edit icon. Under the *Format* you can find an
 *Aggregator* that also could be (re)set. If you want to know more, please
-read `Here
+read `here
 <https://docs.opencelium.io/en/dev/usage/admin.html#data-aggregator>`_.
 You can create a new aggregator pressing on the button |image31|.
 
 In the *Details* panel you can see *Endpoint* and *Body* under the **Request** paragraph
 that could be modified clicking on their placeholders.
+
+
+Action Panel
+"""""""""""""""""
+
+On the bottom you can find the Action Panel.
+
+|image12|
+
+Here you can make most actions regarding to the connection:
+
+|image32| - testing the current connection creating a temporal connection and schedule.
+
+|image33| - saving options: save, save and close, save and go to add schedule (correspondingly |image13|).
+
+|image34| - resize the *methods* section to fullscreen and back.
+
+|image35| - toggle log panel that shows a test connection log messages.
+
+|image36| - configuration that help you to set *name* and *description* in add/update connection form,
+also you can set a color mode of the method and its name/label font size.
+
+|image37|
+
+|image38| - toggle data aggregator.
+
+|image39| - template options: create a new template or load existing one (correspondingly |image14|).
+
+|image40| - animation tool for explaining how to use the *method* section. It simulate the method's editor
+with the predefined data following with scripts that describe steps.
+
+|image15|
+
+Just press on the required animation on the bottom and watch the simulation. On the right side
+you can see the panel where you can pause/play, increase speed or completely stop the simulation.
+During the animation you can not interact with it.
+
+|image25|
+
+Only after stop, you can play with the connection by your own. Moving your mouse on the center or
+clicking on any place you can see the pause/play/stop icons.
+
+|image26|
+
+|image41| - synchronize invokers. Sometimes you need to change the invoker file manually. The connection
+that uses these invokers will not update them automatically, because for some cases it is not needed.
+That is why you can sync by your own using this feature.
+
+|image42| - shortcuts
+
+|image16|
+
+On the left side in the *methods* section you can see the zoom in and zoom out actions
+|image26|
+
+
+Create Reference
+"""""""""""""""""
 
 There is a possibility to add a parameter into the *Endpoint* (except the first
 method in *from connector*). This parameter is a reference to the response of
@@ -114,58 +199,7 @@ a condition operation and set with what are you doing to compare.
 As you can mention, all items under the operators are shifted on the level down. Selecting
 the operator you will see the scope of their influence.
 
-On the bottom you can find the Action Panel.
-
-|image12|
-
-Here you can make most actions regarding to the connection:
-
-|image32| - testing the current connection creating a temporal connection and schedule.
-
-|image33| - saving options: save, save and close, save and go to add schedule (correspondingly |image13|).
-
-|image34| - resize the *methods* section to fullscreen and back.
-
-|image35| - toggle log panel that shows a test connection log messages.
-
-|image36| - configuration that help you to set *name* and *description* in add/update connection form,
-also you can set a color mode of the method and its name/label font size.
-
-|image37|
-
-|image38| - toggle data aggregator.
-
-|image39| - template options: create a new template or load existing one (correspondingly |image14|).
-
-|image40| - animation tool for explaining how to use the *method* section. It simulate the method's editor
-with the predefined data following with scripts that describe steps.
-
-|image15|
-
-Just press on the required animation on the bottom and watch the simulation. On the right side
-you can see the panel where you can pause/play, increase speed or completely stop the simulation.
-During the animation you can not interact with it.
-
-|image25|
-
-Only after stop, you can play with the connection by your own. Moving your mouse on the center or
-clicking on any place you can see the pause/play/stop icons.
-
-|image26|
-
-|image41| - synchronize invokers. Sometimes you need to change the invoker file manually. The connection
-that uses these invokers will not update them automatically, because for some cases it is not needed.
-That is why you can sync by your own using this feature.
-
-|image42| - shortcuts
-
-|image16|
-
-On the left side in the *methods* section you can see the zoom in and zoom out actions
-|image26|
-
-
-Webhooks
+Create Webhook
 """""""""""""""""
 
 The connection editor provides an opportunity to use webhook parameters inside of the connection.
@@ -453,3 +487,11 @@ Response:
    :align: middle
 .. |image46| image:: ../img/connection/46.png
    :width: 40
+.. |image47| image:: ../img/connection/47.png
+   :align: middle
+.. |image48| image:: ../img/connection/48.png
+   :align: middle
+   :width: 300
+.. |image49| image:: ../img/connection/49.png
+   :width: 300
+   :align: middle
