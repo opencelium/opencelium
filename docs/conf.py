@@ -1,9 +1,3 @@
-import sphinx
-from sphinx.util import logging
-
-logger = logging.getLogger(__name__)
-
-
 from __future__ import division, print_function, unicode_literals
 
 from datetime import datetime

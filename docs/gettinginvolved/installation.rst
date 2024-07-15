@@ -3,7 +3,7 @@ Installation
 ##################
 
 .. note::
-	Please check the software requirements, before installing OC. 
+	Please check the software requirements, before installing OC.
 
 Debian/Ubuntu (example for 24.04 LTS)
 """""""""""""""""
@@ -484,40 +484,8 @@ Ansible
 """""""""""""""""
 
 .. note::
-	Only available for Ubuntu systems (tested on 22.04 LTS)!
-
-**Prepare environment:**
-
-1. Install Ansible:
-
-.. code-block:: sh
-	:linenos:
+	Currently in rework.
 	
-	add-apt-repository ppa:ansible/ansible
-	apt install ansible
-
-2. Get oc playbook:
-
-.. code-block:: sh
-	:linenos:
-
-	mkdir /etc/ansible
-	git clone https://github.com/opencelium/ansible.git /etc/ansible/
-
-3. Download application files
-
-.. code-block:: sh
-	:linenos:
-
-	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /etc/ansible/opencelium/files/
-
-4. Run playbook
-
-.. code-block:: sh
-	:linenos:
-
-	ansible-playbook --connection=local /etc/ansible/install_oc.yml
-
 
 Docker Compose
 """""""""""""""""
@@ -568,78 +536,82 @@ Use default Docker installation guide.
 	docker-compose up -d
 
 
-DEB package for Ubuntu 22.04 LTS
+DEB package for Ubuntu 24.04 LTS
 """""""""""""""""
-**Prepare environment:**
 
-1. Update Ubuntu system:
+.. warning:: 
+
+	| We currently do not support deb package installations in productive use. 
+	| We recommend using it for use in a test phase on a clean system!
+
+Prepare environment:
+==================
+
+**1. Update Ubuntu system:**
 
 .. code-block:: sh
 	:linenos:
 
 	apt update
+	apt dist-upgrade
 	apt install curl gnupg
 
-2. Install java:
+**2. Install MongoDB:**
 
-.. code-block:: sh
-	:linenos:
-
-	apt install openjdk-17-jdk
-
-3. Install neo4j:
-
-.. code-block:: sh
-	:linenos:
-
-	wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
-	echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
-	apt update
-	apt install neo4j=1:5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 	
-.. note::
-	Change password (secret1234) if you want.
 
-**Install Application:**
+Install Application:
+==================
 
-1. Install deb package for OpenCelium:
+**1. Install deb package for OpenCelium:**
 
 .. code-block:: sh
 	:linenos:
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.deb.sh | sudo bash
-	sed -i 's!deb .*!deb [signed-by=/etc/apt/keyrings/becon_opencelium-archive-keyring.gpg] https://packagecloud.io/becon/opencelium/ubuntu jammy main!' /etc/apt/sources.list.d/becon_opencelium.list
+	sed -i 's!deb .*!deb [signed-by=/etc/apt/keyrings/becon_opencelium-archive-keyring.gpg] https://packagecloud.io/becon/opencelium/ubuntu noble main!' /etc/apt/sources.list.d/becon_opencelium.list
 	apt update
-	apt install opencelium
+	apt install -y opencelium
+	
+.. note::
+	| Afterwards you can connect to `http://localhost`	
+	| Default User and Password is:
+	
+	| admin@opencelium.io
+	| 1234
+	
+	| If you want to have a look into OpenCelium Logs please use:
+	
+	.. code-block:: sh
+		:linenos:
+		
+		journalctl -xe -u opencelium -f
+		
 
-**Configure environment:**
+Configure environment (optional):
+==================
 
-1. Secure MySql and set root password (required for new MySql installations):
+**1. Secure MySql and set root password (only for new MySql installations):**
 
 .. code-block:: sh
 	:linenos:
 
 	mysql_secure_installation
 	
+**2. Change user passwords for MySQL and MongoDB:**
+
 .. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root
-		
-	If this works (without your password), please set your password again with this command:
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
-		
-	Change password (root) if you want.
-	
-2. Modify application.yml file for backend:
+	Please change the passwords (secret1234, secretsecret) in the following command lines!
+
+.. code-block:: sh
+	:linenos:
+
+	mysql -u root -p -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
+	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword('oc_admin', 'secretsecret')"
+
+**3. Modify application.yml file for backend:**
 
 .. code-block:: sh
 	:linenos:
@@ -647,119 +619,122 @@ DEB package for Ubuntu 22.04 LTS
 	cd /opt/opencelium/src/backend/src/main/resources
 
 .. note::
-	Make changes inside the file application.yml! 
-	Change neo4j and mysql database password.
+	| Make changes inside the file application.yml! 
+	| Change your MongoDB and MySQL database passwords.
 
-3. Restart backend:
-
-.. code-block:: sh
-	:linenos:
-
-	oc restart_backend
-
-4. Welcome to OC:
+**4. Restart Opencelium Backend:**
 
 .. code-block:: sh
 	:linenos:
 	
-	Visit opencelium http://SERVERIP
+	systemctl restart opencelium
 
 
 
 RPM package for SUSE Linux Enterprise Server 15 SP5
 """""""""""""""""
-**Prepare environment:**
 
-1. Install java:
+.. warning:: 
+
+	| We currently do not support deb package installations in productive use. 
+	| We recommend using it for use in a test phase on a clean system!
+
+Prepare environment:
+==================
+
+**1. Update SLES system:**
 
 .. code-block:: sh
 	:linenos:
 
-	zypper install java-17-openjdk
-
-2. Install neo4j:
-
-.. code-block:: sh
-	:linenos:
-
-	zypper addrepo --refresh https://yum.neo4j.org/stable/5 neo4j-repository
 	zypper refresh
-	zypper install neo4j-5.7.0
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234 
-	zypper install insserv
+	zypper update
+	
+**2. Install MongoDB:**
 
-.. note::
-	Change password (secret1234) if you want.
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+	
 
-**Install Application:**
+Install Application:
+==================
 
-1. Install rpm package for OpenCelium:
+**1. Install deb package for OpenCelium:**
 
 .. code-block:: sh
 	:linenos:
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
-	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/sles/15.5/x86_64!' /etc/yum.repos.d/becon_opencelium.repo
-	zypper install OpenCelium
+	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/sles/15.5/x86_64!' /etc/zypp/repos.d/becon_opencelium.repo
+	zypper install -y OpenCelium
+	
+.. note::
+	| Afterwards you can connect to `http://localhost`	
+	| Default User and Password is:
+	
+	| admin@opencelium.io
+	| 1234
+	
+	| If you want to have a look into OpenCelium Logs please use:
+	
+	.. code-block:: sh
+		:linenos:
+		
+		journalctl -xe -u opencelium -f
+		
 
-**Configure environment:**
+Configure environment (optional):
+==================
 
-1. Secure MySql and set root password (required for new MySql installations):
+**1. Secure MySql and set root password (only for new MySql installations):**
 
 .. code-block:: sh
 	:linenos:
 
 	mysql_secure_installation
 	
-.. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root
-		
-	If this works (without your password), please set your password again with this command:
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
-		
-	Change password (root) if you want.
+**2. Change user passwords for MySQL and MongoDB:**
 
-2. Modify application.yml file for backend:
+.. note::
+	Please change the passwords (secret1234, secretsecret) in the following command lines!
+
+.. code-block:: sh
+	:linenos:
+
+	mysql -u root -p -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
+	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword('oc_admin', 'secretsecret')"
+
+**3. Modify application.yml file for backend:**
 
 .. code-block:: sh
 	:linenos:
 
 	cd /opt/opencelium/src/backend/src/main/resources
-	
+
 .. note::
-	Make changes inside the file application.yml! 
-	Change neo4j and mysql database password.
+	| Make changes inside the file application.yml! 
+	| Change your MongoDB and MySQL database passwords.
 
-
-3. Restart backend:
-
-.. code-block:: sh
-	:linenos:
-
-	oc restart_backend
-
-4. Welcome to OC:
+**4. Restart Opencelium Backend:**
 
 .. code-block:: sh
 	:linenos:
 	
-	Visit opencelium http://SERVERIP
+	systemctl restart opencelium
 
 
 RPM package for RedHat 9.2
 """""""""""""""""
-**Prepare environment:**
 
-1. Update RedHat system:
+.. warning:: 
+
+	| We currently do not support deb package installations in productive use. 
+	| We recommend using it for use in a test phase on a clean system!
+
+Prepare environment:
+==================
+
+**1. Update RedHat system:**
 
 .. code-block:: sh
 	:linenos:
@@ -772,44 +747,24 @@ RPM package for RedHat 9.2
 	If you do not install pygpgme, GPG verification will not work.
 	In this case, you can install OpenCelium without GPG verification (see note at installation section).
 
-2. Install java:
+**2. Install MongoDB:**
 
-.. code-block:: sh
-	:linenos:
-
-	yum install java-17-openjdk
-
-3. Install neo4j:
-
-.. code-block:: sh
-	:linenos:
-
-	rpm --import https://debian.neo4j.com/neotechnology.gpg.key
-	cat <<EOF>  /etc/yum.repos.d/neo4j.repo
-	[neo4j]
-	name=Neo4j RPM Repository
-	baseurl=https://yum.neo4j.com/stable/5
-	enabled=1
-	gpgcheck=1
-	EOF
-	yum install neo4j-5.7.0-1
-	/usr/bin/neo4j-admin dbms set-initial-password secret1234
+| Use default MongoDB installation guide.
+| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 	
-.. note::
-	Change password (secret1234) if you want.
 
+Install Application:
+==================
 
-**Install Application (pygpgme required):**
-
-1. Install rpm package for OpenCelium:
+**1. Install deb package for OpenCelium:**
 
 .. code-block:: sh
 	:linenos:
 
 	curl -s https://packagecloud.io/install/repositories/becon/opencelium/script.rpm.sh | sudo bash
 	sed -i 's!baseurl=.*!baseurl=https://packagecloud.io/becon/opencelium/fedora/40/x86_64!' /etc/yum.repos.d/becon_opencelium.repo
-	yum install OpenCelium
-
+	yum install -y OpenCelium
+	
 .. note::
 	**Install Application without pygpgme:**
 
@@ -829,57 +784,58 @@ RPM package for RedHat 9.2
 		sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 		metadata_expire=300
 		EOF
-		yum install OpenCelium
+		yum install -y OpenCelium
+	
+.. note::
+	| Afterwards you can connect to `http://localhost`	
+	| Default User and Password is:
+	
+	| admin@opencelium.io
+	| 1234
+	
+	| If you want to have a look into OpenCelium Logs please use:
+	
+	.. code-block:: sh
+		:linenos:
+		
+		journalctl -xe -u opencelium -f
+		
 
-**Configure environment:**
+Configure environment (optional):
+==================
 
-1. Secure MySql and set root password (required for new MySql installations):
+**1. Secure MySql and set root password (only for new MySql installations):**
 
 .. code-block:: sh
 	:linenos:
 
 	mysql_secure_installation
 	
-.. note::
-	Sometimes setting password doesn't work prperly by mysql_secure_installation. Please check with this command: 
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root
-		
-	If this works (without your password), please set your password again with this command:
-	
-	.. code-block:: sh
-		:linenos:	
-	
-		mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
-		
-	Change password (root) if you want.
+**2. Change user passwords for MySQL and MongoDB:**
 
-2. Modify application.yml file for backend:
+.. note::
+	Please change the passwords (secret1234, secretsecret) in the following command lines!
+
+.. code-block:: sh
+	:linenos:
+
+	mysql -u root -p -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
+	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword('oc_admin', 'secretsecret')"
+
+**3. Modify application.yml file for backend:**
 
 .. code-block:: sh
 	:linenos:
 
 	cd /opt/opencelium/src/backend/src/main/resources
-	
+
 .. note::
-	Make changes inside the file application.yml! 
-	Change neo4j and mysql database password.
+	| Make changes inside the file application.yml! 
+	| Change your MongoDB and MySQL database passwords.
 
-3. Restart backend:
-
-.. code-block:: sh
-	:linenos:
-
-	oc restart_backend
-
-4. Welcome to OC:
+**4. Restart Opencelium Backend:**
 
 .. code-block:: sh
 	:linenos:
 	
-	Visit opencelium http://SERVERIP
-	
-
+	systemctl restart opencelium
