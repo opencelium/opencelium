@@ -40,7 +40,7 @@ The *Action* column has five additional icons: |image10| - *edit*, |image3|- *st
 Clicking on the *webhook* the application creates a webhook for the specific connection.
 Due to it the user can trigger this connection using only url.
 
-*Notification* is such a feature that allows you to be notified via emails, slack or teams when
+*Notification* is such a feature that allows you to be notified via emails or webhooks when
 pre, post or alert event happens.
 
 .. note::
@@ -61,9 +61,7 @@ For E-mail type you need to select the recipients who gets a notification.
 
 |image7|
 
-For Slack type you need to provide the webhook of the channel.
-
-|image18|
+For webhook type you need to provide the webhook of the target system.
 
 After creating the notification you will see a list of notifications and search to look for them
 by name, event or notification type. Also, you can update or delete the corresponding notification,
@@ -96,18 +94,18 @@ If you click on the *x* icon, you will interrupt the current job.
    :width: 400
 .. |image7| image:: ../img/schedule/7.png
    :align: middle
+   :width: 400
 .. |image10| image:: ../img/schedule/10.png
    :width: 30
 .. |image11| image:: ../img/schedule/11.png
    :align: middle
 .. |image13| image:: ../img/schedule/13.png
    :align: middle
+   :width: 400
 .. |image14| image:: ../img/schedule/14.png
    :width: 30
-   :align: middle
 .. |image17| image:: ../img/schedule/17.png
    :align: middle
-.. |image18| image:: ../img/schedule/18.png
 .. |image20| image:: ../img/schedule/20.png
 .. |image24| image:: ../img/schedule/24.png
    :width: 120

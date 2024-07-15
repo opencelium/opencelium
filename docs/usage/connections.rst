@@ -81,7 +81,7 @@ information about the selected element.
 If you want to set or to change the *Label* of the connection, just move your mouse
 over it in *Details* and click on edit icon. Under the *Format* you can find an
 *Aggregator* that also could be (re)set. If you want to know more, please
-read `Here
+read `here
 <https://docs.opencelium.io/en/dev/usage/admin.html#data-aggregator>`_.
 You can create a new aggregator pressing on the button |image31|.
 
@@ -491,5 +491,7 @@ Response:
    :align: middle
 .. |image48| image:: ../img/connection/48.png
    :align: middle
+   :width: 300
 .. |image49| image:: ../img/connection/49.png
    :width: 300
+   :align: middle

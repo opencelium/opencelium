@@ -95,6 +95,7 @@ The reason is a dependency of your selection.
 .. |grid_icon| image:: ../img/management/grid_icon.png
 .. |connector_inline_name_update| image:: ../img/management/connector_inline_name_update.png
    :align: middle
+   :width: 400
 .. |grid_view| image:: ../img/management/grid_view.png
    :align: middle
 .. |list_view| image:: ../img/management/list_view.png
