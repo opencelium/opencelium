@@ -2,6 +2,9 @@
 Connections
 ##################
 
+General Information
+"""""""""""""""""
+
 Connection defines between which connectors do we want to do requests,
 what kind of requests and to specify mapping between them. This is a core
 element of the application. The list of connections displays a title, a description,
@@ -75,10 +78,8 @@ You choose method, fill out the parameter and click plus button. The parameter
 comes from the invoker. If it exists there, you will see it after typing the
 third symbol in the input field as a select popup block.
 
-*Body* can also contain references from the previous methods. Type **#** as
-the first character and you will see another popup.
-
-|image5|
+*Body* can also contain references from the previous methods. Select reference icon
+|image46| to open the reference generator.
 
 You can handle with that in the same principe as for the *Query*.
 When you finish with editing click on the apply icon |image6|.
@@ -87,7 +88,7 @@ Moreover, you can add
 an enhancement between fields. Clicking on the reference
 
 .. note::
-	Enhancement is currently only supported in the body configuration of the target system (to connector). 
+	Enhancement is currently only supported in the body configuration of the target system (to connector).
 
 |image7|
 
@@ -163,6 +164,210 @@ That is why you can sync by your own using this feature.
 On the left side in the *methods* section you can see the zoom in and zoom out actions
 |image26|
 
+
+Webhooks
+"""""""""""""""""
+
+The connection editor provides an opportunity to use webhook parameters inside of the connection.
+If you want to deliver query parameters (using GET) or payload (POST), you need to click on the
+reference icon in body of the method |image46| and select the webhook option. Here you will see the list of existing
+webhook parameters in the connection and a possibility to create a new one.
+
+|image43|
+
+When you click on the plus icon, a dialog will pop up where you need to enter the name of the parameter
+and choose its type.
+
+|image44|
+
+The webhook is also could be used in operators. For *IF* operator you can apply it on both sides.
+
+|image45|
+
+If the process is located inside of the loop, your webhook parameter can also go throw it.
+You just need to add *[iterator]* in the end of the parameter.
+
+Example:
+
+You have a loop operator with *i* iterator and you want to have a webhook reference on parameter
+*result* and go throw it. Then your webhook parameter will look like that: ``result[i]``.
+
+Or if you want to take just the first element of the array: ``result[1]``.
+
+The webhook parameters can also be used in endpoints. Right now, there is no UI for this (coming in
+next version), so you need to add it manually. It has the next format: ``${[name]:[type]}``
+
+Example:
+You have the endpoint: ``{url}/api/`` and you want to add the webhook parameter *methodName* with type *string*
+it will be: ``{url}/api/${methodName:string}``
+
+Pagination
+"""""""""""""""""
+
+Some APIs fetch data with pagination. You define the amount of data and specific page so the system
+responses with a bunch of data. To make clear for the connection how much data should it
+handle, you need to describe the pagination inside of the invoker file.
+There is a new xml-tag on the same level with authType or operations - *pagination*.
+
+Pagination parameters:
+
+#. ``LINK``     - contains url that fetches next data.
+#. ``SIZE``     - total number of elements.
+#. ``PAGE``     - refers to a page number. Will be incremented to one.
+#. ``LIMIT``    - number of elements that should be fetched at a time
+#. ``OFFSET``   - refers to the starting point from which data should be retrieved and incremented to LIMIT
+#. ``RESULT``   - includes an array of elements retrieved from the response.
+#. ``HAS_MORE`` - signifies that the array contains elements which require retrieval.
+#. ``CURSOR``   - utilizes a pointer that refers to a specific database record.
+#. ``ORDER``    - defines in which sequence elements are organised (asc, desc).
+
+Parameter actions:
+
+#. ``READ``      - Specifies that the value of the property should be retrieved from the specified path in the reference.
+#. ``WRITE``     - Specifies that the value of the parameter should be placed at the specified path in the reference.
+#. ``INCREMENT`` - Specifies that the value of the parameter should be added and then increased. Used for OFFSET
+#. ``COLLECT``   - Specifies that elements from the responses should be aggregated into a single list. Used for RESULT
+#. ``FETCH``.    - Specifies the subsequent data to be retrieved. Used for LINK.
+
+Parameter reference examples:
+
+``response.body.$.param1.param2`` - points to a parameter in the RESPONSE BODY.
+``request.body.$.param1.param2`` - points to a parameter in the REQUEST BODY.
+``response.header.$.param1.`` - points to a parameter in the REQUEST HEADER.
+``request.url.$.param1.param2`` - points to a nested parameter within the REQUEST URL.
+
+
+EXAMPLES:
+
+1. Example for OFFSET-LIMIT pagination:
+
+Pagination:
+
+.. code-block:: xml
+
+        <pagination>
+            <limit ref="request.url.$.limit" action="write">5</limit>
+            <result ref="response.body.$.items" action="collect"/>
+            <offset action="increment">0</offset>
+            <size ref="response.body.$.total" action="read"/>
+        </pagination>
+
+Request:
+
+.. code-block:: xml
+
+        <request>
+            <method>GET</method>
+            <endpoint>{url}/offset/example?offset=@{offset}</endpoint>
+            <body/>
+            <header>
+                <item name="Authorization" type="string">{basic}</item>
+                <item name="Content-Type" type="string">application/json</item>
+            </header>
+        </request>
+
+Response:
+
+.. code-block:: xml
+
+        <body type="object" format="json" data="raw">
+            <field name="items" type="array">
+                <field name="id" type="string"/>
+                <field name="name" type="string"/>
+                <field name="username" type="string"/>
+            </field>
+            <field name="nextCursor" type="string"/>
+            <field name="nextLink" type="string"/>
+            <field name="forin" type="string"/>
+            <field name="total" type="string"/>
+            <field name="offset" type="string"/>
+            <field name="limit" type="string"/>
+        </body>
+
+
+2. Example for PAGE-BASED pagination:
+
+Pagination:
+
+.. code-block:: xml
+
+        <pagination>
+            <limit>5</limit>
+            <result ref="response.body.$.content" action="collect"/>
+            <page action="increment">0</page>
+            <size ref="response.body.$.totalElements" action="read"/>
+        </pagination>
+
+Request:
+
+.. code-block:: xml
+
+         <request>
+            <method>GET</method>
+            <endpoint>{url}/page/example?size=@{limit}&amp;page=@{page}</endpoint>
+            <body/>
+            <header>
+                <item name="Authorization" type="string">{basic}</item>
+                <item name="Content-Type" type="string">application/json</item>
+            </header>
+        </request>
+
+Response:
+
+.. code-block:: xml
+
+        <body type="object" format="json" data="raw">
+            <field name="content" type="array">
+                <field name="id" type="string"/>
+                <field name="name" type="string"/>
+                <field name="username" type="string"/>
+            </field>
+            <field name="totalElements" type="number"/>
+        </body>
+
+
+3. Example for CURSOR-BASED pagination with a LINK:
+
+Pagination:
+
+.. code-block:: xml
+        <pagination>
+            <limit>5</limit>
+            <result ref="response.body.$.items" action="collect"/>
+            <link ref="response.body.$.nextLink"/>
+        </pagination>
+
+Request:
+
+.. code-block:: xml
+
+        <request>
+            <method>GET</method>
+            <endpoint>{url}/cursor/example?size=@{limit}</endpoint>
+            <body/>
+            <header>
+                <item name="Authorization" type="string">{basic}</item>
+                <item name="Content-Type" type="string">application/json</item>
+            </header>
+        </request>
+
+Response:
+
+.. code-block:: xml
+
+        <body type="object" format="json" data="raw">
+            <field name="items" type="array">
+                <field name="id" type="string"/>
+                <field name="name" type="string"/>
+                <field name="username" type="string"/>
+            </field>
+            <field name="nextCursor" type="string"/>
+            <field name="nextLink" type="string"/>
+            <field name="forin" type="string"/>
+        </body>
+
+
+
 .. |image0| image:: ../img/connection/0.png
    :align: middle
 .. |image1| image:: ../img/connection/1.png
@@ -173,8 +378,6 @@ On the left side in the *methods* section you can see the zoom in and zoom out a
 .. |image4| image:: ../img/connection/4.png
    :align: middle
    :width: 200
-.. |image5| image:: ../img/connection/5.png
-   :align: middle
 .. |image6| image:: ../img/connection/6.png
 .. |image7| image:: ../img/connection/7.png
    :align: middle
@@ -239,3 +442,14 @@ On the left side in the *methods* section you can see the zoom in and zoom out a
    :width: 30
 .. |image42| image:: ../img/connection/42.png
    :width: 30
+.. |image43| image:: ../img/connection/43.png
+   :width: 200
+   :align: middle
+.. |image44| image:: ../img/connection/44.png
+   :width: 200
+   :align: middle
+.. |image45| image:: ../img/connection/45.png
+   :width: 400
+   :align: middle
+.. |image46| image:: ../img/connection/46.png
+   :width: 40
