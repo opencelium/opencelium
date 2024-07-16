@@ -34,8 +34,17 @@ The logs could be enabled/disabled directly here clicking on the switcher.
 If the schedule contains webhook, it could be copied clicking on the icon: |image4|.
 The url is stored in the buffer. Now you can paste it where you need.
 
-The *Action* column has five additional icons: |image10| - *edit*, |image3|- *start* job (immediately),
-|image1| - *webhook*, |image2| - *notifications*, |image14| - *delete*.
+The *Action* column has five additional icons:
+
+|image10| - *edit*
+
+|image3|- *start* job (immediately)
+
+|image1| - *webhook*
+
+|image2| - *notifications*
+
+|image14| - *delete*
 
 Clicking on the *webhook* the application creates a webhook for the specific connection.
 Due to it the user can trigger this connection using only url.

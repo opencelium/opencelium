@@ -214,7 +214,15 @@ webhook parameters in the connection and a possibility to create a new one.
 |image43|
 
 When you click on the plus icon, a dialog will pop up where you need to enter the name of the parameter
-and choose its type.
+and choose its type. There are next existed types:
+
+#. ``Array``
+#. ``Boolean``
+#. ``Integer``
+#. ``Number``
+#. ``Object``
+#. ``String``
+#. ``Undefined``
 
 |image44|
 
