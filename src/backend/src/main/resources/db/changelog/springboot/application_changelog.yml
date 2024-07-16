@@ -29,3 +29,7 @@ versions:
         operation: add
         value: 4.1
         path: opencelium.version
+      - changeset: 2
+        operation: add
+        value: 84bbce3d33de467b47b7e76c2563769!3f9aff968def8ef2674856f67ae8a93f
+        path: opencelium.token.secret
