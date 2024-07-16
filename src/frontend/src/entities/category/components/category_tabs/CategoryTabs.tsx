@@ -79,7 +79,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
 
   useEffect(() => {
     bc()
-  }, [activeCategory]);
+  }, [activeCategory, addingCategory]);
   useEffect(() => {
     if (!visibleAddCategoryDialog) {
       category.parentSelect = null;
@@ -160,8 +160,9 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
     if (category) {
       result.push(category);
       if (category.parentCategory) {
+        const parentCategoryId = category.parentCategory?.id || category.parentCategory;
         result.push(
-          ...findParentCategories(categories, category.parentCategory.id)
+          ...findParentCategories(categories, parentCategoryId)
         );
       }
     }

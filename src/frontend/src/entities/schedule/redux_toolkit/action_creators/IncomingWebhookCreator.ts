@@ -13,19 +13,23 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scheduleReducer from "./ScheduleSlice";
-import scheduleNotificationReducer from "./NotificationSlice";
-import teamsReducer from "./TeamsSlice";
-import slackReducer from "./SlackSlice";
-import incomingWebhookReducer from "./IncomingWebhookSlice";
-import toolReducer from "./ToolSlice";
+import {createAsyncThunk} from "@reduxjs/toolkit";
+import {IncomingWebhookRequest} from "@entity/schedule/requests/classes/IncomingWebhook";
+import {errorHandler} from "@application/utils/utils";
 
+export const getIncomingWebhook = createAsyncThunk(
+    'schedule/notification/get/incoming_webhook',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new IncomingWebhookRequest();
+            const response = await request.getWebhook();
+            return response.data.result;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 
 export default {
-    scheduleReducer,
-    scheduleNotificationReducer,
-    teamsReducer,
-    slackReducer,
-    incomingWebhookReducer,
-    toolReducer,
+    getIncomingWebhook,
 }

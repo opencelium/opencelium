@@ -6,22 +6,6 @@ Description: ''
 FrameworkVersion: 6.0.26
 Provider:
   Operation:
-    CompanyCreate:
-      Description: ''
-      IncludeTicketData: '0'
-      Type: Company::CompanyCreate
-    CompanyGet:
-      Description: ''
-      IncludeTicketData: '0'
-      Type: Company::CompanyGet
-    CompanySearch:
-      Description: ''
-      IncludeTicketData: '0'
-      Type: Company::CompanySearch
-    CompanyUpdate:
-      Description: ''
-      IncludeTicketData: '0'
-      Type: Company::CompanyUpdate
     ConfigItemCreate:
       Description: ''
       IncludeTicketData: '0'
@@ -58,22 +42,6 @@ Provider:
       MappingOutbound:
         Type: Simple
       Type: ConfigItem::ConfigItemUpdate
-    CustomerCreate:
-      Description: ''
-      IncludeTicketData: '0'
-      Type: Customer::CustomerCreate
-    CustomerGet:
-      Description: ''
-      IncludeTicketData: '0'
-      Type: Customer::CustomerGet
-    CustomerSearch:
-      Description: ''
-      IncludeTicketData: '0'
-      Type: Customer::CustomerSearch
-    CustomerUpdate:
-      Description: ''
-      IncludeTicketData: '0'
-      Type: Customer::CustomerUpdate
     LinkCreate:
       Description: ''
       IncludeTicketData: '0'
@@ -102,6 +70,38 @@ Provider:
       Description: ''
       IncludeTicketData: '0'
       Type: Service::ServiceUpdate
+    CustomerCreate:
+      Description: ''
+      IncludeTicketData: '0'
+      Type: Customer::CustomerCreate
+    CustomerGet:
+      Description: ''
+      IncludeTicketData: '0'
+      Type: Customer::CustomerGet
+    CustomerSearch:
+      Description: ''
+      IncludeTicketData: '0'
+      Type: Customer::CustomerSearch
+    CustomerUpdate:
+      Description: ''
+      IncludeTicketData: '0'
+      Type: Customer::CustomerUpdate
+    CompanyCreate:
+      Description: ''
+      IncludeTicketData: '0'
+      Type: Company::CompanyCreate
+    CompanyGet:
+      Description: ''
+      IncludeTicketData: '0'
+      Type: Company::CompanyGet
+    CompanySearch:
+      Description: ''
+      IncludeTicketData: '0'
+      Type: Company::CompanySearch
+    CompanyUpdate:
+      Description: ''
+      IncludeTicketData: '0'
+      Type: Company::CompanyUpdate      
     TicketGet:
       Description: ''
       IncludeTicketData: '0'
@@ -120,14 +120,6 @@ Provider:
       KeepAlive: ''
       MaxLength: '1000000000'
       RouteOperationMapping:
-        CompanyCreate:
-          Route: /CompanyCreate/:UserLogin/:Password
-        CompanyGet:
-          Route: /CompanyGet/:UserLogin/:Password
-        CompanySearch:
-          Route: /CompanySearch/:UserLogin/:Password
-        CompanyUpdate:
-          Route: CompanyUpdate/:UserLogin/:Password
         ConfigItemCreate:
           Route: /ConfigItemCreate/:UserLogin/:Password
         ConfigItemDelete:
@@ -138,14 +130,6 @@ Provider:
           Route: /ConfigItemSearch/:UserLogin/:Password
         ConfigItemUpdate:
           Route: /ConfigItemUpdate/:UserLogin/:Password
-        CustomerCreate:
-          Route: /CustomerCreate/:UserLogin/:Password
-        CustomerGet:
-          Route: /CustomerGet/:UserLogin/:Password
-        CustomerSearch:
-          Route: /CustomerSearch/:UserLogin/:Password
-        CustomerUpdate:
-          Route: CustomerUpdate/:UserLogin/:Password
         LinkCreate:
           Route: /LinkCreate/:UserLogin/:Password
         LinkDelete:
@@ -160,6 +144,22 @@ Provider:
           Route: /ServiceSearch/:UserLogin/:Password
         ServiceUpdate:
           Route: /ServiceUpdate/:UserLogin/:Password
+        CustomerCreate:
+          Route: /CustomerCreate/:UserLogin/:Password
+        CustomerGet:
+          Route: /CustomerGet/:UserLogin/:Password
+        CustomerSearch:
+          Route: /CustomerSearch/:UserLogin/:Password
+        CustomerUpdate:
+          Route: CustomerUpdate/:UserLogin/:Password
+        CompanyCreate:
+          Route: /CompanyCreate/:UserLogin/:Password
+        CompanyGet:
+          Route: /CompanyGet/:UserLogin/:Password
+        CompanySearch:
+          Route: /CompanySearch/:UserLogin/:Password
+        CompanyUpdate:
+          Route: CompanyUpdate/:UserLogin/:Password          
         TicketGet:
           Route: /TicketGet/:UserLogin/:Password
         TicketSearch:
@@ -169,3 +169,4 @@ RemoteSystem: ''
 Requester:
   Transport:
     Type: HTTP::REST
+

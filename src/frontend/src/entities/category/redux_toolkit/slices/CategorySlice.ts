@@ -101,10 +101,10 @@ export const categorySlice = createSlice({
         state.addingCategory = API_REQUEST_STATE.FINISH;
         const newCategory = action.payload;
         state.categories.push(newCategory);
-
         if (newCategory.parentCategory) {
+          const parentCategoryId = newCategory.parentCategory?.id || newCategory.parentCategory;
           const existingCategory = state.categories.find(
-            (item) => item.id === newCategory.parentCategory.id
+            (item) => item.id === parentCategoryId
           );
           if (existingCategory) {
             if (!existingCategory.subCategories) {
@@ -114,7 +114,6 @@ export const categorySlice = createSlice({
             existingCategory.subCategories.push(newCategory.id);
           }
         }
-
         if (state.activeCategory) {
           state.activeCategory = state.categories.find(c => c.id === state.activeCategory.id) || state.activeCategory;
         }
