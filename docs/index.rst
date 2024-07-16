@@ -2,11 +2,6 @@
 Welcome to OpenCelium documentation
 ##################
 
-.. note::
-	This is our official community documentation. The installation starts with the uncompiled version. There are a few tasks required to run Opencelium. For all subscribers we provide all installations and necessary information on [Service Portal](https://service.opencelium.io). Please contact our [Sales Department](https://service.opencelium.io) if you would like to start with a subscription.
- 
-------------
-
 This documentation is organized into a couple of sections:
 
 .. toctree::

@@ -17,9 +17,9 @@ the corresponded item shows its status: enabled or disabled.
 
 |image_admin_0|
 
-For this moment, there are two items: *Kibana* and *Neo4j*. *Kibana* lets you visualize
-your scheduler jobs data. *Neo4j* is a graph database of the connections. Its UI helps
-you to see the whole picture of each connection via nodes and their relations.
+For this moment, there are two items: *MongoDB* and *MariaDB*. "MongoDB" collects all required
+information about connections. *MariaDB* stores the rest data of OpenCelium, like users, groups,
+schedules etc.
 
 Users
 """""""""""""""""
@@ -110,7 +110,7 @@ part and calls that should be used in *Connection*.
 |image_admin_2|
 
 For subscribers there is also a possibility to add and to update actions. `Here
-<https://docs.opencelium.io/en/dev/management/invoker.html>`_, you can read more
+<https://docs.opencelium.io/en/prod/management/invoker.html>`_, you can read more
 information.
 
 Templates
@@ -118,21 +118,21 @@ Templates
 
 These are business templates. In other words, they are connections that are saved as templates for
 often use. `Here
-<https://docs.opencelium.io/en/dev/management/template.html>`_, you can read how to manage with them.
+<https://docs.opencelium.io/en/prod/management/template.html>`_, you can read how to manage with them.
 
 Notification Templates
 """""""""""""""""
 
 Notification Templates are templates that are used in scheduler jobs to notify users for three event
 types: *pre*, *post*, and *alert*. `Here
-<https://docs.opencelium.io/en/dev/management/notification_template.html>`_, you can read how to manage with them.
+<https://docs.opencelium.io/en/prod/management/notification_template.html>`_, you can read how to manage with them.
 
 Data Aggregator
 """""""""""""""""
 
 Data Aggregator is a feature that provides a possibility to notify a user after the
 triggered connection (this happens in *Schedules*). `Here
-<https://docs.opencelium.io/en/dev/management/aggregator.html>`_, you can read how to manage with them.
+<https://docs.opencelium.io/en/prod/management/aggregator.html>`_, you can read how to manage with them.
 
 
 Update Assistant
@@ -148,28 +148,13 @@ system before update.
 |image_update_assistant_0|
 
 The *Update Assistant* provides you two options of the source: *Online* and *Offline*. The *Online*
-gets versions from the git and in *Offline* you can upload a *zip* file with OpenCelium version.
+gets versions from package cloud and in *Offline* you can upload a *zip* file with OpenCelium version.
 
 |image_update_assistant_1|
 
-The *Template-Update* helps you to update connection templates files and use them in a new version. After
-updating you will be available to continue the process.
-
-|image_update_assistant_2|
-
-The *Invoker-Update* helps you to update invokers files and use them in a new version. After
-updating you will be available to continue the process.
-
-|image_update_assistant_3|
-
-The *Connection-Migration* helps you to update connections itself and use them in a new version. After
-updating you will be available to finish the process.
-
-|image_update_assistant_4|
-
-After all adjustments click on the *Update OC* to finish the procedure. If you want to see logs, please
+After choosing the right version click on the *Update OC* to finish the procedure. If you want to see logs, please
 read the `Administration
-<https://docs.opencelium.io/en/dev/gettinginvolved/administration.html>`_ paragraph.
+<https://docs.opencelium.io/en/prod/gettinginvolved/administration.html>`_ paragraph.
 
 
 
@@ -207,12 +192,4 @@ read the `Administration
 .. |image_update_assistant_0| image:: ../img/update_assistant/0.png
    :align: middle
 .. |image_update_assistant_1| image:: ../img/update_assistant/1.png
-   :align: middle
-.. |image_update_assistant_2| image:: ../img/update_assistant/2.png
-   :align: middle
-.. |image_update_assistant_3| image:: ../img/update_assistant/3.png
-   :align: middle
-.. |image_update_assistant_4| image:: ../img/update_assistant/4.png
-   :align: middle
-.. |image_update_assistant_5| image:: ../img/update_assistant/5.png
    :align: middle

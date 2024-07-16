@@ -2,15 +2,42 @@
 Connections
 ##################
 
-General Information
+Connection List
 """""""""""""""""
 
-Connection defines between which connectors do we want to do requests,
+Connection defines between which connectors we want to do requests,
 what kind of requests and to specify mapping between them. This is a core
-element of the application. The list of connections displays a title, a description,
-and connectors' titles.
+element of the application. The list of connections displays a *title*, a *description*,
+and *connectors' titles*.
 
 |image0|
+
+If you double click on the *title* or on the *description*, you can modify
+it inline.
+
+|image49|
+
+There are also categories above the list. The category collects a set of connections.
+It can be very helpful to divide connections. As an example, you can have a *demo* category for your demo installations.
+
+|image47|
+
+You can create a category clicking on the *+* icon. Each category can have subcategories.
+The path to the parent category will be displayed above as breadcrumb.
+
+|image48|
+
+Each breadcrumb header is a link to the previous category. To delete the category, just
+put your mouse over the category title and click on the *x* icon. The dialog will pop up
+that suggests you to delete recursively.
+
+.. warning::
+    If you delete the category recursively, all subcategories and assigned connections will
+    be removed.
+
+
+Create Connection
+"""""""""""""""""
 
 Adding connection has three steps: *direction*, *mode*, and
 *methods*. Updating connection has just one *methods*.
@@ -54,65 +81,16 @@ information about the selected element.
 If you want to set or to change the *Label* of the connection, just move your mouse
 over it in *Details* and click on edit icon. Under the *Format* you can find an
 *Aggregator* that also could be (re)set. If you want to know more, please
-read `Here
+read `here
 <https://docs.opencelium.io/en/dev/usage/admin.html#data-aggregator>`_.
 You can create a new aggregator pressing on the button |image31|.
 
 In the *Details* panel you can see *Endpoint* and *Body* under the **Request** paragraph
 that could be modified clicking on their placeholders.
 
-There is a possibility to add a parameter into the *Endpoint* (except the first
-method in *from connector*). This parameter is a reference to the response of
-the previously created method.
 
-|image11|
-
-If the response is in json format and array, then you can choose the whole array
-or only a specific element in the array typing *[arrayIndex]*. It means to take
-the element with the specified index. To choose the whole array you need to type
-*[\*]*.
-If the response is in xml format then you can also reference to the attribute
-of the xml tag. Just type *@* and if the xml tag has attributes they will be
-popped up and you can select one.
-You choose method, fill out the parameter and click plus button. The parameter
-comes from the invoker. If it exists there, you will see it after typing the
-third symbol in the input field as a select popup block.
-
-*Body* can also contain references from the previous methods. Select reference icon
-|image46| to open the reference generator.
-
-You can handle with that in the same principe as for the *Query*.
-When you finish with editing click on the apply icon |image6|.
-
-Moreover, you can add
-an enhancement between fields. Clicking on the reference
-
-.. note::
-	Enhancement is currently only supported in the body configuration of the target system (to connector).
-
-|image7|
-
-you will see a popup window where you set a description and an enhancement
-itself.
-
-|image8|
-
-There are predefined variables to relate with the fields. *VAR_[i]* are coming parameters
-and *RESULT_VAR* is the final value for *to connector* field.
-
-The reference could be easily deleted if you mouse over it and click on the delete icon |image20|.
-All variables related to this references will be automatically replaced on **OC_VAR_NOT_EXIST** in the enhancement's script.
-
-|image21|
-
-When you create an operator there are two options: *if* and *loop*. *if* operator
-does a condition before performance. You should define here also a reference, choose
-a condition operation and set with what are you doing to compare.
-
-*loop* operator makes request in the loop under conditions that you define.
-
-As you can mention, all items under the operators are shifted on the level down. Selecting
-the operator you will see the scope of their influence.
+Action Panel
+"""""""""""""""""
 
 On the bottom you can find the Action Panel.
 
@@ -133,7 +111,8 @@ also you can set a color mode of the method and its name/label font size.
 
 |image37|
 
-|image38| - toggle data aggregator.
+|image38| - toggle data `aggregator
+<https://docs.opencelium.io/en/dev/usage/admin.html#data-aggregator>`_.
 
 |image39| - template options: create a new template or load existing one (correspondingly |image14|).
 
@@ -165,7 +144,66 @@ On the left side in the *methods* section you can see the zoom in and zoom out a
 |image26|
 
 
-Webhooks
+Create Reference
+"""""""""""""""""
+
+There is a possibility to add a parameter into the *Endpoint* (except the first
+method in *from connector*). This parameter is a reference to the response of
+the previously created method.
+
+|image11|
+
+If the response is in json format and array, then you can choose the whole array
+or only a specific element in the array typing *[arrayIndex]*. It means to take
+the element with the specified index. To choose the whole array you need to type
+*[\*]*.
+If the response is in xml format then you can also reference to the attribute
+of the xml tag. Just type *@* and if the xml tag has attributes they will be
+popped up and you can select one.
+You choose method, fill out the parameter and click plus button. The parameter
+comes from the invoker. If it exists there, you will see it after typing the
+third symbol in the input field as a select popup block.
+
+*Body* can also contain references from the previous methods. Select reference icon
+|image46| to open the reference generator.
+
+You can handle with that in the same principe as for the *Query*.
+When you finish with editing click on the apply icon |image6|.
+
+Moreover, you can add an enhancement between fields. Clicking on the reference
+
+.. note::
+	Enhancement is currently only supported in the body configuration of the target system (to connector).
+
+|image7|
+
+you will see a popup window where you set a description and an enhancement
+itself.
+
+The enhancement is a piece of code that is processed during the execution of the connection.
+It helps to define the payload properties using references and applied code. Right now, we support
+JavaScript code (engine behind it: *org.openjdk.nashorn:nashorn-core 15.4*)
+
+|image8|
+
+There are predefined variables to relate with the fields. *VAR_[i]* are coming parameters
+and *RESULT_VAR* is the final value for *to connector* field.
+
+The reference could be easily deleted if you mouse over it and click on the delete icon |image20|.
+All variables related to this references will be automatically replaced on **OC_VAR_NOT_EXIST** in the enhancement's script.
+
+|image21|
+
+When you create an operator there are two options: *if* and *loop*. *if* operator
+does a condition before performance. You should define here also a reference, choose
+a condition operation and set with what are you doing to compare.
+
+*loop* operator makes request in the loop under conditions that you define.
+
+As you can mention, all items under the operators are shifted on the level down. Selecting
+the operator you will see the scope of their influence.
+
+Create Webhook
 """""""""""""""""
 
 The connection editor provides an opportunity to use webhook parameters inside of the connection.
@@ -453,3 +491,11 @@ Response:
    :align: middle
 .. |image46| image:: ../img/connection/46.png
    :width: 40
+.. |image47| image:: ../img/connection/47.png
+   :align: middle
+.. |image48| image:: ../img/connection/48.png
+   :align: middle
+   :width: 300
+.. |image49| image:: ../img/connection/49.png
+   :width: 300
+   :align: middle
