@@ -36,7 +36,7 @@ that suggests you to delete recursively.
     be removed.
 
 
-General Information
+Create Connection
 """""""""""""""""
 
 Adding connection has three steps: *direction*, *mode*, and
@@ -111,7 +111,8 @@ also you can set a color mode of the method and its name/label font size.
 
 |image37|
 
-|image38| - toggle data aggregator.
+|image38| - toggle data `aggregator
+<https://docs.opencelium.io/en/dev/usage/admin.html#data-aggregator>`_.
 
 |image39| - template options: create a new template or load existing one (correspondingly |image14|).
 
@@ -169,8 +170,7 @@ third symbol in the input field as a select popup block.
 You can handle with that in the same principe as for the *Query*.
 When you finish with editing click on the apply icon |image6|.
 
-Moreover, you can add
-an enhancement between fields. Clicking on the reference
+Moreover, you can add an enhancement between fields. Clicking on the reference
 
 .. note::
 	Enhancement is currently only supported in the body configuration of the target system (to connector).
@@ -179,6 +179,10 @@ an enhancement between fields. Clicking on the reference
 
 you will see a popup window where you set a description and an enhancement
 itself.
+
+The enhancement is a piece of code that is processed during the execution of the connection.
+It helps to define the payload properties using references and applied code. Right now, we support
+JavaScript code (engine behind it: *org.openjdk.nashorn:nashorn-core 15.4*)
 
 |image8|
 

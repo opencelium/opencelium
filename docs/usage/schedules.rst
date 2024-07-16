@@ -40,6 +40,9 @@ The *Action* column has five additional icons: |image10| - *edit*, |image3|- *st
 Clicking on the *webhook* the application creates a webhook for the specific connection.
 Due to it the user can trigger this connection using only url.
 
+Notification
+"""""""""""""""""
+
 *Notification* is such a feature that allows you to be notified via emails or webhooks when
 pre, post or alert event happens.
 
