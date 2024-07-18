@@ -56,11 +56,11 @@ public class Session {
     @CreatedDate
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private Date createdAt = new Date();
 
-    @Column(name = "request_time")
+    @Column(name = "last_accessed")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date lastAccessed;
+    private Date lastAccessed = new Date();
 
     @JsonIgnore
     @Column(name = "is_active")

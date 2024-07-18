@@ -448,3 +448,32 @@ ALTER TABLE user
 ADD COLUMN IF NOT EXISTS auth_method ENUM('LDAP', 'BASIC') NOT NULL DEFAULT 'BASIC',
 ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN DEFAULT FALSE,
 ADD COLUMN IF NOT EXISTS totp_secret_key VARCHAR(255);
+
+--changeset 4.0:20 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE user_session (
+    session_id VARCHAR(255) NOT NULL PRIMARY KEY,
+    user_id int(11) NOT NULL,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP NOT NULL,
+    last_accessed TIMESTAMP NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--changeset 4.0:21 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+LOCK TABLES activity READ, user_session WRITE;
+
+INSERT INTO user_session (session_id, user_id, ip_address, user_agent, created_at, last_accessed, is_active)
+SELECT
+    UUID(),
+    user_id,
+    NULL,
+    NULL,
+    COALESCE(request_time, NOW()),
+    COALESCE(request_time, NOW()),
+    CASE WHEN is_locked = '1' THEN FALSE ELSE TRUE END
+FROM
+    activity;
+
+UNLOCK TABLES;
