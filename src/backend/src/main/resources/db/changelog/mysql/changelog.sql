@@ -442,3 +442,9 @@ CREATE TABLE change_set_yml (
 CREATE TABLE secret_key_for_encoder (
     secret_key VARCHAR(1000) NOT NULL
 );
+
+--changeset 4.0:19 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE user
+ADD COLUMN IF NOT EXISTS auth_method ENUM('LDAP', 'BASIC') NOT NULL DEFAULT 'BASIC',
+ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS totp_secret_key VARCHAR(255);
