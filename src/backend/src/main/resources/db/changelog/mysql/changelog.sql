@@ -477,3 +477,6 @@ FROM
     activity;
 
 UNLOCK TABLES;
+
+--changeset 4.0:22 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+DROP TABLE IF EXISTS activity;
