@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.exception;
 
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 
-public class UserNotFoundException extends RuntimeException{
+public class UserNotFoundException extends RuntimeException {
 
     private final int id;
 

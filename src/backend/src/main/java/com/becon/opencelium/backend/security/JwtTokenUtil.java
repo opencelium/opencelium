@@ -88,19 +88,19 @@ public class JwtTokenUtil {
 
         Session session = userDetails.getUser().getSession();
         String tokenId = getTokenId(token);
-        if (session.isLocked()){
+        if (!session.isActive()){
             return false;
         }
         final String email = getEmailFromToken(token);
 
-        long inactiveTime = new Date().getTime() - session.getRequestTime().getTime();
+        long inactiveTime = new Date().getTime() - session.getLastAccessed().getTime();
         if (inactiveTime > tokenUtility.getSessionTime()){
             return false;
         }
 
         return (email.equals(userDetails.getUsername())
                 && !isTokenExpired(token)
-                && tokenId.equals(session.getTokenId()));
+                && tokenId.equals(session.getId()));
     }
 
     public JWTClaimsSet getAllClaimsFromToken(String token) {

@@ -14,15 +14,20 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.database.mysql.repository;
+package com.becon.opencelium.backend.exception;
 
-import com.becon.opencelium.backend.database.mysql.entity.Session;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import com.becon.opencelium.backend.constant.ExceptionConstant;
 
-import java.util.Optional;
+public class SessionNotFoundException extends RuntimeException {
 
-@Repository
-public interface SessionRepository extends JpaRepository<Session, String> {
-    Optional<Session> findByUserId(int userId);
+    private final int userId;
+
+    public SessionNotFoundException(final int userId) {
+        super(ExceptionConstant.SESSION_NOT_EXIST);
+        this.userId = userId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
 }

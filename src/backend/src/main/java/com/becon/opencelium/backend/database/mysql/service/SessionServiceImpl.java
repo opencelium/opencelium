@@ -37,15 +37,15 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public Optional<Session> findById(int id) {
-        return sessionRepository.findById(id);
+    public Optional<Session> findByUserId(int userId) {
+        return sessionRepository.findByUserId(userId);
     }
 
     @Override
     public void registerTokenActivity(UserPrincipals userDetails) {
         Session session = userDetails.getUser().getSession();
-        session.setLocked(false);
-        session.setRequestTime(new Date());
+        session.setActive(true);
+        session.setLastAccessed(new Date());
         sessionRepository.save(session);
     }
 }

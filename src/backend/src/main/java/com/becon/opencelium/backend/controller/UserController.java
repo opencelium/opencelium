@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.exception.EmailAlreadyExistException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
+import com.becon.opencelium.backend.exception.SessionNotFoundException;
 import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
@@ -164,7 +165,7 @@ public class UserController {
         User user = userService.requestToEntity(userRequestResource);
         Session session = new Session();
         session.setUser(user);
-        session.setLocked(true);
+        session.setActive(false);
         user.setSession(session);
         userService.save(user);
 
@@ -278,16 +279,15 @@ public class UserController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/{id}/logout")
-    public ResponseEntity<?> logout(@PathVariable("id") int id) {
+    public ResponseEntity<?> logout(@PathVariable("id") int userId) {
         return activityService
-                .findById(id)
+                .findByUserId(userId)
                 .map(
                         p -> {
-                            p.setTokenId("");
-                            p.setLocked(true);
+                            p.setActive(false);
                             activityService.save(p);
                             return ResponseEntity.ok().build();
                         })
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new SessionNotFoundException(userId));
     }
 }

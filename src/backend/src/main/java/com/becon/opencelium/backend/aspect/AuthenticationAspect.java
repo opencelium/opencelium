@@ -45,11 +45,13 @@ public class AuthenticationAspect {
     public void afterTokenGeneration(String token){
         String tokenId = jwtTokenUtil.getTokenId(token);
         String userId = jwtTokenUtil.getClaim(token, "userId").toString();
+
         Session session = new Session();
-        session.setId(Integer.parseInt(userId));
-        session.setTokenId(tokenId);
-        session.setLocked(false);
-        session.setRequestTime(new Date());
+        session.setId(tokenId);
+        session.setUserId(Integer.parseInt(userId));
+        session.setActive(true);
+        session.setLastAccessed(new Date());
+
         activityService.save(session);
     }
 }

@@ -16,7 +16,11 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mysql.entity.*;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
+import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
+import com.becon.opencelium.backend.database.mysql.entity.UserRole;
+import com.becon.opencelium.backend.database.mysql.entity.WidgetSetting;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
@@ -122,7 +126,7 @@ public class UserServiceImpl implements UserService{
         }
 
         UserDetail userDetail = detailService.toEntity(userRequestResource.getUserDetail());
-        Session session = sessionService.findById(userRequestResource.getUserId()).orElse(null);
+        Session session = sessionService.findByUserId(userRequestResource.getUserId()).orElse(null);
 
         user.setId(userRequestResource.getUserId());
         user.setUserRole(userRole);

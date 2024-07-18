@@ -24,44 +24,62 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
 
 @Entity
-@Table(name = "activity")
+@Table(name = "user_session")
 public class Session {
 
     @Id
-    private int id;
+    @JsonIgnore
+    @Column(name = "session_id")
+    private String id;
 
-    @MapsId
+    @Column(name = "user_id")
+    private int userId;
     @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
 
-    @JsonIgnore
-    @Column(name = "token_id")
-    private String tokenId;
+    @Column(name = "ip_address")
+    private String ipAddress;
+
+    @Column(name = "user_agent")
+    private String userAgent;
+
+    @CreatedDate
+    @Column(name = "created_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
 
     @Column(name = "request_time")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date requestTime;
+    private Date lastAccessed;
 
     @JsonIgnore
-    @Column(name = "is_locked")
-    private boolean locked;
+    @Column(name = "is_active")
+    private boolean active;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public User getUser() {
@@ -72,27 +90,43 @@ public class Session {
         this.user = user;
     }
 
-    public String getTokenId() {
-        return tokenId;
+    public String getIpAddress() {
+        return ipAddress;
     }
 
-    public void setTokenId(String tokenId) {
-        this.tokenId = tokenId;
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 
-    public Date getRequestTime() {
-        return requestTime;
+    public String getUserAgent() {
+        return userAgent;
     }
 
-    public void setRequestTime(Date requestTime) {
-        this.requestTime = requestTime;
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 
-    public boolean isLocked() {
-        return locked;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setLocked(boolean locked) {
-        this.locked = locked;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getLastAccessed() {
+        return lastAccessed;
+    }
+
+    public void setLastAccessed(Date lastAccessed) {
+        this.lastAccessed = lastAccessed;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

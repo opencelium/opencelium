@@ -30,7 +30,7 @@ public class SessionResource {
     }
 
     public SessionResource(Session session) {
-        this.requestTime = session.getRequestTime();
+        this.requestTime = session.getLastAccessed();
     }
 
     public Date getRequestTime() {
