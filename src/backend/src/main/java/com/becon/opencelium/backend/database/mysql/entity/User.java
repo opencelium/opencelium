@@ -55,7 +55,7 @@ public class User {
     private String password;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
-    private Activity activity;
+    private Session session;
 
     @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "user")
     private UserDetail userDetail;
@@ -113,12 +113,12 @@ public class User {
         this.password = password;
     }
 
-    public Activity getActivity() {
-        return activity;
+    public Session getSession() {
+        return session;
     }
 
-    public void setActivity(Activity activity) {
-        this.activity = activity;
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     public UserDetail getUserDetail() {

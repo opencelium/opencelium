@@ -16,8 +16,8 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
-import com.becon.opencelium.backend.database.mysql.repository.ActivityRepository;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
+import com.becon.opencelium.backend.database.mysql.repository.SessionRepository;
 import com.becon.opencelium.backend.security.UserPrincipals;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,26 +26,26 @@ import java.util.Date;
 import java.util.Optional;
 
 @Service
-public class ActivityServiceImpl implements ActivityService {
+public class SessionServiceImpl implements SessionService {
 
     @Autowired
-    private ActivityRepository activityRepository;
+    private SessionRepository sessionRepository;
 
     @Override
-    public void save(Activity activity) {
-        activityRepository.save(activity);
+    public void save(Session session) {
+        sessionRepository.save(session);
     }
 
     @Override
-    public Optional<Activity> findById(int id) {
-        return activityRepository.findById(id);
+    public Optional<Session> findById(int id) {
+        return sessionRepository.findById(id);
     }
 
     @Override
     public void registerTokenActivity(UserPrincipals userDetails) {
-        Activity activity = userDetails.getUser().getActivity();
-        activity.setLocked(false);
-        activity.setRequestTime(new Date());
-        activityRepository.save(activity);
+        Session session = userDetails.getUser().getSession();
+        session.setLocked(false);
+        session.setRequestTime(new Date());
+        sessionRepository.save(session);
     }
 }

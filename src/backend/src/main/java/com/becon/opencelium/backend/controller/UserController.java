@@ -16,13 +16,13 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.exception.EmailAlreadyExistException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
 import com.becon.opencelium.backend.exception.UserNotFoundException;
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
 import com.becon.opencelium.backend.database.mysql.entity.User;
-import com.becon.opencelium.backend.database.mysql.service.ActivityServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
@@ -65,7 +65,7 @@ public class UserController {
     private UserRoleServiceImpl userRoleService;
 
     @Autowired
-    private ActivityServiceImpl activityService;
+    private SessionServiceImpl activityService;
 
     @Autowired
     private StorageService storageService;
@@ -162,10 +162,10 @@ public class UserController {
         }
 
         User user = userService.requestToEntity(userRequestResource);
-        Activity activity = new Activity();
-        activity.setUser(user);
-        activity.setLocked(true);
-        user.setActivity(activity);
+        Session session = new Session();
+        session.setUser(user);
+        session.setLocked(true);
+        user.setSession(session);
         userService.save(user);
 
         UserResource userResource = userService.toResource(user);

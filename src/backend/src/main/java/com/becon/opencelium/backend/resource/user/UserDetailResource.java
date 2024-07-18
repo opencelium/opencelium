@@ -66,8 +66,8 @@ public class UserDetailResource {
         if (userDetail.getProfilePicture() != null){
             this.profilePicture = imagePath + userDetail.getProfilePicture();
         }
-        if (userDetail.getUser() != null && userDetail.getUser().getActivity() != null){
-            this.requestTime = userDetail.getUser().getActivity().getRequestTime();
+        if (userDetail.getUser() != null && userDetail.getUser().getSession() != null){
+            this.requestTime = userDetail.getUser().getSession().getRequestTime();
         }
     }
 

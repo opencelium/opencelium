@@ -14,12 +14,18 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.database.mysql.repository;
+package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
+import com.becon.opencelium.backend.security.UserPrincipals;
 
-@Repository
-public interface ActivityRepository extends JpaRepository<Activity, Integer> {
+import java.util.Optional;
+
+public interface SessionService {
+
+    void save(Session session);
+
+    Optional<Session> findById(int id);
+
+    void registerTokenActivity(UserPrincipals userDetails);
 }

@@ -19,7 +19,6 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
-import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +50,7 @@ public class UserServiceImpl implements UserService{
     private UserDetailServiceImpl detailService;
 
     @Autowired
-    private ActivityServiceImpl activityService;
+    private SessionServiceImpl sessionService;
 
     @Autowired
     private WidgetSettingServiceImp widgetSettingServiceImp;
@@ -123,11 +122,11 @@ public class UserServiceImpl implements UserService{
         }
 
         UserDetail userDetail = detailService.toEntity(userRequestResource.getUserDetail());
-        Activity activity  = activityService.findById(userRequestResource.getUserId()).orElse(null);
+        Session session = sessionService.findById(userRequestResource.getUserId()).orElse(null);
 
         user.setId(userRequestResource.getUserId());
         user.setUserRole(userRole);
-        user.setActivity(activity);
+        user.setSession(session);
         user.setEmail(userRequestResource.getEmail());
         user.setUserDetail(userDetail);
 

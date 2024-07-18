@@ -16,8 +16,8 @@
 
 package com.becon.opencelium.backend.aspect;
 
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
-import com.becon.opencelium.backend.database.mysql.service.ActivityServiceImpl;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
+import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -32,7 +32,7 @@ import java.util.Date;
 public class AuthenticationAspect {
 
     @Autowired
-    private ActivityServiceImpl activityService;
+    private SessionServiceImpl activityService;
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
@@ -45,11 +45,11 @@ public class AuthenticationAspect {
     public void afterTokenGeneration(String token){
         String tokenId = jwtTokenUtil.getTokenId(token);
         String userId = jwtTokenUtil.getClaim(token, "userId").toString();
-        Activity activity = new Activity();
-        activity.setId(Integer.parseInt(userId));
-        activity.setTokenId(tokenId);
-        activity.setLocked(false);
-        activity.setRequestTime(new Date());
-        activityService.save(activity);
+        Session session = new Session();
+        session.setId(Integer.parseInt(userId));
+        session.setTokenId(tokenId);
+        session.setLocked(false);
+        session.setRequestTime(new Date());
+        activityService.save(session);
     }
 }

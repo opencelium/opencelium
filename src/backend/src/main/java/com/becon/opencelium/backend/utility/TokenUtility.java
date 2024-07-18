@@ -20,7 +20,7 @@ public class TokenUtility {
         return secret;
     }
 
-    public long getActivityTime() {
+    public long getSessionTime() {
         Long activityTime = env.getProperty(AppYamlPath.TOKEN_ACTIVITY_TIME, Long.class);
         if (activityTime == null) {
             activityTime = SecurityConstant.ACTIVITY_TIME;

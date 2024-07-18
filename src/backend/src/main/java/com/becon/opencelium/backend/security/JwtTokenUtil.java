@@ -16,10 +16,12 @@
 
 package com.becon.opencelium.backend.security;
 
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.utility.TokenUtility;
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -65,7 +67,7 @@ public class JwtTokenUtil {
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
             .claim("userId", user.getId())
             .claim("role", user.getUserRole().getName())
-            .claim("sessionTime", tokenUtility.getActivityTime())
+            .claim("sessionTime", tokenUtility.getSessionTime())
             .expirationTime(new Date(System.currentTimeMillis() + tokenUtility.getExpirationTime() * 1000))
             .issueTime(new Date(System.currentTimeMillis()))
             .subject(user.getEmail())
@@ -84,21 +86,21 @@ public class JwtTokenUtil {
             return false;
         }
 
-        Activity activity = userDetails.getUser().getActivity();
+        Session session = userDetails.getUser().getSession();
         String tokenId = getTokenId(token);
-        if (activity.isLocked()){
+        if (session.isLocked()){
             return false;
         }
         final String email = getEmailFromToken(token);
 
-        long inactiveTime = new Date().getTime() - activity.getRequestTime().getTime();
-        if (inactiveTime > tokenUtility.getActivityTime()){
+        long inactiveTime = new Date().getTime() - session.getRequestTime().getTime();
+        if (inactiveTime > tokenUtility.getSessionTime()){
             return false;
         }
 
         return (email.equals(userDetails.getUsername())
                 && !isTokenExpired(token)
-                && tokenId.equals(activity.getTokenId()));
+                && tokenId.equals(session.getTokenId()));
     }
 
     public JWTClaimsSet getAllClaimsFromToken(String token) {

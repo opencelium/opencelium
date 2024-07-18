@@ -14,30 +14,12 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.resource.user;
+package com.becon.opencelium.backend.database.mysql.repository;
 
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
-import jakarta.annotation.Resource;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-
-@Resource
-public class ActivityResource {
-
-    private Date requestTime;
-
-    public ActivityResource() {
-    }
-
-    public ActivityResource(Activity activity) {
-        this.requestTime = activity.getRequestTime();
-    }
-
-    public Date getRequestTime() {
-        return requestTime;
-    }
-
-    public void setRequestTime(Date requestTime) {
-        this.requestTime = requestTime;
-    }
+@Repository
+public interface SessionRepository extends JpaRepository<Session, Integer> {
 }
