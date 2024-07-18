@@ -39,19 +39,25 @@ public class JwtTokenUtil {
     @Autowired
     private TokenUtility tokenUtility;
 
-    public String getEmailFromToken(String token) {
+    public String extractEmail(String token) {
         return getClaimFromToken(token, JWTClaimsSet::getSubject);
     }
 
-    public String getTokenId(String token) {
+    public String extractSessionId(String token) {
         return getClaimFromToken(token, JWTClaimsSet::getJWTID);
     }
 
-    public Date getExpirationDateFromToken(String token) {
+    public int extractUserId(String token) {
+        String userId = getClaim(token, "userId").toString();
+
+        return Integer.parseInt(userId);
+    }
+
+    public Date extractExpirationDate(String token) {
         return getClaimFromToken(token, JWTClaimsSet::getExpirationTime);
     }
 
-    public Object getClaim(String token, String name){
+    private Object getClaim(String token, String name){
         final JWTClaimsSet claims = getAllClaimsFromToken(token);
         return claims.getClaim(name);
     }
@@ -63,7 +69,17 @@ public class JwtTokenUtil {
 
     public String generateToken(UserPrincipals userDetails) {
         User user = userDetails.getUser();
-        String token = UUID.randomUUID().toString();
+
+        String sessionId;
+        if (user.getSession() != null) {
+            // if 'user' already has a 'session', then use its' id
+            sessionId = user.getSession().getId();
+        } else {
+            // if 'user' does not have a 'session' (first login)
+            // then generate random UUID to create new 'session' for this 'user'
+            sessionId = UUID.randomUUID().toString();
+        }
+
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
             .claim("userId", user.getId())
             .claim("role", user.getUserRole().getName())
@@ -71,7 +87,7 @@ public class JwtTokenUtil {
             .expirationTime(new Date(System.currentTimeMillis() + tokenUtility.getExpirationTime() * 1000))
             .issueTime(new Date(System.currentTimeMillis()))
             .subject(user.getEmail())
-            .jwtID(token)
+            .jwtID(sessionId)
             .build();
 
         return generateToken(claimsSet);
@@ -87,20 +103,21 @@ public class JwtTokenUtil {
         }
 
         Session session = userDetails.getUser().getSession();
-        String tokenId = getTokenId(token);
         if (!session.isActive()){
             return false;
         }
-        final String email = getEmailFromToken(token);
 
         long inactiveTime = new Date().getTime() - session.getLastAccessed().getTime();
         if (inactiveTime > tokenUtility.getSessionTime()){
             return false;
         }
 
+        final String sessionId = extractSessionId(token);
+        final String email = extractEmail(token);
+
         return (email.equals(userDetails.getUsername())
                 && !isTokenExpired(token)
-                && tokenId.equals(session.getId()));
+                && sessionId.equals(session.getId()));
     }
 
     public JWTClaimsSet getAllClaimsFromToken(String token) {
@@ -112,7 +129,7 @@ public class JwtTokenUtil {
     }
 
     private Boolean isTokenExpired(String token) {
-        final Date expiration = getExpirationDateFromToken(token);
+        final Date expiration = extractExpirationDate(token);
         return expiration.before(new Date());
     }
 

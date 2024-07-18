@@ -25,7 +25,9 @@ public interface SessionService {
 
     void save(Session session);
 
-    Optional<Session> findByUserId(int id);
+    Optional<Session> findById(String id);
+
+    Optional<Session> findByUserId(int userId);
 
     void registerTokenActivity(UserPrincipals userDetails);
 }

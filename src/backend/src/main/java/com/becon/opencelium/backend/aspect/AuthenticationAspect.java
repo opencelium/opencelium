@@ -17,7 +17,7 @@
 package com.becon.opencelium.backend.aspect;
 
 import com.becon.opencelium.backend.database.mysql.entity.Session;
-import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.SessionService;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -32,7 +32,7 @@ import java.util.Date;
 public class AuthenticationAspect {
 
     @Autowired
-    private SessionServiceImpl activityService;
+    private SessionService sessionService;
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
@@ -43,15 +43,18 @@ public class AuthenticationAspect {
     @AfterReturning(pointcut = "execution(* com.becon.opencelium.backend.security.JwtTokenUtil.generateToken(com.becon.opencelium.backend.security.UserPrincipals))",
                     returning = "token")
     public void afterTokenGeneration(String token){
-        String tokenId = jwtTokenUtil.getTokenId(token);
-        String userId = jwtTokenUtil.getClaim(token, "userId").toString();
+        String sessionId = jwtTokenUtil.extractSessionId(token);
+        int userId = jwtTokenUtil.extractUserId(token);
 
-        Session session = new Session();
-        session.setId(tokenId);
-        session.setUserId(Integer.parseInt(userId));
-        session.setActive(true);
+        // if 'user' already has a 'session' then use this one
+        // otherwise create new 'session' for this 'user'
+        Session session = sessionService.findById(sessionId).orElse(new Session());
+
+        session.setId(sessionId);
+        session.setUserId(userId);
         session.setLastAccessed(new Date());
+        session.setActive(true);
 
-        activityService.save(session);
+        sessionService.save(session);
     }
 }

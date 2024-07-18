@@ -163,6 +163,7 @@ public class UserController {
         }
 
         User user = userService.requestToEntity(userRequestResource);
+        // TODO remove session related logic
         Session session = new Session();
         session.setUser(user);
         session.setActive(false);

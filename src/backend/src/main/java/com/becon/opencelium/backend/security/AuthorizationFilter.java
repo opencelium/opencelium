@@ -86,7 +86,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(String token) {
-        String email = jwtTokenUtil.getEmailFromToken(token);
+        String email = jwtTokenUtil.extractEmail(token);
         UserPrincipals userDetail = (UserPrincipals) userDetailsService.loadUserByUsername(email);
 
         try {
