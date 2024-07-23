@@ -27,7 +27,7 @@ Prepare Update
 .. code-block:: sh
         :linenos:
         
-        mkdir /opt/opencelium /opt/openceliumOld
+        mkdir /opt/openceliumOld
         mv -t /opt/openceliumOld /opt/opencelium/conf /opt/opencelium/scripts /opt/opencelium/src /opt/opencelium/tools /opt/opencelium/CHANGELOG.rst /opt/opencelium/LICENSE.md /opt/opencelium/README.md
 
 
