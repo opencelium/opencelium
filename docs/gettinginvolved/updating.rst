@@ -3,7 +3,7 @@ Updating
 ##################
 
 
-From OC 4.0 to OC 4.x (latest)
+From OC 4.0 to latest
 """""""""""""""""
 
 .. note::
@@ -20,7 +20,7 @@ Prepare Update
         :linenos:
 
         systemctl stop opencelium
-        service stop nginx
+        systemctl stop nginx
 
 **2. Backup current installation**
 
@@ -28,7 +28,7 @@ Prepare Update
         :linenos:
         
         mkdir /opt/opencelium /opt/openceliumOld
-        mv -t /opt/openceliumOld /opt/conf /opt/logs /opt/scripts /opt/src /opt/tools /opt/CHANGELOG.rst /opt/LICENSE.md /opt/README.md
+        mv -t /opt/openceliumOld /opt/opencelium/conf /opt/opencelium/scripts /opt/opencelium/src /opt/opencelium/tools /opt/opencelium/CHANGELOG.rst /opt/opencelium/LICENSE.md /opt/opencelium/README.md
 
 
 Install Application
@@ -107,7 +107,7 @@ Finally start OpenCelium backend and frontend.
               
 
 
-From OC 3.x to OC 4.x (latest)
+From OC 3.x to latest
 """""""""""""""""
 
 .. note::
