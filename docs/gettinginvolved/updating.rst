@@ -3,7 +3,111 @@ Updating
 ##################
 
 
-From OC 3.x to OC 4.0
+From OC 4.0 to OC 4.x (latest)
+"""""""""""""""""
+
+.. note::
+        | This update guide is intended for existing zip file 4.0 installations. 
+        | For all other installations, please send us an email to : support@opencelium.io
+
+Prepare Update
+==================
+
+
+**1. Stop Services:**
+
+.. code-block:: sh
+        :linenos:
+
+        systemctl stop opencelium
+        service stop nginx
+
+**2. Backup current installation**
+
+.. code-block:: sh
+        :linenos:
+        
+        mkdir /opt/opencelium /opt/openceliumOld
+        mv -t /opt/openceliumOld /opt/conf /opt/logs /opt/scripts /opt/src /opt/tools /opt/CHANGELOG.rst /opt/LICENSE.md /opt/README.md
+
+
+Install Application
+==================
+
+Download and unzip application, and create a link for it.
+
+.. code-block:: sh
+        :linenos:
+
+        wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
+        unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
+        rm /opt/opencelium/oc_latest.zip
+        rm /usr/bin/oc
+        ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
+        chmod +x /usr/bin/oc
+
+
+Configuration
+==================
+
+**1. OpenCelium:**
+
+Create and adjust configuration.
+
+.. code-block:: sh
+        :linenos:
+
+        cp /opt/opencelium/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
+        cp /opt/openceliumOld/src/backend/src/main/resources/invoker/* /opt/opencelium/src/backend/src/main/resources/invoker/
+        cp /opt/openceliumOld/src/backend/src/main/resources/templates/* /opt/opencelium/src/backend/src/main/resources/templates/
+
+
+.. note::
+        | Modify application.yml
+        | Within section "Database configuration section of MariaDB and MongoDB":
+        | - change password of opencelium user for MariaDB (default "secret1234")
+        | - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
+        | - Just in case you had special settings in application.yml, copy these settings to the new application.yml
+        |   (See old application.yml in /opt/openceliumOld/src/backend/src/main/resources)
+        |  
+        | Just in case you are using SSL, add certs to the ssl section. 
+        | It has to be a p12 keystore file with password! 
+        | If you just have key and pem you can create a p12 as follows:
+
+        
+        .. code-block:: sh
+                :linenos:
+                
+                openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/ssl/certs/opencelium.pem -inkey /etc/ssl/private/opencelium.key
+ 
+
+Finally start OpenCelium backend and frontend.
+
+.. code-block:: sh
+        :linenos:
+
+        systemctl daemon-reload
+        systemctl start opencelium
+        systemctl start nginx
+
+.. note::
+        | Afterwards you can connect to `http://localhost`      
+        | Default User and Password is:
+        
+        | admin@opencelium.io
+        | 1234
+        
+        | If you want to have a look into OpenCelium Logs please use:
+        
+        .. code-block:: sh
+                :linenos:
+                
+                journalctl -xe -u opencelium -f
+                
+              
+
+
+From OC 3.x to OC 4.x (latest)
 """""""""""""""""
 
 .. note::
@@ -20,7 +124,7 @@ Prepare Update
         :linenos:
 
         oc stop_backend
-        service nginx stop
+        systemctl stop nginx
 
 
 **2. Install MongoDB:**
@@ -60,7 +164,7 @@ Configuration
 
 **1. MariaDB:**
 
-Create mysql user for OpenCelium. Older versions always used the MySQL root user, but now we are able to use a separate openlium db user.
+Create mysql user for OpenCelium. Older versions always used the MySQL root user, but now we use a separate openlium db user.
 
 .. note::
 	| Please change the password (secret1234) in the following command line!
