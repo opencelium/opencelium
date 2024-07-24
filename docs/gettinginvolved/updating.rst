@@ -10,52 +10,42 @@ From OC 4.0 to latest
         | This update guide is intended for existing zip file 4.0 installations. 
         | For all other installations, please send us an email to : support@opencelium.io
 
-                
-   DEB package for Ubuntu 24.04 LTS
-"""""""""""""""""
+
+Upgrade DEB package for Ubuntu 24.04 LTS
+==================
 
 .. warning:: 
 
 	| We currently do not support deb package installations in productive use. 
 	| We recommend using it for use in a test phase on a clean system!
 
-Prepare environment:
-==================
-
-**1. Update Ubuntu system:**
 
 .. code-block:: sh
 	:linenos:
 
 	apt update
-	apt upgrade -y opencelium
+	apt install --only-upgrade -y opencelium
 	
 
 
-RPM package for SUSE Linux Enterprise Server 15 SP5
-"""""""""""""""""
+Upgrade RPM package for SUSE Linux Enterprise Server 15 SP5
+==================
 
 .. warning:: 
 
 	| We currently do not support deb package installations in productive use. 
 	| We recommend using it for use in a test phase on a clean system!
 
-Prepare environment:
-==================
-
-**1. Update SLES system:**
 
 .. code-block:: sh
 	:linenos:
 
 	zypper refresh
-	zypper update
-
-	zypper upgrade -y OpenCelium
+	zypper update -y OpenCelium
 
 
-RPM package for RedHat 9.2
-"""""""""""""""""
+Upgrade RPM package for RedHat 9.2
+==================
 
 .. warning:: 
 
@@ -71,7 +61,7 @@ Prepare environment:
 	:linenos:
 
 	yum update
-	yum install -y OpenCelium
+	yum update -y OpenCelium
 	
 
 From OC 3.x to latest
