@@ -636,7 +636,7 @@ RPM package for SUSE Linux Enterprise Server 15 SP5
 
 .. warning:: 
 
-	| We currently do not support deb package installations in productive use. 
+	| We currently do not support rpm package installations in productive use. 
 	| We recommend using it for use in a test phase on a clean system!
 
 Prepare environment:
@@ -728,7 +728,7 @@ RPM package for RedHat 9.2
 
 .. warning:: 
 
-	| We currently do not support deb package installations in productive use. 
+	| We currently do not support rpm package installations in productive use. 
 	| We recommend using it for use in a test phase on a clean system!
 
 Prepare environment:
