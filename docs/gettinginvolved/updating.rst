@@ -10,102 +10,69 @@ From OC 4.0 to latest
         | This update guide is intended for existing zip file 4.0 installations. 
         | For all other installations, please send us an email to : support@opencelium.io
 
-Prepare Update
+                
+   DEB package for Ubuntu 24.04 LTS
+"""""""""""""""""
+
+.. warning:: 
+
+	| We currently do not support deb package installations in productive use. 
+	| We recommend using it for use in a test phase on a clean system!
+
+Prepare environment:
 ==================
 
-
-**1. Stop Services:**
-
-.. code-block:: sh
-        :linenos:
-
-        systemctl stop opencelium
-        systemctl stop nginx
-
-**2. Backup current installation**
+**1. Update Ubuntu system:**
 
 .. code-block:: sh
-        :linenos:
-        
-        mkdir /opt/openceliumOld
-        mv -t /opt/openceliumOld /opt/opencelium/conf /opt/opencelium/scripts /opt/opencelium/src /opt/opencelium/tools /opt/opencelium/CHANGELOG.rst /opt/opencelium/LICENSE.md /opt/opencelium/README.md
+	:linenos:
+
+	apt update
+	apt upgrade -y opencelium
+	
 
 
-Install Application
+RPM package for SUSE Linux Enterprise Server 15 SP5
+"""""""""""""""""
+
+.. warning:: 
+
+	| We currently do not support deb package installations in productive use. 
+	| We recommend using it for use in a test phase on a clean system!
+
+Prepare environment:
 ==================
 
-Download and unzip application, and create a link for it.
+**1. Update SLES system:**
 
 .. code-block:: sh
-        :linenos:
+	:linenos:
 
-        wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
-        unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
-        rm /opt/opencelium/oc_latest.zip
-        rm /usr/bin/oc
-        ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
-        chmod +x /usr/bin/oc
+	zypper refresh
+	zypper update
+
+	zypper upgrade -y OpenCelium
 
 
-Configuration
+RPM package for RedHat 9.2
+"""""""""""""""""
+
+.. warning:: 
+
+	| We currently do not support deb package installations in productive use. 
+	| We recommend using it for use in a test phase on a clean system!
+
+Prepare environment:
 ==================
 
-**1. OpenCelium:**
-
-Create and adjust configuration.
+**1. Update RedHat system:**
 
 .. code-block:: sh
-        :linenos:
+	:linenos:
 
-        cp /opt/opencelium/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
-        cp /opt/openceliumOld/src/backend/src/main/resources/invoker/* /opt/opencelium/src/backend/src/main/resources/invoker/
-        cp /opt/openceliumOld/src/backend/src/main/resources/templates/* /opt/opencelium/src/backend/src/main/resources/templates/
-
-
-.. note::
-        | Modify application.yml
-        | Within section "Database configuration section of MariaDB and MongoDB":
-        | - change password of opencelium user for MariaDB (default "secret1234")
-        | - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
-        | - Just in case you had special settings in application.yml, copy these settings to the new application.yml
-        |   (See old application.yml in /opt/openceliumOld/src/backend/src/main/resources)
-        |  
-        | Just in case you are using SSL, add certs to the ssl section. 
-        | It has to be a p12 keystore file with password! 
-        | If you just have key and pem you can create a p12 as follows:
-
-        
-        .. code-block:: sh
-                :linenos:
-                
-                openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/ssl/certs/opencelium.pem -inkey /etc/ssl/private/opencelium.key
- 
-
-Finally start OpenCelium backend and frontend.
-
-.. code-block:: sh
-        :linenos:
-
-        systemctl daemon-reload
-        systemctl start opencelium
-        systemctl start nginx
-
-.. note::
-        | Afterwards you can connect to `http://localhost`      
-        | Default User and Password is:
-        
-        | admin@opencelium.io
-        | 1234
-        
-        | If you want to have a look into OpenCelium Logs please use:
-        
-        .. code-block:: sh
-                :linenos:
-                
-                journalctl -xe -u opencelium -f
-                
-              
-
+	yum update
+	yum install -y OpenCelium
+	
 
 From OC 3.x to latest
 """""""""""""""""
