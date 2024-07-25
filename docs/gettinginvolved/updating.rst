@@ -8,8 +8,7 @@ From OC 4.0 to latest
 
 | Log in to OpenCelium, open the *AdminPanel* and click on *Update Assistant*.
 |
-| How to use `Update Assistant
-<https://docs.opencelium.io/en/prod/usage/admin.html#update-assistant>`
+| Click here to see, how to use `Update Assistant <https://docs.opencelium.io/en/prod/usage/admin.html#update-assistant>`
 | 
 | 
 | For online update....
@@ -247,6 +246,6 @@ Finally start OpenCelium backend and frontend.
 | - Click on "Migrate" to start migration
 
 
-.. |image0| image:: ../docs/img/update_assistant/0.png
+.. |image0| image:: ../img/update_assistant/0.png
    :align: middle
    :width: 400
