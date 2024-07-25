@@ -424,7 +424,7 @@ public class UpdateAssistantController {
                     .filter(p -> p.toString().endsWith(".zip"))
                     .findAny()
                     .orElseThrow(() -> new StorageFileNotFoundException("Zip file not found within folder: " + packageName))
-                    .toAbsolutePath().toFile();
+                    .toFile();
 
             try (ZipFile zipFile = new ZipFile(file)) {
                 Enumeration<? extends ZipEntry> entries = zipFile.entries();
