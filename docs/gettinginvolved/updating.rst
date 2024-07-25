@@ -6,15 +6,22 @@ Updating
 From OC 4.0 to latest
 """""""""""""""""
 
-.. note::
-        | This update guide is intended for existing zip file 4.0 installations. 
-        | For all other installations, please send us an email to : support@opencelium.io
-        
-| - Log in to OpenCelium
-| - Click on "Admin Panel"
-| - Click on "Update Assistant"
-| - Online/Offline  
+| Log in to OpenCelium, open the *AdminPanel* and click on *Update Assistant*.
+|
+| How to use `Update Assistant
+<https://docs.opencelium.io/en/prod/usage/admin.html#update-assistant>`
+| 
+| 
+| For online update....
+| 
+| For offline update, click on the *Offline* button.
+| Click on the *Upload Update* button to upload a new zip file.
+| Now, you see a list of all loaded update files.
+| To update OpenCelium, choose your desired version.
+| The *UpdateProcess* will open, and you will see further instructions.
+| To start the update click on *UpdateOC*.
 
+|image0|
 
 
 Update DEB package for Ubuntu 24.04 LTS
@@ -239,3 +246,7 @@ Finally start OpenCelium backend and frontend.
 |   (See old application.yml in /opt/openceliumOld/...)
 | - Click on "Migrate" to start migration
 
+
+.. |image0| image:: ../docs/img/update_assistant/0.png
+   :align: middle
+   :width: 400
