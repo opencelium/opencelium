@@ -458,13 +458,14 @@ CREATE TABLE user_session (
     created_at TIMESTAMP NOT NULL,
     last_accessed TIMESTAMP NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
+    attempts INT DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --changeset 4.0:21 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-LOCK TABLES activity READ, user_session WRITE;
+LOCK TABLES `activity` READ, `user_session` WRITE;
 
-INSERT INTO user_session (session_id, user_id, ip_address, user_agent, created_at, last_accessed, is_active)
+INSERT INTO user_session (session_id, user_id, ip_address, user_agent, created_at, last_accessed, is_active, attempts)
 SELECT
     UUID(),
     user_id,
@@ -472,9 +473,9 @@ SELECT
     NULL,
     COALESCE(request_time, NOW()),
     COALESCE(request_time, NOW()),
-    CASE WHEN is_locked = '1' THEN FALSE ELSE TRUE END
-FROM
-    activity;
+    CASE WHEN is_locked = '1' THEN FALSE ELSE TRUE END,
+    0
+FROM activity;
 
 UNLOCK TABLES;
 

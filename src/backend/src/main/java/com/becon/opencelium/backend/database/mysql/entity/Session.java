@@ -28,7 +28,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import org.springframework.data.annotation.CreatedDate;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 
@@ -43,7 +44,7 @@ public class Session {
 
     @Column(name = "user_id")
     private int userId;
-    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
 
@@ -53,18 +54,22 @@ public class Session {
     @Column(name = "user_agent")
     private String userAgent;
 
-    @CreatedDate
-    @Column(name = "created_at")
+    @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt = new Date();
+    @Column(name = "created_at", updatable = false)
+    private Date createdAt;
 
+    @UpdateTimestamp
     @Column(name = "last_accessed")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date lastAccessed = new Date();
+    private Date lastAccessed;
 
     @JsonIgnore
     @Column(name = "is_active")
     private boolean active;
+
+    @Column(name = "attempts")
+    private int attempts;
 
     public String getId() {
         return id;
@@ -128,5 +133,13 @@ public class Session {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public int getAttempts() {
+        return attempts;
+    }
+
+    public void setAttempts(int attempts) {
+        this.attempts = attempts;
     }
 }
