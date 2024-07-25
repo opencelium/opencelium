@@ -11,7 +11,7 @@ Update zip file installations
 
 | Log in to OpenCelium, open the *AdminPanel* and click on *Update Assistant*.
 |
-| Click here to see, how to use `Update Assistant <https://docs.opencelium.io/en/prod/usage/admin.html#update-assistant/>`_ 
+| Click here to see, how to use `Update Assistant <https://docs.opencelium.io/en/prod/usage/admin.html#update-assistant>`_ 
 | 
 | For online update....
 | 
