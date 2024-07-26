@@ -10,38 +10,11 @@ Update zip file installations
 ==================
 
 | Log in to OpenCelium, open the *AdminPanel* and click on *Update Assistant*.
-|
 | Click here to see, how to use `Update Assistant <https://docs.opencelium.io/en/prod/usage/admin.html#update-assistant>`_ 
-|
-|
-|
-|
-| 
-| For online update, click on the *Offline* button.
-| Click on the *Download* button to download the update
-| The *UpdateProcess* will open, and you will see further instructions.
-| To start the update click on *UpdateOC*.
-| 
-| For offline update, click on the *Offline* button.
-| Click on the *Upload Update* button to upload a new zip file.
-| Now, you see a list of all loaded update files.
-| To update OpenCelium, choose your desired version.
-| The *UpdateProcess* will open, and you will see further instructions.
-| To start the update click on *UpdateOC*.
-
-|image0|
-
-
 
 
 Update DEB package for Ubuntu 24.04 LTS
 ==================
-
-.. warning:: 
-
-	| We currently do not support deb package installations in productive use. 
-	| We recommend using it for use in a test phase on a clean system!
-
 
 .. code-block:: sh
 	:linenos:
@@ -50,15 +23,8 @@ Update DEB package for Ubuntu 24.04 LTS
 	apt install --only-upgrade -y opencelium
 	
 
-
 Update RPM package for SUSE Linux Enterprise Server 15 SP5
 ==================
-
-.. warning:: 
-
-	| We currently do not support rpm package installations in productive use. 
-	| We recommend using it for use in a test phase on a clean system!
-
 
 .. code-block:: sh
 	:linenos:
@@ -70,22 +36,14 @@ Update RPM package for SUSE Linux Enterprise Server 15 SP5
 Update RPM package for RedHat 9.2
 ==================
 
-.. warning:: 
-
-	| We currently do not support rpm package installations in productive use. 
-	| We recommend using it for use in a test phase on a clean system!
-
-
-**1. Update RedHat system:**
-
 .. code-block:: sh
 	:linenos:
 
 	yum update
 	yum update -y OpenCelium
 	
-
-
+| 
+| 
 
 From OC 3.x to 4.x (latest)
 """""""""""""""""

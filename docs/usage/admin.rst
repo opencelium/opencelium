@@ -3,23 +3,8 @@ Admin Panel
 ##################
 
 Admin Panel includes necessary tools for working with OpenCelium.
-There are: App, Users, Groups, Invokers, Templates, Notification
-Templates, Update Assistant, Converter.
-
-App
-"""""""""""""""""
-
-The applications menu displays a list of software that OpenCelium connected with.
-If they are installed and configured on your machine,
-you can open them clicking on the card and see relations to OC. If not,
-you will see the notification message, that this system is down. Also,
-the corresponded item shows its status: enabled or disabled.
-
-|image_admin_0|
-
-For this moment, there are two items: *MongoDB* and *MariaDB*. "MongoDB" collects all required
-information about connections. *MariaDB* stores the rest data of OpenCelium, like users, groups,
-schedules etc.
+There are: Users, Groups, External Applications, Invokers, Templates, 
+Data Aggregator, Notification Templates, Update Assistant, Swagger API Docs, Migration.
 
 Users
 """""""""""""""""
@@ -101,6 +86,21 @@ permissions for the corresponding row.
 
 |image_group_4|
 
+External Applications
+"""""""""""""""""
+
+The applications menu displays a list of software that OpenCelium connected with.
+If they are installed and configured on your machine,
+you can open them clicking on the card and see relations to OC. If not,
+you will see the notification message, that this system is down. Also,
+the corresponded item shows its status: enabled or disabled.
+
+|image_admin_0|
+
+For this moment, there are two items: *MongoDB* and *MariaDB*. "MongoDB" collects all required
+information about connections. *MariaDB* stores the rest data of OpenCelium, like users, groups,
+schedules etc.
+
 Invokers
 """""""""""""""""
 
@@ -120,13 +120,6 @@ These are business templates. In other words, they are connections that are save
 often use. `Here
 <https://docs.opencelium.io/en/prod/management/template.html>`_, you can read how to manage with them.
 
-Notification Templates
-"""""""""""""""""
-
-Notification Templates are templates that are used in scheduler jobs to notify users for three event
-types: *pre*, *post*, and *alert*. `Here
-<https://docs.opencelium.io/en/prod/management/notification_template.html>`_, you can read how to manage with them.
-
 Data Aggregator
 """""""""""""""""
 
@@ -134,11 +127,17 @@ Data Aggregator is a feature that provides a possibility to notify a user after 
 triggered connection (this happens in *Schedules*). `Here
 <https://docs.opencelium.io/en/prod/management/aggregator.html>`_, you can read how to manage with them.
 
+Notification Templates
+"""""""""""""""""
+
+Notification Templates are templates that are used in scheduler jobs to notify users for three event
+types: *pre*, *post*, and *alert*. `Here
+<https://docs.opencelium.io/en/prod/management/notification_template.html>`_, you can read how to manage with them.
 
 Update Assistant
 """""""""""""""""
 
-The *Available Updates* tool helps you to update OpenCelium to newer version. If the system recognizes
+The *Update Assistant* helps you to update OpenCelium to newer version. If the system recognizes
 a new version in the git repository, it shows the message that it is available. The update process
 consists of several steps, let's consider them.
 
@@ -156,6 +155,21 @@ After choosing the right version click on the *Update OC* to finish the procedur
 read the `Administration
 <https://docs.opencelium.io/en/prod/gettinginvolved/administration.html>`_ paragraph.
 
+Swagger API Docs 
+"""""""""""""""""
+
+Migration
+"""""""""""""""""
+Since version 4.0, OpenCelium uses MongoDB to store your connection data.
+The *Migration* tool helps you to migrate your data from Neo4j to MongoDB,
+in case of updating from an old OpenCelium to 4.x.
+The migration has to be done as last step after updating OpenCelium application.
+
+Enter predefined Neo4j UrL, User and Password.
+See old application.yml (in your backup directory).
+Click on *Migrate* to start data migration.
+
+|image_migration 0|
 
 
 .. |image_admin_0| image:: ../img/admin/0.png
@@ -193,3 +207,7 @@ read the `Administration
    :align: middle
 .. |image_update_assistant_1| image:: ../img/update_assistant/1.png
    :align: middle
+   
+.. |image_migration_0| image:: ../img/admin/4.png
+   :align: middle
+   
