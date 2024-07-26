@@ -162,14 +162,14 @@ Migration
 """""""""""""""""
 Since version 4.0, OpenCelium uses MongoDB to store your connection data.
 The *Migration* tool helps you to migrate your data from Neo4j to MongoDB,
-in case of updating from an old OpenCelium to 4.x.
+in case of updating from an old OpenCelium version to 4.x.
 The migration has to be done as last step after updating OpenCelium application.
 
-Enter predefined Neo4j UrL, User and Password.
+Enter predefined Neo4j Url, User and Password.
 See old application.yml (in your backup directory).
 Click on *Migrate* to start data migration.
 
-|image_migration 0|
+|image_migration_0|
 
 
 .. |image_admin_0| image:: ../img/admin/0.png
