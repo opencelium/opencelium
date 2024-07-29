@@ -18,9 +18,9 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.repository.SessionRepository;
-import com.becon.opencelium.backend.security.UserPrincipals;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
@@ -37,20 +37,21 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public Optional<Session> findById(String id) {
-        return sessionRepository.findById(id);
-    }
-
-    @Override
     public Optional<Session> findByUserId(int userId) {
         return sessionRepository.findByUserId(userId);
     }
 
     @Override
-    public void registerTokenActivity(UserPrincipals userDetails) {
-        Session session = userDetails.getUser().getSession();
+    @Transactional
+    public boolean deleteByUserId(int userId) {
+        return sessionRepository.deleteByUserId(userId) > 0;
+    }
+
+    @Override
+    public void updateLastAccessedTime(Session session) {
         session.setActive(true);
         session.setLastAccessed(new Date());
+
         sessionRepository.save(session);
     }
 }

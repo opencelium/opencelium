@@ -18,14 +18,11 @@ package com.becon.opencelium.backend.aspect;
 
 import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.service.SessionService;
-import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Date;
 
 @Aspect
 @Component
@@ -37,23 +34,21 @@ public class AuthenticationAspect {
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
-    @Autowired
-    private UserServiceImpl userService;
-
     @AfterReturning(pointcut = "execution(* com.becon.opencelium.backend.security.JwtTokenUtil.generateToken(com.becon.opencelium.backend.security.UserPrincipals))",
                     returning = "token")
     public void afterTokenGeneration(String token){
         String sessionId = jwtTokenUtil.extractSessionId(token);
         int userId = jwtTokenUtil.extractUserId(token);
 
-        // if 'user' already has a 'session' then use this one
-        // otherwise create new 'session' for this 'user'
-        Session session = sessionService.findById(sessionId).orElse(new Session());
+        // if 'user' already has a 'session' then delete it and create new one
+        sessionService.deleteByUserId(userId);
+
+        Session session = new Session();
 
         session.setId(sessionId);
         session.setUserId(userId);
-        session.setLastAccessed(new Date());
         session.setActive(true);
+        session.setAttempts(0);
 
         sessionService.save(session);
     }

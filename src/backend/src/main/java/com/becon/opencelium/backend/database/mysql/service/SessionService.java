@@ -17,7 +17,6 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Session;
-import com.becon.opencelium.backend.security.UserPrincipals;
 
 import java.util.Optional;
 
@@ -25,9 +24,9 @@ public interface SessionService {
 
     void save(Session session);
 
-    Optional<Session> findById(String id);
-
     Optional<Session> findByUserId(int userId);
 
-    void registerTokenActivity(UserPrincipals userDetails);
+    boolean deleteByUserId(int userId);
+
+    void updateLastAccessedTime(Session session);
 }

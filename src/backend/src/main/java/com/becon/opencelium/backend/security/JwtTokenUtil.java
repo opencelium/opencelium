@@ -57,11 +57,6 @@ public class JwtTokenUtil {
         return getClaimFromToken(token, JWTClaimsSet::getExpirationTime);
     }
 
-    private Object getClaim(String token, String name){
-        final JWTClaimsSet claims = getAllClaimsFromToken(token);
-        return claims.getClaim(name);
-    }
-
     public <T> T getClaimFromToken(String token, Function<JWTClaimsSet, T> claimsResolver) {
         final JWTClaimsSet claims = getAllClaimsFromToken(token);
         return  claimsResolver.apply(claims);
@@ -69,16 +64,7 @@ public class JwtTokenUtil {
 
     public String generateToken(UserPrincipals userDetails) {
         User user = userDetails.getUser();
-
-        String sessionId;
-        if (user.getSession() != null) {
-            // if 'user' already has a 'session', then use its' id
-            sessionId = user.getSession().getId();
-        } else {
-            // if 'user' does not have a 'session' (first login)
-            // then generate random UUID to create new 'session' for this 'user'
-            sessionId = UUID.randomUUID().toString();
-        }
+        String sessionId = UUID.randomUUID().toString();
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
             .claim("userId", user.getId())
@@ -128,21 +114,26 @@ public class JwtTokenUtil {
         }
     }
 
-    private Boolean isTokenExpired(String token) {
-        final Date expiration = extractExpirationDate(token);
-        return expiration.before(new Date());
+    public String generateToken(JWTClaimsSet claims) {
+        try {
+            MACSigner signer = new MACSigner(tokenUtility.getSecret());
+            SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims); // Create signed JWT
+            signedJWT.sign(signer); // Sign the JWT
+
+            return signedJWT.serialize();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
-    public String generateToken(JWTClaimsSet claims) {
-            try {
-                MACSigner signer = new MACSigner(tokenUtility.getSecret());
-                SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims); // Create signed JWT
-                signedJWT.sign(signer); // Sign the JWT
+    private Object getClaim(String token, String name){
+        final JWTClaimsSet claims = getAllClaimsFromToken(token);
+        return claims.getClaim(name);
+    }
 
-                return signedJWT.serialize();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+    private Boolean isTokenExpired(String token) {
+        final Date expiration = extractExpirationDate(token);
+        return expiration.before(new Date());
     }
 }

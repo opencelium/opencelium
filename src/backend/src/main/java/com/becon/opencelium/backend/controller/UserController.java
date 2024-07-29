@@ -72,7 +72,7 @@ public class UserController {
     private UserRoleServiceImpl userRoleService;
 
     @Autowired
-    private SessionServiceImpl activityService;
+    private SessionServiceImpl sessionService;
 
     @Autowired
     private StorageService storageService;
@@ -282,12 +282,12 @@ public class UserController {
     })
     @GetMapping("/{id}/logout")
     public ResponseEntity<?> logout(@PathVariable("id") int userId) {
-        return activityService
+        return sessionService
                 .findByUserId(userId)
                 .map(
                         p -> {
                             p.setActive(false);
-                            activityService.save(p);
+                            sessionService.save(p);
                             return ResponseEntity.ok().build();
                         })
                 .orElseThrow(() -> new SessionNotFoundException(userId));

@@ -97,7 +97,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             throw new RuntimeException(e);
         }
 
-        sessionService.registerTokenActivity(userDetail);
+        sessionService.updateLastAccessedTime(userDetail.getUser().getSession());
         return new UsernamePasswordAuthenticationToken(userDetail,
                                                        null,
                                                        userDetail.getAuthorities());
