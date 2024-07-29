@@ -138,7 +138,7 @@ Update Assistant
 """""""""""""""""
 
 The *Update Assistant* helps you to update OpenCelium to newer version. If the system recognizes
-a new version in the git repository, it shows the message that it is available. The update process
+a new version in the package cloud, it shows the message that it is available. The update process
 consists of several steps, let's consider them.
 
 The *System Check* tests your machine if everything set up. Also it notifies you to make a backup of the
@@ -146,8 +146,9 @@ system before update.
 
 |image_update_assistant_0|
 
-The *Update Assistant* provides you two options of the source: *Online* and *Offline*. The *Online*
-gets versions from package cloud and in *Offline* you can upload a *zip* file with OpenCelium version.
+| The *Update Assistant* provides you two options of the source: *Online* and *Offline*. 
+| *Online* update gets new versions from package cloud (can be activated in user profile).
+| At *Offline* update, you can upload a *zip* file with a new OpenCelium version.
 
 |image_update_assistant_1|
 
@@ -155,8 +156,6 @@ After choosing the right version click on the *Update OC* to finish the procedur
 read the `Administration
 <https://docs.opencelium.io/en/prod/gettinginvolved/administration.html>`_ paragraph.
 
-Swagger API Docs 
-"""""""""""""""""
 
 Migration
 """""""""""""""""
