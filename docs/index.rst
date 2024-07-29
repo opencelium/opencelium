@@ -61,7 +61,7 @@ This documentation is organized into a couple of sections:
    :caption: Sources
    :maxdepth: 2
 
-   Download >https://packagecloud.io/becon/opencelium/>
+   Download <https://packagecloud.io/becon/opencelium/>
    Repository <https://github.com/opencelium/opencelium/>
    Changelog <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
 

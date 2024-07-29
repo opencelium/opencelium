@@ -148,7 +148,7 @@ system before update.
 
 | The *Update Assistant* provides you two options of the source: *Online* and *Offline*. 
 | *Online* update gets new versions from package cloud (can be activated in user profile).
-| At *Offline* update, you can upload a *zip* file with a new OpenCelium version.
+| At *Offline* update, you can upload a *zip* file for a new OpenCelium version.
 
 |image_update_assistant_1|
 
