@@ -146,7 +146,7 @@ system before update.
 
 |image_update_assistant_0|
 
-| The *Update Assistant* provides you two options: 
+| The *Update Assistant* provides two options: 
 | * **Online:** get the new versions via package cloud
 | * **Offline:** download the version and upload it offline
 
