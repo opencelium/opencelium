@@ -146,9 +146,9 @@ system before update.
 
 |image_update_assistant_0|
 
-| The *Update Assistant* provides you two options of the source: *Online* and *Offline*. 
-| *Online* update gets new versions from package cloud (can be activated in user profile).
-| At *Offline* update, you can upload a *zip* file for a new OpenCelium version.
+| The *Update Assistant* provides you two options: 
+| * **Online:** get the new versions via package cloud
+| * **Offline:** download the version and upload it offline
 
 |image_update_assistant_1|
 
@@ -157,7 +157,7 @@ read the `Administration
 <https://docs.opencelium.io/en/prod/gettinginvolved/administration.html>`_ paragraph.
 
 
-Migration
+Migration from 3.x to 4.x
 """""""""""""""""
 Since version 4.0, OpenCelium uses MongoDB to store your connection data.
 The *Migration* tool helps you to migrate your data from Neo4j to MongoDB,
