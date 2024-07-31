@@ -1,0 +1,84 @@
+/*
+ *  Copyright (C) <2023>  <becon GmbH>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {ICommonState} from "@application/interfaces/core";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {CommonState} from "@application/utils/store";
+import LicenseModel from "@entity/application/requests/models/LicenseModel";
+import {IResponse} from "@application/requests/interfaces/IResponse";
+import {activateLicenseFile, activateLicenseString, getLicenseStatus} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
+
+export interface LicenseState extends ICommonState{
+    activatingLicense: API_REQUEST_STATE,
+    gettingLicenseStatus: API_REQUEST_STATE,
+    license: LicenseModel,
+    status: boolean,
+}
+
+const initialState: LicenseState = {
+    activatingLicense: API_REQUEST_STATE.INITIAL,
+    gettingLicenseStatus: API_REQUEST_STATE.INITIAL,
+    license: null,
+    status: false,
+    ...CommonState,
+}
+
+export const licenseSlice = createSlice({
+    name: 'license',
+    initialState,
+    reducers: {
+    },
+    extraReducers: {
+        [activateLicenseString.pending.type]: (state) => {
+            state.activatingLicense = API_REQUEST_STATE.START;
+        },
+        [activateLicenseString.fulfilled.type]: (state, action: PayloadAction<LicenseModel>) => {
+            state.activatingLicense = API_REQUEST_STATE.FINISH;
+            state.license = action.payload;
+            state.error = null;
+        },
+        [activateLicenseString.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.activatingLicense = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [activateLicenseFile.pending.type]: (state) => {
+            state.activatingLicense = API_REQUEST_STATE.START;
+        },
+        [activateLicenseFile.fulfilled.type]: (state, action: PayloadAction<LicenseModel>) => {
+            state.activatingLicense = API_REQUEST_STATE.FINISH;
+            state.license = action.payload;
+            state.error = null;
+        },
+        [activateLicenseFile.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.activatingLicense = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getLicenseStatus.pending.type]: (state) => {
+            state.gettingLicenseStatus = API_REQUEST_STATE.START;
+        },
+        [getLicenseStatus.fulfilled.type]: (state, action: PayloadAction<boolean>) => {
+            state.gettingLicenseStatus = API_REQUEST_STATE.FINISH;
+            state.status = action.payload;
+            state.error = null;
+        },
+        [getLicenseStatus.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingLicenseStatus = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+    }
+})
+
+export default licenseSlice.reducer;
