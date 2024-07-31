@@ -14,7 +14,11 @@
  */
 
 import entityApplicationReducer from "./ApplicationSlice";
+import licenseReducer from "./LicenseSlice";
+import subscriptionReducer from "./SubscriptionSlice";
 
 export default {
     entityApplicationReducer,
+    licenseReducer,
+    subscriptionReducer,
 }

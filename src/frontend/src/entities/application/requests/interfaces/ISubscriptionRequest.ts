@@ -13,19 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {IRequestSettings} from "@application/requests/interfaces/IRequest";
-import Request from "./Request";
-import IApplicationRequest, {GetServicePortalTokenStatusResponse} from "../interfaces/IApplication";
 import {AxiosResponse} from "axios";
+import SubscriptionModel from "@entity/application/requests/models/SubscriptionModel";
 
-export default class ApplicationRequest extends Request implements IApplicationRequest {
 
-    constructor(settings?: Partial<IRequestSettings>) {
-        super({url: '', ...settings});
-    }
+export default interface ISubscriptionRequest {
 
-    async getServicePortalTokenStatus(): Promise<AxiosResponse<GetServicePortalTokenStatusResponse>>{
-        this.url = 'application/service-portal-status';
-        return super.get<GetServicePortalTokenStatusResponse>();
-    }
+    //to get all subscriptions
+    getAll (): Promise<AxiosResponse<SubscriptionModel[]>>,
+
 }

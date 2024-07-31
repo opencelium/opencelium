@@ -14,8 +14,12 @@
  */
 
 import ApplicationCreators from "./ApplicationCreators";
+import LicenseCreators from "./LicenseCreators";
+import SubscriptionCreators from "./SubscriptionCreators";
 
 
 export default {
     ...ApplicationCreators,
+    ...LicenseCreators,
+    ...SubscriptionCreators,
 }

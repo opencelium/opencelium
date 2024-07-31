@@ -15,10 +15,29 @@
 
 import ActionCreators from "../../redux_toolkit/action_creators";
 
+const {
+    getLicenseStatus, activateLicenseString, activateLicenseFile,
+    getAllSubscriptions,
+} = ActionCreators;
+
 
 export default {
     fulfilled: {
+        [activateLicenseString.fulfilled.type]: "The license text was successfully activated.",
+        [activateLicenseFile.fulfilled.type]: "The license file was successfully activated.",
     },
     rejected: {
+        [activateLicenseFile.rejected.type]: {
+            "__DEFAULT__": "There is an error activating license file."
+        },
+        [activateLicenseString.rejected.type]: {
+            "__DEFAULT__": "There is an error activating license text."
+        },
+        [getLicenseStatus.rejected.type]: {
+            "__DEFAULT__": "There is an error fetching license status."
+        },
+        [getAllSubscriptions.rejected.type]: {
+            "__DEFAULT__": "There is an error fetching subscriptions."
+        }
     },
 }
