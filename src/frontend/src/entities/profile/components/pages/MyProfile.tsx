@@ -36,6 +36,8 @@ import {ProfileImageStyled, DefaultImageStyled} from "./styles";
 import {withTheme} from "styled-components";
 import AvatarDefault from "@image/application/avatar_default.png";
 import {isArray} from "@application/utils/utils";
+import ActivateLicenseComponent from "@entity/profile/components/activate_license/ActivateLicenseComponent";
+import Subscriptions from "@entity/profile/components/subscriptions/Subscriptions";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
@@ -122,16 +124,15 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
     const data = {
         title: 'My Profile',
         formSections: [
-            <FormSection label={{value: 'user details'}}>
-                {Avatar}
-                {Title}
-                {UserDetailsInputs}
-                {Email}
-            </FormSection>,
             <React.Fragment>
-                <FormSection label={{value: 'user group'}}>
-                    {Permissions}
+                <FormSection label={{value: 'user details'}}>
+                    {Avatar}
+                    {Title}
+                    {UserDetailsInputs}
+                    {Email}
                 </FormSection>
+            </React.Fragment>,
+            <React.Fragment>
                 <FormSection label={{value: 'settings'}}>
                     <div style={{position: 'relative'}}>
                         <InputSelect
@@ -144,14 +145,22 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                     </div>
                     <InputSwitch
                         name={`All online services are ${themeSync ? 'enabled' : 'disabled'} (Gravatar, Online Update, Theme)`}
-                        icon={'corporate_fare'}
+                        icon={'sync'}
                         label={'Online Service Sync'}
-                        isChecked={themeSync} onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}
-                        hasConfirmation={true}
+                        isChecked={themeSync}
+                        onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}
+                        hasConfirmation={!themeSync}
                         confirmationText={'Are you agree to share your E-mail with Opencelium Service Portal?'}
                     />
                 </FormSection>
-            </React.Fragment>
+                <FormSection label={{value: 'Subscriptions'}} hasFullWidthInForm>
+                    <Subscriptions/>
+                    {!themeSync && <ActivateLicenseComponent/>}
+                </FormSection>
+            </React.Fragment>,
+            <FormSection label={{value: 'user group'}} hasFullWidthInForm>
+                {Permissions}
+            </FormSection>
         ]
     }
     return(

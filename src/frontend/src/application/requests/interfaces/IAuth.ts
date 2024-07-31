@@ -26,9 +26,6 @@ interface IAuth{
     //to login into the application
     login(credentials: ICredentials): Promise<AxiosResponse<IUser & NoLicenseResponse>>,
 
-    //to upload license token
-    uploadToken(token: string): Promise<AxiosResponse<IUser>>
-
     //to logout from the application
     logout(): void,
 }

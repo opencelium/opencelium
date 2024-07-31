@@ -14,27 +14,25 @@
  */
 
 
-import {IForm} from "../interfaces/core";
+import {IForm} from "@application/interfaces/core";
 
 export enum UploadType {
     String= 'string',
     File= 'file',
 }
-export interface IUploadTokenRadios{
+export interface IActivateLicenseFormRadios{
     type: UploadType;
 }
 
-export interface IUploadTokenTextarea{
+export interface IActivateLicenseFormTextarea{
     token: string;
 }
 
-export interface IUploadTokenFile {
+export interface IActivateLicenseFormFile {
     tokenFile: FileList;
 }
 
-export interface IUploadTokenForm extends IUploadTokenRadios, IUploadTokenTextarea, IUploadTokenFile, IForm<{}, {}, IUploadTokenRadios, IUploadTokenFile, IUploadTokenTextarea, {}>{
-    upload: () => boolean;
-}
-
-export interface IUploadToken extends IUploadTokenForm{
+export interface IActivateLicenseForm extends IActivateLicenseFormRadios, IActivateLicenseFormTextarea, IActivateLicenseFormFile, IForm<{}, {}, IActivateLicenseFormRadios, IActivateLicenseFormFile, IActivateLicenseFormTextarea, {}>{
+    activateFile: () => boolean;
+    activateString: () => boolean;
 }

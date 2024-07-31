@@ -108,5 +108,5 @@ export interface IApplicationRequest{
     getLogoName(email: string): Promise<AxiosResponse<string>>,
 
     //to update user themes
-    updateThemes(data: ModelUpdateThemes): Promise<AxiosResponse<IResponse>>
+    updateThemes(data: ModelUpdateThemes): Promise<AxiosResponse<IResponse>>,
 }

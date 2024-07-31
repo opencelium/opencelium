@@ -33,11 +33,6 @@ export class AuthRequest extends Request implements IAuth{
         return super.post<IUser & NoLicenseResponse>(credentials);
     }
 
-    async uploadToken(token: string): Promise<AxiosResponse<IUser>> {
-        this.url = 'upload-token';
-        return super.post<IUser>({token});
-    }
-
     logout():void{
         const storage = LocalStorage.getStorage(true);
         storage.remove('authUser');
