@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.utility.crypto;
 
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.exception.WrongDecryptException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -65,8 +66,10 @@ public class Encoder {
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivspec);
             byte[] decryptedText = cipher.doFinal(encryptedData, 16, encryptedData.length - 16);
             return new String(decryptedText, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (IllegalBlockSizeException |
+                BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException
+                | IllegalArgumentException e) {
+            throw new WrongDecryptException(e);
         }
     }
 
