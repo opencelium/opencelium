@@ -15,11 +15,18 @@
 
 import {AxiosResponse} from "axios";
 import SubscriptionModel from "@entity/application/requests/models/SubscriptionModel";
+import {IResponse} from "@application/requests/interfaces/IResponse";
 
 
 export default interface ISubscriptionRequest {
 
     //to get all subscriptions
     getAll (): Promise<AxiosResponse<SubscriptionModel[]>>,
+
+    //to get current subscription
+    getCurrent (): Promise<AxiosResponse<SubscriptionModel>>,
+
+    //to set current subscription
+    setCurrent (subscriptionId: string): Promise<AxiosResponse<IResponse>>,
 
 }

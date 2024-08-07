@@ -78,6 +78,10 @@ export enum REQUEST_METHOD{
     DELETE = 'DELETE',
 }
 
+export interface StatusResponse {
+    status: boolean,
+}
+
 export interface IApplicationRequest{
 
     //to make an external request

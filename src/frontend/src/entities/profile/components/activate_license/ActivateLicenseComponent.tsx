@@ -1,6 +1,5 @@
 import React, {useEffect} from 'react';
 import Button from "@basic_components/buttons/Button";
-import {FormSection} from "@app_component/form/form_section/FormSection";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import License from "@entity/application/classes/License";
 import {ActivateLicenseForm} from "@entity/application/classes/ActivateLicenseForm";
@@ -9,16 +8,6 @@ import {IActivateLicenseForm, UploadType} from "@entity/application/interfaces/I
 const ActivateLicenseComponent = () => {
     const {activatingLicense} = License.getReduxState();
     const UploadTokenForm = ActivateLicenseForm.createState<IActivateLicenseForm>();
-    const Type = UploadTokenForm.getRadios({propertyName: "type", props: {
-        icon: 'call_merge',
-        label: 'Upload as',
-        options: [{autoFocus: true, label: 'Text', value: UploadType.String, checked: true, key: UploadType.String}, {label: 'File', value: UploadType.File, checked: false, key: UploadType.File}],
-    }})
-    const TokenText = UploadTokenForm.getTextarea({propertyName: "token", props: {
-        icon: 'lock_outline',
-        label: 'Key',
-        minHeight: '115px'
-    }})
     const TokenFile = UploadTokenForm.getFile({propertyName: "tokenFile", props: {
         label: 'Key',
         icon: 'lock_outline',
@@ -50,9 +39,7 @@ const ActivateLicenseComponent = () => {
     }, [UploadTokenForm.type]);
     return (
         <div>
-            {Type}
-            {UploadTokenForm.type === UploadType.String && TokenText}
-            {UploadTokenForm.type === UploadType.File && TokenFile}
+            {TokenFile}
             <div style={{float: 'right'}}>
                 <Button
                     label={'Activate'}

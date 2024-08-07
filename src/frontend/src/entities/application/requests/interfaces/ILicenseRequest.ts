@@ -15,6 +15,7 @@
 
 import {AxiosResponse} from "axios";
 import LicenseModel from "@entity/application/requests/models/LicenseModel";
+import {StatusResponse} from "@application/requests/interfaces/IApplication";
 
 export interface ActivateLicenseFileRequest {
 
@@ -26,11 +27,14 @@ export interface ActivateLicenseResponse {
     license: LicenseModel,
 }
 
-export interface GetStatusResponse {
-    status: boolean,
+export interface GenerateActivateRequestResponse {
+    request: string,
 }
 
 export default interface ILicenseRequest {
+
+    //to generate activate request
+    generateActivateRequest (): Promise<AxiosResponse<GenerateActivateRequestResponse>>,
 
     //to activate license file
     activateFile (data: ActivateLicenseFileRequest): Promise<AxiosResponse<ActivateLicenseResponse>>,
@@ -39,6 +43,9 @@ export default interface ILicenseRequest {
     activateString (data: ActivateLicenseStringRequest): Promise<AxiosResponse<ActivateLicenseResponse>>,
 
     //to get status
-    getStatus (): Promise<AxiosResponse<GetStatusResponse>>
+    getStatus (): Promise<AxiosResponse<StatusResponse>>,
+
+    //to get activation request status
+    getActivationRequestStatus (): Promise<AxiosResponse<StatusResponse>>
 
 }

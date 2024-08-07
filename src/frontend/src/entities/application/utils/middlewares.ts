@@ -21,6 +21,7 @@ import {getResources, getVersion} from "@application/redux_toolkit/action_creato
 import {setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
+import {generateActivateRequest} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (login.fulfilled.type === action.type) {
@@ -35,6 +36,16 @@ export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next
         if (storage.get('themes') !== action.payload) {
             storage.set('themes', action.payload);
         }
+    }
+    if (generateActivateRequest.fulfilled.type === action.type) {
+        const name = 'opencelium_activate_request';
+        let dataStr = "data:text/txt;charset=utf-8," + encodeURIComponent(action.payload.request);
+        let downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", name + ".txt");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
     }
     return next(action);
 }

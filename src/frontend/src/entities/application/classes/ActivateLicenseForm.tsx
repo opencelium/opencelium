@@ -36,7 +36,7 @@ import {RootState} from "@application/utils/store";
 export class ActivateLicenseForm extends HookStateClass implements IActivateLicenseForm {
 
     @Application.inputType
-    type: UploadType = UploadType.String;
+    type: UploadType = UploadType.File;
 
     @Application.inputType
     token: string = '';

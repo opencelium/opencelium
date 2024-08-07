@@ -89,9 +89,9 @@ const ProgressBarElement: FC<ProgressBarElementProps> =
                 <ProgressBarTitleStyled>{schedule.title}</ProgressBarTitleStyled>
                 <ProgressBarStyled
                     type="linear"
+                    buffer={100}
                     mode="determinate"
                     value={progress}
-                    buffer={100}
                 />
                 <ProgressBarToStyled>
                     <span>{schedule.toConnector}</span>

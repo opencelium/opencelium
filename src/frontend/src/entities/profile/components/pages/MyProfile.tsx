@@ -38,16 +38,24 @@ import AvatarDefault from "@image/application/avatar_default.png";
 import {isArray} from "@application/utils/utils";
 import ActivateLicenseComponent from "@entity/profile/components/activate_license/ActivateLicenseComponent";
 import Subscriptions from "@entity/profile/components/subscriptions/Subscriptions";
+import {getServicePortalTokenStatus} from "@entity/application/redux_toolkit/action_creators/ApplicationCreators";
+import {getActivationRequestStatus} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
+import License from "@entity/application/classes/License";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
     const dispatch = useAppDispatch();
     let {themes} = Application.getReduxState();
+    const {activationRequestStatus} = License.getReduxState();
     if(!themes || !isArray(themes) || themes.length === 0){
         themes = DefaultThemes;
     }
     const {authUser} = Auth.getReduxState();
     const [themeSync, setThemeSync] = useState<boolean>(authUser?.userDetail?.themeSync || false);
+    useEffect(() => {
+        dispatch(getServicePortalTokenStatus());
+        dispatch(getActivationRequestStatus());
+    }, [])
     useEffect(() => {
         setThemeSync(authUser.userDetail.themeSync);
     }, [authUser.userDetail])
@@ -153,9 +161,10 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                         confirmationText={'Are you agree to share your E-mail with Opencelium Service Portal?'}
                     />
                 </FormSection>
-                <FormSection label={{value: 'Subscriptions'}} hasFullWidthInForm>
-                    <Subscriptions/>
-                    {!themeSync && <ActivateLicenseComponent/>}
+                <FormSection label={{value: 'Subscriptions'}} styles={{
+                }}>
+                    <Subscriptions hasOnlineSync={themeSync}/>
+                    {!themeSync && activationRequestStatus && <ActivateLicenseComponent/>}
                 </FormSection>
             </React.Fragment>,
             <FormSection label={{value: 'user group'}} hasFullWidthInForm>

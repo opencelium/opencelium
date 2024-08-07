@@ -5,5 +5,5 @@ export default interface SubscriptionModel {
     duration: string,
     endDate: number,
     totalOperationUsage: number,
-    currentOperationUsage: number,
+    currentOperationUsage?: number,
 }
