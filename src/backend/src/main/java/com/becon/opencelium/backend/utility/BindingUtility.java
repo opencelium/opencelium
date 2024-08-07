@@ -25,7 +25,7 @@ public class BindingUtility {
                 if (method.getResponse() != null) {
                     if (method.getResponse().getFail() != null && method.getResponse().getFail().getBody() != null) {
                         Map<String, Object> fields = method.getResponse().getFail().getBody().getFields();
-                        if(fields != null) {
+                        if (fields != null) {
                             for (Map.Entry<String, Object> entry : fields.entrySet()) {
                                 entry.setValue(findRefAndReplace(entry.getValue(), fbs));
                             }
@@ -33,7 +33,7 @@ public class BindingUtility {
                     }
                     if (method.getResponse().getSuccess() != null && method.getResponse().getSuccess().getBody() != null) {
                         Map<String, Object> fields = method.getResponse().getSuccess().getBody().getFields();
-                        if(fields != null) {
+                        if (fields != null) {
                             for (Map.Entry<String, Object> entry : fields.entrySet()) {
                                 entry.setValue(findRefAndReplace(entry.getValue(), fbs));
                             }
@@ -119,28 +119,26 @@ public class BindingUtility {
 //---------------------------------------------- bind ----------------------------------------------------//
 
     public static String doWithPath(String endpoint, String id, List<LinkedFieldMng> from) {
-        int indexOfQuestionSign = endpoint.indexOf("?");
+        int indexOfQuestionSign = EndpointUtility.findIndexOfQuesSign(endpoint);
         String query = null;
         if (indexOfQuestionSign != -1) {
             query = endpoint.substring(indexOfQuestionSign + 1);
-            String[] pairsRaw = query.split("&");
+            List<String[]> variables = EndpointUtility.getQueryVariables(query);
             out:
-            for (int i = 0; i < pairsRaw.length; i++) {
-                String p = pairsRaw[i];
-                String[] split = p.split("=");
-                if (split[1].matches("\\{%#.+%}")) {
+            for (String[] p : variables) {
+                if (p[1].matches(RegExpression.wrappedDirectRef)) {
                     for (LinkedFieldMng lf : from) {
-                        if (!split[1].contains(lf.getColor() + ".(" + lf.getType() + ")" + (lf.getField() == null ? "" : "." + lf.getField()))) {
+                        if (!p[1].contains(lf.getColor() + ".(" + lf.getType() + ")" + (lf.getField() == null ? "" : "." + lf.getField()))) {
                             continue out;
                         }
                     }
-                    split[1] = "{%" + id + "%}";
-                    pairsRaw[i] = split[0] + "=" + split[1];
+                    //TODO: bind exactly reference itself, not whole value
+                    p[1] = "{%" + id + "%}";
                 }
             }
             StringJoiner sj = new StringJoiner("&");
-            for (String p : pairsRaw) {
-                sj.add(p);
+            for (String[] p : variables) {
+                sj.add(p[0] + "=" + p[1]);
             }
             query = sj.toString();
         }
@@ -150,16 +148,18 @@ public class BindingUtility {
         } else {
             path = endpoint.substring(0, indexOfQuestionSign);
         }
-        String[] subPaths = path.split("/");
+
+        List<String> subPaths = EndpointUtility.splitPath(path);
         out:
-        for (int i = 0; i < subPaths.length; i++) {
-            if (subPaths[i].matches("\\{%#.+%}")) {
+        for (int i = 0; i < subPaths.size(); i++) {
+            if (subPaths.get(i).matches(RegExpression.wrappedDirectRef)) {
                 for (LinkedFieldMng lf : from) {
-                    if (!subPaths[i].contains(lf.getColor() + "(" + lf.getType() + ")" + (lf.getField() == null ? "" : lf.getField()))) {
+                    if (!subPaths.get(i).contains(lf.getColor() + "(" + lf.getType() + ")" + (lf.getField() == null ? "" : lf.getField()))) {
                         continue out;
                     }
                 }
-                subPaths[i] = "{%" + id + "%}";
+                //TODO: bind exactly reference itself, not whole sub path
+                subPaths.set(i, "{%" + id + "%}");
             }
         }
         StringJoiner sj = new StringJoiner("/");
@@ -168,7 +168,9 @@ public class BindingUtility {
         }
         path = sj.toString();
 
-        return (query == null) ? path : path + "?" + query;
+        return (query == null)
+                ? path
+                : path + "?" + query;
     }
 
     public static void doWithHeader(Map<String, String> header, String fieldName, String id) {
@@ -176,6 +178,7 @@ public class BindingUtility {
                 .stream()
                 .filter(entry -> entry.getValue().equals(fieldName))
                 .findFirst()
+                //TODO: bind exactly reference itself, not whole sub path
                 .ifPresent(entry -> entry.setValue("{%" + id + "%}"));
     }
 
