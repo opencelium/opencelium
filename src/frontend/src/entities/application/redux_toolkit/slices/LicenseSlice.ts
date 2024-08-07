@@ -19,20 +19,31 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import LicenseModel from "@entity/application/requests/models/LicenseModel";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import {activateLicenseFile, activateLicenseString, getLicenseStatus} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
+import {
+    activateLicenseFile,
+    activateLicenseString,
+    generateActivateRequest, getActivationRequestStatus,
+    getLicenseStatus
+} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
 
 export interface LicenseState extends ICommonState{
+    generatingActivateRequest: API_REQUEST_STATE,
     activatingLicense: API_REQUEST_STATE,
     gettingLicenseStatus: API_REQUEST_STATE,
+    gettingActivationRequestStatus: API_REQUEST_STATE,
     license: LicenseModel,
     status: boolean,
+    activationRequestStatus: boolean,
 }
 
 const initialState: LicenseState = {
+    generatingActivateRequest: API_REQUEST_STATE.INITIAL,
     activatingLicense: API_REQUEST_STATE.INITIAL,
     gettingLicenseStatus: API_REQUEST_STATE.INITIAL,
+    gettingActivationRequestStatus: API_REQUEST_STATE.INITIAL,
     license: null,
     status: false,
+    activationRequestStatus: false,
     ...CommonState,
 }
 
@@ -42,6 +53,19 @@ export const licenseSlice = createSlice({
     reducers: {
     },
     extraReducers: {
+        [generateActivateRequest.pending.type]: (state) => {
+            state.generatingActivateRequest = API_REQUEST_STATE.START;
+        },
+        [generateActivateRequest.fulfilled.type]: (state, action: PayloadAction<LicenseModel>) => {
+            state.generatingActivateRequest = API_REQUEST_STATE.FINISH;
+            state.license = action.payload;
+            state.activationRequestStatus = true;
+            state.error = null;
+        },
+        [generateActivateRequest.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.generatingActivateRequest = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
         [activateLicenseString.pending.type]: (state) => {
             state.activatingLicense = API_REQUEST_STATE.START;
         },
@@ -76,6 +100,18 @@ export const licenseSlice = createSlice({
         },
         [getLicenseStatus.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingLicenseStatus = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getActivationRequestStatus.pending.type]: (state) => {
+            state.gettingActivationRequestStatus = API_REQUEST_STATE.START;
+        },
+        [getActivationRequestStatus.fulfilled.type]: (state, action: PayloadAction<boolean>) => {
+            state.gettingActivationRequestStatus = API_REQUEST_STATE.FINISH;
+            state.activationRequestStatus = action.payload;
+            state.error = null;
+        },
+        [getActivationRequestStatus.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingActivationRequestStatus = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }

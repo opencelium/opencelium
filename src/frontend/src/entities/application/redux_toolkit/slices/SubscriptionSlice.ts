@@ -19,16 +19,25 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import SubscriptionModel from "@entity/application/requests/models/SubscriptionModel";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import {getAllSubscriptions} from "@entity/application/redux_toolkit/action_creators/SubscriptionCreators";
+import {
+    getAllSubscriptions,
+    getCurrentSubscription, setCurrentSubscription
+} from "@entity/application/redux_toolkit/action_creators/SubscriptionCreators";
 
 export interface SubscriptionState extends ICommonState{
     subscriptions: SubscriptionModel[],
     gettingSubscriptions: API_REQUEST_STATE,
+    currentSubscriptionId: string,
+    gettingCurrentSubscription: API_REQUEST_STATE,
+    settingCurrentSubscription: API_REQUEST_STATE,
 }
 
 const initialState: SubscriptionState = {
     subscriptions: [],
     gettingSubscriptions: API_REQUEST_STATE.INITIAL,
+    currentSubscriptionId: null,
+    gettingCurrentSubscription: API_REQUEST_STATE.INITIAL,
+    settingCurrentSubscription: API_REQUEST_STATE.INITIAL,
     ...CommonState,
 }
 
@@ -48,6 +57,30 @@ export const subscriptionSlice = createSlice({
         },
         [getAllSubscriptions.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingSubscriptions = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getCurrentSubscription.pending.type]: (state) => {
+            state.gettingCurrentSubscription = API_REQUEST_STATE.START;
+        },
+        [getCurrentSubscription.fulfilled.type]: (state, action: PayloadAction<SubscriptionModel>) => {
+            state.gettingCurrentSubscription = API_REQUEST_STATE.FINISH;
+            state.currentSubscriptionId = action.payload._id;
+            state.error = null;
+        },
+        [getCurrentSubscription.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingCurrentSubscription = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [setCurrentSubscription.pending.type]: (state) => {
+            state.settingCurrentSubscription = API_REQUEST_STATE.START;
+        },
+        [setCurrentSubscription.fulfilled.type]: (state, action: PayloadAction<string>) => {
+            state.settingCurrentSubscription = API_REQUEST_STATE.FINISH;
+            state.currentSubscriptionId = action.payload;
+            state.error = null;
+        },
+        [setCurrentSubscription.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.settingCurrentSubscription = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }
