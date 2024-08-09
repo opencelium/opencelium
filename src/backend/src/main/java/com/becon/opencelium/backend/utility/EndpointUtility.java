@@ -3,10 +3,10 @@ package com.becon.opencelium.backend.utility;
 import java.util.*;
 
 public class EndpointUtility {
-    public static final String PRE_DIRECT_REF = "{%#";
-    public static final String SUF_DIRECT_REF = "%}";
-    public static final String PRE_WEBHOOK = "${";
-    public static final String SUF_WEBHOOK = "}";
+    private static final String PRE_DIRECT_REF = "{%#";
+    private static final String SUF_DIRECT_REF = "%}";
+    private static final String PRE_WEBHOOK = "${";
+    private static final String SUF_WEBHOOK = "}";
 
     public static int findIndexOfQuesSign(String endpoint) {
         if (endpoint == null) {
@@ -153,5 +153,28 @@ public class EndpointUtility {
             }
         }
         return res;
+    }
+
+    public static String bindExactlyPlace(String str, List<String> refs, String id) {
+        int length = str.length();
+        out:
+        for (int i = 0; i < length; i++) {
+            if (str.startsWith(PRE_DIRECT_REF, i)) {
+                int sufIdx = str.indexOf(SUF_DIRECT_REF, i);
+                if (sufIdx == -1) {
+                    return str;
+                }
+                int idx = str.indexOf(PRE_DIRECT_REF, i);
+                String part = str.substring(idx + PRE_DIRECT_REF.length()-1, sufIdx);
+                for (String ref : refs) {
+                    if (!part.contains(ref)) {
+                        i = sufIdx + SUF_DIRECT_REF.length() - 1;
+                        continue out;
+                    }
+                }
+                return str.substring(0, idx) + "{%" + id + "%}" + str.substring(sufIdx + PRE_DIRECT_REF.length());
+            }
+        }
+        return str;
     }
 }

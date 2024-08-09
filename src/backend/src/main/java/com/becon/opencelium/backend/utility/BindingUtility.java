@@ -119,6 +119,7 @@ public class BindingUtility {
 //---------------------------------------------- bind ----------------------------------------------------//
 
     public static String doWithPath(String endpoint, String id, List<LinkedFieldMng> from) {
+        List<String> refs = from.stream().map(x -> x.getColor() + ".(" + x.getType() + ")" + (x.getField() == null ? "" : "." + x.getField())).toList();
         int indexOfQuestionSign = EndpointUtility.findIndexOfQuesSign(endpoint);
         String query = null;
         if (indexOfQuestionSign != -1) {
@@ -127,13 +128,12 @@ public class BindingUtility {
             out:
             for (String[] p : variables) {
                 if (p[1].matches(RegExpression.wrappedDirectRef)) {
-                    for (LinkedFieldMng lf : from) {
-                        if (!p[1].contains(lf.getColor() + ".(" + lf.getType() + ")" + (lf.getField() == null ? "" : "." + lf.getField()))) {
+                    for (String ref : refs) {
+                        if (!p[1].contains(ref)) {
                             continue out;
                         }
                     }
-                    //TODO: bind exactly reference itself, not whole value
-                    p[1] = "{%" + id + "%}";
+                    p[1] = EndpointUtility.bindExactlyPlace(p[1], refs, id);
                 }
             }
             StringJoiner sj = new StringJoiner("&");
@@ -153,13 +153,12 @@ public class BindingUtility {
         out:
         for (int i = 0; i < subPaths.size(); i++) {
             if (subPaths.get(i).matches(RegExpression.wrappedDirectRef)) {
-                for (LinkedFieldMng lf : from) {
-                    if (!subPaths.get(i).contains(lf.getColor() + "(" + lf.getType() + ")" + (lf.getField() == null ? "" : lf.getField()))) {
+                for (String ref : refs) {
+                    if (!subPaths.get(i).contains(ref)) {
                         continue out;
                     }
                 }
-                //TODO: bind exactly reference itself, not whole sub path
-                subPaths.set(i, "{%" + id + "%}");
+                subPaths.set(i, EndpointUtility.bindExactlyPlace(subPaths.get(i), refs, id));
             }
         }
         StringJoiner sj = new StringJoiner("/");
@@ -178,7 +177,6 @@ public class BindingUtility {
                 .stream()
                 .filter(entry -> entry.getValue().equals(fieldName))
                 .findFirst()
-                //TODO: bind exactly reference itself, not whole sub path
                 .ifPresent(entry -> entry.setValue("{%" + id + "%}"));
     }
 
