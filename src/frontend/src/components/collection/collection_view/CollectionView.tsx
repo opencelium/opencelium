@@ -41,7 +41,7 @@ import {BadRequest} from "@app_component/default_pages/bad_request/BadRequest";
 import {debounce} from "@application/utils/utils";
 import CategoryTabs from '@entity/category/components/category_tabs/CategoryTabs';
 
-const LIST_VIEW_ENTITIES_NUMBER = 10;
+const LIST_VIEW_ENTITIES_NUMBER = 3;
 
 export enum ViewType{
     LIST= 'LIST',
@@ -183,8 +183,8 @@ const CollectionView: FC<CollectionViewProps> =
                             {collection.getFilterComponents(filterData, (data: any) => setFilterData({...data}))}
                         </Filter>
                     }
-                    {collection.name === "schedules" && <CategoryTabs readOnly/>}
-                    {collection.name === "connections" && <CategoryTabs/>}
+                    {collection.name === "schedules" && <CategoryTabs setCurrentPage={setCurrentPage} readOnly/>}
+                    {collection.name === "connections" && <CategoryTabs setCurrentPage={setCurrentPage}/>}
                     <div style={{marginTop: hasTopBar ? '0' : '20px'}}>
                         {applicationViewType === ViewType.LIST &&
                             <List
