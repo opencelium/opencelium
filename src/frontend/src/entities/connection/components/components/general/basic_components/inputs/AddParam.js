@@ -159,6 +159,7 @@ class AddParam extends React.Component{
                     <Button id={id} icon={'add'} onClick={() => this.toggleForm()} iconSize={'13px'}/>
                 </div>
                 <Dialog
+                    id={'add_param_dialog'}
                     actions={[{label: 'Add', isLoading, onClick: () => this.updateMethod()}, {label: 'Cancel', onClick: () => this.toggleForm()}]}
                     active={isOpenedForm}
                     toggle={() => this.toggleForm()}
