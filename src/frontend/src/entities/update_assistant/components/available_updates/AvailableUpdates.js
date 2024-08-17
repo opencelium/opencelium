@@ -22,7 +22,13 @@ import Table from "@basic_components/table/Table";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import OldVersionEntry from "@entity/update_assistant/components/available_updates/OldVersionEntry";
-import {uploadOnlineVersion, getOnlineUpdates as fetchOnlineUpdates, getOfflineUpdates as fetchOfflineUpdates, uploadApplicationFile as uploadVersion} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
+import {
+    uploadOnlineVersion,
+    getOnlineUpdates as fetchOnlineUpdates,
+    getOfflineUpdates as fetchOfflineUpdates,
+    uploadApplicationFile as uploadVersion,
+    getChangelogInfo
+} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {API_REQUEST_STATE, VERSION_STATUS} from "@application/interfaces/IApplication";
 import Loading from "@app_component/base/loading/Loading";
  import {TextSize} from "@app_component/base/text/interfaces";
@@ -30,6 +36,7 @@ import Loading from "@app_component/base/loading/Loading";
  import InputFile from "@app_component/base/input/file/InputFile";
  import DownloadOnlineVersionIcon
      from "@entity/update_assistant/components/available_updates/DownloadOnlineVersionIcon";
+ import {Dialog} from "@app_component/base/dialog/Dialog";
 
 export const ONLINE_UPDATE = 'ONLINE_UPDATE';
 export const OFFLINE_UPDATE = 'OFFLINE_UPDATE';
@@ -42,17 +49,19 @@ function mapStateToProps(state){
         authUser,
         uploadingOnlineVersion: updateAssistant.uploadingOnlineVersion,
         fetchingOnlineUpdates: updateAssistant.gettingOnlineUpdates,
+        gettingChangelog: updateAssistant.gettingChangelogInfo,
         fetchingOfflineUpdates: updateAssistant.gettingOfflineUpdates,
         uploadingVersion: updateAssistant.uploadingApplicationFile,
         onlineUpdates: updateAssistant.onlineUpdates,
         offlineUpdates: updateAssistant.offlineUpdates,
+        changelog: updateAssistant.changelog,
         error: updateAssistant.error,
     };
 }
 /*
 * TODO: implement cancel requests when switch online to offline
 */
-@connect(mapStateToProps, {fetchOnlineUpdates, fetchOfflineUpdates, uploadVersion, uploadOnlineVersion})
+@connect(mapStateToProps, {fetchOnlineUpdates, fetchOfflineUpdates, uploadVersion, uploadOnlineVersion, getChangelogInfo})
 @withTranslation('update_assistant')
 class AvailableUpdates extends React.Component{
     constructor(props) {
@@ -69,6 +78,7 @@ class AvailableUpdates extends React.Component{
             isOldVersionsExtended: false,
             isNewVersionsExtended: false,
             uploadProgress: 0,
+            showChangelog: false,
         }
     }
 
@@ -95,6 +105,17 @@ class AvailableUpdates extends React.Component{
                 startFetchingOfflineUpdates: false,
             });
         }
+    }
+
+    toggleChangelog() {
+        this.setState({
+            showChangelog: !this.state.showChangelog,
+        })
+    }
+
+    getChangelog(url) {
+        this.props.getChangelogInfo(url);
+        this.toggleChangelog();
     }
 
     uploadVersion(f){
@@ -308,7 +329,11 @@ class AvailableUpdates extends React.Component{
                                 return (
                                     <tr key={version.name}>
                                         <td>{`v${version.name}`}</td>
-                                        <td><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
+                                        <td>
+                                            <div style={{textDecoration: 'underline', cursor: 'pointer'}} title={'Show changelog'} onClick={() => this.getChangelog(version.changelogLink)}>
+                                                {t('FORM.CHANGELOG')}
+                                            </div>
+                                        </td>
                                         <td>
                                             {version.status !== VERSION_STATUS.CURRENT
                                                 ?
@@ -436,8 +461,8 @@ class AvailableUpdates extends React.Component{
     }
 
     render(){
-        const {activeMode, startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
-        const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates} = this.props;
+        const {activeMode, startFetchingOnlineUpdates, startFetchingOfflineUpdates, showChangelog} = this.state;
+        const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates, changelog, gettingChangelog, error} = this.props;
         return(
             <div style={{margin: '20px 0 0 0'}}>
                 <div style={{textAlign: 'center'}}>
@@ -465,6 +490,17 @@ class AvailableUpdates extends React.Component{
                         this.renderUpdates()
                     }
                 </div>
+                <Dialog
+                    actions={[
+                        {id: 'close', label: 'Close', onClick: () => this.toggleChangelog()}
+                    ]}
+                    active={showChangelog}
+                    toggle={() => this.toggleChangelog()}
+                    title={'Changelog'}
+                    styles={{modal: {minWidth: '800px'}}}
+                >
+                    {gettingChangelog === API_REQUEST_STATE.START ? <Loading/> : <pre>{error ? error.message : changelog}</pre>}
+                </Dialog>
             </div>
         );
     }

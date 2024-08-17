@@ -41,7 +41,7 @@ import {BadRequest} from "@app_component/default_pages/bad_request/BadRequest";
 import {debounce} from "@application/utils/utils";
 import CategoryTabs from '@entity/category/components/category_tabs/CategoryTabs';
 
-const LIST_VIEW_ENTITIES_NUMBER = 3;
+const LIST_VIEW_ENTITIES_NUMBER = 10;
 
 export enum ViewType{
     LIST= 'LIST',

@@ -35,6 +35,10 @@ export class UpdateAssistantRequest extends Request implements IUpdateAssistantR
         return super.get<InstallationInfo>();
     }
 
+    async getChangelogInfo(): Promise<AxiosResponse<string>>{
+        return super.get<string>();
+    }
+
     async uploadOnlineVersion(): Promise<AxiosResponse<IResponse>>{
         return super.get<IResponse>();
     }
