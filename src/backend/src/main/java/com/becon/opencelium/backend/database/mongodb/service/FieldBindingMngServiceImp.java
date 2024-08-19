@@ -13,6 +13,7 @@ import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.utility.BindingUtility;
+import com.becon.opencelium.backend.utility.EndpointUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -254,27 +255,12 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
                             endpoint = BindingUtility.doWithPath(endpoint, fb.getId(), fb.getFrom());
                             method.getRequest().setEndpoint(endpoint);
                         }
-                        case "header" -> BindingUtility.doWithHeader(method.getRequest().getHeader(), toField.getField(), fb.getId());
+                        case "header" -> BindingUtility.doWithHeader(method.getRequest().getHeader(), toField.getField(), fb.getId(), fb.getFrom());
                         case "request" -> {
-                            List<String> fieldPaths = new ArrayList<>(List.of(toField.getField().split("\\.")));
+                            List<String> fieldPaths = EndpointUtility.splitByDot(toField.getField());
                             Map<String, Object> fields = method.getRequest().getBody().getFields();
                             Map<String, Object> boundFields = BindingUtility.doWithBody(fields, fieldPaths, fb.getId(), method.getRequest().getBody().getFormat());
                             method.getRequest().getBody().setFields(boundFields);
-                        }
-                        case "response" -> {
-                            List<String> fieldPaths = new ArrayList<>(List.of(toField.getField().split("\\.")));
-                            fieldPaths.remove(0);
-                            BodyMng bodyMngToChange;
-                            String format;
-                            if (toField.getField().startsWith("success")) {
-                                bodyMngToChange = method.getResponse().getSuccess().getBody();
-                                format = method.getResponse().getSuccess().getBody().getFormat();
-                            } else {
-                                bodyMngToChange = method.getResponse().getFail().getBody();
-                                format = method.getResponse().getFail().getBody().getFormat();
-                            }
-                            Map<String, Object> boundFields = BindingUtility.doWithBody(bodyMngToChange.getFields(), fieldPaths, fb.getId(), format);
-                            bodyMngToChange.setFields(boundFields);
                         }
                         default -> throw new RuntimeException("UNSUPPORTED_TYPE: " + toField.getType());
                     }

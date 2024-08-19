@@ -106,10 +106,41 @@ public class EndpointUtility {
     }
 
     public static List<String> splitPath(String path) {
+        return splitByDelimiter(path, '/');
+    }
+
+    public static List<String> splitByDot(String path) {
+        return splitByDelimiter(path, '.');
+    }
+
+    public static String bindExactlyPlace(String str, List<String> refs, String id) {
+        int length = str.length();
+        out:
+        for (int i = 0; i < length; i++) {
+            if (str.startsWith(PRE_DIRECT_REF, i)) {
+                int sufIdx = str.indexOf(SUF_DIRECT_REF, i);
+                if (sufIdx == -1) {
+                    return str;
+                }
+                int idx = str.indexOf(PRE_DIRECT_REF, i);
+                String part = str.substring(idx + PRE_DIRECT_REF.length() - 1, sufIdx);
+                for (String ref : refs) {
+                    if (!part.contains(ref)) {
+                        i = sufIdx + SUF_DIRECT_REF.length() - 1;
+                        continue out;
+                    }
+                }
+                return str.substring(0, idx) + "{%" + id + "%}" + str.substring(sufIdx + SUF_DIRECT_REF.length());
+            }
+        }
+        return str;
+    }
+
+    private static List<String> splitByDelimiter(String path, char delim) {
         if (path == null || path.isEmpty()) {
             return Collections.emptyList();
         }
-        if (path.indexOf('/') == -1) {
+        if (path.indexOf(delim) == -1) {
             return new ArrayList<>() {{
                 add(path);
             }};
@@ -118,7 +149,7 @@ public class EndpointUtility {
         int pre1 = path.indexOf(PRE_DIRECT_REF);
         int pre2 = path.indexOf(PRE_WEBHOOK);
         if (pre1 == -1 && pre2 == -1) {
-            return List.of(path.split("/"));
+            return List.of(path.split((Character.isSpaceChar(delim) ? "\\" : "") + delim));
         }
 
         List<String> res = new ArrayList<>();
@@ -126,7 +157,7 @@ public class EndpointUtility {
         Stack<String> stack = new Stack<>();
         int n = path.length();
         for (int i = 0; i < n; i++) {
-            if (stack.empty() && path.charAt(i) == '/') {
+            if (stack.empty() && path.charAt(i) == delim) {
                 res.add(path.substring(start, i));
                 start = i + 1;
             } else if (stack.isEmpty() && path.charAt(i) == '?') {
@@ -153,28 +184,5 @@ public class EndpointUtility {
             }
         }
         return res;
-    }
-
-    public static String bindExactlyPlace(String str, List<String> refs, String id) {
-        int length = str.length();
-        out:
-        for (int i = 0; i < length; i++) {
-            if (str.startsWith(PRE_DIRECT_REF, i)) {
-                int sufIdx = str.indexOf(SUF_DIRECT_REF, i);
-                if (sufIdx == -1) {
-                    return str;
-                }
-                int idx = str.indexOf(PRE_DIRECT_REF, i);
-                String part = str.substring(idx + PRE_DIRECT_REF.length()-1, sufIdx);
-                for (String ref : refs) {
-                    if (!part.contains(ref)) {
-                        i = sufIdx + SUF_DIRECT_REF.length() - 1;
-                        continue out;
-                    }
-                }
-                return str.substring(0, idx) + "{%" + id + "%}" + str.substring(sufIdx + PRE_DIRECT_REF.length());
-            }
-        }
-        return str;
     }
 }
