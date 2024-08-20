@@ -76,7 +76,6 @@ export default class GraphiQLRequestWithDynamicToken extends GraphiQLRequest {
                     url: connector.requestData.url,
                     sslOn: connector.sslCert,
                 }
-                console.log(loginProps);
                 const response = await request.remoteApiRequest(loginProps);
                 let accessToken = JSON.parse(response.data.body);
                 for(let i = 0; i < pathToToken.length; i++){

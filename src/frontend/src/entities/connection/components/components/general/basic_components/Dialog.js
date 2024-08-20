@@ -101,10 +101,10 @@ class Dialog extends Component{
 
     render(){
         const {isOpen} = this.state;
-        const {title, toggle, children, theme} = this.props;
+        const {title, toggle, children, theme, id} = this.props;
         let dialogClassname = `${styles.dialog} ${theme.dialog}`;
         return(
-            <Modal id={`modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} className={dialogClassname} modalClassName={theme.modal} contentClassName={theme.content} wrapClassName={theme.wrapper}>
+            <Modal id={id || `modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} className={dialogClassname} modalClassName={theme.modal} contentClassName={theme.content} wrapClassName={theme.wrapper}>
                 <ModalHeader toggle={toggle} className={theme.title}>{title}</ModalHeader>
                 <ModalBody className={theme.body}>
                     {children}
@@ -118,6 +118,7 @@ class Dialog extends Component{
 }
 
 Dialog.propTypes = {
+    id: PropTypes.string,
     title: PropTypes.any.isRequired,
     actions: PropTypes.array.isRequired,
     active: PropTypes.bool,

@@ -1,8 +1,10 @@
 package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
+import com.becon.opencelium.backend.enums.PageParam;
+import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.execution.ExecutionManager;
-import com.becon.opencelium.backend.utility.DirectRefUtility;
+import com.becon.opencelium.backend.utility.ReferenceUtility;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +12,6 @@ import com.jayway.jsonpath.JsonPath;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -32,16 +33,18 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
 import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
-import static com.becon.opencelium.backend.constant.RegExpression.queryParams;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
-import static com.becon.opencelium.backend.constant.RegExpression.responsePointer;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.ARRAY_LETTER_INDEX;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_KEY_TYPE;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_FOR_IN_VALUE_TYPE;
-import static com.becon.opencelium.backend.utility.DirectRefUtility.IS_SPLIT_STRING_TYPE;
+import static com.becon.opencelium.backend.constant.RegExpression.webhook;
+import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
+import static com.becon.opencelium.backend.enums.execution.DataType.UNDEFINED;
+import static com.becon.opencelium.backend.utility.ReferenceUtility.ARRAY_LETTER_INDEX;
+import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_KEY_TYPE;
+import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_VALUE_TYPE;
+import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_SPLIT_STRING_TYPE;
 
 public class ReferenceExtractor implements Extractor {
     private final ExecutionManager executionManager;
@@ -54,146 +57,109 @@ public class ReferenceExtractor implements Extractor {
     public Object extractValue(String ref) {
         Object result = null;
 
-        if (ref.matches(directRef) || ref.matches(responsePointer)) {
+        if (ref.matches(directRef) || ref.matches(wrappedDirectRef)) {
             // extract direct reference if necessary
             // '{%#ababab.(response).success.field[*]%}'
             // '#ababab.(response).success.field[*]
             // '#ababab.(request).field[*]
-            ref = DirectRefUtility.extractRef(ref);
+            ref = ReferenceUtility.extractDirectRef(ref);
 
             result = extractFromOperation(ref);
-        } else if (ref.matches(queryParams)) {
+        } else if (ref.matches(enhancement)) {
+            // '#{%bindId%}'
+            String bindId = ref.replace("#{%", "").replace("%}", "");
+
+            result = executionManager.executeScript(bindId);
+        } else if (ref.matches(webhook)) {
             // '${key}'
             // '${key:type}'
             // '${key.field[*]}'
             // '${key.field[*]:type}'
-            result = extractFromQueryParams(ref);
+            result = extractFromWebhook(ref);
+        } else if (ref.matches(pageRef)) {
+            // '@{limit}'
+            // '@{size}'
+            String param = ref.replace("@{", "").replace("}","");
+
+            result = executionManager.getPaginationParamValue(PageParam.fromString(param));
         } else if (ref.matches(requestData)) {
             // '{key}'
             // '{#ctorId.key}'
-            result = extractFromRequestData(ref);
-        } else if (ref.matches(enhancement)) {
-            // '#{%bindId%}'
-            result = extractFromEnhancement(ref);
+            String refValue = ref.replace("{", "").replace("}", "");
+
+            // set id of required connector if exists
+            Integer ctorId = null;
+            if (refValue.startsWith("#")) {
+                ctorId = Integer.valueOf(refValue.substring(1, refValue.indexOf(".")));
+                refValue = refValue.substring(refValue.indexOf(".") + 1);
+            }
+
+            result = executionManager.getRequestData(ctorId).get(refValue);
         }
 
         return result;
     }
 
-    public static boolean isReference(String ref) {
-        return ref != null && (
-            ref.matches(directRef) || ref.matches(responsePointer) || ref.matches(queryParams) ||
-            ref.matches(requestData) || ref.matches(enhancement) || ref.matches(pageRef)
-        );
-    }
-
-    private Object extractFromEnhancement(String ref) {
-        String bindId = ref.replace("#{%", "").replace("%}", "");
-        return executionManager.executeScript(bindId);
-    }
-
-    private Object extractFromRequestData(String ref) {
-        // remove curly braces
-        String refValue = ref.replace("{", "").replace("}", "");
-
-        // set id of required connector if exists
-        Integer ctorId = null;
-        if (refValue.startsWith("#")) {
-            ctorId = Integer.valueOf(refValue.substring(1, refValue.indexOf(".")));
-            refValue = refValue.substring(refValue.indexOf(".") + 1);
-        }
-
-        return executionManager.getRequestData(ctorId).get(refValue);
-    }
-
-    private Object extractFromQueryParams(String ref) {
-        if (ObjectUtils.isEmpty(ref)) {
-            return "";
-        }
-
-        Map<String, Object> queryParams = executionManager.getQueryParams();
-        if (queryParams.isEmpty()) {
+    private Object extractFromWebhook(String ref) {
+        Map<String, Object> webhookVars = executionManager.getWebhookVars();
+        if (webhookVars.isEmpty()) {
             return null;
         }
 
-        try {
-            // get requiredType if specified, then update reference
-            String type = "";
-            if (ref.contains(":")) {
-                type = ref.split(":")[1].replace("}", "");
-                ref = ref.split(":")[0].concat("}");
-            }
+        // get requiredType if specified, then update reference
+        DataType type = UNDEFINED;
+        if (ref.contains(":")) {
+            type = DataType.fromString(ref.split(":")[1].replace("}", ""));
 
-            // convert 'queryParams' to jsonString to work with both
-            // single value and jsonObject cases at the same time
-            String message = new ObjectMapper().writeValueAsString(queryParams);
-            Pattern r = Pattern.compile(RegExpression.queryParams);
-            Matcher m = r.matcher(ref);
-
-            Object value = null;
-            while (m.find()) {
-                // convert 'queryParams' reference to jsonPath
-                String jsonPath = "$." + m.group().replace("${", "").replace("}", "");
-
-                value = JsonPath.read(message, jsonPath);
-            }
-
-            if (value == null) {
-                return null;
-            }
-
-            return mapToType(value, type);
-        } catch (JsonProcessingException ex) {
-            throw new RuntimeException();
+            ref = ref.split(":")[0].concat("}");
         }
+
+        Object value = null;
+        Pattern pattern = Pattern.compile(webhook);
+        Matcher matcher = pattern.matcher(ref);
+
+        if (matcher.find()) {
+            String paths = matcher.group().replace("${", "").replace("}", "");
+            value = getFromJSON(webhookVars, paths);
+        }
+
+        return mapToType(value, type);
     }
 
-    private Object mapToType(Object value, String type) {
-        Object result;
-        String stringValue = value.toString();
-
-        if (type.isBlank()) {
-            // map to number [int, double] if possible
-            final Pattern pattern = Pattern.compile(RegExpression.isNumber, Pattern.MULTILINE);
-            final Matcher matcher = pattern.matcher(stringValue);
-
-            boolean isNumber = false;
-            while (matcher.find()) {
-                isNumber = true;
-            }
-
-            String optionalType = isNumber ? (stringValue.contains(".") ? "double" : "int") : "none";
-
-            result = mapToType(value, optionalType);
-        } else if ("string".equalsIgnoreCase(type)) {
-            result = stringValue.replace("[", "").replace("]", "").replace("'", "");
-        } else if ("int".equalsIgnoreCase(type)) {
-            result = Long.parseLong(stringValue);
-        } else if ("double".equalsIgnoreCase(type)) {
-            result = Double.parseDouble(stringValue);
-        } else if ("boolean".equalsIgnoreCase(type)) {
-            result = Boolean.getBoolean(stringValue);
-        } else if ("array".equalsIgnoreCase(type)) {
-            result = stringValue.replace("[", "")
-                    .replace("]", "")
-                    .replace("\"", "")
-                    .replace("'", "").split(",");
-        } else {
-            result = value;
+    private Object mapToType(Object value, DataType type) {
+        if (value == null) {
+            return null;
         }
 
-        return result;
+        String stringValue = value.toString();
+        return switch (type) {
+            case INTEGER -> Long.parseLong(stringValue);
+            case BOOLEAN -> Boolean.parseBoolean(stringValue);
+            case NUMBER  -> Double.parseDouble(stringValue);
+            case STRING -> stringValue.replace("[", "").replace("]", "")
+                    .replace("'", "");
+            case ARRAY -> {
+                String cleanedString = stringValue.replace("[", "").replace("]", "")
+                        .replace("\"", "").replace("'", "").trim();
+                if (cleanedString.isEmpty()) {
+                    yield Collections.emptyList();
+                } else {
+                    yield Arrays.asList(cleanedString.split("\\s*,\\s*"));
+                }
+            }
+            case UNDEFINED, OBJECT -> value;
+        };
     }
 
     private Object extractFromOperation(String ref) {
         // find operation by color
-        String color = DirectRefUtility.getColor(ref);
+        String color = ReferenceUtility.getColor(ref);
 
         Operation operation = executionManager.findOperationByColor(color)
                 .orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
 
         // extract value
-        String exchangeType = DirectRefUtility.getExchangeType(ref);
+        String exchangeType = ReferenceUtility.getExchangeType(ref);
         String key = executionManager.generateKey(operation.getLoopDepth());
 
         Object entityBody;
@@ -212,11 +178,12 @@ public class ReferenceExtractor implements Extractor {
         }
 
         Object result;
+        String paths = ReferenceUtility.removeOperationInfo(ref);
 
         if (MediaTypeUtility.isJsonCompatible(mediaType)) {
-            result = getFromJSON(entityBody, ref);
+            result = getFromJSON(entityBody, paths);
         } else if (MediaTypeUtility.isXmlCompatible(mediaType)) {
-            result = getFromXML(entityBody, ref);
+            result = getFromXML(entityBody, paths);
         } else {
             result = bodyToString(entityBody);
         }
@@ -236,12 +203,12 @@ public class ReferenceExtractor implements Extractor {
         }
     }
 
-    private Object getFromJSON(Object body, String ref) {
+    private Object getFromJSON(Object body, String paths) {
         Object result = body;
         int partCount = 0;
 
         // creating json path query
-        for (String path : DirectRefUtility.getReferenceParts(ref)) {
+        for (String path : ReferenceUtility.splitPaths(paths)) {
             partCount++;
             if (path.isEmpty()) {
                 continue;
@@ -278,7 +245,7 @@ public class ReferenceExtractor implements Extractor {
                 } else if ("*".equals(match)) {
                     // case 1.1.2: obj['*']~
                     // return all field names of the current object
-                    Object currentBody = getFromJSON(body, DirectRefUtility.getPointerToBody(ref, partCount, matcher.group(0)));
+                    Object currentBody = getFromJSON(body, ReferenceUtility.getPointerToBody(paths, partCount, matcher.group(0)));
                     return getFieldNames(currentBody);
                 } else {
                     // case 1.1.3: obj['field_name']~
@@ -334,7 +301,7 @@ public class ReferenceExtractor implements Extractor {
                 } else if ("*".equals(match)) {
                     // case 2.3: field[*]~
                     // find loop by reference
-                    Loop loop = getLoopByReference(ref);
+                    Loop loop = getLoopByReference(paths);
 
                     // recreate list of strings split by delimiter
                     List<String> strs = new ArrayList<>();
@@ -351,7 +318,7 @@ public class ReferenceExtractor implements Extractor {
                     }
 
                     // find loop by reference
-                    Loop loop = getLoopByReference(ref);
+                    Loop loop = getLoopByReference(paths);
 
                     // it is a primitive value just return string on the specified index
                     return ((String) result).split(loop.getDelimiter())[index];
@@ -383,13 +350,13 @@ public class ReferenceExtractor implements Extractor {
         return result;
     }
 
-    private Object getFromXML(Object body, String ref) {
-        ref = ref.replaceFirst("\\$", "");
+    private Object getFromXML(Object body, String paths) {
+        paths = paths.replaceFirst("\\$", "");
         String xpathQuery = "/";
 
         boolean hasLoop = !executionManager.getLoops().isEmpty();
 
-        for (String part : DirectRefUtility.getReferenceParts(ref)) {
+        for (String part : ReferenceUtility.splitPaths(paths)) {
             if (part.isEmpty()) {
                 continue;
             }
@@ -467,7 +434,7 @@ public class ReferenceExtractor implements Extractor {
 
     private Loop getLoopByReference(String reference) {
         return executionManager.getLoops().stream()
-                .filter(loop -> DirectRefUtility.equals(loop.getRef(), reference))
+                .filter(loop -> ReferenceUtility.equals(loop.getRef(), reference))
                 .findFirst().orElseThrow(() -> new RuntimeException("Wrong 'reference' value is supplied"));
     }
 

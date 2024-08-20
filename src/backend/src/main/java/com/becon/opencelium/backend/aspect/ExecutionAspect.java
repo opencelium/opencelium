@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.aspect;
 
 
 import com.becon.opencelium.backend.constant.AggrConst;
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.LangEnum;
@@ -213,7 +213,7 @@ public class ExecutionAspect {
                 recipients.add(new EventRecipient(destination));
             }
             case "incoming_webhook" -> {
-                String[] webhooks = env.getProperty(YamlPropConst.INCOMING_WEBHOOK, String[].class);
+                String[] webhooks = env.getProperty(AppYamlPath.INCOMING_WEBHOOK, String[].class);
                 if (webhooks == null) {
                     return;
                 }

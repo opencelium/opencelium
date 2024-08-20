@@ -17,18 +17,27 @@ import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
 import { ProgressBarElementProps } from './interfaces';
 import {
+    BarSectionStyled,
     ProgressBarElementStyled,
     ProgressBarFromStyled,
     ProgressBarIteratorStyled,
     ProgressBarSectionStyled, ProgressBarStyled, ProgressBarTitleStyled, ProgressBarToStyled
 } from './styles';
 import {shuffle} from "@application/utils/utils";
+import Button from "@basic_components/buttons/Button";
+import {PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
+import {ColorTheme} from "@style/Theme";
+import {TextSize} from "@app_component/base/text/interfaces";
+import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
+import {useAppDispatch} from "@application/utils/store";
+import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 
 const ProgressBarElement: FC<ProgressBarElementProps> =
     ({
         schedule,
         iterator,
     }) => {
+    const dispatch = useAppDispatch();
     const calculateStep = () => {
         let {avgDuration} = schedule;
         if(avgDuration === 0){
@@ -83,19 +92,35 @@ const ProgressBarElement: FC<ProgressBarElementProps> =
         <ProgressBarElementStyled >
             <ProgressBarIteratorStyled>{iterator}.</ProgressBarIteratorStyled>
             <ProgressBarSectionStyled>
-                <ProgressBarFromStyled>
-                    <span>{schedule.fromConnector}</span>
-                </ProgressBarFromStyled>
-                <ProgressBarTitleStyled>{schedule.title}</ProgressBarTitleStyled>
-                <ProgressBarStyled
-                    type="linear"
-                    buffer={100}
-                    mode="determinate"
-                    value={progress}
-                />
-                <ProgressBarToStyled>
-                    <span>{schedule.toConnector}</span>
-                </ProgressBarToStyled>
+                <BarSectionStyled>
+                    <ProgressBarFromStyled>
+                        <span>{schedule.fromConnector}</span>
+                    </ProgressBarFromStyled>
+                    <div style={{
+                        width: '100%',
+                        position: 'relative'
+                    }}>
+                        <ProgressBarStyled
+                            type="linear"
+                            mode="determinate"
+                            value={progress}
+                            buffer={100}
+                        />
+                        <ProgressBarTitleStyled>{schedule.title}</ProgressBarTitleStyled>
+                    </div>
+                    <TooltipButton
+                        target={`terminate_schedule_${schedule.schedulerId.toString()}`}
+                        position={'bottom'}
+                        tooltip={'Terminate'}
+                        handleClick={() => dispatch(terminateExecution(schedule.schedulerId))}
+                        hasBackground={false}
+                        icon={'close'}
+                        size={TextSize.Size_20}
+                    />
+                    <ProgressBarToStyled>
+                        <span>{schedule.toConnector}</span>
+                    </ProgressBarToStyled>
+                </BarSectionStyled>
             </ProgressBarSectionStyled>
         </ProgressBarElementStyled>
     )

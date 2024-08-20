@@ -34,4 +34,8 @@ export class WebhookRequest extends Request implements IWebhookRequest{
     async deleteWebhookById(): Promise<AxiosResponse<IResponse>>{
         return super.delete<IResponse>();
     }
+    async getWebhookTypes(): Promise<AxiosResponse<string[]>> {
+        this.endpoint = '/supported/types';
+        return super.get<string[]>();
+    }
 }

@@ -11,10 +11,11 @@ import {withTheme} from "styled-components";
 import {ITheme} from "@style/Theme";
 
 const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionModel, theme: ITheme}) => {
+    const max = 1000000;
+    const divisionStep = max / 10;
     const divisions = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     const progressbarHeight = 30;
     const now = 531234;
-    const max = 1000000;
     const percentage = (now / max) * 100;
     return (
         <div>
@@ -56,16 +57,24 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                     now={percentage}
                 />
                 <DivisionsStyled style={{top: -5}}>
-                    {divisions.map((division, index) => (
-                        <DivisionStyled key={division} style={{
-                            height: progressbarHeight + 10,
-                            borderLeft: index !== 0 && index !== divisions.length - 1 ? '1px dotted #000' : 'unset'
-                        }}>
-                            <LabelStyled key={division}>
-                                {`${index < 10 ? `${division === 0 ? '0' : `${division * 10}K`}` : '1M'}`}
-                            </LabelStyled>
-                        </DivisionStyled>
-                    ))}
+                    {divisions.map((division, index) => {
+                        let thousandStep: number = divisionStep * index / 1000;
+                        let millionStep: number = 0;
+                        if (thousandStep >= 1000) {
+                            millionStep = thousandStep / 1000;
+                            thousandStep = thousandStep - (millionStep * 1000);
+                        }
+                        return (
+                            <DivisionStyled key={index} style={{
+                                height: progressbarHeight + 10,
+                                borderLeft: index !== 0 && index !== divisions.length - 1 ? '1px dotted #000' : 'unset'
+                            }}>
+                                <LabelStyled key={index} style={millionStep > 0 && thousandStep > 0 ? {lineHeight: '18px', bottom: '-40px'} : {bottom: '-25px'}}>
+                                    {`${index === 0 ? '0' : `${millionStep > 0 ? `${millionStep}M` : ''}${thousandStep > 0 ? ' ' : ''}${thousandStep > 0 ? `${thousandStep}K` : ''}`}`}
+                                </LabelStyled>
+                            </DivisionStyled>
+                        );
+                    })}
                 </DivisionsStyled>
                 <NowValueStyled
                     style={{

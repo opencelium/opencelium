@@ -24,13 +24,16 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
-import com.becon.opencelium.backend.resource.execution.DataType;
+import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.storage.StorageService;
-import com.becon.opencelium.backend.utility.DirectRefUtility;
+import com.becon.opencelium.backend.utility.ReferenceUtility;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -54,7 +57,9 @@ import java.util.stream.Stream;
 @Service
 public class InvokerServiceImp implements InvokerService {
 
-    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(InvokerServiceImp.class);
+
+    @Autowired @Lazy
     private InvokerContainer invokerContainer;
 
     @Autowired
@@ -124,6 +129,29 @@ public class InvokerServiceImp implements InvokerService {
         } catch (IOException e) {
             throw new StorageException("Failed to delete stored file", e);
         }
+    }
+
+    @Override
+    public void refresh() {
+        List<Document> invokers = getAllInvokerDocuments();
+        Map<String, Invoker> container = containerize(invokers);
+        invokerContainer.updateAll(container);
+    }
+
+    @Override
+    public Map<String, Invoker> containerize(List<Document> invokers) {
+        Map<String, Invoker> container = new HashMap<>();
+        invokers.forEach(document -> {
+            if (document == null) {
+                return;
+            }
+            InvokerParserImp parser = new InvokerParserImp(document);
+            File f = new File(document.getDocumentURI());
+            String invoker = FileNameUtils.removeExtension(f.getName());
+            invoker = invoker.replace("%20", " ");
+            container.put(invoker, parser.parse());
+        });
+        return container;
     }
 
     // Deletes all entries from the database where the invoker is referenced.
@@ -240,8 +268,8 @@ public class InvokerServiceImp implements InvokerService {
 
         path = path.replace("@", "__oc__attributes.");
 
-        String exchangeType = DirectRefUtility.getExchangeType(path);
-        String result = DirectRefUtility.getResult(path);
+        String exchangeType = ReferenceUtility.getExchangeType(path);
+        String result = ReferenceUtility.getResult(path);
 
         Invoker invoker = findByName(invokerName);
         FunctionInvoker functionInvoker = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))
@@ -267,7 +295,7 @@ public class InvokerServiceImp implements InvokerService {
             }
         }
 
-        String[] valueParts = DirectRefUtility.getReferenceParts(path);
+        String[] valueParts = ReferenceUtility.splitPaths(path);
         if (format.equals("xml")) {
             String lastElem = valueParts[valueParts.length - 1];
             if (!lastElem.contains("@")) {
@@ -325,13 +353,37 @@ public class InvokerServiceImp implements InvokerService {
 
     @Override
     public Document getDocument(String name) throws Exception {
-        File file = new File(filePath.toString() + "/" + name);
+        File file = new File(filePath + "/" + name);
 
         if (!FileNameUtils.getExtension(file.getName()).equals("xml")) {
             return null;
         }
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         return file.exists() ? dBuilder.parse(file) : null;
+    }
+
+    @Override
+    public List<Document> getAllInvokerDocuments() {
+        try {
+            Stream<Path> allInvokers = Files.walk(filePath, 1)
+                    .filter(path -> !path.equals(filePath))
+                    .map(filePath::relativize);
+
+            return allInvokers.map(p -> new File(filePath + "/" + p.getFileName()))
+                    .filter(f -> f.getName().endsWith(".xml"))
+                    .map(file -> {
+                        try {
+                            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                            return dBuilder.parse(file);
+                        } catch (Exception e) {
+                            log.error("Failed to parse Invoker[name: {}]", file.getName());
+                            e.printStackTrace();
+                            return null;
+                        }
+                    }).collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new StorageException("Failed to read stored files", e);
+        }
     }
 
     @Override

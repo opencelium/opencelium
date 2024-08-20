@@ -1,15 +1,16 @@
 package com.becon.opencelium.backend.execution.builder;
 
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
-import com.becon.opencelium.backend.resource.execution.DataType;
+import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
-import com.becon.opencelium.backend.resource.execution.ParamLocation;
+import com.becon.opencelium.backend.enums.execution.ParamLocation;
 import com.becon.opencelium.backend.resource.execution.ParameterDTO;
 import com.becon.opencelium.backend.resource.execution.ParameterDTOUtil;
 import com.becon.opencelium.backend.resource.execution.RequestBodyDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
+import com.becon.opencelium.backend.utility.ReferenceUtility;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -17,7 +18,6 @@ import org.springframework.http.RequestEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -28,6 +28,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
+import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
+import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 
 public class RequestEntityBuilder {
     private final OperationDTO operation;
@@ -96,17 +98,20 @@ public class RequestEntityBuilder {
             rawUrl = rawUrl.replace(ref, ParameterDTOUtil.toString(copiedParameter));
         }
 
-        // construct query parameters if exists
-        String query = getParamsByLocation(ParamLocation.QUERY).stream()
-                .map(ParameterDTOUtil::copy)
-                .peek(parameter -> replaceRefs(parameter.getSchema()))
-                .map(ParameterDTOUtil::toString)
-                .collect(Collectors.joining("&"));
-        
-        // add query parameters if exists
-        if (!ObjectUtils.isEmpty(query)) {
-            // append new ones to old query if exists
-            rawUrl = rawUrl + (rawUrl.contains("?") ? "&" : "?") + query;
+        // replace query parameters
+        for (ParameterDTO parameter : getParamsByLocation(ParamLocation.QUERY)) {
+            // reconstruct existing query without resolving references;
+            String rawQuery = ParameterDTOUtil.toString(parameter);
+
+            // replace referenced schema
+            ParameterDTO copiedParameter = ParameterDTOUtil.copy(parameter);
+            replaceRefs(copiedParameter.getSchema());
+
+            // construct correct query parameter
+            String query = ParameterDTOUtil.toString(copiedParameter);
+
+            // replace raw query parameter with correct one
+            rawUrl = rawUrl.replace(rawQuery, query);
         }
 
         return URI.create(rawUrl);
@@ -119,6 +124,17 @@ public class RequestEntityBuilder {
                 .map(ParameterDTOUtil::copy)
                 .peek(parameter -> replaceRefs(parameter.getSchema()))
                 .forEach(parameter -> headers.put(parameter.getName(), List.of(ParameterDTOUtil.toString(parameter))));
+
+        // add Cookie parameter(s) if exists
+        String cookies = getParamsByLocation(ParamLocation.COOKIE).stream()
+                .map(ParameterDTOUtil::copy)
+                .peek(parameter -> replaceRefs(parameter.getSchema()))
+                .map(ParameterDTOUtil::toString)
+                .collect(Collectors.joining("; "));
+
+        if (!cookies.isEmpty()) {
+            headers.add(HttpHeaders.COOKIE, cookies);
+        }
 
         return headers;
     }
@@ -177,7 +193,7 @@ public class RequestEntityBuilder {
             for (Map.Entry<String, SchemaDTO> property : properties.entrySet()) {
                 value = property.getValue() == null ? null : property.getValue().getValue();
 
-                if (value != null && ReferenceExtractor.isReference((String) value)) {
+                if (value != null && ReferenceUtility.containsRef((String) value)) {
                     value = references.apply((String) value);
                 }
 
@@ -197,14 +213,13 @@ public class RequestEntityBuilder {
 
         String value = schema.getValue();
 
-        if (ReferenceExtractor.isReference(value)) {
+        if (ReferenceUtility.containsRef(value)) {
             SchemaDTO referencedSchema = SchemaDTOUtil.fromObject(references.apply(value));
 
             if (referencedSchema == null) {
                 schema.setValue(null);
-            } else if (schema.getType() == DataType.UNDEFINED || schema.getType() == referencedSchema.getType() || value.matches(directRef)) {
-                // if type of schema is UNDEFINED or the same as referencedSchema then
-                // replace all values of this schema with referenced schema
+            } else if (isReferencedPrimary(schema.getType(), referencedSchema.getType(), value)) {
+                // if 'reference' schema is primary then replace all values of this 'schema' with 'referenced' schema
                 schema.setType(referencedSchema.getType());
                 schema.setValue(referencedSchema.getValue());
                 schema.setItems(referencedSchema.getItems());
@@ -246,6 +261,27 @@ public class RequestEntityBuilder {
             // loop through all 'properties' to replace referenced ones
             properties.forEach((name, schemaDTO) -> replaceRefs(schemaDTO));
         }
+    }
+
+    private boolean isReferencedPrimary(DataType actual, DataType referenced, String ref) {
+        // if 'actual' type is UNDEFINED or equal to 'resolved' then 'referenced' should be primary
+        if (actual == DataType.UNDEFINED || actual == referenced) {
+            return true;
+        }
+
+        // if 'ref' is a direct reference or enhancement type then 'referenced' should be primary
+        if (ref.matches(directRef) || ref.matches(enhancement)) {
+            return true;
+        }
+
+        // if 'ref' type webhook and variable type is defined explicitly then 'referenced' should be primary
+        if (ref.matches(webhook) && ref.contains(":")) {
+            // validation of DataType is done when resolving this 'ref'
+            // in ReferenceExtractor.class (line 117) so just check if 'ref' contains :
+            return true;
+        }
+
+        return false;
     }
 
     private List<ParameterDTO> getParamsByLocation(ParamLocation location) {

@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.execution.service;
 
 import com.becon.opencelium.backend.configuration.WebSocketConfig;
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
@@ -43,12 +43,12 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
         ExecutionObj executionObj = new ExecutionObj();
         executionObj.setConnection(connectionMapper.toEntity(connectionMng));
 
-        executionObj.setQueryParams(data.getQueryParams());
+        executionObj.setWebhookVars(data.getQueryParams());
 
-        String host = env.getProperty(YamlPropConst.PROXY_HOST, "");
-        String port = env.getProperty(YamlPropConst.PROXY_PORT, "");
-        String user = env.getProperty(YamlPropConst.PROXY_USER, "");
-        String password = env.getProperty(YamlPropConst.PROXY_PASS, "");
+        String host = env.getProperty(AppYamlPath.PROXY_HOST, "");
+        String port = env.getProperty(AppYamlPath.PROXY_PORT, "");
+        String user = env.getProperty(AppYamlPath.PROXY_USER, "");
+        String password = env.getProperty(AppYamlPath.PROXY_PASS, "");
         ProxyEx proxy = new ProxyEx(host, port, user, password);
         executionObj.setProxy(proxy);
 

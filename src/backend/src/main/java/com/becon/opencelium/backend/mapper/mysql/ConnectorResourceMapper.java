@@ -43,5 +43,4 @@ public interface ConnectorResourceMapper extends Mapper<Connector, ConnectorReso
             @Mapping(target = "sslValidation", source = "sslCert")
     })
     Connector toEntity(ConnectorResource dto);
-
 }

@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
@@ -9,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface ExecutionManager {
-    Map<String, Object> getQueryParams();
+    Map<String, Object> getWebhookVars();
     List<Loop> getLoops();
     String generateKey(int loopDepth);
     Map<String, String> getRequestData(Integer ctorId);
@@ -20,4 +21,5 @@ public interface ExecutionManager {
     List<Operation> getAllOperations();
     void setCurrentCtorId(Integer ctorId);
     void setPagination(Pagination pagination);
+    String getPaginationParamValue(PageParam pageParam);
 }

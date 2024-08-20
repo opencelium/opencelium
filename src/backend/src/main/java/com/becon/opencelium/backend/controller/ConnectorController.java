@@ -30,6 +30,7 @@ import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -46,10 +47,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @Tag(name = "Connector", description = "Manages operations related to Connector management")
@@ -249,13 +247,14 @@ public class ConnectorController {
             failBody = functionInvoker.getResponse().getFail().getBody().getFields();
         }
 
-        Map<String, Object> response = new LinkedHashMap<>();
+        String response = "";
+        String fail = convertMapToJson(failBody);
         if (formatType.equals("json")) {
             System.out.println(responseEntity.getBody());
-            response = mapper.readValue(responseEntity.getBody().toString(), Map.class);
+            response = responseEntity.getBody().toString();
         }
 
-        if ((responseEntity.getStatusCode() == HttpStatus.OK) && hasError(failBody, response)) {
+        if ((responseEntity.getStatusCode() == HttpStatus.OK) && hasError(fail, response)) {
             return ResponseEntity.ok().body("{\"status\":\"401\", \"error\":\"401\"}");
         }
 
@@ -265,24 +264,34 @@ public class ConnectorController {
         return ResponseEntity.ok().body("{\"status\":\"200\"}");
     }
 
-    private boolean hasError(Map<String, Object> failBody, Map<String, Object> response) {
-
-        if (failBody == null) {
-            return false;
+    public static String convertMapToJson(Map<String, Object> map) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(map);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
         }
+    }
 
-        for (Map.Entry<String, Object> failEntry : failBody.entrySet()) {
-            if (!response.containsKey(failEntry.getKey())) {
-                return false;
-            }
+    private boolean hasError(String failBody, String response) {
 
-            if (failEntry.getValue() instanceof Map) {
-                if (!hasError((Map<String, Object>) failEntry.getValue(), (Map<String, Object>) response.get(failEntry.getKey()))) {
-                    return false;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode node1 = objectMapper.readTree(failBody);
+            JsonNode node2 = objectMapper.readTree(response);
+
+            Iterator<String> fieldNames = node1.fieldNames();
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                if (node2.has(fieldName)) {
+                    return true;
                 }
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return true;
+        return false;
     }
 
     @Operation(summary = "Verifies uniqueness of connector title")

@@ -17,27 +17,19 @@
 package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.exception.StorageException;
-import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
-import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
-import com.becon.opencelium.backend.utility.FileNameUtils;
+import com.becon.opencelium.backend.invoker.service.InvokerService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.w3c.dom.Document;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Configuration
 public class InvokerConfiguration {
@@ -45,54 +37,13 @@ public class InvokerConfiguration {
     private final Path filePath = Paths.get(PathConstant.INVOKER);
 
     @Bean
-    public Map<String, Invoker> containerBean(){
+    public Map<String, Invoker> containerBean(@Qualifier("invokerServiceImp") InvokerService invokerService){
         if (Files.notExists(filePath)){
             File directory = new File(PathConstant.INVOKER);
             directory.mkdir();
             System.out.println("Directory has been created: " + PathConstant.INVOKER);
         }
-        List<Document> invokers = getAllInvokers();
-        Map<String, Invoker> container = new HashMap<>();
-        invokers.forEach(document -> {
-            if (document == null){
-                return;
-            }
-            InvokerParserImp parser = new InvokerParserImp(document);
-            File f = new File(document.getDocumentURI());
-            String invoker = FileNameUtils.removeExtension(f.getName());
-            invoker = invoker.replace("%20", " ");
-            container.put(invoker, parser.parse());
-        });
-        return container;
-    }
-
-    @Bean("invokerInit")
-    public InvokerContainer invokerContainerBean(Map<String, Invoker> container) {
-        return new InvokerContainer(container);
-    }
-
-    private List<Document> getAllInvokers(){
-        try {
-            Stream<Path> allInvokers = Files.walk(filePath, 1)
-                    .filter(path -> !path.equals(filePath))
-                    .map(filePath::relativize);
-
-            return allInvokers.map(p -> new File(filePath.toString() + "/" + p.getFileName()))
-                    .map(file -> {
-                        try {
-                            if(!FileNameUtils.getExtension(file.getName()).equals("xml")){
-                                return null;
-                            }
-                            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                            return dBuilder.parse(file);
-                        }
-                        catch (Exception e){
-                            throw new RuntimeException(e);
-                        }
-                    }).collect(Collectors.toList());
-        }
-        catch (IOException e) {
-            throw new StorageException("Failed to read stored files", e);
-        }
+        List<Document> invokers = invokerService.getAllInvokerDocuments();
+        return invokerService.containerize(invokers);
     }
 }

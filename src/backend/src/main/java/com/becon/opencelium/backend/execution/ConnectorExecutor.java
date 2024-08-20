@@ -12,17 +12,17 @@ import com.becon.opencelium.backend.execution.logger.msg.MethodData;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
-import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
-import com.becon.opencelium.backend.invoker.enums.PageParam;
+import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
+import com.becon.opencelium.backend.utility.ReferenceUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ConnectorExecutor {
+
     private final Connector connector;
     private final ExecutionManager executionManager;
     private final RestTemplate restTemplate;
@@ -282,7 +283,7 @@ public class ConnectorExecutor {
             likeValueRef = likeValueRef.substring(beginIndex, endIndex);
         }
 
-        if (ReferenceExtractor.isReference(likeValueRef)) {
+        if (ReferenceUtility.containsRef(likeValueRef)) {
             rightValue = executionManager.getValue(likeValueRef);
         } else {
             rightValue = likeValueRef;

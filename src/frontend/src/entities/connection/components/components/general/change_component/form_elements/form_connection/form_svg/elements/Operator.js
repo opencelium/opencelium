@@ -100,7 +100,8 @@ class Operator extends React.Component{
     }
 
     onMouseOverSvg(){
-        const {currentTechnicalItem, operator, isCreateElementPanelOpened} = this.props;
+        const {currentTechnicalItem, operator, isCreateElementPanelOpened, readOnly} = this.props;
+        if (readOnly) return;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
         const isItemOver = isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== operator.entity.index;
         if(isItemOver){

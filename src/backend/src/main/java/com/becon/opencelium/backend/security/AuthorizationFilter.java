@@ -30,11 +30,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.*;
 
-public class AuthorizationFilter extends BasicAuthenticationFilter {
+@Component
+public class AuthorizationFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
@@ -45,13 +48,6 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
     @Autowired
     private ActivityServiceImpl activityService;
 
-    private final static List<String> ignorList = Arrays.asList("api/webhook/execute", "api/storage/files",
-            "api/webhook/health", "/swagger-ui", "/v3/api-docs", "/docs");
-
-    public AuthorizationFilter(AuthenticationManager authenticationManager) {
-        super(authenticationManager);
-    }
-
     @Override
     protected void doFilterInternal( HttpServletRequest request,
                                      HttpServletResponse response,
@@ -59,15 +55,10 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 
         String url  = request.getRequestURI();
         System.out.println(url);
-        if (containsInIgnoreList(url)){
-            disableCrosOrigin(response);
-            chain.doFilter(request, response);
-            return;
-        }
         String token = extractTokenFromRequest(request);
         if (token == null || !token.startsWith(SecurityConstant.BEARER)){
             chain.doFilter(request, response);
-            throw new WrongHeaderAuthTypeException(token);
+            return;
         }
         String jwt = token.substring(7);
         UsernamePasswordAuthenticationToken auth = getAuthentication(jwt);
@@ -86,9 +77,9 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
         response.setHeader("Content-Type", "application/json");
     }
 
-    private boolean containsInIgnoreList(String s) {
-        return ignorList.stream().anyMatch(s::contains);
-    }
+//    private boolean containsInIgnoreList(String s) {
+//        return ignorList.stream().anyMatch(s::contains);
+//    }
 
     private static String extractTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -102,8 +93,12 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
         String email = jwtTokenUtil.getEmailFromToken(token);
         UserPrincipals userDetail = (UserPrincipals) userDetailsService.loadUserByUsername(email);
 
-        if (!jwtTokenUtil.validateToken(token, userDetail)){
-            return null;
+        try {
+            if (!jwtTokenUtil.validateToken(token, userDetail)){
+                return null;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         activityService.registerTokenActivity(userDetail);

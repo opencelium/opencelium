@@ -5,6 +5,9 @@ import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.enums.execution.DataType;
+import com.becon.opencelium.backend.enums.execution.ParamLocation;
+import com.becon.opencelium.backend.enums.execution.ParamStyle;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
@@ -79,10 +82,14 @@ public class OperationExMapper {
             return mediaType;
         }
 
-        if (methodMng.getRequest().getBody() != null && (mediaType = getMediaTypeFromBody(methodMng.getRequest().getBody().getFormat())) != null) {
+        if (methodMng.getRequest().getBody() != null
+                && methodMng.getRequest().getBody().getFormat() != null
+                && (mediaType = getMediaTypeFromBody(methodMng.getRequest().getBody().getFormat())) != null) {
             return mediaType;
         }
-        return fiv.getRequest().getBody() == null || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null
+        return fiv.getRequest().getBody() == null
+                || fiv.getRequest().getBody().getFormat() == null
+                || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null
                 ? MediaType.APPLICATION_JSON
                 : mediaType;
     }
@@ -191,7 +198,10 @@ public class OperationExMapper {
         }
         for (Map.Entry<String, String> entry : header.entrySet()) {
             ParameterDTO parameterDTO = new ParameterDTO();
-            //parameter's default fields are :
+            if (entry.getKey().equals("Cookie")) {
+                addCookieParams(entry.getValue(), parameters);
+                continue;
+            }
             parameterDTO.setName(entry.getKey());
             parameterDTO.setIn(ParamLocation.HEADER);
             parameterDTO.setStyle(ParamStyle.SIMPLE);
@@ -228,6 +238,32 @@ public class OperationExMapper {
         return parameters;
     }
 
+    private void addCookieParams(String value, List<ParameterDTO> parameters) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        value = value.trim();
+        String[] split = value.split(";");
+
+        for (String kv : split) {
+            if (kv.contains("=")) {
+                String[] pairs = kv.split("=");
+                if (pairs.length == 2) {
+                    SchemaDTO schemaDTO = new SchemaDTO();
+                    schemaDTO.setType(DataType.STRING);
+                    schemaDTO.setValue(pairs[1].trim());
+
+                    ParameterDTO parameterDTO = new ParameterDTO();
+                    parameterDTO.setSchema(schemaDTO);
+                    parameterDTO.setIn(ParamLocation.COOKIE);
+                    parameterDTO.setStyle(ParamStyle.FORM);
+                    parameterDTO.setName(pairs[0].trim());
+                    parameters.add(parameterDTO);
+                }
+            }
+        }
+    }
+
     /**
      * returning parameter's fields :
      * - in always will be PATH
@@ -245,21 +281,21 @@ public class OperationExMapper {
             List<ParameterDTO> list = new ArrayList<>();
             String[] split = path.split("/");
             for (String subPath : split) {
-                String subPathName;
-                if (subPath.matches(RegExpression.enhancement)) {
-                    subPathName = subPath.substring(3, subPath.length() - 2);
-                } else if (subPath.matches(RegExpression.requestData)) {
-                    subPathName = subPath.substring(1, subPath.length() - 1);
-                } else {
+                if (!subPath.contains("{") || !subPath.contains("}")) {
                     continue;
                 }
-                ParameterDTO parameterDTO = new ParameterDTO();
-                parameterDTO.setIn(ParamLocation.PATH);
-                parameterDTO.setName(subPathName);
-                parameterDTO.setStyle(ParamStyle.SIMPLE);
-                parameterDTO.setContent(mediaType);
-                parameterDTO.setSchema(getSchema(subPath, DataType.STRING));
-                list.add(parameterDTO);
+                ArrayList<String> params = getSubPathParameters(subPath);
+
+                for (String param : params) {
+                    String paramName = extractNameOfRef(param);
+                    ParameterDTO parameterDTO = new ParameterDTO();
+                    parameterDTO.setIn(ParamLocation.PATH);
+                    parameterDTO.setName(paramName);
+                    parameterDTO.setStyle(ParamStyle.SIMPLE);
+                    parameterDTO.setContent(mediaType);
+                    parameterDTO.setSchema(getSchema(param, DataType.STRING));
+                    list.add(parameterDTO);
+                }
             }
             return list;
         }
@@ -334,7 +370,7 @@ public class OperationExMapper {
     }
 
     private RequestBodyDTO getRequestBody(BodyMng body, Long connectionId, String methodName, MediaType mediaType) {
-        if (body == null) {
+        if (body == null || body.getFormat()==null || body.getFields()==null) {
             return null;
         }
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
@@ -513,7 +549,8 @@ public class OperationExMapper {
     private DataType findTypeOfReference(String value, Long connectionId, String methodName, LinkedList<String> hierarchy) {
         if (value.matches(RegExpression.requiredData)
                 || value.matches(RegExpression.enhancement)
-                || value.matches(RegExpression.directRef)) {
+                || value.matches(RegExpression.directRef)
+                || value.matches(RegExpression.webhook)) {
 
             ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
             Connector fromConnector = connectorService.getById(connectionMng.getFromConnector().getConnectorId());
@@ -613,6 +650,37 @@ public class OperationExMapper {
             return DataType.OBJECT;
         }
         return null;
+    }
+
+    private ArrayList<String> getSubPathParameters(String subPath) {
+        ArrayList<String> params = new ArrayList<>();
+        char[] chars = subPath.toCharArray();
+        int startIdx = -1;
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == '{') {
+                startIdx = i;
+            } else if (chars[i] == '$' && i + 1 < chars.length && chars[i + 1] == '{') {
+                startIdx = i;
+                i++;
+            } else if (chars[i] == '}' && startIdx != -1) {
+                params.add(subPath.substring(startIdx, i + 1));
+                startIdx = -1;
+            }
+        }
+        return params;
+    }
+
+    private String extractNameOfRef(String param) {
+        if (param.matches(RegExpression.wrappedDirectRef)) {
+            return param.substring(2, param.length() - 2);
+        } else if (param.matches(RegExpression.enhancement)) {
+            return param.substring(3, param.length() - 2);
+        } else if (param.matches(RegExpression.requestData)) {
+            return param.substring(1, param.length() - 1);
+        } else if (param.matches(RegExpression.webhook)) {
+            return param.substring(2, param.length() - 1);
+        }
+        return param;
     }
 
     private static class Tree {

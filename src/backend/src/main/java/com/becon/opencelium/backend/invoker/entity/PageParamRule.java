@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.invoker.entity;
 
-import com.becon.opencelium.backend.invoker.enums.PageParam;
-import com.becon.opencelium.backend.invoker.enums.PageParamAction;
+import com.becon.opencelium.backend.enums.PageParam;
+import com.becon.opencelium.backend.enums.PageParamAction;
 
 import java.util.function.Function;
 

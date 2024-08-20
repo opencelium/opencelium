@@ -8,6 +8,7 @@ public interface SchedulingStrategy {
     void deleteJob(Scheduler scheduler);
     void rescheduleJob(Scheduler scheduler, Long oldCon);
     void runJob(Scheduler scheduler);
+    void runJob(Scheduler scheduler, Map<String, Object> webhookVars);
     void resumeJob(Scheduler scheduler);
     void pauseJob(Scheduler scheduler);
     Map<Long,Integer> getRunningJobs();

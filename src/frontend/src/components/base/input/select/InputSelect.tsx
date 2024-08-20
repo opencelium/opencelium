@@ -56,6 +56,8 @@ const InputSelect: FC<InputSelectProps> = ({
     maxMultiValues,
     autoFocus,
     checkboxProps,
+    categoryList,
+    currentCategory,
     ...props
 }) => {
     let source: OptionProps[];
@@ -202,8 +204,32 @@ const InputSelect: FC<InputSelectProps> = ({
         // @ts-ignore
         setLocalOptions(source.filter(option => multipleValue.findIndex(v => v.value === option.value && v.value !== labelValue) === -1));
     }
+    const CategoryList = (categories: any) => {
+        const flattenedCategories: any = [];
+
+        const flattenCategories = (category: any, indentLevel = 0) => {
+            if (category) {
+                const {label, value, subCategories} = category;
+                if(!(currentCategory && currentCategory.id === value)) {
+                    flattenedCategories.push({label, value, indentLevel, subCategories});
+                }
+
+                if (subCategories) {
+                    subCategories.forEach((subCategory: any) => {
+                        flattenCategories(subCategory, indentLevel + 1);
+                    });
+                }
+            }
+        };
+
+        categories.forEach((category: any) => {
+            flattenCategories(category);
+        });
+
+        return flattenedCategories
+    };
     const hasIcon = !!icon;
-    let height = isToggled ? (localOptions.length > 0 ? localOptions.length : 1) * 34 + 1 : 0;
+    let height = isToggled ? (localOptions.length > 0 ? categoryList ? CategoryList(localOptions).length : localOptions.length : 1) * 34 + 1 : 0;
     let multipleLabels = [];
     let hasValue = !!value;
     if(isMultiple){
@@ -222,6 +248,7 @@ const InputSelect: FC<InputSelectProps> = ({
     }
     const searchPlaceholder = !!placeholder ? placeholder : "Please type to search...";
     const hasSearchInput = isSearchable && (!readOnly || !isMultiple);
+
     return(
         <Input checkboxProps={checkboxProps} className={className} paddingLeft={hasIcon && isIconInside ? '30px' : '0'} componentRef={inputRef} noIcon={!hasIcon} hasUnderline={false} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputContainerStyled hasBorder={!hasValue && !isToggled} ref={containerRef} color={currentOption ? ColorTheme.Black : ColorTheme.Gray}>
@@ -262,7 +289,7 @@ const InputSelect: FC<InputSelectProps> = ({
             {!isSearchable && <SelectStyled id={id} ref={inputSelectRef} tabIndex={-1} color={color} onClick={() => toggleOptions(isToggled)}/>}
             {!readOnly && <ToggleStyled noAnimation={isHidden} hasNotUnderline={isHidden} hasBackground={false} isLoading={!hasIcon && isLoading} emphasizeColor={color} size={16} color={ColorTheme.ToolboxBlue} icon={isToggled ? 'arrow_drop_up' : 'arrow_drop_down'} handleClick={() => toggleOptions(!isToggled)} position={'absolute'} right={1} top={`5px`}/>}
             <LineStyled/>
-            <OptionsStyled ref={selectRef} isVisible={isHidden} height={height} color={ColorTheme.DarkBlue}>
+            {!categoryList && <OptionsStyled ref={selectRef} isVisible={isHidden} height={height} color={ColorTheme.DarkBlue}>
                 {
                     localOptions.length > 0 ? sortAlphabeticallyByKey(localOptions, 'label').map((option:any, key:any) => {
                         return (
@@ -278,7 +305,25 @@ const InputSelect: FC<InputSelectProps> = ({
                         );
                     }) : <EmptyOptionsStyled>{'There are no options'}</EmptyOptionsStyled>
                 }
-            </OptionsStyled>
+            </OptionsStyled>}
+            {categoryList && <OptionsStyled categoryList={categoryList} ref={selectRef} isVisible={isHidden} height={height} color={ColorTheme.DarkBlue}>
+                {
+
+                    localOptions.length > 0 ? CategoryList(localOptions).map((option:any, key:any) => {
+                        return (
+                            <Option key={option.value}
+                                onKeyDown={(e: any) => focusNextOption(e, option)}
+                                isCurrent={isMultiple ? false : currentOption && option.value === currentOption.value || option.value === searchValue}
+                                tabIndex={isToggled ? 0 : -1}
+                                onClick={() => setOption(option)}
+                                {...option}
+                                value={option.label}
+                                getOptionRightComponent={getOptionRightComponent}
+                            />
+                        );
+                    }) : <EmptyOptionsStyled>{'There are no options'}</EmptyOptionsStyled>
+                }
+            </OptionsStyled>}
         </Input>
     );
 }
@@ -297,6 +342,7 @@ InputSelect.defaultProps = {
     getOptionRightComponent: null,
     maxMultiValues: Infinity,
     autoFocus: false,
+    currentCategory: null,
 }
 
 export default InputSelect;

@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.gc.connection;
 
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.gc.base.Criteria;
 import com.becon.opencelium.backend.gc.base.GCRunner;
 import com.becon.opencelium.backend.gc.base.RunGCEvent;
@@ -23,11 +23,11 @@ public class ConnectionGCRunner extends GCRunner<ConnectionForGC> {
 
         this.criteria = setCriteria();
 
-        on = Boolean.parseBoolean(env.getProperty(YamlPropConst.GC_CONNECTION_IS_ON, DEFAULT_GC_IS_ON_STRING));
-        String strategy = env.getProperty(YamlPropConst.GC_CONNECTION_STRATEGY, DEFAULT_STRATEGY_STRING);
-        String cron = env.getProperty(YamlPropConst.GC_CONNECTION_CRON);
-        long fixedDelay = Long.parseLong(env.getProperty(YamlPropConst.GC_CONNECTION_FIXED_DELAY, "-1"));
-        long initialDelay = Long.parseLong(env.getProperty(YamlPropConst.GC_CONNECTION_INITIAL_DELAY, "-1"));
+        on = Boolean.parseBoolean(env.getProperty(AppYamlPath.GC_CONNECTION_IS_ON, DEFAULT_GC_IS_ON_STRING));
+        String strategy = env.getProperty(AppYamlPath.GC_CONNECTION_STRATEGY, DEFAULT_STRATEGY_STRING);
+        String cron = env.getProperty(AppYamlPath.GC_CONNECTION_CRON);
+        long fixedDelay = Long.parseLong(env.getProperty(AppYamlPath.GC_CONNECTION_FIXED_DELAY, "-1"));
+        long initialDelay = Long.parseLong(env.getProperty(AppYamlPath.GC_CONNECTION_INITIAL_DELAY, "-1"));
 
         StrategyConfig strategyConfig = new StrategyConfig(strategy, cron, fixedDelay, initialDelay);
 

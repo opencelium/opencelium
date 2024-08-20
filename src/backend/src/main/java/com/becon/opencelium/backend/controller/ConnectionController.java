@@ -17,7 +17,7 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
-import com.becon.opencelium.backend.constant.YamlPropConst;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
@@ -31,7 +31,10 @@ import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -123,6 +126,16 @@ public class ConnectionController {
     public ResponseEntity<?> getAllMeta() {
         List<Connection> connections = connectionService.findAll();
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
+        //unnecessary fields
+        connectionResources.forEach(c->{
+            c.getFromConnector().setRequestData(null);
+            c.getFromConnector().getInvoker().setOperations(null);
+            c.getFromConnector().getInvoker().setRequiredData(null);
+
+            c.getToConnector().setRequestData(null);
+            c.getToConnector().getInvoker().setOperations(null);
+            c.getToConnector().getInvoker().setRequiredData(null);
+        });
         return ResponseEntity.ok(connectionResources);
     }
 
@@ -446,8 +459,8 @@ public class ConnectionController {
 
         HttpEntity<Object> requestEntity = new HttpEntity<>(apiDataResource.getBody(), headers);
 
-        String proxyHost = environment.getProperty(YamlPropConst.PROXY_HOST, "");
-        String proxyPort = environment.getProperty(YamlPropConst.PROXY_PORT, "");
+        String proxyHost = environment.getProperty(AppYamlPath.PROXY_HOST, "");
+        String proxyPort = environment.getProperty(AppYamlPath.PROXY_PORT, "");
         RestTemplateBuilder restTemplateBuilder =
                 new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, apiDataResource.isSslOn()));
         RestTemplate restTemplate = restTemplateBuilder.build();
@@ -479,4 +492,32 @@ public class ConnectionController {
         ids.getIdentifiers().forEach(connectionService::deleteById);
         return ResponseEntity.noContent().build();
     }
+
+
+    @Operation(summary = "Removes webhook")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "204",
+                    description = "Webhook has been successfully deleted",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/{connectionId}/webhook/vars")
+    public ResponseEntity<?> getVariablesFromConnection(@PathVariable long connectionId) {
+        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            // Convert the Java object to a JSON string
+            String json = objectMapper.writeValueAsString(connectionMng);
+            List<WebhookParamDTO> webhookParams = connectionService.extractVarsFromJson(json);
+            return ResponseEntity.ok(webhookParams);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

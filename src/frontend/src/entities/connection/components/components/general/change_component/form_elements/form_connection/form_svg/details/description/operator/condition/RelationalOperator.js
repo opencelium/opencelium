@@ -20,6 +20,9 @@ import {
     FUNCTIONAL_OPERATORS_FOR_IF,
     FUNCTIONAL_OPERATORS_FOR_LOOP
 } from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
+import {
+    TransitionEffect
+} from "@change_component/form_elements/form_connection/form_svg/details/description/operator/Condition";
 
 
 class RelationalOperator extends React.Component{
@@ -28,9 +31,13 @@ class RelationalOperator extends React.Component{
     }
 
     getStyles(){
-        const {isOperatorHasThreeParams, isOperatorHasValue} = this.props;
+        const {isOperatorHasThreeParams, isOperatorHasValue, referenceTypeRight, isLoopOperator} = this.props;
         let {hasValue} = isOperatorHasValue();
-        return {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '14%' : '10%' : '25%', transition: 'width 0.3s ease 0s',};
+        if (referenceTypeRight === 'webhook') {
+            return {float: 'left', width: hasValue ? isLoopOperator ? '7%' : '7%' : '27%', transition: TransitionEffect,};
+        } else {
+            return {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '7%' : '7%' : '27%', transition: TransitionEffect,};
+        }
     }
 
     getOptions(){
@@ -53,7 +60,7 @@ class RelationalOperator extends React.Component{
     }
 
     render(){
-        const {readOnly, relationalOperator, hasMethod, updateRelationalOperator} = this.props;
+        const {readOnly, relationalOperator, hasMethod, updateRelationalOperator, referenceTypeLeft} = this.props;
         let inputTheme = {inputElement: styles.input_element_pointer_compare_statement_visible};
         let options = this.getOptions();
         inputTheme.input = styles.input_pointer_compare_statement;
@@ -68,7 +75,7 @@ class RelationalOperator extends React.Component{
                     options={options}
                     closeOnSelect={false}
                     placeholder={`...`}
-                    isDisabled={readOnly || !hasMethod}
+                    isDisabled={(readOnly || !hasMethod) && referenceTypeLeft === 'method'}
                     isSearchable={true}
                     openMenuOnClick={true}
                     maxMenuHeight={200}

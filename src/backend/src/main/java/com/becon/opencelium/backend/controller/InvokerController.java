@@ -21,8 +21,6 @@ import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
-import com.becon.opencelium.backend.exception.StorageException;
-import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
@@ -35,7 +33,6 @@ import com.becon.opencelium.backend.resource.connector.FunctionDTO;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.becon.opencelium.backend.resource.connector.InvokerXMLResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.PathUtility;
 import com.becon.opencelium.backend.utility.Xml;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,24 +61,16 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @Tag(name = "Invoker", description = "Manages operations related to Invoker management")
 @RequestMapping(value = "/api/invoker", produces = MediaType.APPLICATION_JSON_VALUE)
 public class InvokerController {
     private final InvokerService invokerService;
-    private final InvokerContainer invokerContainer;
     private final ConnectorService connectorService;
     private final ConnectionService connectionService;
     private final Mapper<Invoker, InvokerDTO> invokerMapper;
@@ -89,14 +78,12 @@ public class InvokerController {
 
     public InvokerController(
             @Qualifier("invokerServiceImp") InvokerService invokerService,
-            InvokerContainer invokerContainer,
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             Mapper<Invoker, InvokerDTO> invokerMapper,
             Mapper<FunctionInvoker, FunctionDTO> functionMapper
     ) {
         this.invokerService = invokerService;
-        this.invokerContainer = invokerContainer;
         this.connectorService = connectorService;
         this.connectionService = connectionService;
         this.invokerMapper = invokerMapper;
@@ -120,6 +107,7 @@ public class InvokerController {
         InvokerDTO invokerResources = invokerMapper.toDTO(invokerService.findByName(name));
         return ResponseEntity.ok(invokerResources);
     }
+
     @Operation(summary = "Retrieves all invokers")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -213,25 +201,14 @@ public class InvokerController {
             throw new RuntimeException(ex);
         }
 
-        List<Document> invokers;
-        Map<String, Invoker> container = new HashMap<>();
         try {
-            invokers = getAllInvokers();
+            invokerService.refresh();
         } catch (Exception e) {
             delete(filename);
             throw new RuntimeException(e);
         }
-        invokers.forEach(document -> {
-            InvokerParserImp parser = new InvokerParserImp(document);
-            File f = new File(document.getDocumentURI());
-            String invoker = FileNameUtils.removeExtension(f.getName());
-            invoker = invoker.replace("%20", " ");
-            container.put(invoker, parser.parse());
-        });
 
-        invokerContainer.updateAll(container);
-
-        Invoker invoker = invokerContainer.getByName(filename);
+        Invoker invoker = invokerService.findByName(filename);
 
         if (invoker.getOperations() == null) {
             delete(filename);
@@ -365,6 +342,23 @@ public class InvokerController {
         }
     }
 
+    @Operation(summary = "Refreshes all invoker files")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Success"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/refresh")
+    public ResponseEntity<?> refresh() {
+        invokerService.refresh();
+        return ResponseEntity.ok().build();
+    }
+
     private static Document convertStringToXMLDocument(String xmlString) {
         //Parser that produces DOM object trees from XML content
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -382,27 +376,5 @@ public class InvokerController {
             e.printStackTrace();
         }
         return null;
-    }
-
-    private List<Document> getAllInvokers() {
-        Path location = Paths.get(PathConstant.INVOKER);
-        try {
-            Stream<Path> allInvokers = Files.walk(location, 1)
-                    .filter(path -> !path.equals(location))
-                    .map(location::relativize);
-
-            return allInvokers.map(p -> new File(location.toString() + "/" + p.getFileName()))
-                    .filter(f -> f.getName().endsWith(".xml"))
-                    .map(file -> {
-                        try {
-                            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                            return dBuilder.parse(file);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new StorageException("Failed to read stored files", e);
-        }
     }
 }

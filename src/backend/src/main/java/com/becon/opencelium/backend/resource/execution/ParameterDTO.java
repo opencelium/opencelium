@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.resource.execution;
 
+import com.becon.opencelium.backend.enums.execution.ParamLocation;
+import com.becon.opencelium.backend.enums.execution.ParamStyle;
 import org.springframework.http.MediaType;
 
 public class ParameterDTO {

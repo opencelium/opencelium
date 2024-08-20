@@ -19,6 +19,7 @@ import {ConnectionRequest} from "../../requests/classes/Connection";
 import { IConnection } from "../../interfaces/IConnection";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {ScheduleRequest} from "@entity/schedule/requests/classes/Schedule";
+import {GetConnectionWebhooksResponse} from "@root/requests/interfaces/IConnection";
 
 export const testConnection = createAsyncThunk(
     'connection/test',
@@ -128,7 +129,7 @@ export const getAndUpdateConnectionTitle = createAsyncThunk(
             }
             getConnection.fieldBinding = fieldBinding;
             const UpdateConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
-            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection, id: connection.id, title: connection.title, description: connection.description});
+            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection, id: connection.id, title: connection.title, description: connection.description, categoryId: connection.categoryId || getConnection.categoryId});
             return UpdateConnectionResponse.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -160,7 +161,7 @@ export const getAndUpdateConnectionDescription = createAsyncThunk(
             }
             getConnection.fieldBinding = fieldBinding;
             const UpdateConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
-            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection, id: connection.id, title: connection.title, description: connection.description});
+            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection, id: connection.id, title: connection.title, description: connection.description, categoryId: connection.categoryId || getConnection.categoryId});
             return UpdateConnectionResponse.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -185,10 +186,11 @@ export const getConnectionWebhooks = createAsyncThunk(
     'connection/webhooks',
     async(connectionId: number, thunkAPI) => {
         try {
-            //const request = new ConnectionRequest({endpoint: `/${connectionId}/webhooks`});
-            //const response = await request.getConnectionWebhooks();
-            //return response.data;
-            return ['test_param', 'name', 'id'];
+            const request = new ConnectionRequest({endpoint: `/${connectionId}/webhook/vars`});
+            const response = await request.getConnectionWebhooks();
+            const webhookMap: Map<string, GetConnectionWebhooksResponse> = new Map();
+            response.data.forEach(webhook => webhookMap.set(webhook.name, webhook));
+            return Array.from(webhookMap.values());
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

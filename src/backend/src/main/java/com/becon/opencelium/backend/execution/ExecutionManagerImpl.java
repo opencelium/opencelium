@@ -11,7 +11,8 @@ import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
-import com.becon.opencelium.backend.invoker.enums.PageParam;
+import com.becon.opencelium.backend.enums.PageParam;
+import com.becon.opencelium.backend.utility.ReferenceUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 
 public class ExecutionManagerImpl implements ExecutionManager {
-    private final Map<String, Object> queryParams;
+    private final Map<String, Object> webhookVars;
     private final Extractor refExtractor;
     private final EnhancementService enhancementService;
     private final List<Loop> loops = new ArrayList<>();
@@ -34,8 +35,8 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private Integer currentCtorId;
     private Pagination pagination;
 
-    public ExecutionManagerImpl(Map<String, Object> queryParams, Connector connectorFrom, Connector connectorTo, List<FieldBind> fieldBind) {
-        this.queryParams = queryParams;
+    public ExecutionManagerImpl(Map<String, Object> webhookVars, Connector connectorFrom, Connector connectorTo, List<FieldBind> fieldBind) {
+        this.webhookVars = webhookVars;
         this.connectorFrom = connectorFrom;
         this.connectorTo = connectorTo;
         this.fieldBind = fieldBind;
@@ -45,8 +46,8 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public Map<String, Object> getQueryParams() {
-        return queryParams;
+    public Map<String, Object> getWebhookVars() {
+        return webhookVars;
     }
 
     @Override
@@ -106,15 +107,33 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public Object getValue(String ref) {
-        if (ref == null) {
+    public Object getValue(String value) {
+        // To trigger this method there should be at least one of 6 reference types in value:
+        // ['directRef', 'wrappedDirectRef', 'enhancement', 'webhook', 'pageRef', 'requestData'
+        if (value == null) {
             return null;
-        } else if (ref.matches(pageRef)) {
-            String param = ref.replace("@{", "").replace("}","");
-            return pagination.getParamValue(PageParam.fromString(param));
         }
 
-        return refExtractor.extractValue(ref);
+        // This method extracts 5 reference types:
+        // ['wrappedDirectRef', 'enhancement', 'webhook', 'pageRef', 'requestData'
+        List<String> references = ReferenceUtility.extractRefs(value);
+
+        // There are 3 cases to skip following if:
+        // 1) value == 'directRef': references.isEmpty() == true - we directly call refExtractor.extractValue(value)
+        // 2) value is a complex reference (only 5 reference types): references.size() > 1
+        // 3) value is a complex reference (only 5 reference types): references.size() == 1 but value is not a reference, it contains a reference
+        if (!references.isEmpty() && (references.size() != 1 || !Objects.equals(value, references.get(0)))) {
+            for (String ref : references) {
+                Object val = refExtractor.extractValue(ref);
+                val = val == null ? "" : val.toString();
+                value = value.replace(ref, (String) val);
+            }
+
+            return value;
+        }
+
+        // at this point we could have simple 'directRef' or other 5 reference types
+        return refExtractor.extractValue(value);
     }
 
     @Override
@@ -135,5 +154,10 @@ public class ExecutionManagerImpl implements ExecutionManager {
     @Override
     public void setPagination(Pagination pagination) {
         this.pagination = pagination;
+    }
+
+    @Override
+    public String getPaginationParamValue(PageParam pageParam) {
+        return pagination.getParamValue(pageParam);
     }
 }
