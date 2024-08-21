@@ -162,9 +162,10 @@ class Enhancement extends Component {
 			<>
 				<FieldBindingsBlockStyled
 					style={{
-						margin: '20px 0 0 50px',
+						margin: '20px 0 30px 50px',
 						fontSize: '12px',
 						maxHeight: '100px',
+						minHeight: '80px',
 					}}
 				>
 					{this.renderExpertVar(expertVar)}
@@ -175,6 +176,9 @@ class Enhancement extends Component {
 					label={'Script'}
 					icon={'javascript'}
 					display={'grid'}
+					hasUnderline={false}
+					labelMargin='-25px 0 0 0'
+					height={`calc(100% - 100px)`}
 				>
 					<AceEditor
 						ref={this.props.enhancementRef}
@@ -183,7 +187,7 @@ class Enhancement extends Component {
 							marginLeft: '50px',
 							marginBottom: 0,
 							width: styleProps.width,
-							height: isOpenedEnhancement ? '65vh' : '380px',
+							height: '100%',
 						}}
 						markers={markers}
 						mode='javascript'
@@ -220,18 +224,27 @@ class Enhancement extends Component {
 		const { description, isDescriptionToggled } = this.state;
 		let { readOnly, isOpenedEnhancement } = this.props;
 		return (
-			<div>
+			<div
+				style={{
+					height: '100%',
+					display: 'flex',
+					flexDirection: 'column',
+					justifyContent: 'space-between',
+				}}
+			>
 				{this.renderEnhancement()}
 				{!isOpenedEnhancement && (
 					<>
-						<b>{`Description`}</b>
-						<TooltipFontIcon
-							tooltipPosition={'right'}
-							style={{ verticalAlign: 'middle', cursor: 'pointer' }}
-							onClick={() => this.toggleDescriptionIcon()}
-							tooltip={isDescriptionToggled ? 'Hide' : 'Show'}
-							value={isDescriptionToggled ? 'expand_less' : 'chevron_right'}
-						/>
+						<div>
+							<b>{`Description`}</b>
+							<TooltipFontIcon
+								tooltipPosition={'right'}
+								style={{ verticalAlign: 'middle', cursor: 'pointer' }}
+								onClick={() => this.toggleDescriptionIcon()}
+								tooltip={isDescriptionToggled ? 'Hide' : 'Show'}
+								value={isDescriptionToggled ? 'expand_less' : 'chevron_right'}
+							/>
+						</div>
 						{isDescriptionToggled && (
 							<Row>
 								<Col md={12}>

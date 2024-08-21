@@ -694,6 +694,7 @@ $DASHED_COLOR: #58854d;
 .enhancement_dialog_body {
 	max-height: 100%;
 	overflow: hidden;
+	display: flex;
 }
 
 .enhancement_dialog {
@@ -734,17 +735,15 @@ $DASHED_COLOR: #58854d;
 }
 .body_enhancement {
 	width: 50%;
-	float: left;
 	padding-left: 10px;
 	position: relative;
 	height: 100%;
 	.data {
 		width: 100%;
 		position: absolute;
-		overflow-y: auto;
-		height: 100%;
-		overflow-x: hidden;
+		height: calc(100% - 40px);
 	}
+	
 }
 .body_reference_not_selected_message {
 	font-size: 24px;
