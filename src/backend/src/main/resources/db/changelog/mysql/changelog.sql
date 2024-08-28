@@ -442,3 +442,37 @@ CREATE TABLE change_set_yml (
 CREATE TABLE secret_key_for_encoder (
     secret_key VARCHAR(1000) NOT NULL
 );
+
+--changeset 4.2:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE activation_request(
+    id         UUID PRIMARY KEY,
+    created_at TIMESTAMP    NOT NULL,
+    hmac       VARCHAR(255) NOT NULL,
+    ttl        INT UNSIGNED NOT NULL,
+    status     ENUM ('pending', 'processed', 'expired') DEFAULT 'pending',
+    INDEX idx_hmac (hmac)
+);
+
+--changeset 4.2:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE subscription(
+    id                    UUID PRIMARY KEY,
+    subId                 VARCHAR(255) NOT NULL,
+    created_at            TIMESTAMP    NOT NULL,
+    license_key           VARCHAR(255) NOT NULL,
+    current_usage         BIGINT       NOT NULL,
+    current_usage_hmac    VARCHAR(255) NOT NULL,
+    active                BOOLEAN      NOT NULL,
+    activation_request_id UUID,
+    FOREIGN KEY (activation_request_id) REFERENCES activation_request (id)
+);
+
+--changeset 4.2:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE operation_usage(
+    id            INT PRIMARY KEY AUTO_INCREMENT,
+    subId         VARCHAR(255) NOT NULL,
+    created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    operation_num BIGINT       NOT NULL,
+    scheduler_id  INT          NOT NULL,
+    connection_id INT          NOT NULL,
+    FOREIGN KEY (scheduler_id, connection_id) REFERENCES scheduler (id, connection_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
