@@ -94,7 +94,7 @@ public class ReferenceExtractor implements Extractor {
                 refValue = refValue.substring(refValue.indexOf(".") + 1);
             }
 
-            result = executionManager.getRequestData(ctorId).get(refValue);
+            result = executionManager.getRequestData(ctorId).getOrDefault(refValue, ref);
         }
 
         return result;
