@@ -449,7 +449,7 @@ CREATE TABLE activation_request(
     created_at TIMESTAMP    NOT NULL,
     hmac       VARCHAR(255) NOT NULL,
     ttl        INT UNSIGNED NOT NULL,
-    status     ENUM ('pending', 'processed', 'expired') DEFAULT 'pending',
+    status     ENUM ('PENDING', 'PROCESSED', 'EXPIRED') DEFAULT 'PENDING',
     INDEX idx_hmac (hmac)
 );
 
