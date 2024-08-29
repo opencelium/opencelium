@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.service_portal;
+package com.becon.opencelium.backend.license.service_portal;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;

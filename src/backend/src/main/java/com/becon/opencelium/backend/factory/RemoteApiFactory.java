@@ -2,9 +2,9 @@ package com.becon.opencelium.backend.factory;
 
 import com.becon.opencelium.backend.enums.ApiModule;
 import com.becon.opencelium.backend.enums.ApiType;
-import com.becon.opencelium.backend.service_portal.LicenseModule;
-import com.becon.opencelium.backend.service_portal.RemoteApi;
-import com.becon.opencelium.backend.service_portal.ServicePortal;
+import com.becon.opencelium.backend.license.service_portal.LicenseModule;
+import com.becon.opencelium.backend.license.service_portal.RemoteApi;
+import com.becon.opencelium.backend.license.service_portal.ServicePortal;
 
 public class RemoteApiFactory {
     private RemoteApiFactory() {}

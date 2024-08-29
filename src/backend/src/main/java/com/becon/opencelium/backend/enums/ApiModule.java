@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.enums;
 
-import com.becon.opencelium.backend.service_portal.LicenseModule;
+import com.becon.opencelium.backend.license.service_portal.LicenseModule;
 
 public enum ApiModule {
     LICENSE(LicenseModule.class);
