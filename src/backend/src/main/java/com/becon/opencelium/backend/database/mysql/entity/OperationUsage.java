@@ -15,15 +15,14 @@ public class OperationUsage {
 
     private String subId;
 
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "operation_num")
     private BigInteger operationNum;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumns({
-            @JoinColumn(name = "scheduler_id", referencedColumnName = "id"),
-//            @JoinColumn(name = "connection_id", referencedColumnName = "connection_id")
-    })
+    @JoinColumn(name = "scheduler_id", referencedColumnName = "id")
     private Scheduler scheduler;
 
     public Long getId() {

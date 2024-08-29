@@ -15,12 +15,16 @@ public class Subscription {
 
     private String subId;
 
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "license_key")
     private String licenseKey;
 
+    @Column(name = "current_usage")
     private BigInteger currentUsage;
 
+    @Column(name = "current_usage_hmac")
     private String currentUsageHmac;
 
     private boolean active;
