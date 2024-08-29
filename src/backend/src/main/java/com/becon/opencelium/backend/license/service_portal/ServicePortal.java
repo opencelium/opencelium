@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.service_portal;
+package com.becon.opencelium.backend.license.service_portal;
 
 import org.springframework.http.*;
 import org.springframework.http.client.MultipartBodyBuilder;
