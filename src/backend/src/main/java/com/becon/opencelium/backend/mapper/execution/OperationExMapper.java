@@ -12,6 +12,7 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
+import com.becon.opencelium.backend.utility.EndpointUtility;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -164,7 +165,7 @@ public class OperationExMapper {
         List<ParameterDTO> parameters = getHeaderParameters(request.getHeader(), mediaType);
 
         //add all query parameters
-        int indexOfQuestionSign = request.getEndpoint().indexOf("?");
+        int indexOfQuestionSign = EndpointUtility.findIndexOfQuesSign(request.getEndpoint());
         if (indexOfQuestionSign != -1) {
             String query = request.getEndpoint().substring(indexOfQuestionSign + 1); //get all queries
             parameters.addAll(getQueryParameters(query, mediaType));
@@ -279,8 +280,8 @@ public class OperationExMapper {
             return Collections.emptyList();
         } else {
             List<ParameterDTO> list = new ArrayList<>();
-            String[] split = path.split("/");
-            for (String subPath : split) {
+            List<String> subPaths = EndpointUtility.splitPath(path);
+            for (String subPath : subPaths) {
                 if (!subPath.contains("{") || !subPath.contains("}")) {
                     continue;
                 }
@@ -318,11 +319,10 @@ public class OperationExMapper {
         Map<String, String> parametersMap = new HashMap<>(); //stores string and array parameters only
         Tree objectParametersTree = new Tree(); //stores object parameters
 
-        String[] pairsRaw = query.split("&"); //stores all parameters as <k,v> temporary
+        List<String[]> pairs = EndpointUtility.getQueryVariables(query);
         //loop for storing all parameters to parametersMap
-        for (String p : pairsRaw) {
-            String[] split = p.split("=");
-            parametersMap.merge(split[0], split.length == 1 ? "" : split[1], (oldV, newV) -> oldV + "&" + newV);
+        for (String[] p : pairs) {
+            parametersMap.merge(p[0], p[1] == null ? "" : p[1], (oldV, newV) -> oldV + "&" + newV);
         }
 
         //main loop for making parameterDTO depending on param's style.
@@ -370,7 +370,7 @@ public class OperationExMapper {
     }
 
     private RequestBodyDTO getRequestBody(BodyMng body, Long connectionId, String methodName, MediaType mediaType) {
-        if (body == null || body.getFormat()==null || body.getFields()==null) {
+        if (body == null || body.getFormat() == null || body.getFields() == null) {
             return null;
         }
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
