@@ -1,11 +1,11 @@
 package com.becon.opencelium.backend.license.service_portal;
 
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
-import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
@@ -75,22 +75,19 @@ public class ServicePortal
     }
 
     @Override
-    public ResponseEntity<String> generateLicense(MultipartFile file) {
-        String url = baseURL + "license/generate";
+    public ResponseEntity<String> generateLicense(String subId, ByteArrayResource file) {
+        String url = baseURL + "license/generate/" + subId;
 
         // Prepare headers
         HttpHeaders headers = new HttpHeaders();
         headers.add(tokenName, token);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("file", file.getResource()); // No need for explicit Content-Disposition unless required
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", file);
 
-        MultiValueMap<String, HttpEntity<?>> multipartRequest =
-                builder.build();
-
-        // Create the request entity
-        HttpEntity<MultiValueMap<String, HttpEntity<?>>> requestEntity = new HttpEntity<>(multipartRequest, headers);
+        // Create the HttpEntity
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         try {
             return restTemplate.exchange(

@@ -6,7 +6,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "operation_usage")
+@Table(name = "operation_usage_history")
 public class OperationUsage {
 
     @Id
@@ -21,9 +21,8 @@ public class OperationUsage {
     @Column(name = "operation_num")
     private BigInteger operationNum;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "scheduler_id", referencedColumnName = "id")
-    private Scheduler scheduler;
+    @Column(name = "connection_title")
+    private String connectionTitle;
 
     public Long getId() {
         return id;
@@ -57,11 +56,11 @@ public class OperationUsage {
         this.operationNum = operationNum;
     }
 
-    public Scheduler getScheduler() {
-        return scheduler;
+    public String getConnectionTitle() {
+        return connectionTitle;
     }
 
-    public void setScheduler(Scheduler scheduler) {
-        this.scheduler = scheduler;
+    public void setConnectionTitle(String connectionTitle) {
+        this.connectionTitle = connectionTitle;
     }
 }

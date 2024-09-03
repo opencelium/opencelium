@@ -1,14 +1,17 @@
 package com.becon.opencelium.backend.database.mysql.entity;
 
+import com.becon.opencelium.backend.license.HMACValidator;
+import com.becon.opencelium.backend.utility.crypto.HMACUtility;
 import jakarta.persistence.*;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "subscription")
-public class Subscription {
+public class Subscription implements HMACValidator {
 
     @Id
     private UUID id;
@@ -18,11 +21,14 @@ public class Subscription {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "start_date")
+    private LocalDateTime startDate;
+
     @Column(name = "license_key")
     private String licenseKey;
 
     @Column(name = "current_usage")
-    private BigInteger currentUsage;
+    private Long currentUsage;
 
     @Column(name = "current_usage_hmac")
     private String currentUsageHmac;
@@ -57,6 +63,14 @@ public class Subscription {
         this.createdAt = createdAt;
     }
 
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
     public String getLicenseKey() {
         return licenseKey;
     }
@@ -65,11 +79,11 @@ public class Subscription {
         this.licenseKey = licenseKey;
     }
 
-    public BigInteger getCurrentUsage() {
+    public Long getCurrentUsage() {
         return currentUsage;
     }
 
-    public void setCurrentUsage(BigInteger currentUsage) {
+    public void setCurrentUsage(Long currentUsage) {
         this.currentUsage = currentUsage;
     }
 
@@ -95,5 +109,26 @@ public class Subscription {
 
     public void setActivationRequest(ActivationRequest activationRequest) {
         this.activationRequest = activationRequest;
+    }
+
+    @Override
+    public boolean verify(String other) {
+        if (this.currentUsageHmac == null) {
+            String hmac = generateHmac();
+            return Objects.equals(hmac, other);
+        } else {
+            return Objects.equals(this.currentUsageHmac, other);
+        }
+    }
+
+    public void generateAndSetHmac() {
+        this.currentUsageHmac = generateHmac();
+    }
+
+    public String generateHmac() {
+        return HMACUtility.encode(
+                this.id.toString()
+                        + (this.currentUsage == null ? 0 : this.currentUsage.toString())
+        );
     }
 }

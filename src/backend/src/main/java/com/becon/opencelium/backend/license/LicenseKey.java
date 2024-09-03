@@ -1,36 +1,53 @@
 package com.becon.opencelium.backend.license;
 
-import java.math.BigInteger;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
-public class LicenseKey {
-    private Timestamp expirationDate;
-    private String companyId;
-    private BigInteger operationUsage;
+public class LicenseKey implements AesEncryptable{
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+    private String duration;
+    private String type;
+    private Long operationUsage;
     private String subId;
     private String hmac;
 
-    public Timestamp getExpirationDate() {
-        return expirationDate;
+    public LocalDateTime getStartDate() {
+        return startDate;
     }
 
-    public void setExpirationDate(Timestamp expirationDate) {
-        this.expirationDate = expirationDate;
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
     }
 
-    public String getCompanyId() {
-        return companyId;
+    public LocalDateTime getEndDate() {
+        return endDate;
     }
 
-    public void setCompanyId(String companyId) {
-        this.companyId = companyId;
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
     }
 
-    public BigInteger getOperationUsage() {
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Long getOperationUsage() {
         return operationUsage;
     }
 
-    public void setOperationUsage(BigInteger operationUsage) {
+    public void setOperationUsage(Long operationUsage) {
         this.operationUsage = operationUsage;
     }
 
@@ -48,5 +65,11 @@ public class LicenseKey {
 
     public void setHmac(String hmac) {
         this.hmac = hmac;
+    }
+
+    @Override
+    public String getAsJson() {
+        //todo
+        return null;
     }
 }

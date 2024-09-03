@@ -28,6 +28,8 @@ public interface PathConstant {
     String ICONS = "src/main/resources/icon/";
     String APP_DEFAULT_YML = "src/main/resources/application_default.yml";
     String INSTRUCTION = "src/backend/assistant/instruction/update_instruction.html";
+    String PUBLIC_KEY_FILE = "license/public_key.txt";
+    String LICENSE = "license/";
     String IMAGES = "/api/storage/files/";
     String VERSIONS = "versions/";
     String ASSISTANT = "assistant/";

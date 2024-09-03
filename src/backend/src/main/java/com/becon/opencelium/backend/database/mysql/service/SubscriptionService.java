@@ -8,4 +8,8 @@ public interface SubscriptionService {
     LicenseKey decryptLicenseKey(String license);
     boolean isValid(Subscription subscription);
     void save(Subscription subscription);
+    boolean exists(String subId);
+    Subscription buildFromLicenseKey(LicenseKey licenseKey);
+    void deactivateAll();
+    Subscription getActiveSubs();
 }
