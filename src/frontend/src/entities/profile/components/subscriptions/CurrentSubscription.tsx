@@ -59,12 +59,6 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                         </div>
                     </InfoStyled>
                     <InfoStyled>
-                        <div><b>Start Date:</b></div>
-                        <div>
-                            {convertTimeForSubscription(subscription.startDate, {hasHours: false, hasMinutes: false, hasSeconds: false})}
-                        </div>
-                    </InfoStyled>
-                    <InfoStyled>
                         <div><b>Expiration Date:</b></div>
                         <div>
                             {convertTimeForSubscription(subscription.endDate, {hasHours: false, hasMinutes: false, hasSeconds: false})}
