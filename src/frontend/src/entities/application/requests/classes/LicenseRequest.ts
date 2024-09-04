@@ -3,7 +3,10 @@ import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {AxiosResponse} from "axios";
 import ILicenseRequest, {
     ActivateLicenseFileRequest,
-    ActivateLicenseResponse, ActivateLicenseStringRequest, GenerateActivateRequestResponse,
+    ActivateLicenseResponse,
+    ActivateLicenseStringRequest,
+    GenerateActivateRequestResponse,
+    GetActivationRequestStatusResponse,
 } from "@entity/application/requests/interfaces/ILicenseRequest";
 import {StatusResponse} from "@application/requests/interfaces/IApplication";
 
@@ -26,12 +29,12 @@ export default class LicenseRequest extends Request implements ILicenseRequest {
     }
 
     async getStatus(): Promise<AxiosResponse<StatusResponse>> {
-        this.endpoint = '/status;'
+        this.endpoint = '/status'
         return super.get<StatusResponse>();
     }
 
-    async getActivationRequestStatus (): Promise<AxiosResponse<StatusResponse>> {
+    async getActivationRequestStatus (): Promise<AxiosResponse<GetActivationRequestStatusResponse>> {
         this.endpoint = '/activation-request/status';
-        return super.get<StatusResponse>();
+        return super.get<GetActivationRequestStatusResponse>();
     }
 }

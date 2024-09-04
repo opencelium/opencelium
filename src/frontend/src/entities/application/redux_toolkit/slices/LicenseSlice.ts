@@ -17,7 +17,7 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ICommonState} from "@application/interfaces/core";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
-import LicenseModel from "@entity/application/requests/models/LicenseModel";
+import LicenseModel, {ActivationRequestStatus} from "@entity/application/requests/models/LicenseModel";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {
     activateLicenseFile,
@@ -33,7 +33,7 @@ export interface LicenseState extends ICommonState{
     gettingActivationRequestStatus: API_REQUEST_STATE,
     license: LicenseModel,
     status: boolean,
-    activationRequestStatus: boolean,
+    activationRequestStatus: ActivationRequestStatus,
 }
 
 const initialState: LicenseState = {
@@ -43,7 +43,7 @@ const initialState: LicenseState = {
     gettingActivationRequestStatus: API_REQUEST_STATE.INITIAL,
     license: null,
     status: false,
-    activationRequestStatus: false,
+    activationRequestStatus: ActivationRequestStatus.EXPIRED,
     ...CommonState,
 }
 
@@ -59,7 +59,7 @@ export const licenseSlice = createSlice({
         [generateActivateRequest.fulfilled.type]: (state, action: PayloadAction<LicenseModel>) => {
             state.generatingActivateRequest = API_REQUEST_STATE.FINISH;
             state.license = action.payload;
-            state.activationRequestStatus = true;
+            state.activationRequestStatus = ActivationRequestStatus.PENDING;
             state.error = null;
         },
         [generateActivateRequest.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -105,7 +105,7 @@ export const licenseSlice = createSlice({
         [getActivationRequestStatus.pending.type]: (state) => {
             state.gettingActivationRequestStatus = API_REQUEST_STATE.START;
         },
-        [getActivationRequestStatus.fulfilled.type]: (state, action: PayloadAction<boolean>) => {
+        [getActivationRequestStatus.fulfilled.type]: (state, action: PayloadAction<ActivationRequestStatus>) => {
             state.gettingActivationRequestStatus = API_REQUEST_STATE.FINISH;
             state.activationRequestStatus = action.payload;
             state.error = null;

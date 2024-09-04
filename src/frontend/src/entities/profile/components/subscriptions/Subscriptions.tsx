@@ -16,29 +16,25 @@ import CurrentSubscription from "@entity/profile/components/subscriptions/Curren
 
 const SubscriptionsComponent = ({hasOnlineSync}: {hasOnlineSync: boolean}) => {
     const dispatch = useAppDispatch();
-    const {generatingActivateRequest, activationRequestStatus} = License.getReduxState();
     const {
-        gettingSubscriptions, subscriptions, currentSubscriptionId,
+        gettingSubscriptions, subscriptions, currentSubscription,
         gettingCurrentSubscription,
     } = Subscription.getReduxState();
     const [selectedSubscription, setSelectedSubscription] = useState<any>();
     const subscriptionOptions = useMemo(() => {
         return Subscription.getOptions(subscriptions);
     }, [subscriptions]);
-    const currentSubscription = useMemo(() => {
-        return subscriptions.find(s => s._id === currentSubscriptionId);
-    }, [currentSubscriptionId]);
     useEffect(() => {
         dispatch(getAllSubscriptions());
         dispatch(getCurrentSubscription());
     }, [])
     useEffect(() => {
         if (gettingSubscriptions === API_REQUEST_STATE.FINISH && gettingCurrentSubscription === API_REQUEST_STATE.FINISH) {
-            setSelectedSubscription(subscriptionOptions.find(s => s.value === currentSubscriptionId));
+            setSelectedSubscription(subscriptionOptions.find(s => s.value === currentSubscription._id));
         }
     }, [gettingSubscriptions, gettingCurrentSubscription]);
     useEffect(() => {
-        if (selectedSubscription && currentSubscriptionId !== selectedSubscription.value) {
+        if (selectedSubscription && currentSubscription._id !== selectedSubscription.value) {
             dispatch(setCurrentSubscription(selectedSubscription.value))
         }
     }, [selectedSubscription]);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { ProgressBar } from 'react-bootstrap';
 import {
     DivisionsStyled,
@@ -9,14 +9,32 @@ import {
 import SubscriptionModel from "@entity/application/requests/models/SubscriptionModel";
 import {withTheme} from "styled-components";
 import {ITheme} from "@style/Theme";
+import {useAppDispatch} from "@application/utils/store";
+import {getLicenseStatus} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
+import License from "@entity/application/classes/License";
+import {convertTimeForSubscription, formatOperationUsage} from "@application/utils/utils";
+import Subscription from "@entity/application/classes/Subscription";
 
+export const RoleNames: any = {
+    admin: 'OC Admin',
+    duo_customer: 'Duo',
+    unlimited_customer: 'Unlimited',
+    professional: 'Professional',
+    enterprise: 'Enterprise',
+    enterprise_plus: 'Enterprise Plus',
+}
 const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionModel, theme: ITheme}) => {
-    const max = 1000000;
+    const dispatch = useAppDispatch();
+    const {status} = License.getReduxState();
+    const max = subscription.totalOperationUsage;
     const divisionStep = max / 10;
     const divisions = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     const progressbarHeight = 30;
-    const now = 531234;
+    const now = subscription.currentOperationUsage;
     const percentage = (now / max) * 100;
+    useEffect(() => {
+        dispatch(getLicenseStatus());
+    }, []);
     return (
         <div>
             <div>
@@ -25,30 +43,57 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                     <InfoStyled>
                         <div><b>Status:</b></div>
                         <div>
-                            {"Valid"}
+                            {status ? "Valid" : "Invalid"}
                         </div>
                     </InfoStyled>
                     <InfoStyled>
                         <div><b>Type:</b></div>
                         <div>
-                            {"Enterprise"}
+                            {RoleNames[subscription.type]}
+                        </div>
+                    </InfoStyled>
+                    <InfoStyled>
+                        <div><b>Amount of API Operations:</b></div>
+                        <div>
+                            {formatOperationUsage(subscription.totalOperationUsage)}
                         </div>
                     </InfoStyled>
                     <InfoStyled>
                         <div><b>Start Date:</b></div>
                         <div>
-                            {"05.08.2024"}
+                            {convertTimeForSubscription(subscription.startDate, {hasHours: false, hasMinutes: false, hasSeconds: false})}
                         </div>
                     </InfoStyled>
                     <InfoStyled>
-                        <div><b>End Date:</b></div>
+                        <div><b>Expiration Date:</b></div>
                         <div>
-                            {"05.08.2025"}
+                            {convertTimeForSubscription(subscription.endDate, {hasHours: false, hasMinutes: false, hasSeconds: false})}
                         </div>
                     </InfoStyled>
+                    <InfoStyled>
+                        <div><b>Monthly Period:</b></div>
+                        <div>
+                            {Subscription.getMonthlyPeriod(subscription.startDate)}
+                        </div>
+                    </InfoStyled>
+                    {max === null && <React.Fragment>
+                        <InfoStyled>
+                            <div><b>Capacity:</b></div>
+                            <div>
+                                {"Unlimited"}
+                            </div>
+                        </InfoStyled>
+                        <InfoStyled>
+                            <div><b>Current Operation Usage:</b></div>
+                            <div>
+                                {now}
+                            </div>
+                        </InfoStyled>
+                    </React.Fragment>
+                    }
                 </div>
             </div>
-            <div style={{position: 'relative', height: progressbarHeight + 50, marginTop: 50}}>
+            {max !== null && <div style={{position: 'relative', height: progressbarHeight + 50, marginTop: 60}}>
                 <ProgressBar
                     style={{
                         borderRadius: '0.25rem',
@@ -81,9 +126,10 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                         left: `calc(${percentage}%)`,
                     }}
                 >
-                    {now}
+                    {formatOperationUsage(now)}
                 </NowValueStyled>
             </div>
+            }
         </div>
     )
 }

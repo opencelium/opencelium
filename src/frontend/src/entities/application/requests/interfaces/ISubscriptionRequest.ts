@@ -20,13 +20,13 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 
 export default interface ISubscriptionRequest {
 
-    //to get all subscriptions
+    //to get all subscriptions (in online mode)
     getAll (): Promise<AxiosResponse<SubscriptionModel[]>>,
 
-    //to get current subscription
+    //to get current subscription (in online/offline mode)
     getCurrent (): Promise<AxiosResponse<SubscriptionModel>>,
 
-    //to set current subscription
-    setCurrent (subscriptionId: string): Promise<AxiosResponse<IResponse>>,
+    //to set current subscription (in online mode)
+    setCurrent (subscriptionId: string): Promise<AxiosResponse<SubscriptionModel>>,
 
 }

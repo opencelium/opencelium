@@ -27,7 +27,7 @@ import {
 export interface SubscriptionState extends ICommonState{
     subscriptions: SubscriptionModel[],
     gettingSubscriptions: API_REQUEST_STATE,
-    currentSubscriptionId: string,
+    currentSubscription: SubscriptionModel,
     gettingCurrentSubscription: API_REQUEST_STATE,
     settingCurrentSubscription: API_REQUEST_STATE,
 }
@@ -35,7 +35,7 @@ export interface SubscriptionState extends ICommonState{
 const initialState: SubscriptionState = {
     subscriptions: [],
     gettingSubscriptions: API_REQUEST_STATE.INITIAL,
-    currentSubscriptionId: null,
+    currentSubscription: null,
     gettingCurrentSubscription: API_REQUEST_STATE.INITIAL,
     settingCurrentSubscription: API_REQUEST_STATE.INITIAL,
     ...CommonState,
@@ -64,7 +64,7 @@ export const subscriptionSlice = createSlice({
         },
         [getCurrentSubscription.fulfilled.type]: (state, action: PayloadAction<SubscriptionModel>) => {
             state.gettingCurrentSubscription = API_REQUEST_STATE.FINISH;
-            state.currentSubscriptionId = action.payload._id;
+            state.currentSubscription = action.payload;
             state.error = null;
         },
         [getCurrentSubscription.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -74,9 +74,9 @@ export const subscriptionSlice = createSlice({
         [setCurrentSubscription.pending.type]: (state) => {
             state.settingCurrentSubscription = API_REQUEST_STATE.START;
         },
-        [setCurrentSubscription.fulfilled.type]: (state, action: PayloadAction<string>) => {
+        [setCurrentSubscription.fulfilled.type]: (state, action: PayloadAction<SubscriptionModel>) => {
             state.settingCurrentSubscription = API_REQUEST_STATE.FINISH;
-            state.currentSubscriptionId = action.payload;
+            state.currentSubscription = action.payload;
             state.error = null;
         },
         [setCurrentSubscription.rejected.type]: (state, action: PayloadAction<IResponse>) => {

@@ -41,6 +41,7 @@ import Subscriptions from "@entity/profile/components/subscriptions/Subscription
 import {getServicePortalTokenStatus} from "@entity/application/redux_toolkit/action_creators/ApplicationCreators";
 import {getActivationRequestStatus} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
 import License from "@entity/application/classes/License";
+import {ActivationRequestStatus} from "@entity/application/requests/models/LicenseModel";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
@@ -161,15 +162,13 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                         confirmationText={'Are you agree to share your E-mail with Opencelium Service Portal?'}
                     />
                 </FormSection>
-                <FormSection label={{value: 'Subscriptions'}} styles={{
-                }}>
-                    <Subscriptions hasOnlineSync={themeSync}/>
-                    {!themeSync && activationRequestStatus && <ActivateLicenseComponent/>}
+                <FormSection label={{value: 'Subscriptions'}}>
+
+                    {Permissions}
+                    {/*<Subscriptions hasOnlineSync={themeSync}/>
+                    {!themeSync && activationRequestStatus === ActivationRequestStatus.PENDING && <ActivateLicenseComponent/>}*/}
                 </FormSection>
-            </React.Fragment>,
-            <FormSection label={{value: 'user group'}} hasFullWidthInForm>
-                {Permissions}
-            </FormSection>
+            </React.Fragment>
         ]
     }
     return(

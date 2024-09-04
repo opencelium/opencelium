@@ -14,7 +14,7 @@
  */
 
 import {AxiosResponse} from "axios";
-import LicenseModel from "@entity/application/requests/models/LicenseModel";
+import LicenseModel, {ActivationRequestStatus} from "@entity/application/requests/models/LicenseModel";
 import {StatusResponse} from "@application/requests/interfaces/IApplication";
 
 export interface ActivateLicenseFileRequest {
@@ -30,22 +30,25 @@ export interface ActivateLicenseResponse {
 export interface GenerateActivateRequestResponse {
     request: string,
 }
+export interface GetActivationRequestStatusResponse {
+    status: ActivationRequestStatus,
+}
 
 export default interface ILicenseRequest {
 
-    //to generate activate request
+    //to generate activate request (in offline mode)
     generateActivateRequest (): Promise<AxiosResponse<GenerateActivateRequestResponse>>,
 
-    //to activate license file
+    //to activate license file (in offline mode)
     activateFile (data: ActivateLicenseFileRequest): Promise<AxiosResponse<ActivateLicenseResponse>>,
 
-    //to activate license string
+    //to activate license string (in offline mode)
     activateString (data: ActivateLicenseStringRequest): Promise<AxiosResponse<ActivateLicenseResponse>>,
 
     //to get status
     getStatus (): Promise<AxiosResponse<StatusResponse>>,
 
     //to get activation request status
-    getActivationRequestStatus (): Promise<AxiosResponse<StatusResponse>>
+    getActivationRequestStatus (): Promise<AxiosResponse<GetActivationRequestStatusResponse>>
 
 }

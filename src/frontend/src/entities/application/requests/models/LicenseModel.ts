@@ -3,3 +3,9 @@ export default interface LicenseModel {
     name: string,
     key: string,
 }
+export enum ActivationRequestStatus {
+    PENDING= 'PENDING',
+    PROCESSED= 'PROCESSED',
+    EXPIRED= 'EXPIRED'
+
+}

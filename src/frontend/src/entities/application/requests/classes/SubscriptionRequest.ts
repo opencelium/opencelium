@@ -21,9 +21,9 @@ export default class SubscriptionRequest extends Request implements ISubscriptio
         return super.get<SubscriptionModel>();
     }
 
-    async setCurrent(subscriptionId: string): Promise<AxiosResponse<IResponse>>{
+    async setCurrent(subscriptionId: string): Promise<AxiosResponse<SubscriptionModel>>{
         this.endpoint = '/current';
-        return super.post<IResponse>({subscriptionId});
+        return super.post<SubscriptionModel>({subscriptionId});
     }
 
 }
