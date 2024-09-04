@@ -113,12 +113,10 @@ public class ReferenceUtility {
                 braces.push(current);
                 holder.append(current);
             } else if (current == ']') {
-                char top = braces.peek();
-                if (top == '[') {
-                    braces.pop();
-                } else {
+                if (braces.isEmpty() || braces.pop() != '[') {
                     throw new RuntimeException("Wrong value is supplied to reference");
                 }
+
                 holder.append(current);
             } else {
                 holder.append(current);
@@ -128,7 +126,7 @@ public class ReferenceUtility {
         String[] result = new String[parts.size()];
 
         for (int i = 0; i < parts.size(); i++) {
-            result[i] = parts.get(i);
+            result[i] = wrapSpacesIfNecessary(parts.get(i));
         }
 
         return result;
@@ -172,5 +170,51 @@ public class ReferenceUtility {
         }
 
         return true;
+    }
+
+    private static String wrapSpacesIfNecessary(String part) {
+        if (!part.contains(" ")) {
+            return part;
+        }
+
+        StringBuilder result = new StringBuilder();
+        StringBuilder holder = new StringBuilder();
+        Stack<Character> braces = new Stack<>();
+        char current;
+
+        for (int i = 0; i < part.length(); i++) {
+            current = part.charAt(i);
+
+            if (current == '[') {
+                appendNonEmptyHolder(result, holder);
+                braces.push(current);
+                result.append(current);
+            } else if (current == ']') {
+                if (braces.isEmpty() || braces.pop() != '[') {
+                    throw new RuntimeException("Wrong value is supplied to reference");
+                }
+
+                result.append(current);
+            } else if (braces.isEmpty()) {
+                holder.append(current);
+            } else {
+                result.append(current);
+            }
+        }
+
+        appendNonEmptyHolder(result, holder);
+
+        return result.toString();
+    }
+
+    private static void appendNonEmptyHolder(StringBuilder result, StringBuilder holder) {
+        if (!holder.isEmpty()) {
+            if (holder.indexOf(" ") != -1) {
+                result.append("['").append(holder).append("']");
+            } else {
+                result.append(holder);
+            }
+            holder.setLength(0);
+        }
     }
 }

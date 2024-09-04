@@ -38,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Configuration
@@ -50,7 +51,6 @@ public class StorageConfiguration {
     private final ChangeSetDao changeSetDao;
     private final Environment environment;
 
-    private static final String ZIP_EXTENSION = ".zip";
     private static final String JAR_PREFIX = "opencelium.backend-";
     private static final String JAR_EXTENSION = ".jar";
 
@@ -98,27 +98,45 @@ public class StorageConfiguration {
         }
 
         // deleting old version zip and jar files
-        cleanOldFiles(PathConstant.LIBS, JAR_EXTENSION, JAR_PREFIX);
-        cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, ZIP_EXTENSION, "");
+        cleanOldFiles(PathConstant.LIBS, f -> f.isFile() && f.getName().endsWith(JAR_EXTENSION), JAR_PREFIX);
+        cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, File::isDirectory, "");
     }
 
-    private void cleanOldFiles(String folderPath, String extension, String prefix) {
-        try (Stream<File> files = Files.list(Paths.get(folderPath)).map(Path::toFile).filter(File::isFile)
-                .filter(file -> file.getName().endsWith(extension))) {
+    private void cleanOldFiles(String folder, Predicate<File> filter, String prefix) {
+        try (Stream<File> files = Files.list(Paths.get(folder)).map(Path::toFile).filter(filter)) {
 
             Double ocVersion = environment.getProperty("opencelium.version", Double.class, 0.0);
             int intValue = ocVersion.intValue();
 
-            files.filter(f -> !f.getName().startsWith(prefix + intValue) || !f.getName().endsWith(extension)).forEach(f -> {
-                if (f.delete()) {
-                    System.out.println(f.getName() + " file is deleted");
+            files.filter(f -> !f.getName().startsWith(prefix + intValue + ".")).forEach(f -> {
+                if (forceDelete(f)) {
+                    System.out.println(f.getAbsolutePath() + " - file/folder is deleted");
                 } else {
-                    System.out.println(f.getName() + " file cannot be deleted");
+                    System.out.println(f.getAbsolutePath() + " - file/folder cannot be deleted");
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean forceDelete(File folder) {
+        if (folder == null || !folder.exists()) {
+            return false;
+        }
+
+        if (folder.isDirectory()) {
+            String[] entries = folder.list();
+            if (entries != null) {
+                for (String entry : entries) {
+                    File currentFile = new File(folder, entry);
+                    if (!forceDelete(currentFile)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return folder.delete();
     }
 
     private void updateVisibility() {
