@@ -22,9 +22,6 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +33,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.ldap.userdetails.LdapUserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -79,12 +77,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication auth) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        UserPrincipals userPrincipals = (UserPrincipals) auth.getPrincipal();
-        User user = userPrincipals.getUser();
+        User user = getUser(auth);
         UserResource userResource = new UserResource(user);
 
         String payload = mapper.writeValueAsString(userResource);
-        String token = jwtTokenUtil.generateToken(userPrincipals);
+        String token = jwtTokenUtil.generateToken(user);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(payload);
@@ -106,5 +103,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         response.setContentType("application/json");
         response.getWriter().write(payload);
         response.setStatus(HttpStatus.FORBIDDEN.value());
+    }
+
+    private User getUser(Authentication authentication) {
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof LdapUserDetails) {
+            // TODO create user
+            return new User();
+        }
+
+        return ((UserPrincipals) authentication.getPrincipal()).getUser();
     }
 }
