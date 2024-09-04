@@ -69,7 +69,7 @@ public class JwtTokenUtil {
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
             .claim("userId", user.getId())
             .claim("role", user.getUserRole().getName())
-            .claim("sessionTime", tokenUtility.getSessionTime())
+            .claim("sessionTime", tokenUtility.getActivityTime())
             .expirationTime(new Date(System.currentTimeMillis() + tokenUtility.getExpirationTime() * 1000))
             .issueTime(new Date(System.currentTimeMillis()))
             .subject(user.getEmail())
@@ -94,7 +94,7 @@ public class JwtTokenUtil {
         }
 
         long inactiveTime = new Date().getTime() - session.getLastAccessed().getTime();
-        if (inactiveTime > tokenUtility.getSessionTime()){
+        if (inactiveTime > tokenUtility.getActivityTime()){
             return false;
         }
 
