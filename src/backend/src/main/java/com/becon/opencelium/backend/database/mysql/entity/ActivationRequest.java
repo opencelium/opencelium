@@ -1,22 +1,22 @@
 package com.becon.opencelium.backend.database.mysql.entity;
 
 import com.becon.opencelium.backend.enums.ActivReqStatus;
-import com.becon.opencelium.backend.license.HMACValidator;
-import com.becon.opencelium.backend.utility.crypto.HMACUtility;
+import com.becon.opencelium.backend.license.HmacValidator;
+import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "activation_request")
-public class ActivationRequest implements HMACValidator {
+public class ActivationRequest implements HmacValidator {
     @Id
     private UUID id;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     private String hmac;
 
@@ -54,12 +54,12 @@ public class ActivationRequest implements HMACValidator {
         if (this.id == null) {
             return null;
         }
-        return HMACUtility.encode(
-                this.id
-                        + (this.machineUUID == null ? "" : this.machineUUID)
+        return HmacUtility.encode(
+                (this.machineUUID == null ? "" : this.machineUUID)
                         + (this.macAddress == null ? "" : this.macAddress)
                         + (this.processorId == null ? "" : this.processorId)
                         + (this.computerName == null ? "" : this.computerName)
+                        + this.id
         );
     }
 
@@ -95,11 +95,11 @@ public class ActivationRequest implements HMACValidator {
         this.status = status;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 

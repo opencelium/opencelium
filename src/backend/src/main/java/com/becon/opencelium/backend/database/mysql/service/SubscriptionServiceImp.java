@@ -3,21 +3,27 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
 import com.becon.opencelium.backend.license.LicenseKey;
+import com.becon.opencelium.backend.license.SubsDTO;
+import com.becon.opencelium.backend.quartz.ResetLimitsJob;
 import com.becon.opencelium.backend.utility.LicenseKeyUtility;
-import com.becon.opencelium.backend.utility.crypto.AESUtility;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.quartz.*;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.time.ZoneId;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class SubscriptionServiceImp implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
+    private final Scheduler scheduler;
 
-    public SubscriptionServiceImp(SubscriptionRepository subscriptionRepository) {
+    public SubscriptionServiceImp(SubscriptionRepository subscriptionRepository, Scheduler scheduler) {
         this.subscriptionRepository = subscriptionRepository;
+        this.scheduler = scheduler;
     }
 
     @Override
@@ -27,13 +33,13 @@ public class SubscriptionServiceImp implements SubscriptionService {
 
     @Override
     public LicenseKey decryptLicenseKey(String license) {
-        return (LicenseKey) AESUtility.decrypt(license, LicenseKey.class);
+        return LicenseKeyUtility.decrypt(license);
     }
 
     @Override
     public boolean isValid(Subscription s) {
-        LicenseKey licenseKey = (LicenseKey) AESUtility.decrypt(s.getLicenseKey(), LicenseKey.class);
-        if (licenseKey == null || licenseKey.getEndDate().isBefore(LocalDateTime.now()) || licenseKey.getStartDate().isAfter(LocalDateTime.now())) {
+        LicenseKey licenseKey = LicenseKeyUtility.decrypt(s.getLicenseKey());
+        if (licenseKey == null || licenseKey.getEndDate().isBefore(Instant.now()) || licenseKey.getStartDate().isAfter(Instant.now())) {
             return false;
         }
         return s.generateHmac().equals(s.getCurrentUsageHmac());
@@ -42,6 +48,7 @@ public class SubscriptionServiceImp implements SubscriptionService {
     @Override
     public void save(Subscription subscription) {
         subscription.generateAndSetHmac();
+        initTask(subscription);
         subscriptionRepository.save(subscription);
     }
 
@@ -55,7 +62,7 @@ public class SubscriptionServiceImp implements SubscriptionService {
         Subscription subscription = new Subscription();
         subscription.setId(UUID.randomUUID());
         subscription.setSubId(licenseKey.getSubId());
-        subscription.setCreatedAt(LocalDateTime.now());
+        subscription.setCreatedAt(Instant.now());
         subscription.setStartDate(licenseKey.getStartDate());
         subscription.setCurrentUsage(0L);
         subscription.setActive(true);
@@ -66,6 +73,7 @@ public class SubscriptionServiceImp implements SubscriptionService {
     @Override
     public void deactivateAll() {
         subscriptionRepository.deactivateAll();
+        killAllTasks();
     }
 
     @Override
@@ -73,14 +81,53 @@ public class SubscriptionServiceImp implements SubscriptionService {
         return subscriptionRepository.findActiveSubs().orElse(null);
     }
 
-    @Scheduled(cron = "@monthly")
-    private void restartLimitsMonthly() {
-        //todo need to be changed
-        List<Subscription> all = subscriptionRepository.findAll();
-        for (Subscription s : all) {
-            s.setCurrentUsage(0L);
-            s.generateAndSetHmac();
-            subscriptionRepository.save(s);
+    @Override
+    public SubsDTO toDto(LicenseKey licenseKey, Subscription subscription) {
+        SubsDTO subsDTO = new SubsDTO();
+        subsDTO.setActive(subscription.isActive());
+        subsDTO.setSubsId(subscription.getSubId());
+        subsDTO.setCurrentOperationUsage(subscription.getCurrentUsage());
+
+        subsDTO.setDuration(licenseKey.getDuration());
+        subsDTO.setType(licenseKey.getType());
+        subsDTO.setStartDate(licenseKey.getStartDate().getEpochSecond());
+        subsDTO.setEndDate(licenseKey.getEndDate().getEpochSecond());
+        subsDTO.setTotalOperationUsage(licenseKey.getOperationUsage());
+        return subsDTO;
+    }
+
+    @Override
+    public Subscription getById(String id) {
+        return subscriptionRepository.findById(UUID.fromString(id)).orElseThrow(() -> new RuntimeException("Subscription not found"));
+    }
+
+    private void initTask(Subscription subscription) {
+        JobDetail job = JobBuilder.newJob(ResetLimitsJob.class)
+                .withIdentity("subs-" + subscription.getId(), "subs-group")
+                .build();
+
+        String cron = String.format("0 0 0 %d * ?", LocalDateTime.ofInstant(subscription.getStartDate(), ZoneId.systemDefault()).getDayOfMonth());
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .withIdentity("default", "default")
+                .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                .build();
+        try {
+            scheduler.scheduleJob(job, trigger);
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void killAllTasks() {
+        try {
+            for (String groupName : scheduler.getJobGroupNames()) {
+                Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName));
+                for (JobKey jobKey : jobKeys) {
+                    scheduler.deleteJob(jobKey);
+                }
+            }
+        } catch (SchedulerException e) {
+            e.printStackTrace();
         }
     }
 }

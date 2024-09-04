@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,7 +14,7 @@ import java.util.UUID;
 public interface ActivationRequestRepository extends JpaRepository<ActivationRequest, UUID> {
     @Modifying
     @Transactional
-    @Query("UPDATE ActivationRequest ar SET ar.status = 'EXPIRED' where ar.status <> 'EXPIRED'")
+    @Query("UPDATE ActivationRequest ar SET ar.status = com.becon.opencelium.backend.enums.ActivReqStatus.EXPIRED")
     void expireAllActivationRequests();
 
     @Query(value = "select * from activation_request ar where ar.status <> 'EXPIRED' limit 1", nativeQuery = true)

@@ -1,29 +1,29 @@
 package com.becon.opencelium.backend.license;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
-public class LicenseKey implements AesEncryptable{
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+public class LicenseKey {
+    private Instant startDate;
+    private Instant endDate;
     private String duration;
     private String type;
     private Long operationUsage;
     private String subId;
     private String hmac;
 
-    public LocalDateTime getStartDate() {
+    public Instant getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDateTime startDate) {
+    public void setStartDate(Instant startDate) {
         this.startDate = startDate;
     }
 
-    public LocalDateTime getEndDate() {
+    public Instant getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(LocalDateTime endDate) {
+    public void setEndDate(Instant endDate) {
         this.endDate = endDate;
     }
 
@@ -65,11 +65,5 @@ public class LicenseKey implements AesEncryptable{
 
     public void setHmac(String hmac) {
         this.hmac = hmac;
-    }
-
-    @Override
-    public String getAsJson() {
-        //todo
-        return null;
     }
 }

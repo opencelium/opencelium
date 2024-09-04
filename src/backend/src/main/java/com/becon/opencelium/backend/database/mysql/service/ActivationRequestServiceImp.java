@@ -6,7 +6,7 @@ import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.utility.MachineUtility;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,8 +41,9 @@ public class ActivationRequestServiceImp implements ActivationRequestService {
         ar.setMacAddress(MachineUtility.getMacAddress());
         ar.setProcessorId(MachineUtility.getProcessorId());
         ar.setComputerName(MachineUtility.getComputerName());
-        ar.setCreatedAt(LocalDateTime.now());
+        ar.setCreatedAt(Instant.now());
         ar.setStatus(ActivReqStatus.PENDING);
+        ar.setTtl(3600);
         ar.generateAndSetHmac();
         return ar;
     }
@@ -58,7 +59,7 @@ public class ActivationRequestServiceImp implements ActivationRequestService {
                     }
                 },
                 ar.getTtl(),
-                TimeUnit.MILLISECONDS);
+                TimeUnit.SECONDS);
     }
 
     @Override

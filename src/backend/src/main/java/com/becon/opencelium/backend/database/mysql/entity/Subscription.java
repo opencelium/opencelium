@@ -1,17 +1,16 @@
 package com.becon.opencelium.backend.database.mysql.entity;
 
-import com.becon.opencelium.backend.license.HMACValidator;
-import com.becon.opencelium.backend.utility.crypto.HMACUtility;
+import com.becon.opencelium.backend.license.HmacValidator;
+import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import jakarta.persistence.*;
 
-import java.math.BigInteger;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "subscription")
-public class Subscription implements HMACValidator {
+public class Subscription implements HmacValidator {
 
     @Id
     private UUID id;
@@ -19,10 +18,10 @@ public class Subscription implements HMACValidator {
     private String subId;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Column(name = "start_date")
-    private LocalDateTime startDate;
+    private Instant startDate;
 
     @Column(name = "license_key")
     private String licenseKey;
@@ -55,19 +54,19 @@ public class Subscription implements HMACValidator {
         this.subId = subId;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getStartDate() {
+    public Instant getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDateTime startDate) {
+    public void setStartDate(Instant startDate) {
         this.startDate = startDate;
     }
 
@@ -126,9 +125,8 @@ public class Subscription implements HMACValidator {
     }
 
     public String generateHmac() {
-        return HMACUtility.encode(
-                this.id.toString()
-                        + (this.currentUsage == null ? 0 : this.currentUsage.toString())
+        return HmacUtility.encode(
+                (this.currentUsage == null ? 0 : this.currentUsage.toString()) + this.id.toString()
         );
     }
 }

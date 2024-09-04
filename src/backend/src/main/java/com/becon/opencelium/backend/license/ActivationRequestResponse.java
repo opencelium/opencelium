@@ -2,13 +2,12 @@ package com.becon.opencelium.backend.license;
 
 import com.becon.opencelium.backend.enums.ActivReqStatus;
 
-import java.time.Instant;
 import java.util.UUID;
 
-public class ActivationRequestDTO {
+public class ActivationRequestResponse {
     private UUID id;
 
-    private Instant createdAt;
+    private Long createdAt;
 
     private String hmac;
 
@@ -30,11 +29,11 @@ public class ActivationRequestDTO {
         this.id = id;
     }
 
-    public Instant getCreatedAt() {
+    public Long getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
+    public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
     }
 

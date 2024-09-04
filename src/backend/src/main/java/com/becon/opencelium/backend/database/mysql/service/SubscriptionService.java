@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.license.LicenseKey;
+import com.becon.opencelium.backend.license.SubsDTO;
 
 public interface SubscriptionService {
     boolean verifyLicenseKey(String licenseKey);
@@ -12,4 +13,6 @@ public interface SubscriptionService {
     Subscription buildFromLicenseKey(LicenseKey licenseKey);
     void deactivateAll();
     Subscription getActiveSubs();
+    SubsDTO toDto(LicenseKey licenseKey, Subscription subscription);
+    Subscription getById(String id);
 }

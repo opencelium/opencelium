@@ -1,14 +1,17 @@
 package com.becon.opencelium.backend.utility.crypto;
 
-import com.becon.opencelium.backend.license.HMACValidator;
+import com.becon.opencelium.backend.license.HmacValidator;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
-public class HMACUtility {
+public class HmacUtility {
     private static final String SECRET_KEY = "zrOCf7Tg/YD1MsCfPvSIZ9UqkJIq0clFIUm4OC1cscJTR4w3WAIVzK/vVgH3bQKEUNylkavS3KTkwkHWLONLEy8xDLfNLipzUmlnBuWosQDdXyhY/xl9pytU4UE/vWkR";
     private static final String HMAC_ALGORITHM = "HmacSHA256";
+
+    private HmacUtility() {
+    }
 
     public static String encode(String data) {
         if (data == null) {
@@ -40,7 +43,7 @@ public class HMACUtility {
         }
     }
 
-    public static <T extends HMACValidator> boolean verify(T data, String hmac) {
+    public static <T extends HmacValidator> boolean verify(T data, String hmac) {
         return data.verify(hmac);
     }
 }

@@ -13,6 +13,7 @@ public class MachineUtility {
     public static final String CMD_GET_Proc_ID_LINUX = "lscpu | grep 'Serial'";
     public static final String CMD_GET_Proc_ID_MAC = "system_profiler SPHardwareDataType | grep 'Serial Number'";
 
+    private MachineUtility() {}
     public static String getMachineUUID() {
         String uuid = null;
         String os = System.getProperty("os.name").toLowerCase();
