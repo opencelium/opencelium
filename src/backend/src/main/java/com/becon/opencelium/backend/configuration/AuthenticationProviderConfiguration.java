@@ -31,7 +31,10 @@ public class AuthenticationProviderConfiguration {
     private DaoUserDetailsService daoUserDetailsService;
 
     @Autowired
-    private LdapGroupMappingProperties properties;
+    private LdapGroupMappingProperties groupMappingProperties;
+
+    @Autowired
+    private LdapProperties properties;
 
 
     @Bean
@@ -50,23 +53,41 @@ public class AuthenticationProviderConfiguration {
 
     @Bean
     public LdapAuthenticator ldapAuthenticator() {
+        String userSearchBase = properties.getUserSearchBase() + "," + properties.getBase();
+        String searchFilter = properties.getUserSearchFilter();
+
         BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
-        authenticator.setUserSearch(new FilterBasedLdapUserSearch("ou=people,dc=example,dc=com", "(cn={0})", ldapContextSource()));
+        authenticator.setUserSearch(new FilterBasedLdapUserSearch(userSearchBase, searchFilter, ldapContextSource()));
 
         return authenticator;
     }
 
     @Bean
     public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() {
+        String groupSearchBase = properties.getGroupSearchBase() + "," + properties.getBase();
+        String searchFilter = properties.getGroupSearchFilter();
 
-        DefaultLdapAuthoritiesPopulator authoritiesPopulator = new DefaultLdapAuthoritiesPopulator(ldapContextSource(), "ou=groups,dc=example,dc=com");
+        DefaultLdapAuthoritiesPopulator authoritiesPopulator = new DefaultLdapAuthoritiesPopulator(ldapContextSource(), groupSearchBase);
+        authoritiesPopulator.setGroupSearchFilter(searchFilter);
         authoritiesPopulator.setAuthorityMapper(this::authorityMapper);
 
         return authoritiesPopulator;
     }
 
+    @Bean
+    public LdapContextSource ldapContextSource() {
+        LdapContextSource contextSource = new LdapContextSource();
+
+        contextSource.setUrl(properties.getUrls());
+        contextSource.setUserDn(properties.getManagerDn());
+        contextSource.setPassword(properties.getManagerPassword());
+
+        return contextSource;
+    }
+
+
     private GrantedAuthority authorityMapper(Map<String, List<String>> userRole) {
-        String group = properties.getDefaultMappingGroup();
+        String group = groupMappingProperties.getDefaultMappingGroup();
 
         List<String> groups = userRole.get(SpringSecurityLdapTemplate.DN_KEY);
         if (groups != null && !groups.isEmpty()) {
@@ -74,7 +95,7 @@ public class AuthenticationProviderConfiguration {
         }
 
         String roleName = null;
-        for (LdapGroupMappingProperties.GroupMapping mapping : properties.getLdapGroupMapping()) {
+        for (LdapGroupMappingProperties.GroupMapping mapping : groupMappingProperties.getLdapGroupMapping()) {
             if (Objects.equals(group, mapping.getLdapGroup())) {
                 roleName = mapping.getGroup();
                 break;
@@ -82,16 +103,5 @@ public class AuthenticationProviderConfiguration {
         }
 
         return new SimpleGrantedAuthority(roleName);
-    }
-
-    @Bean
-    public LdapContextSource ldapContextSource() {
-        LdapContextSource contextSource = new LdapContextSource();
-
-        contextSource.setUrl("ldap://localhost:10389");
-        contextSource.setUserDn("uid=admin,ou=system");
-        contextSource.setPassword("secret");
-
-        return contextSource;
     }
 }
