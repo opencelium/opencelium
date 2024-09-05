@@ -136,7 +136,7 @@ public class EndpointUtility {
         return str;
     }
 
-    private static List<String> splitByDelimiter(String path, char delim) {
+    public static List<String> splitByDelimiter(String path, char delim) {
         if (path == null || path.isEmpty()) {
             return Collections.emptyList();
         }
@@ -149,7 +149,7 @@ public class EndpointUtility {
         int pre1 = path.indexOf(PRE_DIRECT_REF);
         int pre2 = path.indexOf(PRE_WEBHOOK);
         if (pre1 == -1 && pre2 == -1) {
-            return List.of(path.split((Character.isSpaceChar(delim) ? "\\" : "") + delim));
+            return new ArrayList<>(List.of(path.split((isSpecialRegexChar(delim) ? "\\" : "") + delim)));
         }
 
         List<String> res = new ArrayList<>();
@@ -184,5 +184,9 @@ public class EndpointUtility {
             }
         }
         return res;
+    }
+    private static boolean isSpecialRegexChar(char delim) {
+        String specialChars = ".^$*+?()[]{}\\|/";
+        return specialChars.indexOf(delim) != -1;
     }
 }
