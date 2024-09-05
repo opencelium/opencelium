@@ -138,6 +138,7 @@ public class SecurityConfiguration {
                 try {
                     return super.doAuthentication(authentication);
                 } catch (InternalAuthenticationServiceException e) {
+                    // move next authentication if LDAP server is not available
                     // TODO: should do LOG(warn) if LDAP server is not available?
                     throw new ProviderNotFoundException(e.getMessage());
                 }

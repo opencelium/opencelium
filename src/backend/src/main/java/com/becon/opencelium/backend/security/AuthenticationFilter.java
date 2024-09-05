@@ -18,9 +18,16 @@ package com.becon.opencelium.backend.security;
 
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
+import com.becon.opencelium.backend.database.mysql.entity.UserRole;
+import com.becon.opencelium.backend.database.mysql.service.UserRoleService;
+import com.becon.opencelium.backend.database.mysql.service.UserService;
+import com.becon.opencelium.backend.enums.AuthMethod;
+import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,6 +40,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.ldap.userdetails.LdapUserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
@@ -41,12 +49,20 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 
 @Component
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserRoleService userRoleService;
+
 
     @Override
     @Autowired
@@ -108,9 +124,35 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private User getUser(Authentication authentication) {
         Object principal = authentication.getPrincipal();
 
-        if (principal instanceof LdapUserDetails) {
-            // TODO create user
-            return new User();
+        if (principal instanceof LdapUserDetails ldapUserDetails) {
+            String email = ldapUserDetails.getUsername();
+
+            User user = userService.findByEmail(email).orElseGet(() -> {
+                User newUser = new User();
+                newUser.setEmail(email);
+                newUser.setAuthMethod(AuthMethod.LDAP);
+
+                // create details for new user
+                UserDetail userDetail = new UserDetail();
+                userDetail.setLang(LangEnum.EN.getCode());
+                userDetail.setTutorial(false);
+                userDetail.setUser(newUser);
+
+                newUser.setUserDetail(userDetail);
+
+                return newUser;
+            });
+
+            Collection<? extends GrantedAuthority> authorities = ldapUserDetails.getAuthorities();
+            GrantedAuthority authority = authorities.stream()
+                    .filter(a -> userRoleService.existsByRole(a.getAuthority()))
+                    .findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException("LDAP group mapping does not exists."));
+
+            UserRole role = userRoleService.findByRole(authority.getAuthority()).orElseThrow();
+            user.setUserRole(role);
+
+            return userService.save(user);
         }
 
         return ((UserPrincipals) authentication.getPrincipal()).getUser();
