@@ -1,6 +1,6 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
-import SubscriptionRequest from "@entity/application/requests/classes/SubscriptionRequest";
+import SubscriptionRequest from "@entity/license_management/requests/classes/SubscriptionRequest";
 
 export const getAllSubscriptions = createAsyncThunk(
     'subscription/get/all',

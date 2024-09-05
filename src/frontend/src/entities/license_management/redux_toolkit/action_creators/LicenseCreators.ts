@@ -1,10 +1,10 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
+import LicenseRequest from "@entity/license_management/requests/classes/LicenseRequest";
 import {
     ActivateLicenseFileRequest,
     ActivateLicenseStringRequest
-} from "@entity/application/requests/interfaces/ILicenseRequest";
-import LicenseRequest from "@entity/application/requests/classes/LicenseRequest";
+} from "@entity/license_management/requests/interfaces/ILicenseRequest";
 
 export const generateActivateRequest = createAsyncThunk(
     'license/generate/request',

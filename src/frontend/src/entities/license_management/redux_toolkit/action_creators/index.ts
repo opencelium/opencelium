@@ -13,8 +13,11 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import entityApplicationReducer from "./ApplicationSlice";
+import LicenseCreators from "./LicenseCreators";
+import SubscriptionCreators from "./SubscriptionCreators";
+
 
 export default {
-    entityApplicationReducer,
+    ...LicenseCreators,
+    ...SubscriptionCreators,
 }

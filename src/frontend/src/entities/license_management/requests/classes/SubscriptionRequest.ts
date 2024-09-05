@@ -1,9 +1,8 @@
 import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {AxiosResponse} from "axios";
-import ISubscriptionRequest from "@entity/application/requests/interfaces/ISubscriptionRequest";
-import SubscriptionModel from "@entity/application/requests/models/SubscriptionModel";
-import {IResponse} from "@application/requests/interfaces/IResponse";
+import ISubscriptionRequest from "@entity/license_management/requests/interfaces/ISubscriptionRequest";
+import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
 
 export default class SubscriptionRequest extends Request implements ISubscriptionRequest {
 

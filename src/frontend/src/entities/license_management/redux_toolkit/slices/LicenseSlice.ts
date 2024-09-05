@@ -17,14 +17,13 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ICommonState} from "@application/interfaces/core";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
-import LicenseModel, {ActivationRequestStatus} from "@entity/application/requests/models/LicenseModel";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {
     activateLicenseFile,
     activateLicenseString,
-    generateActivateRequest, getActivationRequestStatus,
-    getLicenseStatus
-} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
+    generateActivateRequest, getActivationRequestStatus, getLicenseStatus
+} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
+import LicenseModel, {ActivationRequestStatus} from "@entity/license_management/requests/models/LicenseModel";
 
 export interface LicenseState extends ICommonState{
     generatingActivateRequest: API_REQUEST_STATE,

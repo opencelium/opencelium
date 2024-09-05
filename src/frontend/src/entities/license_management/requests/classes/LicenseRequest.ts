@@ -1,14 +1,11 @@
 import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {AxiosResponse} from "axios";
-import ILicenseRequest, {
-    ActivateLicenseFileRequest,
-    ActivateLicenseResponse,
-    ActivateLicenseStringRequest,
-    GenerateActivateRequestResponse,
-    GetActivationRequestStatusResponse,
-} from "@entity/application/requests/interfaces/ILicenseRequest";
 import {StatusResponse} from "@application/requests/interfaces/IApplication";
+import ILicenseRequest, {
+    ActivateLicenseFileRequest, ActivateLicenseResponse, ActivateLicenseStringRequest,
+    GenerateActivateRequestResponse, GetActivationRequestStatusResponse
+} from "@entity/license_management/requests/interfaces/ILicenseRequest";
 
 export default class LicenseRequest extends Request implements ILicenseRequest {
 

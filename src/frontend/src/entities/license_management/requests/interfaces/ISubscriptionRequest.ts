@@ -13,8 +13,19 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import entityApplicationReducer from "./ApplicationSlice";
+import {AxiosResponse} from "axios";
+import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
 
-export default {
-    entityApplicationReducer,
+
+export default interface ISubscriptionRequest {
+
+    //to get all subscriptions (in online mode)
+    getAll (): Promise<AxiosResponse<SubscriptionModel[]>>,
+
+    //to get current subscription (in online/offline mode)
+    getCurrent (): Promise<AxiosResponse<SubscriptionModel>>,
+
+    //to set current subscription (in online mode)
+    setCurrent (subscriptionId: string): Promise<AxiosResponse<SubscriptionModel>>,
+
 }

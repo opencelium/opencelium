@@ -17,12 +17,12 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ICommonState} from "@application/interfaces/core";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
-import SubscriptionModel from "@entity/application/requests/models/SubscriptionModel";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {
     getAllSubscriptions,
     getCurrentSubscription, setCurrentSubscription
-} from "@entity/application/redux_toolkit/action_creators/SubscriptionCreators";
+} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
+import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
 
 export interface SubscriptionState extends ICommonState{
     subscriptions: SubscriptionModel[],

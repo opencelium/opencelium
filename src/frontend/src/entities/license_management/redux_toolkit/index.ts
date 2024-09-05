@@ -13,8 +13,10 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import entityApplicationReducer from "./ApplicationSlice";
+import actionCreators from "./action_creators";
+import reducers from "./slices";
 
 export default {
-    entityApplicationReducer,
+    reducers,
+    actionCreators,
 }

@@ -1,6 +1,6 @@
 import {RootState, useAppSelector} from "@application/utils/store";
-import SubscriptionModel from "@entity/application/requests/models/SubscriptionModel";
 import {convertTimeForSubscription} from "@application/utils/utils";
+import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
 
 export default class Subscription {
 

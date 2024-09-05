@@ -36,18 +36,14 @@ import {ProfileImageStyled, DefaultImageStyled} from "./styles";
 import {withTheme} from "styled-components";
 import AvatarDefault from "@image/application/avatar_default.png";
 import {isArray} from "@application/utils/utils";
-import ActivateLicenseComponent from "@entity/profile/components/activate_license/ActivateLicenseComponent";
-import Subscriptions from "@entity/profile/components/subscriptions/Subscriptions";
 import {getServicePortalTokenStatus} from "@entity/application/redux_toolkit/action_creators/ApplicationCreators";
-import {getActivationRequestStatus} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
-import License from "@entity/application/classes/License";
-import {ActivationRequestStatus} from "@entity/application/requests/models/LicenseModel";
+import License from "@entity/license_management/classes/License";
+import {getActivationRequestStatus} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
     const dispatch = useAppDispatch();
     let {themes} = Application.getReduxState();
-    const {activationRequestStatus} = License.getReduxState();
     if(!themes || !isArray(themes) || themes.length === 0){
         themes = DefaultThemes;
     }
@@ -163,10 +159,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                     />
                 </FormSection>
                 <FormSection label={{value: 'Subscriptions'}}>
-
                     {Permissions}
-                    {/*<Subscriptions hasOnlineSync={themeSync}/>
-                    {!themeSync && activationRequestStatus === ActivationRequestStatus.PENDING && <ActivateLicenseComponent/>}*/}
                 </FormSection>
             </React.Fragment>
         ]

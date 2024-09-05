@@ -14,8 +14,8 @@
  */
 
 import {AxiosResponse} from "axios";
-import LicenseModel, {ActivationRequestStatus} from "@entity/application/requests/models/LicenseModel";
 import {StatusResponse} from "@application/requests/interfaces/IApplication";
+import LicenseModel, {ActivationRequestStatus} from "@entity/license_management/requests/models/LicenseModel";
 
 export interface ActivateLicenseFileRequest {
 

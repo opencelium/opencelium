@@ -17,21 +17,20 @@ import {ReactElement} from "react";
 import {InputRadiosProps} from "@app_component/base/input/radio/interfaces";
 import {InputTextareaProps} from "@app_component/base/input/textarea/interfaces";
 import {InputFileProps} from "@app_component/base/input/file/interfaces";
-import {
-    activateLicenseFile,
-    activateLicenseString
-} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
 import {HookStateClass} from "@application/classes/HookStateClass";
-import {
-    IActivateLicenseForm, IActivateLicenseFormFile,
-    IActivateLicenseFormRadios,
-    IActivateLicenseFormTextarea,
-    UploadType
-} from "@entity/application/interfaces/IActivateLicenseForm";
 import {AuthState} from "@application/redux_toolkit/slices/AuthSlice";
 import {IInput} from "@application/interfaces/core";
 import {Application} from "@application/classes/Application";
 import {RootState} from "@application/utils/store";
+import {
+    IActivateLicenseForm, IActivateLicenseFormFile,
+    IActivateLicenseFormRadios, IActivateLicenseFormTextarea,
+    UploadType
+} from "@entity/license_management/interfaces/IActivateLicenseForm";
+import {
+    activateLicenseFile,
+    activateLicenseString
+} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 
 export class ActivateLicenseForm extends HookStateClass implements IActivateLicenseForm {
 

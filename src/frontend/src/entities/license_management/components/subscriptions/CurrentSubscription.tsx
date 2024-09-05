@@ -5,15 +5,15 @@ import {
     DivisionStyled, InfoStyled,
     LabelStyled,
     NowValueStyled
-} from "@entity/profile/components/subscriptions/style";
-import SubscriptionModel from "@entity/application/requests/models/SubscriptionModel";
+} from "./style";
 import {withTheme} from "styled-components";
 import {ITheme} from "@style/Theme";
 import {useAppDispatch} from "@application/utils/store";
-import {getLicenseStatus} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
-import License from "@entity/application/classes/License";
 import {convertTimeForSubscription, formatOperationUsage} from "@application/utils/utils";
-import Subscription from "@entity/application/classes/Subscription";
+import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
+import License from "@entity/license_management/classes/License";
+import {getLicenseStatus} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
+import Subscription from "@entity/license_management/classes/Subscription";
 
 export const RoleNames: any = {
     admin: 'OC Admin',

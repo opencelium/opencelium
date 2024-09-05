@@ -17,7 +17,6 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ICommonState} from "@application/interfaces/core";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
-import {getLicenseStatus} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {getServicePortalTokenStatus} from "@entity/application/redux_toolkit/action_creators/ApplicationCreators";
 

@@ -13,20 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AxiosResponse} from "axios";
-import SubscriptionModel from "@entity/application/requests/models/SubscriptionModel";
-import {IResponse} from "@application/requests/interfaces/IResponse";
+import React from "react";
+import {Route} from "react-router-dom";
+import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
+import LicenseManagement from "@entity/license_management/components/pages/LicenseManagement";
 
-
-export default interface ISubscriptionRequest {
-
-    //to get all subscriptions (in online mode)
-    getAll (): Promise<AxiosResponse<SubscriptionModel[]>>,
-
-    //to get current subscription (in online/offline mode)
-    getCurrent (): Promise<AxiosResponse<SubscriptionModel>>,
-
-    //to set current subscription (in online mode)
-    setCurrent (subscriptionId: string): Promise<AxiosResponse<SubscriptionModel>>,
-
-}
+export default (
+    <Route path="/license_management" key={'license_management'}>
+        <Route index element={<ErrorBoundary><LicenseManagement/></ErrorBoundary>}/>
+    </Route>
+)

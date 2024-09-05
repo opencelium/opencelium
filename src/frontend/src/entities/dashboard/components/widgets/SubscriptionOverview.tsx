@@ -19,9 +19,9 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {SubscriptionOverviewWidgetStyled} from './styles';
 import {ContentLoading} from "@app_component/base/loading/ContentLoading";
 import {WidgetTitle} from "../widget_title/WidgetTitle";
-import CurrentSubscription from "@entity/profile/components/subscriptions/CurrentSubscription";
-import {getCurrentSubscription} from "@entity/application/redux_toolkit/action_creators/SubscriptionCreators";
-import Subscription from "@entity/application/classes/Subscription";
+import Subscription from "@entity/license_management/classes/Subscription";
+import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
+import CurrentSubscription from "@entity/license_management/components/subscriptions/CurrentSubscription";
 
 const SubscriptionOverviewWidget: FC =
     ({

@@ -1,18 +1,15 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import InputSelect from "@app_component/base/input/select/InputSelect";
-import Subscription from "@entity/application/classes/Subscription";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import Button from "@basic_components/buttons/Button";
-import License from "@entity/application/classes/License";
 import {useAppDispatch} from "@application/utils/store";
-import {
-    generateActivateRequest,
-} from "@entity/application/redux_toolkit/action_creators/LicenseCreators";
+import Subscription from "@entity/license_management/classes/Subscription";
 import {
     getAllSubscriptions,
     getCurrentSubscription, setCurrentSubscription
-} from "@entity/application/redux_toolkit/action_creators/SubscriptionCreators";
-import CurrentSubscription from "@entity/profile/components/subscriptions/CurrentSubscription";
+} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
+import CurrentSubscription from "@entity/license_management/components/subscriptions/CurrentSubscription";
+import {generateActivateRequest} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 
 const SubscriptionsComponent = ({hasOnlineSync}: {hasOnlineSync: boolean}) => {
     const dispatch = useAppDispatch();
