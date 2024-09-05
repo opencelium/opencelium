@@ -14,6 +14,7 @@ export default class LicenseRequest extends Request implements ILicenseRequest {
     }
 
     async generateActivateRequest (): Promise<AxiosResponse<GenerateActivateRequestResponse>> {
+        this.url = 'subs';
         return super.get<GenerateActivateRequestResponse>();
     }
 

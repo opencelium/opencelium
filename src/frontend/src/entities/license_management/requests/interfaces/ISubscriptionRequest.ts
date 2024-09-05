@@ -26,6 +26,6 @@ export default interface ISubscriptionRequest {
     getCurrent (): Promise<AxiosResponse<SubscriptionModel>>,
 
     //to set current subscription (in online mode)
-    setCurrent (subscriptionId: string): Promise<AxiosResponse<SubscriptionModel>>,
+    setCurrent (): Promise<AxiosResponse<SubscriptionModel>>,
 
 }

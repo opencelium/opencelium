@@ -7,7 +7,7 @@ import SubscriptionModel from "@entity/license_management/requests/models/Subscr
 export default class SubscriptionRequest extends Request implements ISubscriptionRequest {
 
     constructor(settings?: Partial<IRequestSettings>) {
-        super({url: 'subscription', ...settings});
+        super({url: 'subs', ...settings});
     }
 
     async getAll(): Promise<AxiosResponse<SubscriptionModel[]>>{
@@ -16,13 +16,12 @@ export default class SubscriptionRequest extends Request implements ISubscriptio
     }
 
     async getCurrent(): Promise<AxiosResponse<SubscriptionModel>>{
-        this.endpoint = '/current';
+        this.endpoint = '/active';
         return super.get<SubscriptionModel>();
     }
 
-    async setCurrent(subscriptionId: string): Promise<AxiosResponse<SubscriptionModel>>{
-        this.endpoint = '/current';
-        return super.post<SubscriptionModel>({subscriptionId});
+    async setCurrent(): Promise<AxiosResponse<SubscriptionModel>>{
+        return super.post<SubscriptionModel>({});
     }
 
 }

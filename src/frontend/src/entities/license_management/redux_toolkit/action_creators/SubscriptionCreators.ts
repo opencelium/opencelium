@@ -7,19 +7,8 @@ export const getAllSubscriptions = createAsyncThunk(
     async(data: never, thunkAPI) => {
         try {
             const request = new SubscriptionRequest();
-            //const response = await request.getAll();
-            //return response.data;
-            return [
-                {
-                    _id: '1',
-                    type: 'enterprise',
-                    endDate: + new Date('1. October 2024'),
-                    duration: '12 Monate',
-                    startDate: + new Date('2. October 2023'),
-                    totalOperationUsage: 1000000,
-                    currentOperationUsage: 540000,
-                }
-            ]
+            const response = await request.getAll();
+            return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -30,17 +19,8 @@ export const getCurrentSubscription = createAsyncThunk(
     async(data: never, thunkAPI) => {
         try {
             const request = new SubscriptionRequest();
-            //const response = await request.getCurrent();
-            //return response.data;
-            return {
-                _id: '1',
-                type: 'enterprise',
-                endDate: + new Date('1. October 2024'),
-                duration: '12 Monate',
-                startDate: + new Date('2. October 2023'),
-                totalOperationUsage: 1000000,
-                currentOperationUsage: 540000,
-            }
+            const response = await request.getCurrent();
+            return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -50,8 +30,8 @@ export const setCurrentSubscription = createAsyncThunk(
     'subscription/set/current',
     async(subscriptionId: string, thunkAPI) => {
         try {
-            const request = new SubscriptionRequest();
-            const response = await request.setCurrent(subscriptionId);
+            const request = new SubscriptionRequest({endpoint: `/${subscriptionId}`});
+            const response = await request.setCurrent();
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
