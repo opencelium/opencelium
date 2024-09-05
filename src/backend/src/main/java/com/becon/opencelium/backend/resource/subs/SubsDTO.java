@@ -6,8 +6,8 @@ public class SubsDTO {
     private long startDate;
     private long endDate;
     private String duration;
-    private int totalOperationUsage;
-    private int currentOperationUsage;
+    private long totalOperationUsage;
+    private long currentOperationUsage;
     private boolean active;
 
     // Getters and Setters
@@ -51,19 +51,19 @@ public class SubsDTO {
         this.duration = duration;
     }
 
-    public int getTotalOperationUsage() {
+    public long getTotalOperationUsage() {
         return totalOperationUsage;
     }
 
-    public void setTotalOperationUsage(int totalOperationUsage) {
+    public void setTotalOperationUsage(long totalOperationUsage) {
         this.totalOperationUsage = totalOperationUsage;
     }
 
-    public int getCurrentOperationUsage() {
+    public long getCurrentOperationUsage() {
         return currentOperationUsage;
     }
 
-    public void setCurrentOperationUsage(int currentOperationUsage) {
+    public void setCurrentOperationUsage(long currentOperationUsage) {
         this.currentOperationUsage = currentOperationUsage;
     }
 

@@ -458,7 +458,7 @@ CREATE TABLE subscription(
     id                    UUID PRIMARY KEY,
     subId                 VARCHAR(255) NOT NULL,
     created_at            TIMESTAMP    NOT NULL,
-    license_key           VARCHAR(255) NOT NULL,
+    license_key           VARCHAR(2048) NOT NULL,
     current_usage         BIGINT       NOT NULL,
     current_usage_hmac    VARCHAR(255) NOT NULL,
     active                BOOLEAN      NOT NULL,

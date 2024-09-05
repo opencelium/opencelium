@@ -129,14 +129,13 @@ public class MachineUtility {
         }
     }
 
-    public static String generateUniqueString(String uuid) {
+    public static String getStringForHmacEncode() {
         MachineUtility.getMachineUUID();
         MachineUtility.getMacAddress();
         MachineUtility.getProcessorId();
         return MachineUtility.getMachineUUID()
                 + MachineUtility.getMacAddress()
                 + MachineUtility.getProcessorId()
-                + (MachineUtility.getComputerName() == null ? "" : MachineUtility.getComputerName())
-                + uuid;
+                + (MachineUtility.getComputerName() == null ? "" : MachineUtility.getComputerName());
     }
 }

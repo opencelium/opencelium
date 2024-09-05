@@ -35,11 +35,4 @@ public class HmacUtility {
     public static <T extends HmacValidator> boolean verify(T data, String hmac) {
         return data.verify(hmac); // Using the object's verify method
     }
-
-    public static <T> String generateHmac(String uuid, Class<T> clazz) {
-        if (uuid == null) {
-            return null;
-        }
-        return encode(MachineUtility.generateUniqueString(uuid));
-    }
 }

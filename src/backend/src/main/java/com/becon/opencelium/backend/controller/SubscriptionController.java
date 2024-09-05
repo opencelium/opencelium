@@ -96,6 +96,7 @@ public class SubscriptionController {
 
         Subscription subscription = subscriptionService.buildFromLicenseKey(lk);
         subscription.setActivationRequest(saved);
+        subscription.setLicenseKey(licenseKey);
         subscriptionService.deactivateAll();
         subscriptionService.save(subscription);
 
