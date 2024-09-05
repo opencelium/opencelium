@@ -33,3 +33,17 @@ versions:
         operation: add
         value: 84bbce3d33de467b47b7e76c2563769!3f9aff968def8ef2674856f67ae8a93f
         path: opencelium.token.secret
+  - version: 4.2
+    changes:
+      - changeset: 1
+        operation: add
+        value: 4.2
+        path: opencelium.version
+      - changeset: 2
+        operation: add
+        value: https://api.serviceportal.com
+        path: opencelium.service_portal.base_url
+      - changeset: 3
+        operation: add
+        value: your-token-here
+        path: opencelium.service_portal.token

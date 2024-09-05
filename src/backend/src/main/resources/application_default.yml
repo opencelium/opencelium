@@ -181,6 +181,9 @@ opencelium:
         url: {insert you webhook url here}
   installation:
     type: sources
+  service_portal:
+    base_url: "https://api.serviceportal.com"
+    token: "your-token-here"
 #  rest_template:
 #    proxy:
 #      host: 127.0.0.1
