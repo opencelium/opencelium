@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -212,21 +213,22 @@ public class SecurityConfiguration {
 
 
     private GrantedAuthority ldapAuthorityMapper(Map<String, List<String>> userRole) {
-        String group = groupMappingProperties.getDefaultMappingGroup();
+        String group = null; // LDAP group is equivalent of UserRole
 
         List<String> groups = userRole.get(SpringSecurityLdapTemplate.DN_KEY);
         if (groups != null && !groups.isEmpty()) {
             group = groups.get(0);
         }
 
-        String roleName = null;
         for (LdapGroupMappingProperties.GroupMapping mapping : groupMappingProperties.getLdapGroupMapping()) {
             if (Objects.equals(group, mapping.getLdapGroup())) {
-                roleName = mapping.getGroup();
+                group = mapping.getGroup();
                 break;
             }
+
+            group = groupMappingProperties.getDefaultMappingGroup();
         }
 
-        return new SimpleGrantedAuthority(roleName);
+        return new SimpleGrantedAuthority(group);
     }
 }
