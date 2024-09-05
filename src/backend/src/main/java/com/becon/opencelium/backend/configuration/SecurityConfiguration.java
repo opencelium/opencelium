@@ -20,17 +20,30 @@ import com.becon.opencelium.backend.security.AuthExceptionHandler;
 import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
 import com.becon.opencelium.backend.security.AuthenticationProviderManager;
+import com.becon.opencelium.backend.security.DaoUserDetailsService;
 import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.ldap.SpringSecurityLdapTemplate;
+import org.springframework.security.ldap.authentication.BindAuthenticator;
+import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
+import org.springframework.security.ldap.authentication.LdapAuthenticator;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
+import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -39,16 +52,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
 
     @Autowired
-    private AuthenticationProvider ldapAuthenticationProvider;
-
-    @Autowired
-    private AuthenticationProvider daoAuthenticationProvider;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Lazy
     @Autowired
@@ -64,6 +76,16 @@ public class SecurityConfiguration {
 
     @Autowired
     private AuthExceptionHandler authExceptionHandler;
+
+    @Autowired
+    private DaoUserDetailsService daoUserDetailsService;
+
+    @Autowired
+    private LdapGroupMappingProperties groupMappingProperties;
+
+    @Autowired
+    private LdapProperties properties;
+
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception{
@@ -87,9 +109,58 @@ public class SecurityConfiguration {
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
-        List<AuthenticationProvider> providers = List.of(ldapAuthenticationProvider, daoAuthenticationProvider);
+        // TODO: rewrite this
+        List<AuthenticationProvider> providers = List.of(ldapAuthenticationProvider(), daoAuthenticationProvider());
 
         return new AuthenticationProviderManager(providers);
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        final DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setPasswordEncoder(bCryptPasswordEncoder);
+        authenticationProvider.setUserDetailsService(daoUserDetailsService);
+
+        return authenticationProvider;
+    }
+
+    @Bean
+    public LdapAuthenticationProvider ldapAuthenticationProvider() {
+        return new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
+    }
+
+    @Bean
+    public LdapAuthenticator ldapAuthenticator() {
+        String userSearchBase = properties.getUserSearchBase() + "," + properties.getBase();
+        String searchFilter = properties.getUserSearchFilter();
+
+        BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
+        authenticator.setUserSearch(new FilterBasedLdapUserSearch(userSearchBase, searchFilter, ldapContextSource()));
+
+        return authenticator;
+    }
+
+    @Bean
+    public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() {
+        String groupSearchBase = properties.getGroupSearchBase() + "," + properties.getBase();
+        String searchFilter = properties.getGroupSearchFilter();
+
+        DefaultLdapAuthoritiesPopulator authoritiesPopulator = new DefaultLdapAuthoritiesPopulator(ldapContextSource(), groupSearchBase);
+        authoritiesPopulator.setGroupSearchFilter(searchFilter);
+        authoritiesPopulator.setAuthorityMapper(this::ldapAuthorityMapper);
+
+        return authoritiesPopulator;
+    }
+
+    @Bean
+    public LdapContextSource ldapContextSource() {
+        LdapContextSource contextSource = new LdapContextSource();
+
+        contextSource.setUrl(properties.getUrls());
+        contextSource.setUserDn(properties.getManagerDn());
+        contextSource.setPassword(properties.getManagerPassword());
+
+        return contextSource;
     }
 
     @Bean
@@ -120,5 +191,25 @@ public class SecurityConfiguration {
                 "/docs"};
         return (web) -> web.ignoring()
                 .requestMatchers(enpoints);
+    }
+
+
+    private GrantedAuthority ldapAuthorityMapper(Map<String, List<String>> userRole) {
+        String group = groupMappingProperties.getDefaultMappingGroup();
+
+        List<String> groups = userRole.get(SpringSecurityLdapTemplate.DN_KEY);
+        if (groups != null && !groups.isEmpty()) {
+            group = groups.get(0);
+        }
+
+        String roleName = null;
+        for (LdapGroupMappingProperties.GroupMapping mapping : groupMappingProperties.getLdapGroupMapping()) {
+            if (Objects.equals(group, mapping.getLdapGroup())) {
+                roleName = mapping.getGroup();
+                break;
+            }
+        }
+
+        return new SimpleGrantedAuthority(roleName);
     }
 }
