@@ -79,7 +79,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public Subscription getActiveSubs() {
-        return null;
+        return subscriptionRepository.findActiveSubs().orElse(null);
     }
 
     @Override
