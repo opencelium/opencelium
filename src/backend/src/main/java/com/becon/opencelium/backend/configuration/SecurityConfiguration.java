@@ -19,17 +19,20 @@ package com.becon.opencelium.backend.configuration;
 import com.becon.opencelium.backend.security.AuthExceptionHandler;
 import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
-import com.becon.opencelium.backend.security.AuthenticationProviderManager;
 import com.becon.opencelium.backend.security.DaoUserDetailsService;
 import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authentication.ProviderNotFoundException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -108,11 +111,14 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager() throws Exception {
-        // TODO: rewrite this
-        List<AuthenticationProvider> providers = List.of(ldapAuthenticationProvider(), daoAuthenticationProvider());
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder
+                .authenticationProvider(ldapAuthenticationProvider())
+                .authenticationProvider(daoAuthenticationProvider());
 
-        return new AuthenticationProviderManager(providers);
+        return authenticationManagerBuilder.build();
     }
 
     @Bean
@@ -126,7 +132,17 @@ public class SecurityConfiguration {
 
     @Bean
     public LdapAuthenticationProvider ldapAuthenticationProvider() {
-        return new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
+        return new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator()){
+            @Override
+            protected DirContextOperations doAuthentication(UsernamePasswordAuthenticationToken authentication) {
+                try {
+                    return super.doAuthentication(authentication);
+                } catch (InternalAuthenticationServiceException e) {
+                    // TODO: should do LOG(warn) if LDAP server is not available?
+                    throw new ProviderNotFoundException(e.getMessage());
+                }
+            }
+        };
     }
 
     @Bean
