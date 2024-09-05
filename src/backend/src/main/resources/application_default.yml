@@ -161,7 +161,7 @@ opencelium:
 ###########################################################################
   debug_mode: true
   token:
-    secret: becon.opencelium
+    secret: 84bbce3d33de467b47b7e76c2563769!3f9aff968def8ef2674856f67ae8a93f
     activity-time: 18000
     experation-time: 86400
   ###########################################################################
@@ -181,6 +181,9 @@ opencelium:
         url: {insert you webhook url here}
   installation:
     type: sources
+  service_portal:
+    base_url: "https://api.serviceportal.com"
+    token: "your-token-here"
 #  rest_template:
 #    proxy:
 #      host: 127.0.0.1

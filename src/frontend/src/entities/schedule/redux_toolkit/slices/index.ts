@@ -26,6 +26,6 @@ export default {
     scheduleNotificationReducer,
     teamsReducer,
     slackReducer,
-    toolReducer,
     incomingWebhookReducer,
+    toolReducer,
 }

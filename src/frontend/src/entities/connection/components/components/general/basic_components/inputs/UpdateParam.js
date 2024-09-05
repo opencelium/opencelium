@@ -136,6 +136,7 @@ class UpdateParam extends React.Component{
                     <Button id={id} icon={'create'} onClick={() => this.toggleForm()} iconSize={'13px'}/>
                 </div>
                 <Dialog
+                    id={'update_param_dialog'}
                     actions={[{label: 'Update', isLoading, onClick: () => this.updateMethod()}, {label: 'Cancel', onClick: () => this.toggleForm()}]}
                     active={isOpenedForm}
                     toggle={() => this.toggleForm()}

@@ -36,7 +36,7 @@ import {getAllMetaConnections} from "@root/redux_toolkit/action_creators/Connect
 
 const AllCategoriesTab: any = {name: 'All', parentCategory: null, subCategories: []};
 
-const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
+const CategoryTabs: FC<CategoryTabsProps> = ({setCurrentPage, readOnly = false}) => {
 
   const [tabs, setTabs] = useState<CategoryModel[]>([]);
   const [visibleAddCategoryDialog, setVisibleAddCategoryDialog] = useState(false);
@@ -79,7 +79,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
 
   useEffect(() => {
     bc()
-  }, [activeCategory]);
+  }, [activeCategory, addingCategory]);
   useEffect(() => {
     if (!visibleAddCategoryDialog) {
       category.parentSelect = null;
@@ -160,8 +160,9 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
     if (category) {
       result.push(category);
       if (category.parentCategory) {
+        const parentCategoryId = category.parentCategory?.id || category.parentCategory;
         result.push(
-          ...findParentCategories(categories, category.parentCategory.id)
+          ...findParentCategories(categories, parentCategoryId)
         );
       }
     }
@@ -184,6 +185,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
   }
 
   const handleBreadcrumbClick = (breadcrumb: any) => {
+    setCurrentPage(1);
     const tab = categories.find((category: CategoryModel) => category.name === breadcrumb);
     if(breadcrumb !== 'All'){
       if(tab.subCategories){
@@ -233,6 +235,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({readOnly = false}) => {
       <div className={styles.tab_panel}>
         {tabs.map((tab, index) => (
           <div className={`${styles.tab} ${activeTab === tab.name ? `${styles.active_tab}` : ''}`} key={index} onClick={() => {
+            setCurrentPage(1);
             if(tab.name !== activeTab) {
               handleTabClick(tab.name, tab);
             }

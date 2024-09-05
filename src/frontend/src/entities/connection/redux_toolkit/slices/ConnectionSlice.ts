@@ -395,6 +395,10 @@ const connectionReducers = (isModal: boolean = false) => {
       ) => {
         state.addingConnection = API_REQUEST_STATE.FINISH;
         state.connections.push(action.payload);
+        if (!action.payload.id) {
+          action.payload.id = action.payload.connectionId;
+          delete action.payload.connectionId;
+        }
         state.metaConnections.push(action.payload);
         state.currentConnection = action.payload;
         state.error = null;

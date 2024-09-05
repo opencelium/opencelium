@@ -2,8 +2,31 @@
 Changelog
 *********
 
+4.1
+========
 
-Major Release :loudspeaker:
+:Date: July 11, 2024
+
+Features
+--------
+
+* Support of the paginator functionality
+* Webhook GET and POST requests support for loop and if operators
+* Grouping of connection and schedule entries
+* Cancellation of an executed connection from the UI
+
+Fixes
+--------
+
+* api operation is not saved when the request body is an array (OC-623)
+* wrong data type in api operation (OC-625)
+* field value is not loaded on the connector page (OC-629)
+* URL is constructed incorrectly (OC-861)
+* Type of Object is not correct (OC-868)
+* Bug appeared when getting xml response from Ivanti (OC-751)
+
+
+Major Relase :loudspeaker:
 ========
 
 
@@ -19,7 +42,7 @@ Features
 * Redesign of Update Assistant
 * Quick connection generator
 * Extend installation types to DEB, RPM, Docker and Ansible
-* Data encryption of connector informations
+* Data encryption of connector information
 
 
 Fixes
@@ -28,7 +51,7 @@ Fixes
 * Error appears when i tried to add an invoker (OC-631)
 * operator regex is not supported (OC-796)
 * Cant add a slack notification (OC-782)
-* When we build payload we need take to account type and format of the fields and correspondently create fields (OC-646)
+* When we build payload we need take to account type and format of the fields and correspondingly create fields (OC-646)
 * If an endpoint does not exist then throw corresponding exception (OC-712)
 * Converter Add MimeType (OC-805)
 
@@ -434,3 +457,4 @@ Connector
 * Zabbix
 * Icinga2
 * OTRS/Znuny/OTOBO
+

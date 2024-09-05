@@ -1,16 +1,18 @@
 pipelines:
-    branches:
-      prod:
-        - step:
-           script:
-             - git remote add sync git@github.com:opencelium/opencelium.git
-             - git checkout prod
-             - git pull    
-             - git push sync prod --tags --force
-      dev:
-        - step:
-           script:
-             - git remote add sync git@github.com:opencelium/opencelium.git
-             - git checkout dev
-             - git pull    
-             - git push sync dev --force
+  branches:
+    prod:
+      - step:
+          name: Sync Prod Branch
+          script:
+            - git remote add sync git@github.com:opencelium/opencelium.git
+            - git checkout prod
+            - git pull
+            - git push sync prod --tags --force
+    dev:
+      - step:
+          name: Sync Dev Branch
+          script:
+            - git remote add sync git@github.com:opencelium/opencelium.git
+            - git checkout dev
+            - git pull
+            - git push sync dev --force

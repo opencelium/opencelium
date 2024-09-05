@@ -49,6 +49,9 @@ export interface IUpdateAssistantRequest{
     //to get installation information (if type !== sources hide update assistant)
     getInstallationInfo(): Promise<AxiosResponse<InstallationInfo>>
 
+    //to get changelog information by version
+    getChangelogInfo(): Promise<AxiosResponse<string>>
+
     //to upload online version by version
     uploadOnlineVersion(): Promise<AxiosResponse<IResponse>>,
 

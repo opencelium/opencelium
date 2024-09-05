@@ -27,7 +27,7 @@ export class TemplateRequest extends Request implements ITemplateRequest{
         super({url: 'template', ...settings});
     }
 
-    async checkTemplateName(): Promise<AxiosResponse<IResponse>>{
+    async checkTemplateId(): Promise<AxiosResponse<IResponse>>{
         return super.get<IResponse>();
     }
 

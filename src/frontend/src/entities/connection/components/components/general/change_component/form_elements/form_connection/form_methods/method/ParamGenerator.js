@@ -86,6 +86,10 @@ class ParamGenerator extends Component {
     }
 
     handleClickOutside(event){
+        const addParamElem = document.getElementById('add_param_dialog');
+        const addParamFade = addParamElem ? addParamElem.parentElement : null;
+        const updateParamElem = document.getElementById('update_param_dialog');
+        const updateParamFade = updateParamElem ? updateParamElem.parentElement : null;
         const webhookGeneratorElem = document.getElementById('webhook_generator_dialog');
         const webhookGeneratorFade = webhookGeneratorElem ? webhookGeneratorElem.parentElement : null;
         const selectSearch = document.getElementById(`param_generator_${this.props.method.index}`);
@@ -97,7 +101,11 @@ class ParamGenerator extends Component {
         if (this.paramGeneratorRef.current && !this.paramGeneratorRef.current.contains(event.target)
             && (!this.webhookRef.current || !this.webhookRef.current.contains(event.target))
             && (!webhookGeneratorElem || !webhookGeneratorElem.contains(event.target))
-            && (!webhookGeneratorFade || !webhookGeneratorFade.contains(event.target))) {
+            && (!webhookGeneratorFade || !webhookGeneratorFade.contains(event.target))
+            && (!addParamElem || !addParamElem.contains(event.target))
+            && (!addParamFade || !addParamFade.contains(event.target))
+            && (!updateParamElem || !updateParamElem.contains(event.target))
+            && (!updateParamFade || !updateParamFade.contains(event.target))) {
             if(this.props.editCancel) {
                 this.props.editCancel();
             }

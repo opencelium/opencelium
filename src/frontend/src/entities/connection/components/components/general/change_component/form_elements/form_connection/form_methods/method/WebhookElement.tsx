@@ -22,13 +22,27 @@ const WebhookElement: FC<WebhookElementProps> = ({connection, webhook, submitEdi
     }
     return (
         <div
-            onMouseOver={() => {if(!showIcon) toggleIcon(!showIcon)}}
-            onMouseLeave={() => {if(showIcon) toggleIcon(!showIcon)}}
+            onMouseOver={() => {
+                if (!showIcon) toggleIcon(!showIcon)
+            }}
+            onMouseLeave={() => {
+                if (showIcon) toggleIcon(!showIcon)
+            }}
             title={webhook.label}
-            style={{position: 'relative', float: 'left', margin: '7px 2px', width: '20px', height: '10px', background: '#eee'}}
+            style={{
+                position: 'relative',
+                float: 'left',
+                margin: '7px 2px',
+                height: '10px',
+                background: '#eee',
+                marginTop: 0
+            }}
         >
+            <span style={{padding: '2px 5px', borderRadius: 3, color: '#000', background: '#eee'}}
+                  title={webhook.label}>{webhook.name}</span>
             {showIcon && <div style={{position: "absolute", right: '-5px', top: '-12px'}}>
-                <Button background={ColorTheme.Black} handleClick={() => toggleConfirmation(true)} hasBackground={false} icon={'delete'} iconSize={TextSize.Size_12}/>
+                <Button background={ColorTheme.Black} handleClick={() => toggleConfirmation(true)} hasBackground={false}
+                        icon={'delete'} iconSize={TextSize.Size_12}/>
             </div>}
             <Confirmation
                 okClick={remove}

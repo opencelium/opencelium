@@ -32,12 +32,10 @@ public class FieldBindExMapper {
         if (enhancement.getArgs() == null) {
             enhancementEx.setArgs(new HashMap<>());
         } else {
-            String[] vars = enhancement.getArgs().substring(0, enhancement.getArgs().length() - 1).split(";");
+            String variables = enhancement.getArgs().replaceAll("\n", "");
+            String[] vars = variables.substring(0, variables.length() - 1).split(";");
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = vars[i].trim();
-                if (vars[i].startsWith("//")) {
-                    vars[i] = vars[i].substring(2);
-                }
+                vars[i] = vars[i].substring(2);
             }
 
             Map<String, String> args = new HashMap<>();
