@@ -59,18 +59,18 @@ public class SubscriptionController {
     @GetMapping(path = "/all")
     public ResponseEntity<String> getAllSubscriptions() {
         SubscriptionModule subsModule = remoteApi.getModule(ApiModule.SUBSCRIPTION);
-        return subsModule.getAllSubs();
+        return ResponseEntity.ok(subsModule.getAllSubs().getBody());
     }
 
     @GetMapping(path = "/connection/check")
     public ResponseEntity<?> checkConnection() {
-        return remoteApi.checkConnection();
+        return ResponseEntity.ok(remoteApi.checkConnection().getBody());
     }
 
     @GetMapping(path = "/{subId}")
     public ResponseEntity<String> getSubById(@PathVariable String subId) {
         SubscriptionModule module = remoteApi.getModule(ApiModule.SUBSCRIPTION);
-        return module.getSubById(subId);
+        return ResponseEntity.ok(module.getAllSubs().getBody());
     }
 
     @PostMapping(path = "/{subId}")
@@ -96,6 +96,7 @@ public class SubscriptionController {
 
         Subscription subscription = subscriptionService.buildFromLicenseKey(lk);
         subscription.setActivationRequest(saved);
+        subscription.setLicenseKey(licenseKey);
         subscriptionService.deactivateAll();
         subscriptionService.save(subscription);
 

@@ -9,14 +9,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import static com.becon.opencelium.backend.utility.crypto.HmacUtility.generateHmac;
 
 @Service
 public class ActivationRequestServiceImp implements ActivationRequestService{
@@ -31,7 +28,7 @@ public class ActivationRequestServiceImp implements ActivationRequestService{
     @Override
     public ActivationRequest save(ActivationRequest activationRequest) {
         String id = activationRequest.getId().toString();
-        activationRequest.setHmac(HmacUtility.generateHmac(id, ActivationRequest.class));
+        activationRequest.setHmac(HmacUtility.encode(id));
         return activationRequestRepository.save(activationRequest);
     }
 
@@ -44,14 +41,10 @@ public class ActivationRequestServiceImp implements ActivationRequestService{
     public ActivationRequest generateActivReq() {
         ActivationRequest ar = new ActivationRequest();
         ar.setId(UUID.randomUUID());
-        ar.setMachineUUID(MachineUtility.getMachineUUID());
-        ar.setMacAddress(MachineUtility.getMacAddress());
-        ar.setProcessorId(MachineUtility.getProcessorId());
-        ar.setComputerName(MachineUtility.getComputerName());
         ar.setCreatedAt(LocalDateTime.now());
         ar.setStatus(ActivReqStatus.PENDING);
         ar.setTtl(3600);
-        ar.setHmac(generateHmac(ar.getId().toString(), ActivationRequest.class));
+        ar.setHmac(HmacUtility.encode(ar.getId().toString() + MachineUtility.getStringForHmacEncode()));
         return ar;
     }
 

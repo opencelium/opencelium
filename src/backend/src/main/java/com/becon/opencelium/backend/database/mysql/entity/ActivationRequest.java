@@ -1,14 +1,10 @@
 package com.becon.opencelium.backend.database.mysql.entity;
 
 import com.becon.opencelium.backend.enums.ActivReqStatus;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApi;
-import com.becon.opencelium.backend.subscription.remoteapi.ServicePortal;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
-import com.becon.opencelium.backend.subscription.remoteapi.module.SubscriptionModule;
+import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacValidator;
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -36,16 +32,16 @@ public class ActivationRequest implements HmacValidator {
     private ActivReqStatus status = ActivReqStatus.PENDING;
 
     @Transient
-    private String machineUUID;
+    private String machineUUID = MachineUtility.getMachineUUID();
 
     @Transient
-    private String macAddress;
+    private String macAddress = MachineUtility.getMacAddress();
 
     @Transient
-    private String processorId;
+    private String processorId = MachineUtility.getProcessorId();
 
     @Transient
-    private String computerName;
+    private String computerName = MachineUtility.getComputerName();
 
     public UUID getId() {
         return id;
@@ -91,32 +87,16 @@ public class ActivationRequest implements HmacValidator {
         return machineUUID;
     }
 
-    public void setMachineUUID(String machineUUID) {
-        this.machineUUID = machineUUID;
-    }
-
     public String getMacAddress() {
         return macAddress;
-    }
-
-    public void setMacAddress(String macAddress) {
-        this.macAddress = macAddress;
     }
 
     public String getProcessorId() {
         return processorId;
     }
 
-    public void setProcessorId(String processorId) {
-        this.processorId = processorId;
-    }
-
     public String getComputerName() {
         return computerName;
-    }
-
-    public void setComputerName(String computerName) {
-        this.computerName = computerName;
     }
 
     @Override
@@ -125,7 +105,7 @@ public class ActivationRequest implements HmacValidator {
             return false;
         }
         if (this.hmac == null) {
-            String hmac = HmacUtility.generateHmac(this.id.toString(), ActivationRequest.class);
+            String hmac = HmacUtility.encode(id + MachineUtility.getStringForHmacEncode());
             return Objects.equals(hmac, anotherHmac);
         } else {
             return Objects.equals(this.hmac, anotherHmac);
