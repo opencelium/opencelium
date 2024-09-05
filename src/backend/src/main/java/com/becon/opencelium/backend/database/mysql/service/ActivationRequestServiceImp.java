@@ -41,10 +41,6 @@ public class ActivationRequestServiceImp implements ActivationRequestService{
     public ActivationRequest generateActivReq() {
         ActivationRequest ar = new ActivationRequest();
         ar.setId(UUID.randomUUID());
-        ar.setMachineUUID(MachineUtility.getMachineUUID());
-        ar.setMacAddress(MachineUtility.getMacAddress());
-        ar.setProcessorId(MachineUtility.getProcessorId());
-        ar.setComputerName(MachineUtility.getComputerName());
         ar.setCreatedAt(LocalDateTime.now());
         ar.setStatus(ActivReqStatus.PENDING);
         ar.setTtl(3600);
