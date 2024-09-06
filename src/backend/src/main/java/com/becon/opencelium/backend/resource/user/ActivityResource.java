@@ -14,19 +14,30 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.database.mysql.service;
+package com.becon.opencelium.backend.resource.user;
 
-import com.becon.opencelium.backend.database.mysql.entity.Session;
+import com.becon.opencelium.backend.database.mysql.entity.Activity;
+import jakarta.annotation.Resource;
 
-import java.util.Optional;
+import java.util.Date;
 
-public interface SessionService {
+@Resource
+public class ActivityResource {
 
-    void save(Session session);
+    private Date requestTime;
 
-    Optional<Session> findByUserId(int userId);
+    public ActivityResource() {
+    }
 
-    boolean deleteByUserId(int userId);
+    public ActivityResource(Activity activity) {
+        this.requestTime = activity.getRequestTime();
+    }
 
-    void updateLastAccessedTime(Session session);
+    public Date getRequestTime() {
+        return requestTime;
+    }
+
+    public void setRequestTime(Date requestTime) {
+        this.requestTime = requestTime;
+    }
 }
