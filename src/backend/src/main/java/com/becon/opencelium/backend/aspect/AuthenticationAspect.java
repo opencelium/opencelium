@@ -34,7 +34,7 @@ public class AuthenticationAspect {
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
-    @AfterReturning(pointcut = "execution(* com.becon.opencelium.backend.security.JwtTokenUtil.generateToken(com.becon.opencelium.backend.security.UserPrincipals))",
+    @AfterReturning(pointcut = "execution(* com.becon.opencelium.backend.security.JwtTokenUtil.generateToken(com.becon.opencelium.backend.database.mysql.entity.User))",
                     returning = "token")
     public void afterTokenGeneration(String token){
         String sessionId = jwtTokenUtil.extractSessionId(token);

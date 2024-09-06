@@ -29,7 +29,7 @@ public interface UserService {
 
     Optional<User> findById(int id);
 
-    void save(User user);
+    User save(User user);
 
     boolean existsByEmail(String email);
 
