@@ -236,12 +236,10 @@ public class ConnectorController {
             throw new CommunicationFailedException();
         }
 
-        ObjectMapper mapper = new ObjectMapper();
         FunctionInvoker functionInvoker = invokerService.getTestFunction(connector.getInvoker());
 
         Map<String, Object> failBody = null;
         String formatType = "";
-        String type = "";
         if (functionInvoker.getResponse().getFail() != null && functionInvoker.getResponse().getFail().getBody() != null) {
             formatType = functionInvoker.getResponse().getFail().getBody().getFormat();
             failBody = functionInvoker.getResponse().getFail().getBody().getFields();
@@ -275,23 +273,48 @@ public class ConnectorController {
     }
 
     private boolean hasError(String failBody, String response) {
-
+        if (failBody == null || failBody.isEmpty()) {
+            return false;
+        }
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode node1 = objectMapper.readTree(failBody);
-            JsonNode node2 = objectMapper.readTree(response);
+            JsonNode invFailNode = objectMapper.readTree(failBody);
+            JsonNode responseNode = objectMapper.readTree(response);
 
-            Iterator<String> fieldNames = node1.fieldNames();
-            while (fieldNames.hasNext()) {
-                String fieldName = fieldNames.next();
-                if (node2.has(fieldName)) {
-                    return true;
-                }
-            }
+            return containsProperties(responseNode, invFailNode);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return false;
+    }
+
+    private boolean containsProperties(JsonNode jsonNode1, JsonNode jsonNode2) {
+        if (jsonNode2.isObject()) {
+            for (String key : iterable(jsonNode2.fieldNames())) {
+                if (!jsonNode1.has(key)) {
+                    return false;
+                }
+                if (!containsProperties(jsonNode1.get(key), jsonNode2.get(key))) {
+                    return false;
+                }
+            }
+        } else if (jsonNode2.isArray()) {
+            if (!jsonNode1.isArray() || jsonNode1.size() < jsonNode2.size()) {
+                return false;
+            }
+            for (int i = 0; i < jsonNode2.size(); i++) {
+                if (!containsProperties(jsonNode1.get(i), jsonNode2.get(i))) {
+                    return false;
+                }
+            }
+        } else {
+            return jsonNode1.isValueNode() && jsonNode2.isValueNode();
+        }
+        return true;
+    }
+
+    private <T> Iterable<T> iterable(final java.util.Iterator<T> iterator) {
+        return () -> iterator;
     }
 
     @Operation(summary = "Verifies uniqueness of connector title")

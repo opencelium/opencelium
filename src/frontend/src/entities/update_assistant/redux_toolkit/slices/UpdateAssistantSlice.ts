@@ -20,20 +20,22 @@ import {ICommonState} from "@application/interfaces/core";
 import {IApplicationResponse, IResponse} from "@application/requests/interfaces/IResponse";
 import {
     checkApplicationBeforeUpdate,
-    deleteApplicationFile,
     checkForUpdates,
+    deleteApplicationFile,
+    downloadOnlineVersion,
+    getChangelogInfo,
+    getInstallationInfo,
     getOfflineUpdates,
+    getOnlineUpdates,
     updateApplication,
     uploadApplicationFile,
-    getOnlineUpdates,
-    uploadOnlineVersion, downloadOnlineVersion, getInstallationInfo
+    uploadOnlineVersion
 } from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
-import {
-    CheckForUpdateProps, InstallationInfo, VersionProps,
-} from "@application/requests/interfaces/IUpdateAssistant";
+import {CheckForUpdateProps, InstallationInfo, VersionProps,} from "@application/requests/interfaces/IUpdateAssistant";
 
 export interface AuthState extends ICommonState{
     gettingInstallationInfo: API_REQUEST_STATE,
+    gettingChangelogInfo: API_REQUEST_STATE,
     uploadingOnlineVersion: API_REQUEST_STATE,
     downloadingOnlineVersion: API_REQUEST_STATE,
     gettingOnlineUpdates: API_REQUEST_STATE,
@@ -50,10 +52,12 @@ export interface AuthState extends ICommonState{
     offlineUpdates: any[],
     checkResetFiles: any,
     hasUpdates: boolean,
+    changelog: string,
 }
 
 const initialState: AuthState = {
     gettingInstallationInfo: API_REQUEST_STATE.INITIAL,
+    gettingChangelogInfo: API_REQUEST_STATE.INITIAL,
     uploadingOnlineVersion: API_REQUEST_STATE.INITIAL,
     downloadingOnlineVersion: API_REQUEST_STATE.INITIAL,
     gettingOnlineUpdates: API_REQUEST_STATE.INITIAL,
@@ -70,6 +74,7 @@ const initialState: AuthState = {
     checkResetFiles: null,
     lastAvailableVersion: '',
     hasUpdates: false,
+    changelog: '',
     ...CommonState,
 }
 
@@ -89,6 +94,19 @@ export const updateAssistantSlice = createSlice({
         },
         [getInstallationInfo.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingInstallationInfo = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getChangelogInfo.pending.type]: (state) => {
+            state.gettingChangelogInfo = API_REQUEST_STATE.START;
+            state.changelog = '';
+        },
+        [getChangelogInfo.fulfilled.type]: (state, action: PayloadAction<string>) => {
+            state.gettingChangelogInfo = API_REQUEST_STATE.FINISH;
+            state.changelog = action.payload;
+            state.error = null;
+        },
+        [getChangelogInfo.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingChangelogInfo = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [uploadOnlineVersion.pending.type]: (state) => {

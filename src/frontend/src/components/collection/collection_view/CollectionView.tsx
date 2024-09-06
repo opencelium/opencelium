@@ -183,8 +183,8 @@ const CollectionView: FC<CollectionViewProps> =
                             {collection.getFilterComponents(filterData, (data: any) => setFilterData({...data}))}
                         </Filter>
                     }
-                    {collection.name === "schedules" && <CategoryTabs readOnly/>}
-                    {collection.name === "connections" && <CategoryTabs/>}
+                    {collection.name === "schedules" && <CategoryTabs setCurrentPage={setCurrentPage} readOnly/>}
+                    {collection.name === "connections" && <CategoryTabs setCurrentPage={setCurrentPage}/>}
                     <div style={{marginTop: hasTopBar ? '0' : '20px'}}>
                         {applicationViewType === ViewType.LIST &&
                             <List

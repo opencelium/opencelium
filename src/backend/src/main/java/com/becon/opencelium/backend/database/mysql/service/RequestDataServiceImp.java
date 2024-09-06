@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.entity.SecretKey;
 import com.becon.opencelium.backend.database.mysql.repository.RequestDataRepository;
 import com.becon.opencelium.backend.database.mysql.repository.SecretKeyRepository;
+import com.becon.opencelium.backend.exception.WrongDecryptException;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
 import org.springframework.stereotype.Service;
 
@@ -95,7 +96,7 @@ public class RequestDataServiceImp implements RequestDataService {
             }
             try {
                 decrypt(requestData);
-            } catch (Exception e) {
+            } catch (WrongDecryptException e) {
                 encrypt(requestData);
                 requestDataRepository.save(requestData);
             }

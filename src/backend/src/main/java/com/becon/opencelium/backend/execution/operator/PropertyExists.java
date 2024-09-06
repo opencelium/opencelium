@@ -16,6 +16,10 @@ public class PropertyExists implements Operator {
             return set.contains(o2);
         }
 
+        if (o1 instanceof List list) {
+            return list.contains(o2);
+        }
+
         if (!(o1 instanceof Map object)) {
             throw new RuntimeException("PropertyExists doesn't support the " + o1.getClass() +
                     ". Please ensure that the left value is of type List or Map." +

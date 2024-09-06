@@ -19,6 +19,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
 import MariaDBImagePath from "@image/apps/mariadb.png";
+import MongoDBImagePath from "@image/apps/mongodb.png";
 import {ExternalApplicationListProps} from "../pages/interfaces";
 import ExternalApplications from "../../collections/ExternalApplications";
 import {checkAllExternalApplications} from "../../redux_toolkit/action_creators/ExternalApplicationCreators";
@@ -39,7 +40,7 @@ const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(Ext
             status: actuatorHealth.components?.mariaDB?.status || ExternalApplicationStatus.DOWN,
             version: actuatorHealth.components?.mariaDB?.details.version || '',
         },{
-            id: 2, name: actuatorHealth.components?.mongoDB?.details.name || 'MongoDB', icon: MariaDBImagePath, link: '', value: actuatorHealth.components?.mongoDB?.details.name || 'db',
+            id: 2, name: actuatorHealth.components?.mongoDB?.details.name || 'MongoDB', icon: MongoDBImagePath, link: '', value: actuatorHealth.components?.mongoDB?.details.name || 'db',
             status: actuatorHealth.components?.mongoDB?.status || ExternalApplicationStatus.DOWN,
             version: actuatorHealth.components?.mongoDB?.details.version || '',
         })
