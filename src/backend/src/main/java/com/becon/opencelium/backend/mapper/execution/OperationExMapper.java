@@ -244,23 +244,22 @@ public class OperationExMapper {
             return;
         }
         value = value.trim();
-        String[] split = value.split(";");
+        List<String> pairs = EndpointUtility.splitByDelimiter(value, ';');
 
-        for (String kv : split) {
-            if (kv.contains("=")) {
-                String[] pairs = kv.split("=");
-                if (pairs.length == 2) {
-                    SchemaDTO schemaDTO = new SchemaDTO();
-                    schemaDTO.setType(DataType.STRING);
-                    schemaDTO.setValue(pairs[1].trim());
+        for (String kv : pairs) {
 
-                    ParameterDTO parameterDTO = new ParameterDTO();
-                    parameterDTO.setSchema(schemaDTO);
-                    parameterDTO.setIn(ParamLocation.COOKIE);
-                    parameterDTO.setStyle(ParamStyle.FORM);
-                    parameterDTO.setName(pairs[0].trim());
-                    parameters.add(parameterDTO);
-                }
+            List<String> keyVal = EndpointUtility.splitByDelimiter(kv, '=');
+            if (keyVal.size() == 2) {
+                SchemaDTO schemaDTO = new SchemaDTO();
+                schemaDTO.setType(DataType.STRING);
+                schemaDTO.setValue(keyVal.get(1).trim());
+
+                ParameterDTO parameterDTO = new ParameterDTO();
+                parameterDTO.setSchema(schemaDTO);
+                parameterDTO.setIn(ParamLocation.COOKIE);
+                parameterDTO.setStyle(ParamStyle.FORM);
+                parameterDTO.setName(keyVal.get(0).trim());
+                parameters.add(parameterDTO);
             }
         }
     }
