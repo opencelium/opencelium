@@ -14,6 +14,7 @@ import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
 import com.becon.opencelium.backend.utility.EndpointUtility;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
@@ -247,20 +248,28 @@ public class OperationExMapper {
         List<String> pairs = EndpointUtility.splitByDelimiter(value, ';');
 
         for (String kv : pairs) {
-
             List<String> keyVal = EndpointUtility.splitByDelimiter(kv, '=');
+            SchemaDTO schemaDTO = new SchemaDTO();
+            schemaDTO.setType(DataType.STRING);
+            ParameterDTO parameterDTO = new ParameterDTO();
             if (keyVal.size() == 2) {
-                SchemaDTO schemaDTO = new SchemaDTO();
-                schemaDTO.setType(DataType.STRING);
                 schemaDTO.setValue(keyVal.get(1).trim());
 
-                ParameterDTO parameterDTO = new ParameterDTO();
-                parameterDTO.setSchema(schemaDTO);
-                parameterDTO.setIn(ParamLocation.COOKIE);
                 parameterDTO.setStyle(ParamStyle.FORM);
+                parameterDTO.setIn(ParamLocation.COOKIE);
                 parameterDTO.setName(keyVal.get(0).trim());
-                parameters.add(parameterDTO);
+            } else if (keyVal.size() == 1) {
+                schemaDTO.setValue(keyVal.get(0).trim());
+
+                parameterDTO.setIn(ParamLocation.HEADER);
+                parameterDTO.setStyle(ParamStyle.SIMPLE);
+                parameterDTO.setName(HttpHeaders.COOKIE);
+            } else {
+                //ignore
+                continue;
             }
+            parameterDTO.setSchema(schemaDTO);
+            parameters.add(parameterDTO);
         }
     }
 
