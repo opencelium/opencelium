@@ -62,8 +62,7 @@ public class JwtTokenUtil {
         return  claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserPrincipals userDetails) {
-        User user = userDetails.getUser();
+    public String generateToken(User user) {
         String sessionId = UUID.randomUUID().toString();
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
