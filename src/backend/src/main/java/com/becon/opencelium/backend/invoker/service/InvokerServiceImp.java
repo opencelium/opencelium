@@ -59,7 +59,8 @@ public class InvokerServiceImp implements InvokerService {
 
     private static final Logger log = LoggerFactory.getLogger(InvokerServiceImp.class);
 
-    @Autowired @Lazy
+    @Autowired
+    @Lazy
     private InvokerContainer invokerContainer;
 
     @Autowired
@@ -211,10 +212,10 @@ public class InvokerServiceImp implements InvokerService {
 
         Map<String, Object> fields = functionInvoker.getRequest().getBody().getFields();
 
-        return findFieldType(fields, hierarchy);
+        return findFieldType(fields, hierarchy, new ArrayList<>(hierarchy.size()));
     }
 
-    private DataType findFieldType(Object field, LinkedList<String> hierarchy) {
+    private DataType findFieldType(Object field, LinkedList<String> hierarchy, List<String> seen) {
 
         if (field == null) {
             return null;
@@ -236,7 +237,7 @@ public class InvokerServiceImp implements InvokerService {
                 return DataType.STRING;
             }
             if (field instanceof Number) {
-                if (field instanceof Long | field instanceof Integer | field instanceof Short) {
+                if (field instanceof Long || field instanceof Integer || field instanceof Short) {
                     return DataType.INTEGER;
                 }
                 return DataType.NUMBER;
@@ -248,17 +249,36 @@ public class InvokerServiceImp implements InvokerService {
                 return DataType.UNDEFINED;
 //                throw new RuntimeException("Field path is incorrect : " + hierarchy.getFirst());
             }
-            Object obj = map.get(hierarchy.pollFirst());
-            return findFieldType(obj, hierarchy);
+            Object obj = map.get(hierarchy.getFirst());
+            seen.add(hierarchy.pollFirst());
+            return findFieldType(obj, hierarchy, seen);
         }
 
         if (field instanceof List<?> list) {
             int index;
-            String idx = hierarchy.pollFirst();
+            String idx = hierarchy.getFirst();
             idx = idx.replaceAll("[\\[|\\]]", "");
             index = Integer.parseInt(idx);
+            if (list.isEmpty()) {
+                throw new RuntimeException(
+                        String.format(
+                                "No such element in list. You tried to reference the %s element of the '%s' array, but this array is empty in the invoker file. Please populate the array with at least %s elements or modify the reference path.",
+                                idx,
+                                String.join(".", seen),
+                                idx));
+            }
+            if (index >= list.size()) {
+                throw new RuntimeException(
+                        String.format(
+                                "No such element in list. You tried to reference the %s element of the '%s' array, but the array's size is %d in the invoker file. Please ensure the array has at least %s elements or modify the reference path.",
+                                idx,
+                                String.join(".", seen),
+                                list.size(),
+                                idx));
+            }
             Object obj = list.get(index);
-            return findFieldType(obj, hierarchy);
+            seen.set(seen.size() - 1, seen.get(seen.size() - 1) + hierarchy.pollFirst());
+            return findFieldType(obj, hierarchy, seen);
         }
         return DataType.OBJECT;
     }
