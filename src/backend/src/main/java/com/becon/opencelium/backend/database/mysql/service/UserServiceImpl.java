@@ -16,13 +16,10 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mysql.entity.Session;
-import com.becon.opencelium.backend.database.mysql.entity.User;
-import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
-import com.becon.opencelium.backend.database.mysql.entity.UserRole;
-import com.becon.opencelium.backend.database.mysql.entity.WidgetSetting;
+import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
+import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +29,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +51,7 @@ public class UserServiceImpl implements UserService{
     private UserDetailServiceImpl detailService;
 
     @Autowired
-    private SessionServiceImpl sessionService;
+    private ActivityServiceImpl activityService;
 
     @Autowired
     private WidgetSettingServiceImp widgetSettingServiceImp;
@@ -101,7 +97,6 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    @Transactional
     public User requestToEntity(UserRequestResource userRequestResource) {
         User user = new User();
         User userDb = userRepository.findById(userRequestResource.getUserId()).orElse(null);
@@ -128,11 +123,11 @@ public class UserServiceImpl implements UserService{
         }
 
         UserDetail userDetail = detailService.toEntity(userRequestResource.getUserDetail());
-        Session session = sessionService.findByUserId(userRequestResource.getUserId()).orElse(null);
+        Activity activity  = activityService.findById(userRequestResource.getUserId()).orElse(null);
 
         user.setId(userRequestResource.getUserId());
         user.setUserRole(userRole);
-        user.setSession(session);
+        user.setActivity(activity);
         user.setEmail(userRequestResource.getEmail());
         user.setUserDetail(userDetail);
 

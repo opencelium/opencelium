@@ -14,20 +14,18 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.exception;
+package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.database.mysql.entity.Activity;
+import com.becon.opencelium.backend.security.UserPrincipals;
 
-public class SessionNotFoundException extends RuntimeException {
+import java.util.Optional;
 
-    private final int userId;
+public interface ActivityService {
 
-    public SessionNotFoundException(final int userId) {
-        super(ExceptionConstant.SESSION_NOT_EXIST);
-        this.userId = userId;
-    }
+    void save(Activity activity);
 
-    public int getUserId() {
-        return userId;
-    }
+    Optional<Activity> findById(int id);
+
+    void registerTokenActivity(UserPrincipals userDetails);
 }

@@ -17,20 +17,24 @@
 package com.becon.opencelium.backend.security;
 
 import com.becon.opencelium.backend.constant.SecurityConstant;
-import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
+import com.becon.opencelium.backend.exception.WrongHeaderAuthTypeException;
+import com.becon.opencelium.backend.database.mysql.service.ActivityServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.*;
 
 @Component
 public class AuthorizationFilter extends OncePerRequestFilter {
@@ -42,7 +46,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Autowired
-    private SessionServiceImpl sessionService;
+    private ActivityServiceImpl activityService;
 
     @Override
     protected void doFilterInternal( HttpServletRequest request,
@@ -86,7 +90,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(String token) {
-        String email = jwtTokenUtil.extractEmail(token);
+        String email = jwtTokenUtil.getEmailFromToken(token);
         UserPrincipals userDetail = (UserPrincipals) userDetailsService.loadUserByUsername(email);
 
         try {
@@ -97,7 +101,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             throw new RuntimeException(e);
         }
 
-        sessionService.updateLastAccessedTime(userDetail.getUser().getSession());
+        activityService.registerTokenActivity(userDetail);
         return new UsernamePasswordAuthenticationToken(userDetail,
                                                        null,
                                                        userDetail.getAuthorities());
