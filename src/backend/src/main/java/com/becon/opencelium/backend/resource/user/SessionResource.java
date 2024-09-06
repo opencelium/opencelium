@@ -14,20 +14,30 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.exception;
+package com.becon.opencelium.backend.resource.user;
 
-import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
+import jakarta.annotation.Resource;
 
-public class UserNotFoundException extends RuntimeException {
+import java.util.Date;
 
-    private final int id;
+@Resource
+public class SessionResource {
 
-    public UserNotFoundException(final int id) {
-        super(ExceptionConstant.USER_NOT_EXIST);
-        this.id = id;
+    private Date requestTime;
+
+    public SessionResource() {
     }
 
-    public int getId() {
-        return id;
+    public SessionResource(Session session) {
+        this.requestTime = session.getLastAccessed();
+    }
+
+    public Date getRequestTime() {
+        return requestTime;
+    }
+
+    public void setRequestTime(Date requestTime) {
+        this.requestTime = requestTime;
     }
 }

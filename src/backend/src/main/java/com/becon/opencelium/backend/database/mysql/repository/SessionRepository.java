@@ -16,10 +16,20 @@
 
 package com.becon.opencelium.backend.database.mysql.repository;
 
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
-public interface ActivityRepository extends JpaRepository<Activity, Integer> {
+public interface SessionRepository extends JpaRepository<Session, String> {
+    Optional<Session> findByUserId(int userId);
+
+    @Modifying
+    @Query("DELETE FROM Session s WHERE s.userId = :userId")
+    int deleteByUserId(@Param("userId") int userId);
 }

@@ -442,3 +442,42 @@ CREATE TABLE change_set_yml (
 CREATE TABLE secret_key_for_encoder (
     secret_key VARCHAR(1000) NOT NULL
 );
+
+--changeset 4.0:19 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE user
+ADD COLUMN IF NOT EXISTS auth_method ENUM('LDAP', 'BASIC') NOT NULL DEFAULT 'BASIC',
+ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS totp_secret_key VARCHAR(255);
+
+--changeset 4.0:20 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE user_session (
+    session_id VARCHAR(255) NOT NULL PRIMARY KEY,
+    user_id int(11) NOT NULL,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP NOT NULL,
+    last_accessed TIMESTAMP NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    attempts INT DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--changeset 4.0:21 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+LOCK TABLES `activity` READ, `user_session` WRITE;
+
+INSERT INTO user_session (session_id, user_id, ip_address, user_agent, created_at, last_accessed, is_active, attempts)
+SELECT
+    UUID(),
+    user_id,
+    NULL,
+    NULL,
+    COALESCE(request_time, NOW()),
+    COALESCE(request_time, NOW()),
+    CASE WHEN is_locked = '1' THEN FALSE ELSE TRUE END,
+    0
+FROM activity;
+
+UNLOCK TABLES;
+
+--changeset 4.0:22 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+DROP TABLE IF EXISTS activity;
