@@ -11,8 +11,8 @@ public class LdapProperties {
     private String groupSearchBase;
     private String managerDn;
     private String managerPassword;
-    private String groupSearchFilter;
-    private String userSearchFilter;
+    private String groupSearchFilter = "(member={0})";
+    private String userSearchFilter = "(cn={0})";
 
     public String getUrls() {
         return urls;
@@ -71,7 +71,7 @@ public class LdapProperties {
     }
 
     public String getGroupSearchFilter() {
-        return groupSearchFilter != null ? groupSearchFilter : "(member={0})";
+        return groupSearchFilter;
     }
 
     public void setGroupSearchFilter(String groupSearchFilter) {
@@ -79,7 +79,7 @@ public class LdapProperties {
     }
 
     public String getUserSearchFilter() {
-        return userSearchFilter != null ? userSearchFilter : "(cn={0})";
+        return userSearchFilter;
     }
 
     public void setUserSearchFilter(String userSearchFilter) {
