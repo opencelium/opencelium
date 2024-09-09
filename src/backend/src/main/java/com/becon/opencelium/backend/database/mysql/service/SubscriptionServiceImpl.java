@@ -36,8 +36,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository,
                                    Scheduler scheduler,
-                                   @Qualifier("connectionServiceImpl") ConnectionService connectionService,
-                                   @Qualifier("operationUsageHistoryServiceImp") OperationUsageHistoryService operationUsageHistoryService) {
+                                   @Qualifier("connectionServiceImp") ConnectionService connectionService,
+                                   @Qualifier("operationUsageHistoryServiceImpl") OperationUsageHistoryService operationUsageHistoryService) {
         this.subscriptionRepository = subscriptionRepository;
         this.scheduler = scheduler;
         this.connectionService =connectionService;
