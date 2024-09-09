@@ -443,13 +443,45 @@ CREATE TABLE secret_key_for_encoder (
     secret_key VARCHAR(1000) NOT NULL
 );
 
---changeset 4.0:19 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--changeset 4.2:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE activation_request(
+    id         UUID PRIMARY KEY,
+    created_at TIMESTAMP    NOT NULL,
+    hmac       VARCHAR(255) NOT NULL,
+    ttl        INT UNSIGNED NOT NULL,
+    status     ENUM ('PENDING', 'PROCESSED', 'EXPIRED') DEFAULT 'PENDING',
+    INDEX idx_hmac (hmac)
+);
+
+--changeset 4.2:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE subscription(
+    id                    UUID PRIMARY KEY,
+    subId                 VARCHAR(255) NOT NULL,
+    created_at            TIMESTAMP    NOT NULL,
+    license_key           VARCHAR(2048) NOT NULL,
+    current_usage         BIGINT       NOT NULL,
+    current_usage_hmac    VARCHAR(255) NOT NULL,
+    active                BOOLEAN      NOT NULL,
+    activation_request_id UUID,
+    FOREIGN KEY (activation_request_id) REFERENCES activation_request (id)
+);
+
+--changeset 4.2:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE operation_usage_history(
+    id               INT PRIMARY KEY AUTO_INCREMENT,
+    subId            VARCHAR(255) NOT NULL,
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    operation_num    BIGINT       NOT NULL,
+    connection_title VARCHAR(255) NOT NULL
+);
+
+--changeset 4.2:4 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE user
 ADD COLUMN IF NOT EXISTS auth_method ENUM('LDAP', 'BASIC') NOT NULL DEFAULT 'BASIC',
 ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN DEFAULT FALSE,
 ADD COLUMN IF NOT EXISTS totp_secret_key VARCHAR(255);
 
---changeset 4.0:20 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--changeset 4.2:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 CREATE TABLE user_session (
     session_id VARCHAR(255) NOT NULL PRIMARY KEY,
     user_id int(11) NOT NULL,
@@ -462,7 +494,7 @@ CREATE TABLE user_session (
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---changeset 4.0:21 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--changeset 4.2:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 LOCK TABLES `activity` READ, `user_session` WRITE;
 
 INSERT INTO user_session (session_id, user_id, ip_address, user_agent, created_at, last_accessed, is_active, attempts)
@@ -479,5 +511,5 @@ FROM activity;
 
 UNLOCK TABLES;
 
---changeset 4.0:22 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--changeset 4.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 DROP TABLE IF EXISTS activity;
