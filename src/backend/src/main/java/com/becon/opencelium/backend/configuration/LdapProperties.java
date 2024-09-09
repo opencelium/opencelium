@@ -11,8 +11,8 @@ public class LdapProperties {
     private String groupSearchBase;
     private String managerDn;
     private String managerPassword;
-    private String groupSearchFilter;
-    private String userSearchFilter;
+    private String groupSearchFilter = "(member={0})";
+    private String userSearchFilter = "(cn={0})";
 
     public String getUrls() {
         return urls;
