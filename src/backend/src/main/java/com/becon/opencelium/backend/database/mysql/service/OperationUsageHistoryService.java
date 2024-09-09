@@ -9,4 +9,5 @@ public interface OperationUsageHistoryService {
     void save(OperationUsageHistory operationUsageHistory);
     List<OperationUsageHistory> findAll();
     Optional<OperationUsageHistory> findById(Long id);
+    OperationUsageHistory createEntity(String subId, String connectionName, long requestSize);
 }

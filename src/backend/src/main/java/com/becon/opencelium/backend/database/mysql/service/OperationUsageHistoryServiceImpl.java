@@ -28,4 +28,13 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     public Optional<OperationUsageHistory> findById(Long id) {
         return operationUsageHistoryRepository.findById(id);
     }
+
+    @Override
+    public OperationUsageHistory createEntity(String subId, String connectionName, long operationNumber) {
+        OperationUsageHistory operationUsageHistory = new OperationUsageHistory();
+        operationUsageHistory.setOperationNum(operationNumber);
+        operationUsageHistory.setSubId(subId);
+        operationUsageHistory.setConnectionTitle(connectionName);
+        return operationUsageHistory;
+    }
 }

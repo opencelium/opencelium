@@ -1,8 +1,11 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistory;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
 import com.becon.opencelium.backend.quartz.ResetLimitsJob;
+import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
@@ -10,7 +13,10 @@ import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -24,15 +30,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final Scheduler scheduler;
+    private final ConnectionService connectionService;
+    private final OperationUsageHistoryService operationUsageHistoryService;
+    private final Logger logger = LoggerFactory.getLogger(SubscriptionServiceImpl.class);
 
-    public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository, Scheduler scheduler) {
+    public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository,
+                                   Scheduler scheduler,
+                                   @Qualifier("connectionServiceImpl") ConnectionService connectionService,
+                                   @Qualifier("operationUsageHistoryServiceImp") OperationUsageHistoryService operationUsageHistoryService) {
         this.subscriptionRepository = subscriptionRepository;
         this.scheduler = scheduler;
-    }
-
-    @Override
-    public boolean verifyLicenseKey(String licenseKey) {
-        return false;
+        this.connectionService =connectionService;
+        this.operationUsageHistoryService = operationUsageHistoryService;
     }
 
     @Override
@@ -41,8 +50,33 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public boolean isValid(Subscription subscription) {
-        return false;
+    public boolean isValid(Subscription sub) {
+        LicenseKey licenseKey = LicenseKeyUtility.decrypt(sub.getLicenseKey());
+        if (licenseKey == null || !isHmacValid(sub, licenseKey.getHmac())) {
+            logger.warn("License key is not Valid");
+            return false;
+        }
+        if (Instant.ofEpochSecond(licenseKey.getStartDate()).isAfter(Instant.now())) {
+            logger.warn("Subscription will start at " + Instant.ofEpochSecond(licenseKey.getEndDate()));
+            return false;
+        }
+        if (!isCurrentUsageIsValid(sub)) {
+            logger.warn("Usage number of operation has been changed manually.");
+            return false;
+        }
+        if (Instant.ofEpochSecond(licenseKey.getEndDate()).isBefore(Instant.now())) {
+            logger.warn("You subscription has been expired at " + Instant.ofEpochSecond(licenseKey.getEndDate()));
+            return false;
+        }
+        if (sub.getCurrentUsage() > licenseKey.getOperationUsage()) {
+            logger.warn("You have reached limit of operation usage: " + licenseKey.getOperationUsage());
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isHmacValid(Subscription sub, String hmac) {
+        return HmacUtility.verify(sub.getSubId() + MachineUtility.getStringForHmacEncode(), hmac);
     }
 
     @Override
@@ -99,7 +133,30 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public Subscription getById(String id) {
-        return null;
+        return subscriptionRepository.findById(UUID.fromString(id))
+                .orElseThrow(() -> new RuntimeException("Subsction not found"));
+    }
+
+    @Override
+    public void updateUsage(Subscription sub, long connectionId,long requestSize) {
+        Connection connection = connectionService.getById(connectionId);
+        OperationUsageHistory operationUsageHistory = operationUsageHistoryService
+                .createEntity(sub.getSubId(), connection.getTitle(), requestSize);
+        operationUsageHistoryService.save(operationUsageHistory);
+        if (!isCurrentUsageIsValid(sub)) {
+            throw new RuntimeException("Number of operations have been changed manually.");
+        }
+
+        long updatedOperationUsage = sub.getCurrentUsage() + requestSize;
+        String newHmac = HmacUtility.encode(sub.getSubId() + updatedOperationUsage);
+        sub.setCurrentUsage(updatedOperationUsage);
+        sub.setCurrentUsageHmac(newHmac);
+        save(sub);
+    }
+
+    private boolean isCurrentUsageIsValid(Subscription sub) {
+        return HmacUtility
+                    .verify(sub.getSubId() + sub.getCurrentUsage(), sub.getCurrentUsageHmac());
     }
 
     private void initTask(Subscription subscription) {

@@ -16,6 +16,9 @@
 
 package com.becon.opencelium.backend.quartz;
 
+import com.becon.opencelium.backend.database.mysql.entity.Subscription;
+import com.becon.opencelium.backend.database.mysql.service.OperationUsageHistoryService;
+import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
@@ -33,17 +36,25 @@ import java.util.Map;
 public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final SubscriptionService subscriptionService;
 
     private Thread thread;
 
-    public JobExecutor(@Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService, SimpMessagingTemplate simpMessagingTemplate) {
+    public JobExecutor(@Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
+                       @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
+                       SimpMessagingTemplate simpMessagingTemplate) {
         this.executionObjectService = executionObjectService;
         this.simpMessagingTemplate = simpMessagingTemplate;
+        this.subscriptionService = subscriptionService;
     }
 
     @Override
     public void executeInternal(JobExecutionContext context) throws JobExecutionException {
         thread = Thread.currentThread();
+        Subscription activeSub = subscriptionService.getActiveSubs();
+        if (!subscriptionService.isValid(activeSub)) {
+            throw new RuntimeException("Subscription is not valid");
+        }
         try {
             JobDataMap dataMap = context.getMergedJobDataMap();
             QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
@@ -57,6 +68,9 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
 
             executor.start();
             context.put("operationsEx", executor.getOperations());
+            // increments current_usage in subscription and saves entity in current_usage_history.
+            long requestSize = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
+            subscriptionService.updateUsage(activeSub, executionObj.getConnection().getConnectionId(), requestSize);
         } catch (ThreadDeath ignored) {
         } finally {
             thread = null;
