@@ -71,7 +71,7 @@ public class LdapProperties {
     }
 
     public String getGroupSearchFilter() {
-        return groupSearchFilter;
+        return groupSearchFilter != null ? groupSearchFilter : "(member={0})";
     }
 
     public void setGroupSearchFilter(String groupSearchFilter) {
@@ -79,7 +79,7 @@ public class LdapProperties {
     }
 
     public String getUserSearchFilter() {
-        return userSearchFilter;
+        return userSearchFilter != null ? userSearchFilter : "(cn={0})";
     }
 
     public void setUserSearchFilter(String userSearchFilter) {
