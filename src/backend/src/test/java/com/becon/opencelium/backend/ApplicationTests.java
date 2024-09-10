@@ -17,19 +17,8 @@
 package com.becon.opencelium.backend;
 
 
-import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
-import com.becon.opencelium.backend.database.mysql.service.ActivationRequestServiceImp;
-import com.becon.opencelium.backend.mapper.mysql.ActivationRequestMapper;
-import com.becon.opencelium.backend.subscription.dto.ActivationRequestDTO;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApi;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApiFactory;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiType;
-import com.becon.opencelium.backend.subscription.remoteapi.module.SubscriptionModule;
-import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
-import com.becon.opencelium.backend.utility.crypto.Base64Utility;
+
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
