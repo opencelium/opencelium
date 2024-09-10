@@ -25,7 +25,7 @@ public class BindingUtility {
                 if (method.getResponse() != null) {
                     if (method.getResponse().getFail() != null && method.getResponse().getFail().getBody() != null) {
                         Map<String, Object> fields = method.getResponse().getFail().getBody().getFields();
-                        if(fields != null) {
+                        if (fields != null) {
                             for (Map.Entry<String, Object> entry : fields.entrySet()) {
                                 entry.setValue(findRefAndReplace(entry.getValue(), fbs));
                             }
@@ -33,7 +33,7 @@ public class BindingUtility {
                     }
                     if (method.getResponse().getSuccess() != null && method.getResponse().getSuccess().getBody() != null) {
                         Map<String, Object> fields = method.getResponse().getSuccess().getBody().getFields();
-                        if(fields != null) {
+                        if (fields != null) {
                             for (Map.Entry<String, Object> entry : fields.entrySet()) {
                                 entry.setValue(findRefAndReplace(entry.getValue(), fbs));
                             }
@@ -119,28 +119,30 @@ public class BindingUtility {
 //---------------------------------------------- bind ----------------------------------------------------//
 
     public static String doWithPath(String endpoint, String id, List<LinkedFieldMng> from) {
-        int indexOfQuestionSign = endpoint.indexOf("?");
+        List<String> refs = from.stream().map(x -> x.getColor() + ".(" + x.getType() + ")" + (x.getField() == null ? "" : "." + x.getField())).toList();
+        int indexOfQuestionSign = EndpointUtility.findIndexOfQuesSign(endpoint);
         String query = null;
         if (indexOfQuestionSign != -1) {
             query = endpoint.substring(indexOfQuestionSign + 1);
-            String[] pairsRaw = query.split("&");
+            List<String[]> variables = EndpointUtility.getQueryVariables(query);
             out:
-            for (int i = 0; i < pairsRaw.length; i++) {
-                String p = pairsRaw[i];
-                String[] split = p.split("=");
-                if (split[1].matches("\\{%#.+%}")) {
-                    for (LinkedFieldMng lf : from) {
-                        if (!split[1].contains(lf.getColor() + ".(" + lf.getType() + ")" + (lf.getField() == null ? "" : "." + lf.getField()))) {
+            for (String[] p : variables) {
+                if (p[1].matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
+                    // p[1] can be:
+                    // pure ref - '{%#ffffff.(response).a.b%}'
+                    // one enhancement having several references - '{%#ffffff.(response).a.b;#ffffff.(response).a.c%}'
+                    // more than one enhancement - 'userId_{%#ffffff.(response).user.id%}, username_{%#ffffff.(response).user.name%}'
+                    for (String ref : refs) {
+                        if (!p[1].contains(ref)) {
                             continue out;
                         }
                     }
-                    split[1] = "{%" + id + "%}";
-                    pairsRaw[i] = split[0] + "=" + split[1];
+                    p[1] = EndpointUtility.bindExactlyPlace(p[1], refs, id);
                 }
             }
             StringJoiner sj = new StringJoiner("&");
-            for (String p : pairsRaw) {
-                sj.add(p);
+            for (String[] p : variables) {
+                sj.add(p[0] + "=" + p[1]);
             }
             query = sj.toString();
         }
@@ -150,16 +152,17 @@ public class BindingUtility {
         } else {
             path = endpoint.substring(0, indexOfQuestionSign);
         }
-        String[] subPaths = path.split("/");
+
+        List<String> subPaths = EndpointUtility.splitPath(path);
         out:
-        for (int i = 0; i < subPaths.length; i++) {
-            if (subPaths[i].matches("\\{%#.+%}")) {
-                for (LinkedFieldMng lf : from) {
-                    if (!subPaths[i].contains(lf.getColor() + "(" + lf.getType() + ")" + (lf.getField() == null ? "" : lf.getField()))) {
+        for (int i = 0; i < subPaths.size(); i++) {
+            if (subPaths.get(i).matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
+                for (String ref : refs) {
+                    if (!subPaths.get(i).contains(ref)) {
                         continue out;
                     }
                 }
-                subPaths[i] = "{%" + id + "%}";
+                subPaths.set(i, EndpointUtility.bindExactlyPlace(subPaths.get(i), refs, id));
             }
         }
         StringJoiner sj = new StringJoiner("/");
@@ -168,15 +171,18 @@ public class BindingUtility {
         }
         path = sj.toString();
 
-        return (query == null) ? path : path + "?" + query;
+        return (query == null)
+                ? path
+                : path + "?" + query;
     }
 
-    public static void doWithHeader(Map<String, String> header, String fieldName, String id) {
+    public static void doWithHeader(Map<String, String> header, String fieldName, String id, List<LinkedFieldMng> from) {
+        List<String> refs = from.stream().map(x -> x.getColor() + ".(" + x.getType() + ")" + (x.getField() == null ? "" : "." + x.getField())).toList();
         header.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue().equals(fieldName))
                 .findFirst()
-                .ifPresent(entry -> entry.setValue("{%" + id + "%}"));
+                .ifPresent(entry -> entry.setValue(EndpointUtility.bindExactlyPlace(entry.getValue(), refs, id)));
     }
 
     public static Map<String, Object> doWithBody(Map<String, Object> src, List<String> fieldPaths, String id, String format) {

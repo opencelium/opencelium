@@ -444,29 +444,72 @@ CREATE TABLE secret_key_for_encoder (
 );
 
 --changeset 4.2:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE user
+ADD COLUMN IF NOT EXISTS auth_method ENUM('LDAP', 'BASIC') NOT NULL DEFAULT 'BASIC',
+ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS totp_secret_key VARCHAR(255);
+
+--changeset 4.2:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+DROP TABLE IF EXISTS user_session;
+CREATE TABLE user_session (
+    session_id VARCHAR(255) NOT NULL PRIMARY KEY,
+    user_id int(11) NOT NULL,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP NOT NULL,
+    last_accessed TIMESTAMP NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    attempts INT DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--changeset 4.2:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+LOCK TABLES `activity` READ, `user_session` WRITE;
+
+INSERT INTO user_session (session_id, user_id, ip_address, user_agent, created_at, last_accessed, is_active, attempts)
+SELECT
+    UUID(),
+    user_id,
+    NULL,
+    NULL,
+    COALESCE(request_time, NOW()),
+    COALESCE(request_time, NOW()),
+    CASE WHEN is_locked = '1' THEN FALSE ELSE TRUE END,
+    0
+FROM activity;
+
+UNLOCK TABLES;
+
+--changeset 4.2:4 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+DROP TABLE IF EXISTS activity;
+
+--changeset 4.2:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+DROP TABLE IF EXISTS subscription;
+DROP TABLE IF EXISTS activation_request;
+DROP TABLE IF EXISTS operation_usage_history;
 CREATE TABLE activation_request(
-    id         UUID PRIMARY KEY,
+    id         VARCHAR(255) PRIMARY KEY,
     created_at TIMESTAMP    NOT NULL,
-    hmac       VARCHAR(255) NOT NULL,
+    hmac       VARCHAR(255) UNIQUE,
     ttl        INT UNSIGNED NOT NULL,
     status     ENUM ('PENDING', 'PROCESSED', 'EXPIRED') DEFAULT 'PENDING',
     INDEX idx_hmac (hmac)
 );
 
---changeset 4.2:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--changeset 4.2:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 CREATE TABLE subscription(
-    id                    UUID PRIMARY KEY,
-    subId                 VARCHAR(255) NOT NULL,
+    id                    VARCHAR(255) PRIMARY KEY,
+    subId                 VARCHAR(255) UNIQUE NOT NULL,
     created_at            TIMESTAMP    NOT NULL,
     license_key           VARCHAR(2048) NOT NULL,
     current_usage         BIGINT       NOT NULL,
     current_usage_hmac    VARCHAR(255) NOT NULL,
     active                BOOLEAN      NOT NULL,
-    activation_request_id UUID,
+    activation_request_id VARCHAR(255),
     FOREIGN KEY (activation_request_id) REFERENCES activation_request (id)
 );
 
---changeset 4.2:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--changeset 4.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 CREATE TABLE operation_usage_history(
     id               INT PRIMARY KEY AUTO_INCREMENT,
     subId            VARCHAR(255) NOT NULL,

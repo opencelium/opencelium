@@ -25,18 +25,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class JwtUserDetailsService implements UserDetailsService {
-
+public class DaoUserDetailsService implements UserDetailsService {
 
     @Autowired
     private UserServiceImpl userService;
-//
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userService.findByEmail(email).orElse(null);
-        if (user == null) {
-            throw new UsernameNotFoundException(email);
-        }
+        User user = userService.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
+
         return new UserPrincipals(user);
     }
 }

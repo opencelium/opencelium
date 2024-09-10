@@ -19,10 +19,10 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.exception.EmailAlreadyExistException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
+import com.becon.opencelium.backend.exception.SessionNotFoundException;
 import com.becon.opencelium.backend.exception.UserNotFoundException;
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
 import com.becon.opencelium.backend.database.mysql.entity.User;
-import com.becon.opencelium.backend.database.mysql.service.ActivityServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
@@ -42,7 +42,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -65,7 +72,7 @@ public class UserController {
     private UserRoleServiceImpl userRoleService;
 
     @Autowired
-    private ActivityServiceImpl activityService;
+    private SessionServiceImpl sessionService;
 
     @Autowired
     private StorageService storageService;
@@ -162,10 +169,6 @@ public class UserController {
         }
 
         User user = userService.requestToEntity(userRequestResource);
-        Activity activity = new Activity();
-        activity.setUser(user);
-        activity.setLocked(true);
-        user.setActivity(activity);
         userService.save(user);
 
         UserResource userResource = userService.toResource(user);
@@ -278,16 +281,15 @@ public class UserController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/{id}/logout")
-    public ResponseEntity<?> logout(@PathVariable("id") int id) {
-        return activityService
-                .findById(id)
+    public ResponseEntity<?> logout(@PathVariable("id") int userId) {
+        return sessionService
+                .findByUserId(userId)
                 .map(
                         p -> {
-                            p.setTokenId("");
-                            p.setLocked(true);
-                            activityService.save(p);
+                            p.setActive(false);
+                            sessionService.save(p);
                             return ResponseEntity.ok().build();
                         })
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new SessionNotFoundException(userId));
     }
 }

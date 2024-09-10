@@ -14,33 +14,30 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.database.mysql.service;
+package com.becon.opencelium.backend.resource.user;
 
-import com.becon.opencelium.backend.database.mysql.entity.UserRole;
-import com.becon.opencelium.backend.resource.user.UserRoleResource;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
+import jakarta.annotation.Resource;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Date;
 
-public interface UserRoleService {
+@Resource
+public class SessionResource {
 
-    boolean existsById(int id);
+    private Date requestTime;
 
-    void save(UserRole userRole);
+    public SessionResource() {
+    }
 
-    Optional<UserRole> findById(int id);
+    public SessionResource(Session session) {
+        this.requestTime = session.getLastAccessed();
+    }
 
-    List<UserRole> findAll();
+    public Date getRequestTime() {
+        return requestTime;
+    }
 
-    UserRole getOne(int id);
-
-    boolean existsByRole(String role);
-
-    Optional<UserRole> findByRole(String role);
-
-    void deleteById(int id);
-
-    UserRole toEntity(UserRoleResource resource);
-
-    UserRoleResource toResource(UserRole entity);
+    public void setRequestTime(Date requestTime) {
+        this.requestTime = requestTime;
+    }
 }

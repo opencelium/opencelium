@@ -10,8 +10,7 @@ import java.util.UUID;
 public class Subscription {
 
     @Id
-    @GeneratedValue
-    private UUID id;
+    private String id;
 
     @Column(name = "subId", nullable = false, length = 255)
     private String subId;
@@ -31,16 +30,16 @@ public class Subscription {
     @Column(name = "active", nullable = false)
     private boolean active;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "activation_request_id", referencedColumnName = "id")
     private ActivationRequest activationRequest;
 
     // Getters and Setters
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

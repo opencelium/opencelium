@@ -16,10 +16,12 @@
 
 package com.becon.opencelium.backend.security;
 
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.utility.TokenUtility;
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -37,21 +39,22 @@ public class JwtTokenUtil {
     @Autowired
     private TokenUtility tokenUtility;
 
-    public String getEmailFromToken(String token) {
+    public String extractEmail(String token) {
         return getClaimFromToken(token, JWTClaimsSet::getSubject);
     }
 
-    public String getTokenId(String token) {
+    public String extractSessionId(String token) {
         return getClaimFromToken(token, JWTClaimsSet::getJWTID);
     }
 
-    public Date getExpirationDateFromToken(String token) {
-        return getClaimFromToken(token, JWTClaimsSet::getExpirationTime);
+    public int extractUserId(String token) {
+        String userId = getClaim(token, "userId").toString();
+
+        return Integer.parseInt(userId);
     }
 
-    public Object getClaim(String token, String name){
-        final JWTClaimsSet claims = getAllClaimsFromToken(token);
-        return claims.getClaim(name);
+    public Date extractExpirationDate(String token) {
+        return getClaimFromToken(token, JWTClaimsSet::getExpirationTime);
     }
 
     public <T> T getClaimFromToken(String token, Function<JWTClaimsSet, T> claimsResolver) {
@@ -59,9 +62,9 @@ public class JwtTokenUtil {
         return  claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserPrincipals userDetails) {
-        User user = userDetails.getUser();
-        String token = UUID.randomUUID().toString();
+    public String generateToken(User user) {
+        String sessionId = UUID.randomUUID().toString();
+
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
             .claim("userId", user.getId())
             .claim("role", user.getUserRole().getName())
@@ -69,7 +72,7 @@ public class JwtTokenUtil {
             .expirationTime(new Date(System.currentTimeMillis() + tokenUtility.getExpirationTime() * 1000))
             .issueTime(new Date(System.currentTimeMillis()))
             .subject(user.getEmail())
-            .jwtID(token)
+            .jwtID(sessionId)
             .build();
 
         return generateToken(claimsSet);
@@ -84,21 +87,22 @@ public class JwtTokenUtil {
             return false;
         }
 
-        Activity activity = userDetails.getUser().getActivity();
-        String tokenId = getTokenId(token);
-        if (activity.isLocked()){
+        Session session = userDetails.getUser().getSession();
+        if (!session.isActive()){
             return false;
         }
-        final String email = getEmailFromToken(token);
 
-        long inactiveTime = new Date().getTime() - activity.getRequestTime().getTime();
+        long inactiveTime = new Date().getTime() - session.getLastAccessed().getTime();
         if (inactiveTime > tokenUtility.getActivityTime()){
             return false;
         }
 
+        final String sessionId = extractSessionId(token);
+        final String email = extractEmail(token);
+
         return (email.equals(userDetails.getUsername())
                 && !isTokenExpired(token)
-                && tokenId.equals(activity.getTokenId()));
+                && sessionId.equals(session.getId()));
     }
 
     public JWTClaimsSet getAllClaimsFromToken(String token) {
@@ -109,21 +113,26 @@ public class JwtTokenUtil {
         }
     }
 
-    private Boolean isTokenExpired(String token) {
-        final Date expiration = getExpirationDateFromToken(token);
-        return expiration.before(new Date());
+    public String generateToken(JWTClaimsSet claims) {
+        try {
+            MACSigner signer = new MACSigner(tokenUtility.getSecret());
+            SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims); // Create signed JWT
+            signedJWT.sign(signer); // Sign the JWT
+
+            return signedJWT.serialize();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
-    public String generateToken(JWTClaimsSet claims) {
-            try {
-                MACSigner signer = new MACSigner(tokenUtility.getSecret());
-                SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims); // Create signed JWT
-                signedJWT.sign(signer); // Sign the JWT
+    private Object getClaim(String token, String name){
+        final JWTClaimsSet claims = getAllClaimsFromToken(token);
+        return claims.getClaim(name);
+    }
 
-                return signedJWT.serialize();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+    private Boolean isTokenExpired(String token) {
+        final Date expiration = extractExpirationDate(token);
+        return expiration.before(new Date());
     }
 }

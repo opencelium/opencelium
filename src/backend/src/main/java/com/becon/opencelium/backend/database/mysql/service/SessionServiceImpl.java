@@ -16,36 +16,42 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
-import com.becon.opencelium.backend.database.mysql.repository.ActivityRepository;
-import com.becon.opencelium.backend.security.UserPrincipals;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
+import com.becon.opencelium.backend.database.mysql.repository.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
 
 @Service
-public class ActivityServiceImpl implements ActivityService {
+public class SessionServiceImpl implements SessionService {
 
     @Autowired
-    private ActivityRepository activityRepository;
+    private SessionRepository sessionRepository;
 
     @Override
-    public void save(Activity activity) {
-        activityRepository.save(activity);
+    public void save(Session session) {
+        sessionRepository.save(session);
     }
 
     @Override
-    public Optional<Activity> findById(int id) {
-        return activityRepository.findById(id);
+    public Optional<Session> findByUserId(int userId) {
+        return sessionRepository.findByUserId(userId);
     }
 
     @Override
-    public void registerTokenActivity(UserPrincipals userDetails) {
-        Activity activity = userDetails.getUser().getActivity();
-        activity.setLocked(false);
-        activity.setRequestTime(new Date());
-        activityRepository.save(activity);
+    @Transactional
+    public boolean deleteByUserId(int userId) {
+        return sessionRepository.deleteByUserId(userId) > 0;
+    }
+
+    @Override
+    public void updateLastAccessedTime(Session session) {
+        session.setActive(true);
+        session.setLastAccessed(new Date());
+
+        sessionRepository.save(session);
     }
 }

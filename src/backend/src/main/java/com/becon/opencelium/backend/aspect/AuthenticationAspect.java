@@ -16,40 +16,40 @@
 
 package com.becon.opencelium.backend.aspect;
 
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
-import com.becon.opencelium.backend.database.mysql.service.ActivityServiceImpl;
-import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
+import com.becon.opencelium.backend.database.mysql.service.SessionService;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
 @Aspect
 @Component
 public class AuthenticationAspect {
 
     @Autowired
-    private ActivityServiceImpl activityService;
+    private SessionService sessionService;
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
-    @Autowired
-    private UserServiceImpl userService;
-
-    @AfterReturning(pointcut = "execution(* com.becon.opencelium.backend.security.JwtTokenUtil.generateToken(com.becon.opencelium.backend.security.UserPrincipals))",
+    @AfterReturning(pointcut = "execution(* com.becon.opencelium.backend.security.JwtTokenUtil.generateToken(com.becon.opencelium.backend.database.mysql.entity.User))",
                     returning = "token")
     public void afterTokenGeneration(String token){
-        String tokenId = jwtTokenUtil.getTokenId(token);
-        String userId = jwtTokenUtil.getClaim(token, "userId").toString();
-        Activity activity = new Activity();
-        activity.setId(Integer.parseInt(userId));
-        activity.setTokenId(tokenId);
-        activity.setLocked(false);
-        activity.setRequestTime(new Date());
-        activityService.save(activity);
+        String sessionId = jwtTokenUtil.extractSessionId(token);
+        int userId = jwtTokenUtil.extractUserId(token);
+
+        // if 'user' already has a 'session' then delete it and create new one
+        sessionService.deleteByUserId(userId);
+
+        Session session = new Session();
+
+        session.setId(sessionId);
+        session.setUserId(userId);
+        session.setActive(true);
+        session.setAttempts(0);
+
+        sessionService.save(session);
     }
 }
