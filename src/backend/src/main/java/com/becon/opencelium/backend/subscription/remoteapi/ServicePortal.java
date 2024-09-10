@@ -17,7 +17,7 @@ import java.io.File;
 public class ServicePortal implements RemoteApi, SubscriptionModule {
 
     private String BASE_URL = "http://oc-service-portal.westeurope.cloudapp.azure.com:443";
-    private String AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YzQ1ZjBiYTk3MTFmODcwOWE3OTMzNSIsImVtYWlsIjoic3ViXzJAbWFpbC5jb20iLCJjb21wYW55SWQiOiI2NmM0NWVjZGE5NzExZjg3MDlhNzkyNzMiLCJpYXQiOjE3MjQxNDU1MDMsImV4cCI6MTczNDE0NTUwM30.dcKKz05Tyyyqe10jJN5G6mrwaMcdxMuz-fGFdr_MNe0";
+    private String AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZTA3ODZhODQyNjAxMzhlZWIyNzBhNiIsImVtYWlsIjoiYWRtaW5Ab3BlbmNlbGl1bS5pbyIsImNvbXBhbnlJZCI6IjY2ZTA3ODZhODQyNjAxMzhlZWIyNzBhMSIsImlhdCI6MTcyNTk4Njk0MywiZXhwIjoxNzM1OTg2OTQzfQ.HsYTjIqQsZq2uHGZ1d3LY4DPf-dbz5nfMNScLKzZIUM";
     private final RestTemplate restTemplate;
     public ServicePortal() {
         this.restTemplate = new RestTemplate();

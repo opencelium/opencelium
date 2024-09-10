@@ -86,7 +86,7 @@ public class SubscriptionController {
 
         String licenseKey = extractLicenseKey(response);
         LicenseKey lk = LicenseKeyUtility.decrypt(licenseKey);
-        if (LicenseKeyUtility.verify(lk, ar)) {
+        if (!LicenseKeyUtility.verify(lk, ar)) {
             throw new RuntimeException("LicenseKey is not valid");
         }
 
