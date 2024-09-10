@@ -20,8 +20,10 @@ import {CommonState} from "@application/utils/store";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {
     activateLicenseFile,
-    activateLicenseString,
-    generateActivateRequest, getActivationRequestStatus, getLicenseStatus
+    activateLicenseString, deleteLicense,
+    generateActivateRequest,
+    getActivationRequestStatus,
+    getLicenseStatus,
 } from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 import LicenseModel, {ActivationRequestStatus} from "@entity/license_management/requests/models/LicenseModel";
 
@@ -30,6 +32,7 @@ export interface LicenseState extends ICommonState{
     activatingLicense: API_REQUEST_STATE,
     gettingLicenseStatus: API_REQUEST_STATE,
     gettingActivationRequestStatus: API_REQUEST_STATE,
+    deletingLicense: API_REQUEST_STATE,
     license: LicenseModel,
     status: boolean,
     activationRequestStatus: ActivationRequestStatus,
@@ -40,6 +43,7 @@ const initialState: LicenseState = {
     activatingLicense: API_REQUEST_STATE.INITIAL,
     gettingLicenseStatus: API_REQUEST_STATE.INITIAL,
     gettingActivationRequestStatus: API_REQUEST_STATE.INITIAL,
+    deletingLicense: API_REQUEST_STATE.INITIAL,
     license: null,
     status: false,
     activationRequestStatus: ActivationRequestStatus.EXPIRED,
@@ -111,6 +115,18 @@ export const licenseSlice = createSlice({
         },
         [getActivationRequestStatus.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingActivationRequestStatus = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [deleteLicense.pending.type]: (state) => {
+            state.deletingLicense = API_REQUEST_STATE.START;
+        },
+        [deleteLicense.fulfilled.type]: (state, action: PayloadAction<ActivationRequestStatus>) => {
+            state.deletingLicense = API_REQUEST_STATE.FINISH;
+            state.license = null;
+            state.error = null;
+        },
+        [deleteLicense.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.deletingLicense = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }

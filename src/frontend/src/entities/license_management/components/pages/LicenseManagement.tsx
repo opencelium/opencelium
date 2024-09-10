@@ -22,13 +22,16 @@ import CurrentSubscription from "@entity/license_management/components/subscript
 import {useAppDispatch} from "@application/utils/store";
 import Subscription from "@entity/license_management/classes/Subscription";
 import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
-import {generateActivateRequest} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
-import Button from "@basic_components/buttons/Button";
+import {
+    deleteLicense,
+    generateActivateRequest
+} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 import ImportLicenseComponent from "@entity/license_management/components/import_license/ImportLicenseComponent";
 import {ActivationRequestStatus} from "@entity/license_management/requests/models/LicenseModel";
 import License from "@entity/license_management/classes/License";
 import {Auth} from "@application/classes/Auth";
 import ActivateLicenseComponent from "@entity/license_management/components/activate_license/ActivateLicenseComponent";
+import Button from "@app_component/base/button/Button";
 
 
 const LicenseManagement: FC<IForm> = ({}) => {
@@ -37,7 +40,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
     const {
         currentSubscription, gettingCurrentSubscription
     } = Subscription.getReduxState();
-    const {activationRequestStatus, status} = License.getReduxState();
+    const {activationRequestStatus, status, license} = License.getReduxState();
     useEffect(() => {
         dispatch(getCurrentSubscription());
     }, [])
@@ -47,17 +50,27 @@ const LicenseManagement: FC<IForm> = ({}) => {
         actions.push(
             <Button
                 icon={'file_download'}
-                title={'Generate Activation Request'}
-                onClick={() => dispatch(generateActivateRequest())}
+                label={'Generate Activation Request'}
+                handleClick={() => dispatch(generateActivateRequest())}
             />
         );
         if (activationRequestStatus === ActivationRequestStatus.PENDING) {
             actions.push(<ImportLicenseComponent/>);
         }
     } else {
-        if (!status) {
+        if (!status && !currentSubscription) {
             actions.push(<ActivateLicenseComponent/>);
         }
+    }
+    if (currentSubscription) {
+        actions.push(
+            <Button
+                icon={'delete'}
+                label={'Delete License'}
+                hasConfirmation={true}
+                confirmationText={'Do you really want to delete?'}
+                handleClick={() => dispatch(deleteLicense(license._id))}
+            />);
     }
     const data = {
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Subscription Overview'}],

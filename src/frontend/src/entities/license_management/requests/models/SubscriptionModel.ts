@@ -6,4 +6,5 @@ export default interface SubscriptionModel {
     endDate: number,
     totalOperationUsage: number | null,
     currentOperationUsage?: number,
+    active: boolean,
 }

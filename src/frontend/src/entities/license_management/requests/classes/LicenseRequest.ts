@@ -6,6 +6,7 @@ import ILicenseRequest, {
     ActivateLicenseFileRequest, ActivateLicenseResponse, ActivateLicenseStringRequest,
     GenerateActivateRequestResponse, GetActivationRequestStatusResponse
 } from "@entity/license_management/requests/interfaces/ILicenseRequest";
+import {IResponse} from "@application/requests/interfaces/IResponse";
 
 export default class LicenseRequest extends Request implements ILicenseRequest {
 
@@ -34,5 +35,9 @@ export default class LicenseRequest extends Request implements ILicenseRequest {
     async getActivationRequestStatus (): Promise<AxiosResponse<GetActivationRequestStatusResponse>> {
         this.endpoint = '/activation-request/status';
         return super.get<GetActivationRequestStatusResponse>();
+    }
+
+    async deleteLicense (): Promise<AxiosResponse<IResponse>> {
+        return super.delete<IResponse>();
     }
 }

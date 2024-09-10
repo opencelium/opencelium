@@ -43,7 +43,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                     <InfoStyled>
                         <div><b>Status:</b></div>
                         <div>
-                            {status ? "Valid" : "Invalid"}
+                            {subscription.active ? "Valid" : "Invalid"}
                         </div>
                     </InfoStyled>
                     <InfoStyled>

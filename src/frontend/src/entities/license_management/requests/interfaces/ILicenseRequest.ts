@@ -16,6 +16,7 @@
 import {AxiosResponse} from "axios";
 import {StatusResponse} from "@application/requests/interfaces/IApplication";
 import LicenseModel, {ActivationRequestStatus} from "@entity/license_management/requests/models/LicenseModel";
+import {IResponse} from "@application/requests/interfaces/IResponse";
 
 export interface ActivateLicenseFileRequest {
 
@@ -49,6 +50,9 @@ export default interface ILicenseRequest {
     getStatus (): Promise<AxiosResponse<StatusResponse>>,
 
     //to get activation request status
-    getActivationRequestStatus (): Promise<AxiosResponse<GetActivationRequestStatusResponse>>
+    getActivationRequestStatus (): Promise<AxiosResponse<GetActivationRequestStatusResponse>>,
+
+    //to delete license
+    deleteLicense (): Promise<AxiosResponse<IResponse>>,
 
 }
