@@ -8,15 +8,13 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @Table(name = "activation_request", indexes = {@Index(name = "idx_hmac", columnList = "hmac")})
 public class ActivationRequest implements HmacValidator {
 
     @Id
-    @GeneratedValue
-    private UUID id;
+    private String id;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -32,22 +30,22 @@ public class ActivationRequest implements HmacValidator {
     private ActivReqStatus status = ActivReqStatus.PENDING;
 
     @Transient
-    private String machineUUID = MachineUtility.getMachineUUID();
+    private final String machineUuid = MachineUtility.getMachineUUID();
 
     @Transient
-    private String macAddress = MachineUtility.getMacAddress();
+    private final String macAddress = MachineUtility.getMacAddress();
 
     @Transient
-    private String processorId = MachineUtility.getProcessorId();
+    private final String processorId = MachineUtility.getProcessorId();
 
     @Transient
-    private String computerName = MachineUtility.getComputerName();
+    private final String computerName = MachineUtility.getComputerName();
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -83,8 +81,8 @@ public class ActivationRequest implements HmacValidator {
         this.status = status;
     }
 
-    public String getMachineUUID() {
-        return machineUUID;
+    public String getMachineUuid() {
+        return machineUuid;
     }
 
     public String getMacAddress() {
