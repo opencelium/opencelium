@@ -153,7 +153,7 @@ public class BindingUtility {
             path = endpoint.substring(0, indexOfQuestionSign);
         }
 
-        List<String> subPaths = EndpointUtility.splitPath(path);
+        List<String> subPaths = EndpointUtility.splitByDelimiter(path,'/', false);
         out:
         for (int i = 0; i < subPaths.size(); i++) {
             if (subPaths.get(i).matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
