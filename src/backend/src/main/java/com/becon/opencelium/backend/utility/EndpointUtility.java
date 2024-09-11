@@ -7,8 +7,8 @@ public class EndpointUtility {
     private static final String SUF_DIRECT_REF = "%}";
     private static final String PRE_WEBHOOK = "${";
     private static final String SUF_WEBHOOK = "}";
-    private static final String PRE_WRAPPER = "['";
-    private static final String SUF_WRAPPER = "']";
+    private static final String PRE_BRACKET = "['";
+    private static final String SUF_BRACKET = "']";
 
     public static int findIndexOfQuesSign(String endpoint) {
         if (endpoint == null) {
@@ -146,7 +146,7 @@ public class EndpointUtility {
 
         int pre1 = path.indexOf(PRE_DIRECT_REF);
         int pre2 = path.indexOf(PRE_WEBHOOK);
-        int pre3 = path.indexOf(PRE_WRAPPER);
+        int pre3 = path.indexOf(PRE_BRACKET);
         if (pre1 == -1 && pre2 == -1 && pre3 == -1) {
             return new ArrayList<>(List.of(path.split((isSpecialRegexChar(delim) ? "\\" : "") + delim)));
         }
@@ -169,9 +169,9 @@ public class EndpointUtility {
             } else if (i + PRE_WEBHOOK.length() < n && path.startsWith(PRE_WEBHOOK, i)) {
                 stack.push(SUF_WEBHOOK);
                 i += PRE_WEBHOOK.length() - 1;
-            } else if (i + PRE_WRAPPER.length() < n && path.startsWith(PRE_WRAPPER, i)) {
-                stack.push(SUF_WRAPPER);
-                i += SUF_WRAPPER.length() - 1;
+            } else if (i + PRE_BRACKET.length() < n && path.startsWith(PRE_BRACKET, i)) {
+                stack.push(SUF_BRACKET);
+                i += SUF_BRACKET.length() - 1;
             } else if (i + SUF_DIRECT_REF.length() < n && path.startsWith(SUF_DIRECT_REF, i)) {
                 if (!stack.empty() && stack.peek().equals(SUF_DIRECT_REF)) {
                     stack.pop();
@@ -182,10 +182,10 @@ public class EndpointUtility {
                     stack.pop();
                     i += SUF_WEBHOOK.length() - 1;
                 }
-            } else if (i + SUF_WRAPPER.length() < n && path.startsWith(SUF_WRAPPER, i)) {
-                if (!stack.isEmpty() && stack.peek().equals(SUF_WRAPPER)) {
+            } else if (i + SUF_BRACKET.length() < n && path.startsWith(SUF_BRACKET, i)) {
+                if (!stack.isEmpty() && stack.peek().equals(SUF_BRACKET)) {
                     stack.pop();
-                    i += SUF_WRAPPER.length() - 1;
+                    i += SUF_BRACKET.length() - 1;
                 }
             } else if (i == n - 1) {
                 if (hasBracket) {
@@ -203,7 +203,7 @@ public class EndpointUtility {
             return Collections.emptyList();
         }
 
-        if (!path.contains(PRE_WRAPPER)) {
+        if (!path.contains(PRE_BRACKET)) {
             return Collections.singletonList(path);
         }
 
@@ -212,13 +212,13 @@ public class EndpointUtility {
         int start = -1;
 
         for (int i = 0; i < len; i++) {
-            if (i + PRE_WRAPPER.length() < len && path.startsWith(PRE_WRAPPER, i)) {
+            if (i + PRE_BRACKET.length() < len && path.startsWith(PRE_BRACKET, i)) {
                 start = i;
-                i += PRE_WRAPPER.length() - 1;
-            } else if (i + SUF_WRAPPER.length() < len && path.startsWith(SUF_WRAPPER, i) && start != -1) {
-                res.add(path.substring(start, i + SUF_WRAPPER.length()));
+                i += PRE_BRACKET.length() - 1;
+            } else if (i + SUF_BRACKET.length() < len && path.startsWith(SUF_BRACKET, i) && start != -1) {
+                res.add(path.substring(start, i + SUF_BRACKET.length()));
                 start = -1;
-                i += SUF_WRAPPER.length() - 1;
+                i += SUF_BRACKET.length() - 1;
             } else if (i == len - 1) {
                 res.add(path.substring(start));
             }
