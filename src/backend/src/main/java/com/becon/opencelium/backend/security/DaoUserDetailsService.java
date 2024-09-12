@@ -32,7 +32,12 @@ public class DaoUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userService.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
+        User user = userService.findByEmail(email).orElse(null);
+        if (user == null || user.getPassword() == null) {
+            // 1. user == null          - there is no user with this 'email'
+            // 2. user.password == null - there is a clone of LDAP user, and setup is not finished to authenticate via OC
+            throw new UsernameNotFoundException(email);
+        }
 
         return new UserPrincipals(user);
     }
