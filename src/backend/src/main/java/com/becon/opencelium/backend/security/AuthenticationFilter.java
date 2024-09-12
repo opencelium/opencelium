@@ -58,7 +58,7 @@ import java.util.UUID;
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+    protected JwtTokenUtil jwtTokenUtil;
 
     @Autowired
     private UserService userService;
@@ -99,20 +99,25 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                             FilterChain chain, Authentication auth) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         User user = getUser(auth);
-        UserResource userResource = new UserResource(user);
 
-        String payload = mapper.writeValueAsString(userResource);
-        String token = jwtTokenUtil.generateToken(user);
+        if (user.isTotpEnabled()) {
+            response.addHeader("session_id", user.getSession().getId());
+        } else {
+            UserResource userResource = new UserResource(user);
+
+            String payload = mapper.writeValueAsString(userResource);
+            String token = jwtTokenUtil.generateToken(user);
+
+            response.getWriter().write(payload);
+            response.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstant.BEARER + " " + token);
+        }
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(payload);
-        response.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstant.BEARER + " " + token);
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request,
-                                              HttpServletResponse response, AuthenticationException failed)
-                                                                            throws IOException {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+                                              AuthenticationException failed) throws IOException {
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         ObjectMapper mapper = new ObjectMapper();
 
