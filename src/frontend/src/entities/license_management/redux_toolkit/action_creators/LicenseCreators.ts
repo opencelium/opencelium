@@ -6,6 +6,18 @@ import {
     ActivateLicenseStringRequest
 } from "@entity/license_management/requests/interfaces/ILicenseRequest";
 
+export const getLicenseList = createAsyncThunk(
+    'license/get/list',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new LicenseRequest();
+            const response = await request.getLicenseList();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 export const generateActivateRequest = createAsyncThunk(
     'license/generate/request',
     async(data: never, thunkAPI) => {
@@ -80,6 +92,7 @@ export const deleteLicense = createAsyncThunk(
 )
 
 export default {
+    getLicenseList,
     generateActivateRequest,
     activateLicenseFile,
     activateLicenseString,

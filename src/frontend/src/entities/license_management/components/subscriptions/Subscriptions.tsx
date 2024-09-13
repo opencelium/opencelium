@@ -5,31 +5,35 @@ import Button from "@basic_components/buttons/Button";
 import {useAppDispatch} from "@application/utils/store";
 import Subscription from "@entity/license_management/classes/Subscription";
 import {
-    getAllSubscriptions,
     getCurrentSubscription, setCurrentSubscription
 } from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import CurrentSubscription from "@entity/license_management/components/subscriptions/CurrentSubscription";
-import {generateActivateRequest} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
+import {
+    generateActivateRequest,
+    getLicenseList
+} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
+import License from "@entity/license_management/classes/License";
 
 const SubscriptionsComponent = ({hasOnlineSync}: {hasOnlineSync: boolean}) => {
     const dispatch = useAppDispatch();
     const {
-        gettingSubscriptions, subscriptions, currentSubscription,
+        currentSubscription,
         gettingCurrentSubscription,
     } = Subscription.getReduxState();
+    const {gettingLicenseList, licenseList} = License.getReduxState();
     const [selectedSubscription, setSelectedSubscription] = useState<any>();
-    const subscriptionOptions = useMemo(() => {
-        return Subscription.getOptions(subscriptions);
-    }, [subscriptions]);
+    const licenseOptions = useMemo(() => {
+        return License.getOptions(licenseList);
+    }, [licenseList]);
     useEffect(() => {
-        dispatch(getAllSubscriptions());
+        dispatch(getLicenseList());
         dispatch(getCurrentSubscription());
     }, [])
     useEffect(() => {
-        if (gettingSubscriptions === API_REQUEST_STATE.FINISH && gettingCurrentSubscription === API_REQUEST_STATE.FINISH) {
-            setSelectedSubscription(subscriptionOptions.find(s => s.value === currentSubscription._id));
+        if (gettingLicenseList === API_REQUEST_STATE.FINISH && gettingCurrentSubscription === API_REQUEST_STATE.FINISH) {
+            setSelectedSubscription(licenseOptions.find(s => s.value === currentSubscription._id));
         }
-    }, [gettingSubscriptions, gettingCurrentSubscription]);
+    }, [gettingLicenseList, gettingCurrentSubscription]);
     useEffect(() => {
         if (selectedSubscription && currentSubscription._id !== selectedSubscription.value) {
             dispatch(setCurrentSubscription(selectedSubscription.value))
@@ -37,11 +41,11 @@ const SubscriptionsComponent = ({hasOnlineSync}: {hasOnlineSync: boolean}) => {
     }, [selectedSubscription]);
     return (
         <div style={{position: 'relative'}}>
-            {!hasOnlineSync && subscriptionOptions.length === 0 ? null : <InputSelect
-                isLoading={gettingSubscriptions === API_REQUEST_STATE.START || gettingCurrentSubscription === API_REQUEST_STATE.START}
+            {!hasOnlineSync && licenseOptions.length === 0 ? null : <InputSelect
+                isLoading={gettingLicenseList === API_REQUEST_STATE.START || gettingCurrentSubscription === API_REQUEST_STATE.START}
                 icon={'local_police'}
                 label={'Subscriptions'}
-                options={subscriptionOptions}
+                options={licenseOptions}
                 value={selectedSubscription}
                 onChange={setSelectedSubscription}
             />

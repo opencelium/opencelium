@@ -15,8 +15,12 @@
 
 import {AxiosResponse} from "axios";
 import {StatusResponse} from "@application/requests/interfaces/IApplication";
-import LicenseModel, {ActivationRequestStatus} from "@entity/license_management/requests/models/LicenseModel";
+import LicenseModel, {
+    ActivationRequestStatus,
+    LicenseListItem
+} from "@entity/license_management/requests/models/LicenseModel";
 import {IResponse} from "@application/requests/interfaces/IResponse";
+import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
 
 export interface ActivateLicenseFileRequest {
 
@@ -36,6 +40,9 @@ export interface GetActivationRequestStatusResponse {
 }
 
 export default interface ILicenseRequest {
+
+    //to get all licenses (in online mode)
+    getLicenseList (): Promise<AxiosResponse<LicenseListItem[]>>,
 
     //to generate activate request (in offline mode)
     generateActivateRequest (): Promise<AxiosResponse<GenerateActivateRequestResponse>>,

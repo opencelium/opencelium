@@ -22,6 +22,9 @@ export const RoleNames: any = {
     professional: 'Professional',
     enterprise: 'Enterprise',
     enterprise_plus: 'Enterprise Plus',
+    professional_api: 'OpenCelium Professional (API)',
+    enterprise_api: 'OpenCelium Enterprise (API)',
+    enterprise_plus_api: 'OpenCelium Enterprise Plus (API)',
 }
 const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionModel, theme: ITheme}) => {
     const dispatch = useAppDispatch();

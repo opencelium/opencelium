@@ -10,11 +10,6 @@ export default class SubscriptionRequest extends Request implements ISubscriptio
         super({url: 'subs', ...settings});
     }
 
-    async getAll(): Promise<AxiosResponse<SubscriptionModel[]>>{
-        this.endpoint = '/all';
-        return super.get<SubscriptionModel[]>();
-    }
-
     async getCurrent(): Promise<AxiosResponse<SubscriptionModel>>{
         this.endpoint = '/active';
         return super.get<SubscriptionModel>();

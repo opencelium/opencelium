@@ -2,18 +2,6 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import SubscriptionRequest from "@entity/license_management/requests/classes/SubscriptionRequest";
 
-export const getAllSubscriptions = createAsyncThunk(
-    'subscription/get/all',
-    async(data: never, thunkAPI) => {
-        try {
-            const request = new SubscriptionRequest();
-            const response = await request.getAll();
-            return response.data;
-        } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
-        }
-    }
-)
 export const getCurrentSubscription = createAsyncThunk(
     'subscription/get/current',
     async(data: never, thunkAPI) => {
@@ -40,7 +28,6 @@ export const setCurrentSubscription = createAsyncThunk(
 )
 
 export default {
-    getAllSubscriptions,
     getCurrentSubscription,
     setCurrentSubscription,
 }

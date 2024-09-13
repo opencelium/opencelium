@@ -19,22 +19,17 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {
-    getAllSubscriptions,
     getCurrentSubscription, setCurrentSubscription
 } from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
 
 export interface SubscriptionState extends ICommonState{
-    subscriptions: SubscriptionModel[],
-    gettingSubscriptions: API_REQUEST_STATE,
     currentSubscription: SubscriptionModel,
     gettingCurrentSubscription: API_REQUEST_STATE,
     settingCurrentSubscription: API_REQUEST_STATE,
 }
 
 const initialState: SubscriptionState = {
-    subscriptions: [],
-    gettingSubscriptions: API_REQUEST_STATE.INITIAL,
     currentSubscription: null,
     gettingCurrentSubscription: API_REQUEST_STATE.INITIAL,
     settingCurrentSubscription: API_REQUEST_STATE.INITIAL,
@@ -47,18 +42,6 @@ export const subscriptionSlice = createSlice({
     reducers: {
     },
     extraReducers: {
-        [getAllSubscriptions.pending.type]: (state) => {
-            state.gettingSubscriptions = API_REQUEST_STATE.START;
-        },
-        [getAllSubscriptions.fulfilled.type]: (state, action: PayloadAction<SubscriptionModel[]>) => {
-            state.gettingSubscriptions = API_REQUEST_STATE.FINISH;
-            state.subscriptions = action.payload;
-            state.error = null;
-        },
-        [getAllSubscriptions.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.gettingSubscriptions = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
-        },
         [getCurrentSubscription.pending.type]: (state) => {
             state.gettingCurrentSubscription = API_REQUEST_STATE.START;
         },

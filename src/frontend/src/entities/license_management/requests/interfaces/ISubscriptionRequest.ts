@@ -19,9 +19,6 @@ import SubscriptionModel from "@entity/license_management/requests/models/Subscr
 
 export default interface ISubscriptionRequest {
 
-    //to get all subscriptions (in online mode)
-    getAll (): Promise<AxiosResponse<SubscriptionModel[]>>,
-
     //to get current subscription (in online/offline mode)
     getCurrent (): Promise<AxiosResponse<SubscriptionModel>>,
 

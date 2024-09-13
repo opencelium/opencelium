@@ -17,7 +17,7 @@ import ActionCreators from "../../redux_toolkit/action_creators";
 
 const {
     getLicenseStatus, activateLicenseString, activateLicenseFile,
-    getAllSubscriptions,
+    getLicenseList
 } = ActionCreators;
 
 
@@ -36,8 +36,8 @@ export default {
         [getLicenseStatus.rejected.type]: {
             "__DEFAULT__": "There is an error fetching license status."
         },
-        [getAllSubscriptions.rejected.type]: {
-            "__DEFAULT__": "There is an error fetching subscriptions."
+        [getLicenseList.rejected.type]: {
+            "__DEFAULT__": "There is an error fetching licenses."
         }
     },
 }

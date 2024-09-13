@@ -7,11 +7,18 @@ import ILicenseRequest, {
     GenerateActivateRequestResponse, GetActivationRequestStatusResponse
 } from "@entity/license_management/requests/interfaces/ILicenseRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
+import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
+import {LicenseListItem} from "@entity/license_management/requests/models/LicenseModel";
 
 export default class LicenseRequest extends Request implements ILicenseRequest {
 
     constructor(settings?: Partial<IRequestSettings>) {
         super({url: 'license', ...settings});
+    }
+
+    async getLicenseList(): Promise<AxiosResponse<LicenseListItem[]>>{
+        this.url = '/subs/all';
+        return super.get<LicenseListItem[]>();
     }
 
     async generateActivateRequest (): Promise<AxiosResponse<GenerateActivateRequestResponse>> {

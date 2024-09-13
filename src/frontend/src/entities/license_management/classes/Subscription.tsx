@@ -8,15 +8,6 @@ export default class Subscription {
         return useAppSelector((state: RootState) => state.subscriptionReducer);
     }
 
-    static getOptions(subscriptions: SubscriptionModel[]) {
-        return subscriptions.map(s => {
-            return {
-                label: s.type,
-                value: s._id,
-            }
-        })
-    }
-
     static getMonthlyPeriod(comingDate: number): string {
         const date = new Date(comingDate);
         const inputDay = date.getDate();

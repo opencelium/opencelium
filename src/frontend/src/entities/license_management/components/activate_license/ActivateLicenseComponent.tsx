@@ -7,34 +7,25 @@ import {IActivateLicenseForm, UploadType} from "@entity/license_management/inter
 import Dialog from "@basic_components/Dialog";
 import InputSelect from "@app_component/base/input/select/InputSelect";
 import {
-    getAllSubscriptions,
-    getCurrentSubscription, setCurrentSubscription
+    setCurrentSubscription
 } from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import {useAppDispatch} from "@application/utils/store";
 import Subscription from "@entity/license_management/classes/Subscription";
+import {getLicenseList} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 
 const ActivateLicenseComponent = () => {
     const dispatch = useAppDispatch();
-    const {
-        gettingSubscriptions, subscriptions, currentSubscription,
-        gettingCurrentSubscription,
-    } = Subscription.getReduxState();
+    const {gettingCurrentSubscription} = Subscription.getReduxState();
+    const {gettingLicenseList, licenseList} = License.getReduxState();
     const [selectedSubscription, setSelectedSubscription] = useState<any>();
-    const subscriptionOptions = useMemo(() => {
-        return Subscription.getOptions(subscriptions);
-    }, [subscriptions]);
+    const licenseOptions = useMemo(() => {
+        return License.getOptions(licenseList);
+    }, [licenseList]);
     const {activatingLicense} = License.getReduxState();
     const [showDialog, toggleDialog] = useState<boolean>(false);
     const UploadTokenForm = ActivateLicenseForm.createState<IActivateLicenseForm>();
-    const TokenFile = UploadTokenForm.getFile({propertyName: "tokenFile", props: {
-        label: 'Key',
-        icon: 'lock_outline',
-        hasNoImage: false,
-        hasCrop: false,
-        buttonProps: {label: '', iconSize: '18px'},
-    }})
     useEffect(() => {
-        dispatch(getAllSubscriptions());
+        dispatch(getLicenseList());
     }, [])
     const activate = () => {
         dispatch(setCurrentSubscription(selectedSubscription.value))
@@ -58,10 +49,10 @@ const ActivateLicenseComponent = () => {
                 toggle={() => toggleDialog(!showDialog)}
             >
                 <InputSelect
-                    isLoading={gettingSubscriptions === API_REQUEST_STATE.START || gettingCurrentSubscription === API_REQUEST_STATE.START}
+                    isLoading={gettingLicenseList === API_REQUEST_STATE.START || gettingCurrentSubscription === API_REQUEST_STATE.START}
                     icon={'local_police'}
                     label={'Subscriptions'}
-                    options={subscriptionOptions}
+                    options={licenseOptions}
                     value={selectedSubscription}
                     onChange={setSelectedSubscription}
                 />
