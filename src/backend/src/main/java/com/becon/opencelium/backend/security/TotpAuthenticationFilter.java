@@ -36,23 +36,28 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         if (!request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
 
         String sessionId = request.getHeader("session_id");
-        String code = request.getParameter("code");
         Session session = sessionService.findById(sessionId)
-                .orElseThrow(() -> new AuthenticationServiceException("Invalid 'session_id' has been supplied"));
+                .orElseThrow(() -> new AuthenticationServiceException("Invalid 'session_id' has been supplied."));
+        if (!session.isActive()) {
+            throw new AuthenticationServiceException("Inactive 'session_id' has been supplied.");
+        }
+
         User user = session.getUser();
+        String code = request.getParameter("code");
 
         if (session.getAttempts() < 4 && totpService.isValidTotp(user.getTotpSecretKey(), code)) {
             UserPrincipals userDetails = new UserPrincipals(user);
+
             return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         }
 
-        throw new AuthenticationServiceException("Invalid TOTP 'code' has been supplied");
+        throw new AuthenticationServiceException("Invalid TOTP 'code' has been supplied.");
     }
 
     @Override
@@ -61,8 +66,10 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
         ObjectMapper mapper = new ObjectMapper();
         User user = ((UserPrincipals) auth.getPrincipal()).getUser();
         UserResource userResource = new UserResource(user);
+
         String payload = mapper.writeValueAsString(userResource);
         String token = jwtTokenUtil.generateToken(user);
+
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(payload);
         response.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstant.BEARER + " " + token);
@@ -73,9 +80,11 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
                                               AuthenticationException failed) throws IOException {
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         ObjectMapper mapper = new ObjectMapper();
+
         String sessionId = request.getHeader("session_id");
         Optional<Session> optionalSession = sessionService.findById(sessionId);
-        response.setContentType("application/json");
+
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         ErrorResource errorResource = new ErrorResource(failed, HttpStatus.UNAUTHORIZED, uri.getPath());
         if (optionalSession.isEmpty()) {
             errorResource.setMessage("Invalid 'session_id' has been supplied");
@@ -84,6 +93,7 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
             Session session = optionalSession.get();
             session.setAttempts(session.getAttempts() + 1);
             sessionService.save(session);
+
             errorResource.setMessage(String.format("'session_id' or 'code' did not match. You have %d attempts remaining.", 5 - session.getAttempts()));
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
         } else {
