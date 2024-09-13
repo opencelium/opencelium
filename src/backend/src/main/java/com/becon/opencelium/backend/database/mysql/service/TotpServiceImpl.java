@@ -60,8 +60,8 @@ public class TotpServiceImpl implements TotpService {
 
     @Override
     @Transactional
-    public boolean enableTotp(int id, String code) {
-        User user = userService.findById(id).orElseThrow();
+    public boolean enableTotp(int userId, String code) {
+        User user = userService.findById(userId).orElseThrow();
         if (isValidTotp(user.getTotpSecretKey(), code)) {
             user.setTotpEnabled(true);
             return true;
@@ -71,8 +71,8 @@ public class TotpServiceImpl implements TotpService {
 
     @Override
     @Transactional
-    public boolean disableTotp(int id, String code) {
-        User user = userService.findById(id).orElseThrow();
+    public boolean disableTotp(int userId, String code) {
+        User user = userService.findById(userId).orElseThrow();
         if (isValidTotp(user.getTotpSecretKey(), code)) {
             user.setTotpEnabled(false);
             user.setTotpSecretKey(null);
