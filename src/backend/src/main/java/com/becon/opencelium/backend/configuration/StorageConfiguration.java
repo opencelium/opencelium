@@ -19,8 +19,10 @@ package com.becon.opencelium.backend.configuration;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
+import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.RequestDataService;
+import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.storage.UserStorageService;
@@ -57,6 +59,7 @@ public class StorageConfiguration {
     private final RequestDataService requestDataService;
     private final ChangeSetDao changeSetDao;
     private final Environment environment;
+    private final SubscriptionService subscriptionService;
 
     @Autowired
     private ResourceLoader resourceLoader;
@@ -68,6 +71,7 @@ public class StorageConfiguration {
             UserStorageService userStorageService,
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("requestDataServiceImp") RequestDataService requestDataService,
+            @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
             InvokerContainer invokerContainer,
             DataSource dataSource,
             Environment environment
@@ -78,6 +82,7 @@ public class StorageConfiguration {
         this.requestDataService = requestDataService;
         this.changeSetDao = new ChangeSetDao(dataSource);
         this.environment = environment;
+        this.subscriptionService = subscriptionService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -118,7 +123,10 @@ public class StorageConfiguration {
         try {
             String initLicenseContent = readInitLicense();
             LicenseKey licenseKey = LicenseKeyUtility.decrypt(initLicenseContent);
-            System.out.println(licenseKey);
+            Subscription subscription = subscriptionService.buildFromLicenseKey(licenseKey);
+            if(!subscriptionService.exists(subscription.getSubId())) {
+                subscriptionService.save(subscription);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
