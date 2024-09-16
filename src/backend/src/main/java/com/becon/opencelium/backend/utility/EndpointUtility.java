@@ -226,6 +226,13 @@ public class EndpointUtility {
         return res;
     }
 
+    public static boolean startsWith(String path, String prefix) {
+        if (path.startsWith(PRE_BRACKET) && prefix.startsWith(SUF_BRACKET)) {
+            return path.startsWith(PRE_BRACKET + prefix);
+        }
+        return path.startsWith(prefix);
+    }
+
     private static boolean isSpecialRegexChar(char delim) {
         String specialChars = ".^$*+?()[]{}\\|/";
         return specialChars.indexOf(delim) != -1;
