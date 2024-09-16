@@ -19,6 +19,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -72,6 +73,7 @@ public class LicenseKeyUtility {
 
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, publicKey);
+            System.out.println(Arrays.toString(Base64.getDecoder().decode(encryptedLicense)));
             byte[] licenseKeyBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedLicense));
             System.out.println(new String(licenseKeyBytes));
             ObjectMapper objectMapper = new ObjectMapper();
