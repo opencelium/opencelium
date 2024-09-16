@@ -227,7 +227,7 @@ public class EndpointUtility {
     }
 
     public static boolean startsWith(String path, String prefix) {
-        if (path.startsWith(PRE_BRACKET) && prefix.startsWith(SUF_BRACKET)) {
+        if (path.startsWith(PRE_BRACKET) && path.endsWith(SUF_BRACKET)) {
             return path.startsWith(PRE_BRACKET + prefix);
         }
         return path.startsWith(prefix);
