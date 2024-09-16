@@ -78,6 +78,10 @@ export enum REQUEST_METHOD{
     DELETE = 'DELETE',
 }
 
+export interface StatusResponse {
+    status: boolean,
+}
+
 export interface IApplicationRequest{
 
     //to make an external request
@@ -108,5 +112,5 @@ export interface IApplicationRequest{
     getLogoName(email: string): Promise<AxiosResponse<string>>,
 
     //to update user themes
-    updateThemes(data: ModelUpdateThemes): Promise<AxiosResponse<IResponse>>
+    updateThemes(data: ModelUpdateThemes): Promise<AxiosResponse<IResponse>>,
 }

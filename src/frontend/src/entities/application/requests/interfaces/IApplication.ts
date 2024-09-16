@@ -13,5 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {AxiosResponse} from "axios";
+
+export interface GetServicePortalTokenStatusResponse {
+    status: boolean,
+}
+
 export default interface IApplicationRequest {
+
+    getServicePortalTokenStatus(): Promise<AxiosResponse<GetServicePortalTokenStatusResponse>>
 }

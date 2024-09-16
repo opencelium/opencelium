@@ -43,11 +43,13 @@ import {
     WidgetItemStyled
 } from './styles';
 import { Auth } from '@application/classes/Auth';
+import {SubscriptionOverviewWidget} from "@entity/dashboard/components/widgets/SubscriptionOverview";
 
 export const HAS_DASHBOARD_WIDGET_ENGINE = true;
 
 export const WIDGET_LIST = {
     'MONITORING_BOARDS': <MonitoringBoardsWidget/>,
+    'SUBSCRIPTION_OVERVIEW': <SubscriptionOverviewWidget/>,
     'CURRENT_SCHEDULER': <CurrentSchedulesWidget/>,
     'CONNECTION_OVERVIEW': <ConnectionOverviewWidget/>,
 }

@@ -17,17 +17,23 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ICommonState} from "@application/interfaces/core";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
+import {IResponse} from "@application/requests/interfaces/IResponse";
+import {getServicePortalTokenStatus} from "@entity/application/redux_toolkit/action_creators/ApplicationCreators";
 
 export interface EntityApplicationState extends ICommonState{
     documentation: any,
     checkingApi: API_REQUEST_STATE,
     updatingLogoData: API_REQUEST_STATE,
+    gettingServicePortalStatus: API_REQUEST_STATE,
+    servicePortalTokenStatus: boolean,
 }
 
 const initialState: EntityApplicationState = {
     documentation: null,
     checkingApi: API_REQUEST_STATE.INITIAL,
     updatingLogoData: API_REQUEST_STATE.INITIAL,
+    gettingServicePortalStatus: API_REQUEST_STATE.INITIAL,
+    servicePortalTokenStatus: false,
     ...CommonState,
 }
 
@@ -37,6 +43,18 @@ export const applicationSlice = createSlice({
     reducers: {
     },
     extraReducers: {
+        [getServicePortalTokenStatus.pending.type]: (state) => {
+            state.gettingServicePortalStatus = API_REQUEST_STATE.START;
+        },
+        [getServicePortalTokenStatus.fulfilled.type]: (state, action: PayloadAction<boolean>) => {
+            state.gettingServicePortalStatus = API_REQUEST_STATE.FINISH;
+            state.servicePortalTokenStatus = action.payload;
+            state.error = null;
+        },
+        [getServicePortalTokenStatus.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingServicePortalStatus = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
     }
 })
 

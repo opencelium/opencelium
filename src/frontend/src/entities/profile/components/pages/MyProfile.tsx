@@ -36,6 +36,9 @@ import {ProfileImageStyled, DefaultImageStyled} from "./styles";
 import {withTheme} from "styled-components";
 import AvatarDefault from "@image/application/avatar_default.png";
 import {isArray} from "@application/utils/utils";
+import {getServicePortalTokenStatus} from "@entity/application/redux_toolkit/action_creators/ApplicationCreators";
+import License from "@entity/license_management/classes/License";
+import {getActivationRequestStatus} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
@@ -46,6 +49,10 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
     }
     const {authUser} = Auth.getReduxState();
     const [themeSync, setThemeSync] = useState<boolean>(authUser?.userDetail?.themeSync || false);
+    useEffect(() => {
+        dispatch(getServicePortalTokenStatus());
+        dispatch(getActivationRequestStatus());
+    }, [])
     useEffect(() => {
         setThemeSync(authUser.userDetail.themeSync);
     }, [authUser.userDetail])
@@ -122,16 +129,15 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
     const data = {
         title: 'My Profile',
         formSections: [
-            <FormSection label={{value: 'user details'}}>
-                {Avatar}
-                {Title}
-                {UserDetailsInputs}
-                {Email}
-            </FormSection>,
             <React.Fragment>
-                <FormSection label={{value: 'user group'}}>
-                    {Permissions}
+                <FormSection label={{value: 'user details'}}>
+                    {Avatar}
+                    {Title}
+                    {UserDetailsInputs}
+                    {Email}
                 </FormSection>
+            </React.Fragment>,
+            <React.Fragment>
                 <FormSection label={{value: 'settings'}}>
                     <div style={{position: 'relative'}}>
                         <InputSelect
@@ -144,12 +150,16 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                     </div>
                     <InputSwitch
                         name={`All online services are ${themeSync ? 'enabled' : 'disabled'} (Gravatar, Online Update, Theme)`}
-                        icon={'corporate_fare'}
+                        icon={'sync'}
                         label={'Online Service Sync'}
-                        isChecked={themeSync} onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}
-                        hasConfirmation={true}
+                        isChecked={themeSync}
+                        onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}
+                        hasConfirmation={!themeSync}
                         confirmationText={'Are you agree to share your E-mail with Opencelium Service Portal?'}
                     />
+                </FormSection>
+                <FormSection label={{value: 'Subscriptions'}}>
+                    {Permissions}
                 </FormSection>
             </React.Fragment>
         ]

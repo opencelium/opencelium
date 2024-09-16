@@ -19,8 +19,6 @@ import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {getResources, getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
-import IAuthUser from "@entity/user/interfaces/IAuthUser";
-import {updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (login.fulfilled.type === action.type) {

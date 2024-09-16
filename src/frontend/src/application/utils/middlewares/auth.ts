@@ -16,7 +16,7 @@
 import { Middleware } from 'redux'
 import { logout } from '@application/redux_toolkit/slices/AuthSlice';
 import {AppDispatch, RootState} from "@application/utils/store";
-import {login, uploadToken} from "@application/redux_toolkit/action_creators/AuthCreators";
+import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {LogoutProps} from "@application/interfaces/IAuth";
@@ -48,7 +48,7 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
             dispatch(logout(logoutProps));
         }
     }
-    if (login.fulfilled.type === action.type || uploadToken.fulfilled.type === action.type) {
+    if (login.fulfilled.type === action.type) {
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);
         dispatch(checkConnection());

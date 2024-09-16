@@ -48,7 +48,7 @@ export const widgetSettingSlice = createSlice({
         },
         [getAllWidgetSettings.fulfilled.type]: (state, action: PayloadAction<IWidgetSetting[]>) => {
             state.gettingAllWidgetSettings = API_REQUEST_STATE.FINISH;
-            state.widgetSettings = action.payload;
+            state.widgetSettings = action.payload.filter(widget => widget.i !== 'MONITORING_BOARDS');
             state.error = null;
         },
         [getAllWidgetSettings.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -60,7 +60,7 @@ export const widgetSettingSlice = createSlice({
         },
         [updateAllWidgetSettings.fulfilled.type]: (state, action: PayloadAction<IWidgetSetting[]>) => {
             state.updatingAllWidgetSettings = API_REQUEST_STATE.FINISH;
-            state.widgetSettings = action.payload;
+            state.widgetSettings = action.payload.filter(widget => widget.i !== 'MONITORING_BOARDS');
             state.error = null;
         },
         [updateAllWidgetSettings.rejected.type]: (state, action: PayloadAction<IResponse>) => {

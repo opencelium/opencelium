@@ -13,5 +13,22 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {createAsyncThunk} from "@reduxjs/toolkit";
+import {errorHandler} from "@application/utils/utils";
+import ApplicationRequest from "@entity/application/requests/classes/Application";
+
+export const getServicePortalTokenStatus = createAsyncThunk(
+    'application/get/service-portal/status',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new ApplicationRequest();
+            const response = await request.getServicePortalTokenStatus();
+            return response.data.status;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 export default {
+    getServicePortalTokenStatus,
 }

@@ -13,28 +13,10 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import actionCreators from "./action_creators";
+import reducers from "./slices";
 
-import {IForm} from "../interfaces/core";
-
-export enum UploadType {
-    String= 'string',
-    File= 'file',
-}
-export interface IUploadTokenRadios{
-    type: UploadType;
-}
-
-export interface IUploadTokenTextarea{
-    token: string;
-}
-
-export interface IUploadTokenFile {
-    tokenFile: FileList;
-}
-
-export interface IUploadTokenForm extends IUploadTokenRadios, IUploadTokenTextarea, IUploadTokenFile, IForm<{}, {}, IUploadTokenRadios, IUploadTokenFile, IUploadTokenTextarea, {}>{
-    upload: () => boolean;
-}
-
-export interface IUploadToken extends IUploadTokenForm{
+export default {
+    reducers,
+    actionCreators,
 }

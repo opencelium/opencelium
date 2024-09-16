@@ -13,12 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ActionCreators from "../../redux_toolkit/action_creators";
+import React from "react";
+import {Route} from "react-router-dom";
+import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
+import LicenseManagement from "@entity/license_management/components/pages/LicenseManagement";
 
-
-export default {
-    fulfilled: {
-    },
-    rejected: {
-    },
-}
+export default (
+    <Route path="/license_management" key={'license_management'}>
+        <Route index element={<ErrorBoundary><LicenseManagement/></ErrorBoundary>}/>
+    </Route>
+)

@@ -15,11 +15,17 @@
 
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import Request from "./Request";
-import IApplicationRequest from "../interfaces/IApplication";
+import IApplicationRequest, {GetServicePortalTokenStatusResponse} from "../interfaces/IApplication";
+import {AxiosResponse} from "axios";
 
 export default class ApplicationRequest extends Request implements IApplicationRequest {
 
     constructor(settings?: Partial<IRequestSettings>) {
         super({url: '', ...settings});
+    }
+
+    async getServicePortalTokenStatus(): Promise<AxiosResponse<GetServicePortalTokenStatusResponse>>{
+        this.url = 'application/service-portal-status';
+        return super.get<GetServicePortalTokenStatusResponse>();
     }
 }

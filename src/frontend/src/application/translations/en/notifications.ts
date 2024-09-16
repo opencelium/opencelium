@@ -17,8 +17,10 @@ import ActionCreators from "../../redux_toolkit/action_creators";
 import {actions} from '../../redux_toolkit/slices/ApplicationSlice';
 
 const {
-    login, getResources, getVersion, updateResources, getGlobalSearchData, getAllComponents,
-    addTicket, openExternalUrl, updateThemes, checkConnection, requestRemoteApi, uploadToken
+    login, getResources, getVersion,
+    updateResources, getGlobalSearchData, getAllComponents,
+    addTicket, openExternalUrl, updateThemes,
+    checkConnection, requestRemoteApi
 } = ActionCreators;
 
 const {setThemes} = actions;
@@ -38,10 +40,6 @@ export default {
             "Bad credentials": "Wrong email or password",
             "Network Error": "The server connection problem.",
             "NO_LICENSE": "Please, upload the license token to continue."
-        },
-        [uploadToken.rejected.type]: {
-            "__DEFAULT__": "There is an error during the upload token",
-            "WRONG_LICENSE_TOKEN": "The token is wrong, please try another one."
         },
         [checkConnection.rejected.type]: {
             "__DEFAULT__": "Your session has stopped. Please log in again or you will be log out."

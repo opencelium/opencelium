@@ -44,11 +44,12 @@ export const widgetSlice = createSlice({
         [getAllWidgets.fulfilled.type]: (state, action: PayloadAction<IWidget[]>) => {
             const WIDGET_COORDINATES = {
                 'CONNECTION_OVERVIEW': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4},
-                'CURRENT_SCHEDULER': {x: 10, y: 0, w: 6, h: 3, minW: 6, minH: 3},
-                'MONITORING_BOARDS': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4}
+                'CURRENT_SCHEDULER': {x: 10, y: 0, w: 6, h: 4, minW: 6, minH: 4},
+                'MONITORING_BOARDS': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4},
+                'SUBSCRIPTION_OVERVIEW': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4},
             };
             state.gettingAllWidgets = API_REQUEST_STATE.FINISH;
-            state.widgets = action.payload.map(widget => {return {...widget, ...WIDGET_COORDINATES[widget.i]};});
+            state.widgets = action.payload.map(widget => {return {...widget, ...WIDGET_COORDINATES[widget.i]};}).filter(widget => widget.i !== 'MONITORING_BOARDS');
             state.error = null;
         },
         [getAllWidgets.rejected.type]: (state, action: PayloadAction<IResponse>) => {
