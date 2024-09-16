@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileWriter;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,8 +28,6 @@ public class ActivationRequestServiceImp implements ActivationRequestService{
 
     @Override
     public ActivationRequest save(ActivationRequest activationRequest) {
-        String id = activationRequest.getId().toString();
-        activationRequest.setHmac(HmacUtility.encode(id));
         return activationRequestRepository.save(activationRequest);
     }
 
@@ -40,11 +39,11 @@ public class ActivationRequestServiceImp implements ActivationRequestService{
     @Override
     public ActivationRequest generateActivReq() {
         ActivationRequest ar = new ActivationRequest();
-        ar.setId(UUID.randomUUID());
+        ar.setId(UUID.randomUUID().toString());
         ar.setCreatedAt(LocalDateTime.now());
         ar.setStatus(ActivReqStatus.PENDING);
         ar.setTtl(3600);
-        ar.setHmac(HmacUtility.encode(ar.getId().toString() + MachineUtility.getStringForHmacEncode()));
+        ar.setHmac(HmacUtility.encode(ar.getId()+ MachineUtility.getStringForHmacEncode()));
         return ar;
     }
 
@@ -87,9 +86,12 @@ public class ActivationRequestServiceImp implements ActivationRequestService{
 
     @Override
     public ActivationRequest findByHmac(String hmac) {
-        return activationRequestRepository.findByHmac(hmac)
+        return activationRequestRepository.findFirstByHmac(hmac)
                 .orElseThrow(()-> new RuntimeException("Activation Request not found by hmac: " + hmac));
     }
 
-
+    @Override
+    public Optional<ActivationRequest> findById(String id) {
+        return activationRequestRepository.findById(id);
+    }
 }

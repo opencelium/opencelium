@@ -17,19 +17,8 @@
 package com.becon.opencelium.backend;
 
 
-import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
-import com.becon.opencelium.backend.database.mysql.service.ActivationRequestServiceImp;
-import com.becon.opencelium.backend.mapper.mysql.ActivationRequestMapper;
-import com.becon.opencelium.backend.subscription.dto.ActivationRequestDTO;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApi;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApiFactory;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiType;
-import com.becon.opencelium.backend.subscription.remoteapi.module.SubscriptionModule;
-import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
-import com.becon.opencelium.backend.utility.crypto.Base64Utility;
+
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
@@ -37,7 +26,5 @@ public class ApplicationTests {
 
 	@Test
 	public void contextLoads() {
-		String lk = "vGVDzpQGLoN5OjhHYuZBON0Mj6o1fZ0mUJR6v3FicsfAVKTwkVD7paJ1qdWd8FTftxg6uNIpVWIuMv4PRwgCGc4IdrzQdvGHy7JbfrkfJJHD7XMN6MBEFJ7nVUibDMaYhaSeHBaB68k2+oh0NVgYfegQRvnb/fsj7BYA5fvKnDCLaSAshGF0rtFCkFHa0/CkONvKUfJO1jEKq6jdbMEc4TZABNIsJ0+hYKB2HJhXHAUeFLaewh/khDMn/WXIGoS3szxb2Exs1uP+QBOR5E+GSewrJR09e9ZAANVcNjYe/2EjJukV3Xa7MHfwBF97FOZNWoyOwjNY3MmrOtrNzh89Og==";
-		LicenseKeyUtility.decrypt(lk);
 	}
 }
