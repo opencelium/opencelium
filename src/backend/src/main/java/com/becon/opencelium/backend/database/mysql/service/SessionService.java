@@ -22,6 +22,8 @@ import java.util.Optional;
 
 public interface SessionService {
 
+    Optional<Session> findById(String id);
+
     void save(Session session);
 
     Optional<Session> findByUserId(int userId);

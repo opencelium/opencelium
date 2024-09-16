@@ -86,7 +86,7 @@ public class SubscriptionController {
 
         String licenseKey = extractLicenseKey(response);
         LicenseKey lk = LicenseKeyUtility.decrypt(licenseKey);
-        if (LicenseKeyUtility.verify(lk, ar)) {
+        if (!LicenseKeyUtility.verify(lk, ar)) {
             throw new RuntimeException("LicenseKey is not valid");
         }
 
@@ -120,7 +120,6 @@ public class SubscriptionController {
         activationRequestService.expireAll();
         activationRequestService.save(ar);
         activationRequestService.activateTTL(ar);
-
         return ResponseEntity.ok()
                 .headers(headers)
                 .contentLength(resource.contentLength())
@@ -146,12 +145,13 @@ public class SubscriptionController {
         if (!LicenseKeyUtility.verify(lk, ar)) {
             throw new RuntimeException("License file is not valid");
         } else {
+            activationRequestService.expireAll();
             ar.setStatus(ActivReqStatus.PROCESSED);
             ActivationRequest saved = activationRequestService.save(ar);
 
             Subscription subscription = subscriptionService.buildFromLicenseKey(lk);
             subscription.setActivationRequest(saved);
-
+            subscription.setLicenseKey(content);
             subscriptionService.deactivateAll();
             subscriptionService.save(subscription);
         }

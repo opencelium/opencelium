@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ActivationRequestRepository extends JpaRepository<ActivationRequest, UUID> {
+public interface ActivationRequestRepository extends JpaRepository<ActivationRequest, String> {
 
     @Modifying
     @Transactional
@@ -18,5 +18,5 @@ public interface ActivationRequestRepository extends JpaRepository<ActivationReq
     @Query(value = "select * from activation_request ar where ar.status <> 'EXPIRED' limit 1", nativeQuery = true)
     Optional<ActivationRequest> findActiveAR();
 
-    Optional<ActivationRequest> findByHmac(String hmac);
+    Optional<ActivationRequest> findFirstByHmac(String hmac);
 }

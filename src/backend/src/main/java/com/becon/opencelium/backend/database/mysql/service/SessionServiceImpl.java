@@ -32,6 +32,11 @@ public class SessionServiceImpl implements SessionService {
     private SessionRepository sessionRepository;
 
     @Override
+    public Optional<Session> findById(String id) {
+        return sessionRepository.findById(id);
+    }
+
+    @Override
     public void save(Session session) {
         sessionRepository.save(session);
     }

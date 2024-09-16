@@ -63,6 +63,8 @@ dependencies {
 	implementation 'javax.json:javax.json-api:1.1.4'
 	implementation 'org.neo4j.driver:neo4j-java-driver:5.18.0'
 	implementation 'org.jsoup:jsoup:1.13.1'
+	implementation 'com.google.zxing:core:3.4.1'
+	implementation 'com.warrenstrange:googleauth:1.4.0'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2'
 	compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
