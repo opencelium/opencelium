@@ -5,8 +5,11 @@ import License from "@entity/license_management/classes/License";
 import {ActivateLicenseForm} from "@entity/license_management/classes/ActivateLicenseForm";
 import {IActivateLicenseForm, UploadType} from "@entity/license_management/interfaces/IActivateLicenseForm";
 import Dialog from "@basic_components/Dialog";
+import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
+import {useAppDispatch} from "@application/utils/store";
 
 const ImportLicenseComponent = () => {
+    const dispatch = useAppDispatch();
     const {activatingLicense, generatingActivateRequest} = License.getReduxState();
     const [showDialog, toggleDialog] = useState<boolean>(false);
     const UploadTokenForm = ActivateLicenseForm.createState<IActivateLicenseForm>();
@@ -27,6 +30,7 @@ const ImportLicenseComponent = () => {
     }
     useEffect(() => {
         if (activatingLicense === API_REQUEST_STATE.FINISH) {
+            dispatch(getCurrentSubscription());
             toggleDialog(false);
         }
     }, [activatingLicense])

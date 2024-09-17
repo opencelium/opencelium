@@ -40,12 +40,11 @@ const LicenseManagement: FC<IForm> = ({}) => {
     const {
         currentSubscription, gettingCurrentSubscription
     } = Subscription.getReduxState();
-    const {activationRequestStatus, status, license} = License.getReduxState();
+    const {activationRequestStatus, status} = License.getReduxState();
     useEffect(() => {
         dispatch(getCurrentSubscription());
     }, [])
     const actions = []
-
     if (!authUser.userDetail.themeSync){
         actions.push(
             <Button
@@ -69,7 +68,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
                 label={'Delete License'}
                 hasConfirmation={true}
                 confirmationText={'Do you really want to delete?'}
-                handleClick={() => dispatch(deleteLicense(license._id))}
+                handleClick={() => dispatch(deleteLicense(currentSubscription.subId))}
             />);
     }
     const data = {
