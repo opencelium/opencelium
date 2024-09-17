@@ -59,7 +59,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
             actions.push(<ImportLicenseComponent/>);
         //}
     } else {
-        if (!status && !currentSubscription) {
+        if (!status && (!currentSubscription || Subscription.isFree(currentSubscription))) {
             actions.push(<ActivateLicenseComponent/>);
         }
     }
