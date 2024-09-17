@@ -40,10 +40,12 @@ const LicenseManagement: FC<IForm> = ({}) => {
     const {
         currentSubscription, gettingCurrentSubscription
     } = Subscription.getReduxState();
-    const {activationRequestStatus, status} = License.getReduxState();
+    const {activationRequestStatus, status, activatingLicense} = License.getReduxState();
     useEffect(() => {
-        dispatch(getCurrentSubscription());
-    }, [])
+        if (activatingLicense === API_REQUEST_STATE.INITIAL || activatingLicense === API_REQUEST_STATE.FINISH) {
+            dispatch(getCurrentSubscription());
+        }
+    }, [activatingLicense])
     const actions = []
     if (!authUser.userDetail.themeSync){
         actions.push(
