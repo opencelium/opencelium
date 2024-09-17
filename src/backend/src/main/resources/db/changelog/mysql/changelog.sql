@@ -528,3 +528,7 @@ VALUES (
     3600,                                                -- ttl (3600 seconds)
     'PENDING'                                            -- status
 );
+
+--changeset 4.2:9 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+INSERT INTO widget (id, name, icon, tooltipTranslationKey)
+VALUES (4, 'SUBSCRIPTION_OVERVIEW', 'local_police', 'Subscription Overview');

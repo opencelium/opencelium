@@ -36,7 +36,7 @@ public class ServicePortal
 
     @Override
     public ResponseEntity<String> getAllSubs() {
-        String url = baseURL + "subscription/all";
+        String url = baseURL + "opencelium/license/all";
 
         // Set up the headers with the token
         HttpHeaders headers = new HttpHeaders();
@@ -56,7 +56,7 @@ public class ServicePortal
 
     @Override
     public ResponseEntity<String> getSubById(String id) {
-        String url = baseURL + "subscription/" + id;
+        String url = baseURL + "opencelium/license/" + id;
 
         // Set up the headers with the token
         HttpHeaders headers = new HttpHeaders();
