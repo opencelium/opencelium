@@ -7,6 +7,7 @@ public class LicenseKey {
     private long endDate;
     private long operationUsage;
     private String subId;
+    private String licenseId;
     private String duration;
     private String type;
     private String hmac;
@@ -65,5 +66,13 @@ public class LicenseKey {
 
     public void setHmac(String hmac) {
         this.hmac = hmac;
+    }
+
+    public String getLicenseId() {
+        return licenseId;
+    }
+
+    public void setLicenseId(String licenseId) {
+        this.licenseId = licenseId;
     }
 }

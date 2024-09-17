@@ -93,11 +93,9 @@ public class SubscriptionController {
         activationRequestService.expireAll();
         ar.setStatus(ActivReqStatus.PROCESSED);
         ActivationRequest saved = activationRequestService.save(ar);
-
-        Subscription subscription = subscriptionService.buildFromLicenseKey(lk);
-        subscription.setActivationRequest(saved);
+        Subscription subscription = subscriptionService.convertToSub(licenseKey);
         subscription.setLicenseKey(licenseKey);
-        subscriptionService.deactivateAll();
+
         subscriptionService.save(subscription);
 
         SubsDTO subsDTO = subscriptionService.toDto(lk, subscription);
@@ -149,10 +147,9 @@ public class SubscriptionController {
             ar.setStatus(ActivReqStatus.PROCESSED);
             ActivationRequest saved = activationRequestService.save(ar);
 
-            Subscription subscription = subscriptionService.buildFromLicenseKey(lk);
-            subscription.setActivationRequest(saved);
+            Subscription subscription = subscriptionService.convertToSub(content);
             subscription.setLicenseKey(content);
-            subscriptionService.deactivateAll();
+            subscription.setActivationRequest(saved);
             subscriptionService.save(subscription);
         }
         return ResponseEntity.ok().build();

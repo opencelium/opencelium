@@ -500,6 +500,7 @@ CREATE TABLE activation_request(
 CREATE TABLE subscription(
     id                    VARCHAR(255) PRIMARY KEY,
     subId                 VARCHAR(255) UNIQUE NOT NULL,
+    license_id            VARCHAR(255) UNIQUE NOT NULL,
     created_at            TIMESTAMP    NOT NULL,
     license_key           VARCHAR(2048) NOT NULL,
     current_usage         BIGINT       NOT NULL,

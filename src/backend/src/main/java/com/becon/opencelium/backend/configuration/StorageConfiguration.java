@@ -26,9 +26,6 @@ import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.storage.UserStorageService;
-import com.becon.opencelium.backend.subscription.dto.LicenseKey;
-import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
-import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,9 +118,8 @@ public class StorageConfiguration {
 
     private void setInitialLicense() {
         try {
-            String initLicenseContent = readInitLicense();
-            LicenseKey licenseKey = LicenseKeyUtility.decrypt(initLicenseContent);
-            Subscription subscription = subscriptionService.buildFromLicenseKey(licenseKey);
+            String initLicense = readInitLicense();
+            Subscription subscription = subscriptionService.convertToSub(initLicense);
             if(!subscriptionService.exists(subscription.getSubId())) {
                 subscriptionService.save(subscription);
             }

@@ -1,22 +1,20 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistory;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
 import com.becon.opencelium.backend.quartz.ResetLimitsJob;
-import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
-import jakarta.transaction.Transactional;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -73,6 +71,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public void save(Subscription subscription) {
+        deactivateAll();
         subscription.setCurrentUsageHmac(HmacUtility
                 .encode(subscription.getId() + subscription.getCurrentUsage()));
         initTask(subscription);
@@ -85,7 +84,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public Subscription buildFromLicenseKey(LicenseKey licenseKey) {
+    public Subscription convertToSub(String licenseKey) {
+        return null;
+    }
+
+    @Override
+    public Subscription buildFromLicenseKey(LicenseKey licenseKey, ActivationRequest ar) {
         Subscription subscription = subscriptionRepository.findBySubId(licenseKey.getSubId()).orElse(null);
         if (subscription == null) {
             subscription = new Subscription();

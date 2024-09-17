@@ -15,6 +15,9 @@ public class Subscription {
     @Column(name = "subId", nullable = false, length = 255)
     private String subId;
 
+    @Column(name = "license_id", nullable = false, length = 255)
+    private String licenseId;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -49,6 +52,14 @@ public class Subscription {
 
     public void setSubId(String subId) {
         this.subId = subId;
+    }
+
+    public String getLicenseId() {
+        return licenseId;
+    }
+
+    public void setLicenseId(String licenseId) {
+        this.licenseId = licenseId;
     }
 
     public LocalDateTime getCreatedAt() {
