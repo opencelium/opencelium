@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.exception.EmailAlreadyExistException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
@@ -30,6 +31,7 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.security.UserPrincipals;
 import com.becon.opencelium.backend.storage.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -42,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +52,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
@@ -76,6 +80,9 @@ public class UserController {
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private TotpService totpService;
 
 
     @Operation(summary = "Retrieves user data from the database based on the provided user 'id'")
@@ -282,14 +289,87 @@ public class UserController {
     })
     @GetMapping("/{id}/logout")
     public ResponseEntity<?> logout(@PathVariable("id") int userId) {
+        // skip userId, instead logout current user
+        int id = getCurrentUserId();
+
         return sessionService
-                .findByUserId(userId)
-                .map(
-                        p -> {
-                            p.setActive(false);
-                            sessionService.save(p);
-                            return ResponseEntity.ok().build();
-                        })
-                .orElseThrow(() -> new SessionNotFoundException(userId));
+                .findByUserId(id)
+                .map(s -> {
+                    s.setActive(false);
+                    sessionService.save(s);
+
+                    return ResponseEntity.ok().build();
+                })
+                .orElseThrow(() -> new SessionNotFoundException(id));
+    }
+
+    @Operation(summary = "Returns QR and totp secret")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "QR and totp code is successfully generated.",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/{id}/totp-qr")
+    public ResponseEntity<?> getTotpQrAndSecret(@PathVariable("id") int userId) {
+        // skip userId, instead logout current user
+        int id = getCurrentUserId();
+
+        return ResponseEntity.ok(totpService.getTotpResource(id));
+    }
+
+    @Operation(summary = "Enables TOTP to currently logged in user.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "TOTP is successfully enabled to logged in user",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping("/{id}/totp-enable")
+    public ResponseEntity<?> enableTotp(@PathVariable("id") int userId, @RequestParam String code) {
+        // skip userId, instead logout current user
+        int id = getCurrentUserId();
+
+        return ResponseEntity.ok(totpService.enableTotp(id, code));
+    }
+
+    @Operation(summary = "Disables TOTP to currently logged in user.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "TOTP is successfully disabled to logged in user",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping("/{id}/totp-disable")
+    public ResponseEntity<?> disableTotp(@PathVariable("id") int userId, @RequestParam String code) {
+        // skip userId, instead logout current user
+        int id = getCurrentUserId();
+
+        return ResponseEntity.ok(totpService.disableTotp(id, code));
+    }
+
+    /*
+    Returns request sending users id
+    */
+    private int getCurrentUserId() {
+        UserPrincipals userPrincipals = (UserPrincipals) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+
+        return userPrincipals.getUser().getId();
     }
 }

@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.UUID;
 import java.util.function.Function;
 
 @Component
@@ -63,8 +62,6 @@ public class JwtTokenUtil {
     }
 
     public String generateToken(User user) {
-        String sessionId = UUID.randomUUID().toString();
-
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
             .claim("userId", user.getId())
             .claim("role", user.getUserRole().getName())
@@ -72,7 +69,7 @@ public class JwtTokenUtil {
             .expirationTime(new Date(System.currentTimeMillis() + tokenUtility.getExpirationTime() * 1000))
             .issueTime(new Date(System.currentTimeMillis()))
             .subject(user.getEmail())
-            .jwtID(sessionId)
+            .jwtID(user.getSession().getId())
             .build();
 
         return generateToken(claimsSet);

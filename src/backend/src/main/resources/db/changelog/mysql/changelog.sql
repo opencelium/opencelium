@@ -517,3 +517,13 @@ CREATE TABLE operation_usage_history(
     operation_num    BIGINT       NOT NULL,
     connection_title VARCHAR(255) NOT NULL
 );
+
+--changeset 4.2:8 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+INSERT INTO activation_request (id, created_at, hmac, ttl, status)
+VALUES (
+    'a98faa17-c80f-48a6-9a4b-86f20c62063d',              -- id
+    FROM_UNIXTIME(1725978183628 / 1000),                 -- created_at (convert milliseconds to seconds)
+    'pRzM8L+sX/+rZfxxYOkltUJyu4xuz0JP38x2LYFrmbs=',      -- hmac
+    3600,                                                -- ttl (3600 seconds)
+    'PENDING'                                            -- status
+);

@@ -17,9 +17,11 @@
 package com.becon.opencelium.backend.security;
 
 import com.becon.opencelium.backend.constant.SecurityConstant;
+import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.database.mysql.entity.UserRole;
+import com.becon.opencelium.backend.database.mysql.service.SessionService;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.AuthMethod;
@@ -50,12 +52,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 @Component
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+    protected JwtTokenUtil jwtTokenUtil;
 
     @Autowired
     private UserService userService;
@@ -63,6 +66,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Autowired
     private UserRoleService userRoleService;
 
+    @Autowired
+    protected SessionService sessionService;
 
     @Override
     @Autowired
@@ -94,20 +99,25 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                             FilterChain chain, Authentication auth) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         User user = getUser(auth);
-        UserResource userResource = new UserResource(user);
 
-        String payload = mapper.writeValueAsString(userResource);
-        String token = jwtTokenUtil.generateToken(user);
+        if (user.isTotpEnabled()) {
+            response.addHeader("session_id", user.getSession().getId());
+        } else {
+            UserResource userResource = new UserResource(user);
+
+            String payload = mapper.writeValueAsString(userResource);
+            String token = jwtTokenUtil.generateToken(user);
+
+            response.getWriter().write(payload);
+            response.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstant.BEARER + " " + token);
+        }
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(payload);
-        response.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstant.BEARER + " " + token);
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request,
-                                              HttpServletResponse response, AuthenticationException failed)
-                                                                            throws IOException {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+                                              AuthenticationException failed) throws IOException {
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         ObjectMapper mapper = new ObjectMapper();
 
@@ -121,7 +131,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         response.setStatus(HttpStatus.FORBIDDEN.value());
     }
 
+
     private User getUser(Authentication authentication) {
+        User result;
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof LdapUserDetails ldapUserDetails) {
@@ -152,9 +164,31 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             UserRole role = userRoleService.findByRole(authority.getAuthority()).orElseThrow();
             user.setUserRole(role);
 
-            return userService.save(user);
+            result = userService.save(user);
+        } else {
+            result = ((UserPrincipals) authentication.getPrincipal()).getUser();
         }
+        createNewSession(result);
 
-        return ((UserPrincipals) authentication.getPrincipal()).getUser();
+        return result;
+    }
+
+    private void createNewSession(User user) {
+        int userId = user.getId();
+        String sessionId = UUID.randomUUID().toString();
+
+        // if 'user' already has a 'session' then delete it and create new one
+        sessionService.deleteByUserId(userId);
+
+        Session session = new Session();
+
+        session.setId(sessionId);
+        session.setUserId(userId);
+        session.setActive(true);
+        session.setAttempts(0);
+
+        sessionService.save(session);
+
+        user.setSession(session);
     }
 }

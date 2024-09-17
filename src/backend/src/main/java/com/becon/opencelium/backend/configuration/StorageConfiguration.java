@@ -24,21 +24,28 @@ import com.becon.opencelium.backend.database.mysql.service.RequestDataService;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.storage.UserStorageService;
+import com.becon.opencelium.backend.subscription.dto.LicenseKey;
+import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
+import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 import javax.sql.DataSource;
-import java.io.File;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Configuration
@@ -50,6 +57,9 @@ public class StorageConfiguration {
     private final RequestDataService requestDataService;
     private final ChangeSetDao changeSetDao;
     private final Environment environment;
+
+    @Autowired
+    private ResourceLoader resourceLoader;
 
     private static final String JAR_PREFIX = "opencelium.backend-";
     private static final String JAR_EXTENSION = ".jar";
@@ -72,6 +82,8 @@ public class StorageConfiguration {
 
     @EventListener(ApplicationReadyEvent.class)
     public void createStorageAfterStartup() {
+        // upload freeLicense
+        setInitialLicense();
 
         // creating 'src/main/resources/templates/' directory
         createDirectory(PathConstant.TEMPLATE);
@@ -100,6 +112,16 @@ public class StorageConfiguration {
         // deleting old version zip and jar files
         cleanOldFiles(PathConstant.LIBS, f -> f.isFile() && f.getName().endsWith(JAR_EXTENSION), JAR_PREFIX);
         cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, File::isDirectory, "");
+    }
+
+    private void setInitialLicense() {
+        try {
+            String initLicenseContent = readInitLicense();
+            LicenseKey licenseKey = LicenseKeyUtility.decrypt(initLicenseContent);
+            System.out.println(licenseKey);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void cleanOldFiles(String folder, Predicate<File> filter, String prefix) {
@@ -167,6 +189,20 @@ public class StorageConfiguration {
             } else {
                 System.out.println("Failed to create directory: " + name);
             }
+        }
+    }
+
+    public String readInitLicense() throws IOException {
+        // Load the file from resources/license/ folder
+        Resource resource = resourceLoader.getResource("classpath:license/init-license.txt");
+
+        // Use InputStream to read the content of the file
+        InputStream inputStream = resource.getInputStream();
+
+        // Using BufferedReader and InputStreamReader to read the file content
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            // Collect all lines into a single string without adding '\n'
+            return reader.lines().collect(Collectors.joining());
         }
     }
 }
