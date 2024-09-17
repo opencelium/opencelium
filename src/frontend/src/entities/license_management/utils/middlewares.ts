@@ -20,7 +20,7 @@ import {generateActivateRequest} from "@entity/license_management/redux_toolkit/
 export const licenseManagementMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (generateActivateRequest.fulfilled.type === action.type) {
         const name = 'opencelium_activate_request';
-        let dataStr = "data:text/txt;charset=utf-8," + encodeURIComponent(action.payload.request);
+        let dataStr = "data:text/txt;charset=utf-8," + encodeURIComponent(action.payload);
         let downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
         downloadAnchorNode.setAttribute("download", name + ".txt");
