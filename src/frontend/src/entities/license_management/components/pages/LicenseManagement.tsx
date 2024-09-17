@@ -54,9 +54,9 @@ const LicenseManagement: FC<IForm> = ({}) => {
                 handleClick={() => dispatch(generateActivateRequest())}
             />
         );
-        if (activationRequestStatus === ActivationRequestStatus.PENDING) {
+        //if (activationRequestStatus === ActivationRequestStatus.PENDING) {
             actions.push(<ImportLicenseComponent/>);
-        }
+        //}
     } else {
         if (!status && !currentSubscription) {
             actions.push(<ActivateLicenseComponent/>);
