@@ -17,16 +17,20 @@ export default class LicenseRequest extends Request implements ILicenseRequest {
     }
 
     async getLicenseList(): Promise<AxiosResponse<LicenseListItem[]>>{
-        this.url = '/subs/all';
+        this.url = 'subs/all';
         return super.get<LicenseListItem[]>();
     }
 
     async generateActivateRequest (): Promise<AxiosResponse<GenerateActivateRequestResponse>> {
         this.url = 'subs';
+        this.endpoint = '/activation/request/generate';
         return super.get<GenerateActivateRequestResponse>();
     }
 
     async activateFile(data: ActivateLicenseFileRequest): Promise<AxiosResponse<ActivateLicenseResponse>>{
+        this.url = 'subs';
+        this.endpoint = '/activate/license';
+        this.isFormData = true;
         return super.post<ActivateLicenseResponse>(data);
     }
 

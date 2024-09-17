@@ -35,6 +35,8 @@ export const activateLicenseFile = createAsyncThunk(
     async(data: ActivateLicenseFileRequest, thunkAPI) => {
         try {
             const request = new LicenseRequest();
+            const formData = new FormData();
+            formData.append('file', data.tokenFile[0]);
             const response = await request.activateFile(data);
             return response.data.license;
         } catch(e){
