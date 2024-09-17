@@ -26,7 +26,18 @@ import java.util.List;
 
 public class LicenseKeyUtility {
     private static final String ENCRYPTION_ALGO = "RSA";
-    private static final String PUBLIC_KEY ="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAySXNCZthSV2xdfPVCoXdmQpmoEDli2ry85AJW28ouGby5b/pUMlgc3v0gCXiLK1w7s9lEM5HkRXogtLGJkWsvKWl6cPo6a/Oeh0vHC2R9VuC1z1xXHpiVo8b0QNcFC+sN93Hi33i0+X4Dqm7qR2v3eAQ6eeSccVsaaSyT8HjTds9rGKHx465iC9ZpPdCBtY7Gfo+Jj/IzJHU0pT4vZCXy4sicjd3TV+rBrFc1I6pMePfbqRN452H9Df6qbHqOFa+h/D1NO0egQ2Dzkdehx+N4/7cOmtePts5D0D6G1pUOWD7L2fTMXcYaWlmsifW+N/A9RPGpI7M5dVu06vOiCrj6wIDAQAB";
+    private static final String PUBLIC_KEY ="MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAnj2andeiYdgRAp1jkLej" +
+            "/xgslVEN+qodRNjguHNBV2gKHim9VXCvakAZveUqXN7/L7R+wlDrlnjLDWV5cN4a" +
+            "WDQFPKK0YcH+A1oSI7m/SbBaeyQSwH5PT/kYG0AU3C1FItoshhDKDhvSMk5iUJc6" +
+            "6ZXRg4xBH9x3jOfKHRrvJlLRx8NX+WLPJNLpVog/an2lmDqWw2AsJYgf8p18baCa" +
+            "vHKil39e8gDNizAQhQdC1yEK4RLgtsmGFGnrhCjNaZ/+NriYE4D/CK71QT4d//eF" +
+            "4LNgBqIGEPRb4ekt9qUH2T6F5XqiR90BFRLTyMv0ASos+k25GQqHS7WRjUHUOu0F" +
+            "1UL9POtjLCVj39q9U9ip6G3UYTNJ7gF6wUpzwmqQuLID4Bx3YOT7GeaiPc2AdlQl" +
+            "T5MbFSBMqHXcsScHfEQU2IPb2iYowLoKH7nqrCHOtR83/CDbzKKCHm0R072QmFh+" +
+            "67YPL3U1Vg+zrT4emlEYSM3gdOrcb4Wgm85+sUs3aoWmRPsDITUG+vqAbZ2C/gxg" +
+            "EmlVZzbKgH4NpFIO/eh7oW7cWXyJ+2Fc07T/NRs1UBAR6cjpZBFeVKIgIsWay6sF" +
+            "ffOyv1lUM0DRvtM53BgaXV2V5TUbOzKlM+d2jBqlrCeq6TpJVG6FCrJsaaOgSq6Z" +
+            "gt5JLtdbtZqZtnYndk3FT78CAwEAAQ==";
     private final static Logger logger = LoggerFactory.getLogger(LicenseKeyUtility.class);
 
     // TODO: create chain of responsibility for different verifications.
