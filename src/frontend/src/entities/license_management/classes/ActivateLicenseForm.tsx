@@ -48,7 +48,7 @@ export class ActivateLicenseForm extends HookStateClass implements IActivateLice
     constructor(uploadTokenData?: { type: UploadType, token: string, tokenFile: FileList } | null) {
         // @ts-ignore
         super(uploadTokenData?.validations || {});
-        this.type = uploadTokenData?.type || UploadType.String;
+        this.type = uploadTokenData?.type || UploadType.File;
         this.token = uploadTokenData?.token || '';
         this.tokenFile = uploadTokenData?.tokenFile || null;
     }
@@ -68,7 +68,7 @@ export class ActivateLicenseForm extends HookStateClass implements IActivateLice
         return super.getInputFile<IActivateLicenseFormFile, InputFileProps>(data);
     }
 
-    @Application.dispatch(activateLicenseFile, {mapping: (data: IActivateLicenseForm) => {return {token: data.token};}})
+    @Application.dispatch(activateLicenseFile, {mapping: (data: IActivateLicenseForm) => {return {tokenFile: data.tokenFile};}})
     activateFile(): boolean{
         return true;
     }

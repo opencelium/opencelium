@@ -1,5 +1,5 @@
 import React, {ChangeEvent, useEffect, useState} from 'react';
-import Button from "@basic_components/buttons/Button";
+import Button from "@app_component/base/button/Button";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import License from "@entity/license_management/classes/License";
 import {ActivateLicenseForm} from "@entity/license_management/classes/ActivateLicenseForm";
@@ -15,6 +15,7 @@ const ImportLicenseComponent = () => {
         icon: 'lock_outline',
         hasNoImage: false,
         hasCrop: false,
+        accept: '.txt',
         buttonProps: {label: '', iconSize: '18px'},
     }})
     const upload = () => {
@@ -36,7 +37,7 @@ const ImportLicenseComponent = () => {
         <div style={{display: 'inline-block'}}>
             <Dialog
                 actions={[
-                    {id: 'download', label: 'Download', onClick: upload, isLoading: generatingActivateRequest === API_REQUEST_STATE.START},
+                    {id: 'import', label: 'Import', onClick: upload, isLoading: generatingActivateRequest === API_REQUEST_STATE.START},
                     {id: 'cancel', label: 'Cancel', onClick: () => toggleDialog(false)}]}
                 title={'Add Connection'} active={showDialog} toggle={() => toggleDialog(!showDialog)}>
                 {TokenFile}
