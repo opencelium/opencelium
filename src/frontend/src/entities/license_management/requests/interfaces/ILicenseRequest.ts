@@ -48,7 +48,7 @@ export default interface ILicenseRequest {
     generateActivateRequest (): Promise<AxiosResponse<GenerateActivateRequestResponse>>,
 
     //to activate license file (in offline mode)
-    activateFile (data: ActivateLicenseFileRequest): Promise<AxiosResponse<ActivateLicenseResponse>>,
+    activateFile (data: FormData): Promise<AxiosResponse<ActivateLicenseResponse>>,
 
     //to activate license string (in offline mode)
     activateString (data: ActivateLicenseStringRequest): Promise<AxiosResponse<ActivateLicenseResponse>>,

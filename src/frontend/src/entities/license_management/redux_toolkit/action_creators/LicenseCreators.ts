@@ -34,10 +34,10 @@ export const activateLicenseFile = createAsyncThunk(
     'license/activate/file',
     async(data: ActivateLicenseFileRequest, thunkAPI) => {
         try {
-            const request = new LicenseRequest();
             const formData = new FormData();
             formData.append('file', data.tokenFile[0]);
-            const response = await request.activateFile(data);
+            const request = new LicenseRequest({isFormData: true});
+            const response = await request.activateFile(formData);
             return response.data.license;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
