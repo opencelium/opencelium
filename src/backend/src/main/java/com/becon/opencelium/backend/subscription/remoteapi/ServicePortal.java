@@ -1,9 +1,12 @@
 package com.becon.opencelium.backend.subscription.remoteapi;
 
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.subscription.remoteapi.dto.ConnectionStatusDto;
 import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.SubscriptionModule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -16,11 +19,15 @@ import java.io.File;
 @Component
 public class ServicePortal implements RemoteApi, SubscriptionModule {
 
-    private String BASE_URL = "http://oc-service-portal.westeurope.cloudapp.azure.com:443";
-    private String AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZTA3ODZhODQyNjAxMzhlZWIyNzBhNiIsImVtYWlsIjoiYWRtaW5Ab3BlbmNlbGl1bS5pbyIsImNvbXBhbnlJZCI6IjY2ZTA3ODZhODQyNjAxMzhlZWIyNzBhMSIsImlhdCI6MTcyNTk4Njk0MywiZXhwIjoxNzM1OTg2OTQzfQ.HsYTjIqQsZq2uHGZ1d3LY4DPf-dbz5nfMNScLKzZIUM";
+    private final String BASE_URL;
+    private final String AUTH_TOKEN;
     private final RestTemplate restTemplate;
+    @Autowired
+    private Environment env;
     public ServicePortal() {
         this.restTemplate = new RestTemplate();
+        BASE_URL = env.getProperty(AppYamlPath.SP_BASE_URL);
+        AUTH_TOKEN = env.getProperty(AppYamlPath.SP_TOKEN);
     }
 
     @Override
