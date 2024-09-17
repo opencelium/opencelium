@@ -10,10 +10,7 @@ public interface SubscriptionService {
     boolean isValid(Subscription subscription);
     void save(Subscription subscription);
     boolean exists(String subId);
-    Subscription convertToSub(String licenseKey);
-
-    Subscription buildFromLicenseKey(LicenseKey licenseKey, ActivationRequest ar);
-
+    Subscription convertToSub(String licenseKey, ActivationRequest ar);
     void deactivateAll();
     Subscription getActiveSubs();
     SubsDTO toDto(LicenseKey licenseKey, Subscription subscription);

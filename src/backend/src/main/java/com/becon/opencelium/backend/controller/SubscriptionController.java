@@ -83,22 +83,16 @@ public class SubscriptionController {
         SubscriptionModule sModule = remoteApi.getModule(ApiModule.SUBSCRIPTION);
         File arFile = activationRequestService.createFile(encodedAr, "activation-request");
         String response  = sModule.generateLicenseKey(arFile, subId).getBody();
-
         String licenseKey = extractLicenseKey(response);
-        LicenseKey lk = LicenseKeyUtility.decrypt(licenseKey);
-        if (!LicenseKeyUtility.verify(lk, ar)) {
-            throw new RuntimeException("LicenseKey is not valid");
-        }
 
         activationRequestService.expireAll();
         ar.setStatus(ActivReqStatus.PROCESSED);
         ActivationRequest saved = activationRequestService.save(ar);
-        Subscription subscription = subscriptionService.convertToSub(licenseKey);
-        subscription.setLicenseKey(licenseKey);
+        Subscription subscription = subscriptionService.convertToSub(licenseKey, saved);
 
         subscriptionService.save(subscription);
 
-        SubsDTO subsDTO = subscriptionService.toDto(lk, subscription);
+        SubsDTO subsDTO = subscriptionService.toDto(LicenseKeyUtility.decrypt(licenseKey), subscription);
         return ResponseEntity.ok().body(subsDTO);
     }
 
@@ -147,9 +141,7 @@ public class SubscriptionController {
             ar.setStatus(ActivReqStatus.PROCESSED);
             ActivationRequest saved = activationRequestService.save(ar);
 
-            Subscription subscription = subscriptionService.convertToSub(content);
-            subscription.setLicenseKey(content);
-            subscription.setActivationRequest(saved);
+            Subscription subscription = subscriptionService.convertToSub(content, saved);
             subscriptionService.save(subscription);
         }
         return ResponseEntity.ok().build();

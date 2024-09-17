@@ -75,7 +75,6 @@ public class LicenseKeyUtility {
             cipher.init(Cipher.DECRYPT_MODE, publicKey);
             System.out.println(Arrays.toString(Base64.getDecoder().decode(encryptedLicense)));
             byte[] licenseKeyBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedLicense));
-            System.out.println(new String(licenseKeyBytes));
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(licenseKeyBytes, LicenseKey.class);
         } catch (Exception e) {

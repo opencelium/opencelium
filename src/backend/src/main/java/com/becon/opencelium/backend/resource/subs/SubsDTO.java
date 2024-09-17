@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.resource.subs;
 
 public class SubsDTO {
     private String subId;
+    private String licenseId;
     private String type;
     private long startDate;
     private long endDate;
@@ -17,6 +18,14 @@ public class SubsDTO {
 
     public void setSubId(String subId) {
         this.subId = subId;
+    }
+
+    public String getLicenseId() {
+        return licenseId;
+    }
+
+    public void setLicenseId(String licenseId) {
+        this.licenseId = licenseId;
     }
 
     public String getType() {

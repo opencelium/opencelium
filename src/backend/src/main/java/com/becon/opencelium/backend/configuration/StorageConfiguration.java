@@ -17,15 +17,19 @@
 package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
+import com.becon.opencelium.backend.database.mysql.service.ActivationRequestService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.RequestDataService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.storage.UserStorageService;
+import com.becon.opencelium.backend.subscription.dto.LicenseKey;
+import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +61,7 @@ public class StorageConfiguration {
     private final ChangeSetDao changeSetDao;
     private final Environment environment;
     private final SubscriptionService subscriptionService;
+    private final ActivationRequestService activationRequestService;
 
     @Autowired
     private ResourceLoader resourceLoader;
@@ -69,6 +74,7 @@ public class StorageConfiguration {
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("requestDataServiceImp") RequestDataService requestDataService,
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
+            @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService,
             InvokerContainer invokerContainer,
             DataSource dataSource,
             Environment environment
@@ -80,6 +86,7 @@ public class StorageConfiguration {
         this.changeSetDao = new ChangeSetDao(dataSource);
         this.environment = environment;
         this.subscriptionService = subscriptionService;
+        this.activationRequestService = activationRequestService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -119,7 +126,9 @@ public class StorageConfiguration {
     private void setInitialLicense() {
         try {
             String initLicense = readInitLicense();
-            Subscription subscription = subscriptionService.convertToSub(initLicense);
+            LicenseKey lk = LicenseKeyUtility.decrypt(initLicense);
+            ActivationRequest ar = activationRequestService.findByHmac(lk.getHmac());
+            Subscription subscription = subscriptionService.convertToSub(initLicense,ar);
             if(!subscriptionService.exists(subscription.getSubId())) {
                 subscriptionService.save(subscription);
             }

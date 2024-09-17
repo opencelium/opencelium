@@ -84,23 +84,25 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public Subscription convertToSub(String licenseKey) {
-        return null;
-    }
-
-    @Override
-    public Subscription buildFromLicenseKey(LicenseKey licenseKey, ActivationRequest ar) {
-        Subscription subscription = subscriptionRepository.findBySubId(licenseKey.getSubId()).orElse(null);
+    public Subscription convertToSub(String licenseKey, ActivationRequest ar) {
+        LicenseKey lk = LicenseKeyUtility.decrypt(licenseKey);
+        if (!LicenseKeyUtility.verify(lk, ar)) {
+            throw new RuntimeException("LicenseKey is not valid");
+        }
+        Subscription subscription = subscriptionRepository.findBySubId(lk.getSubId()).orElse(null);
         if (subscription == null) {
             subscription = new Subscription();
             subscription.setId(UUID.randomUUID().toString());
         }
-        subscription.setSubId(licenseKey.getSubId());
+        subscription.setSubId(lk.getSubId());
         subscription.setCreatedAt(LocalDateTime.now());
         subscription.setCurrentUsage(0L);
         subscription.setActive(true);
         subscription.setCurrentUsageHmac(HmacUtility
                 .encode(subscription.getId() + subscription.getCurrentUsage()));
+        subscription.setActivationRequest(ar);
+        subscription.setLicenseKey(licenseKey);
+        subscription.setLicenseId(lk.getLicenseId());
         return subscription;
     }
 
@@ -125,6 +127,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subsDTO.setDuration(licenseKey.getDuration());
         subsDTO.setType(licenseKey.getType());
         subsDTO.setStartDate(licenseKey.getStartDate());
+        subsDTO.setSubId(licenseKey.getSubId());
         subsDTO.setEndDate(licenseKey.getEndDate());
         subsDTO.setTotalOperationUsage(licenseKey.getOperationUsage());
         return subsDTO;
