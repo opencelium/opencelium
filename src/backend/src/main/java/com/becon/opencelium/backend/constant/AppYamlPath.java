@@ -14,6 +14,10 @@ public interface AppYamlPath {
     String TOKEN_ACTIVITY_TIME = "opencelium.token.activity-time";
     String TOKEN_SECRET = "opencelium.token.secret";
 
+    //Service portal variables;
+    String SP_BASE_URL = "opencelium.service_portal.base_url";
+    String SP_TOKEN = "opencelium.service_portal.token";
+
     // Indicates that the gc is enabled or not. Default: true
     String GC_CONNECTION_IS_ON = "opencelium.gc.connection.isOn";
 
