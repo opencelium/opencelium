@@ -62,7 +62,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
             actions.push(<ActivateLicenseComponent/>);
         }
     }
-    if (currentSubscription) {
+    if (currentSubscription && !Subscription.isFree(currentSubscription)) {
         actions.push(
             <Button
                 icon={'delete'}

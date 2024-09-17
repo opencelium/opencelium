@@ -8,6 +8,10 @@ export default class Subscription {
         return useAppSelector((state: RootState) => state.subscriptionReducer);
     }
 
+    static isFree(subscription: SubscriptionModel) {
+        return subscription.type === 'free';
+    }
+
     static getMonthlyPeriod(comingDate: number): string {
         const date = new Date(comingDate);
         const inputDay = date.getDate();
