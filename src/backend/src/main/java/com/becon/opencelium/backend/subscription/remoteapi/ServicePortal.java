@@ -36,7 +36,7 @@ public class ServicePortal implements RemoteApi, SubscriptionModule {
 
     @Override
     public ResponseEntity<String> checkConnection() {
-        String url = BASE_URL + "/opencelium/connection/status";
+        String url = BASE_URL + "/api/opencelium/connection/status";
         try {
             HttpHeaders httpHeaders = getHeader();
             HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
@@ -58,7 +58,7 @@ public class ServicePortal implements RemoteApi, SubscriptionModule {
 
     @Override
     public ResponseEntity<String> getAllSubs() {
-        String url = BASE_URL + "/opencelium/license/all";
+        String url = BASE_URL + "/api/opencelium/license/all";
         HttpHeaders headers = getHeader();
         HttpEntity<String> entity = new HttpEntity<>(headers);
         return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
@@ -66,7 +66,7 @@ public class ServicePortal implements RemoteApi, SubscriptionModule {
 
     @Override
     public ResponseEntity<String> getSubById(String id) {
-        String url = BASE_URL + "/api/opencelium/licence/" + id;
+        String url = BASE_URL + "/api/opencelium/license/" + id;
         HttpHeaders headers = getHeader();
         HttpEntity<String> entity = new HttpEntity<>(headers);
         return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
