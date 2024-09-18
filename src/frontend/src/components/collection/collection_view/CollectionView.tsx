@@ -61,6 +61,7 @@ const CollectionView: FC<CollectionViewProps> =
         hasError,
         isListViewCard,
         defaultFilterData,
+        onListRowClick,
     }) => {
         const dispatch = useAppDispatch();
         const {searchFields, currentPages, viewType, gridViewType} = Application.getReduxState();
@@ -199,6 +200,7 @@ const CollectionView: FC<CollectionViewProps> =
                                 isRefreshing={isRefreshing}
                                 shouldBeUpdated={shouldBeUpdated}
                                 filterData={filterData}
+                                onListRowClick={onListRowClick}
                             />}
                         {applicationViewType === ViewType.GRID &&
                             <Grid
@@ -229,6 +231,7 @@ CollectionView.defaultProps = {
     isListViewCard: true,
     defaultFilterData: null,
     loadingStyles: {},
+    onListRowClick: null,
 }
 
 

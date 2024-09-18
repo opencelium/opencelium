@@ -43,6 +43,7 @@ interface ListRowProps{
     collection: any,
     check: any,
     checks: any[],
+    onListRowClick?: (entity: any) => void,
 }
 
 export {

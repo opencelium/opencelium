@@ -1,6 +1,11 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import SubscriptionRequest from "@entity/license_management/requests/classes/SubscriptionRequest";
+import {
+    OperationUsageDetailModel,
+    OperationUsageEntryModel
+} from "@entity/license_management/requests/models/SubscriptionModel";
+import OperationUsageDetails from "@entity/license_management/collections/OperationUsageDetails";
 
 export const getCurrentSubscription = createAsyncThunk(
     'subscription/get/current',
@@ -8,6 +13,60 @@ export const getCurrentSubscription = createAsyncThunk(
         try {
             const request = new SubscriptionRequest();
             const response = await request.getCurrent();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+export const getOperationUsageEntries = createAsyncThunk(
+    'subscription/get/operation/usage',
+    async(data: never, thunkAPI) => {
+        try {
+            const testData: OperationUsageEntryModel[] = [{
+                id: 1,
+                title: 'idoit-otrs',
+                number: 1003,
+            },{
+                id: 2,
+                title: 'idoit-checkmk',
+                number: 231,
+            }]
+            return testData;
+            const request = new SubscriptionRequest();
+            const response = await request.getOperationUsageEntries();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+export const getOperationUsageDetails = createAsyncThunk(
+    'subscription/get/operation/usage/details',
+    async(entryId: number, thunkAPI) => {
+        try {
+            const testData1: OperationUsageDetailModel[] = [{
+                id: 1,
+                datetime: + new Date(),
+                number: 500,
+            },{
+                id: 2,
+                datetime: + new Date(),
+                number: 503,
+            }]
+            const testData2: OperationUsageDetailModel[] = [{
+                id: 1,
+                datetime: + new Date(),
+                number: 120,
+            },{
+                id: 2,
+                datetime: + new Date(),
+                number: 111,
+            }]
+            const testData = [testData1, testData2]
+            return testData[entryId - 1];
+            const request = new SubscriptionRequest();
+            const response = await request.getOperationUsageDetails();
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -29,5 +88,7 @@ export const setCurrentSubscription = createAsyncThunk(
 
 export default {
     getCurrentSubscription,
+    getOperationUsageEntries,
+    getOperationUsageDetails,
     setCurrentSubscription,
 }
