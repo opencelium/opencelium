@@ -27,7 +27,6 @@ import {
     generateActivateRequest
 } from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 import ImportLicenseComponent from "@entity/license_management/components/import_license/ImportLicenseComponent";
-import {ActivationRequestStatus} from "@entity/license_management/requests/models/LicenseModel";
 import License from "@entity/license_management/classes/License";
 import {Auth} from "@application/classes/Auth";
 import ActivateLicenseComponent from "@entity/license_management/components/activate_license/ActivateLicenseComponent";
@@ -40,7 +39,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
     const {
         currentSubscription, gettingCurrentSubscription
     } = Subscription.getReduxState();
-    const {activationRequestStatus, status, activatingLicense} = License.getReduxState();
+    const {activationRequestStatus, status, activatingLicense, deletingLicense} = License.getReduxState();
     useEffect(() => {
         if (activatingLicense === API_REQUEST_STATE.INITIAL || activatingLicense === API_REQUEST_STATE.FINISH) {
             dispatch(getCurrentSubscription());
@@ -69,6 +68,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
                 icon={'delete'}
                 label={'Delete License'}
                 hasConfirmation={true}
+                isLoading={deletingLicense === API_REQUEST_STATE.START}
                 confirmationText={'Do you really want to delete?'}
                 handleClick={() => dispatch(deleteLicense(currentSubscription.subId))}
             />);
