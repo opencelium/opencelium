@@ -79,8 +79,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public void deleteById(String subId) {
-        subscriptionRepository.deleteById(subId);
+    public void deleteBySubId(String subId) {
+        subscriptionRepository.deleteBySubId(subId);
     }
 
     @Override

@@ -172,7 +172,7 @@ public class SubscriptionController {
 
     @DeleteMapping(path = "/{subId}")
     public ResponseEntity<String> deleteBySubId(@PathVariable String subId) {
-        subscriptionService.deleteById(subId);
+        subscriptionService.deleteBySubId(subId);
         return ResponseEntity.noContent().build();
     }
 

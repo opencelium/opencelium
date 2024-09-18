@@ -15,7 +15,10 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Stri
     @Query("UPDATE Subscription s SET s.active = false")
     void deactivateAll();
 
+    @Transactional
     void deleteByLicenseId(String licenseId);
+    @Transactional
+    void deleteBySubId(String subId);
 
 //    @Query(value = "select * from subscription ar where ar.active = 1 limit 1", nativeQuery = true)
     Optional<Subscription> findFirstByActiveTrue();
