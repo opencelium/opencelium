@@ -48,6 +48,7 @@ export default class LicenseRequest extends Request implements ILicenseRequest {
     }
 
     async deleteLicense (): Promise<AxiosResponse<IResponse>> {
+        this.url = 'subs';
         return super.delete<IResponse>();
     }
 }
