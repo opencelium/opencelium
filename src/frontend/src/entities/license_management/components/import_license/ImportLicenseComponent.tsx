@@ -26,6 +26,11 @@ const ImportLicenseComponent = () => {
         }
     }
     useEffect(() => {
+        if (activatingLicense === API_REQUEST_STATE.FINISH) {
+            toggleDialog(false);
+        }
+    }, [activatingLicense])
+    useEffect(() => {
         switch (UploadTokenForm.type) {
             case UploadType.File:
                 //@ts-ignore
@@ -37,9 +42,9 @@ const ImportLicenseComponent = () => {
         <div style={{display: 'inline-block'}}>
             <Dialog
                 actions={[
-                    {id: 'import', label: 'Import', onClick: upload, isLoading: generatingActivateRequest === API_REQUEST_STATE.START},
+                    {id: 'import', label: 'Import', onClick: upload, isLoading: activatingLicense === API_REQUEST_STATE.START},
                     {id: 'cancel', label: 'Cancel', onClick: () => toggleDialog(false)}]}
-                title={'Add Connection'} active={showDialog} toggle={() => toggleDialog(!showDialog)}>
+                title={'Import License'} active={showDialog} toggle={() => toggleDialog(!showDialog)}>
                 {TokenFile}
             </Dialog>
             <Button

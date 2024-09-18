@@ -28,8 +28,6 @@ export const RoleNames: any = {
     free: 'Free',
 }
 const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionModel, theme: ITheme}) => {
-    const dispatch = useAppDispatch();
-    const {status} = License.getReduxState();
     const max = subscription.totalOperationUsage;
     const divisionStep = max / 10;
     const divisions = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
@@ -37,7 +35,6 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
     const now = subscription.currentOperationUsage;
     const percentage = (now / max) * 100;
     useEffect(() => {
-        dispatch(getLicenseStatus());
     }, []);
     return (
         <div>

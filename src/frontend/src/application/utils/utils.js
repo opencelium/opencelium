@@ -202,7 +202,7 @@ export const formatOperationUsage = (operationUsage) => {
 
 export const convertTimeForSubscription = (timestamp, settings = {hasHours: true, hasMinutes: true, hasSeconds: true}) => {
     if(!timestamp){
-        return '-';
+        return '∞';
     }
     const date = new Date(timestamp);
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"

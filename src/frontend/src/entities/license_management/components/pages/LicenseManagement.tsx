@@ -40,12 +40,13 @@ const LicenseManagement: FC<IForm> = ({}) => {
     const {
         currentSubscription, gettingCurrentSubscription
     } = Subscription.getReduxState();
-    const {activationRequestStatus, status, license} = License.getReduxState();
+    const {activationRequestStatus, status, activatingLicense} = License.getReduxState();
     useEffect(() => {
-        dispatch(getCurrentSubscription());
-    }, [])
+        if (activatingLicense === API_REQUEST_STATE.INITIAL || activatingLicense === API_REQUEST_STATE.FINISH) {
+            dispatch(getCurrentSubscription());
+        }
+    }, [activatingLicense])
     const actions = []
-
     if (!authUser.userDetail.themeSync){
         actions.push(
             <Button
@@ -54,22 +55,22 @@ const LicenseManagement: FC<IForm> = ({}) => {
                 handleClick={() => dispatch(generateActivateRequest())}
             />
         );
-        if (activationRequestStatus === ActivationRequestStatus.PENDING) {
+        //if (activationRequestStatus === ActivationRequestStatus.PENDING) {
             actions.push(<ImportLicenseComponent/>);
-        }
+        //}
     } else {
-        if (!status && !currentSubscription) {
+        if (!status && (!currentSubscription || Subscription.isFree(currentSubscription))) {
             actions.push(<ActivateLicenseComponent/>);
         }
     }
-    if (currentSubscription) {
+    if (currentSubscription && !Subscription.isFree(currentSubscription)) {
         actions.push(
             <Button
                 icon={'delete'}
                 label={'Delete License'}
                 hasConfirmation={true}
                 confirmationText={'Do you really want to delete?'}
-                handleClick={() => dispatch(deleteLicense(license._id))}
+                handleClick={() => dispatch(deleteLicense(currentSubscription.subId))}
             />);
     }
     const data = {
