@@ -170,6 +170,18 @@ public class SubscriptionController {
         return ResponseEntity.ok().body(dto);
     }
 
+    @DeleteMapping(path = "/{subId}")
+    public ResponseEntity<String> deleteBySubId(@PathVariable String subId) {
+        subscriptionService.deleteById(subId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(path = "/license/{licenseId}")
+    public ResponseEntity<String> deleteBylicenseId(@PathVariable String licenseId) {
+        subscriptionService.deleteByLicenseId(licenseId);
+        return ResponseEntity.noContent().build();
+    }
+
     private String extractLicenseKey(String body) {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode node;

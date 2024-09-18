@@ -9,6 +9,8 @@ public interface SubscriptionService {
     LicenseKey decryptLicenseKey(String license);
     boolean isValid(Subscription subscription);
     void save(Subscription subscription);
+    void deleteById(String subId);
+    void deleteByLicenseId(String licenseId);
     boolean exists(String subId);
     Subscription convertToSub(String licenseKey, ActivationRequest ar);
     void deactivateAll();

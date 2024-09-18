@@ -79,6 +79,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public void deleteById(String subId) {
+        subscriptionRepository.deleteById(subId);
+    }
+
+    @Override
+    public void deleteByLicenseId(String licenseId) {
+        subscriptionRepository.deleteByLicenseId(licenseId);
+    }
+
+    @Override
     public boolean exists(String subId) {
         return false;
     }
