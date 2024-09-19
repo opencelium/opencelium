@@ -490,6 +490,7 @@ VALUES (4, 'SUBSCRIPTION_OVERVIEW', 'local_police', 'Subscription Overview');
 --changeset 4.2:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 DROP TABLE IF EXISTS subscription;
 DROP TABLE IF EXISTS activation_request;
+DROP TABLE IF EXISTS operation_usage_history_detail;
 DROP TABLE IF EXISTS operation_usage_history;
 CREATE TABLE activation_request(
     id         VARCHAR(255) PRIMARY KEY,
