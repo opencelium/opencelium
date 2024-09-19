@@ -19,6 +19,7 @@ interface DefaultListRawProps{
     url: string,
     id: string,
     entity: any,
+    onClick?: (entity: any) => void,
 }
 
 export {

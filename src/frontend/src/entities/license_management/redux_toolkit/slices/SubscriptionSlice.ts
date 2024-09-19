@@ -19,20 +19,31 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {
-    getCurrentSubscription, setCurrentSubscription
+    getCurrentSubscription, getOperationUsageDetails, getOperationUsageEntries, setCurrentSubscription
 } from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
-import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
+import SubscriptionModel, {
+    OperationUsageDetailModel,
+    OperationUsageEntryModel
+} from "@entity/license_management/requests/models/SubscriptionModel";
 
 export interface SubscriptionState extends ICommonState{
     currentSubscription: SubscriptionModel,
     gettingCurrentSubscription: API_REQUEST_STATE,
+    gettingOperationUsageEntries: API_REQUEST_STATE,
+    gettingOperationUsageDetails: API_REQUEST_STATE,
     settingCurrentSubscription: API_REQUEST_STATE,
+    operationUsageEntries: OperationUsageEntryModel[],
+    operationUsageDetails: OperationUsageDetailModel[],
 }
 
 const initialState: SubscriptionState = {
     currentSubscription: null,
     gettingCurrentSubscription: API_REQUEST_STATE.INITIAL,
+    gettingOperationUsageEntries: API_REQUEST_STATE.INITIAL,
+    gettingOperationUsageDetails: API_REQUEST_STATE.INITIAL,
     settingCurrentSubscription: API_REQUEST_STATE.INITIAL,
+    operationUsageEntries: [],
+    operationUsageDetails: [],
     ...CommonState,
 }
 
@@ -52,6 +63,30 @@ export const subscriptionSlice = createSlice({
         },
         [getCurrentSubscription.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingCurrentSubscription = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getOperationUsageEntries.pending.type]: (state) => {
+            state.gettingOperationUsageEntries = API_REQUEST_STATE.START;
+        },
+        [getOperationUsageEntries.fulfilled.type]: (state, action: PayloadAction<OperationUsageEntryModel[]>) => {
+            state.gettingOperationUsageEntries = API_REQUEST_STATE.FINISH;
+            state.operationUsageEntries = action.payload;
+            state.error = null;
+        },
+        [getOperationUsageEntries.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingOperationUsageEntries = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getOperationUsageDetails.pending.type]: (state) => {
+            state.gettingOperationUsageDetails = API_REQUEST_STATE.START;
+        },
+        [getOperationUsageDetails.fulfilled.type]: (state, action: PayloadAction<OperationUsageDetailModel[]>) => {
+            state.gettingOperationUsageDetails = API_REQUEST_STATE.FINISH;
+            state.operationUsageDetails = action.payload;
+            state.error = null;
+        },
+        [getOperationUsageDetails.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingOperationUsageDetails = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [setCurrentSubscription.pending.type]: (state) => {

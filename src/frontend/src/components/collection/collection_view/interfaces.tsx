@@ -48,9 +48,10 @@ interface ViewProps{
 
 interface ListViewProps extends ViewProps{
     checks: any[],
-    setChecks: (checks: any[]) => void;
+    setChecks: (checks: any[]) => void,
     filterData?: any,
     isCard?: boolean,
+    onListRowClick?: (entity: any) => void,
 }
 
 interface CollectionViewProps{
@@ -67,6 +68,7 @@ interface CollectionViewProps{
     isListViewCard?: boolean,
     defaultFilterData?: any,
     loadingStyles?: any,
+    onListRowClick?: (entity: any) => void,
 }
 
 interface CheckProps{

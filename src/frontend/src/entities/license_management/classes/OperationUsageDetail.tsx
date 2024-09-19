@@ -13,25 +13,22 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AxiosResponse} from "axios";
-import SubscriptionModel, {
+import {
     OperationUsageDetailModel,
-    OperationUsageEntryModel
 } from "@entity/license_management/requests/models/SubscriptionModel";
 
 
-export default interface ISubscriptionRequest {
+export class OperationUsageDetail implements OperationUsageDetailModel{
+    id: number;
 
-    //to get current subscription (in online/offline mode)
-    getCurrent (): Promise<AxiosResponse<SubscriptionModel>>,
+    datetime: number;
 
-    //to set current subscription (in online mode)
-    setCurrent (): Promise<AxiosResponse<SubscriptionModel>>,
+    number: number = 0;
 
-    //to get operation usage info
-    getOperationUsageEntries (): Promise<AxiosResponse<OperationUsageEntryModel[]>>
-
-    //to get operation usage details
-    getOperationUsageDetails (): Promise<AxiosResponse<OperationUsageDetailModel[]>>
+    constructor(operationUsageEntry?: Partial<OperationUsageDetailModel> | null) {
+        this.id = operationUsageEntry ? operationUsageEntry.id : 0;
+        this.number = operationUsageEntry ? operationUsageEntry.number : 0;
+        this.datetime = operationUsageEntry ? operationUsageEntry.datetime : 0;
+    }
 
 }

@@ -27,11 +27,13 @@ const DefaultListRaw: FC<DefaultListRawProps> =
          url,
          id,
          entity,
+         onClick,
      }) => {
         let navigate = useNavigate();
         const hasDisabledStyle = entity.isDisabled || entity.isLoading;
+        const hasOnClickEvent = !!onClick;
         return (
-            <DefaultListRawStyled id={id} title={entity.title || ''} style={{cursor: hasDisabledStyle ? "default" : "pointer", color: hasDisabledStyle ? '#777' : '#000', background: hasDisabledStyle ? '#eee' : 'unset'}} onClick={entity.isDisabled ? () => {} : (e: any) => {
+            <DefaultListRawStyled id={id} title={entity.title || ''} style={{cursor: hasDisabledStyle ? "default" : "pointer", color: hasDisabledStyle ? '#777' : '#000', background: hasDisabledStyle ? '#eee' : 'unset'}} onClick={entity.isDisabled ? () => {} : hasOnClickEvent ? (e) => onClick(entity) : (e: any) => {
                 if (timer) clearTimeout(timer);
                 timer = setTimeout(function() {
                     let element = e.target;
@@ -76,6 +78,7 @@ const DefaultListRaw: FC<DefaultListRawProps> =
     }
 
 DefaultListRaw.defaultProps = {
+    onClick: null,
 }
 
 

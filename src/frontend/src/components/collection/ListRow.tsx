@@ -31,10 +31,11 @@ const ListRow: FC<ListRowProps> =
         collection,
         check,
         checks,
+        onListRowClick,
     }) => {
         const ListRawComponent = collection.ListRawComponent ? collection.ListRawComponent : ListRowStyled;
         return (
-            <ListRawComponent entity={entity} url={collection.getListRawUrl ? collection.getListRawUrl(entity) : ''} id={collection.getListRawUrl ? `raw_${collection.getListRawUrl(entity).split('/').join('_')}` : ''}>
+            <ListRawComponent onClick={onListRowClick || null} entity={entity} url={collection.getListRawUrl ? collection.getListRawUrl(entity) : ''} id={collection.getListRawUrl ? `raw_${collection.getListRawUrl(entity).split('/').join('_')}` : ''}>
                 {collection.hasCheckboxes &&
                 <td>
                     <input type={'checkbox'} checked={isChecked} onChange={(e) => {

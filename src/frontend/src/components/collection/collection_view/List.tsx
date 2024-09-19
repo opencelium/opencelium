@@ -43,6 +43,7 @@ const List: FC<ListViewProps> =
         isRefreshing,
         filterData,
         isCard,
+        onListRowClick,
     }) => {
     const [sortTypes, setSortTypes] = useState<any>({});
     const [visibleEntities, setVisibleEntities] = useState([]);
@@ -169,6 +170,7 @@ const List: FC<ListViewProps> =
                                     collection={collection}
                                     check={check}
                                     checks={checks}
+                                    onListRowClick={onListRowClick}
                                 />
                             )
                         })

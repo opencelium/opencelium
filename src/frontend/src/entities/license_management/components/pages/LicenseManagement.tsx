@@ -31,20 +31,21 @@ import License from "@entity/license_management/classes/License";
 import {Auth} from "@application/classes/Auth";
 import ActivateLicenseComponent from "@entity/license_management/components/activate_license/ActivateLicenseComponent";
 import Button from "@app_component/base/button/Button";
+import {DetailView} from "@entity/license_management/components/detail_view/DetailView";
 
 
 const LicenseManagement: FC<IForm> = ({}) => {
     const dispatch = useAppDispatch();
     const {authUser} = Auth.getReduxState();
     const {
-        currentSubscription, gettingCurrentSubscription
+        currentSubscription, gettingCurrentSubscription,
     } = Subscription.getReduxState();
     const {activationRequestStatus, status, activatingLicense, deletingLicense} = License.getReduxState();
     useEffect(() => {
-        if (activatingLicense === API_REQUEST_STATE.INITIAL || activatingLicense === API_REQUEST_STATE.FINISH) {
+        if (activatingLicense === API_REQUEST_STATE.INITIAL || activatingLicense === API_REQUEST_STATE.FINISH || deletingLicense === API_REQUEST_STATE.FINISH) {
             dispatch(getCurrentSubscription());
         }
-    }, [activatingLicense])
+    }, [activatingLicense, deletingLicense])
     const actions = []
     if (!authUser.userDetail.themeSync){
         actions.push(
@@ -81,6 +82,9 @@ const LicenseManagement: FC<IForm> = ({}) => {
                 <div style={{marginLeft: 20}}>
                     {currentSubscription && <CurrentSubscription subscription={currentSubscription}/>}
                 </div>
+            </FormSection>,
+            <FormSection label={{value: 'Detail View'}}>
+                <DetailView/>
             </FormSection>
         ]
     }
