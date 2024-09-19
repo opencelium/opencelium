@@ -29,6 +29,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -65,12 +66,12 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             }
             ExecutionObj executionObj = executionObjectService.buildObj(data);
             ConnectionExecutor executor = new ConnectionExecutor(executionObj, simpMessagingTemplate);
-
+            long startTime = System.currentTimeMillis();
             executor.start();
             context.put("operationsEx", executor.getOperations());
             // increments current_usage in subscription and saves entity in current_usage_history.
-            long requestSize = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
-            subscriptionService.updateUsage(activeSub, executionObj.getConnection().getConnectionId(), requestSize);
+            long operationUsage = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
+            subscriptionService.updateUsage(activeSub, executionObj.getConnection().getConnectionId(), operationUsage, startTime);
         } catch (ThreadDeath ignored) {
         } finally {
             thread = null;

@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.database.mysql.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,7 +19,8 @@ public class Subscription {
     @Column(name = "license_id", nullable = false, length = 255)
     private String licenseId;
 
-    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "license_key", length = 255, nullable = false)

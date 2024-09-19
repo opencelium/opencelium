@@ -1,9 +1,6 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistory;
-import com.becon.opencelium.backend.database.mysql.entity.Subscription;
+import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
 import com.becon.opencelium.backend.quartz.ResetLimitsJob;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
@@ -12,12 +9,14 @@ import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import org.quartz.*;
+import org.quartz.Scheduler;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -31,16 +30,22 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final Scheduler scheduler;
     private final ConnectionService connectionService;
     private final OperationUsageHistoryService operationUsageHistoryService;
+    private final OperationUsageHistoryDetailService operationUsageHistoryDetailService;
+    private final ActivationRequestService activationRequestService;
     private final Logger logger = LoggerFactory.getLogger(SubscriptionServiceImpl.class);
 
     public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository,
                                    Scheduler scheduler,
                                    @Qualifier("connectionServiceImp") ConnectionService connectionService,
-                                   @Qualifier("operationUsageHistoryServiceImpl") OperationUsageHistoryService operationUsageHistoryService) {
+                                   @Qualifier("operationUsageHistoryServiceImpl") OperationUsageHistoryService operationUsageHistoryService,
+                                   @Qualifier("operationUsageHistoryDetailServiceImp") OperationUsageHistoryDetailService operationUsageHistoryDetailService,
+                                   @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService) {
         this.subscriptionRepository = subscriptionRepository;
         this.scheduler = scheduler;
         this.connectionService =connectionService;
         this.operationUsageHistoryService = operationUsageHistoryService;
+        this.operationUsageHistoryDetailService = operationUsageHistoryDetailService;
+        this.activationRequestService = activationRequestService;
     }
 
     @Override
@@ -81,16 +86,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public void deleteBySubId(String subId) {
         subscriptionRepository.deleteBySubId(subId);
+        activateDefault();
     }
 
     @Override
     public void deleteByLicenseId(String licenseId) {
         subscriptionRepository.deleteByLicenseId(licenseId);
+        activateDefault();
+
     }
 
     @Override
     public boolean exists(String subId) {
-        return false;
+        return subscriptionRepository.existsBySubId(subId);
     }
 
     @Override
@@ -150,10 +158,29 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public void updateUsage(Subscription sub, long connectionId,long requestSize) {
+    public void updateUsage(Subscription sub, long connectionId,long requestSize, long startTime) {
         Connection connection = connectionService.getById(connectionId);
+
+        // Try to find existing operation usage history
         OperationUsageHistory operationUsageHistory = operationUsageHistoryService
-                .createEntity(sub.getSubId(), connection.getTitle(), requestSize);
+                .findByConnectionTitle(connection.getTitle())
+                .map(history -> {
+                    // If history exists, increment its total usage
+                    history.setTotalUsage(history.getTotalUsage() + requestSize);
+                    // Create and add a new OperationUsageHistoryDetail
+                    OperationUsageHistoryDetail newDetail = new OperationUsageHistoryDetail();
+                    newDetail.setOperationUsage(requestSize);
+                    newDetail.setStartDate(Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime());
+                    newDetail.setOperationUsageHistory(history);  // Set the bidirectional relationship
+                    operationUsageHistoryDetailService.save(newDetail);
+                    // Add the new detail to the existing list
+//                    history.getDetails().add(newDetail);
+                    return history;
+                })
+                .orElseGet(() -> {
+                    // If no history exists, create a new one
+                    return operationUsageHistoryService.createNewEntity(sub, connection.getTitle(), requestSize, startTime);
+                });
         operationUsageHistoryService.save(operationUsageHistory);
         if (!isCurrentUsageIsValid(sub)) {
             throw new RuntimeException("Number of operations have been changed manually.");
@@ -229,6 +256,28 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
         } catch (SchedulerException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void activateDefault(){
+        if (getActiveSubs() != null) {
+            return;
+        }
+        try {
+            // Read and decrypt the license
+            String freeLicense = LicenseKeyUtility.readFreeLicense();
+            LicenseKey licenseKey = LicenseKeyUtility.decrypt(freeLicense);
+
+            // Find the subscription by the decrypted license subId
+            Subscription subscription = subscriptionRepository.findBySubId(licenseKey.getSubId()).orElseGet(() -> {
+                // If not found, create a new subscription using the activation request
+                ActivationRequest ar = activationRequestService.getActiveAR();
+                return convertToSub(freeLicense, ar);
+            });
+            subscription.setActive(true);
+            subscriptionRepository.save(subscription);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to activate the default subscription due to an I/O error", e);
         }
     }
 }

@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacValidator;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -16,7 +17,8 @@ public class ActivationRequest implements HmacValidator {
     @Id
     private String id;
 
-    @Column(name = "created_at")
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "hmac", length = 255, nullable = false)
@@ -30,16 +32,16 @@ public class ActivationRequest implements HmacValidator {
     private ActivReqStatus status = ActivReqStatus.PENDING;
 
     @Transient
-    private final String machineUuid = MachineUtility.getMachineUUID();
+    private String machineUuid = MachineUtility.getMachineUUID();
 
     @Transient
-    private final String macAddress = MachineUtility.getMacAddress();
+    private String macAddress = MachineUtility.getMacAddress();
 
     @Transient
-    private final String processorId = MachineUtility.getProcessorId();
+    private String processorId = MachineUtility.getProcessorId();
 
     @Transient
-    private final String computerName = MachineUtility.getComputerName();
+    private String computerName = MachineUtility.getComputerName();
 
     public String getId() {
         return id;
@@ -95,6 +97,22 @@ public class ActivationRequest implements HmacValidator {
 
     public String getComputerName() {
         return computerName;
+    }
+
+    public void setMachineUuid(String machineUuid) {
+        this.machineUuid = machineUuid;
+    }
+
+    public void setMacAddress(String macAddress) {
+        this.macAddress = macAddress;
+    }
+
+    public void setProcessorId(String processorId) {
+        this.processorId = processorId;
+    }
+
+    public void setComputerName(String computerName) {
+        this.computerName = computerName;
     }
 
     @Override

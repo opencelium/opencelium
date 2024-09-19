@@ -484,6 +484,10 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS activity;
 
 --changeset 4.2:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+INSERT INTO widget (id, name, icon, tooltipTranslationKey)
+VALUES (4, 'SUBSCRIPTION_OVERVIEW', 'local_police', 'Subscription Overview');
+
+--changeset 4.2:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 DROP TABLE IF EXISTS subscription;
 DROP TABLE IF EXISTS activation_request;
 DROP TABLE IF EXISTS operation_usage_history;
@@ -496,7 +500,7 @@ CREATE TABLE activation_request(
     INDEX idx_hmac (hmac)
 );
 
---changeset 4.2:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--changeset 4.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 CREATE TABLE subscription(
     id                    VARCHAR(255) PRIMARY KEY,
     subId                 VARCHAR(255) UNIQUE NOT NULL,
@@ -510,25 +514,21 @@ CREATE TABLE subscription(
     FOREIGN KEY (activation_request_id) REFERENCES activation_request (id)
 );
 
---changeset 4.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--changeset 4.2:8 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 CREATE TABLE operation_usage_history(
-    id               INT PRIMARY KEY AUTO_INCREMENT,
+    id               BIGINT PRIMARY KEY AUTO_INCREMENT,
     subId            VARCHAR(255) NOT NULL,
+    license_id       VARCHAR(255) NOT NULL,
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    operation_num    BIGINT       NOT NULL,
+    total_usage      BIGINT       NOT NULL,
     connection_title VARCHAR(255) NOT NULL
 );
 
---changeset 4.2:8 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-INSERT INTO activation_request (id, created_at, hmac, ttl, status)
-VALUES (
-    'a98faa17-c80f-48a6-9a4b-86f20c62063d',              -- id
-    FROM_UNIXTIME(1725978183628 / 1000),                 -- created_at (convert milliseconds to seconds)
-    'pRzM8L+sX/+rZfxxYOkltUJyu4xuz0JP38x2LYFrmbs=',      -- hmac
-    3600,                                                -- ttl (3600 seconds)
-    'PENDING'                                            -- status
-);
-
 --changeset 4.2:9 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-INSERT INTO widget (id, name, icon, tooltipTranslationKey)
-VALUES (4, 'SUBSCRIPTION_OVERVIEW', 'local_police', 'Subscription Overview');
+CREATE TABLE operation_usage_history_detail(
+    id               BIGINT PRIMARY KEY AUTO_INCREMENT,
+    start_date       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    operation_usage  BIGINT       NOT NULL,
+    operation_usage_history_id BIGINT NOT NULL,
+    FOREIGN KEY (operation_usage_history_id) REFERENCES operation_usage_history (id) ON DELETE CASCADE
+);

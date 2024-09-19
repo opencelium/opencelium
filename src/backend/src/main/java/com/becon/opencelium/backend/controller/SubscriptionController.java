@@ -41,10 +41,12 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
     private final ActivationRequestService activationRequestService;
     private final ActivationRequestMapper activationRequestMapper;
+//    private final OperationUsageHistoryService operationUsageHistoryService;
 
     public SubscriptionController(
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
             @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService,
+//            @Qualifier("activationRequestServiceImp") OperationUsageHistoryService operationUsageHistoryService,
             ActivationRequestMapper activationRequestMapper
 
     ) {
@@ -52,6 +54,7 @@ public class SubscriptionController {
         this.activationRequestService = activationRequestService;
         this.remoteApi = RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL);
         this.activationRequestMapper = activationRequestMapper;
+//        this.operationUsageHistoryService = operationUsageHistoryService;
     }
 
     // -------------------- ONLINE -------------------- //
@@ -168,6 +171,16 @@ public class SubscriptionController {
         }
         ActivationRequestDTO dto = activationRequestMapper.toDTO(ar);
         return ResponseEntity.ok().body(dto);
+    }
+
+    @GetMapping("/operation/usage")
+    public ResponseEntity<ActivationRequestDTO> getOperationUsage() {
+//        operationUsageHistoryService.
+//        if (ar == null) {
+//            return ResponseEntity.noContent().build();
+//        }
+//        ActivationRequestDTO dto = activationRequestMapper.toDTO(ar);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(path = "/{subId}")

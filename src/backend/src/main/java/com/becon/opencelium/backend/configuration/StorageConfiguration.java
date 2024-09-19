@@ -38,7 +38,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 import javax.sql.DataSource;
@@ -48,7 +47,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Configuration
@@ -125,9 +123,8 @@ public class StorageConfiguration {
 
     private void setInitialLicense() {
         try {
-            String initLicense = readInitLicense();
-            LicenseKey lk = LicenseKeyUtility.decrypt(initLicense);
-            ActivationRequest ar = activationRequestService.findByHmac(lk.getHmac());
+            ActivationRequest ar = activationRequestService.getFreeAR().orElse(null);
+            String initLicense = LicenseKeyUtility.readFreeLicense();
             Subscription subscription = subscriptionService.convertToSub(initLicense,ar);
             if(!subscriptionService.exists(subscription.getSubId())) {
                 subscriptionService.save(subscription);
@@ -189,7 +186,6 @@ public class StorageConfiguration {
                 });
             }
         });
-
         connectorService.saveAll(connectors);
     }
 
@@ -202,20 +198,6 @@ public class StorageConfiguration {
             } else {
                 System.out.println("Failed to create directory: " + name);
             }
-        }
-    }
-
-    public String readInitLicense() throws IOException {
-        // Load the file from resources/license/ folder
-        Resource resource = resourceLoader.getResource("classpath:license/init-license.txt");
-
-        // Use InputStream to read the content of the file
-        InputStream inputStream = resource.getInputStream();
-
-        // Using BufferedReader and InputStreamReader to read the file content
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            // Collect all lines into a single string without adding '\n'
-            return reader.lines().collect(Collectors.joining());
         }
     }
 }

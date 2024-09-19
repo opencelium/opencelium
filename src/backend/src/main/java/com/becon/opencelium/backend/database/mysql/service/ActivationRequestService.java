@@ -15,5 +15,6 @@ public interface ActivationRequestService {
     ActivationRequest getActiveAR();
     File createFile(String ar, String fileName);
     ActivationRequest findByHmac(String hmac);
+    Optional<ActivationRequest> getFreeAR();
     Optional<ActivationRequest> findById(String id);
 }

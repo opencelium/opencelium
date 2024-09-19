@@ -1,28 +1,27 @@
 package com.becon.opencelium.backend.subscription.utility;
 
-import com.becon.opencelium.backend.database.mysql.service.SubscriptionServiceImpl;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.utility.crypto.HmacValidator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.stream.Collectors;
 
 public class LicenseKeyUtility {
     private static final String ENCRYPTION_ALGO = "RSA";
@@ -115,5 +114,20 @@ public class LicenseKeyUtility {
         X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         return keyFactory.generatePublic(X509publicKey);
+    }
+
+    public static String readFreeLicense() throws IOException {
+        ResourceLoader resourceLoader = new DefaultResourceLoader();
+        // Load the file from resources/license/ folder
+        Resource resource = resourceLoader.getResource("classpath:license/init-license.txt");
+
+        // Use InputStream to read the content of the file
+        InputStream inputStream = resource.getInputStream();
+
+        // Using BufferedReader and InputStreamReader to read the file content
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            // Collect all lines into a single string without adding '\n'
+            return reader.lines().collect(Collectors.joining());
+        }
     }
 }

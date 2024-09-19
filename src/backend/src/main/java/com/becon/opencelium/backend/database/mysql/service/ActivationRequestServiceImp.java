@@ -1,15 +1,19 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
 import com.becon.opencelium.backend.database.mysql.repository.ActivationRequestRepository;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -91,7 +95,28 @@ public class ActivationRequestServiceImp implements ActivationRequestService{
     }
 
     @Override
+    public Optional<ActivationRequest> getFreeAR() {
+        try {
+            ActivationRequest ar = decodeBase64AR(Constant.DEFAULT_AR);
+            return Optional.of(ar);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public Optional<ActivationRequest> findById(String id) {
         return activationRequestRepository.findById(id);
+    }
+
+    // Function to decode a base64 encoded Activation Request JSON string into a Java object
+    public ActivationRequest decodeBase64AR(String base64EncodedAR) throws IOException {
+        // Decode the Base64 string
+        byte[] decodedBytes = Base64.getDecoder().decode(base64EncodedAR);
+        String jsonString = new String(decodedBytes);
+
+        // Parse the JSON string to a Java object
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(jsonString, ActivationRequest.class);
     }
 }

@@ -24,4 +24,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Stri
     Optional<Subscription> findFirstByActiveTrue();
 
     Optional<Subscription> findBySubId(String subId);
+
+    boolean existsBySubId(String subId);
 }
