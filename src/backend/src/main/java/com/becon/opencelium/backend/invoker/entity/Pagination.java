@@ -74,8 +74,11 @@ public class Pagination implements Cloneable {
             }
         }
         if (existsParam(PageParam.SIZE)) {
-            int size = Integer.parseInt(getParamValue(PageParam.SIZE));
-            return currentSize < size;
+            String value = getParamValue(PageParam.SIZE);
+            if (value != null) {
+                int size = Integer.parseInt(value);
+                return currentSize < size;
+            }
         }
         if (existsParam(PageParam.CURSOR)) {
             String result = findParam(PageParam.CURSOR).getValue();
@@ -85,7 +88,7 @@ public class Pagination implements Cloneable {
         }
         if (existsParam(PageParam.LINK)) {
             String url = getParamValue(PageParam.LINK);
-            if (!url.isEmpty()) {
+            if (url != null && !url.isEmpty()) {
                 try {
                     URI uri = new URI(url);
                     return !uri.getRawQuery().contains("null");
