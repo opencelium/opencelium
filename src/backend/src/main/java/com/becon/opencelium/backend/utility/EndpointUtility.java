@@ -10,48 +10,70 @@ public class EndpointUtility {
     private static final String PRE_BRACKET = "['";
     private static final String SUF_BRACKET = "']";
 
-    public static int findIndexOfQuesSign(String endpoint) {
-        if (endpoint == null) {
+    public static int indexOf(String path, char ch, boolean hasWebHook, boolean hasDirectRef){
+        return indexOf(path, ch, true, hasWebHook, hasDirectRef);
+    }
+
+    public static int indexOf(String path, char ch, boolean hasBracket, boolean hasWebhook, boolean hasDirectRef) {
+        if (path == null) {
             return -1;
         }
-        int idx = endpoint.indexOf('?');
+        int idx = path.indexOf(ch);
         if (idx == -1) {
             return idx;
         }
 
-        int pre1 = endpoint.indexOf(PRE_DIRECT_REF);
-        int pre2 = endpoint.indexOf(PRE_WEBHOOK);
-        if (pre1 == -1 && pre2 == -1 || pre1 > idx && pre2 > idx) {
+        int pre1 = path.indexOf(PRE_DIRECT_REF);
+        int pre2 = path.indexOf(PRE_WEBHOOK);
+        int pre3 = path.indexOf(PRE_BRACKET);
+        if ((!hasDirectRef || pre1 == -1)
+                && (!hasWebhook || pre2 == -1)
+                && (!hasBracket || pre3 == -1)
+                ||
+                (!hasDirectRef || pre1 > idx)
+                        && (!hasWebhook || pre2 > idx)
+                        && (!hasBracket || pre3 > idx)) {
             return idx;
         }
 
-        // Hmm, ok, some ref has '?' sign. Then find exactly '?' sign's place.
         Stack<String> stack = new Stack<>();
-        int n = endpoint.length();
+        int n = path.length();
         for (int i = 0; i < n; i++) {
-            if (stack.empty() && endpoint.charAt(i) == '?') {
+            if (stack.empty() && path.charAt(i) == ch) {
                 return i;
             }
 
-            if (i + PRE_DIRECT_REF.length() < n && endpoint.startsWith(PRE_DIRECT_REF, i)) {
+            if (hasDirectRef && i + PRE_DIRECT_REF.length() < n && path.startsWith(PRE_DIRECT_REF, i)) {
                 stack.push(SUF_DIRECT_REF);
                 i += PRE_DIRECT_REF.length() - 1;
-            } else if (i + PRE_WEBHOOK.length() < n && endpoint.startsWith(PRE_WEBHOOK, i)) {
+            } else if (hasWebhook && i + PRE_WEBHOOK.length() < n && path.startsWith(PRE_WEBHOOK, i)) {
                 stack.push(SUF_WEBHOOK);
                 i += PRE_WEBHOOK.length() - 1;
-            } else if (i + SUF_DIRECT_REF.length() < n && endpoint.startsWith(SUF_DIRECT_REF, i)) {
+            } else if (hasBracket && i + PRE_BRACKET.length() < n && path.startsWith(PRE_BRACKET, i)) {
+                stack.push(SUF_BRACKET);
+                i += PRE_BRACKET.length() - 1;
+            } else if (hasDirectRef && i + SUF_DIRECT_REF.length() < n && path.startsWith(SUF_DIRECT_REF, i)) {
                 if (!stack.empty() && stack.peek().equals(SUF_DIRECT_REF)) {
                     stack.pop();
                     i += SUF_DIRECT_REF.length() - 1;
                 }
-            } else if (i + SUF_WEBHOOK.length() < n && endpoint.startsWith(SUF_WEBHOOK, i)) {
+            } else if (hasWebhook && i + SUF_WEBHOOK.length() < n && path.startsWith(SUF_WEBHOOK, i)) {
                 if (!stack.empty() && stack.peek().equals(SUF_WEBHOOK)) {
                     stack.pop();
                     i += SUF_WEBHOOK.length() - 1;
                 }
+            } else if (hasBracket && i + SUF_BRACKET.length() < n && path.startsWith(SUF_BRACKET, i)) {
+                if (!stack.empty() && stack.peek().equals(SUF_BRACKET)) {
+                    stack.pop();
+                    i += SUF_BRACKET.length() - 1;
+                }
             }
         }
         return -1;
+    }
+
+    public static int findIndexOfQuesSign(String endpoint) {
+        return indexOf(endpoint, '?', false, true, true);
     }
 
     // response example : {{"name": "Obidjon"},{"role":"admin}}
