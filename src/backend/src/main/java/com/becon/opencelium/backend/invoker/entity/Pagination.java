@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -133,7 +134,13 @@ public class Pagination implements Cloneable {
                 .filter(paramRule -> paramRule.getRef() != null)
                 .filter(paramRule -> paramRule.getRef().split("\\.",2)[0].equals("response"))
                 .forEach(paramRule -> {
-                    String value = httpRepository.findValueByPath(paramRule.getRef());
+                    String value;
+                    try {
+                        value = httpRepository.findValueByPath(paramRule.getRef());
+                    } catch (PathNotFoundException ex) {
+                        value = null;
+                    }
+
                     if (paramRule.getParam().equals(PageParam.RESULT)) {
                         if (paramRule.getValue() == null || paramRule.getValue().isEmpty()) {
                             paramRule.setValue(response.getBody());
