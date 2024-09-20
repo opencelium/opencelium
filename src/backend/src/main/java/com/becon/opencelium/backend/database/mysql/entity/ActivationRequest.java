@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacValidator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -17,6 +18,7 @@ public class ActivationRequest implements HmacValidator {
     @Id
     private String id;
 
+    @JsonIgnore
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

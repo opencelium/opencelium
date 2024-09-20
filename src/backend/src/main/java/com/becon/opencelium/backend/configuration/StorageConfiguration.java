@@ -127,6 +127,7 @@ public class StorageConfiguration {
             String initLicense = LicenseKeyUtility.readFreeLicense();
             Subscription subscription = subscriptionService.convertToSub(initLicense,ar);
             if(!subscriptionService.exists(subscription.getSubId())) {
+                activationRequestService.save(ar);
                 subscriptionService.save(subscription);
             }
         } catch (Exception e) {
