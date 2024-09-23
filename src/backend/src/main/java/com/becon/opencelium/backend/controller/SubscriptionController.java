@@ -1,10 +1,14 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
+import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistory;
+import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistoryDetail;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.mapper.mysql.ActivationRequestMapper;
+import com.becon.opencelium.backend.resource.subs.OperationUsageDetailsDto;
+import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.ActivationRequestDTO;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
@@ -22,6 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,12 +46,12 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
     private final ActivationRequestService activationRequestService;
     private final ActivationRequestMapper activationRequestMapper;
-//    private final OperationUsageHistoryService operationUsageHistoryService;
+    private final OperationUsageHistoryService operationUsageHistoryService;
 
     public SubscriptionController(
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
             @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService,
-//            @Qualifier("activationRequestServiceImp") OperationUsageHistoryService operationUsageHistoryService,
+            @Qualifier("operationUsageHistoryServiceImpl") OperationUsageHistoryService operationUsageHistoryService,
             ActivationRequestMapper activationRequestMapper
 
     ) {
@@ -54,7 +59,7 @@ public class SubscriptionController {
         this.activationRequestService = activationRequestService;
         this.remoteApi = RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL);
         this.activationRequestMapper = activationRequestMapper;
-//        this.operationUsageHistoryService = operationUsageHistoryService;
+        this.operationUsageHistoryService = operationUsageHistoryService;
     }
 
     // -------------------- ONLINE -------------------- //
@@ -174,13 +179,23 @@ public class SubscriptionController {
     }
 
     @GetMapping("/operation/usage")
-    public ResponseEntity<ActivationRequestDTO> getOperationUsage() {
-//        operationUsageHistoryService.
-//        if (ar == null) {
-//            return ResponseEntity.noContent().build();
-//        }
-//        ActivationRequestDTO dto = activationRequestMapper.toDTO(ar);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<PaginatedDto> getOperationUsage(@RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "10") int size) {
+
+        Page<OperationUsageHistory> usageHistories = operationUsageHistoryService.getAllUsage(page, size);
+        PaginatedDto dto = operationUsageHistoryService.toPaginatedDto(usageHistories);
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/operation/usage/{usageId}/details")
+    public ResponseEntity<PaginatedDto> getOperationUsageDetails(
+                                                                    @RequestParam(defaultValue = "0") int page,
+                                                                    @RequestParam(defaultValue = "10") int size,
+                                                                    @PathVariable String usageId) {
+
+        Page<OperationUsageHistoryDetail> usageDetails = operationUsageHistoryService.getAllUsageDetails(page, size);
+        PaginatedDto dto = operationUsageHistoryService.toUsageDetailsDto(usageDetails);
+        return ResponseEntity.ok(dto);
     }
 
     @DeleteMapping(path = "/{subId}")

@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.database.mysql.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -19,6 +20,7 @@ public class OperationUsageHistory {
     @Column(name = "subId", nullable = false, length = 255)
     private String subId;
 
+    @JsonIgnore
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP", updatable = false)
     private LocalDateTime createdAt;

@@ -4,7 +4,13 @@ import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistory;
 import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistoryDetail;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.repository.OperationUsageHistoryRepository;
+import com.becon.opencelium.backend.resource.subs.OperationUsageHistoryDto;
+import com.becon.opencelium.backend.resource.subs.OperationUsageDetailsDto;
+import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -30,6 +36,17 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     @Override
     public List<OperationUsageHistory> findAll() {
         return operationUsageHistoryRepository.findAll();
+    }
+
+    @Override
+    public Page<OperationUsageHistory> getAllUsage(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return operationUsageHistoryRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<OperationUsageHistoryDetail> getAllUsageDetails(int page, int size) {
+        return operationUsageHistoryDetailServiceImp.getAllUsageDetails(page, size);
     }
 
     @Override
@@ -72,5 +89,15 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     @Override
     public Optional<OperationUsageHistory> findByConnectionTitle(String title) {
         return operationUsageHistoryRepository.findByConnectionTitle(title);
+    }
+
+    @Override
+    public PaginatedDto<OperationUsageHistory, OperationUsageHistoryDto> toPaginatedDto(Page<OperationUsageHistory> page) {
+        return new PaginatedDto<OperationUsageHistory, OperationUsageHistoryDto>(page, OperationUsageHistoryDto::new);
+    }
+
+    @Override
+    public PaginatedDto<OperationUsageHistoryDetail, OperationUsageDetailsDto> toUsageDetailsDto(Page<OperationUsageHistoryDetail> page) {
+        return new PaginatedDto<OperationUsageHistoryDetail, OperationUsageDetailsDto>(page, OperationUsageDetailsDto::new);
     }
 }
