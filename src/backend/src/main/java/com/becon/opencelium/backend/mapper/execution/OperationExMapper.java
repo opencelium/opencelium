@@ -408,10 +408,17 @@ public class OperationExMapper {
         for (Map.Entry<String, Object> entry : fields.entrySet()) {
             LinkedList<String> hierarchy = new LinkedList<>();
             hierarchy.add(entry.getKey());
+            if (body.getData().equals("graphql")) {
+                String queryFieldName = "query"; // Is this the only field that could be used as a query?
+                Map<String, Object> map = body.getFields();
+                if (map.containsKey(queryFieldName) && map.get(queryFieldName) instanceof String query) {
+                    map.put(queryFieldName, query.replace("\n", ""));
+                }
+            }
             if (body.getFormat().equals("xml")) {
                 String name = entry.getKey();
-                if (name.contains(":")) {
-                    name = name.split(":")[1];
+                if (name.matches("^[a-zA-Z ]+:.*$")) {
+                    name = name.substring(name.indexOf(":") + 1);
                 }
                 props.put(name, getSchemaFromObjectXML(hierarchy, entry.getValue(), connectionId, methodName));
             } else {
