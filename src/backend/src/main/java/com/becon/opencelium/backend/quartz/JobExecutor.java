@@ -24,6 +24,8 @@ import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import org.quartz.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -38,6 +40,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final SubscriptionService subscriptionService;
+    private final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
 
     private Thread thread;
 
@@ -71,6 +74,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             context.put("operationsEx", executor.getOperations());
             // increments current_usage in subscription and saves entity in current_usage_history.
             long operationUsage = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
+            logger.info("Operation usage for Connection " + executionObj.getConnection().getConnectionName() + " is " + operationUsage);
             subscriptionService.updateUsage(activeSub, executionObj.getConnection().getConnectionId(), operationUsage, startTime);
         } catch (ThreadDeath ignored) {
         } finally {
