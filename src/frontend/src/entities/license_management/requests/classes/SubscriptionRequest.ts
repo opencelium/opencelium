@@ -6,6 +6,7 @@ import SubscriptionModel, {
     OperationUsageDetailModel,
     OperationUsageEntryModel
 } from "@entity/license_management/requests/models/SubscriptionModel";
+import {PageResponse} from "@application/requests/interfaces/IResponse";
 
 export default class SubscriptionRequest extends Request implements ISubscriptionRequest {
 
@@ -22,14 +23,12 @@ export default class SubscriptionRequest extends Request implements ISubscriptio
         return super.post<SubscriptionModel>({});
     }
 
-    async getOperationUsageEntries(): Promise<AxiosResponse<OperationUsageEntryModel[]>>{
-        this.endpoint = '/operation/usage';
-        return super.get<OperationUsageEntryModel[]>();
+    async getOperationUsageEntries(): Promise<AxiosResponse<PageResponse<OperationUsageEntryModel>>>{
+        return super.get<PageResponse<OperationUsageEntryModel>>();
     }
 
-    async getOperationUsageDetails(): Promise<AxiosResponse<OperationUsageDetailModel[]>>{
-        this.endpoint = '/operation/usage/details';
-        return super.get<OperationUsageDetailModel[]>();
+    async getOperationUsageDetails(): Promise<AxiosResponse<PageResponse<OperationUsageDetailModel>>>{
+        return super.get<PageResponse<OperationUsageDetailModel>>();
     }
 
 }

@@ -12,31 +12,36 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+import React from 'react';
 import ListCollection from "@application/classes/ListCollection";
 import {ListProp} from "@application/interfaces/IListCollection";
 import {OperationUsageDetailModel} from "@entity/license_management/requests/models/SubscriptionModel";
 import {OperationUsageDetailProps} from "@entity/license_management/interfaces/ISubscription";
 import {OperationUsageDetail} from "@entity/license_management/classes/OperationUsageDetail";
+import {convertTimeForCronExpression} from "@application/utils/utils";
 
 class OperationUsageDetails extends ListCollection<OperationUsageDetailProps>{
     name: string = 'operation_usage_details';
     entities: OperationUsageDetailModel[];
     keyPropName: OperationUsageDetailProps ='';
-    sortingProps: OperationUsageDetailProps[] = ['datetime'];
     listProps: ListProp<OperationUsageDetailProps>[] = [
         {
-            propertyKey: 'datetime',
+            propertyKey: 'startDate',
             width: '50%',
+            getValue: (entity: OperationUsageDetailModel) => {
+                return (
+                    <span>{convertTimeForCronExpression(entity.startDate)}</span>
+                )
+            }
         },
         {
-            propertyKey: 'number',
+            propertyKey: 'operationUsage',
             width: '50%',
         },
     ];
     translations = {
-        datetime: 'Datetime',
-        number: 'API Operations',
+        startDate: 'Start date',
+        operationUsage: 'API Operations',
     };
     hasSearch = false;
     hasActions = false;
