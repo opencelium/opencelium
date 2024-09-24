@@ -12,8 +12,8 @@ import java.util.Optional;
 public interface OperationUsageHistoryService {
     void save(OperationUsageHistory operationUsageHistory);
     List<OperationUsageHistory> findAll();
-    Page<OperationUsageHistory> getAllUsage(int page, int size);
-    Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(String usageId,int page, int size);
+    Page<OperationUsageHistory> getAllUsage(int page, int size, String[] sort);
+    Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(String usageId,int page, int size, String[] sort);
     Optional<OperationUsageHistory> findById(Long id);
     OperationUsageHistory createNewEntity(Subscription subId, String connectionName, long requestSize, long startTime);
 
