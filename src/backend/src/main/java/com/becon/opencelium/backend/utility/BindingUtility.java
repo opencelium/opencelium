@@ -153,7 +153,7 @@ public class BindingUtility {
             path = endpoint.substring(0, indexOfQuestionSign);
         }
 
-        List<String> subPaths = EndpointUtility.splitByDelimiter(path,'/');
+        List<String> subPaths = EndpointUtility.splitByDelimiter(path, '/');
         out:
         for (int i = 0; i < subPaths.size(); i++) {
             if (subPaths.get(i).matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
@@ -211,7 +211,7 @@ public class BindingUtility {
                     continue;
                 }
                 fieldPaths.remove(0);
-                String index = name.substring(name.indexOf('[') + 1, name.indexOf(']'));
+                String index = name.substring(name.lastIndexOf('[') + 1, name.lastIndexOf(']'));
                 resultMap.put(entry.getKey(), processJSON(entry.getValue(), fieldPaths, id, index));
             } else {
                 resultMap.put(entry.getKey(), entry.getValue());
@@ -253,9 +253,12 @@ public class BindingUtility {
                 List<Object> list = (List<Object>) value;
                 if (list.get(0) instanceof Map<?, ?>) { // array of objects
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
-                    return mapList.stream().map(f -> doWithJsonBody(f, fieldPaths, id));
+                    return mapList.stream()
+                            .map(f -> doWithJsonBody(f, fieldPaths, id));
                 } else { // array of primitives
-                    return Collections.singletonList(list.stream().map(f -> putIdToBody(f, id)).toList());
+                    return list.stream()
+                            .map(f -> putIdToBody(f, id))
+                            .toList();
                 }
             }
         }
@@ -276,7 +279,7 @@ public class BindingUtility {
                 resultMap.put(entry.getKey(), processXML(entry.getValue(), fieldPaths, id, null));
             } else if (name.matches(entry.getKey() + "\\[.*]")) { //array
                 fieldPaths.remove(0);
-                String index = name.substring(name.indexOf('[') + 1, name.indexOf(']'));
+                String index = name.substring(name.lastIndexOf('[') + 1, name.lastIndexOf(']'));
                 resultMap.put(entry.getKey(), processXML(entry.getValue(), fieldPaths, id, index));
             } else {
                 resultMap.put(entry.getKey(), entry.getValue());
@@ -288,7 +291,7 @@ public class BindingUtility {
     @SuppressWarnings("unchecked")
     private static Object processXML(Object value, List<String> fieldPaths, String id, String index) {
         if (index == null) {
-            if (fieldPaths.isEmpty() || fieldPaths.size() == 1 && fieldPaths.get(0).startsWith("@")) { // primitive type
+            if (fieldPaths.isEmpty() || fieldPaths.size() == 1 && EndpointUtility.startsWith(fieldPaths.get(0), "@")) { // primitive type
                 if (value instanceof Map<?, ?>) {
                     Map<String, Object> map = (Map<String, Object>) value;
                     if (map.size() == 2 && map.containsKey(ocValue) && map.containsKey(ocAttributes)) {
@@ -331,9 +334,12 @@ public class BindingUtility {
                 List<Object> list = (List<Object>) value;
                 if (list.get(0) instanceof Map<?, ?>) { // array of objects
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
-                    return mapList.stream().map(f -> doWithXMLBody(f, fieldPaths, id));
+                    return mapList.stream()
+                            .map(f -> doWithXMLBody(f, fieldPaths, id));
                 } else { // array of primitives
-                    return Collections.singletonList(list.stream().map(f -> putIdToBody(f, id)).toList());
+                    return list.stream()
+                            .map(f -> putIdToBody(f, id))
+                            .toList();
                 }
             }
         }
