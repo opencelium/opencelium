@@ -23,8 +23,8 @@ public class OperationUsageHistoryDetailServiceImp implements OperationUsageHist
     }
 
     @Override
-    public Page<OperationUsageHistoryDetail> getAllUsageDetails(int page, int size) {
+    public Page<OperationUsageHistoryDetail> getAllUsageDetailsByOperationUsageHistoryId(String usageId,int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return operationUsageHistoryDetailRepository.findAll(pageable);
+        return operationUsageHistoryDetailRepository.findAllByOperationUsageHistoryId(usageId,pageable);
     }
 }

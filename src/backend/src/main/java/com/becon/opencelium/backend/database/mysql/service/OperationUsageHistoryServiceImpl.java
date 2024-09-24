@@ -45,8 +45,8 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     }
 
     @Override
-    public Page<OperationUsageHistoryDetail> getAllUsageDetails(int page, int size) {
-        return operationUsageHistoryDetailServiceImp.getAllUsageDetails(page, size);
+    public Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(String usageId, int page, int size) {
+        return operationUsageHistoryDetailServiceImp.getAllUsageDetailsByOperationUsageHistoryId(usageId,page, size);
     }
 
     @Override

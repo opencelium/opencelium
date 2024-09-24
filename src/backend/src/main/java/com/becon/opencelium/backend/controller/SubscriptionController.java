@@ -7,7 +7,6 @@ import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.mapper.mysql.ActivationRequestMapper;
-import com.becon.opencelium.backend.resource.subs.OperationUsageDetailsDto;
 import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.ActivationRequestDTO;
@@ -189,10 +188,11 @@ public class SubscriptionController {
 
     @GetMapping("/operation/usage/{usageId}/details")
     public ResponseEntity<PaginatedDto> getOperationUsageDetails(
-                                                                    @RequestParam(defaultValue = "0") int page,
-                                                                    @RequestParam(defaultValue = "10") int size,
-                                                                    @PathVariable String usageId) {
-        Page<OperationUsageHistoryDetail> usageDetails = operationUsageHistoryService.getAllUsageDetails(page, size);
+                                                                @RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "10") int size,
+                                                                @PathVariable String usageId) {
+        Page<OperationUsageHistoryDetail> usageDetails = operationUsageHistoryService
+                .getAllUsageDetailsByUsageId(usageId,page, size);
         PaginatedDto dto = operationUsageHistoryService.toUsageDetailsDto(usageDetails);
         return ResponseEntity.ok(dto);
     }

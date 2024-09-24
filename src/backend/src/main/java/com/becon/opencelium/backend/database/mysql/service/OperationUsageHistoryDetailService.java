@@ -6,5 +6,5 @@ import org.springframework.data.domain.Page;
 
 public interface OperationUsageHistoryDetailService {
     void save(OperationUsageHistoryDetail detail);
-    Page<OperationUsageHistoryDetail> getAllUsageDetails(int page, int size);
+    Page<OperationUsageHistoryDetail> getAllUsageDetailsByOperationUsageHistoryId(String usageId,int page, int size);
 }
