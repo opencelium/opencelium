@@ -21,6 +21,8 @@ import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
 import com.becon.opencelium.backend.security.DaoUserDetailsService;
 import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,7 +59,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -89,6 +90,8 @@ public class SecurityConfiguration {
 
     @Autowired
     private LdapProperties properties;
+
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfiguration.class);
 
 
     @Bean
@@ -140,7 +143,7 @@ public class SecurityConfiguration {
                     return super.doAuthentication(authentication);
                 } catch (InternalAuthenticationServiceException e) {
                     // move next authentication if LDAP server is not available
-                    // TODO: should do LOG(warn) if LDAP server is not available?
+                    logger.warn("LDAP server is not configured or not running: " + e.getMessage());
                     throw new ProviderNotFoundException(e.getMessage());
                 }
             }
