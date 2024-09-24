@@ -248,6 +248,10 @@ public class ConnectorExecutor {
             responseEntity = new ResponseEntity<>(paginatedBody,
                     responseEntity.getHeaders(),
                     responseEntity.getStatusCode());
+
+            // remove reference for used pagination
+            pagination = null;
+            executionManager.setPagination(pagination);
         }
         logger.logAndSend("Response : " + convertToStringIfNecessary(responseEntity.getBody()));
 
