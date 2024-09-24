@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -73,8 +74,11 @@ public class Pagination implements Cloneable {
             }
         }
         if (existsParam(PageParam.SIZE)) {
-            int size = Integer.parseInt(getParamValue(PageParam.SIZE));
-            return currentSize < size;
+            String value = getParamValue(PageParam.SIZE);
+            if (value != null) {
+                int size = Integer.parseInt(value);
+                return currentSize < size;
+            }
         }
         if (existsParam(PageParam.CURSOR)) {
             String result = findParam(PageParam.CURSOR).getValue();
@@ -84,7 +88,7 @@ public class Pagination implements Cloneable {
         }
         if (existsParam(PageParam.LINK)) {
             String url = getParamValue(PageParam.LINK);
-            if (!url.isEmpty()) {
+            if (url != null && !url.isEmpty()) {
                 try {
                     URI uri = new URI(url);
                     return !uri.getRawQuery().contains("null");
@@ -133,7 +137,13 @@ public class Pagination implements Cloneable {
                 .filter(paramRule -> paramRule.getRef() != null)
                 .filter(paramRule -> paramRule.getRef().split("\\.",2)[0].equals("response"))
                 .forEach(paramRule -> {
-                    String value = httpRepository.findValueByPath(paramRule.getRef());
+                    String value;
+                    try {
+                        value = httpRepository.findValueByPath(paramRule.getRef());
+                    } catch (PathNotFoundException ex) {
+                        value = null;
+                    }
+
                     if (paramRule.getParam().equals(PageParam.RESULT)) {
                         if (paramRule.getValue() == null || paramRule.getValue().isEmpty()) {
                             paramRule.setValue(response.getBody());
