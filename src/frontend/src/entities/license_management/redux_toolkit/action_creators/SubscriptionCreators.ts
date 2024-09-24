@@ -39,7 +39,7 @@ export const getOperationUsageDetails = createAsyncThunk(
         try {
             const page = 0;
             const size = 10;
-            const request = new SubscriptionRequest({endpoint: `/operation/usage/${entryId}/details?page=${page}&size=${size}`});
+            const request = new SubscriptionRequest({endpoint: `/operation/usage/${entryId}/details?page=${page}&size=${size}&sort=startDate,desc`});
             const response = await request.getOperationUsageDetails();
             return response.data.content;
         } catch(e){
