@@ -35,6 +35,13 @@ export interface IResponse{
     result?: boolean | any,
 }
 
+export interface PageResponse<Entry> {
+    content: Entry[],
+    currentPage: number,
+    totalPages: number,
+    totalItems: number,
+}
+
 export interface SettingsProps{
     withoutNotification?: boolean,
 }

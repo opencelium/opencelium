@@ -23,19 +23,11 @@ export const getOperationUsageEntries = createAsyncThunk(
     'subscription/get/operation/usage',
     async(data: never, thunkAPI) => {
         try {
-            const testData: OperationUsageEntryModel[] = [{
-                id: 1,
-                title: 'idoit-otrs',
-                number: 1003,
-            },{
-                id: 2,
-                title: 'idoit-checkmk',
-                number: 231,
-            }]
-            return testData;
-            const request = new SubscriptionRequest();
+            const page = 0;
+            const size = 10000;
+            const request = new SubscriptionRequest({endpoint: `/operation/usage?page=${page}&size=${size}`});
             const response = await request.getOperationUsageEntries();
-            return response.data;
+            return response.data.content;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -45,29 +37,11 @@ export const getOperationUsageDetails = createAsyncThunk(
     'subscription/get/operation/usage/details',
     async(entryId: number, thunkAPI) => {
         try {
-            const testData1: OperationUsageDetailModel[] = [{
-                id: 1,
-                datetime: + new Date(),
-                number: 500,
-            },{
-                id: 2,
-                datetime: + new Date(),
-                number: 503,
-            }]
-            const testData2: OperationUsageDetailModel[] = [{
-                id: 1,
-                datetime: + new Date(),
-                number: 120,
-            },{
-                id: 2,
-                datetime: + new Date(),
-                number: 111,
-            }]
-            const testData = [testData1, testData2]
-            return testData[entryId - 1];
-            const request = new SubscriptionRequest();
+            const page = 0;
+            const size = 10;
+            const request = new SubscriptionRequest({endpoint: `/operation/usage/${entryId}/details?page=${page}&size=${size}`});
             const response = await request.getOperationUsageDetails();
-            return response.data;
+            return response.data.content;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

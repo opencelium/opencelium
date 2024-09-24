@@ -26,6 +26,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import OperationUsageDetails from "@entity/license_management/collections/OperationUsageDetails";
 import Button from "@app_component/base/button/Button";
 import {ConnectorPermissions} from "@entity/connector/constants";
+import {OperationUsageEntryModel} from "@entity/license_management/requests/models/SubscriptionModel";
 
 const DetailView = () => {
     const dispatch = useAppDispatch();
@@ -34,7 +35,7 @@ const DetailView = () => {
         operationUsageDetails, operationUsageEntries
     } = Subscription.getReduxState();
     const [page, setPage] = useState<'entries' | 'details'>('entries');
-    const [currentEntry, setCurrentEntry] = useState<any>(null);
+    const [currentEntry, setCurrentEntry] = useState<null | OperationUsageEntryModel>(null);
     const [detailsShouldBeUpdated, setDetailsShouldBeUpdated] = useState(false);
     const [entriesShouldBeUpdated, setEntriesShouldBeUpdated] = useState(false);
     useEffect(() => {
@@ -83,7 +84,7 @@ const DetailView = () => {
                 <div style={{width: '100%'}}>
                     <div style={{display: 'flex', justifyContent: 'space-between'}}>
                         <div style={{fontSize: '20px'}}>
-                            {currentEntry?.title || ''}
+                            {currentEntry?.connectionTitle || ''}
                         </div>
                         <Button
                             key={'back_button'}

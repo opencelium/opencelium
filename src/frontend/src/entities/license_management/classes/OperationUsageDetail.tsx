@@ -19,16 +19,17 @@ import {
 
 
 export class OperationUsageDetail implements OperationUsageDetailModel{
+
     id: number;
 
-    datetime: number;
+    startDate: number;
 
-    number: number = 0;
+    operationUsage: number = 0;
 
     constructor(operationUsageEntry?: Partial<OperationUsageDetailModel> | null) {
         this.id = operationUsageEntry ? operationUsageEntry.id : 0;
-        this.number = operationUsageEntry ? operationUsageEntry.number : 0;
-        this.datetime = operationUsageEntry ? operationUsageEntry.datetime : 0;
+        this.operationUsage = operationUsageEntry ? operationUsageEntry.operationUsage : 0;
+        this.startDate = operationUsageEntry ? operationUsageEntry.startDate : 0;
     }
 
 }
