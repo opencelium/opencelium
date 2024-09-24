@@ -192,7 +192,6 @@ public class SubscriptionController {
                                                                     @RequestParam(defaultValue = "0") int page,
                                                                     @RequestParam(defaultValue = "10") int size,
                                                                     @PathVariable String usageId) {
-
         Page<OperationUsageHistoryDetail> usageDetails = operationUsageHistoryService.getAllUsageDetails(page, size);
         PaginatedDto dto = operationUsageHistoryService.toUsageDetailsDto(usageDetails);
         return ResponseEntity.ok(dto);
