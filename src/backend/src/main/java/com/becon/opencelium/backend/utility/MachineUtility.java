@@ -11,7 +11,8 @@ public class MachineUtility {
     public static final String CMD_GET_UUID_LIN_OR_MAC = "cat /etc/machine-id";
 
     public static final String CMD_GET_Proc_ID_WIN = "wmic cpu get ProcessorId";
-    public static final String CMD_GET_Proc_ID_LINUX = "lscpu | grep 'Serial'";
+//    public static final String CMD_GET_Proc_ID_LINUX = "lscpu | grep 'Serial'";
+    public static final String[] CMD_GET_Proc_ID_LINUX = { "/bin/sh", "-c", "dmidecode -t processor | grep ID" };
     public static final String CMD_GET_Proc_ID_MAC = "system_profiler SPHardwareDataType | grep 'Serial Number'";
 
     private MachineUtility() {}
@@ -134,9 +135,6 @@ public class MachineUtility {
     }
 
     public static String getStringForHmacEncode() {
-        MachineUtility.getMachineUUID();
-        MachineUtility.getMacAddress();
-        MachineUtility.getProcessorId();
         return MachineUtility.getMachineUUID()
                 + MachineUtility.getMacAddress()
                 + MachineUtility.getProcessorId()
