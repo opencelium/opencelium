@@ -50,5 +50,6 @@ public interface InvokerService {
     boolean existsByFileName(String fileName);
     void deleteInvokerFile(String name);
     void refresh();
+    List<Invoker> synchronise();
 //    Object findField(String field, Map<String, Object> body);
 }

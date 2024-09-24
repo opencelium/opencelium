@@ -359,6 +359,26 @@ public class InvokerController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Synchronises invokers in memory with invokers on the server and returns all invokers")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Success"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/synchronisation")
+    public ResponseEntity<List<InvokerDTO>> synchronise() {
+        List<InvokerDTO> invokerDTOS = invokerService.synchronise()
+                .stream().map(invokerMapper::toDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(invokerDTOS);
+    }
+
     private static Document convertStringToXMLDocument(String xmlString) {
         //Parser that produces DOM object trees from XML content
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
