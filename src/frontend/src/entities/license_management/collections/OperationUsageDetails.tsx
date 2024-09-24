@@ -18,19 +18,18 @@ import {ListProp} from "@application/interfaces/IListCollection";
 import {OperationUsageDetailModel} from "@entity/license_management/requests/models/SubscriptionModel";
 import {OperationUsageDetailProps} from "@entity/license_management/interfaces/ISubscription";
 import {OperationUsageDetail} from "@entity/license_management/classes/OperationUsageDetail";
-import {convertTimeForCronExpression} from "@application/utils/utils";
+import {convertTimeForTotalUsage} from "@application/utils/utils";
 
 class OperationUsageDetails extends ListCollection<OperationUsageDetailProps>{
-    name: string = 'operation_usage_details';
     entities: OperationUsageDetailModel[];
-    keyPropName: OperationUsageDetailProps ='';
+    keyPropName: OperationUsageDetailProps ='startDate';
     listProps: ListProp<OperationUsageDetailProps>[] = [
         {
             propertyKey: 'startDate',
             width: '50%',
             getValue: (entity: OperationUsageDetailModel) => {
                 return (
-                    <span>{convertTimeForCronExpression(entity.startDate)}</span>
+                    <span>{convertTimeForTotalUsage(entity.startDate)}</span>
                 )
             }
         },

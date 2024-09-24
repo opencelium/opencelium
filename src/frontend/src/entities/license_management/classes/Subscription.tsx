@@ -15,7 +15,6 @@ export default class Subscription {
     static getMonthlyPeriod(comingDate: number): string {
         const date = new Date(comingDate);
         const inputDay = date.getDate();
-        console.log(inputDay);
         // End date is one day before the input day, same month and year as today
         const todayDate = new Date();
         const inputTodayDay = todayDate.getDate();

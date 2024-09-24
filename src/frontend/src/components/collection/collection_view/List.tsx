@@ -44,6 +44,7 @@ const List: FC<ListViewProps> =
         filterData,
         isCard,
         onListRowClick,
+        hasPaginationProps,
     }) => {
     const [sortTypes, setSortTypes] = useState<any>({});
     const [visibleEntities, setVisibleEntities] = useState([]);
@@ -57,9 +58,11 @@ const List: FC<ListViewProps> =
         setSortTypes(newSortTypes)
     }, []);
     useEffect(() => {
-        let newVisibleEntities = collection.getEntitiesByPage(searchValue, currentPage, entitiesPerPage, filterData);
-        setVisibleEntities(newVisibleEntities);
-        defineIsAllChecked(checks, newVisibleEntities);
+        if (!hasPaginationProps) {
+            let newVisibleEntities = collection.getEntitiesByPage(searchValue, currentPage, entitiesPerPage, filterData);
+            setVisibleEntities(newVisibleEntities);
+            defineIsAllChecked(checks, newVisibleEntities);
+        }
     }, [currentPage, searchValue, sortTypes, entitiesPerPage, collection.entities.length, shouldBeUpdated, filterData]);
     const toggleCheckAll = (newIsAllChecked: boolean) => {
         let newChecks : any = {};

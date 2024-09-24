@@ -21,13 +21,11 @@ export const getCurrentSubscription = createAsyncThunk(
 )
 export const getOperationUsageEntries = createAsyncThunk(
     'subscription/get/operation/usage',
-    async(data: never, thunkAPI) => {
+    async(data: {page: number, size: number} = {page: 0, size: 10000}, thunkAPI) => {
         try {
-            const page = 0;
-            const size = 10000;
-            const request = new SubscriptionRequest({endpoint: `/operation/usage?page=${page}&size=${size}`});
+            const request = new SubscriptionRequest({endpoint: `/operation/usage?page=${data.page}&size=${data.size}`});
             const response = await request.getOperationUsageEntries();
-            return response.data.content;
+            return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -35,13 +33,11 @@ export const getOperationUsageEntries = createAsyncThunk(
 )
 export const getOperationUsageDetails = createAsyncThunk(
     'subscription/get/operation/usage/details',
-    async(entryId: number, thunkAPI) => {
+    async(data: {page: number, size: number, entryId: number} = {page: 0, size: 5, entryId: 0}, thunkAPI) => {
         try {
-            const page = 0;
-            const size = 10;
-            const request = new SubscriptionRequest({endpoint: `/operation/usage/${entryId}/details?page=${page}&size=${size}`});
+            const request = new SubscriptionRequest({endpoint: `/operation/usage/${data.entryId}/details?page=${data.page}&size=${data.size}&sort=startDate,desc`});
             const response = await request.getOperationUsageDetails();
-            return response.data.content;
+            return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

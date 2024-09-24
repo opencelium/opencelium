@@ -39,6 +39,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
     const {authUser} = Auth.getReduxState();
     const {
         currentSubscription, gettingCurrentSubscription,
+        gettingOperationUsageDetails, gettingOperationUsageEntries,
     } = Subscription.getReduxState();
     const {activationRequestStatus, status, activatingLicense, deletingLicense} = License.getReduxState();
     useEffect(() => {
@@ -50,22 +51,24 @@ const LicenseManagement: FC<IForm> = ({}) => {
     if (!authUser.userDetail.themeSync){
         actions.push(
             <Button
+                key={'download'}
                 icon={'file_download'}
                 label={'Generate Activation Request'}
                 handleClick={() => dispatch(generateActivateRequest())}
             />
         );
         //if (activationRequestStatus === ActivationRequestStatus.PENDING) {
-            actions.push(<ImportLicenseComponent/>);
+            actions.push(<ImportLicenseComponent key={'upload'}/>);
         //}
     } else {
         if (!status && (!currentSubscription || Subscription.isFree(currentSubscription))) {
-            actions.push(<ActivateLicenseComponent/>);
+            actions.push(<ActivateLicenseComponent key={'activate'}/>);
         }
     }
     if (currentSubscription && !Subscription.isFree(currentSubscription)) {
         actions.push(
             <Button
+                key={'delete'}
                 icon={'delete'}
                 label={'Delete License'}
                 hasConfirmation={true}
