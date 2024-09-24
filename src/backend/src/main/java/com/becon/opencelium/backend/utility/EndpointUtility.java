@@ -7,6 +7,8 @@ public class EndpointUtility {
     private static final String SUF_DIRECT_REF = "%}";
     private static final String PRE_WEBHOOK = "${";
     private static final String SUF_WEBHOOK = "}";
+    private static final String PRE_BRACKET = "['";
+    private static final String SUF_BRACKET = "']";
 
     public static int findIndexOfQuesSign(String endpoint) {
         if (endpoint == null) {
@@ -105,14 +107,6 @@ public class EndpointUtility {
         return res;
     }
 
-    public static List<String> splitPath(String path) {
-        return splitByDelimiter(path, '/');
-    }
-
-    public static List<String> splitByDot(String path) {
-        return splitByDelimiter(path, '.');
-    }
-
     public static String bindExactlyPlace(String str, List<String> refs, String id) {
         int length = str.length();
         out:
@@ -137,6 +131,10 @@ public class EndpointUtility {
     }
 
     public static List<String> splitByDelimiter(String path, char delim) {
+        return splitByDelimiter(path, delim, false);
+    }
+
+    public static List<String> splitByDelimiter(String path, char delim, boolean hasBracket) {
         if (path == null || path.isEmpty()) {
             return Collections.emptyList();
         }
@@ -148,7 +146,8 @@ public class EndpointUtility {
 
         int pre1 = path.indexOf(PRE_DIRECT_REF);
         int pre2 = path.indexOf(PRE_WEBHOOK);
-        if (pre1 == -1 && pre2 == -1) {
+        int pre3 = path.indexOf(PRE_BRACKET);
+        if (pre1 == -1 && pre2 == -1 && pre3 == -1) {
             return new ArrayList<>(List.of(path.split((isSpecialRegexChar(delim) ? "\\" : "") + delim)));
         }
 
@@ -158,17 +157,21 @@ public class EndpointUtility {
         int n = path.length();
         for (int i = 0; i < n; i++) {
             if (stack.empty() && path.charAt(i) == delim) {
-                res.add(path.substring(start, i));
+                if (hasBracket) {
+                    res.addAll(parseBracketNotationPath(path.substring(start, i)));
+                } else {
+                    res.add(path.substring(start, i));
+                }
                 start = i + 1;
-            } else if (stack.isEmpty() && path.charAt(i) == '?') {
-                res.add(path.substring(start, i));
-                return res;
             } else if (i + PRE_DIRECT_REF.length() < n && path.startsWith(PRE_DIRECT_REF, i)) {
                 stack.push(SUF_DIRECT_REF);
                 i += PRE_DIRECT_REF.length() - 1;
             } else if (i + PRE_WEBHOOK.length() < n && path.startsWith(PRE_WEBHOOK, i)) {
                 stack.push(SUF_WEBHOOK);
                 i += PRE_WEBHOOK.length() - 1;
+            } else if (i + PRE_BRACKET.length() < n && path.startsWith(PRE_BRACKET, i)) {
+                stack.push(SUF_BRACKET);
+                i += SUF_BRACKET.length() - 1;
             } else if (i + SUF_DIRECT_REF.length() < n && path.startsWith(SUF_DIRECT_REF, i)) {
                 if (!stack.empty() && stack.peek().equals(SUF_DIRECT_REF)) {
                     stack.pop();
@@ -179,12 +182,50 @@ public class EndpointUtility {
                     stack.pop();
                     i += SUF_WEBHOOK.length() - 1;
                 }
+            } else if (i + SUF_BRACKET.length() < n && path.startsWith(SUF_BRACKET, i)) {
+                if (!stack.isEmpty() && stack.peek().equals(SUF_BRACKET)) {
+                    stack.pop();
+                    i += SUF_BRACKET.length() - 1;
+                }
             } else if (i == n - 1) {
+                if (hasBracket) {
+                    res.addAll(parseBracketNotationPath(path.substring(start)));
+                } else {
+                    res.add(path.substring(start));
+                }
+            }
+        }
+        return res;
+    }
+
+    public static List<String> parseBracketNotationPath(String path) {
+        if (path == null || path.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        if (!path.contains(PRE_BRACKET)) {
+            return Collections.singletonList(path);
+        }
+
+        int len = path.length();
+        List<String> res = new ArrayList<>();
+        int start = -1;
+
+        for (int i = 0; i < len; i++) {
+            if (i + PRE_BRACKET.length() < len && path.startsWith(PRE_BRACKET, i)) {
+                start = i;
+                i += PRE_BRACKET.length() - 1;
+            } else if (i + SUF_BRACKET.length() < len && path.startsWith(SUF_BRACKET, i) && start != -1) {
+                res.add(path.substring(start, i + SUF_BRACKET.length()));
+                start = -1;
+                i += SUF_BRACKET.length() - 1;
+            } else if (i == len - 1) {
                 res.add(path.substring(start));
             }
         }
         return res;
     }
+
     private static boolean isSpecialRegexChar(char delim) {
         String specialChars = ".^$*+?()[]{}\\|/";
         return specialChars.indexOf(delim) != -1;

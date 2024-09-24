@@ -27,7 +27,6 @@ public class OperationExMapper {
     private final InvokerService invokerService;
     private final ConnectionMngService connectionMngService;
     private final ConnectorService connectorService;
-    private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
 
@@ -97,8 +96,8 @@ public class OperationExMapper {
     }
 
     private MediaType getContentTypeFromHeader(Map<String, String> header) {
-        if (header != null && header.containsKey(HEADER_CONTENT_TYPE)) {
-            String contentType = header.get(HEADER_CONTENT_TYPE);
+        if (header != null && header.containsKey(HttpHeaders.CONTENT_TYPE)) {
+            String contentType = header.get(HttpHeaders.CONTENT_TYPE);
             if (contentType != null) {
                 try {
                     return MediaType.parseMediaType(contentType);
@@ -200,7 +199,7 @@ public class OperationExMapper {
         }
         for (Map.Entry<String, String> entry : header.entrySet()) {
             ParameterDTO parameterDTO = new ParameterDTO();
-            if (entry.getKey().equals("Cookie")) {
+            if (entry.getKey().equals(HttpHeaders.COOKIE)) {
                 addCookieParams(entry.getValue(), parameters);
                 continue;
             }
@@ -288,7 +287,7 @@ public class OperationExMapper {
             return Collections.emptyList();
         } else {
             List<ParameterDTO> list = new ArrayList<>();
-            List<String> subPaths = EndpointUtility.splitPath(path);
+            List<String> subPaths = EndpointUtility.splitByDelimiter(path, '/');
             for (String subPath : subPaths) {
                 if (!subPath.contains("{") || !subPath.contains("}")) {
                     continue;

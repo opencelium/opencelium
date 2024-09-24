@@ -257,7 +257,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
                         }
                         case "header" -> BindingUtility.doWithHeader(method.getRequest().getHeader(), toField.getField(), fb.getId(), fb.getFrom());
                         case "request" -> {
-                            List<String> fieldPaths = EndpointUtility.splitByDot(toField.getField());
+                            List<String> fieldPaths = EndpointUtility.splitByDelimiter(toField.getField(), '.', true);
                             Map<String, Object> fields = method.getRequest().getBody().getFields();
                             Map<String, Object> boundFields = BindingUtility.doWithBody(fields, fieldPaths, fb.getId(), method.getRequest().getBody().getFormat());
                             method.getRequest().getBody().setFields(boundFields);
