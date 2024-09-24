@@ -22,31 +22,48 @@ import {
 } from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import OperationUsageEntries from "@entity/license_management/collections/OperationUsageEntries";
 import {CollectionView} from "@app_component/collection/collection_view/CollectionView";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import OperationUsageDetails from "@entity/license_management/collections/OperationUsageDetails";
 import Button from "@app_component/base/button/Button";
 import {ConnectorPermissions} from "@entity/connector/constants";
 import {OperationUsageEntryModel} from "@entity/license_management/requests/models/SubscriptionModel";
-
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {Loading} from "@app_component/base/loading/Loading";
+const EntriesPerPage = 5;
+const DetailsPerPage = 5;
 const DetailView = () => {
     const dispatch = useAppDispatch();
     const {
-        gettingOperationUsageDetails, gettingOperationUsageEntries,
-        operationUsageDetails, operationUsageEntries
+        gettingOperationUsageEntries, gettingOperationUsageDetails,
+        operationUsageDetails, operationUsageEntries,
+        entriesTotalPages, detailsTotalPages,
     } = Subscription.getReduxState();
     const [page, setPage] = useState<'entries' | 'details'>('entries');
     const [currentEntry, setCurrentEntry] = useState<null | OperationUsageEntryModel>(null);
     const [detailsShouldBeUpdated, setDetailsShouldBeUpdated] = useState(false);
     const [entriesShouldBeUpdated, setEntriesShouldBeUpdated] = useState(false);
+    const [entryPage, setEntryPage] = useState<number>(0);
+    const [detailsPage, setDetailsPage] = useState<number>(0);
     useEffect(() => {
         if (currentEntry) {
             setPage('details');
-            dispatch(getOperationUsageDetails(currentEntry.id));
+            if (detailsPage !== 0) {
+                setDetailsPage(0);
+            } else {
+                dispatch(getOperationUsageDetails({entryId: currentEntry.id, page: detailsPage === 0 ? 0 : detailsPage - 1, size: DetailsPerPage}));
+            }
         } else {
             setPage('entries');
-            dispatch(getOperationUsageEntries());
+            dispatch(getOperationUsageEntries({page: entryPage === 0 ? 0 : entryPage - 1, size: EntriesPerPage}));
         }
     }, [currentEntry])
+    useEffect(() => {
+        if (currentEntry) {
+            dispatch(getOperationUsageDetails({entryId: currentEntry.id, page: detailsPage === 0 ? 0 : detailsPage - 1, size: DetailsPerPage}));
+        }
+    }, [detailsPage])
+    useEffect(() => {
+        dispatch(getOperationUsageEntries({page: detailsPage === 0 ? 0 : detailsPage - 1, size: DetailsPerPage}));
+    }, [entryPage])
     useEffect(() => {
         setDetailsShouldBeUpdated(!detailsShouldBeUpdated);
     }, [operationUsageDetails, currentEntry])
@@ -55,6 +72,7 @@ const DetailView = () => {
     }, [operationUsageEntries, currentEntry])
     const entries = new OperationUsageEntries(operationUsageEntries);
     const details = new OperationUsageDetails(operationUsageDetails);
+    const isLoading = gettingOperationUsageDetails === API_REQUEST_STATE.START || gettingOperationUsageEntries === API_REQUEST_STATE.START;
     const EntriesCollection =
         <CollectionView
             hasViewSection={false}
@@ -63,19 +81,31 @@ const DetailView = () => {
             hasTopBar={false}
             collection={entries}
             shouldBeUpdated={entriesShouldBeUpdated}
-            isLoading={gettingOperationUsageEntries === API_REQUEST_STATE.START}
             componentPermission={ConnectorPermissions}
             onListRowClick={(entity) => {setCurrentEntry(entity)}}
+            isLoading={isLoading}
+            paginationProps={{
+                totalPages: entriesTotalPages,
+                setPage: (newPage: number) => {
+                    setEntryPage(newPage);
+                }
+            }}
         />;
     const DetailsCollection =
         <CollectionView
+            isLoading={isLoading}
             hasViewSection={false}
             isListViewCard={false}
             hasTopBar={false}
             collection={details}
             shouldBeUpdated={detailsShouldBeUpdated}
-            isLoading={gettingOperationUsageDetails === API_REQUEST_STATE.START}
             componentPermission={ConnectorPermissions}
+            paginationProps={{
+                totalPages: detailsTotalPages,
+                setPage: (newPage: number) => {
+                    setDetailsPage(newPage);
+                }
+            }}
         />;
     const collection = page === 'entries' ? EntriesCollection : DetailsCollection;
     return (

@@ -19,6 +19,7 @@ import Inputs from "./inputs/Inputs";
 import {Label} from "./label/Label";
 import { FormSectionProps } from './interfaces';
 import { FormSectionStyled } from './styles';
+import {Loading} from "@app_component/base/loading/Loading";
 
 const FormSection: FC<FormSectionProps> =
     ({

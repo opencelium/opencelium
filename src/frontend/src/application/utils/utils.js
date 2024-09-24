@@ -768,7 +768,10 @@ export function convertCronExpForSchedulerlist(cronExp){
  *
  * @param timeStamp - time
  */
-export function convertTimeForCronExpression(timeStamp){
+export function convertTimeForTotalUsage(timeStamp){
+    if (!timeStamp) {
+        return '-';
+    }
     let date = new Date(timeStamp);
     let year = date.getFullYear();
     let month = date.getMonth() + 1;

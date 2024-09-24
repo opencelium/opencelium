@@ -24,7 +24,7 @@ import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultLi
 class OperationUsageEntries extends ListCollection<OperationUsageEntryProps>{
     name: string = 'operation_usage_entries';
     entities: OperationUsageEntryModel[];
-    keyPropName: OperationUsageEntryProps ='';
+    keyPropName: OperationUsageEntryProps ='connectionTitle';
     sortingProps: OperationUsageEntryProps[] = ['connectionTitle'];
     ListRawComponent = DefaultListRaw;
     listProps: ListProp<OperationUsageEntryProps>[] = [
