@@ -67,7 +67,7 @@ const DashboardForm: FC<DashboardFormProps> =
         const {authUser} = Auth.getReduxState();
         const {widgets, gettingAllWidgets} = Widget.getReduxState();
         const {gettingAllWidgetSettings, updatingAllWidgetSettings, widgetSettings} = WidgetSetting.getReduxState();
-        const {currentSubscription} = Subscription.getReduxState();
+        const {currentSubscription, gettingCurrentSubscription} = Subscription.getReduxState();
         const [isWidgetEditOn, setIsWidgetEditOn] = useState<boolean>(false);
         const [currentWidget, setCurrentWidget] = useState(null);
         const [layout, setLayout] = useState<IWidgetSetting[]>([]);
@@ -172,7 +172,7 @@ const DashboardForm: FC<DashboardFormProps> =
         return (
             <DashboardFormStyled>
                 <TitleStyled title={'Dashboard'} icon={EditDashboardIcon}/>
-                {!currentSubscription && <NoLicenseMessage/>}
+                {(!currentSubscription && gettingCurrentSubscription === API_REQUEST_STATE.FINISH) && <NoLicenseMessage/>}
                 <DashboardViewStyled>
                     <div>
                         {isWidgetEditOn &&
