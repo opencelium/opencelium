@@ -81,12 +81,23 @@ export const getActivationRequestStatus = createAsyncThunk(
     }
 )
 export const deleteLicense = createAsyncThunk(
-    'license/license',
+    'license/delete',
     async(licenseId: string, thunkAPI) => {
         try {
             const request = new LicenseRequest({endpoint: `/${licenseId}`});
             await request.deleteLicense();
             return licenseId;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+export const activateFreeLicense = createAsyncThunk(
+    'license/activate/free',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new LicenseRequest();
+            await request.activateFreeLicense();
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -100,4 +111,5 @@ export default {
     activateLicenseString,
     getLicenseStatus,
     getActivationRequestStatus,
+    activateFreeLicense,
 }

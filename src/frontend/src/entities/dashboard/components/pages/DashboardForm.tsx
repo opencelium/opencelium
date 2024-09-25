@@ -44,6 +44,9 @@ import {
 } from './styles';
 import { Auth } from '@application/classes/Auth';
 import {SubscriptionOverviewWidget} from "@entity/dashboard/components/widgets/SubscriptionOverview";
+import NoLicenseMessage from "@entity/dashboard/components/no_license_message/NoLicenseMessage";
+import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
+import Subscription from "@entity/license_management/classes/Subscription";
 
 export const HAS_DASHBOARD_WIDGET_ENGINE = true;
 
@@ -64,6 +67,7 @@ const DashboardForm: FC<DashboardFormProps> =
         const {authUser} = Auth.getReduxState();
         const {widgets, gettingAllWidgets} = Widget.getReduxState();
         const {gettingAllWidgetSettings, updatingAllWidgetSettings, widgetSettings} = WidgetSetting.getReduxState();
+        const {currentSubscription} = Subscription.getReduxState();
         const [isWidgetEditOn, setIsWidgetEditOn] = useState<boolean>(false);
         const [currentWidget, setCurrentWidget] = useState(null);
         const [layout, setLayout] = useState<IWidgetSetting[]>([]);
@@ -72,6 +76,7 @@ const DashboardForm: FC<DashboardFormProps> =
         useEffect(() => {
             dispatch(getAllWidgets());
             dispatch(getAllWidgetSettings());
+            dispatch(getCurrentSubscription());
         }, [])
         useEffect(() => {
             let newLayout = widgetSettings.map(item => {
@@ -167,6 +172,7 @@ const DashboardForm: FC<DashboardFormProps> =
         return (
             <DashboardFormStyled>
                 <TitleStyled title={'Dashboard'} icon={EditDashboardIcon}/>
+                {!currentSubscription && <NoLicenseMessage/>}
                 <DashboardViewStyled>
                     <div>
                         {isWidgetEditOn &&
