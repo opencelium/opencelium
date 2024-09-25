@@ -4,16 +4,18 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MachineUtility {
 
     public static final String CMD_GET_UUID_WIN = "wmic csproduct get UUID";
     public static final String CMD_GET_UUID_LIN_OR_MAC = "cat /etc/machine-id";
 
-    public static final String CMD_GET_Proc_ID_WIN = "wmic cpu get ProcessorId";
+    public static final String CMD_GET_SYS_ID_WIN = "wmic csproduct get UUID";
 //    public static final String CMD_GET_Proc_ID_LINUX = "lscpu | grep 'Serial'";
-    public static final String[] CMD_GET_Proc_ID_LINUX = { "/bin/sh", "-c", "dmidecode -t processor | grep ID" };
-    public static final String CMD_GET_Proc_ID_MAC = "system_profiler SPHardwareDataType | grep 'Serial Number'";
+    public static final String CMD_GET_SYS_ID_LINUX = "dmidecode -s system-uuid";
+    public static final String CMD_GET_SYS_ID_MAC = "ioreg -rd1 -c IOPlatformExpertDevice | grep IOPlatformUUID";
 
     private MachineUtility() {}
     public static String getMachineUUID() {
@@ -79,48 +81,23 @@ public class MachineUtility {
         }
     }
 
-    public static String getProcessorId() {
+    public static String getSystemUuid() {
 //        return "PROCESSOR_ID";
-        String processorId = null;
         String os = System.getProperty("os.name").toLowerCase();
-
         try {
-            Process process = null;
             if (os.contains("win")) {
-                // Windows command to get the processor ID
-                process = Runtime.getRuntime().exec(CMD_GET_Proc_ID_WIN);
+                return getWindowsUUID();
             } else if (os.contains("nix") || os.contains("nux")) {
-                // Linux command to get the processor ID
-                process = Runtime.getRuntime().exec(CMD_GET_Proc_ID_LINUX);
+                return getLinuxUUID();
             } else if (os.contains("mac")) {
-                // macOS command to get the hardware UUID (as macOS doesn't have a straightforward processor ID)
-                process = Runtime.getRuntime().exec(CMD_GET_Proc_ID_MAC);
-            }
-
-            if (process != null) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (os.contains("win")) {
-                        if (!line.isEmpty() && !line.contains("ProcessorId")) {
-                            processorId = line.trim();
-                            break;
-                        }
-                    } else {
-                        // For Linux or macOS, split by colon to get the ID part
-                        String[] parts = line.split(":");
-                        if (parts.length > 1) {
-                            processorId = parts[1].trim();
-                            break;
-                        }
-                    }
-                }
-                reader.close();
+                return getMacUUID();
+            } else {
+                throw new UnsupportedOperationException("Operating system not supported for fetching System UUID.");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return processorId == null ? "" : processorId;
+
     }
 
     public static String getComputerName() {
@@ -135,9 +112,71 @@ public class MachineUtility {
     }
 
     public static String getStringForHmacEncode() {
-        return MachineUtility.getMachineUUID()
-                + MachineUtility.getMacAddress()
-                + MachineUtility.getProcessorId()
-                + (MachineUtility.getComputerName() == null ? "" : MachineUtility.getComputerName());
+        // Collect values and parameter names in pairs
+        Map<String, String> parameters = new LinkedHashMap<>();
+        parameters.put("Machine UUID", MachineUtility.getMachineUUID());
+        parameters.put("MAC Address", MachineUtility.getMacAddress());
+        parameters.put("System ID", MachineUtility.getSystemUuid());
+        parameters.put("Computer Name", MachineUtility.getComputerName());
+
+        StringBuilder missingParameters = new StringBuilder();
+        StringBuilder result = new StringBuilder();
+
+        // Iterate over the parameters and check for empty or null values
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            String value = entry.getValue();
+            if (value == null || value.isEmpty()) {
+                missingParameters.append(entry.getKey()).append(" is empty. ");
+            } else {
+                result.append(value); // Append the value to the result if it's valid
+            }
+        }
+
+        // Throw exception if any parameters are missing
+        if (missingParameters.length() > 0) {
+            throw new IllegalArgumentException(missingParameters.toString() + "Please fill them or grant permissions.");
+        }
+
+        return result.toString();
+    }
+
+
+    private static String getWindowsUUID() throws Exception {
+        Process process = Runtime.getRuntime().exec("wmic csproduct get UUID");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line != null && !line.isEmpty() && !line.startsWith("UUID")) {
+                return line.trim();  // Return the UUID from Windows command
+            }
+        }
+        return "";  // Return null if UUID is not found
+    }
+
+    private static String getLinuxUUID() throws Exception {
+        String[] cmd = { "/bin/sh", "-c", "dmidecode -s system-uuid" };
+        Process process = Runtime.getRuntime().exec(cmd);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line != null && !line.isEmpty()) {
+                return line.trim();  // Return the UUID from Linux command
+            }
+        }
+        return "";  // Return null if UUID is not found
+    }
+
+    private static String getMacUUID() throws Exception {
+        String[] cmd = { "/bin/sh", "-c", "ioreg -rd1 -c IOPlatformExpertDevice | grep IOPlatformUUID" };
+        Process process = Runtime.getRuntime().exec(cmd);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.contains("IOPlatformUUID")) {
+                String[] parts = line.split("\"");  // Extract UUID from the output
+                return parts[3].trim();  // Return the UUID from macOS command
+            }
+        }
+        return "";  // Return null if UUID is not found
     }
 }

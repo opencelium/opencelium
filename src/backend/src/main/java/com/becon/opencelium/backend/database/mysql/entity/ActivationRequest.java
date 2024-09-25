@@ -40,7 +40,7 @@ public class ActivationRequest implements HmacValidator {
     private String macAddress = MachineUtility.getMacAddress();
 
     @Transient
-    private String processorId = MachineUtility.getProcessorId();
+    private String processorId = MachineUtility.getSystemUuid();
 
     @Transient
     private String computerName = MachineUtility.getComputerName();
