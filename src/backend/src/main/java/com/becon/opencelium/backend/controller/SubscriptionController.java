@@ -125,6 +125,19 @@ public class SubscriptionController {
                 .body(resource);
     }
 
+    @GetMapping("/free/activate")
+    public ResponseEntity<Resource> activateFreeSub() {
+        ActivationRequest ar = activationRequestService.readFreeAR()
+                .orElseThrow(() -> new RuntimeException("Free Activation Request is not found or not valid"));
+        String initLicense = LicenseKeyUtility.readFreeLicense();
+        Subscription subscription = subscriptionService.convertToSub(initLicense,ar);
+        if(!subscriptionService.exists(subscription.getSubId())) {
+            activationRequestService.save(ar);
+            subscriptionService.save(subscription);
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping(value = "/activate/license", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> activateLicense(@RequestParam("file") MultipartFile licenseKey) {
         String content;

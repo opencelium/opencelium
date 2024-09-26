@@ -1,5 +1,8 @@
 package com.becon.opencelium.backend.subscription.utility;
 
+import com.becon.opencelium.backend.constant.Constant;
+import com.becon.opencelium.backend.constant.SubscriptionConstant;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.utility.crypto.HmacValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -116,18 +119,20 @@ public class LicenseKeyUtility {
         return keyFactory.generatePublic(X509publicKey);
     }
 
-    public static String readFreeLicense() throws IOException {
-        ResourceLoader resourceLoader = new DefaultResourceLoader();
-        // Load the file from resources/license/ folder
-        Resource resource = resourceLoader.getResource("classpath:license/init-license.txt");
+    public static String readFreeLicense() {
+        return SubscriptionConstant.FREE_LICENSE;
 
-        // Use InputStream to read the content of the file
-        InputStream inputStream = resource.getInputStream();
-
-        // Using BufferedReader and InputStreamReader to read the file content
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            // Collect all lines into a single string without adding '\n'
-            return reader.lines().collect(Collectors.joining());
-        }
+//        ResourceLoader resourceLoader = new DefaultResourceLoader();
+//        // Load the file from resources/license/ folder
+//        Resource resource = resourceLoader.getResource("classpath:license/init-license.txt");
+//
+//        // Use InputStream to read the content of the file
+//        InputStream inputStream = resource.getInputStream();
+//
+//        // Using BufferedReader and InputStreamReader to read the file content
+//        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+//            // Collect all lines into a single string without adding '\n'
+//            return reader.lines().collect(Collectors.joining());
+//        }
     }
 }

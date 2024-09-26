@@ -56,9 +56,9 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     public void executeInternal(JobExecutionContext context) throws JobExecutionException {
         thread = Thread.currentThread();
         Subscription activeSub = subscriptionService.getActiveSubs();
-        if (!subscriptionService.isValid(activeSub)) {
-            throw new RuntimeException("Subscription is not valid");
-        }
+//        if (!subscriptionService.isValid(activeSub)) {
+//            throw new RuntimeException("Subscription is not valid");
+//        }
         try {
             JobDataMap dataMap = context.getMergedJobDataMap();
             QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");

@@ -9,13 +9,13 @@ import java.util.Map;
 
 public class MachineUtility {
 
-    public static final String CMD_GET_UUID_WIN = "wmic csproduct get UUID";
-    public static final String CMD_GET_UUID_LIN_OR_MAC = "cat /etc/machine-id";
+    private static final String CMD_GET_UUID_WIN = "wmic csproduct get UUID";
+    private static final String CMD_GET_UUID_LIN_OR_MAC = "cat /etc/machine-id";
 
-    public static final String CMD_GET_SYS_ID_WIN = "wmic csproduct get UUID";
+    private static final String CMD_GET_SYS_ID_WIN = "wmic csproduct get UUID";
 //    public static final String CMD_GET_Proc_ID_LINUX = "lscpu | grep 'Serial'";
-    public static final String CMD_GET_SYS_ID_LINUX = "dmidecode -s system-uuid";
-    public static final String CMD_GET_SYS_ID_MAC = "ioreg -rd1 -c IOPlatformExpertDevice | grep IOPlatformUUID";
+    private static final String CMD_GET_SYS_ID_LINUX = "dmidecode -s system-uuid";
+    private static final String CMD_GET_SYS_ID_MAC = "ioreg -rd1 -c IOPlatformExpertDevice | grep IOPlatformUUID";
 
     private MachineUtility() {}
     public static String getMachineUUID() {
