@@ -53,12 +53,13 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                             {RoleNames[subscription.type]}
                         </div>
                     </InfoStyled>
-                    <InfoStyled>
+                    {!isUnlimited && <InfoStyled>
                         <div><b>Amount of API Operations:</b></div>
                         <div>
                             {hasNoSubscription ? '-' : formatOperationUsage(subscription.totalOperationUsage)}
                         </div>
                     </InfoStyled>
+                    }
                     <InfoStyled>
                         <div><b>Expiration Date:</b></div>
                         <div>
