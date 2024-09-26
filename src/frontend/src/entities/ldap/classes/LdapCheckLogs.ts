@@ -13,14 +13,23 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AxiosResponse} from "axios";
-import {IResponse} from "@application/requests/interfaces/IResponse";
-import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
+import Socket, { Message, Subscription } from "@application/classes/socket/Socket";
 
 
-export default interface ILdapRequest {
+export default class LdapCheckLogs {
 
-    getDefaultConfig(): Promise<AxiosResponse<LdapConfigModel>>,
+    static message: string = '/ldap/debug';
 
-    testConfig(): Promise<AxiosResponse<IResponse>>,
+    static subscription: Subscription = null;
+
+    static subscribe(socket: Socket, callback: (message: Message) => void): void{
+        socket._subscribe(this.message, callback, (subscription: Subscription) => {this.subscription = subscription;});
+    }
+
+    static unsubscribe(): void{
+        if(this.subscription){
+            this.subscription.unsubscribe()
+        }
+    }
+
 }

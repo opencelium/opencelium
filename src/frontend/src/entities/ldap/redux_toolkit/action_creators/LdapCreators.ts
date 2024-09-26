@@ -43,11 +43,11 @@ export const getDefaultConfig = createAsyncThunk(
 )
 export const testConfig = createAsyncThunk(
     'ldap/test',
-    async(config: LdapConfigModel, thunkAPI) => {
+    async(data: never, thunkAPI) => {
         try {
             return;
             const request = new LdapRequest()
-            await request.testConfig(config);
+            await request.testConfig();
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

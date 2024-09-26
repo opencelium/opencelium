@@ -48,8 +48,8 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
         // @ts-ignore
         this.dispatch = formData.dispatch ? formData.dispatch : useAppDispatch();
     }
-    static createState<T>(args?: Partial<LdapConfigModel>, observation?: any):T{
-        return super.createState<LdapConfigModel>(
+    static createState<T>(args?: Partial<ILdapCheckForm>, observation?: any):T{
+        return super.createState<ILdapCheckForm>(
             LdapCheckForm,
             (state: RootState) => state.ldapReducer,
             args,
