@@ -6,13 +6,21 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class LdapProperties {
     private String urls;
     private String base;
-    private String username;
     private String userSearchBase;
     private String groupSearchBase;
     private String managerDn;
     private String managerPassword;
     private String groupSearchFilter = "(member={0})";
     private String userSearchFilter = "(cn={0})";
+    private boolean showLogs = false;
+
+    public String getConfiguration() {
+        if (urls == null && base == null && userSearchBase == null && groupSearchBase == null && managerDn == null && managerPassword == null) {
+            return "ldap configuration not found.";
+        }
+
+        return toString();
+    }
 
     public String getUrls() {
         return urls;
@@ -28,14 +36,6 @@ public class LdapProperties {
 
     public void setBase(String base) {
         this.base = base;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getUserSearchBase() {
@@ -84,5 +84,25 @@ public class LdapProperties {
 
     public void setUserSearchFilter(String userSearchFilter) {
         this.userSearchFilter = userSearchFilter;
+    }
+
+    public boolean isShowLogs() {
+        return showLogs;
+    }
+
+    public void setShowLogs(boolean showLogs) {
+        this.showLogs = showLogs;
+    }
+
+    @Override
+    public String toString() {
+        return "System found ldap configuration: {" +
+                "urls='" + urls + "', " +
+                "base='" + base + "', " +
+                "userSearchBase='" + userSearchBase + "', " +
+                "groupSearchBase='" + groupSearchBase + "', " +
+                "managerDn='" + managerDn + "', " +
+                "groupSearchFilter='" + groupSearchFilter + "', " +
+                "userSearchFilter='" + userSearchFilter + "'}";
     }
 }

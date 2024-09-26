@@ -3,10 +3,10 @@ package com.becon.opencelium.backend.constant;
 public interface SubscriptionConstant {
 
     // Default Activation Request
-    String DEFAULT_AR = "eyJpZCI6IjJkZDNlODlkLTc3MmUtNDNiOC05NzhlLWQxNjc4MTdhODhlNyIsIm1hY2hpbmVVdWlkIjoiTUFDSElO" +
-            "RV9VVUlEIiwibWFjQWRkcmVzcyI6Ik1BQ19BRERSRVNTIiwic3lzdGVtVVVJRCI6bnVsbCwiY29tcHV0ZXJOYW1lIjoiQ09NUFVUR" +
-            "VJfTkFNRSIsImNyZWF0ZWRBdCI6MTcyNzI4MjA1OTg1MSwiaG1hYyI6ImU0bGVoSC9YS0h1emgxbS82SFRCdklrL0lmcjROSDdOTk" +
-            "N1Z1ZnS3MwK0U9Iiwic3RhdHVzIjoiUEVORElORyJ9";
+    String DEFAULT_AR = "eyJpZCI6ImVmZjA0MmExLWI5ZGItNDNiMy04NTVkLWI2MmQ3MTJjZTRjOSIsImhtYWMiOiJJMUkzbFk3SVE0akM2a" +
+            "jA3M0JIenNwOTJHNThJbWRzNFl3TTEvdEdiTHE4PSIsInR0bCI6MzYwMCwic3RhdHVzIjoiUEVORElORyIsIm1hY2hpbmVVdWlkIj" +
+            "oiTUFDSElORV9VVUlEIiwibWFjQWRkcmVzcyI6Ik1BQ19BRERSRVNTIiwic3lzdGVtVVVJRCI6IlNZU1RFTV9VVUlEIiwiY29tcHV" +
+            "0ZXJOYW1lIjoiQ09NUFVURVJfTkFNRSJ9";
 
     // License for free Subscription
     String FREE_LICENSE = "TYidZve2brv337lPLRaQ7cUM6Xm2ecPTeodbmBjlBURwxhhWwcziT6kiTJgHCpfN6SRfXx+CdK4rhvaSh3BBFqh" +
