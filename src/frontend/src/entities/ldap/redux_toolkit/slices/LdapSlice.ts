@@ -25,12 +25,14 @@ export interface MigrationState extends ICommonState{
     gettingDefaultConfig: API_REQUEST_STATE,
     testingConfig: API_REQUEST_STATE,
     defaultConfig: LdapConfigModel,
+    debugLogs: string[],
 }
 
 const initialState: MigrationState = {
     gettingDefaultConfig: API_REQUEST_STATE.INITIAL,
     testingConfig: API_REQUEST_STATE.INITIAL,
     defaultConfig: null,
+    debugLogs: [],
     ...CommonState,
 }
 
@@ -40,6 +42,12 @@ export const ldapSlice = createSlice({
     reducers: {
         clearDefaultConfig: (state) => {
             state.defaultConfig = null;
+        },
+        clearDebugLogs: (state) => {
+            state.debugLogs = [];
+        },
+        addDebugLog: (state, action: PayloadAction<string>) => {
+            state.debugLogs.push(action.payload)
         },
     },
     extraReducers: {
@@ -70,7 +78,8 @@ export const ldapSlice = createSlice({
 })
 
 export const {
-    clearDefaultConfig,
+    clearDefaultConfig, clearDebugLogs,
+    addDebugLog,
 } = ldapSlice.actions;
 
 export default ldapSlice.reducer;
