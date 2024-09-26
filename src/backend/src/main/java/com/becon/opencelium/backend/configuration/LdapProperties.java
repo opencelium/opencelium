@@ -12,7 +12,7 @@ public class LdapProperties {
     private String managerPassword;
     private String groupSearchFilter = "(member={0})";
     private String userSearchFilter = "(cn={0})";
-    private boolean showLogs = true;
+    private boolean showLogs = false;
 
     public String getConfiguration() {
         if (urls == null && base == null && userSearchBase == null && groupSearchBase == null && managerDn == null && managerPassword == null) {
@@ -102,7 +102,6 @@ public class LdapProperties {
                 "userSearchBase='" + userSearchBase + "', " +
                 "groupSearchBase='" + groupSearchBase + "', " +
                 "managerDn='" + managerDn + "', " +
-                "managerPassword='" + managerPassword + "', " +
                 "groupSearchFilter='" + groupSearchFilter + "', " +
                 "userSearchFilter='" + userSearchFilter + "'}";
     }
