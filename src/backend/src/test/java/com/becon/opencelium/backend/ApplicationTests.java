@@ -18,8 +18,15 @@ package com.becon.opencelium.backend;
 
 
 
+import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
+import com.becon.opencelium.backend.enums.ActivReqStatus;
+import com.becon.opencelium.backend.utility.crypto.Base64Utility;
+import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @SpringBootTest
 public class ApplicationTests {
