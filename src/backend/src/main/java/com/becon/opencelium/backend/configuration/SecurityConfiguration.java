@@ -143,7 +143,9 @@ public class SecurityConfiguration {
                     return super.doAuthentication(authentication);
                 } catch (InternalAuthenticationServiceException e) {
                     // move next authentication if LDAP server is not available
-                    logger.warn("LDAP server is not configured or not running: " + e.getMessage());
+                    if (properties.isShowLogs()) {
+                        logger.info(properties.getConfiguration());
+                    }
                     throw new ProviderNotFoundException(e.getMessage());
                 }
             }

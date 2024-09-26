@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.security;
 
+import com.becon.opencelium.backend.configuration.LdapProperties;
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.entity.User;
@@ -33,6 +34,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -68,6 +71,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Autowired
     protected SessionService sessionService;
+
+    @Autowired
+    private LdapProperties properties;
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     @Override
     @Autowired
@@ -135,6 +143,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private User getUser(Authentication authentication) {
         User result;
         Object principal = authentication.getPrincipal();
+        String authType;
 
         if (principal instanceof LdapUserDetails ldapUserDetails) {
             String email = ldapUserDetails.getUsername();
@@ -165,10 +174,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             user.setUserRole(role);
 
             result = userService.save(user);
+            authType = "LDAP server";
         } else {
             result = ((UserPrincipals) authentication.getPrincipal()).getUser();
+            authType = "OC system";
         }
         createNewSession(result);
+
+        if (properties.isShowLogs()) {
+            logger.info("User " + result.getEmail() + " is authenticated via " + authType);
+        }
 
         return result;
     }

@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
 
-@ConfigurationProperties(prefix = "security.authorization.ldap")
+@ConfigurationProperties(prefix = "opencelium.security.authorization.ldap")
 public class LdapGroupMappingProperties {
     private List<GroupMapping> ldapGroupMapping;
     private String defaultMappingGroup;
