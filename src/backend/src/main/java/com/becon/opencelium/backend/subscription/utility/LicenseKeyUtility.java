@@ -86,7 +86,6 @@ public class LicenseKeyUtility {
 
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, publicKey);
-            System.out.println(Arrays.toString(Base64.getDecoder().decode(encryptedLicense)));
             byte[] licenseKeyBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedLicense));
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(licenseKeyBytes, LicenseKey.class);

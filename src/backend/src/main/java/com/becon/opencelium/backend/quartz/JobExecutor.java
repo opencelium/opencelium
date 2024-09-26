@@ -56,9 +56,9 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     public void executeInternal(JobExecutionContext context) throws JobExecutionException {
         thread = Thread.currentThread();
         Subscription activeSub = subscriptionService.getActiveSubs();
-//        if (!subscriptionService.isValid(activeSub)) {
-//            throw new RuntimeException("Subscription is not valid");
-//        }
+        if (!subscriptionService.isValid(activeSub)) {
+            throw new RuntimeException("Subscription is not valid");
+        }
         try {
             JobDataMap dataMap = context.getMergedJobDataMap();
             QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
@@ -75,7 +75,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             // increments current_usage in subscription and saves entity in current_usage_history.
             long operationUsage = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
             logger.info("Operation usage for Connection " + executionObj.getConnection().getConnectionName() + " is " + operationUsage);
-//            subscriptionService.updateUsage(activeSub, executionObj.getConnection().getConnectionId(), operationUsage, startTime);
+            subscriptionService.updateUsage(activeSub, executionObj.getConnection().getConnectionId(), operationUsage, startTime);
         } catch (ThreadDeath ignored) {
         } finally {
             thread = null;
