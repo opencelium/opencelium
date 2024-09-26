@@ -271,7 +271,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             // Find the subscription by the decrypted license subId
             Subscription subscription = subscriptionRepository.findBySubId(licenseKey.getSubId()).orElseGet(() -> {
                 // If not found, create a new subscription using the activation request
-                ActivationRequest ar = activationRequestService.getActiveAR();
+                ActivationRequest ar = activationRequestService.readFreeAR()
+                        .orElseThrow(() -> new RuntimeException("Free Activation Request not found!"));
                 return convertToSub(freeLicense, ar);
             });
             subscription.setActive(true);
