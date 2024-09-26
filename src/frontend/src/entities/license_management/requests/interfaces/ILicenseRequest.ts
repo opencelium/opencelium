@@ -62,4 +62,7 @@ export default interface ILicenseRequest {
     //to delete license
     deleteLicense (): Promise<AxiosResponse<IResponse>>,
 
+    //to activate free license
+    activateFreeLicense (): Promise<AxiosResponse<IResponse>>,
+
 }
