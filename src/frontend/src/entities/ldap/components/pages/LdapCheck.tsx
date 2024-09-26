@@ -86,7 +86,7 @@ const LdapCheck: FC<IForm> = ({}) => {
                 {TextInputs}
                 {!defaultConfig && <div style={{marginLeft: 10, marginTop: 20, marginBottom: 20}}><Hint message={'You can set the default configurations in application.yml file'}/></div>}
             </FormSection>,
-            <FormSection dependencies={[debugLogs.length !== 0]} label={{value: 'Debug'}}>
+            <FormSection dependencies={[debugLogs.length === 0]} label={{value: 'Debug'}}>
                 {debugLogs.map(log => {
                     return (
                         <div>{log}</div>
