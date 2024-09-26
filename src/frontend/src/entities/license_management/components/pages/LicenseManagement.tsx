@@ -40,19 +40,29 @@ const LicenseManagement: FC<IForm> = ({}) => {
     const {authUser} = Auth.getReduxState();
     const {
         currentSubscription, gettingCurrentSubscription,
-        gettingOperationUsageDetails, gettingOperationUsageEntries,
     } = Subscription.getReduxState();
     const {
-        activationRequestStatus, status, activatingLicense,
+        status, activatingLicense,
         deletingLicense, activatingFreeLicense,
     } = License.getReduxState();
     useEffect(() => {
-        if (activatingLicense === API_REQUEST_STATE.INITIAL || activatingLicense === API_REQUEST_STATE.FINISH
-            || deletingLicense === API_REQUEST_STATE.FINISH || activatingFreeLicense === API_REQUEST_STATE.FINISH) {
+        if (activatingLicense === API_REQUEST_STATE.INITIAL || activatingLicense === API_REQUEST_STATE.FINISH) {
             dispatch(getCurrentSubscription());
-            console.log('get subscription')
+            console.log('get subscription after activatingLicense');
         }
-    }, [activatingLicense, deletingLicense, activatingFreeLicense])
+    }, [activatingLicense])
+    useEffect(() => {
+        if (deletingLicense === API_REQUEST_STATE.FINISH || activatingFreeLicense === API_REQUEST_STATE.FINISH) {
+            dispatch(getCurrentSubscription());
+            console.log('get subscription after deletingLicense')
+        }
+    }, [deletingLicense]);
+    useEffect(() => {
+        if (activatingFreeLicense === API_REQUEST_STATE.FINISH) {
+            dispatch(getCurrentSubscription());
+            console.log('get subscription after activatingFreeLicense')
+        }
+    }, [activatingFreeLicense]);
     const actions = []
     if (!authUser.userDetail.themeSync){
         actions.push(
