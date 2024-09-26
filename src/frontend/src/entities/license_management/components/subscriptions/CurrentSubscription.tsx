@@ -35,6 +35,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
     const percentage = (now / max) * 100;
     const hasNoSubscription = subscription.type === 'empty';
     const [showDocsDialog, toggleDocsDialog] = useState<boolean>(hasNoSubscription);
+    const isUnlimited = max === 0;
     return (
         <div>
             <div>
@@ -70,7 +71,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                             {hasNoSubscription ? '-' : Subscription.getMonthlyPeriod(subscription.startDate)}
                         </div>
                     </InfoStyled>
-                    {max === null && !hasNoSubscription && <React.Fragment>
+                    {isUnlimited && !hasNoSubscription && <React.Fragment>
                         <InfoStyled>
                             <div><b>Capacity:</b></div>
                             <div>
@@ -87,7 +88,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                     }
                 </div>
             </div>
-            {max !== null && <div style={{position: 'relative', height: progressbarHeight + 50, marginTop: 60}}>
+            {!isUnlimited && <div style={{position: 'relative', height: progressbarHeight + 50, marginTop: 60}}>
                 <ProgressBar
                     style={{
                         borderRadius: '0.25rem',
