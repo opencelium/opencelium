@@ -96,8 +96,14 @@ export const activateFreeLicense = createAsyncThunk(
     'license/activate/free',
     async(data: never, thunkAPI) => {
         try {
-            const request = new LicenseRequest();
-            await request.activateFreeLicense();
+            const activationRequest = `eyJpZCI6IjJkZDNlODlkLTc3MmUtNDNiOC05NzhlLWQxNjc4MTdhODhlNyIsIm1hY2hpbmVVdWlkIjoiTUFDSElORV9VVUlEIiwibWFjQWRkcmVzcyI6Ik1BQ19BRERSRVNTIiwic3lzdGVtVVVJRCI6bnVsbCwiY29tcHV0ZXJOYW1lIjoiQ09NUFVURVJfTkFNRSIsImNyZWF0ZWRBdCI6MTcyNzI4MjA1OTg1MSwiaG1hYyI6ImU0bGVoSC9YS0h1emgxbS82SFRCdklrL0lmcjROSDdOTkN1Z1ZnS3MwK0U9Iiwic3RhdHVzIjoiUEVORElORyJ9`;
+            const blob = new Blob([activationRequest], { type: "text/plain" });
+            const file = new File([blob], "free_license.txt", { type: "text/plain" });
+            const formData = new FormData();
+            formData.append('file', file);
+            const request = new LicenseRequest({isFormData: true});
+            const response = await request.activateFile(formData);
+            return response.data.license;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

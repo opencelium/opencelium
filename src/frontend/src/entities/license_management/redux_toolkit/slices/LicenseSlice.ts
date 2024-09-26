@@ -153,17 +153,6 @@ export const licenseSlice = createSlice({
             state.deletingLicense = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
-        [activateFreeLicense.pending.type]: (state) => {
-            state.activatingFreeLicense = API_REQUEST_STATE.START;
-        },
-        [activateFreeLicense.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
-            state.activatingFreeLicense = API_REQUEST_STATE.FINISH;
-            state.error = null;
-        },
-        [activateFreeLicense.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.activatingFreeLicense = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
-        },
     }
 })
 
