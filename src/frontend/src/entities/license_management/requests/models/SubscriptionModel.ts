@@ -12,12 +12,14 @@ export default interface SubscriptionModel {
 
 export interface OperationUsageEntryModel {
     id: number,
-    title: string,
-    number: number,
+    licenseId: string,
+    subId: string,
+    connectionTitle: string,
+    totalUsage: number,
 }
 
 export interface OperationUsageDetailModel {
     id: number,
-    datetime: number,
-    number: number,
+    startDate: number,
+    operationUsage: number,
 }

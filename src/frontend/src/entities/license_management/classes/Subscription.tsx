@@ -12,10 +12,23 @@ export default class Subscription {
         return subscription.type === 'free';
     }
 
+    static getEmptySubscription(): SubscriptionModel {
+        return {
+            _id: '',
+            type: 'empty',
+            duration: '-',
+            endDate: 0,
+            active: false,
+            startDate: 0,
+            subId: '',
+            totalOperationUsage: null,
+            currentOperationUsage: null,
+        }
+    }
+
     static getMonthlyPeriod(comingDate: number): string {
         const date = new Date(comingDate);
         const inputDay = date.getDate();
-        console.log(inputDay);
         // End date is one day before the input day, same month and year as today
         const todayDate = new Date();
         const inputTodayDay = todayDate.getDate();

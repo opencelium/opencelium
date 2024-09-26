@@ -13,23 +13,26 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {
-    OperationUsageDetailModel,
-} from "@entity/license_management/requests/models/SubscriptionModel";
+import React, {FC} from 'react';
+import {withTheme} from 'styled-components';
+import { LoadingProps } from './interfaces';
+import {CollectionLoadingStyled} from './styles';
 
-
-export class OperationUsageDetail implements OperationUsageDetailModel{
-
-    id: number;
-
-    startDate: number;
-
-    operationUsage: number = 0;
-
-    constructor(operationUsageEntry?: Partial<OperationUsageDetailModel> | null) {
-        this.id = operationUsageEntry ? operationUsageEntry.id : 0;
-        this.operationUsage = operationUsageEntry ? operationUsageEntry.operationUsage : 0;
-        this.startDate = operationUsageEntry ? operationUsageEntry.startDate : 0;
+const CollectionLoading: FC<LoadingProps> =
+    ({
+         ...props
+     }) => {
+        return (
+            <CollectionLoadingStyled {...props}/>
+        )
     }
 
+CollectionLoading.defaultProps = {
 }
+
+
+export {
+    CollectionLoading,
+};
+
+export default withTheme(CollectionLoading);

@@ -44,6 +44,7 @@ interface ViewProps{
     entitiesPerPage?: number,
     isRefreshing?: boolean,
     shouldBeUpdated?: boolean,
+    hasPaginationProps: boolean,
 }
 
 interface ListViewProps extends ViewProps{
@@ -52,6 +53,7 @@ interface ListViewProps extends ViewProps{
     filterData?: any,
     isCard?: boolean,
     onListRowClick?: (entity: any) => void,
+    hasPaginationProps: boolean,
 }
 
 interface CollectionViewProps{
@@ -69,6 +71,10 @@ interface CollectionViewProps{
     defaultFilterData?: any,
     loadingStyles?: any,
     onListRowClick?: (entity: any) => void,
+    paginationProps?: {
+        totalPages: number,
+        setPage: (page: number) => void,
+    } | undefined | null,
 }
 
 interface CheckProps{

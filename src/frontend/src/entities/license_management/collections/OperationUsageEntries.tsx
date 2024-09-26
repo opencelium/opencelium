@@ -24,22 +24,22 @@ import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultLi
 class OperationUsageEntries extends ListCollection<OperationUsageEntryProps>{
     name: string = 'operation_usage_entries';
     entities: OperationUsageEntryModel[];
-    keyPropName: OperationUsageEntryProps ='';
-    sortingProps: OperationUsageEntryProps[] = ['title'];
+    keyPropName: OperationUsageEntryProps ='connectionTitle';
+    sortingProps: OperationUsageEntryProps[] = ['connectionTitle'];
     ListRawComponent = DefaultListRaw;
     listProps: ListProp<OperationUsageEntryProps>[] = [
         {
-            propertyKey: 'title',
+            propertyKey: 'connectionTitle',
             width: '50%',
         },
         {
-            propertyKey: 'number',
+            propertyKey: 'totalUsage',
             width: '50%',
         },
     ];
     translations = {
-        title: 'Connection',
-        number: 'API Operations',
+        connectionTitle: 'Connection',
+        totalUsage: 'API Operations',
     };
     hasSearch = false;
     hasActions = false;
@@ -56,18 +56,18 @@ class OperationUsageEntries extends ListCollection<OperationUsageEntryProps>{
 
     search(connector: OperationUsageEntryModel, searchValue: string){
         searchValue = searchValue.toLowerCase();
-        let checkTitle = connector.title ? connector.title.toLowerCase().indexOf(searchValue) !== -1 : false;
-        return checkTitle;
+        const checkConnectionTitle = connector.connectionTitle ? connector.connectionTitle.toLowerCase().indexOf(searchValue) !== -1 : false;
+        return checkConnectionTitle;
     }
 
     sort(sortingProp: string, sortingType: SortType): void{
         switch (sortingProp){
-            case 'title':
+            case 'connectionTitle':
                 this.entities = this.entities.sort((a: OperationUsageEntryModel, b: OperationUsageEntryModel) => {
                     if(sortingType === SortType.asc){
-                        return this.asc(a.title, b.title);
+                        return this.asc(a.connectionTitle, b.connectionTitle);
                     } else{
-                        return this.desc(a.title, b.title);
+                        return this.desc(a.connectionTitle, b.connectionTitle);
                     }
                 })
                 break;

@@ -17,7 +17,7 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ICommonState} from "@application/interfaces/core";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
-import {IResponse} from "@application/requests/interfaces/IResponse";
+import {IResponse, PageResponse} from "@application/requests/interfaces/IResponse";
 import {
     getCurrentSubscription, getOperationUsageDetails, getOperationUsageEntries, setCurrentSubscription
 } from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
@@ -33,7 +33,9 @@ export interface SubscriptionState extends ICommonState{
     gettingOperationUsageDetails: API_REQUEST_STATE,
     settingCurrentSubscription: API_REQUEST_STATE,
     operationUsageEntries: OperationUsageEntryModel[],
+    entriesTotalPages: number,
     operationUsageDetails: OperationUsageDetailModel[],
+    detailsTotalPages: number,
 }
 
 const initialState: SubscriptionState = {
@@ -43,7 +45,9 @@ const initialState: SubscriptionState = {
     gettingOperationUsageDetails: API_REQUEST_STATE.INITIAL,
     settingCurrentSubscription: API_REQUEST_STATE.INITIAL,
     operationUsageEntries: [],
+    entriesTotalPages: 0,
     operationUsageDetails: [],
+    detailsTotalPages: 0,
     ...CommonState,
 }
 
@@ -68,9 +72,10 @@ export const subscriptionSlice = createSlice({
         [getOperationUsageEntries.pending.type]: (state) => {
             state.gettingOperationUsageEntries = API_REQUEST_STATE.START;
         },
-        [getOperationUsageEntries.fulfilled.type]: (state, action: PayloadAction<OperationUsageEntryModel[]>) => {
+        [getOperationUsageEntries.fulfilled.type]: (state, action: PayloadAction<PageResponse<OperationUsageEntryModel>>) => {
             state.gettingOperationUsageEntries = API_REQUEST_STATE.FINISH;
-            state.operationUsageEntries = action.payload;
+            state.operationUsageEntries = action.payload.content;
+            state.entriesTotalPages = action.payload.totalPages;
             state.error = null;
         },
         [getOperationUsageEntries.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -80,9 +85,10 @@ export const subscriptionSlice = createSlice({
         [getOperationUsageDetails.pending.type]: (state) => {
             state.gettingOperationUsageDetails = API_REQUEST_STATE.START;
         },
-        [getOperationUsageDetails.fulfilled.type]: (state, action: PayloadAction<OperationUsageDetailModel[]>) => {
+        [getOperationUsageDetails.fulfilled.type]: (state, action: PayloadAction<PageResponse<OperationUsageDetailModel>>) => {
             state.gettingOperationUsageDetails = API_REQUEST_STATE.FINISH;
-            state.operationUsageDetails = action.payload;
+            state.operationUsageDetails = action.payload.content;
+            state.detailsTotalPages = action.payload.totalPages;
             state.error = null;
         },
         [getOperationUsageDetails.rejected.type]: (state, action: PayloadAction<IResponse>) => {

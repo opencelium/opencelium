@@ -23,6 +23,7 @@ import {useAppDispatch} from "@application/utils/store";
 import Subscription from "@entity/license_management/classes/Subscription";
 import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import {
+    activateFreeLicense,
     deleteLicense,
     generateActivateRequest
 } from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
@@ -39,33 +40,41 @@ const LicenseManagement: FC<IForm> = ({}) => {
     const {authUser} = Auth.getReduxState();
     const {
         currentSubscription, gettingCurrentSubscription,
+        gettingOperationUsageDetails, gettingOperationUsageEntries,
     } = Subscription.getReduxState();
-    const {activationRequestStatus, status, activatingLicense, deletingLicense} = License.getReduxState();
+    const {
+        activationRequestStatus, status, activatingLicense,
+        deletingLicense, activatingFreeLicense,
+    } = License.getReduxState();
     useEffect(() => {
-        if (activatingLicense === API_REQUEST_STATE.INITIAL || activatingLicense === API_REQUEST_STATE.FINISH || deletingLicense === API_REQUEST_STATE.FINISH) {
+        if (activatingLicense === API_REQUEST_STATE.INITIAL || activatingLicense === API_REQUEST_STATE.FINISH
+            || deletingLicense === API_REQUEST_STATE.FINISH || activatingFreeLicense === API_REQUEST_STATE.FINISH) {
             dispatch(getCurrentSubscription());
+            console.log('get subscription')
         }
-    }, [activatingLicense, deletingLicense])
+    }, [activatingLicense, deletingLicense, activatingFreeLicense])
     const actions = []
     if (!authUser.userDetail.themeSync){
         actions.push(
             <Button
+                key={'download'}
                 icon={'file_download'}
                 label={'Generate Activation Request'}
                 handleClick={() => dispatch(generateActivateRequest())}
             />
         );
         //if (activationRequestStatus === ActivationRequestStatus.PENDING) {
-            actions.push(<ImportLicenseComponent/>);
+            actions.push(<ImportLicenseComponent key={'upload'}/>);
         //}
     } else {
         if (!status && (!currentSubscription || Subscription.isFree(currentSubscription))) {
-            actions.push(<ActivateLicenseComponent/>);
+            actions.push(<ActivateLicenseComponent key={'activate'}/>);
         }
     }
     if (currentSubscription && !Subscription.isFree(currentSubscription)) {
         actions.push(
             <Button
+                key={'delete'}
                 icon={'delete'}
                 label={'Delete License'}
                 hasConfirmation={true}
@@ -74,16 +83,26 @@ const LicenseManagement: FC<IForm> = ({}) => {
                 handleClick={() => dispatch(deleteLicense(currentSubscription.subId))}
             />);
     }
+    if (!currentSubscription) {
+        actions.push(
+            <Button
+                key={'renew_free'}
+                icon={'check'}
+                label={'Activate Free License'}
+                isLoading={activatingFreeLicense === API_REQUEST_STATE.START}
+                handleClick={() => dispatch(activateFreeLicense())}
+            />);
+    }
     const data = {
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Subscription Overview'}],
         actions,
         formSections: [
             <FormSection label={{value: 'subscription'}}>
                 <div style={{marginLeft: 20}}>
-                    {currentSubscription && <CurrentSubscription subscription={currentSubscription}/>}
+                    <CurrentSubscription subscription={currentSubscription || Subscription.getEmptySubscription()}/>
                 </div>
             </FormSection>,
-            <FormSection label={{value: 'Detail View'}}>
+            <FormSection label={{value: 'Detail View'}} dependencies={[!currentSubscription]}>
                 <DetailView/>
             </FormSection>
         ]

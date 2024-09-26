@@ -19,10 +19,13 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {
+    activateFreeLicense,
     activateLicenseFile,
-    activateLicenseString, deleteLicense,
+    activateLicenseString,
+    deleteLicense,
     generateActivateRequest,
-    getActivationRequestStatus, getLicenseList,
+    getActivationRequestStatus,
+    getLicenseList,
     getLicenseStatus,
 } from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 import LicenseModel, {
@@ -37,6 +40,7 @@ export interface LicenseState extends ICommonState{
     gettingActivationRequestStatus: API_REQUEST_STATE,
     gettingLicenseList: API_REQUEST_STATE,
     deletingLicense: API_REQUEST_STATE,
+    activatingFreeLicense: API_REQUEST_STATE,
     license: LicenseModel,
     licenseList: LicenseListItem[],
     status: boolean,
@@ -50,6 +54,7 @@ const initialState: LicenseState = {
     gettingActivationRequestStatus: API_REQUEST_STATE.INITIAL,
     deletingLicense: API_REQUEST_STATE.INITIAL,
     gettingLicenseList: API_REQUEST_STATE.INITIAL,
+    activatingFreeLicense: API_REQUEST_STATE.INITIAL,
     licenseList: [],
     license: null,
     status: false,

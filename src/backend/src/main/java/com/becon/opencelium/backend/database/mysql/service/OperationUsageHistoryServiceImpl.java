@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -39,14 +40,16 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     }
 
     @Override
-    public Page<OperationUsageHistory> getAllUsage(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<OperationUsageHistory> getAllUsage(int page, int size, String[] sort) {
+        Sort.Direction direction = Sort.Direction.fromString(sort[1]);
+        Sort sortBy = Sort.by(direction, sort[0]);
+        Pageable pageable = PageRequest.of(page, size, sortBy);
         return operationUsageHistoryRepository.findAll(pageable);
     }
 
     @Override
-    public Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(String usageId, int page, int size) {
-        return operationUsageHistoryDetailServiceImp.getAllUsageDetailsByOperationUsageHistoryId(usageId,page, size);
+    public Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(String usageId, int page, int size, String[] sort) {
+        return operationUsageHistoryDetailServiceImp.getAllUsageDetailsByOperationUsageHistoryId(usageId,page, size, sort);
     }
 
     @Override

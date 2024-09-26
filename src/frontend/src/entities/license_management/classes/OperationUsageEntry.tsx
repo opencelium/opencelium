@@ -19,14 +19,20 @@ import {OperationUsageEntryModel} from "@entity/license_management/requests/mode
 export class OperationUsageEntry implements OperationUsageEntryModel{
     id: number;
 
-    title: string = '';
+    licenseId: string;
 
-    number: number = 0;
+    subId: string;
+
+    connectionTitle: string = '';
+
+    totalUsage: number = 0;
 
     constructor(operationUsageEntry?: Partial<OperationUsageEntryModel> | null) {
         this.id = operationUsageEntry ? operationUsageEntry.id : 0;
-        this.number = operationUsageEntry ? operationUsageEntry.number : 0;
-        this.title = operationUsageEntry ? operationUsageEntry.title : '';
+        this.licenseId = operationUsageEntry ? operationUsageEntry.licenseId : '';
+        this.subId = operationUsageEntry ? operationUsageEntry.subId : '';
+        this.totalUsage = operationUsageEntry ? operationUsageEntry.totalUsage : 0;
+        this.connectionTitle = operationUsageEntry ? operationUsageEntry.connectionTitle : '';
     }
 
 }

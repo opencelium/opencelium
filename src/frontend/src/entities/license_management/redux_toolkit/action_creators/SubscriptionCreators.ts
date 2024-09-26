@@ -21,19 +21,9 @@ export const getCurrentSubscription = createAsyncThunk(
 )
 export const getOperationUsageEntries = createAsyncThunk(
     'subscription/get/operation/usage',
-    async(data: never, thunkAPI) => {
+    async(data: {page: number, size: number} = {page: 0, size: 10000}, thunkAPI) => {
         try {
-            const testData: OperationUsageEntryModel[] = [{
-                id: 1,
-                title: 'idoit-otrs',
-                number: 1003,
-            },{
-                id: 2,
-                title: 'idoit-checkmk',
-                number: 231,
-            }]
-            return testData;
-            const request = new SubscriptionRequest();
+            const request = new SubscriptionRequest({endpoint: `/operation/usage?page=${data.page}&size=${data.size}`});
             const response = await request.getOperationUsageEntries();
             return response.data;
         } catch(e){
@@ -43,29 +33,9 @@ export const getOperationUsageEntries = createAsyncThunk(
 )
 export const getOperationUsageDetails = createAsyncThunk(
     'subscription/get/operation/usage/details',
-    async(entryId: number, thunkAPI) => {
+    async(data: {page: number, size: number, entryId: number} = {page: 0, size: 5, entryId: 0}, thunkAPI) => {
         try {
-            const testData1: OperationUsageDetailModel[] = [{
-                id: 1,
-                datetime: + new Date(),
-                number: 500,
-            },{
-                id: 2,
-                datetime: + new Date(),
-                number: 503,
-            }]
-            const testData2: OperationUsageDetailModel[] = [{
-                id: 1,
-                datetime: + new Date(),
-                number: 120,
-            },{
-                id: 2,
-                datetime: + new Date(),
-                number: 111,
-            }]
-            const testData = [testData1, testData2]
-            return testData[entryId - 1];
-            const request = new SubscriptionRequest();
+            const request = new SubscriptionRequest({endpoint: `/operation/usage/${data.entryId}/details?page=${data.page}&size=${data.size}&sort=startDate,desc`});
             const response = await request.getOperationUsageDetails();
             return response.data;
         } catch(e){

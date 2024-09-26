@@ -263,7 +263,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (getActiveSubs() != null) {
             return;
         }
-        try {
+//        try {
             // Read and decrypt the license
             String freeLicense = LicenseKeyUtility.readFreeLicense();
             LicenseKey licenseKey = LicenseKeyUtility.decrypt(freeLicense);
@@ -276,8 +276,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             });
             subscription.setActive(true);
             subscriptionRepository.save(subscription);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to activate the default subscription due to an I/O error", e);
-        }
+//        } catch (IOException e) {
+//            throw new RuntimeException("Failed to activate the default subscription due to an I/O error", e);
+//        }
     }
 }

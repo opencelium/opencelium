@@ -125,6 +125,19 @@ public class SubscriptionController {
                 .body(resource);
     }
 
+    @GetMapping("/free/activate")
+    public ResponseEntity<Resource> activateFreeSub() {
+        ActivationRequest ar = activationRequestService.readFreeAR()
+                .orElseThrow(() -> new RuntimeException("Free Activation Request is not found or not valid"));
+        String initLicense = LicenseKeyUtility.readFreeLicense();
+        Subscription subscription = subscriptionService.convertToSub(initLicense,ar);
+        if(!subscriptionService.exists(subscription.getSubId())) {
+            activationRequestService.save(ar);
+            subscriptionService.save(subscription);
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping(value = "/activate/license", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> activateLicense(@RequestParam("file") MultipartFile licenseKey) {
         String content;
@@ -179,9 +192,10 @@ public class SubscriptionController {
 
     @GetMapping("/operation/usage")
     public ResponseEntity<PaginatedDto> getOperationUsage(@RequestParam(defaultValue = "0") int page,
-                                                          @RequestParam(defaultValue = "10") int size) {
+                                                          @RequestParam(defaultValue = "10") int size,
+                                                          @RequestParam(defaultValue = "id,asc") String[] sort) {
 
-        Page<OperationUsageHistory> usageHistories = operationUsageHistoryService.getAllUsage(page, size);
+        Page<OperationUsageHistory> usageHistories = operationUsageHistoryService.getAllUsage(page, size, sort);
         PaginatedDto dto = operationUsageHistoryService.toPaginatedDto(usageHistories);
         return ResponseEntity.ok(dto);
     }
@@ -190,9 +204,10 @@ public class SubscriptionController {
     public ResponseEntity<PaginatedDto> getOperationUsageDetails(
                                                                 @RequestParam(defaultValue = "0") int page,
                                                                 @RequestParam(defaultValue = "10") int size,
-                                                                @PathVariable String usageId) {
+                                                                @PathVariable String usageId,
+                                                                @RequestParam(defaultValue = "id,asc") String[] sort) {
         Page<OperationUsageHistoryDetail> usageDetails = operationUsageHistoryService
-                .getAllUsageDetailsByUsageId(usageId,page, size);
+                .getAllUsageDetailsByUsageId(usageId,page, size, sort);
         PaginatedDto dto = operationUsageHistoryService.toUsageDetailsDto(usageDetails);
         return ResponseEntity.ok(dto);
     }

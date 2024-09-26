@@ -178,7 +178,7 @@ opencelium:
   notification:
     tools:
       incoming_webhook:
-        url: {insert you webhook url here}
+        url: {insert your webhook url here}
   installation:
     type: sources
   service_portal:

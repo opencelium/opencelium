@@ -28,7 +28,6 @@ import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.storage.UserStorageService;
-import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
@@ -90,7 +89,7 @@ public class StorageConfiguration {
     @EventListener(ApplicationReadyEvent.class)
     public void createStorageAfterStartup() {
         // upload freeLicense
-        setInitialLicense();
+//        setInitialLicense();
 
         // creating 'src/main/resources/templates/' directory
         createDirectory(PathConstant.TEMPLATE);
@@ -123,7 +122,7 @@ public class StorageConfiguration {
 
     private void setInitialLicense() {
         try {
-            ActivationRequest ar = activationRequestService.getFreeAR().orElse(null);
+            ActivationRequest ar = activationRequestService.readFreeAR().orElse(null);
             String initLicense = LicenseKeyUtility.readFreeLicense();
             Subscription subscription = subscriptionService.convertToSub(initLicense,ar);
             if(!subscriptionService.exists(subscription.getSubId())) {
