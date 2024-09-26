@@ -40,7 +40,7 @@ public class ActivationRequest implements HmacValidator {
     private String macAddress = MachineUtility.getMacAddress();
 
     @Transient
-    private String systemUuid = MachineUtility.getSystemUuid();
+    private String systemUUID = MachineUtility.getSystemUuid();
 
     @Transient
     private String computerName = MachineUtility.getComputerName();
@@ -93,8 +93,8 @@ public class ActivationRequest implements HmacValidator {
         return macAddress;
     }
 
-    public String getSystemUuid() {
-        return systemUuid;
+    public String getSystemUUID() {
+        return systemUUID;
     }
 
     public String getComputerName() {
@@ -109,8 +109,8 @@ public class ActivationRequest implements HmacValidator {
         this.macAddress = macAddress;
     }
 
-    public void setSystemUuid(String systemUuid) {
-        this.systemUuid = systemUuid;
+    public void setSystemUUID(String systemUUID) {
+        this.systemUUID = systemUUID;
     }
 
     public void setComputerName(String computerName) {
