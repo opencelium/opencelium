@@ -40,9 +40,6 @@ export const ldapSlice = createSlice({
     name: 'ldap',
     initialState,
     reducers: {
-        clearDefaultConfig: (state) => {
-            state.defaultConfig = null;
-        },
         clearDebugLogs: (state) => {
             state.debugLogs = [];
         },
@@ -78,7 +75,7 @@ export const ldapSlice = createSlice({
 })
 
 export const {
-    clearDefaultConfig, clearDebugLogs,
+    clearDebugLogs,
     addDebugLog,
 } = ldapSlice.actions;
 

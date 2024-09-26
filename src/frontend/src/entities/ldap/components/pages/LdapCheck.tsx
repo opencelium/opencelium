@@ -23,7 +23,7 @@ import LdapCheckForm from "../../classes/LdapCheckForm";
 import ILdapCheckForm from "@entity/ldap/interfaces/ILdapCheckForm";
 import {useAppDispatch} from "@application/utils/store";
 import {getDefaultConfig} from "@entity/ldap/redux_toolkit/action_creators/LdapCreators";
-import {addDebugLog, clearDebugLogs, clearDefaultConfig} from "@entity/ldap/redux_toolkit/slices/LdapSlice";
+import {addDebugLog, clearDebugLogs} from "@entity/ldap/redux_toolkit/slices/LdapSlice";
 import Hint from "@app_component/base/hint/Hint";
 import Socket from "@application/classes/socket/Socket";
 import {Auth} from "@application/classes/Auth";
@@ -45,7 +45,6 @@ const LdapCheck: FC<IForm> = ({}) => {
         })
         setSocket(socketInstance);
         return () => {
-            dispatch(clearDefaultConfig());
             dispatch(clearDebugLogs());
         }
     }, []);
@@ -58,7 +57,7 @@ const LdapCheck: FC<IForm> = ({}) => {
             }
         };
     },[])
-    const ldapForm = LdapCheckForm.createState<ILdapCheckForm>({}, defaultConfig);
+    const ldapForm = LdapCheckForm.createState<ILdapCheckForm>({_readOnly: true}, defaultConfig);
     const TextInputs = ldapForm.getTexts([
         {propertyName: "url", props: {icon: 'perm_identity', label: "Url", required: true}},
         {propertyName: "baseDN", props: {icon: 'perm_identity', label: "BaseDN", required: true}},
