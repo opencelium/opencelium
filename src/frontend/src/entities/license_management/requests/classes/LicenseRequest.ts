@@ -54,6 +54,6 @@ export default class LicenseRequest extends Request implements ILicenseRequest {
 
     async activateFreeLicense (): Promise<AxiosResponse<IResponse>> {
         this.url = 'subs/free/activate';
-        return super.post<IResponse>({});
+        return super.get<IResponse>();
     }
 }
