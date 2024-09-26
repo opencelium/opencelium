@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.constant.Constant;
+import com.becon.opencelium.backend.constant.SubscriptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
 import com.becon.opencelium.backend.database.mysql.repository.ActivationRequestRepository;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
@@ -95,9 +96,9 @@ public class ActivationRequestServiceImp implements ActivationRequestService{
     }
 
     @Override
-    public Optional<ActivationRequest> getFreeAR() {
+    public Optional<ActivationRequest> readFreeAR() {
         try {
-            ActivationRequest ar = decodeBase64AR(Constant.DEFAULT_AR);
+            ActivationRequest ar = decodeBase64AR(SubscriptionConstant.DEFAULT_AR);
             return Optional.of(ar);
         } catch (Exception e) {
             throw new RuntimeException(e);

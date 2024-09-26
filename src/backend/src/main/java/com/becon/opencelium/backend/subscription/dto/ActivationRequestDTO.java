@@ -9,7 +9,7 @@ public class ActivationRequestDTO implements HmacValidator {
     private String id;
     private String machineUuid;
     private String macAddress;
-    private String processorId;
+    private String systemUUID;
     private String computerName;
     private long createdAt;
     private String hmac;
@@ -41,12 +41,12 @@ public class ActivationRequestDTO implements HmacValidator {
         this.macAddress = macAddress;
     }
 
-    public String getProcessorId() {
-        return processorId;
+    public String getSystemUUID() {
+        return systemUUID;
     }
 
-    public void setProcessorId(String processorId) {
-        this.processorId = processorId;
+    public void setSystemUUID(String systemUUID) {
+        this.systemUUID = systemUUID;
     }
 
     public String getComputerName() {
@@ -100,7 +100,7 @@ public class ActivationRequestDTO implements HmacValidator {
                 "id='" + id + '\'' +
                 ", machineUuid='" + machineUuid + '\'' +
                 ", macAddress='" + macAddress + '\'' +
-                ", processorId='" + processorId + '\'' +
+                ", processorId='" + systemUUID + '\'' +
                 ", computerName='" + computerName + '\'' +
                 ", createdAt=" + createdAt +
                 ", hmac='" + hmac + '\'' +

@@ -140,6 +140,12 @@ public class InvokerServiceImp implements InvokerService {
     }
 
     @Override
+    public List<Invoker> synchronise() {
+        refresh();
+        return findAll();
+    }
+
+    @Override
     public Map<String, Invoker> containerize(List<Document> invokers) {
         Map<String, Invoker> container = new HashMap<>();
         invokers.forEach(document -> {
