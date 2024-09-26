@@ -33,6 +33,7 @@ import DataAggregatorToolkit from './data_aggregator/redux_toolkit'
 import MigrationToolkit from './migrate/redux_toolkit';
 import CategoryToolkit from './category/redux_toolkit';
 import LicenseManagementToolkit from './license_management/redux_toolkit';
+import LdapManagementToolkit from './ldap/redux_toolkit';
 
 const ActionCreators = {
     ...ConnectionToolkit.actionCreators,
@@ -50,6 +51,7 @@ const ActionCreators = {
     ...MigrationToolkit.actionCreators,
     ...CategoryToolkit.actionCreators,
     ...LicenseManagementToolkit.actionCreators,
+    ...LdapManagementToolkit.actionCreators,
 }
 
 const reducers = {
@@ -69,6 +71,7 @@ const reducers = {
     ...MigrationToolkit.reducers,
     ...CategoryToolkit.reducers,
     ...LicenseManagementToolkit.reducers,
+    ...LdapManagementToolkit.reducers,
 }
 
 const entitiesTranslations = require.context('.', true, /\/\w+\/translations\/index.ts$/);
