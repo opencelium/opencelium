@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { ProgressBar } from 'react-bootstrap';
 import {
     DivisionsStyled,
@@ -8,11 +8,9 @@ import {
 } from "./style";
 import {withTheme} from "styled-components";
 import {ITheme} from "@style/Theme";
-import {useAppDispatch} from "@application/utils/store";
+import Dialog from "@app_component/base/dialog/Dialog";
 import {convertTimeForSubscription, formatOperationUsage} from "@application/utils/utils";
 import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
-import License from "@entity/license_management/classes/License";
-import {getLicenseStatus} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 import Subscription from "@entity/license_management/classes/Subscription";
 
 export const RoleNames: any = {
@@ -26,6 +24,7 @@ export const RoleNames: any = {
     enterprise_api: 'OpenCelium Enterprise (API)',
     enterprise_plus_api: 'OpenCelium Enterprise Plus (API)',
     free: 'Free',
+    empty: '-',
 }
 const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionModel, theme: ITheme}) => {
     const max = subscription.totalOperationUsage;
@@ -34,8 +33,8 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
     const progressbarHeight = 30;
     const now = subscription.currentOperationUsage;
     const percentage = (now / max) * 100;
-    useEffect(() => {
-    }, []);
+    const hasNoSubscription = subscription.type === 'empty';
+    const [showDocsDialog, toggleDocsDialog] = useState<boolean>(hasNoSubscription);
     return (
         <div>
             <div>
@@ -56,22 +55,22 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                     <InfoStyled>
                         <div><b>Amount of API Operations:</b></div>
                         <div>
-                            {formatOperationUsage(subscription.totalOperationUsage)}
+                            {hasNoSubscription ? '-' : formatOperationUsage(subscription.totalOperationUsage)}
                         </div>
                     </InfoStyled>
                     <InfoStyled>
                         <div><b>Expiration Date:</b></div>
                         <div>
-                            {convertTimeForSubscription(subscription.endDate, {hasHours: false, hasMinutes: false, hasSeconds: false})}
+                            {hasNoSubscription ? '-' : convertTimeForSubscription(subscription.endDate, {hasHours: false, hasMinutes: false, hasSeconds: false})}
                         </div>
                     </InfoStyled>
                     <InfoStyled>
                         <div><b>Monthly Period:</b></div>
                         <div>
-                            {Subscription.getMonthlyPeriod(subscription.startDate)}
+                            {hasNoSubscription ? '-' : Subscription.getMonthlyPeriod(subscription.startDate)}
                         </div>
                     </InfoStyled>
-                    {max === null && <React.Fragment>
+                    {max === null && !hasNoSubscription && <React.Fragment>
                         <InfoStyled>
                             <div><b>Capacity:</b></div>
                             <div>
@@ -125,6 +124,21 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                 </NowValueStyled>
             </div>
             }
+            <Dialog
+                actions={[{label: 'Close', onClick: () => toggleDocsDialog(false), id: 'close'}]}
+                active={showDocsDialog}
+                toggle={() => toggleDocsDialog(!showDocsDialog)}
+                title={''}
+            >
+                <p style={{textAlign: 'center', fontSize: 24, fontWeight: 'bold'}}>
+                    {"New License Management"}
+                </p>
+                <p style={{textAlign: 'center', marginBottom: 0}}>
+                    {"Since 4.2 we have a license management integration. Click "}
+                    <a target={'_blank'} href={"https://docs.opencelium.io/en/prod/"}>{"here"}</a>
+                    {" to read how to enable license."}
+                </p>
+            </Dialog>
         </div>
     )
 }
