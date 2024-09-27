@@ -1,5 +1,5 @@
 import React, {ChangeEvent, useEffect, useMemo, useState} from 'react';
-import Button from "@basic_components/buttons/Button";
+import Button from "@app_component/base/button/Button";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import License from "@entity/license_management/classes/License";
 import {ActivateLicenseForm} from "@entity/license_management/classes/ActivateLicenseForm";
