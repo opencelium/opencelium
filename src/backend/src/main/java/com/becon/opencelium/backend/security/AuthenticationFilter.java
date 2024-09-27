@@ -168,7 +168,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             GrantedAuthority authority = authorities.stream()
                     .filter(a -> userRoleService.existsByRole(a.getAuthority()))
                     .findFirst()
-                    .orElseThrow(() -> new EntityNotFoundException("LDAP group mapping does not exists."));
+                    .orElseThrow(() -> new EntityNotFoundException("LDAP group to OC role mapping does not exists."));
 
             UserRole role = userRoleService.findByRole(authority.getAuthority()).orElseThrow();
             user.setUserRole(role);

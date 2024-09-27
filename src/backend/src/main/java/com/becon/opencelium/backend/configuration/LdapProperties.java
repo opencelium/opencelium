@@ -2,20 +2,25 @@ package com.becon.opencelium.backend.configuration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @ConfigurationProperties(prefix = "spring.security.ldap")
 public class LdapProperties {
     private String urls;
+    private String username;
+    private String password;
     private String base;
     private String userSearchBase;
-    private String groupSearchBase;
-    private String managerDn;
-    private String managerPassword;
-    private String groupSearchFilter = "(member={0})";
     private String userSearchFilter = "(cn={0})";
+    private String groupSearchBase;
+    private String groupSearchFilter = "(member={0})";
+    private List<Group2Role> groupRoleMapping = new ArrayList<>();
+    private String defaultRole;
     private boolean showLogs = false;
 
     public String getConfiguration() {
-        if (urls == null && base == null && userSearchBase == null && groupSearchBase == null && managerDn == null && managerPassword == null) {
+        if (urls == null && base == null && userSearchBase == null && groupSearchBase == null && username == null && password == null) {
             return "ldap configuration not found.";
         }
 
@@ -28,6 +33,22 @@ public class LdapProperties {
 
     public void setUrls(String urls) {
         this.urls = urls;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getBase() {
@@ -46,28 +67,20 @@ public class LdapProperties {
         this.userSearchBase = userSearchBase;
     }
 
+    public String getUserSearchFilter() {
+        return userSearchFilter;
+    }
+
+    public void setUserSearchFilter(String userSearchFilter) {
+        this.userSearchFilter = userSearchFilter;
+    }
+
     public String getGroupSearchBase() {
         return groupSearchBase;
     }
 
     public void setGroupSearchBase(String groupSearchBase) {
         this.groupSearchBase = groupSearchBase;
-    }
-
-    public String getManagerDn() {
-        return managerDn;
-    }
-
-    public void setManagerDn(String managerDn) {
-        this.managerDn = managerDn;
-    }
-
-    public String getManagerPassword() {
-        return managerPassword;
-    }
-
-    public void setManagerPassword(String managerPassword) {
-        this.managerPassword = managerPassword;
     }
 
     public String getGroupSearchFilter() {
@@ -78,12 +91,20 @@ public class LdapProperties {
         this.groupSearchFilter = groupSearchFilter;
     }
 
-    public String getUserSearchFilter() {
-        return userSearchFilter;
+    public List<Group2Role> getGroupRoleMapping() {
+        return groupRoleMapping;
     }
 
-    public void setUserSearchFilter(String userSearchFilter) {
-        this.userSearchFilter = userSearchFilter;
+    public void setGroupRoleMapping(List<Group2Role> groupRoleMapping) {
+        this.groupRoleMapping = groupRoleMapping;
+    }
+
+    public String getDefaultRole() {
+        return defaultRole;
+    }
+
+    public void setDefaultRole(String defaultRole) {
+        this.defaultRole = defaultRole;
     }
 
     public boolean isShowLogs() {
@@ -101,8 +122,29 @@ public class LdapProperties {
                 "base='" + base + "', " +
                 "userSearchBase='" + userSearchBase + "', " +
                 "groupSearchBase='" + groupSearchBase + "', " +
-                "managerDn='" + managerDn + "', " +
+                "username='" + username + "', " +
                 "groupSearchFilter='" + groupSearchFilter + "', " +
                 "userSearchFilter='" + userSearchFilter + "'}";
+    }
+
+    public static class Group2Role {
+        private String ldapGroup;
+        private String ocRole;
+
+        public String getLdapGroup() {
+            return ldapGroup;
+        }
+
+        public void setLdapGroup(String ldapGroup) {
+            this.ldapGroup = ldapGroup;
+        }
+
+        public String getOcRole() {
+            return ocRole;
+        }
+
+        public void setOcRole(String ocRole) {
+            this.ocRole = ocRole;
+        }
     }
 }
