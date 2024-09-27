@@ -4,21 +4,37 @@ import jakarta.annotation.Resource;
 
 @Resource
 public class LdapConfigDTO {
-    private String url;
+    private String urls;
+    private String username;
+    private String password;
     private String baseDN;
     private String userDN;
     private String groupDN;
-    private String readAccountDN;
-    private String readAccountPassword;
     private String userSearchFilter;
     private String groupSearchFilter;
 
-    public String getUrl() {
-        return url;
+    public String getUrls() {
+        return urls;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setUrls(String urls) {
+        this.urls = urls;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getBaseDN() {
@@ -43,22 +59,6 @@ public class LdapConfigDTO {
 
     public void setGroupDN(String groupDN) {
         this.groupDN = groupDN;
-    }
-
-    public String getReadAccountDN() {
-        return readAccountDN;
-    }
-
-    public void setReadAccountDN(String readAccountDN) {
-        this.readAccountDN = readAccountDN;
-    }
-
-    public String getReadAccountPassword() {
-        return readAccountPassword;
-    }
-
-    public void setReadAccountPassword(String readAccountPassword) {
-        this.readAccountPassword = readAccountPassword;
     }
 
     public String getUserSearchFilter() {

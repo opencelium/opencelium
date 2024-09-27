@@ -27,15 +27,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ldap.core.LdapTemplate;
-import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.naming.directory.Attributes;
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import java.util.Hashtable;
 
 @Controller
 @Tag(name = "Ldap", description = "To retrieve ldap configuration and test connection to ldap server")
@@ -45,10 +47,10 @@ public class LdapController {
     @Autowired
     private LdapProperties properties;
 
-    @Operation(summary = "")
+    @Operation(summary = "Returns ldap configuration")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
-                description = "",
+                description = "Success",
                 content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
@@ -61,22 +63,22 @@ public class LdapController {
     public ResponseEntity<LdapConfigDTO> profilePictureUpload() {
         LdapConfigDTO result = new LdapConfigDTO();
 
-        result.setUrl(properties.getUrls());
+        result.setUrls(properties.getUrls());
         result.setBaseDN(properties.getBase());
         result.setUserDN(properties.getUserSearchBase());
         result.setGroupDN(properties.getGroupSearchBase());
-        result.setReadAccountDN(properties.getUsername());
-        result.setReadAccountPassword(properties.getPassword());
+        result.setUsername(properties.getUsername());
+        result.setPassword(properties.getPassword());
         result.setUserSearchFilter(properties.getUserSearchFilter());
         result.setGroupSearchFilter(properties.getGroupSearchFilter());
 
         return ResponseEntity.ok(result);
     }
 
-    @Operation(summary = "")
+    @Operation(summary = "Tests if connection can be established with given configuration")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
-                description = "",
+                description = "Success",
                 content = @Content),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
@@ -86,26 +88,21 @@ public class LdapController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping("/test")
-    public ResponseEntity<?> groupPictureUpload(@RequestBody LdapConfigDTO request) {
+    public ResponseEntity<String> groupPictureUpload(@RequestBody LdapConfigDTO dto) {
+        Hashtable<String, String> env = new Hashtable<>();
         try {
-            LdapContextSource contextSource = new LdapContextSource();
-            contextSource.setUrl(request.getUrl());
-            contextSource.setBase(request.getBaseDN());
-            contextSource.setUserDn(request.getReadAccountDN());
-            contextSource.setPassword(request.getReadAccountPassword());
-            contextSource.afterPropertiesSet();
+            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+            env.put(Context.PROVIDER_URL, dto.getUrls());
+            env.put(Context.SECURITY_AUTHENTICATION, "simple");
+            env.put(Context.SECURITY_PRINCIPAL, dto.getUsername());
+            env.put(Context.SECURITY_CREDENTIALS, dto.getPassword());
 
-            LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
+            DirContext ctx = new InitialDirContext(env);
+            ctx.close();
 
-            ldapTemplate.search(
-                    request.getUserDN(),
-                    request.getUserSearchFilter(),
-                    Attributes::clone
-            );
-
-            return ResponseEntity.ok("LDAP connection successful");
-        } catch (Exception e) {
-            return ResponseEntity.ok(e.getMessage());
+            return ResponseEntity.ok("Successfully connected to LDAP server");
+        } catch (NamingException e) {
+            return ResponseEntity.ok("Could not connect to LDAP server: " + e.getMessage());
         }
     }
 }
