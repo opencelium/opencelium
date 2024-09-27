@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -86,10 +87,7 @@ public class SecurityConfiguration {
     private DaoUserDetailsService daoUserDetailsService;
 
     @Autowired
-    private LdapGroupMappingProperties groupMappingProperties;
-
-    @Autowired
-    private LdapProperties properties;
+    private LdapProperties ldapProperties;
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfiguration.class);
 
@@ -143,8 +141,8 @@ public class SecurityConfiguration {
                     return super.doAuthentication(authentication);
                 } catch (InternalAuthenticationServiceException e) {
                     // move next authentication if LDAP server is not available
-                    if (properties.isShowLogs()) {
-                        logger.info(properties.getConfiguration());
+                    if (ldapProperties.isShowLogs()) {
+                        logger.info(ldapProperties.getConfiguration());
                     }
                     throw new ProviderNotFoundException(e.getMessage());
                 }
@@ -154,8 +152,8 @@ public class SecurityConfiguration {
 
     @Bean
     public LdapAuthenticator ldapAuthenticator() {
-        String userSearchBase = properties.getUserSearchBase() + "," + properties.getBase();
-        String searchFilter = properties.getUserSearchFilter();
+        String userSearchBase = ldapProperties.getUserSearchBase() + "," + ldapProperties.getBase();
+        String searchFilter = ldapProperties.getUserSearchFilter();
 
         BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
         authenticator.setUserSearch(new FilterBasedLdapUserSearch(userSearchBase, searchFilter, ldapContextSource()));
@@ -165,8 +163,8 @@ public class SecurityConfiguration {
 
     @Bean
     public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() {
-        String groupSearchBase = properties.getGroupSearchBase() + "," + properties.getBase();
-        String searchFilter = properties.getGroupSearchFilter();
+        String groupSearchBase = ldapProperties.getGroupSearchBase() + "," + ldapProperties.getBase();
+        String searchFilter = ldapProperties.getGroupSearchFilter();
 
         DefaultLdapAuthoritiesPopulator authoritiesPopulator = new DefaultLdapAuthoritiesPopulator(ldapContextSource(), groupSearchBase);
         authoritiesPopulator.setGroupSearchFilter(searchFilter);
@@ -179,9 +177,9 @@ public class SecurityConfiguration {
     public LdapContextSource ldapContextSource() {
         LdapContextSource contextSource = new LdapContextSource();
 
-        contextSource.setUrl(properties.getUrls());
-        contextSource.setUserDn(properties.getManagerDn());
-        contextSource.setPassword(properties.getManagerPassword());
+        contextSource.setUrl(ldapProperties.getUrls());
+        contextSource.setUserDn(ldapProperties.getUsername());
+        contextSource.setPassword(ldapProperties.getPassword());
 
         return contextSource;
     }
@@ -217,23 +215,18 @@ public class SecurityConfiguration {
     }
 
 
-    private GrantedAuthority ldapAuthorityMapper(Map<String, List<String>> userRole) {
-        String group = null; // LDAP group is equivalent of UserRole
-
-        List<String> groups = userRole.get(SpringSecurityLdapTemplate.DN_KEY);
-        if (groups != null && !groups.isEmpty()) {
-            group = groups.get(0);
+    private GrantedAuthority ldapAuthorityMapper(Map<String, List<String>> userGroups) {
+        List<String> groups = userGroups.get(SpringSecurityLdapTemplate.DN_KEY);
+        if (groups == null || groups.isEmpty()) {
+            throw new AuthenticationServiceException("User should be a member of at least one group");
         }
 
-        for (LdapGroupMappingProperties.GroupMapping mapping : groupMappingProperties.getLdapGroupMapping()) {
-            if (Objects.equals(group, mapping.getLdapGroup())) {
-                group = mapping.getGroup();
-                break;
-            }
+        String ocRole = ldapProperties.getGroupRoleMapping().stream()
+                .filter(mapping -> Objects.equals(groups.get(0), mapping.getLdapGroup()))
+                .findFirst()
+                .map(LdapProperties.Group2Role::getOcRole)
+                .orElse(ldapProperties.getDefaultRole());
 
-            group = groupMappingProperties.getDefaultMappingGroup();
-        }
-
-        return new SimpleGrantedAuthority(group);
+        return new SimpleGrantedAuthority(ocRole);
     }
 }

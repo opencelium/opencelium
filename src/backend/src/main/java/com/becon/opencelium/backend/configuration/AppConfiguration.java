@@ -22,7 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 
 @Configuration
-@EnableConfigurationProperties(value = { LdapGroupMappingProperties.class, LdapProperties.class })
+@EnableConfigurationProperties(value = LdapProperties.class)
 public class AppConfiguration {
 
     @Autowired
