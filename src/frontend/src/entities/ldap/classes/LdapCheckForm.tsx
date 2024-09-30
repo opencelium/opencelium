@@ -11,7 +11,7 @@ import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
 export default class LdapCheckForm extends HookStateClass implements ILdapCheckForm{
 
     @App.inputType
-    url: string = '';
+    urls: string = '';
 
     @App.inputType
     baseDN: string = '';
@@ -37,7 +37,7 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
     constructor(formData?: Partial<LdapConfigModel> | null) {
         // @ts-ignore
         super(formData?.validations || {}, formData?._readOnly, formData?.wholeInstance);
-        this.url = formData?.url || '';
+        this.urls = formData?.urls || '';
         this.baseDN = formData?.baseDN || '';
         this.userDN = formData?.userDN || '';
         this.groupDN = formData?.groupDN || '';
@@ -67,15 +67,15 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
     }
     validateUrl(): boolean{
         let isNotValid = false;
-        if(this.url === ''){
+        if(this.urls === ''){
             isNotValid = true;
-            this.validations['url'] = 'The url is a required field';
+            this.validations['urls'] = 'The url is a required field';
         }
         if(isNotValid){
             // @ts-ignore
-            this.updateUrl(this, this.url);
+            this.updateUrls(this, this.urls);
             if(!this.isFocused){
-                document.getElementById('input_url').focus();
+                document.getElementById('input_urls').focus();
                 this.isFocused = true;
             }
             return false;

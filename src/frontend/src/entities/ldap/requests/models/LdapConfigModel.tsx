@@ -1,5 +1,5 @@
 export default interface LdapConfigModel {
-    url: string,
+    urls: string,
     baseDN: string,
     userDN: string,
     groupDN: string,

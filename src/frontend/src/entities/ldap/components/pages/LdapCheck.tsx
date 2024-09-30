@@ -44,7 +44,7 @@ const LdapCheck: FC<IForm> = ({}) => {
 
     const ldapForm = LdapCheckForm.createState<ILdapCheckForm>({_readOnly: true}, defaultConfig);
     const TextInputs = ldapForm.getTexts([
-        {propertyName: "url", props: {icon: 'perm_identity', label: "Url", required: true}},
+        {propertyName: "urls", props: {icon: 'perm_identity', label: "Url", required: true}},
         {propertyName: "baseDN", props: {icon: 'perm_identity', label: "BaseDN", required: true}},
         {propertyName: "userDN", props: {icon: 'perm_identity', label: "UserDN", required: true}},
         {propertyName: "groupDN", props: {icon: 'perm_identity', label: "GroupDN"}},
