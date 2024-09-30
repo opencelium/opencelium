@@ -3,8 +3,8 @@ export default interface LdapConfigModel {
     baseDN: string,
     userDN: string,
     groupDN: string,
-    readAccountDN: string,
-    readAccountPassword: string,
+    username: string,
+    password: string,
     userSearchFilter: string,
     groupSearchFilter: string,
 }

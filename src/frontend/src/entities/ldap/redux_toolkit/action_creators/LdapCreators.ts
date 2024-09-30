@@ -15,7 +15,6 @@
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
-import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
 import LdapRequest from "@entity/ldap/requests/classes/Ldap";
 
 export const getDefaultConfig = createAsyncThunk(

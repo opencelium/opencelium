@@ -23,10 +23,10 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
     groupDN: string = '';
 
     @App.inputType
-    readAccountDN: string = '';
+    username: string = '';
 
     @App.inputType
-    readAccountPassword: string = '';
+    password: string = '';
 
     @App.inputType
     userSearchFilter: string = '';
@@ -41,8 +41,8 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
         this.baseDN = formData?.baseDN || '';
         this.userDN = formData?.userDN || '';
         this.groupDN = formData?.groupDN || '';
-        this.readAccountDN = formData?.readAccountDN || '';
-        this.readAccountPassword = formData?.readAccountPassword || '';
+        this.username = formData?.username || '';
+        this.password = formData?.password || '';
         this.userSearchFilter = formData?.userSearchFilter || '';
         this.groupSearchFilter = formData?.groupSearchFilter || '';
         // @ts-ignore
@@ -120,18 +120,7 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
 
     @App.dispatch(testConfig, {
         hasNoValidation: false,
-        mapping: (ldapCheckForm: ILdapCheckForm): LdapConfigModel => {
-            return {
-                url: ldapCheckForm.url,
-                baseDN: ldapCheckForm.baseDN,
-                userDN: ldapCheckForm.userDN,
-                groupDN: ldapCheckForm.groupDN,
-                readAccountDN: ldapCheckForm.readAccountDN,
-                readAccountPassword: ldapCheckForm.readAccountPassword,
-                userSearchFilter: ldapCheckForm.userSearchFilter,
-                groupSearchFilter: ldapCheckForm.groupSearchFilter,
-            };
-        }})
+        mapping: (): void => {}})
     test(): boolean{
         this.isFocused = false;
         return this.validateUrl() && this.validateBaseDN() && this.validateUserDN();

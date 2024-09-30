@@ -48,8 +48,8 @@ const LdapCheck: FC<IForm> = ({}) => {
         {propertyName: "baseDN", props: {icon: 'perm_identity', label: "BaseDN", required: true}},
         {propertyName: "userDN", props: {icon: 'perm_identity', label: "UserDN", required: true}},
         {propertyName: "groupDN", props: {icon: 'perm_identity', label: "GroupDN"}},
-        {propertyName: "readAccountDN", props: {icon: 'perm_identity', label: "Read Account DN"}},
-        {propertyName: "readAccountPassword", props: {icon: 'perm_identity', label: "Read Account Password"}},
+        {propertyName: "username", props: {icon: 'perm_identity', label: "Read Account DN"}},
+        {propertyName: "password", props: {icon: 'perm_identity', label: "Read Account Password"}},
         {propertyName: "userSearchFilter", props: {icon: 'perm_identity', label: "User Search Filter"}},
         {propertyName: "groupSearchFilter", props: {icon: 'perm_identity', label: "Group Search Filter"}},
     ])
@@ -69,7 +69,7 @@ const LdapCheck: FC<IForm> = ({}) => {
         formSections: [
             <FormSection label={{value: 'Configurations'}}>
                 {TextInputs}
-                {!defaultConfig && <div style={{marginLeft: 10, marginTop: 20, marginBottom: 20}}><Hint message={'You can set the default configurations in application.yml file'}/></div>}
+                {!defaultConfig && <div style={{marginLeft: 10, marginTop: 20, marginBottom: 20}}><Hint message={'You can set configurations in application.yml file'}/></div>}
             </FormSection>,
             <FormSection dependencies={[debugLogs.length === 0]} label={{value: 'Debug'}}>
                 <div>{debugLogs}</div>
