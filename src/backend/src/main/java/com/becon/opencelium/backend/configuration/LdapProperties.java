@@ -7,7 +7,7 @@ import java.util.List;
 
 @ConfigurationProperties(prefix = "spring.security.ldap")
 public class LdapProperties {
-    private String urls;
+    private String url;
     private String username;
     private String password;
     private String base;
@@ -20,19 +20,19 @@ public class LdapProperties {
     private boolean showLogs = false;
 
     public String getConfiguration() {
-        if (urls == null && base == null && userSearchBase == null && groupSearchBase == null && username == null && password == null) {
+        if (url == null && base == null && userSearchBase == null && groupSearchBase == null && username == null && password == null) {
             return "ldap configuration not found.";
         }
 
         return toString();
     }
 
-    public String getUrls() {
-        return urls;
+    public String getUrl() {
+        return url;
     }
 
-    public void setUrls(String urls) {
-        this.urls = urls;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String getUsername() {
@@ -118,7 +118,7 @@ public class LdapProperties {
     @Override
     public String toString() {
         return "System found ldap configuration: {" +
-                "urls='" + urls + "', " +
+                "urls='" + url + "', " +
                 "base='" + base + "', " +
                 "userSearchBase='" + userSearchBase + "', " +
                 "groupSearchBase='" + groupSearchBase + "', " +

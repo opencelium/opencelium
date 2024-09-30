@@ -63,7 +63,7 @@ public class LdapController {
     public ResponseEntity<LdapConfigDTO> profilePictureUpload() {
         LdapConfigDTO result = new LdapConfigDTO();
 
-        result.setUrls(properties.getUrls());
+        result.setUrls(properties.getUrl());
         result.setBaseDN(properties.getBase());
         result.setUserDN(properties.getUserSearchBase());
         result.setGroupDN(properties.getGroupSearchBase());
