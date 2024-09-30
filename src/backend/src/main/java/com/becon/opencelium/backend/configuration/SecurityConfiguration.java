@@ -177,7 +177,7 @@ public class SecurityConfiguration {
     public LdapContextSource ldapContextSource() {
         LdapContextSource contextSource = new LdapContextSource();
 
-        contextSource.setUrl(ldapProperties.getUrl());
+        contextSource.setUrl(ldapProperties.getUrls());
         contextSource.setUserDn(ldapProperties.getUsername());
         contextSource.setPassword(ldapProperties.getPassword());
 
