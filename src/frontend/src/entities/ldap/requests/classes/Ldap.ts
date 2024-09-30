@@ -17,7 +17,6 @@ import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import Request from "@entity/application/requests/classes/Request";
 import ILdapRequest from "../interfaces/ILdap";
 import {AxiosResponse} from "axios";
-import {IResponse} from "@application/requests/interfaces/IResponse";
 import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
 
 export default class LdapRequest extends Request implements ILdapRequest {
@@ -27,11 +26,12 @@ export default class LdapRequest extends Request implements ILdapRequest {
     }
 
     async getDefaultConfig(): Promise<AxiosResponse<LdapConfigModel>>{
+        this.endpoint = '/default/config';
         return super.get<LdapConfigModel>();
     }
 
-    async testConfig(): Promise<AxiosResponse<IResponse>>{
-        this.endpoint = 'test';
-        return super.get<IResponse>();
+    async testConfig(): Promise<AxiosResponse<string>>{
+        this.endpoint = '/test';
+        return super.get<string>();
     }
 }

@@ -22,5 +22,5 @@ export default interface ILdapRequest {
 
     getDefaultConfig(): Promise<AxiosResponse<LdapConfigModel>>,
 
-    testConfig(): Promise<AxiosResponse<IResponse>>,
+    testConfig(): Promise<AxiosResponse<string>>,
 }

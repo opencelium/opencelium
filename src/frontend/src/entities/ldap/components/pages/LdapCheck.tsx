@@ -23,9 +23,8 @@ import LdapCheckForm from "../../classes/LdapCheckForm";
 import ILdapCheckForm from "@entity/ldap/interfaces/ILdapCheckForm";
 import {useAppDispatch} from "@application/utils/store";
 import {getDefaultConfig} from "@entity/ldap/redux_toolkit/action_creators/LdapCreators";
-import {addDebugLog, clearDebugLogs} from "@entity/ldap/redux_toolkit/slices/LdapSlice";
+import {clearDebugLogs} from "@entity/ldap/redux_toolkit/slices/LdapSlice";
 import Hint from "@app_component/base/hint/Hint";
-import Socket from "@application/classes/socket/Socket";
 import {Auth} from "@application/classes/Auth";
 
 
@@ -36,27 +35,13 @@ const LdapCheck: FC<IForm> = ({}) => {
         gettingDefaultConfig, testingConfig, defaultConfig,
         debugLogs, error,
     } = LdapCheckForm.getReduxState();
-    const [socket, setSocket] = useState<Socket>(null);
     useEffect(() => {
         dispatch(getDefaultConfig());
-        const socketInstance = Socket.createSocket(authUser.token);
-        socketInstance.subscribe.ConnectionLogs((data) => {
-            dispatch(addDebugLog(data.body));
-        })
-        setSocket(socketInstance);
         return () => {
             dispatch(clearDebugLogs());
         }
     }, []);
 
-    useEffect(() => {
-        return () => {
-            if (socket) {
-                socket.unsubscribe.ConnectionLogs();
-                socket.disconnect();
-            }
-        };
-    },[])
     const ldapForm = LdapCheckForm.createState<ILdapCheckForm>({_readOnly: true}, defaultConfig);
     const TextInputs = ldapForm.getTexts([
         {propertyName: "url", props: {icon: 'perm_identity', label: "Url", required: true}},
@@ -87,11 +72,7 @@ const LdapCheck: FC<IForm> = ({}) => {
                 {!defaultConfig && <div style={{marginLeft: 10, marginTop: 20, marginBottom: 20}}><Hint message={'You can set the default configurations in application.yml file'}/></div>}
             </FormSection>,
             <FormSection dependencies={[debugLogs.length === 0]} label={{value: 'Debug'}}>
-                {debugLogs.map(log => {
-                    return (
-                        <div>{log}</div>
-                    );
-                })}
+                <div>{debugLogs}</div>
             </FormSection>
         ]
     }
