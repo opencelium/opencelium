@@ -125,6 +125,11 @@ const CollectionView: FC<CollectionViewProps> =
                 setChecks([]);
             }
         }, [collection.deletingEntitiesState]);
+        const decreasePage = () => {
+            if (currentPage > 1) {
+                setPage(currentPage - 1);
+            }
+        }
         const onChangeViewType = (newViewType: ViewType) => {
             setIsRefreshing(true);
             setTimeout(() => {
@@ -213,6 +218,7 @@ const CollectionView: FC<CollectionViewProps> =
                                 filterData={filterData}
                                 onListRowClick={onListRowClick}
                                 hasPaginationProps={!!paginationProps}
+                                decreasePage={decreasePage}
                             />}
                         {applicationViewType === ViewType.GRID &&
                             <Grid
@@ -225,6 +231,7 @@ const CollectionView: FC<CollectionViewProps> =
                                 isRefreshing={isRefreshing}
                                 shouldBeUpdated={shouldBeUpdated}
                                 hasPaginationProps={!!paginationProps}
+                                decreasePage={decreasePage}
                             />
                         }
                     </div>

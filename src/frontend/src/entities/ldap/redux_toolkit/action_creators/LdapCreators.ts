@@ -15,24 +15,13 @@
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
-import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
 import LdapRequest from "@entity/ldap/requests/classes/Ldap";
+import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
 
 export const getDefaultConfig = createAsyncThunk(
     'ldap/get/default',
     async(data: never, thunkAPI) => {
         try {
-            const testConfigData: LdapConfigModel = {
-                url: 'ldap://localhost:10389',
-                baseDN: 'dc=example,dc=com',
-                userDN: 'ou=people',
-                groupDN: 'ou=groups',
-                readAccountDN: 'uid=admin,ou=system',
-                readAccountPassword: 'password',
-                userSearchFilter: '(uid={0})',
-                groupSearchFilter: '(member={0})'
-            }
-            return testConfigData;
             const request = new LdapRequest()
             const response = await request.getDefaultConfig();
             return response.data;
@@ -43,11 +32,11 @@ export const getDefaultConfig = createAsyncThunk(
 )
 export const testConfig = createAsyncThunk(
     'ldap/test',
-    async(data: never, thunkAPI) => {
+    async(data: LdapConfigModel, thunkAPI) => {
         try {
-            return;
             const request = new LdapRequest()
-            await request.testConfig();
+            const response = await request.testConfig(data);
+            return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

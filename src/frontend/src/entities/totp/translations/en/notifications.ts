@@ -19,7 +19,7 @@ import {getDefaultConfig, testConfig} from "@entity/ldap/redux_toolkit/action_cr
 
 export default {
     fulfilled: {
-        [testConfig.fulfilled.type]: "The test was successfully fulfilled",
+        [testConfig.fulfilled.type]: "The migration was successfully fulfilled",
     },
     rejected: {
         [getDefaultConfig.rejected.type]: {

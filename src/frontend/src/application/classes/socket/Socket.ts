@@ -17,7 +17,6 @@ import SockJS from 'sockjs-client';
 import {Client, over, Frame, Message, Subscription} from 'stompjs';
 import ConnectionLogs from "./ConnectionLogs";
 import {baseUrl} from "@entity/application/requests/classes/url";
-import LdapCheckLogs from "@entity/ldap/classes/LdapCheckLogs";
 
 export default class CSocket{
 
@@ -27,12 +26,10 @@ export default class CSocket{
 
     public subscribe: {[name: string]: (callback: (message: Message) => void) => void} = {
         ConnectionLogs: (callback: (message: Message) => void) => ConnectionLogs.subscribe(this, callback),
-        LdapCheckLogs: (callback: (message: Message) => void) => LdapCheckLogs.subscribe(this, callback),
     }
 
     public unsubscribe: {[name: string]: () => void} = {
         ConnectionLogs: ConnectionLogs.unsubscribe,
-        LdapCheckLogs: LdapCheckLogs.unsubscribe,
     }
 
     constructor(client: Client) {

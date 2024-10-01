@@ -13,23 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Socket, { Message, Subscription } from "@application/classes/socket/Socket";
+import LdapCreators from "./TotpCreators";
 
-
-export default class LdapCheckLogs {
-
-    static message: string = '/ldap/debug';
-
-    static subscription: Subscription = null;
-
-    static subscribe(socket: Socket, callback: (message: Message) => void): void{
-        socket._subscribe(this.message, callback, (subscription: Subscription) => {this.subscription = subscription;});
-    }
-
-    static unsubscribe(): void{
-        if(this.subscription){
-            this.subscription.unsubscribe()
-        }
-    }
-
+export default {
+    ...LdapCreators,
 }
