@@ -32,6 +32,6 @@ export default class LdapRequest extends Request implements ILdapRequest {
 
     async testConfig(): Promise<AxiosResponse<string>>{
         this.endpoint = '/test';
-        return super.get<string>();
+        return super.post<string>({});
     }
 }
