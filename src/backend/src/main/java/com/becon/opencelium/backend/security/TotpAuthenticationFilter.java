@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.user.SessionTotpCodeResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -28,6 +29,8 @@ import java.util.Optional;
 @Component
 public class TotpAuthenticationFilter extends AuthenticationFilter {
 
+    private static final String SESSION_ID = "com.becon.opencelium.backend.security.session_id";
+
     @Autowired
     private TotpService totpService;
 
@@ -41,23 +44,32 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
 
-        String sessionId = request.getHeader("session_id");
-        Session session = sessionService.findById(sessionId)
-                .orElseThrow(() -> new AuthenticationServiceException("Invalid 'session_id' has been supplied."));
-        if (!session.isActive()) {
-            throw new AuthenticationServiceException("Inactive 'session_id' has been supplied.");
+        try {
+            SessionTotpCodeResource dto = new ObjectMapper()
+                    .readValue(request.getInputStream(), SessionTotpCodeResource.class);
+
+            String sessionId = dto.getSessionId();
+            request.setAttribute(SESSION_ID, sessionId); // cache session_id - this is used in case of failed auth attempt
+
+            Session session = sessionService.findById(sessionId)
+                    .orElseThrow(() -> new AuthenticationServiceException("Invalid 'session_id' has been supplied."));
+            if (!session.isActive()) {
+                throw new AuthenticationServiceException("Inactive 'session_id' has been supplied.");
+            }
+
+            User user = session.getUser();
+            String code = dto.getCode();
+
+            if (session.getAttempts() < 4 && totpService.isValidTotp(user.getTotpSecretKey(), code)) {
+                UserPrincipals userDetails = new UserPrincipals(user);
+
+                return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            }
+
+            throw new AuthenticationServiceException("Invalid TOTP 'code' has been supplied.");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        User user = session.getUser();
-        String code = request.getParameter("code");
-
-        if (session.getAttempts() < 4 && totpService.isValidTotp(user.getTotpSecretKey(), code)) {
-            UserPrincipals userDetails = new UserPrincipals(user);
-
-            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        }
-
-        throw new AuthenticationServiceException("Invalid TOTP 'code' has been supplied.");
     }
 
     @Override
@@ -81,7 +93,7 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         ObjectMapper mapper = new ObjectMapper();
 
-        String sessionId = request.getHeader("session_id");
+        String sessionId = (String) request.getAttribute(SESSION_ID);
         Optional<Session> optionalSession = sessionService.findById(sessionId);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

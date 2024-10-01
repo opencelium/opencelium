@@ -102,7 +102,7 @@ public class LdapController {
 
             return ResponseEntity.ok("Successfully connected to LDAP server");
         } catch (NamingException e) {
-            return ResponseEntity.ok("Could not connect to LDAP server: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Could not connect to LDAP server: " + e.getMessage());
         }
     }
 }
