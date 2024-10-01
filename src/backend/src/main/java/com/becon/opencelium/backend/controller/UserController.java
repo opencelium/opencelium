@@ -29,6 +29,7 @@ import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
+import com.becon.opencelium.backend.resource.user.SessionTotpCodeResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.security.UserPrincipals;
@@ -336,16 +337,16 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping("/totp/{action}")
-    public ResponseEntity<?> totpAction(@PathVariable("action") String action, @RequestParam String code) {
+    public ResponseEntity<?> totpAction(@PathVariable("action") String action, @RequestBody SessionTotpCodeResource dto) {
         // totp related actions should be done only by users themselves
         int userId = getCurrentUserId();
 
         if ("enable".equals(action)) {
-            return ResponseEntity.ok(totpService.enableTotp(userId, code));
+            return ResponseEntity.ok(totpService.enableTotp(userId, dto.getCode()));
         }
 
         if ("disable".equals(action)) {
-            return ResponseEntity.ok(totpService.disableTotp(userId, code));
+            return ResponseEntity.ok(totpService.disableTotp(userId, dto.getCode()));
         }
 
         throw new RuntimeException("Wrong TOTP action is supplied, available options: [enable, disable]");
