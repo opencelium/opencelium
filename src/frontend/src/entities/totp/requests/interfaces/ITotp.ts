@@ -17,10 +17,36 @@ import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
 
+export interface GenerateQRCodeResponse {
+    secretKey: string,
+    qr: string,
+}
 
-export default interface ILdapRequest {
+export interface ToggleTotpRequest {
+    code: string,
+}
 
-    getDefaultConfig(): Promise<AxiosResponse<LdapConfigModel>>,
+export interface LoginTOTPRequest {
+    username: string,
+    password: string,
+}
 
-    testConfig(data: LdapConfigModel): Promise<AxiosResponse<string>>,
+export interface LoginTOTPResponse {
+    session_id: string,
+}
+
+export interface ValidateTOTPRequest {
+    session_id: string,
+    code: string,
+}
+
+export default interface ITotpRequest {
+
+    generateQRCode(): Promise<AxiosResponse<GenerateQRCodeResponse>>,
+
+    toggleTotp(data: ToggleTotpRequest): Promise<AxiosResponse<IResponse>>,
+
+    login(data: LoginTOTPRequest): Promise<AxiosResponse<LoginTOTPResponse>>,
+
+    validate(data: ValidateTOTPRequest): Promise<AxiosResponse<any>>,
 }

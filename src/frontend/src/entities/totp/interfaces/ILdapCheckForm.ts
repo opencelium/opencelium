@@ -13,25 +13,28 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {IRequestSettings} from "@application/requests/interfaces/IRequest";
-import Request from "@entity/application/requests/classes/Request";
-import ILdapRequest from "../interfaces/ILdap";
-import {AxiosResponse} from "axios";
+import {IForm} from "@application/interfaces/core";
 import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
 
-export default class LdapRequest extends Request implements ILdapRequest {
+export interface ILdapSwitch{
+}
 
-    constructor(settings?: Partial<IRequestSettings>) {
-        super({url: 'ldap', ...settings});
-    }
+export interface ILdapFile{
+}
 
-    async getDefaultConfig(): Promise<AxiosResponse<LdapConfigModel>>{
-        this.endpoint = '/default/config';
-        return super.get<LdapConfigModel>();
-    }
+export interface ILdapTextarea{
+}
 
-    async testConfig(data: LdapConfigModel): Promise<AxiosResponse<string>>{
-        this.endpoint = '/test';
-        return super.post<string>(data);
-    }
+export interface ILdapSelect{
+}
+
+export interface ILdapRadios{
+}
+
+export interface ILdapText extends LdapConfigModel{
+
+}
+
+export default interface ILdapCheckForm extends ILdapText, ILdapSelect, ILdapRadios, ILdapFile, ILdapSwitch, IForm<ILdapText, ILdapSelect, ILdapRadios, ILdapFile, ILdapTextarea, ILdapSwitch>{
+    test: () => boolean;
 }

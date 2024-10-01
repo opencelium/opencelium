@@ -13,20 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-import {getDefaultConfig, testConfig} from "@entity/ldap/redux_toolkit/action_creators/LdapCreators";
+import LdapCreators from "./TotpCreators";
 
 export default {
-    fulfilled: {
-        [testConfig.fulfilled.type]: "The test was successfully fulfilled",
-    },
-    rejected: {
-        [getDefaultConfig.rejected.type]: {
-            "__DEFAULT__": "There is an error in fetching default config from application.yml file.",
-        },
-        [testConfig.rejected.type]: {
-            "__NATIVE__": "-",
-        },
-    },
+    ...LdapCreators,
 }

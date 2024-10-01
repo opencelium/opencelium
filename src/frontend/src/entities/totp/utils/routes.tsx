@@ -13,20 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import React from "react";
+import {Route} from "react-router-dom";
+import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
+import LdapCheck from "@entity/ldap/components/pages/LdapCheck";
 
-
-import {getDefaultConfig, testConfig} from "@entity/ldap/redux_toolkit/action_creators/LdapCreators";
-
-export default {
-    fulfilled: {
-        [testConfig.fulfilled.type]: "The test was successfully fulfilled",
-    },
-    rejected: {
-        [getDefaultConfig.rejected.type]: {
-            "__DEFAULT__": "There is an error in fetching default config from application.yml file.",
-        },
-        [testConfig.rejected.type]: {
-            "__NATIVE__": "-",
-        },
-    },
-}
+export default (
+    <Route path="/ldap" key={'ldap'}>
+        <Route index element={<ErrorBoundary><LdapCheck/></ErrorBoundary>}/>
+    </Route>
+)
