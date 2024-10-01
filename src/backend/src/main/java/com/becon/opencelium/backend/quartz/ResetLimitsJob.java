@@ -11,7 +11,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 public class ResetLimitsJob extends QuartzJobBean {
     private final SubscriptionService subscriptionService;
 
-    public ResetLimitsJob(@Qualifier("subscriptionServiceImp") SubscriptionService subscriptionService) {
+    public ResetLimitsJob(@Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService) {
         this.subscriptionService = subscriptionService;
     }
 
