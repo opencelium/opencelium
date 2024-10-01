@@ -28,6 +28,7 @@ import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.user.SessionTotpCodeResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -109,7 +110,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         User user = getUser(auth);
 
         if (user.isTotpEnabled()) {
-            response.addHeader("session_id", user.getSession().getId());
+            SessionTotpCodeResource resource = new SessionTotpCodeResource(user.getSession().getId());
+            String payload = mapper.writeValueAsString(resource);
+
+            response.getWriter().write(payload);
         } else {
             UserResource userResource = new UserResource(user);
 
