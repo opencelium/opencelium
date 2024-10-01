@@ -315,15 +315,15 @@ public class UserController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping("/{id}/totp-qr")
-    public ResponseEntity<?> getTotpQrAndSecret(@PathVariable("id") int userId) {
-        // skip userId, instead logout current user
-        int id = getCurrentUserId();
+    @GetMapping("/totp-qr")
+    public ResponseEntity<?> getTotpQrAndSecret() {
+        // totp related actions should be done only by users themselves
+        int userId = getCurrentUserId();
 
-        return ResponseEntity.ok(totpService.getTotpResource(id));
+        return ResponseEntity.ok(totpService.getTotpResource(userId));
     }
 
-    @Operation(summary = "Enables TOTP to currently logged in user.")
+    @Operation(summary = "Enables or disables TOTP to current user")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "TOTP is successfully enabled to logged in user",
@@ -335,32 +335,20 @@ public class UserController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/{id}/totp-enable")
-    public ResponseEntity<?> enableTotp(@PathVariable("id") int userId, @RequestParam String code) {
-        // skip userId, instead logout current user
-        int id = getCurrentUserId();
+    @PutMapping("/totp/{action}")
+    public ResponseEntity<?> totpAction(@PathVariable("action") String action, @RequestParam String code) {
+        // totp related actions should be done only by users themselves
+        int userId = getCurrentUserId();
 
-        return ResponseEntity.ok(totpService.enableTotp(id, code));
-    }
+        if ("enable".equals(action)) {
+            return ResponseEntity.ok(totpService.enableTotp(userId, code));
+        }
 
-    @Operation(summary = "Disables TOTP to currently logged in user.")
-    @ApiResponses(value = {
-            @ApiResponse( responseCode = "200",
-                    description = "TOTP is successfully disabled to logged in user",
-                    content = @Content),
-            @ApiResponse( responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @PutMapping("/{id}/totp-disable")
-    public ResponseEntity<?> disableTotp(@PathVariable("id") int userId, @RequestParam String code) {
-        // skip userId, instead logout current user
-        int id = getCurrentUserId();
+        if ("disable".equals(action)) {
+            return ResponseEntity.ok(totpService.disableTotp(userId, code));
+        }
 
-        return ResponseEntity.ok(totpService.disableTotp(id, code));
+        throw new RuntimeException("Wrong TOTP action is supplied, available options: [enable, disable]");
     }
 
     /*

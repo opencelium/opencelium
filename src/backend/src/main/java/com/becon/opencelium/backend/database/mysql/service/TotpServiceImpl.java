@@ -29,13 +29,18 @@ public class TotpServiceImpl implements TotpService {
     @Transactional
     public TotpResource getTotpResource(int userId) {
         User user = userService.findById(userId).orElseThrow();
-        String secret = provider.createCredentials().getKey();
 
-        user.setTotpSecretKey(secret);
+        String secretKey;
+        if (user.getTotpSecretKey() != null) {
+            secretKey = user.getTotpSecretKey();
+        } else {
+            secretKey = provider.createCredentials().getKey();
+            user.setTotpSecretKey(secretKey);
+        }
 
         String issuer = "opencelium";
         String account = user.getEmail();
-        String data = String.format("otpauth://totp/%s:%s?secret=%s&issuer=%s", issuer, account, secret, issuer);
+        String data = String.format("otpauth://totp/%s:%s?secret=%s&issuer=%s", issuer, account, secretKey, issuer);
 
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         int width = 300;
@@ -58,7 +63,7 @@ public class TotpServiceImpl implements TotpService {
             // Convert byte array to Base64
             String base64Image = Base64.getEncoder().encodeToString(qrCodeImage);
 
-            return new TotpResource(secret, "data:image/png;base64," + base64Image);
+            return new TotpResource(secretKey, "data:image/png;base64," + base64Image);
         } catch (WriterException | IOException e) {
             throw new RuntimeException("Failed to generate QR code for TOTP");
         }
@@ -88,7 +93,6 @@ public class TotpServiceImpl implements TotpService {
             throw new RuntimeException("totp has not been enabled yet.");
         } else if (isValidTotp(user.getTotpSecretKey(), code)) {
             user.setTotpEnabled(false);
-            user.setTotpSecretKey(null);
             return true;
         }
 
