@@ -263,7 +263,7 @@ public class UserController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteUsersById(@RequestBody IdentifiersDTO<Integer> payload) {
         payload.getIdentifiers().forEach(id -> {
             User p = userService.findById(id).orElseThrow(() -> new UserNotFoundException(id));
