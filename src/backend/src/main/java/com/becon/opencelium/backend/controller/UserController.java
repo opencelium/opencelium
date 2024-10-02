@@ -27,6 +27,7 @@ import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.SessionTotpCodeResource;
@@ -350,6 +351,31 @@ public class UserController {
         }
 
         throw new RuntimeException("Wrong TOTP action is supplied, available options: [enable, disable]");
+    }
+
+    @Operation(summary = "Returns status of QR code by secretKey.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "QR and Secret Key existed already.",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/totp-qr/exists")
+    public ResponseEntity<?> isQRCodeExists() {
+        // totp related actions should be done only by users themselves
+        int userId = getCurrentUserId();
+        User user = userService.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        ResultDTO<Boolean> resultDTO = new ResultDTO<>();
+        resultDTO.setResult(false);
+        if (user.getTotpSecretKey() != null) {
+            resultDTO.setResult(true);
+        }
+        return ResponseEntity.ok(resultDTO);
     }
 
     /*

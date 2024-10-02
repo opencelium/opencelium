@@ -27,6 +27,7 @@ public class UserResource {
 
     private int userId;
     private String email;
+    private boolean totpEnabled;
     private UserRoleResource userGroup; // TODO: should be  userRole
     private UserDetailResource userDetail;
     private List<WidgetSettingResource> widgetSettings;
@@ -37,6 +38,7 @@ public class UserResource {
     public UserResource(User user) {
         this.userId = user.getId();
         this.email = user.getEmail();
+        this.totpEnabled = user.isTotpEnabled();
         this.userGroup = new UserRoleResource(user.getUserRole());
         this.userDetail = new UserDetailResource(user.getUserDetail());
         this.widgetSettings = user.getWidgetSettings().stream().map(WidgetSettingResource::new)
@@ -57,6 +59,14 @@ public class UserResource {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public boolean isTotpEnabled() {
+        return totpEnabled;
+    }
+
+    public void setTotpEnabled(boolean totpEnabled) {
+        this.totpEnabled = totpEnabled;
     }
 
     public UserRoleResource getUserGroup() {
