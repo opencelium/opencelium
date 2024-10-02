@@ -13,8 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ldapReducer from "./TotpSlice";
+import totpReducer from "./TotpSlice";
 
 export default {
-    ldapReducer,
+    totpReducer,
 }

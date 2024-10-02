@@ -36,9 +36,7 @@ import {ProfileImageStyled, DefaultImageStyled} from "./styles";
 import {withTheme} from "styled-components";
 import AvatarDefault from "@image/application/avatar_default.png";
 import {isArray} from "@application/utils/utils";
-import {getServicePortalTokenStatus} from "@entity/application/redux_toolkit/action_creators/ApplicationCreators";
-import License from "@entity/license_management/classes/License";
-import {getActivationRequestStatus} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
+import TotpSwitcher from "@entity/profile/components/pages/TotpSwitcher";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
@@ -135,6 +133,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                     {Title}
                     {UserDetailsInputs}
                     {Email}
+                    <TotpSwitcher/>
                 </FormSection>
             </React.Fragment>,
             <React.Fragment>

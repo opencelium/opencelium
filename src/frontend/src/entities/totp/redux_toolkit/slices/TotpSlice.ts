@@ -25,21 +25,24 @@ import {
     generateQRCode,
     loginTotp, validateTotp
 } from "@entity/totp/redux_toolkit/action_creators/TotpCreators";
+import {GenerateQRCodeResponse} from "@entity/totp/requests/interfaces/ITotp";
 
 export interface TotpState extends ICommonState {
     generatingQRCode: API_REQUEST_STATE,
-    enablingTotp: API_REQUEST_STATE,
-    disablingTotp: API_REQUEST_STATE,
+    togglingTotp: API_REQUEST_STATE,
     loginingTotp: API_REQUEST_STATE,
     validatingTotp: API_REQUEST_STATE,
+    qrCode: string,
+    secretKey: string,
 }
 
 const initialState: TotpState = {
     generatingQRCode: API_REQUEST_STATE.INITIAL,
-    enablingTotp: API_REQUEST_STATE.INITIAL,
-    disablingTotp: API_REQUEST_STATE.INITIAL,
+    togglingTotp: API_REQUEST_STATE.INITIAL,
     loginingTotp: API_REQUEST_STATE.INITIAL,
     validatingTotp: API_REQUEST_STATE.INITIAL,
+    qrCode: '',
+    secretKey: '',
     ...CommonState,
 }
 
@@ -52,8 +55,10 @@ export const totpSlice = createSlice({
         [generateQRCode.pending.type]: (state) => {
             state.generatingQRCode = API_REQUEST_STATE.START;
         },
-        [generateQRCode.fulfilled.type]: (state, action: PayloadAction<LdapConfigModel>) => {
+        [generateQRCode.fulfilled.type]: (state, action: PayloadAction<GenerateQRCodeResponse>) => {
             state.generatingQRCode = API_REQUEST_STATE.FINISH;
+            state.qrCode = action.payload.qr;
+            state.secretKey = action.payload.secretKey;
             state.error = null;
         },
         [generateQRCode.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -61,25 +66,25 @@ export const totpSlice = createSlice({
             state.error = action.payload;
         },
         [enableTotp.pending.type]: (state) => {
-            state.enablingTotp = API_REQUEST_STATE.START;
+            state.togglingTotp = API_REQUEST_STATE.START;
         },
         [enableTotp.fulfilled.type]: (state, action: PayloadAction<LdapConfigModel>) => {
-            state.enablingTotp = API_REQUEST_STATE.FINISH;
+            state.togglingTotp = API_REQUEST_STATE.FINISH;
             state.error = null;
         },
         [enableTotp.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.enablingTotp = API_REQUEST_STATE.ERROR;
+            state.togglingTotp = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [disableTotp.pending.type]: (state) => {
-            state.disablingTotp = API_REQUEST_STATE.START;
+            state.togglingTotp = API_REQUEST_STATE.START;
         },
         [disableTotp.fulfilled.type]: (state, action: PayloadAction<LdapConfigModel>) => {
-            state.disablingTotp = API_REQUEST_STATE.FINISH;
+            state.togglingTotp = API_REQUEST_STATE.FINISH;
             state.error = null;
         },
         [disableTotp.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.disablingTotp = API_REQUEST_STATE.ERROR;
+            state.togglingTotp = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [loginTotp.pending.type]: (state) => {

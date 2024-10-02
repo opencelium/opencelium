@@ -13,8 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import LdapCreators from "./TotpCreators";
+import TotpCreators from "./TotpCreators";
 
 export default {
-    ...LdapCreators,
+    ...TotpCreators,
 }

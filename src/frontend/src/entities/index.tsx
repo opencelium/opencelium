@@ -34,6 +34,7 @@ import MigrationToolkit from './migrate/redux_toolkit';
 import CategoryToolkit from './category/redux_toolkit';
 import LicenseManagementToolkit from './license_management/redux_toolkit';
 import LdapManagementToolkit from './ldap/redux_toolkit';
+import TotpToolkit from './totp/redux_toolkit';
 
 const ActionCreators = {
     ...ConnectionToolkit.actionCreators,
@@ -52,6 +53,7 @@ const ActionCreators = {
     ...CategoryToolkit.actionCreators,
     ...LicenseManagementToolkit.actionCreators,
     ...LdapManagementToolkit.actionCreators,
+    ...TotpToolkit.actionCreators,
 }
 
 const reducers = {
@@ -72,6 +74,7 @@ const reducers = {
     ...CategoryToolkit.reducers,
     ...LicenseManagementToolkit.reducers,
     ...LdapManagementToolkit.reducers,
+    ...TotpToolkit.reducers,
 }
 
 const entitiesTranslations = require.context('.', true, /\/\w+\/translations\/index.ts$/);
