@@ -50,8 +50,8 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
     const {authUser} = Auth.getReduxState();
     const [themeSync, setThemeSync] = useState<boolean>(authUser?.userDetail?.themeSync || false);
     useEffect(() => {
-        dispatch(getServicePortalTokenStatus());
-        dispatch(getActivationRequestStatus());
+        //dispatch(getServicePortalTokenStatus());
+        //dispatch(getActivationRequestStatus());
     }, [])
     useEffect(() => {
         setThemeSync(authUser.userDetail.themeSync);

@@ -29,7 +29,6 @@ import {Auth} from "@application/classes/Auth";
 
 
 const LdapCheck: FC<IForm> = ({}) => {
-    const {authUser} = Auth.getReduxState();
     const dispatch = useAppDispatch();
     const {
         gettingDefaultConfig, testingConfig, defaultConfig,
@@ -42,7 +41,7 @@ const LdapCheck: FC<IForm> = ({}) => {
         }
     }, []);
 
-    const ldapForm = LdapCheckForm.createState<ILdapCheckForm>({_readOnly: true}, defaultConfig);
+    const ldapForm = LdapCheckForm.createState<ILdapCheckForm>({_readOnly: false}, defaultConfig);
     const TextInputs = ldapForm.getTexts([
         {propertyName: "urls", props: {icon: 'perm_identity', label: "Url", required: true}},
         {propertyName: "baseDN", props: {icon: 'perm_identity', label: "BaseDN", required: true}},
@@ -72,7 +71,7 @@ const LdapCheck: FC<IForm> = ({}) => {
                 {!defaultConfig && <div style={{marginLeft: 10, marginTop: 20, marginBottom: 20}}><Hint message={'You can set configurations in application.yml file'}/></div>}
             </FormSection>,
             <FormSection dependencies={[debugLogs.length === 0]} label={{value: 'Debug'}}>
-                <div>{debugLogs}</div>
+                <div style={{margin: '20px 0 0 20px'}}>{debugLogs}</div>
             </FormSection>
         ]
     }

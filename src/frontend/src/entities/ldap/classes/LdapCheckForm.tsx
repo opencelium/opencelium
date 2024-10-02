@@ -117,7 +117,6 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
         return true;
     }
 
-
     @App.dispatch(testConfig, {
         hasNoValidation: false,
         mapping: (config: ILdapCheckForm): LdapConfigModel => {

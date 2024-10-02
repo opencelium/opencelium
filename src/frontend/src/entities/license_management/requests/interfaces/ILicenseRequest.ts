@@ -20,7 +20,6 @@ import LicenseModel, {
     LicenseListItem
 } from "@entity/license_management/requests/models/LicenseModel";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
 
 export interface ActivateLicenseFileRequest {
     tokenFile: Blob[],
