@@ -71,6 +71,12 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public User getById(Integer userId) {
+        return findById(userId)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+    }
+
+    @Override
     public User save(User user) {
         return userRepository.save(user);
     }
