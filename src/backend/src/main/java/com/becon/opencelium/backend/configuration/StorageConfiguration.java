@@ -89,7 +89,7 @@ public class StorageConfiguration {
     @EventListener(ApplicationReadyEvent.class)
     public void createStorageAfterStartup() {
         // upload freeLicense
-//        setInitialLicense();
+        setInitialLicense();
 
         // creating 'src/main/resources/templates/' directory
         createDirectory(PathConstant.TEMPLATE);
@@ -121,6 +121,9 @@ public class StorageConfiguration {
     }
 
     private void setInitialLicense() {
+        if (!doesFileExist(PathConstant.LICENSE + "init-license.txt")) {
+            return;
+        }
         try {
             ActivationRequest ar = activationRequestService.readFreeAR().orElse(null);
             String initLicense = LicenseKeyUtility.readFreeLicense();
@@ -199,5 +202,10 @@ public class StorageConfiguration {
                 System.out.println("Failed to create directory: " + name);
             }
         }
+    }
+
+    private boolean doesFileExist(String filePath) {
+        File file = new File(filePath);
+        return file.exists() && file.isFile();
     }
 }

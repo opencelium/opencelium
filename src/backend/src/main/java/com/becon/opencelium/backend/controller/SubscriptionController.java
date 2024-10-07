@@ -127,6 +127,7 @@ public class SubscriptionController {
 
     @GetMapping("/free/activate")
     public ResponseEntity<Resource> activateFreeSub() {
+        subscriptionService.createFreeLicenseFileIfNotExists();
         ActivationRequest ar = activationRequestService.readFreeAR()
                 .orElseThrow(() -> new RuntimeException("Free Activation Request is not found or not valid"));
         String initLicense = LicenseKeyUtility.readFreeLicense();

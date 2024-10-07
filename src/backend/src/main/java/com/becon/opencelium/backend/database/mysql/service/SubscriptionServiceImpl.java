@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.constant.SubscriptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
 import com.becon.opencelium.backend.quartz.ResetLimitsJob;
@@ -16,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -191,6 +195,42 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         sub.setCurrentUsage(updatedOperationUsage);
         sub.setCurrentUsageHmac(newHmac);
         save(sub);
+    }
+
+    @Override
+    public void createFreeLicenseFileIfNotExists() {
+        String freeLicensePath = PathConstant.LICENSE + "init-license.txt";
+        File file = new File(freeLicensePath);
+
+        File parentDirectory = file.getParentFile();  // Get the parent directory
+
+        // Check if the directory exists, and if not, create it
+        if (parentDirectory != null && !parentDirectory.exists()) {
+            if (parentDirectory.mkdirs()) {
+                logger.info("Directories created: " + parentDirectory.getAbsolutePath());
+            } else {
+                throw new RuntimeException("Failed to create directories: " + parentDirectory.getAbsolutePath());
+            }
+        }
+        if (file.exists()) {
+            logger.info("Free license already exists.");
+            return ;  // File already exists, no need to create it.
+        }
+
+        try {
+            if (file.createNewFile()) {
+                // Write the content to the file
+                try (FileWriter writer = new FileWriter(file)) {
+                    writer.write(SubscriptionConstant.FREE_LICENSE);
+                    logger.info("Content written to file.");
+                }
+                logger.info("Free License has been created:" + freeLicensePath);
+            } else {
+                logger.error("Free license could not be created.");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private boolean isCurrentUsageIsValid(Subscription sub) {
