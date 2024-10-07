@@ -38,6 +38,9 @@ export default {
         },
         [getLicenseList.rejected.type]: {
             "__DEFAULT__": "There is an error fetching licenses."
+        },
+        [getLicenseStatus.rejected.type]: {
+            "__DEFAULT__": "Please, check your API-Key to sync with Service Portal."
         }
     },
 }

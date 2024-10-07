@@ -118,7 +118,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
         ]
     }
     return(
-        <FormComponent {...data} isLoading={gettingCurrentSubscription === API_REQUEST_STATE.START}/>
+        <FormComponent {...data} hasNotAlert={true} isLoading={gettingCurrentSubscription === API_REQUEST_STATE.START}/>
     )
 }
 

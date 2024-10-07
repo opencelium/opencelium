@@ -75,6 +75,7 @@ const DetailView = () => {
     const isLoading = gettingOperationUsageDetails === API_REQUEST_STATE.START || gettingOperationUsageEntries === API_REQUEST_STATE.START;
     const EntriesCollection =
         <CollectionView
+            hasNotAlert={true}
             hasViewSection={false}
             isListViewCard={false}
             hasTitle={false}
@@ -93,6 +94,7 @@ const DetailView = () => {
         />;
     const DetailsCollection =
         <CollectionView
+            hasNotAlert={true}
             isLoading={isLoading}
             hasViewSection={false}
             isListViewCard={false}

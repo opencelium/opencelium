@@ -27,15 +27,18 @@ export const RoleNames: any = {
     empty: '-',
 }
 const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionModel, theme: ITheme}) => {
-    const max = subscription.totalOperationUsage;
+    const max = subscription?.totalOperationUsage || 0;
     const divisionStep = max / 10;
     const divisions = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     const progressbarHeight = 30;
-    const now = subscription.currentOperationUsage;
+    const now = subscription?.currentOperationUsage || 0;
     const percentage = (now / max) * 100;
-    const hasNoSubscription = subscription.type === 'empty';
+    const hasNoSubscription = subscription?.type === 'empty' || false;
     const [showDocsDialog, toggleDocsDialog] = useState<boolean>(hasNoSubscription);
     const isUnlimited = max === 0;
+    if (!subscription) {
+        return null;
+    }
     return (
         <div>
             <div>

@@ -3,11 +3,10 @@ import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {AxiosResponse} from "axios";
 import {StatusResponse} from "@application/requests/interfaces/IApplication";
 import ILicenseRequest, {
-    ActivateLicenseFileRequest, ActivateLicenseResponse, ActivateLicenseStringRequest,
+    ActivateLicenseResponse, ActivateLicenseStringRequest,
     GenerateActivateRequestResponse, GetActivationRequestStatusResponse
 } from "@entity/license_management/requests/interfaces/ILicenseRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
 import {LicenseListItem} from "@entity/license_management/requests/models/LicenseModel";
 
 export default class LicenseRequest extends Request implements ILicenseRequest {
@@ -38,7 +37,8 @@ export default class LicenseRequest extends Request implements ILicenseRequest {
     }
 
     async getStatus(): Promise<AxiosResponse<StatusResponse>> {
-        this.endpoint = '/status'
+        this.url = 'subs';
+        this.endpoint = '/connection/check'
         return super.get<StatusResponse>();
     }
 

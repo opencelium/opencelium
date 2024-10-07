@@ -44,9 +44,9 @@ import {
 } from './styles';
 import { Auth } from '@application/classes/Auth';
 import {SubscriptionOverviewWidget} from "@entity/dashboard/components/widgets/SubscriptionOverview";
-import NoLicenseMessage from "@entity/dashboard/components/no_license_message/NoLicenseMessage";
 import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import Subscription from "@entity/license_management/classes/Subscription";
+import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
 
 export const HAS_DASHBOARD_WIDGET_ENGINE = true;
 
@@ -172,7 +172,7 @@ const DashboardForm: FC<DashboardFormProps> =
         return (
             <DashboardFormStyled>
                 <TitleStyled title={'Dashboard'} icon={EditDashboardIcon}/>
-                {(!currentSubscription && gettingCurrentSubscription === API_REQUEST_STATE.FINISH) && <NoLicenseMessage/>}
+                {(!currentSubscription && gettingCurrentSubscription === API_REQUEST_STATE.FINISH) && <div style={{marginLeft: 20, marginRight: 20}}><LicenseAlertMessage/></div>}
                 <DashboardViewStyled>
                     <div>
                         {isWidgetEditOn &&

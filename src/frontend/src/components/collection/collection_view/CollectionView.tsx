@@ -40,6 +40,7 @@ import Title from "../collection_title/Title";
 import {BadRequest} from "@app_component/default_pages/bad_request/BadRequest";
 import {debounce} from "@application/utils/utils";
 import CategoryTabs from '@entity/category/components/category_tabs/CategoryTabs';
+import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
 
 const LIST_VIEW_ENTITIES_NUMBER = 10;
 
@@ -63,6 +64,7 @@ const CollectionView: FC<CollectionViewProps> =
         defaultFilterData,
         onListRowClick,
         paginationProps,
+        hasNotAlert,
     }) => {
         const dispatch = useAppDispatch();
         const {searchFields, currentPages, viewType, gridViewType} = Application.getReduxState();
@@ -172,6 +174,7 @@ const CollectionView: FC<CollectionViewProps> =
             <ErrorBoundary>
                 <CollectionViewStyled>
                     {hasTitle && <Title title={collection.title}/>}
+                    {!hasNotAlert ? <LicenseAlertMessage/> : null}
                     {hasTopBar && <TopSectionStyled hasViewSection={hasViewSection}>
                         <ActionsStyled>
                             {collection.getTopActions(applicationViewType, checkedIds)}
