@@ -13,7 +13,7 @@ public class LdapProperties {
     private String urls;
     private String username;
     private String password;
-    private String timeout;
+    private String timeout = "1000"; // in milliseconds
     private String userSearchBase;
     private String userSearchFilter = "(cn={0})";
     private String groupSearchBase;
