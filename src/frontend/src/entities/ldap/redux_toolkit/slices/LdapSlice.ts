@@ -67,7 +67,11 @@ export const ldapSlice = createSlice({
         },
         [testConfig.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.testingConfig = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
+            if (action.payload?.message) {
+                state.debugLogs = action.payload?.message;
+            } else {
+                state.error = action.payload;
+            }
         },
     }
 })

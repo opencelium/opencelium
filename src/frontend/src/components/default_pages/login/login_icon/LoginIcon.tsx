@@ -28,6 +28,7 @@ const LoginIcon: FC<LoginIconProps> =
      }) => {
         const {
             isAuth,
+            sessionId,
             logining,
         } = Auth.getReduxState();
         const [hasRotation, toggleRotation] = useState(false);
@@ -44,7 +45,7 @@ const LoginIcon: FC<LoginIconProps> =
         }
         return (
             <LoginIconStyled hasRotation={hasRotation} isAuth={false}>
-                <Image src={LogoOcWhiteImagePath} alt={OC_NAME} onClick={onClick} isLoading={logining === API_REQUEST_STATE.START} width={isAuth ? '40px' : '48px'} loadingSize={'30px'}/>
+                <Image src={LogoOcWhiteImagePath} alt={OC_NAME} onClick={onClick} isLoading={logining === API_REQUEST_STATE.START || !!sessionId} width={isAuth ? '40px' : '48px'} loadingSize={'30px'}/>
             </LoginIconStyled>
         )
     }

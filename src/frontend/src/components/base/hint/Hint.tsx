@@ -1,8 +1,8 @@
 import React from 'react';
 
-const Hint = ({message}: {message: any}) => {
+const Hint = ({message, style}: {message: any, style?: any}) => {
     return (
-        <div>
+        <div style={style || {}}>
             <b>{`Hint: `}</b>
             <span>{message}</span>
         </div>

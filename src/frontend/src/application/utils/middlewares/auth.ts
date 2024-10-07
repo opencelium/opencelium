@@ -14,7 +14,7 @@
  */
 
 import { Middleware } from 'redux'
-import { logout } from '@application/redux_toolkit/slices/AuthSlice';
+import {logout, setLoginInfo} from '@application/redux_toolkit/slices/AuthSlice';
 import {AppDispatch, RootState} from "@application/utils/store";
 import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
 import {LocalStorage} from "@application/classes/LocalStorage";
@@ -25,6 +25,7 @@ import {clearCurrentPages, clearSearchFields } from '@application/redux_toolkit/
 import {clearWidgetSettings} from "@entity/dashboard/redux_toolkit/slices/WidgetSettingSlice";
 import { checkConnection } from '@application/redux_toolkit/action_creators/CheckConnectionCreators';
 import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
+import {validateTotp} from "@entity/totp/redux_toolkit/action_creators/TotpCreators";
 
 export const checkAccess = (storeApi: any, action: any) => {
     const response: IResponse = action.payload;
@@ -48,7 +49,10 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
             dispatch(logout(logoutProps));
         }
     }
-    if (login.fulfilled.type === action.type) {
+    if (validateTotp.fulfilled.type === action.type) {
+        dispatch(setLoginInfo(action.payload));
+    }
+    if (login.fulfilled.type === action.type || setLoginInfo.type === action.type) {
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);
         dispatch(checkConnection());

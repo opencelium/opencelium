@@ -24,11 +24,15 @@ export const login = createAsyncThunk(
         try {
             const request = new AuthRequest({hasAuthToken: false, isApi: false});
             const loginResponseData = await request.login(data);
+            if (loginResponseData.data.sessionId) {
+                console.log(loginResponseData.data);
+                return thunkAPI.rejectWithValue({...errorHandler({message: 'SESSION_ID_IS_REQUIRED'}), sessionId: loginResponseData.data.sessionId, settings: {withoutNotification: true}});
+            }
             const authUser = User.getUserFromLoginResponse(loginResponseData);
             if(!authUser){
                 return thunkAPI.rejectWithValue(errorHandler({message: 'Your token is not valid'}));
             }
-            return {...authUser, hasLicense: true};
+            return {...authUser};
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

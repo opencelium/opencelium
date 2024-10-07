@@ -17,6 +17,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import TotpRequest from "@entity/totp/requests/classes/Totp";
 import {LoginTOTPRequest, ToggleTotpRequest, ValidateTOTPRequest} from "@entity/totp/requests/interfaces/ITotp";
+import User from "@entity/user/classes/User";
 
 export const generateQRCode = createAsyncThunk(
     'totp/generate/qr',
@@ -68,8 +69,24 @@ export const validateTotp = createAsyncThunk(
     'totp/validate',
     async(data: ValidateTOTPRequest, thunkAPI) => {
         try {
-            const request = new TotpRequest({endpoint: `/totp/disable`})
+            const request = new TotpRequest()
             const response = await request.validate(data);
+            const authUser = User.getUserFromLoginResponse(response);
+            if(!authUser){
+                return thunkAPI.rejectWithValue(errorHandler({message: 'Your token is not valid'}));
+            }
+            return {...authUser};
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+export const isTotpExist = createAsyncThunk(
+    'totp/exist',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new TotpRequest()
+            const response = await request.isExist();
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -82,4 +99,5 @@ export default {
     disableTotp,
     loginTotp,
     validateTotp,
+    isTotpExist,
 }

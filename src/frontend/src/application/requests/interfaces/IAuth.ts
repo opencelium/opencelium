@@ -16,15 +16,13 @@
 import {AxiosResponse} from "axios";
 import IUser from "@entity/user/interfaces/IUser";
 import {ICredentials} from "../../interfaces/IAuth";
+import {LoginTOTPResponse} from "@entity/totp/requests/interfaces/ITotp";
 
-export interface NoLicenseResponse {
-    hasLicense: false,
-}
 
 interface IAuth{
 
     //to login into the application
-    login(credentials: ICredentials): Promise<AxiosResponse<IUser & NoLicenseResponse>>,
+    login(credentials: ICredentials): Promise<AxiosResponse<IUser & LoginTOTPResponse>>,
 
     //to logout from the application
     logout(): void,

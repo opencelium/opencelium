@@ -301,7 +301,7 @@ export default class User extends HookStateClass implements IUser{
     }
 
     static getUserFromLoginResponse(user: any): IAuthUser{
-        const {data: {userDetail, userGroup}, headers} = user;
+        const {data: {userDetail, userGroup, totpEnabled}, headers} = user;
         const token = headers?.authorization || '';
         if(token === '') {
             return null;
@@ -316,6 +316,7 @@ export default class User extends HookStateClass implements IUser{
             lastLogin: decodedData.iat * 1000,
             userGroup,
             userDetail,
+            totpEnabled,
         };
     }
 
