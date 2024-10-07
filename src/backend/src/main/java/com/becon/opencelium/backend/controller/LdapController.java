@@ -64,7 +64,6 @@ public class LdapController {
         LdapConfigDTO result = new LdapConfigDTO();
 
         result.setUrls(properties.getUrls());
-        result.setBaseDN(properties.getBase());
         result.setUserDN(properties.getUserSearchBase());
         result.setGroupDN(properties.getGroupSearchBase());
         result.setUsername(properties.getUsername());

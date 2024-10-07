@@ -152,7 +152,7 @@ public class SecurityConfiguration {
 
     @Bean
     public LdapAuthenticator ldapAuthenticator() {
-        String userSearchBase = ldapProperties.getUserSearchBase() + "," + ldapProperties.getBase();
+        String userSearchBase = ldapProperties.getUserSearchBase();
         String searchFilter = ldapProperties.getUserSearchFilter();
 
         BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
@@ -163,7 +163,7 @@ public class SecurityConfiguration {
 
     @Bean
     public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() {
-        String groupSearchBase = ldapProperties.getGroupSearchBase() + "," + ldapProperties.getBase();
+        String groupSearchBase = ldapProperties.getGroupSearchBase();
         String searchFilter = ldapProperties.getGroupSearchFilter();
 
         DefaultLdapAuthoritiesPopulator authoritiesPopulator = new DefaultLdapAuthoritiesPopulator(ldapContextSource(), groupSearchBase);

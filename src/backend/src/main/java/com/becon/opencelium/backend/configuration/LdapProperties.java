@@ -10,7 +10,6 @@ public class LdapProperties {
     private String urls;
     private String username;
     private String password;
-    private String base;
     private String userSearchBase;
     private String userSearchFilter = "(cn={0})";
     private String groupSearchBase;
@@ -20,7 +19,7 @@ public class LdapProperties {
     private boolean showLogs = false;
 
     public String getConfiguration() {
-        if (urls == null && base == null && userSearchBase == null && groupSearchBase == null && username == null && password == null) {
+        if (urls == null && userSearchBase == null && groupSearchBase == null && username == null && password == null) {
             return "ldap configuration not found.";
         }
 
@@ -49,14 +48,6 @@ public class LdapProperties {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getBase() {
-        return base;
-    }
-
-    public void setBase(String base) {
-        this.base = base;
     }
 
     public String getUserSearchBase() {
@@ -119,7 +110,6 @@ public class LdapProperties {
     public String toString() {
         return "System found ldap configuration: {" +
                 "urls='" + urls + "', " +
-                "base='" + base + "', " +
                 "userSearchBase='" + userSearchBase + "', " +
                 "groupSearchBase='" + groupSearchBase + "', " +
                 "username='" + username + "', " +

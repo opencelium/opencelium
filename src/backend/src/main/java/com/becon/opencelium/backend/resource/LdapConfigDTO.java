@@ -7,7 +7,6 @@ public class LdapConfigDTO {
     private String urls;
     private String username;
     private String password;
-    private String baseDN;
     private String userDN;
     private String groupDN;
     private String userSearchFilter;
@@ -35,14 +34,6 @@ public class LdapConfigDTO {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getBaseDN() {
-        return baseDN;
-    }
-
-    public void setBaseDN(String baseDN) {
-        this.baseDN = baseDN;
     }
 
     public String getUserDN() {
