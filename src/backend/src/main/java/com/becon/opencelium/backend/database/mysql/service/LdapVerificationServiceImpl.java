@@ -87,14 +87,14 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
     }
 
 
-    private void checkHost(String url, long timeout, List<String> messages) {
+    private void checkHost(String url, String timeout, List<String> messages) {
         Hashtable<String, String> env = new Hashtable<>();
         try {
             env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
             env.put(Context.PROVIDER_URL, url);
             env.put(Context.SECURITY_AUTHENTICATION, "none");
-            env.put(LdapProperties.CONNECT_TIMEOUT_KEY, String.valueOf(timeout));
-            env.put(LdapProperties.READ_TIMEOUT_KEY, String.valueOf(timeout));
+            env.put(LdapProperties.CONNECT_TIMEOUT_KEY, timeout);
+            env.put(LdapProperties.READ_TIMEOUT_KEY, timeout);
 
             DirContext ctx = new InitialDirContext(env);
             ctx.getAttributes("");
@@ -106,7 +106,7 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
         }
     }
 
-    private void checkAdminCredentials(String url, String username, String password, long timeout, List<String> messages) throws NamingException {
+    private void checkAdminCredentials(String url, String username, String password, String timeout, List<String> messages) throws NamingException {
         Hashtable<String, String> env = new Hashtable<>();
         try {
             env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -114,8 +114,8 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             env.put(Context.SECURITY_AUTHENTICATION, "simple");
             env.put(Context.SECURITY_PRINCIPAL, username);
             env.put(Context.SECURITY_CREDENTIALS, password);
-            env.put(LdapProperties.CONNECT_TIMEOUT_KEY, String.valueOf(timeout));
-            env.put(LdapProperties.READ_TIMEOUT_KEY, String.valueOf(timeout));
+            env.put(LdapProperties.CONNECT_TIMEOUT_KEY, timeout);
+            env.put(LdapProperties.READ_TIMEOUT_KEY, timeout);
 
             DirContext ctx = new InitialDirContext(env);
             ctx.close();
@@ -152,10 +152,10 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
         List<Object> users = ldapTemplate.search(query, Attributes::clone);
 
         if (users == null || users.isEmpty()) {
-            throw new RuntimeException("User with username='" + username + "' does not exist in host = '" + config.getUrls() + "' under userSearchBase = '" + config.getUserDN() + "'");
+            throw new RuntimeException("User with username = '" + username + "' does not exist in host = '" + config.getUrls() + "' under userSearchBase = '" + config.getUserDN() + "'");
         }
 
-        return "User with username='" + username + "' exists in host = '" + config.getUrls() + "' under userSearchBase = '" + config.getUserDN() + "'";
+        return "User with username = '" + username + "' exists in host = '" + config.getUrls() + "' under userSearchBase = '" + config.getUserDN() + "'";
     }
 
     private static LdapTemplate createLdapTemplate(LdapConfigDTO config) {

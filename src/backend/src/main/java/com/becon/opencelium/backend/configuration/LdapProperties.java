@@ -13,7 +13,7 @@ public class LdapProperties {
     private String urls;
     private String username;
     private String password;
-    private long timeout;
+    private String timeout;
     private String userSearchBase;
     private String userSearchFilter = "(cn={0})";
     private String groupSearchBase;
@@ -46,11 +46,11 @@ public class LdapProperties {
         this.password = password;
     }
 
-    public long getTimeout() {
+    public String getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(long timeout) {
+    public void setTimeout(String timeout) {
         this.timeout = timeout;
     }
 

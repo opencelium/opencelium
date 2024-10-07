@@ -7,7 +7,7 @@ public class LdapConfigDTO {
     private String urls;
     private String username;
     private String password;
-    private long timeout;
+    private String timeout;
     private String userDN;
     private String groupDN;
     private String userSearchFilter;
@@ -37,11 +37,11 @@ public class LdapConfigDTO {
         this.password = password;
     }
 
-    public long getTimeout() {
+    public String getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(long timeout) {
+    public void setTimeout(String timeout) {
         this.timeout = timeout;
     }
 
