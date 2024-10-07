@@ -18,4 +18,5 @@ public interface SubscriptionService {
     SubsDTO toDto(LicenseKey licenseKey, Subscription subscription);
     Subscription getById(String id);
     void updateUsage(Subscription activeSub, long connectionId, long requestSize, long startTime);
+    void createFreeLicenseFileIfNotExists();
 }
