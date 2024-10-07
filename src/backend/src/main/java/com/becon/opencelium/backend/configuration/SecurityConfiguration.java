@@ -16,13 +16,12 @@
 
 package com.becon.opencelium.backend.configuration;
 
+import com.becon.opencelium.backend.database.mysql.service.LdapVerificationService;
 import com.becon.opencelium.backend.security.AuthExceptionHandler;
 import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
 import com.becon.opencelium.backend.security.DaoUserDetailsService;
 import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +30,6 @@ import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -89,7 +87,8 @@ public class SecurityConfiguration {
     @Autowired
     private LdapProperties ldapProperties;
 
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfiguration.class);
+    @Autowired
+    private LdapVerificationService ldapVerificationService;
 
 
     @Bean
@@ -139,11 +138,8 @@ public class SecurityConfiguration {
             protected DirContextOperations doAuthentication(UsernamePasswordAuthenticationToken authentication) {
                 try {
                     return super.doAuthentication(authentication);
-                } catch (InternalAuthenticationServiceException e) {
-                    // move next authentication if LDAP server is not available
-                    if (ldapProperties.isShowLogs()) {
-                        logger.info(ldapProperties.getConfiguration());
-                    }
+                } catch (Throwable e) {
+                    ldapVerificationService.showLogs(ldapProperties);
                     throw new ProviderNotFoundException(e.getMessage());
                 }
             }
