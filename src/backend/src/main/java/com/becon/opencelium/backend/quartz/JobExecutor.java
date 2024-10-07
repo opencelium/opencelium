@@ -73,9 +73,12 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             executor.start();
             context.put("operationsEx", executor.getOperations());
             // increments current_usage in subscription and saves entity in current_usage_history.
-            long operationUsage = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
-            logger.info("Operation usage for Connection " + executionObj.getConnection().getConnectionName() + " is " + operationUsage);
-            subscriptionService.updateUsage(activeSub, executionObj.getConnection().getConnectionId(), operationUsage, startTime);
+            String connectionName = executionObj.getConnection().getConnectionName();
+            if (connectionName != null && !connectionName.contains("!*test_connection_")) {
+                long operationUsage = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
+                logger.info("Operation usage for Connection " + connectionName + " is " + operationUsage);
+                subscriptionService.updateUsage(activeSub, executionObj.getConnection().getConnectionId(), operationUsage, startTime);
+            }
         } catch (ThreadDeath ignored) {
         } finally {
             thread = null;
