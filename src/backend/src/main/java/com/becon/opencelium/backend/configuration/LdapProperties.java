@@ -7,9 +7,13 @@ import java.util.List;
 
 @ConfigurationProperties(prefix = "spring.security.ldap")
 public class LdapProperties {
+    public static final String CONNECT_TIMEOUT_KEY = "com.sun.jndi.ldap.connect.timeout";
+    public static final String READ_TIMEOUT_KEY = "com.sun.jndi.ldap.read.timeout";
+
     private String urls;
     private String username;
     private String password;
+    private long timeout;
     private String userSearchBase;
     private String userSearchFilter = "(cn={0})";
     private String groupSearchBase;
@@ -40,6 +44,14 @@ public class LdapProperties {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
     }
 
     public String getUserSearchBase() {

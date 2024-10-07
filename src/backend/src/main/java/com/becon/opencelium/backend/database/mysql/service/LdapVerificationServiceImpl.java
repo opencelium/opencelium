@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.configuration.LdapProperties;
 import com.becon.opencelium.backend.resource.LdapConfigDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.NameNotFoundException;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
@@ -24,6 +25,9 @@ import static org.springframework.ldap.query.LdapQueryBuilder.query;
 @Service
 public class LdapVerificationServiceImpl implements LdapVerificationService {
 
+    @Autowired
+    private LdapProperties properties;
+
     private static final Logger logger = LoggerFactory.getLogger(LdapVerificationService.class);
 
     @Override
@@ -39,17 +43,18 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
         config.setGroupDN(properties.getGroupSearchBase());
         config.setUsername(properties.getUsername());
         config.setPassword(properties.getPassword());
+        config.setTimeout(properties.getTimeout());
         config.setUserSearchFilter(properties.getUserSearchFilter());
         config.setGroupSearchFilter(properties.getGroupSearchFilter());
 
         List<String> messages = new ArrayList<>();
         try {
             // host is reachable ?
-            checkHost(config.getUrls(), messages);
+            checkHost(config.getUrls(), config.getTimeout(), messages);
             logger.info(messages.get(0));
 
             // user has read access to directory ?
-            checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), messages);
+            checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout(), messages);
             logger.info(messages.get(1));
 
             // user exists ?
@@ -65,10 +70,10 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
 
         try {
             // host is reachable ?
-            checkHost(config.getUrls(), messages);
+            checkHost(config.getUrls(), config.getTimeout(), messages);
 
             // user has read access to directory ?
-            checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), messages);
+            checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout(), messages);
 
             // count users under userDN
             countUsers(config, messages);
@@ -82,12 +87,14 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
     }
 
 
-    private void checkHost(String url, List<String> messages) {
+    private void checkHost(String url, long timeout, List<String> messages) {
         Hashtable<String, String> env = new Hashtable<>();
         try {
             env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
             env.put(Context.PROVIDER_URL, url);
             env.put(Context.SECURITY_AUTHENTICATION, "none");
+            env.put(LdapProperties.CONNECT_TIMEOUT_KEY, String.valueOf(timeout));
+            env.put(LdapProperties.READ_TIMEOUT_KEY, String.valueOf(timeout));
 
             DirContext ctx = new InitialDirContext(env);
             ctx.getAttributes("");
@@ -99,7 +106,7 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
         }
     }
 
-    private void checkAdminCredentials(String url, String username, String password, List<String> messages) throws NamingException {
+    private void checkAdminCredentials(String url, String username, String password, long timeout, List<String> messages) throws NamingException {
         Hashtable<String, String> env = new Hashtable<>();
         try {
             env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -107,6 +114,8 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             env.put(Context.SECURITY_AUTHENTICATION, "simple");
             env.put(Context.SECURITY_PRINCIPAL, username);
             env.put(Context.SECURITY_CREDENTIALS, password);
+            env.put(LdapProperties.CONNECT_TIMEOUT_KEY, String.valueOf(timeout));
+            env.put(LdapProperties.READ_TIMEOUT_KEY, String.valueOf(timeout));
 
             DirContext ctx = new InitialDirContext(env);
             ctx.close();
@@ -157,6 +166,11 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
         contextSource.setUserDn(config.getUsername());
         contextSource.setPassword(config.getPassword());
         contextSource.afterPropertiesSet();
+
+        Hashtable<String, Object> env = new Hashtable<>();
+        env.put(LdapProperties.CONNECT_TIMEOUT_KEY, config.getTimeout());
+        env.put(LdapProperties.READ_TIMEOUT_KEY, config.getTimeout());
+        contextSource.setBaseEnvironmentProperties(env);
 
         return new LdapTemplate(contextSource);
     }

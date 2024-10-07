@@ -55,6 +55,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -176,6 +177,12 @@ public class SecurityConfiguration {
         contextSource.setUrl(ldapProperties.getUrls());
         contextSource.setUserDn(ldapProperties.getUsername());
         contextSource.setPassword(ldapProperties.getPassword());
+
+        // add timeout for connecting and reading to/from Ldap server
+        Hashtable<String, Object> env = new Hashtable<>();
+        env.put(LdapProperties.CONNECT_TIMEOUT_KEY, ldapProperties.getTimeout());
+        env.put(LdapProperties.READ_TIMEOUT_KEY, ldapProperties.getTimeout());
+        contextSource.setBaseEnvironmentProperties(env);
 
         return contextSource;
     }
