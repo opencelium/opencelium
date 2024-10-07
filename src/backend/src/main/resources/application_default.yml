@@ -111,6 +111,11 @@ spring:
   web:
     resources:
       add-mappings=false:
+###########################################################################
+#                                                                         #
+#   LDAP configuration section.                                           #
+#                                                                         #
+###########################################################################
 #  security:
 #    ldap:
 #      # LDAP server URL
