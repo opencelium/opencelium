@@ -34,6 +34,7 @@ const RejectedActions = Object.keys(NotificationTranslations.rejected);
 interface NotificationDataProps{
     hasNotification: boolean,
     type: NotificationType,
+    title?: string,
 }
 
 export const notificationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
@@ -44,7 +45,7 @@ export const notificationMiddleware: Middleware<{}, RootState> = storeApi => nex
         const notification: INotification = {
             id: date.getTime(),
             type: notificationData.type,
-            title: 'OC',
+            title: notificationData?.title || 'OC',
             actionType: action.type,
             createdTime: date.getTime().toString(),
             params: {...action.payload},
@@ -81,6 +82,7 @@ export const notificationMiddleware: Middleware<{}, RootState> = storeApi => nex
 
 const getNotificationData = (action: PayloadAction<any>): NotificationDataProps => {
     let withoutNotification = action.payload?.settings?.withoutNotification;
+    let title = action.payload?.settings?.title || '';
     let hasNotification;
     let type;
     if(withoutNotification === true){
@@ -92,5 +94,5 @@ const getNotificationData = (action: PayloadAction<any>): NotificationDataProps 
         if (isRejectedAction) type = NotificationType.ERROR;
         hasNotification = isFulfilledAction || isRejectedAction
     }
-    return {hasNotification, type}
+    return {hasNotification, type, title}
 }

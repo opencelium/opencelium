@@ -81,6 +81,7 @@ interface ButtonProps {
     tabIndex?: any,
     loadingSize?: string,
     isExternalHref?: boolean,
+    title?: string,
 }
 
 

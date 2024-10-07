@@ -25,7 +25,7 @@ import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/a
 import {
     activateFreeLicense,
     deleteLicense,
-    generateActivateRequest
+    generateActivateRequest, getLicenseStatus
 } from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 import ImportLicenseComponent from "@entity/license_management/components/import_license/ImportLicenseComponent";
 import License from "@entity/license_management/classes/License";
@@ -46,15 +46,18 @@ const LicenseManagement: FC<IForm> = ({}) => {
         deletingLicense, activatingFreeLicense,
     } = License.getReduxState();
     useEffect(() => {
+        if (authUser.userDetail.themeSync) {
+            dispatch(getLicenseStatus());
+        }
+    }, [authUser?.userDetail?.themeSync])
+    useEffect(() => {
         if (activatingLicense === API_REQUEST_STATE.INITIAL || activatingLicense === API_REQUEST_STATE.FINISH) {
             dispatch(getCurrentSubscription());
-            console.log('get subscription after activatingLicense');
         }
     }, [activatingLicense])
     useEffect(() => {
         if (deletingLicense === API_REQUEST_STATE.FINISH || activatingFreeLicense === API_REQUEST_STATE.FINISH) {
             dispatch(getCurrentSubscription());
-            console.log('get subscription after deletingLicense')
         }
     }, [deletingLicense]);
     useEffect(() => {
@@ -77,7 +80,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
             actions.push(<ImportLicenseComponent key={'upload'}/>);
         //}
     } else {
-        if (!status && (!currentSubscription || Subscription.isFree(currentSubscription))) {
+        if (authUser.userDetail.themeSync && (!currentSubscription || Subscription.isFree(currentSubscription))) {
             actions.push(<ActivateLicenseComponent key={'activate'}/>);
         }
     }

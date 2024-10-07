@@ -49,9 +49,6 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
     const {authUser} = Auth.getReduxState();
     const [themeSync, setThemeSync] = useState<boolean>(authUser?.userDetail?.themeSync || false);
     useEffect(() => {
-        dispatch(getLicenseStatus());
-    }, [])
-    useEffect(() => {
         setThemeSync(authUser.userDetail.themeSync);
     }, [authUser.userDetail])
     const userGroup = UserGroup.createState<IUserGroup>({
