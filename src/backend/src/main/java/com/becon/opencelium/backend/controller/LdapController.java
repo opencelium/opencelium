@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.configuration.LdapProperties;
+import com.becon.opencelium.backend.database.mysql.service.LdapVerificationService;
 import com.becon.opencelium.backend.resource.LdapConfigDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,11 +34,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import java.util.Hashtable;
+import java.util.List;
 
 @Controller
 @Tag(name = "Ldap", description = "To retrieve ldap configuration and test connection to ldap server")
@@ -46,6 +43,9 @@ public class LdapController {
 
     @Autowired
     private LdapProperties properties;
+
+    @Autowired
+    private LdapVerificationService service;
 
     @Operation(summary = "Returns ldap configuration")
     @ApiResponses(value = {
@@ -60,7 +60,7 @@ public class LdapController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/default/config")
-    public ResponseEntity<LdapConfigDTO> profilePictureUpload() {
+    public ResponseEntity<LdapConfigDTO> getDefaultConfiguration() {
         LdapConfigDTO result = new LdapConfigDTO();
 
         result.setUrls(properties.getUrls());
@@ -87,21 +87,15 @@ public class LdapController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping("/test")
-    public ResponseEntity<String> groupPictureUpload(@RequestBody LdapConfigDTO dto) {
-        Hashtable<String, String> env = new Hashtable<>();
-        try {
-            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-            env.put(Context.PROVIDER_URL, dto.getUrls());
-            env.put(Context.SECURITY_AUTHENTICATION, "simple");
-            env.put(Context.SECURITY_PRINCIPAL, dto.getUsername());
-            env.put(Context.SECURITY_CREDENTIALS, dto.getPassword());
+    public ResponseEntity<List<String>> testConnection(@RequestBody LdapConfigDTO dto) {
+        List<String> messages = service.collectMessages(dto);
 
-            DirContext ctx = new InitialDirContext(env);
-            ctx.close();
-
-            return ResponseEntity.ok("Successfully connected to LDAP server");
-        } catch (NamingException e) {
-            return ResponseEntity.badRequest().body("Could not connect to LDAP server: " + e.getMessage());
+        if (messages.size() < 4) {
+            return ResponseEntity.badRequest().body(messages);
         }
+
+        // remove last message
+        messages.remove(3);
+        return ResponseEntity.ok(messages);
     }
 }
