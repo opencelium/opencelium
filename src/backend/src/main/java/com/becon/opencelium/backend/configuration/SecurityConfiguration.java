@@ -139,7 +139,7 @@ public class SecurityConfiguration {
                 try {
                     return super.doAuthentication(authentication);
                 } catch (Throwable e) {
-                    ldapVerificationService.showLogs(ldapProperties);
+                    ldapVerificationService.showLogs(ldapProperties, (String) authentication.getPrincipal());
                     throw new ProviderNotFoundException(e.getMessage());
                 }
             }

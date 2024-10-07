@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ldap.NameNotFoundException;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
+import org.springframework.ldap.query.LdapQuery;
 import org.springframework.stereotype.Service;
 
 import javax.naming.Context;
@@ -18,13 +19,15 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import static org.springframework.ldap.query.LdapQueryBuilder.query;
+
 @Service
 public class LdapVerificationServiceImpl implements LdapVerificationService {
 
     private static final Logger logger = LoggerFactory.getLogger(LdapVerificationService.class);
 
     @Override
-    public void showLogs(LdapProperties properties) {
+    public void showLogs(LdapProperties properties, String username) {
         if (!properties.isShowLogs()) {
             return;
         }
@@ -48,6 +51,9 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             // user has read access to directory ?
             checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), messages);
             logger.info(messages.get(1));
+
+            // user exists ?
+            logger.info(userExists(config, username));
         } catch (Throwable th) {
             logger.warn(th.getMessage());
         }
@@ -113,15 +119,7 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
     }
 
     private void countUsers(LdapConfigDTO config, List<String> messages) {
-        LdapContextSource contextSource = new LdapContextSource();
-
-        contextSource.setUrl(config.getUrls());
-        contextSource.setBase("");
-        contextSource.setUserDn(config.getUsername());
-        contextSource.setPassword(config.getPassword());
-        contextSource.afterPropertiesSet();
-
-        LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
+        LdapTemplate ldapTemplate = createLdapTemplate(config);
         try {
             List<Object> users = ldapTemplate.search(
                     config.getUserDN(),
@@ -134,5 +132,32 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             messages.add("Could not count users in host = '" + config.getUrls() + "' under userDN = '" + config.getUserDN() + "'");
             throw e;
         }
+    }
+
+    private String userExists(LdapConfigDTO config, String username) {
+        LdapTemplate ldapTemplate = createLdapTemplate(config);
+        LdapQuery query = query()
+                .base(config.getUserDN())
+                .filter(config.getUserSearchFilter(), username);
+
+        List<Object> users = ldapTemplate.search(query, Attributes::clone);
+
+        if (users == null || users.isEmpty()) {
+            throw new RuntimeException("User with username='" + username + "' does not exist in host = '" + config.getUrls() + "' under userSearchBase = '" + config.getUserDN() + "'");
+        }
+
+        return "User with username='" + username + "' exists in host = '" + config.getUrls() + "' under userSearchBase = '" + config.getUserDN() + "'";
+    }
+
+    private static LdapTemplate createLdapTemplate(LdapConfigDTO config) {
+        LdapContextSource contextSource = new LdapContextSource();
+
+        contextSource.setUrl(config.getUrls());
+        contextSource.setBase("");
+        contextSource.setUserDn(config.getUsername());
+        contextSource.setPassword(config.getPassword());
+        contextSource.afterPropertiesSet();
+
+        return new LdapTemplate(contextSource);
     }
 }

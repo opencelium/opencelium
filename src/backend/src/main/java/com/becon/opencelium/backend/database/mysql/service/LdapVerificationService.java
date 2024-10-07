@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface LdapVerificationService {
     List<String> collectMessages(LdapConfigDTO config);
-    void showLogs(LdapProperties properties);
+    void showLogs(LdapProperties properties, String username);
 }
