@@ -111,6 +111,29 @@ spring:
   web:
     resources:
       add-mappings=false:
+#  security:
+#    ldap:
+#      # LDAP server URL
+#      urls: ldap://ldap.forumsys.com:389
+#      # User search base
+#      user-search-base: dc=example
+#      # Group search base
+#      group-search-base: dc=example
+#      # LDAP manager credentials
+#      username: cn=read-only-admin,dc=example,dc=com
+#      password: password
+#      # Where to search for roles/groups
+#      group-search-filter: (uniquemember={0})
+#      # User search filter
+#      user-search-filter: (cn={0})
+#      # Maps groups between ldap and opencelium
+#      group-role-mapping:
+#        - ldap-group: ou=mathematicians,dc=example,dc=com
+#          oc-role: Admin
+#        - ldap-group: ou=scientists,dc=example,dc=com
+#          oc-role: User
+#      default-role: User
+#      show-logs: true
 
 springdoc:
   swagger-ui:
