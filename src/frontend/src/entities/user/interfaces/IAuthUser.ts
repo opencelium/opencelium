@@ -34,4 +34,5 @@ export default interface IAuthUser{
     themes?: string,
     logoName?: string,
     hasLicense?: boolean,
+    totpEnabled?: boolean,
 }

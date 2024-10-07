@@ -76,10 +76,23 @@ export const validateTotp = createAsyncThunk(
         }
     }
 )
+export const isTotpExist = createAsyncThunk(
+    'totp/exist',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new TotpRequest()
+            const response = await request.isExist();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 export default {
     generateQRCode,
     enableTotp,
     disableTotp,
     loginTotp,
     validateTotp,
+    isTotpExist,
 }

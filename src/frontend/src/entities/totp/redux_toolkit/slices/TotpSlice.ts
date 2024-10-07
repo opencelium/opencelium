@@ -22,16 +22,18 @@ import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
 import {
     disableTotp,
     enableTotp,
-    generateQRCode,
+    generateQRCode, isTotpExist,
     loginTotp, validateTotp
 } from "@entity/totp/redux_toolkit/action_creators/TotpCreators";
-import {GenerateQRCodeResponse} from "@entity/totp/requests/interfaces/ITotp";
+import {GenerateQRCodeResponse, IsTotpExistResponse} from "@entity/totp/requests/interfaces/ITotp";
 
 export interface TotpState extends ICommonState {
     generatingQRCode: API_REQUEST_STATE,
     togglingTotp: API_REQUEST_STATE,
     loginingTotp: API_REQUEST_STATE,
     validatingTotp: API_REQUEST_STATE,
+    checkingExistence: API_REQUEST_STATE,
+    isExist: boolean,
     qrCode: string,
     secretKey: string,
 }
@@ -41,6 +43,8 @@ const initialState: TotpState = {
     togglingTotp: API_REQUEST_STATE.INITIAL,
     loginingTotp: API_REQUEST_STATE.INITIAL,
     validatingTotp: API_REQUEST_STATE.INITIAL,
+    checkingExistence: API_REQUEST_STATE.INITIAL,
+    isExist: false,
     qrCode: '',
     secretKey: '',
     ...CommonState,
@@ -107,6 +111,18 @@ export const totpSlice = createSlice({
         },
         [validateTotp.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.validatingTotp = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [isTotpExist.pending.type]: (state) => {
+            state.checkingExistence = API_REQUEST_STATE.START;
+        },
+        [isTotpExist.fulfilled.type]: (state, action: PayloadAction<IsTotpExistResponse>) => {
+            state.checkingExistence = API_REQUEST_STATE.FINISH;
+            state.isExist = action.payload.result;
+            state.error = null;
+        },
+        [isTotpExist.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.checkingExistence = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }

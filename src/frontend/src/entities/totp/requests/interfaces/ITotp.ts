@@ -40,6 +40,10 @@ export interface ValidateTOTPRequest {
     code: string,
 }
 
+export interface IsTotpExistResponse {
+    result: boolean,
+}
+
 export default interface ITotpRequest {
 
     generateQRCode(): Promise<AxiosResponse<GenerateQRCodeResponse>>,
@@ -49,4 +53,6 @@ export default interface ITotpRequest {
     login(data: LoginTOTPRequest): Promise<AxiosResponse<LoginTOTPResponse>>,
 
     validate(data: ValidateTOTPRequest): Promise<AxiosResponse<any>>,
+
+    isExist(): Promise<AxiosResponse<IsTotpExistResponse>>,
 }

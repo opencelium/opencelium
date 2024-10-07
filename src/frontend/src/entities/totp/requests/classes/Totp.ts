@@ -17,7 +17,7 @@ import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import Request from "@entity/application/requests/classes/Request";
 import {AxiosResponse} from "axios";
 import ITotpRequest, {
-    GenerateQRCodeResponse,
+    GenerateQRCodeResponse, IsTotpExistResponse,
     LoginTOTPRequest, LoginTOTPResponse,
     ToggleTotpRequest,
     ValidateTOTPRequest
@@ -47,5 +47,10 @@ export default class TotpRequest extends Request implements ITotpRequest {
     async validate(data: ValidateTOTPRequest): Promise<AxiosResponse<any>> {
         this.endpoint = '/totp-validate';
         return super.post<any>(data);
+    }
+
+    async isExist(): Promise<AxiosResponse<IsTotpExistResponse>> {
+        this.endpoint = '/totp-qr/exists';
+        return super.get<IsTotpExistResponse>();
     }
 }
