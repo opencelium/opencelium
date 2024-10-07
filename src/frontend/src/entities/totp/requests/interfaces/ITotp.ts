@@ -32,11 +32,11 @@ export interface LoginTOTPRequest {
 }
 
 export interface LoginTOTPResponse {
-    session_id: string,
+    sessionId: string,
 }
 
 export interface ValidateTOTPRequest {
-    session_id: string,
+    sessionId: string,
     code: string,
 }
 

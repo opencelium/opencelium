@@ -15,18 +15,20 @@
 
 
 
-import {getDefaultConfig, testConfig} from "@entity/ldap/redux_toolkit/action_creators/LdapCreators";
+import {disableTotp, enableTotp, validateTotp} from "@entity/totp/redux_toolkit/action_creators/TotpCreators";
 
 export default {
     fulfilled: {
-        [testConfig.fulfilled.type]: "The migration was successfully fulfilled",
     },
     rejected: {
-        [getDefaultConfig.rejected.type]: {
-            "__DEFAULT__": "There is an error in fetching default config from application.yml file.",
-        },
-        [testConfig.rejected.type]: {
+        [validateTotp.rejected.type]: {
             "__NATIVE__": "-",
         },
+        [enableTotp.rejected.type]: {
+            "__NATIVE__": "-",
+        },
+        [disableTotp.rejected.type]: {
+            "__NATIVE__": "-",
+        }
     },
 }

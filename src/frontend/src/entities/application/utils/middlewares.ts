@@ -19,9 +19,11 @@ import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {getResources, getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {validateTotp} from "@entity/totp/redux_toolkit/action_creators/TotpCreators";
+import {setLoginInfo} from "@application/redux_toolkit/slices/AuthSlice";
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
-    if (login.fulfilled.type === action.type) {
+    if (login.fulfilled.type === action.type || setLoginInfo.type === action.type) {
         const dispatch: AppDispatch = storeApi.dispatch;
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);

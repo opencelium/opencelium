@@ -16,10 +16,11 @@
 import {AxiosResponse} from "axios";
 import Request from "@entity/application/requests/classes/Request";
 import IUser from "@entity/user/interfaces/IUser";
-import {IAuth, NoLicenseResponse} from "../interfaces/IAuth";
+import {IAuth} from "../interfaces/IAuth";
 import {ICredentials} from "../../interfaces/IAuth";
 import {IRequestSettings} from "../interfaces/IRequest";
 import {LocalStorage} from "../../classes/LocalStorage";
+import {LoginTOTPResponse} from "@entity/totp/requests/interfaces/ITotp";
 
 
 export class AuthRequest extends Request implements IAuth{
@@ -28,9 +29,9 @@ export class AuthRequest extends Request implements IAuth{
         super({url: '', ...settings});
     }
 
-    async login(credentials: ICredentials): Promise<AxiosResponse<IUser & NoLicenseResponse>>{
+    async login(credentials: ICredentials): Promise<AxiosResponse<IUser & LoginTOTPResponse>>{
         this.url = 'login';
-        return super.post<IUser & NoLicenseResponse>(credentials);
+        return super.post<IUser & LoginTOTPResponse>(credentials);
     }
 
     logout():void{

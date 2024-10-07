@@ -21,8 +21,10 @@ import {InputTextType} from "@app_component/base/input/text/interfaces";
 import {ColorTheme} from "@style/Theme";
 import {HeaderStyled, LoginFormStyled} from "./styles";
 import {LoginIcon} from "./login_icon/LoginIcon";
+import AuthCode from "@app_component/default_pages/login/AuthCode";
 
 const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?: boolean}) => {
+    const {sessionId} = Auth.getReduxState();
     const LoginForm = Auth.createState<IAuth>();
     const EmailInput = LoginForm.getText({
         propertyName: "email", props: {/*
@@ -66,6 +68,7 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
             {EmailInput}
             {PasswordInput}
             <LoginIcon hasAnimation={hasAnimation} login={() => LoginForm.login()}/>
+            {!!sessionId && <AuthCode/>}
         </LoginFormStyled>
     )
 }
