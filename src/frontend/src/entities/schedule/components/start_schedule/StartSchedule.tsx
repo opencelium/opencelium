@@ -9,6 +9,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 const StartSchedule = ({entity, scheduleModel, componentPermission}: any) => {
     const dispatch = useAppDispatch();
     const {currentSubscription, gettingCurrentSubscription} = Subscription.getReduxState();
+    const isDisabled = !currentSubscription || currentSubscription.currentOperationUsage >= currentSubscription.totalOperationUsage;
     return (
         <PermissionTooltipButton
             target={`start_entity_${entity.id.toString()}`}
@@ -20,7 +21,7 @@ const StartSchedule = ({entity, scheduleModel, componentPermission}: any) => {
             size={TextSize.Size_20}
             permission={componentPermission.UPDATE}
             isLoading={gettingCurrentSubscription !== API_REQUEST_STATE.FINISH}
-            isDisabled={!currentSubscription}
+            isDisabled={isDisabled}
         />
     )
 }
