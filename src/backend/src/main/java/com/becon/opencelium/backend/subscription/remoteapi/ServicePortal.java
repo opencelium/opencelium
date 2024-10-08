@@ -15,6 +15,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
@@ -41,10 +43,26 @@ public class ServicePortal implements RemoteApi, SubscriptionModule {
             HttpHeaders httpHeaders = getHeader();
             HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
             return restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+        } catch (ResourceAccessException e) {
+            // This handles cases when the URL is not reachable
+            e.printStackTrace();
+            throw new RuntimeException("Service Portal " + url + " is not reachable. Please check your settings!");
+        } catch (HttpClientErrorException.Unauthorized e) {
+            // This handles cases when the token is either missing or invalid
+            e.printStackTrace();
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                throw new RuntimeException("Token for Service Portal Auth is not valid. Please check your settings!");
+            }
+        } catch (HttpClientErrorException.Forbidden e) {
+            // This handles cases when the token is missing
+            e.printStackTrace();
+            throw new RuntimeException("Token for Service Portal Auth is not set. Please check your settings!");
         } catch (Exception e) {
-            // Log the error or handle it accordingly
-            throw new RuntimeException(e);
+            // This catches any other unexpected errors
+            e.printStackTrace();
+            throw new RuntimeException("An unexpected error occurred: " + e.getMessage());
         }
+        return null;
     }
 
     @Override
@@ -86,6 +104,14 @@ public class ServicePortal implements RemoteApi, SubscriptionModule {
     }
 
     private HttpHeaders getHeader() {
+        if (AUTH_TOKEN == null || AUTH_TOKEN.isEmpty()) {
+            throw new RuntimeException("Token for the Service Portal Auth is not set. " +
+                    "Please check your settings in application.yml file. Path: " + AppYamlPath.SP_TOKEN);
+        }
+        if (BASE_URL == null || BASE_URL.isEmpty()) {
+            throw new RuntimeException("Base URL for the Service Portal is not set. " +
+                    "Please check your settings in application.yml file. Path: " + AppYamlPath.SP_BASE_URL);
+        }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("x-access-token", AUTH_TOKEN);
         return httpHeaders;
