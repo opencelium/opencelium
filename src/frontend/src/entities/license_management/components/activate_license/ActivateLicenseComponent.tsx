@@ -1,6 +1,6 @@
 import React, {ChangeEvent, useEffect, useMemo, useState} from 'react';
 import Button from "@app_component/base/button/Button";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import License from "@entity/license_management/classes/License";
 import {ActivateLicenseForm} from "@entity/license_management/classes/ActivateLicenseForm";
 import {IActivateLicenseForm, UploadType} from "@entity/license_management/interfaces/IActivateLicenseForm";
@@ -11,12 +11,15 @@ import {
 } from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import {useAppDispatch} from "@application/utils/store";
 import Subscription from "@entity/license_management/classes/Subscription";
-import {getLicenseList} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
+import {
+    getLicenseList,
+    getLicenseStatus
+} from "@entity/license_management/redux_toolkit/action_creators/LicenseCreators";
 
 const ActivateLicenseComponent = () => {
     const dispatch = useAppDispatch();
     const {gettingCurrentSubscription} = Subscription.getReduxState();
-    const {gettingLicenseList, licenseList} = License.getReduxState();
+    const {gettingLicenseList, licenseList, gettingLicenseStatus, status} = License.getReduxState();
     const [selectedSubscription, setSelectedSubscription] = useState<any>();
     const licenseOptions = useMemo(() => {
         return License.getOptions(licenseList);
@@ -25,8 +28,12 @@ const ActivateLicenseComponent = () => {
     const [showDialog, toggleDialog] = useState<boolean>(false);
     const UploadTokenForm = ActivateLicenseForm.createState<IActivateLicenseForm>();
     useEffect(() => {
-        dispatch(getLicenseList());
-    }, [])
+        if (gettingLicenseStatus === API_REQUEST_STATE.FINISH) {
+            if (status === TRIPLET_STATE.TRUE) {
+                dispatch(getLicenseList());
+            }
+        }
+    }, [gettingLicenseStatus]);
     const activate = () => {
         dispatch(setCurrentSubscription(selectedSubscription.value))
     }
@@ -62,6 +69,8 @@ const ActivateLicenseComponent = () => {
                 label={'Activate License'}
                 icon={'cloud_sync'}
                 handleClick={() => toggleDialog(true)}
+                isDisabled={status !== TRIPLET_STATE.TRUE}
+                title={'Please, check your settings.'}
                 isLoading={activatingLicense === API_REQUEST_STATE.START}
             />
         </div>

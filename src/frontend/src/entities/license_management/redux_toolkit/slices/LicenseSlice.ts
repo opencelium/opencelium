@@ -15,7 +15,7 @@
 
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ICommonState} from "@application/interfaces/core";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {
@@ -32,6 +32,7 @@ import LicenseModel, {
     ActivationRequestStatus,
     LicenseListItem
 } from "@entity/license_management/requests/models/LicenseModel";
+import {StatusResponse} from "@application/requests/interfaces/IApplication";
 
 export interface LicenseState extends ICommonState{
     generatingActivateRequest: API_REQUEST_STATE,
@@ -43,7 +44,7 @@ export interface LicenseState extends ICommonState{
     activatingFreeLicense: API_REQUEST_STATE,
     license: LicenseModel,
     licenseList: LicenseListItem[],
-    status: boolean,
+    status: TRIPLET_STATE,
     activationRequestStatus: ActivationRequestStatus,
 }
 
@@ -57,7 +58,7 @@ const initialState: LicenseState = {
     activatingFreeLicense: API_REQUEST_STATE.INITIAL,
     licenseList: [],
     license: null,
-    status: false,
+    status: TRIPLET_STATE.INITIAL,
     activationRequestStatus: ActivationRequestStatus.EXPIRED,
     ...CommonState,
 }
@@ -120,14 +121,15 @@ export const licenseSlice = createSlice({
         [getLicenseStatus.pending.type]: (state) => {
             state.gettingLicenseStatus = API_REQUEST_STATE.START;
         },
-        [getLicenseStatus.fulfilled.type]: (state, action: PayloadAction<boolean>) => {
+        [getLicenseStatus.fulfilled.type]: (state, action: PayloadAction<StatusResponse>) => {
             state.gettingLicenseStatus = API_REQUEST_STATE.FINISH;
-            state.status = action.payload;
+            state.status = action.payload.status === true ? TRIPLET_STATE.TRUE : TRIPLET_STATE.FALSE;
             state.error = null;
         },
         [getLicenseStatus.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingLicenseStatus = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
+            state.status = TRIPLET_STATE.FALSE;
         },
         [getActivationRequestStatus.pending.type]: (state) => {
             state.gettingActivationRequestStatus = API_REQUEST_STATE.START;

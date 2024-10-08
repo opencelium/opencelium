@@ -67,6 +67,7 @@ interface CollectionViewProps{
     hasTitle?: boolean,
     hasViewSection?: boolean,
     defaultViewType?: ViewType | '',
+    hasNotAlert?: boolean,
     hasError?: boolean,
     isListViewCard?: boolean,
     defaultFilterData?: any,

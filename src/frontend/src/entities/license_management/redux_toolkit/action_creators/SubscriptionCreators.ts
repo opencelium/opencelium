@@ -1,12 +1,6 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import SubscriptionRequest from "@entity/license_management/requests/classes/SubscriptionRequest";
-import {
-    OperationUsageDetailModel,
-    OperationUsageEntryModel
-} from "@entity/license_management/requests/models/SubscriptionModel";
-import OperationUsageDetails from "@entity/license_management/collections/OperationUsageDetails";
-
 export const getCurrentSubscription = createAsyncThunk(
     'subscription/get/current',
     async(data: never, thunkAPI) => {

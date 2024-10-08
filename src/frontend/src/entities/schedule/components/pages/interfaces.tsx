@@ -23,6 +23,7 @@ interface ScheduleListProps{
     hasTopBar?: boolean,
     isReadonly?: boolean,
     hasTitle?: boolean,
+    hasNotAlert?: boolean,
 }
 
 export {

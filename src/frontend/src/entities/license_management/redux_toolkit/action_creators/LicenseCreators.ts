@@ -62,9 +62,9 @@ export const getLicenseStatus = createAsyncThunk(
         try {
             const request = new LicenseRequest();
             const response = await request.getStatus();
-            return response.data.status;
+            return {...response.data, settings: {title: 'Online Service failed'}};
         } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
+            return thunkAPI.rejectWithValue({...errorHandler(e), settings: {title: 'Online Service failed'}});
         }
     }
 )

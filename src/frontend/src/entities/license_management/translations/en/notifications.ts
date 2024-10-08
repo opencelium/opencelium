@@ -33,11 +33,11 @@ export default {
         [activateLicenseString.rejected.type]: {
             "__DEFAULT__": "There is an error activating license text."
         },
-        [getLicenseStatus.rejected.type]: {
-            "__DEFAULT__": "There is an error fetching license status."
-        },
         [getLicenseList.rejected.type]: {
             "__DEFAULT__": "There is an error fetching licenses."
+        },
+        [getLicenseStatus.rejected.type]: {
+            "__NATIVE__": "-"
         }
     },
 }

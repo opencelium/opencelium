@@ -30,10 +30,8 @@ import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_cr
 import { Category } from '@entity/category/classes/Category';
 import {getAllMetaConnections} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import { Connection } from '@entity/connection/classes/Connection';
-import connections from "@root/collections/Connections";
-import {capitalize} from "@application/utils/utils";
 
-const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)(({hasTopBar, isReadonly, hasTitle}) => {
+const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)(({hasTopBar, isReadonly, hasTitle, hasNotAlert}) => {
     const dispatch = useAppDispatch();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     const {metaConnections} = Connection.getReduxState();
@@ -61,7 +59,7 @@ const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)
     const CSchedules = new Schedules(filteredSchedules, dispatch, deletingSchedulesById, isReadonly, hasElasticSearch, updatingSchedule);
     return (
         <React.Fragment>
-            <CollectionView defaultViewType={ViewType.LIST} hasViewSection={false} hasTopBar={hasTopBar} hasTitle={hasTitle} shouldBeUpdated={shouldBeUpdated} collection={CSchedules} isLoading={gettingAllSchedules === API_REQUEST_STATE.START} componentPermission={SchedulePermissions}/>
+            <CollectionView defaultViewType={ViewType.LIST} hasNotAlert={hasNotAlert} hasViewSection={false} hasTopBar={hasTopBar} hasTitle={hasTitle} shouldBeUpdated={shouldBeUpdated} collection={CSchedules} isLoading={gettingAllSchedules === API_REQUEST_STATE.START} componentPermission={SchedulePermissions}/>
             {gettingAllSchedules === API_REQUEST_STATE.FINISH && <CurrentSchedules/>}
         </React.Fragment>
     )
@@ -71,6 +69,7 @@ ScheduleList.defaultProps = {
     hasTopBar: true,
     isReadonly: false,
     hasTitle: true,
+    hasNotAlert: false,
 }
 
 export {
