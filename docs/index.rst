@@ -29,6 +29,8 @@ This documentation is organized into a couple of sections:
    :caption: Management
    :maxdepth: 2
 
+   management/authentication
+   management/license_management
    management/template
    management/notification_template
    management/aggregator
