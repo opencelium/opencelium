@@ -16,13 +16,12 @@
 
 package com.becon.opencelium.backend.configuration;
 
+import com.becon.opencelium.backend.database.mysql.service.LdapVerificationService;
 import com.becon.opencelium.backend.security.AuthExceptionHandler;
 import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
 import com.becon.opencelium.backend.security.DaoUserDetailsService;
 import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +30,6 @@ import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -57,6 +55,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -89,7 +88,8 @@ public class SecurityConfiguration {
     @Autowired
     private LdapProperties ldapProperties;
 
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfiguration.class);
+    @Autowired
+    private LdapVerificationService ldapVerificationService;
 
 
     @Bean
@@ -139,11 +139,8 @@ public class SecurityConfiguration {
             protected DirContextOperations doAuthentication(UsernamePasswordAuthenticationToken authentication) {
                 try {
                     return super.doAuthentication(authentication);
-                } catch (InternalAuthenticationServiceException e) {
-                    // move next authentication if LDAP server is not available
-                    if (ldapProperties.isShowLogs()) {
-                        logger.info(ldapProperties.getConfiguration());
-                    }
+                } catch (Throwable e) {
+                    ldapVerificationService.showLogs(ldapProperties, (String) authentication.getPrincipal());
                     throw new ProviderNotFoundException(e.getMessage());
                 }
             }
@@ -152,7 +149,7 @@ public class SecurityConfiguration {
 
     @Bean
     public LdapAuthenticator ldapAuthenticator() {
-        String userSearchBase = ldapProperties.getUserSearchBase() + "," + ldapProperties.getBase();
+        String userSearchBase = ldapProperties.getUserSearchBase();
         String searchFilter = ldapProperties.getUserSearchFilter();
 
         BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
@@ -163,7 +160,7 @@ public class SecurityConfiguration {
 
     @Bean
     public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() {
-        String groupSearchBase = ldapProperties.getGroupSearchBase() + "," + ldapProperties.getBase();
+        String groupSearchBase = ldapProperties.getGroupSearchBase();
         String searchFilter = ldapProperties.getGroupSearchFilter();
 
         DefaultLdapAuthoritiesPopulator authoritiesPopulator = new DefaultLdapAuthoritiesPopulator(ldapContextSource(), groupSearchBase);
@@ -180,6 +177,12 @@ public class SecurityConfiguration {
         contextSource.setUrl(ldapProperties.getUrls());
         contextSource.setUserDn(ldapProperties.getUsername());
         contextSource.setPassword(ldapProperties.getPassword());
+
+        // add timeout for connecting and reading to/from Ldap server
+        Hashtable<String, Object> env = new Hashtable<>();
+        env.put(LdapProperties.CONNECT_TIMEOUT_KEY, ldapProperties.getTimeout());
+        env.put(LdapProperties.READ_TIMEOUT_KEY, ldapProperties.getTimeout());
+        contextSource.setBaseEnvironmentProperties(env);
 
         return contextSource;
     }
