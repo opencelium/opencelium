@@ -25,14 +25,14 @@ export interface MigrationState extends ICommonState{
     gettingDefaultConfig: API_REQUEST_STATE,
     testingConfig: API_REQUEST_STATE,
     defaultConfig: LdapConfigModel,
-    debugLogs: string,
+    debugLogs: string[],
 }
 
 const initialState: MigrationState = {
     gettingDefaultConfig: API_REQUEST_STATE.INITIAL,
     testingConfig: API_REQUEST_STATE.INITIAL,
     defaultConfig: null,
-    debugLogs: '',
+    debugLogs: [],
     ...CommonState,
 }
 
@@ -41,7 +41,7 @@ export const ldapSlice = createSlice({
     initialState,
     reducers: {
         clearDebugLogs: (state) => {
-            state.debugLogs = '';
+            state.debugLogs = [];
         },
     },
     extraReducers: {
@@ -60,7 +60,7 @@ export const ldapSlice = createSlice({
         [testConfig.pending.type]: (state) => {
             state.testingConfig = API_REQUEST_STATE.START;
         },
-        [testConfig.fulfilled.type]: (state, action: PayloadAction<string>) => {
+        [testConfig.fulfilled.type]: (state, action: PayloadAction<string[]>) => {
             state.testingConfig = API_REQUEST_STATE.FINISH;
             state.debugLogs = action.payload;
             state.error = null;
@@ -68,7 +68,7 @@ export const ldapSlice = createSlice({
         [testConfig.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.testingConfig = API_REQUEST_STATE.ERROR;
             if (action.payload?.message) {
-                state.debugLogs = action.payload?.message;
+                state.debugLogs = [action.payload?.message];
             } else {
                 state.error = action.payload;
             }

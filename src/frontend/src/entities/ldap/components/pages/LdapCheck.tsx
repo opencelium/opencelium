@@ -25,7 +25,6 @@ import {useAppDispatch} from "@application/utils/store";
 import {getDefaultConfig} from "@entity/ldap/redux_toolkit/action_creators/LdapCreators";
 import {clearDebugLogs} from "@entity/ldap/redux_toolkit/slices/LdapSlice";
 import Hint from "@app_component/base/hint/Hint";
-import {Auth} from "@application/classes/Auth";
 
 
 const LdapCheck: FC<IForm> = ({}) => {
@@ -71,7 +70,11 @@ const LdapCheck: FC<IForm> = ({}) => {
                 {!defaultConfig && <div style={{marginLeft: 10, marginTop: 20, marginBottom: 20}}><Hint message={'You can set configurations in application.yml file'}/></div>}
             </FormSection>,
             <FormSection dependencies={[debugLogs.length === 0]} label={{value: 'Debug'}}>
-                <div style={{margin: '20px 0 0 20px'}}>{debugLogs}</div>
+                {debugLogs.map((log, index) => {
+                    return (
+                        <div key={index} style={{margin: '20px 0 0 20px'}}>{log}</div>
+                    );
+                })}
             </FormSection>
         ]
     }
