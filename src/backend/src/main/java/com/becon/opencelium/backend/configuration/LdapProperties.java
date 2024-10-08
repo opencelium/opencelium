@@ -7,10 +7,13 @@ import java.util.List;
 
 @ConfigurationProperties(prefix = "spring.security.ldap")
 public class LdapProperties {
+    public static final String CONNECT_TIMEOUT_KEY = "com.sun.jndi.ldap.connect.timeout";
+    public static final String READ_TIMEOUT_KEY = "com.sun.jndi.ldap.read.timeout";
+
     private String urls;
     private String username;
     private String password;
-    private String base;
+    private String timeout = "1000"; // in milliseconds
     private String userSearchBase;
     private String userSearchFilter = "(cn={0})";
     private String groupSearchBase;
@@ -18,14 +21,6 @@ public class LdapProperties {
     private List<Group2Role> groupRoleMapping = new ArrayList<>();
     private String defaultRole;
     private boolean showLogs = false;
-
-    public String getConfiguration() {
-        if (urls == null && base == null && userSearchBase == null && groupSearchBase == null && username == null && password == null) {
-            return "ldap configuration not found.";
-        }
-
-        return toString();
-    }
 
     public String getUrls() {
         return urls;
@@ -51,12 +46,12 @@ public class LdapProperties {
         this.password = password;
     }
 
-    public String getBase() {
-        return base;
+    public String getTimeout() {
+        return timeout;
     }
 
-    public void setBase(String base) {
-        this.base = base;
+    public void setTimeout(String timeout) {
+        this.timeout = timeout;
     }
 
     public String getUserSearchBase() {
@@ -113,18 +108,6 @@ public class LdapProperties {
 
     public void setShowLogs(boolean showLogs) {
         this.showLogs = showLogs;
-    }
-
-    @Override
-    public String toString() {
-        return "System found ldap configuration: {" +
-                "urls='" + urls + "', " +
-                "base='" + base + "', " +
-                "userSearchBase='" + userSearchBase + "', " +
-                "groupSearchBase='" + groupSearchBase + "', " +
-                "username='" + username + "', " +
-                "groupSearchFilter='" + groupSearchFilter + "', " +
-                "userSearchFilter='" + userSearchFilter + "'}";
     }
 
     public static class Group2Role {
