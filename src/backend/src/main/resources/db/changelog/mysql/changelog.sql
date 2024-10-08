@@ -533,3 +533,13 @@ CREATE TABLE operation_usage_history_detail(
     operation_usage_history_id BIGINT NOT NULL,
     FOREIGN KEY (operation_usage_history_id) REFERENCES operation_usage_history (id) ON DELETE CASCADE
 );
+
+--changeset 4.2:10 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE connection_editor_settings
+(
+    id                BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id           INT       NOT NULL,
+    color_mode        VARCHAR(255) NOT NULL,
+    process_text_size INT          NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+);
