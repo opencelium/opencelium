@@ -4,10 +4,13 @@ import com.becon.opencelium.backend.configuration.WebSocketConfig;
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.mapper.execution.ConnectionExMapper;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
+import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.Logger;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
@@ -22,15 +25,18 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
     private final ConnectionExMapper connectionMapper;
     private final SchedulerService schedulerService;
     private final ConnectionMngService connectionMngService;
+    private final ConnectionService connectionService;
 
     public ExecutionObjectServiceImp(
             Environment environment,
             ConnectionExMapper connectionMapper,
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
-            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService) {
+            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
+            @Qualifier("connectionServiceImp") ConnectionService connectionService) {
         this.connectionMapper = connectionMapper;
         this.schedulerService = schedulerService;
         this.connectionMngService = connectionMngService;
+        this.connectionService = connectionService;
         this.env = environment;
     }
 
@@ -41,7 +47,9 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
         ConnectionMng connectionMng = connectionMngService.getByConnectionId(scheduler.getConnection().getId());
 
         ExecutionObj executionObj = new ExecutionObj();
-        executionObj.setConnection(connectionMapper.toEntity(connectionMng));
+        ConnectionEx connectionEx = connectionMapper.toEntity(connectionMng);
+        connectionEx.setConnectionName(getConnectionName(connectionMng.getConnectionId()));
+        executionObj.setConnection(connectionEx);
 
         executionObj.setWebhookVars(data.getQueryParams());
 
@@ -60,5 +68,10 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
         executionObj.setLogger(logger);
 
         return executionObj;
+    }
+
+    private String getConnectionName(Long connectionId) {
+        Connection connection = connectionService.findById(connectionId).orElseThrow();
+        return connection.getTitle();
     }
 }
