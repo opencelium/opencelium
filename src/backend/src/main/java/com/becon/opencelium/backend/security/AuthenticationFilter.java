@@ -23,12 +23,13 @@ import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import com.becon.opencelium.backend.database.mysql.service.SessionService;
+import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.resource.user.SessionTotpCodeResource;
+import com.becon.opencelium.backend.resource.user.TotpResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -74,6 +75,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected SessionService sessionService;
 
     @Autowired
+    protected TotpService totpService;
+
+    @Autowired
     private LdapProperties properties;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
@@ -110,7 +114,14 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         User user = getUser(auth);
 
         if (user.isTotpEnabled()) {
-            SessionTotpCodeResource resource = new SessionTotpCodeResource(user.getSession().getId());
+            TotpResource resource;
+            if (user.getTotpSecretKey() == null) {
+                resource = totpService.getTotpResource(user.getId());
+            } else {
+                resource = new TotpResource();
+            }
+            resource.setSessionId(user.getSession().getId());
+
             String payload = mapper.writeValueAsString(resource);
 
             response.getWriter().write(payload);
