@@ -74,8 +74,11 @@ public class TotpServiceImpl implements TotpService {
         User user = userService.getById(userId);
 
         if ("enable".equals(action)) {
+            if (user.isTotpEnabled()) {
+                return;
+            }
+
             user.setTotpEnabled(true);
-            user.setTotpSecretKey(null);
 
             // remove users' session if exists to force TOTP process completion by logging in again
             sessionService.deleteByUserId(userId);

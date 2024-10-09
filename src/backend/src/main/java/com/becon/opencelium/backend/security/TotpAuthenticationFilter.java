@@ -3,15 +3,13 @@ package com.becon.opencelium.backend.security;
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.entity.User;
-import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.resource.user.SessionTotpCodeResource;
+import com.becon.opencelium.backend.resource.user.TotpResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,8 +29,6 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
 
     private static final String SESSION_ID = "com.becon.opencelium.backend.security.session_id";
 
-    @Autowired
-    private TotpService totpService;
 
     public TotpAuthenticationFilter() {
         setFilterProcessesUrl("/totp-validate");
@@ -45,8 +41,8 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
         }
 
         try {
-            SessionTotpCodeResource dto = new ObjectMapper()
-                    .readValue(request.getInputStream(), SessionTotpCodeResource.class);
+            TotpResource dto = new ObjectMapper()
+                    .readValue(request.getInputStream(), TotpResource.class);
 
             String sessionId = dto.getSessionId();
             request.setAttribute(SESSION_ID, sessionId); // cache session_id - this is used in case of failed auth attempt
