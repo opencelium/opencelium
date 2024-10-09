@@ -25,6 +25,7 @@ export const enableTotp = createAsyncThunk(
         try {
             const request = new TotpRequest({endpoint: `/${userId}/totp/enable`})
             await request.toggleTotp();
+            return userId;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -36,6 +37,7 @@ export const disableTotp = createAsyncThunk(
         try {
             const request = new TotpRequest({endpoint: `/${userId}/totp/disable`})
             await request.toggleTotp();
+            return userId;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -47,6 +49,7 @@ export const enableUsersTotp = createAsyncThunk(
         try {
             const request = new TotpRequest()
             await request.enableUsersTotp(userIds);
+            return userIds;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

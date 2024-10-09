@@ -18,7 +18,7 @@ import {HookStateClass} from "../classes/HookStateClass";
 import {Application as App} from "./Application";
 import {
     IAuth,
-    IAuthText,
+    IAuthText, ICredentials,
 } from "../interfaces/IAuth";
 import {IInput} from "../interfaces/core";
 import {RootState, useAppSelector} from "../utils/store";
@@ -108,7 +108,7 @@ export class Auth extends HookStateClass implements IAuth{
         return isValidUsername && isValidPassword;
     }
 
-    @App.dispatch(login, {mapping: (authData: IAuth) => {return {username: authData.username, password: authData.password};}})
+    @App.dispatch(login, {mapping: (authData: IAuth): ICredentials => {return {email: authData.username, password: authData.password};}})
     login(): boolean{
         return this.validateLogin();
     }

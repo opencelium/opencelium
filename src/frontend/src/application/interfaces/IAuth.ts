@@ -18,7 +18,7 @@ import {JwtPayload} from "jsonwebtoken";
 import {IForm} from "../interfaces/core";
 
 export interface ICredentials{
-    username: string,
+    email: string,
     password: string,
 }
 

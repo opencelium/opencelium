@@ -34,7 +34,7 @@ export default class TotpRequest extends Request implements ITotpRequest {
 
     async enableUsersTotp(userIds:number[]): Promise<AxiosResponse<IResponse>> {
         this.endpoint = '/list/totp/enable';
-        return super.put<IResponse>(userIds);
+        return super.post<IResponse>(userIds);
     }
 
     async login(data: LoginTOTPRequest): Promise<AxiosResponse<LoginTOTPResponse>> {

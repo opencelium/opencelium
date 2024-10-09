@@ -62,6 +62,8 @@ export default class User extends HookStateClass implements IUser{
 
     userGroup: IUserGroup = null;
 
+    totpEnabled: boolean = false;
+
     constructor(user?: Partial<IUser> | null) {
         // @ts-ignore
         super(user?.validations || {}, user?._readOnly, user?.wholeInstance);
@@ -78,6 +80,7 @@ export default class User extends HookStateClass implements IUser{
         this.repeatPassword = user?.repeatPassword || '';
         this.userGroupSelect = user?.userGroupSelect || null;
         this.userGroup = user?.userGroup || null;
+        this.totpEnabled = user?.totpEnabled || false;
         if(!this.userGroupSelect && this.userGroup?.groupId){
             this.userGroupSelect = {label: this.userGroup.name, value: this.userGroup.groupId.toString()};
         }

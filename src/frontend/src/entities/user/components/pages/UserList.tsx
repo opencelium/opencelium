@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
@@ -28,13 +28,17 @@ import { UserPermissions } from '../../constants';
 const UserList: FC<UserListProps> = permission(UserPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
     const {authUser} = Auth.getReduxState();
+    const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     const {gettingUsers, users, deletingUsersById, uploadingUserImage} = User.getReduxState();
     useEffect(() => {
         dispatch(getAllUsers());
     }, [])
+    useEffect(() => {
+        setShouldBeUpdated(!shouldBeUpdated);
+    }, [users])
     const CUsers = new Users(users, dispatch, authUser || null, deletingUsersById, uploadingUserImage);
     return (
-        <CollectionView collection={CUsers} isLoading={gettingUsers === API_REQUEST_STATE.START} componentPermission={UserPermissions}/>
+        <CollectionView collection={CUsers} shouldBeUpdated={shouldBeUpdated} isLoading={gettingUsers === API_REQUEST_STATE.START} componentPermission={UserPermissions}/>
     )
 })
 
