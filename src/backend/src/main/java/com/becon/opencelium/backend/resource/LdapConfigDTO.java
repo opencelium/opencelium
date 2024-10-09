@@ -7,7 +7,7 @@ public class LdapConfigDTO {
     private String urls;
     private String username;
     private String password;
-    private String timeout;
+    private String timeout = "30000";
     private String userDN;
     private String groupDN;
     private String userSearchFilter;

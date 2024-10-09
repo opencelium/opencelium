@@ -49,6 +49,9 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
 
         List<String> messages = new ArrayList<>();
         try {
+            // verify timeout is not null
+            checkTimeout(config.getTimeout(), messages);
+
             // host is reachable ?
             checkHost(config.getUrls(), config.getTimeout(), messages);
             logger.info(messages.get(0));
@@ -69,6 +72,9 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
         List<String> messages = new ArrayList<>();
 
         try {
+            // verify timeout is not null
+            checkTimeout(config.getTimeout(), messages);
+
             // host is reachable ?
             checkHost(config.getUrls(), config.getTimeout(), messages);
 
@@ -86,6 +92,14 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
         return messages;
     }
 
+
+    private void checkTimeout(String timeout, List<String> messages) {
+        if (timeout == null) {
+            messages.add("'timeout' in Ldap configuration should be not null");
+
+            throw new RuntimeException("'timeout' in Ldap configuration should be not null");
+        }
+    }
 
     private void checkHost(String url, String timeout, List<String> messages) {
         Hashtable<String, String> env = new Hashtable<>();
