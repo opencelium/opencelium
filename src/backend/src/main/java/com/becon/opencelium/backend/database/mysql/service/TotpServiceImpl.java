@@ -7,6 +7,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.imageio.ImageIO;
@@ -18,25 +19,23 @@ import java.util.Base64;
 
 @Service
 public class TotpServiceImpl implements TotpService {
-    private final UserService userService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private SessionService sessionService;
+
     private final GoogleAuthenticator provider = new GoogleAuthenticator();
 
-    public TotpServiceImpl(UserService userService) {
-        this.userService = userService;
-    }
 
     @Override
     @Transactional
     public TotpResource getTotpResource(int userId) {
-        User user = userService.findById(userId).orElseThrow();
+        User user = userService.getById(userId);
+        String secretKey = provider.createCredentials().getKey();
 
-        String secretKey;
-        if (user.getTotpSecretKey() != null) {
-            secretKey = user.getTotpSecretKey();
-        } else {
-            secretKey = provider.createCredentials().getKey();
-            user.setTotpSecretKey(secretKey);
-        }
+        user.setTotpSecretKey(secretKey);
 
         String issuer = "opencelium";
         String account = user.getEmail();
@@ -71,34 +70,21 @@ public class TotpServiceImpl implements TotpService {
 
     @Override
     @Transactional
-    public boolean enableTotp(int userId, String code) {
-        User user = userService.findById(userId).orElseThrow();
+    public void totpAction(int userId, String action) {
+        User user = userService.getById(userId);
 
-        if (user.isTotpEnabled()) {
-            throw new RuntimeException("totp has already been enabled.");
-        } else if (user.getTotpSecretKey() == null) {
-            throw new RuntimeException("First create totp secretKey");
-        } else if (isValidTotp(user.getTotpSecretKey(), code)) {
+        if ("enable".equals(action)) {
             user.setTotpEnabled(true);
-            return true;
-        }
+            user.setTotpSecretKey(null);
 
-        throw new RuntimeException("Wrong totp code has been supplied.");
-    }
-
-    @Override
-    @Transactional
-    public boolean disableTotp(int userId, String code) {
-        User user = userService.findById(userId).orElseThrow();
-
-        if (!user.isTotpEnabled() || user.getTotpSecretKey() == null) {
-            throw new RuntimeException("totp has not been enabled yet.");
-        } else if (isValidTotp(user.getTotpSecretKey(), code)) {
+            // remove users' session if exists to force TOTP process completion by logging in again
+            sessionService.deleteByUserId(userId);
+        } else if ("disable".equals(action)) {
             user.setTotpEnabled(false);
-            return true;
+            user.setTotpSecretKey(null);
+        } else {
+            throw new RuntimeException("Wrong TOTP action is supplied, available options: [enable, disable]");
         }
-
-        throw new RuntimeException("Wrong totp code has been supplied.");
     }
 
     @Override
