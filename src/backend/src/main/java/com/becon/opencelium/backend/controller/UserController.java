@@ -291,18 +291,15 @@ public class UserController {
     })
     @GetMapping("/{id}/logout")
     public ResponseEntity<?> logout(@PathVariable("id") int userId) {
-        // skip userId, instead logout current user
-        int id = getCurrentUserId();
-
         return sessionService
-                .findByUserId(id)
+                .findByUserId(userId)
                 .map(s -> {
                     s.setActive(false);
                     sessionService.save(s);
 
                     return ResponseEntity.ok().build();
                 })
-                .orElseThrow(() -> new SessionNotFoundException(id));
+                .orElseThrow(() -> new SessionNotFoundException(userId));
     }
 
     @Operation(summary = "Returns QR and totp secret")
