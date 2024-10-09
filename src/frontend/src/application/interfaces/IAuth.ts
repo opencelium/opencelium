@@ -18,7 +18,7 @@ import {JwtPayload} from "jsonwebtoken";
 import {IForm} from "../interfaces/core";
 
 export interface ICredentials{
-    email: string,
+    username: string,
     password: string,
 }
 
@@ -35,7 +35,7 @@ export interface TokenProps extends JwtPayload{
 
 
 export interface IAuthText{
-    email: string;
+    username: string;
     password: string;
 }
 

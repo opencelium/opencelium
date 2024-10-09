@@ -99,7 +99,7 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         />);
     }
     const data = {
-        title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: formData.formTitle}],
+        title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'User Groups', link: '/usergroups'}, {name: formData.formTitle}],
         actions: actions,
         formSections: [
             <FormSection label={{value: 'user details'}}>

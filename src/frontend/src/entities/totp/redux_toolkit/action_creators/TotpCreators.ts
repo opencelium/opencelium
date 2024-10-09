@@ -19,24 +19,12 @@ import TotpRequest from "@entity/totp/requests/classes/Totp";
 import {LoginTOTPRequest, ToggleTotpRequest, ValidateTOTPRequest} from "@entity/totp/requests/interfaces/ITotp";
 import User from "@entity/user/classes/User";
 
-export const generateQRCode = createAsyncThunk(
-    'totp/generate/qr',
-    async(data: never, thunkAPI) => {
-        try {
-            const request = new TotpRequest()
-            const response = await request.generateQRCode();
-            return response.data;
-        } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
-        }
-    }
-)
 export const enableTotp = createAsyncThunk(
     'totp/enable',
-    async(data: ToggleTotpRequest, thunkAPI) => {
+    async(userId: number, thunkAPI) => {
         try {
-            const request = new TotpRequest({endpoint: `/totp/enable`})
-            await request.toggleTotp(data);
+            const request = new TotpRequest({endpoint: `/${userId}/totp/enable`})
+            await request.toggleTotp();
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -44,10 +32,21 @@ export const enableTotp = createAsyncThunk(
 )
 export const disableTotp = createAsyncThunk(
     'totp/disable',
-    async(data: ToggleTotpRequest, thunkAPI) => {
+    async(userId: number, thunkAPI) => {
         try {
-            const request = new TotpRequest({endpoint: `/totp/disable`})
-            await request.toggleTotp(data);
+            const request = new TotpRequest({endpoint: `/${userId}/totp/disable`})
+            await request.toggleTotp();
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+export const enableUsersTotp = createAsyncThunk(
+    'totp/users/enable',
+    async(userIds: number[], thunkAPI) => {
+        try {
+            const request = new TotpRequest()
+            await request.enableUsersTotp(userIds);
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -81,23 +80,10 @@ export const validateTotp = createAsyncThunk(
         }
     }
 )
-export const isTotpExist = createAsyncThunk(
-    'totp/exist',
-    async(data: never, thunkAPI) => {
-        try {
-            const request = new TotpRequest()
-            const response = await request.isExist();
-            return response.data;
-        } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
-        }
-    }
-)
 export default {
-    generateQRCode,
     enableTotp,
     disableTotp,
+    enableUsersTotp,
     loginTotp,
     validateTotp,
-    isTotpExist,
 }

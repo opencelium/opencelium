@@ -18,33 +18,26 @@ import {ICommonState} from "@application/interfaces/core";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
 import {
     disableTotp,
-    enableTotp,
-    generateQRCode, isTotpExist,
+    enableTotp, enableUsersTotp,
     loginTotp, validateTotp
 } from "@entity/totp/redux_toolkit/action_creators/TotpCreators";
-import {GenerateQRCodeResponse, IsTotpExistResponse} from "@entity/totp/requests/interfaces/ITotp";
 
 export interface TotpState extends ICommonState {
-    generatingQRCode: API_REQUEST_STATE,
     togglingTotp: API_REQUEST_STATE,
+    enablingUsersTotp: API_REQUEST_STATE,
     loginingTotp: API_REQUEST_STATE,
     validatingTotp: API_REQUEST_STATE,
-    checkingExistence: API_REQUEST_STATE,
-    isExist: boolean,
     qrCode: string,
     secretKey: string,
 }
 
 const initialState: TotpState = {
-    generatingQRCode: API_REQUEST_STATE.INITIAL,
     togglingTotp: API_REQUEST_STATE.INITIAL,
+    enablingUsersTotp: API_REQUEST_STATE.INITIAL,
     loginingTotp: API_REQUEST_STATE.INITIAL,
     validatingTotp: API_REQUEST_STATE.INITIAL,
-    checkingExistence: API_REQUEST_STATE.INITIAL,
-    isExist: false,
     qrCode: '',
     secretKey: '',
     ...CommonState,
@@ -54,25 +47,29 @@ export const totpSlice = createSlice({
     name: 'totp',
     initialState,
     reducers: {
+        setQrCode: (state, action: PayloadAction<string>) => {
+            state.qrCode = action.payload;
+        },
+        setSecretKey: (state, action: PayloadAction<string>) => {
+            state.secretKey = action.payload;
+        },
     },
     extraReducers: {
-        [generateQRCode.pending.type]: (state) => {
-            state.generatingQRCode = API_REQUEST_STATE.START;
+        [enableUsersTotp.pending.type]: (state) => {
+            state.enablingUsersTotp = API_REQUEST_STATE.START;
         },
-        [generateQRCode.fulfilled.type]: (state, action: PayloadAction<GenerateQRCodeResponse>) => {
-            state.generatingQRCode = API_REQUEST_STATE.FINISH;
-            state.qrCode = action.payload.qr;
-            state.secretKey = action.payload.secretKey;
+        [enableUsersTotp.fulfilled.type]: (state, action: PayloadAction<number[]>) => {
+            state.enablingUsersTotp = API_REQUEST_STATE.FINISH;
             state.error = null;
         },
-        [generateQRCode.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.generatingQRCode = API_REQUEST_STATE.ERROR;
+        [enableUsersTotp.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.enablingUsersTotp = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [enableTotp.pending.type]: (state) => {
             state.togglingTotp = API_REQUEST_STATE.START;
         },
-        [enableTotp.fulfilled.type]: (state, action: PayloadAction<LdapConfigModel>) => {
+        [enableTotp.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
             state.togglingTotp = API_REQUEST_STATE.FINISH;
             state.error = null;
         },
@@ -83,7 +80,7 @@ export const totpSlice = createSlice({
         [disableTotp.pending.type]: (state) => {
             state.togglingTotp = API_REQUEST_STATE.START;
         },
-        [disableTotp.fulfilled.type]: (state, action: PayloadAction<LdapConfigModel>) => {
+        [disableTotp.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
             state.togglingTotp = API_REQUEST_STATE.FINISH;
             state.error = null;
         },
@@ -94,7 +91,7 @@ export const totpSlice = createSlice({
         [loginTotp.pending.type]: (state) => {
             state.loginingTotp = API_REQUEST_STATE.START;
         },
-        [loginTotp.fulfilled.type]: (state, action: PayloadAction<LdapConfigModel>) => {
+        [loginTotp.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
             state.loginingTotp = API_REQUEST_STATE.FINISH;
             state.error = null;
         },
@@ -105,7 +102,7 @@ export const totpSlice = createSlice({
         [validateTotp.pending.type]: (state) => {
             state.validatingTotp = API_REQUEST_STATE.START;
         },
-        [validateTotp.fulfilled.type]: (state, action: PayloadAction<LdapConfigModel>) => {
+        [validateTotp.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
             state.validatingTotp = API_REQUEST_STATE.FINISH;
             state.error = null;
         },
@@ -113,22 +110,11 @@ export const totpSlice = createSlice({
             state.validatingTotp = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
-        [isTotpExist.pending.type]: (state) => {
-            state.checkingExistence = API_REQUEST_STATE.START;
-        },
-        [isTotpExist.fulfilled.type]: (state, action: PayloadAction<IsTotpExistResponse>) => {
-            state.checkingExistence = API_REQUEST_STATE.FINISH;
-            state.isExist = action.payload.result;
-            state.error = null;
-        },
-        [isTotpExist.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.checkingExistence = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
-        },
     }
 })
 
 export const {
+    setQrCode, setSecretKey,
 } = totpSlice.actions;
 
 export default totpSlice.reducer;

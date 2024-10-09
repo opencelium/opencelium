@@ -240,7 +240,7 @@ const DataAggregatorDialogForm:FC<IForm> =
             theme,
         }
         const data = {
-            title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: formData.formTitle}],
+            title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Data Aggregator', link: '/data_aggregator'}, {name: formData.formTitle}],
             actions,
             formSections: [
                 <FormSection label={{value: 'General Data'}}>

@@ -25,8 +25,13 @@ export const login = createAsyncThunk(
             const request = new AuthRequest({hasAuthToken: false, isApi: false});
             const loginResponseData = await request.login(data);
             if (loginResponseData.data.sessionId) {
-                console.log(loginResponseData.data);
-                return thunkAPI.rejectWithValue({...errorHandler({message: 'SESSION_ID_IS_REQUIRED'}), sessionId: loginResponseData.data.sessionId, settings: {withoutNotification: true}});
+                return thunkAPI.rejectWithValue({
+                    ...errorHandler({message: 'SESSION_ID_IS_REQUIRED'}),
+                    sessionId: loginResponseData.data.sessionId,
+                    secretKey: loginResponseData.data.secretKey,
+                    qr: loginResponseData.data.qr,
+                    settings: {withoutNotification: true}
+                });
             }
             const authUser = User.getUserFromLoginResponse(loginResponseData);
             if(!authUser){

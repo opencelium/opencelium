@@ -1,4 +1,3 @@
-import {createAsyncThunk} from "@reduxjs/toolkit";
 /*
  *  Copyright (C) <2023>  <becon GmbH>
  *
@@ -13,7 +12,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
  *  You should have received a copy of the GNU General Public License
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import { ToolRequest } from "@entity/schedule/requests/classes/Tool";
 

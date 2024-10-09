@@ -18,15 +18,17 @@ import {AppDispatch, RootState} from "@application/utils/store";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import { updateAuthUser } from '@application/redux_toolkit/slices/AuthSlice';
 import {disableTotp, enableTotp} from "@entity/totp/redux_toolkit/action_creators/TotpCreators";
+import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
+import {setQrCode, setSecretKey} from "@entity/totp/redux_toolkit/slices/TotpSlice";
 
 const userDetailMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
+    const dispatch: AppDispatch = storeApi.dispatch;
     if (enableTotp.fulfilled.type === action.type) {
         const authState = storeApi.getState().authReducer;
         const authUser = {...authState.authUser};
         authUser.totpEnabled = true;
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', authUser);
-        const dispatch: AppDispatch = storeApi.dispatch;
         dispatch(updateAuthUser(authUser));
     }
     if (disableTotp.fulfilled.type === action.type) {
@@ -35,8 +37,15 @@ const userDetailMiddleware: Middleware<{}, RootState> = storeApi => next => acti
         authUser.totpEnabled = false;
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', authUser);
-        const dispatch: AppDispatch = storeApi.dispatch;
         dispatch(updateAuthUser(authUser));
+    }
+    if (login.rejected.type === action.type) {
+        if (action.payload.qr) {
+            dispatch(setQrCode(action.payload.qr));
+        }
+        if (action.payload.secretKey) {
+            dispatch(setSecretKey(action.payload.secretKey));
+        }
     }
     return next(action);
 }
