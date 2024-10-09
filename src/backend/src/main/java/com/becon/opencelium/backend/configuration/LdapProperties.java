@@ -14,10 +14,10 @@ public class LdapProperties {
     private String username;
     private String password;
     private String timeout = "30000"; // in milliseconds
-    private String userSearchBase;
-    private String userSearchFilter = "(cn={0})";
-    private String groupSearchBase;
-    private String groupSearchFilter = "(member={0})";
+    private String userSearchBase = "";
+    private String userSearchFilter = "";
+    private String groupSearchBase = "";
+    private String groupSearchFilter = "";
     private List<Group2Role> groupRoleMapping = new ArrayList<>();
     private String defaultRole;
     private boolean showLogs = false;
