@@ -29,6 +29,8 @@ public interface UserService {
 
     Optional<User> findById(int id);
 
+    User getById(Integer userId);
+
     User save(User user);
 
     boolean existsByEmail(String email);
