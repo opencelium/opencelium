@@ -20,6 +20,7 @@ import {CommonState} from "@application/utils/store";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {getDefaultConfig, testConfig} from "@entity/ldap/redux_toolkit/action_creators/LdapCreators";
 import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
+import {isArray} from "@application/utils/utils";
 
 export interface MigrationState extends ICommonState{
     gettingDefaultConfig: API_REQUEST_STATE,
@@ -65,10 +66,10 @@ export const ldapSlice = createSlice({
             state.debugLogs = action.payload;
             state.error = null;
         },
-        [testConfig.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        [testConfig.rejected.type]: (state, action: PayloadAction<string[]>) => {
             state.testingConfig = API_REQUEST_STATE.ERROR;
-            if (action.payload?.message) {
-                state.debugLogs = [action.payload?.message];
+            if (isArray(action.payload)) {
+                state.debugLogs = action.payload;
             } else {
                 state.error = action.payload;
             }
