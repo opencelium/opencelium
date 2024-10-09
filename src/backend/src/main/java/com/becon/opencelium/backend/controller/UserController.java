@@ -30,7 +30,6 @@ import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
-import com.becon.opencelium.backend.resource.user.SessionTotpCodeResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.security.UserPrincipals;
@@ -54,7 +53,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
@@ -291,24 +289,21 @@ public class UserController {
     })
     @GetMapping("/{id}/logout")
     public ResponseEntity<?> logout(@PathVariable("id") int userId) {
-        // skip userId, instead logout current user
-        int id = getCurrentUserId();
-
         return sessionService
-                .findByUserId(id)
+                .findByUserId(userId)
                 .map(s -> {
                     s.setActive(false);
                     sessionService.save(s);
 
                     return ResponseEntity.ok().build();
                 })
-                .orElseThrow(() -> new SessionNotFoundException(id));
+                .orElseThrow(() -> new SessionNotFoundException(userId));
     }
 
-    @Operation(summary = "Returns QR and totp secret")
+    @Operation(summary = "Enables or disables TOTP to a user")
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
-                    description = "QR and totp code is successfully generated.",
+                    description = "TOTP is successfully enabled or disabled to user",
                     content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
@@ -317,40 +312,30 @@ public class UserController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping("/totp-qr")
-    public ResponseEntity<?> getTotpQrAndSecret() {
-        // totp related actions should be done only by users themselves
-        int userId = getCurrentUserId();
+    @PutMapping(path = "/{id}/totp/{action}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> totpAction(@PathVariable("id") int userId, @PathVariable("action") String action) {
+        totpService.totpAction(userId, action);
 
-        return ResponseEntity.ok(totpService.getTotpResource(userId));
+        return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Enables or disables TOTP to current user")
+    @Operation(summary = "Enables or disables TOTP to users by ids")
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "200",
-                    description = "TOTP is successfully enabled to logged in user",
+            @ApiResponse( responseCode = "204",
+                    description = "TOTP is successfully enabled or disabled to users",
                     content = @Content),
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+                    content = @Content(schema = @Schema(implementation = Integer.class))),
             @ApiResponse( responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping("/totp/{action}")
-    public ResponseEntity<?> totpAction(@PathVariable("action") String action, @RequestBody SessionTotpCodeResource dto) {
-        // totp related actions should be done only by users themselves
-        int userId = getCurrentUserId();
+    @PutMapping(path = "/list/totp/{action}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> totpsAction(@PathVariable("action") String action, @RequestBody IdentifiersDTO<Integer> payload) {
+        payload.getIdentifiers().forEach(userId -> totpService.totpAction(userId, action));
 
-        if ("enable".equals(action)) {
-            return ResponseEntity.ok(totpService.enableTotp(userId, dto.getCode()));
-        }
-
-        if ("disable".equals(action)) {
-            return ResponseEntity.ok(totpService.disableTotp(userId, dto.getCode()));
-        }
-
-        throw new RuntimeException("Wrong TOTP action is supplied, available options: [enable, disable]");
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Returns status of QR code by secretKey.")
