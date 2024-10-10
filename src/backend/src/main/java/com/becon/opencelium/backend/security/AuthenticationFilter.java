@@ -66,10 +66,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    private UserService userService;
+    private UserRoleService userRoleService;
 
     @Autowired
-    private UserRoleService userRoleService;
+    protected UserService userService;
 
     @Autowired
     protected SessionService sessionService;
@@ -113,12 +113,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         ObjectMapper mapper = new ObjectMapper();
         User user = getUser(auth);
 
-        if (user.isTotpEnabled()) {
+        if (user.getTotpSecretKey() != null) {
             TotpResource resource;
-            if (user.getTotpSecretKey() == null) {
-                resource = totpService.getTotpResource(user.getId());
-            } else {
+            if (user.isTotpEnabled()) {
                 resource = new TotpResource();
+            } else {
+                resource = totpService.getTotpResource(user.getId());
             }
             resource.setSessionId(user.getSession().getId());
 

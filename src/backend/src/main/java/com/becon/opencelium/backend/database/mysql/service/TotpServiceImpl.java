@@ -30,12 +30,10 @@ public class TotpServiceImpl implements TotpService {
 
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public TotpResource getTotpResource(int userId) {
         User user = userService.getById(userId);
-        String secretKey = provider.createCredentials().getKey();
-
-        user.setTotpSecretKey(secretKey);
+        String secretKey = user.getTotpSecretKey();
 
         String issuer = "opencelium";
         String account = user.getEmail();
@@ -78,7 +76,9 @@ public class TotpServiceImpl implements TotpService {
                 return;
             }
 
-            user.setTotpEnabled(true);
+            // create new secret key, we finalise enabling after first successful process completion
+            String secretKey = provider.createCredentials().getKey();
+            user.setTotpSecretKey(secretKey);
 
             // remove users' session if exists to force TOTP process completion by logging in again
             sessionService.deleteByUserId(userId);
