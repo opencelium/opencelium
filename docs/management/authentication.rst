@@ -89,12 +89,12 @@ on the right side.
 
 
 .. |image1| image:: ../img/management/authentication/1.png
-   :align: center
+   :align: middle
 .. |image2| image:: ../img/management/authentication/2.png
-   :align: center
+   :align: middle
    :width: 200
 .. |image3| image:: ../img/management/authentication/3.png
-   :align: center
+   :align: middle
 .. |image4| image:: ../img/management/authentication/4.png
-   :align: center
+   :align: middle
    :width: 400
