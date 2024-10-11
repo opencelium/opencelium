@@ -66,10 +66,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    private UserService userService;
+    private UserRoleService userRoleService;
 
     @Autowired
-    private UserRoleService userRoleService;
+    protected UserService userService;
 
     @Autowired
     protected SessionService sessionService;
@@ -113,14 +113,17 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         ObjectMapper mapper = new ObjectMapper();
         User user = getUser(auth);
 
-        if (user.isTotpEnabled()) {
+        if (user.getTotpSecretKey() != null) {
             TotpResource resource;
-            if (user.getTotpSecretKey() == null) {
-                resource = totpService.getTotpResource(user.getId());
+            if (user.isTotpProcessCompleted()) {
+                // if TOTP process has been completed then just send sessionId
+                String sessionId = user.getSession().getId();
+
+                resource = new TotpResource(sessionId);
             } else {
-                resource = new TotpResource();
+                // if TOTP has not been completed then send QR and secretKey
+                resource = totpService.getTotpResource(user);
             }
-            resource.setSessionId(user.getSession().getId());
 
             String payload = mapper.writeValueAsString(resource);
 

@@ -75,6 +75,12 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
         User user = ((UserPrincipals) auth.getPrincipal()).getUser();
         UserResource userResource = new UserResource(user);
 
+        if (!user.isTotpProcessCompleted()) {
+            // After first successful authentication via TOTP set this process as completed
+            user.setTotpProcessCompleted(true);
+            userService.save(user);
+        }
+
         String payload = mapper.writeValueAsString(userResource);
         String token = jwtTokenUtil.generateToken(user);
 

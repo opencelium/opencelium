@@ -543,3 +543,6 @@ CREATE TABLE connection_editor_settings
     process_text_size INT          NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 );
+
+--changeset 4.2:11 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE user CHANGE totp_enabled totp_process_completed BOOLEAN DEFAULT FALSE;

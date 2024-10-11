@@ -85,7 +85,7 @@ public class JwtTokenUtil {
         }
 
         Session session = userDetails.getUser().getSession();
-        if (!session.isActive()){
+        if (session == null || !session.isActive()){
             return false;
         }
 

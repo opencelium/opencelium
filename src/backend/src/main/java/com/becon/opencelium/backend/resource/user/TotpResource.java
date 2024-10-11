@@ -17,7 +17,12 @@ public class TotpResource {
     public TotpResource() {
     }
 
-    public TotpResource(String secretKey, String qr) {
+    public TotpResource(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public TotpResource(String sessionId, String secretKey, String qr) {
+        this.sessionId = sessionId;
         this.secretKey = secretKey;
         this.qr = qr;
     }
