@@ -96,7 +96,7 @@ export default class Users extends ListCollection<UserProps>{
         return(
             <React.Fragment>
                 <PermissionButton key={'add_button'} autoFocus={!hasSearch} icon={'add'} href={'add'} label={'Add User'} permission={UserPermissions.CREATE}/>
-                <EnableTFAButton checkedIds={checkedIds} permission={UserPermissions.UPDATE}/>
+                <EnableTFAButton checkedIds={checkedIds.map(id => +id)} permission={UserPermissions.UPDATE}/>
                 {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteUsersById(checkedIds))} permission={UserPermissions.DELETE}/>}
             </React.Fragment>
         );
