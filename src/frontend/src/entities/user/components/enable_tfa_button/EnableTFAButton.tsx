@@ -13,7 +13,7 @@ const EnableTfaButton = ({checkedIds, permission}: {checkedIds: number[], permis
             key={'enable_tfa_button'}
             isDisabled={checkedIds.length === 0}
             icon={'smartphone'}
-            label={'Enable TFA'}
+            label={'Enable 2FA'}
             permission={permission}
             isLoading={enablingUsersTotp === API_REQUEST_STATE.START}
             handleClick={() => {
