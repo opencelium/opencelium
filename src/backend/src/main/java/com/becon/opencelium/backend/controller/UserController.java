@@ -331,10 +331,9 @@ public class UserController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping(path = "/list/totp/{action}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/list/totp/{action}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> totpsAction(@PathVariable("action") String action, @RequestBody IdentifiersDTO<Integer> payload) {
         payload.getIdentifiers().forEach(userId -> totpService.totpAction(userId, action));
-
         return ResponseEntity.ok().build();
     }
 
