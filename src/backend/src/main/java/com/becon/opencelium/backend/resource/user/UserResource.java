@@ -38,7 +38,7 @@ public class UserResource {
     public UserResource(User user) {
         this.userId = user.getId();
         this.email = user.getEmail();
-        this.totpEnabled = user.isTotpEnabled();
+        this.totpEnabled = user.getTotpSecretKey() != null;
         this.userGroup = new UserRoleResource(user.getUserRole());
         this.userDetail = new UserDetailResource(user.getUserDetail());
         this.widgetSettings = user.getWidgetSettings().stream().map(WidgetSettingResource::new)
