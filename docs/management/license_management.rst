@@ -56,13 +56,13 @@ in your Service Portal account, in *Profile*.
 Now, you can choose your license and activate it.
 
 .. |image1| image:: ../img/management/license_management/1.png
-   :align: middle
+   :align: center
 .. |image2| image:: ../img/management/license_management/2.png
-   :align: middle
+   :align: center
    :width: 200
 .. |image3| image:: ../img/management/license_management/3.png
-   :align: middle
-   :width: 200
+   :align: center
+   :width: 400
 .. |image4| image:: ../img/management/license_management/4.png
-   :align: middle
+   :align: center
    :width: 200
