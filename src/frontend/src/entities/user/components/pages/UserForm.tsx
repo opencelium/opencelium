@@ -123,7 +123,7 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
     }
 
     const data = {
-        title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: formData.formTitle}],
+        title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Users', link: '/users'}, {name: formData.formTitle}],
         actions,
         formSections: [
             <FormSection label={{value: 'user details'}}>

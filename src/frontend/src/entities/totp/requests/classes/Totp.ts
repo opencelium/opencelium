@@ -17,9 +17,7 @@ import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import Request from "@entity/application/requests/classes/Request";
 import {AxiosResponse} from "axios";
 import ITotpRequest, {
-    GenerateQRCodeResponse, IsTotpExistResponse,
     LoginTOTPRequest, LoginTOTPResponse,
-    ToggleTotpRequest,
     ValidateTOTPRequest
 } from "../interfaces/ITotp";
 import {IResponse} from "@application/requests/interfaces/IResponse";
@@ -30,13 +28,13 @@ export default class TotpRequest extends Request implements ITotpRequest {
         super({url: 'user', ...settings});
     }
 
-    async generateQRCode(): Promise<AxiosResponse<GenerateQRCodeResponse>>{
-        this.endpoint = '/totp-qr';
-        return super.get<GenerateQRCodeResponse>();
+    async toggleTotp(): Promise<AxiosResponse<IResponse>> {
+        return super.put<IResponse>({});
     }
 
-    async toggleTotp(data: ToggleTotpRequest): Promise<AxiosResponse<IResponse>> {
-        return super.put<IResponse>(data);
+    async enableUsersTotp(userIds:number[]): Promise<AxiosResponse<IResponse>> {
+        this.endpoint = '/list/totp/enable';
+        return super.put<IResponse>({identifiers: userIds});
     }
 
     async login(data: LoginTOTPRequest): Promise<AxiosResponse<LoginTOTPResponse>> {
@@ -48,10 +46,5 @@ export default class TotpRequest extends Request implements ITotpRequest {
         this.url = 'totp-validate';
         this.isApi = false;
         return super.post<any>(data);
-    }
-
-    async isExist(): Promise<AxiosResponse<IsTotpExistResponse>> {
-        this.endpoint = '/totp-qr/exists';
-        return super.get<IsTotpExistResponse>();
     }
 }

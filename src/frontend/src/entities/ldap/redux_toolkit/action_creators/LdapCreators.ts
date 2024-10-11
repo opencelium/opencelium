@@ -38,7 +38,8 @@ export const testConfig = createAsyncThunk(
             const response = await request.testConfig(data);
             return response.data;
         } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
+            console.log(e);
+            return thunkAPI.rejectWithValue(e.response.data);
         }
     }
 )

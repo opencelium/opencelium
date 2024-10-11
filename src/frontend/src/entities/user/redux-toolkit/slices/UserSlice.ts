@@ -64,6 +64,9 @@ export const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
+        setUsers: (state, action: PayloadAction<ModelUser[]>) => {
+            state.users = action.payload;
+        }
     },
     extraReducers: {
         [checkUserEmail.pending.type]: (state) => {
@@ -186,5 +189,7 @@ export const userSlice = createSlice({
         },
     }
 })
+
+export const {setUsers} = userSlice.actions;
 
 export default userSlice.reducer;

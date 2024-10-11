@@ -14,9 +14,6 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
     urls: string = '';
 
     @App.inputType
-    baseDN: string = '';
-
-    @App.inputType
     userDN: string = '';
 
     @App.inputType
@@ -38,7 +35,6 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
         // @ts-ignore
         super(formData?.validations || {}, formData?._readOnly, formData?.wholeInstance);
         this.urls = formData?.urls || '';
-        this.baseDN = formData?.baseDN || '';
         this.userDN = formData?.userDN || '';
         this.groupDN = formData?.groupDN || '';
         this.username = formData?.username || '';
@@ -82,23 +78,6 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
         }
         return true;
     }
-    validateBaseDN(): boolean{
-        let isNotValid = false;
-        if(this.baseDN === ''){
-            isNotValid = true;
-            this.validations['baseDN'] = 'The baseDN is a required field';
-        }
-        if(isNotValid){
-            // @ts-ignore
-            this.updateBaseDN(this, this.baseDN);
-            if(!this.isFocused){
-                document.getElementById('input_baseDN').focus();
-                this.isFocused = true;
-            }
-            return false;
-        }
-        return true;
-    }
     validateUserDN(): boolean{
         let isNotValid = false;
         if(this.userDN === ''){
@@ -123,7 +102,6 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
             return {
                 urls: config.urls,
                 groupDN: config.groupDN,
-                baseDN: config.baseDN,
                 userDN: config.userDN,
                 password: config.password,
                 username: config.username,
@@ -133,6 +111,6 @@ export default class LdapCheckForm extends HookStateClass implements ILdapCheckF
         }})
     test(): boolean{
         this.isFocused = false;
-        return this.validateUrl() && this.validateBaseDN() && this.validateUserDN();
+        return this.validateUrl() && this.validateUserDN();
     }
 }

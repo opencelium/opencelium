@@ -17,7 +17,6 @@ import {AxiosResponse} from "axios";
 import {ITicket} from "../../interfaces/ITicket";
 import {IResponse} from "./IResponse";
 import {IComponent} from "../../interfaces/IApplication";
-import ModelUpdateThemes from "../models/UpdateThemes";
 
 export interface ApplicationVersionResponseProps{
     /*
@@ -109,8 +108,5 @@ export interface IApplicationRequest{
     openExternalUrl(): Promise<AxiosResponse<IResponse>>,
 
     //to get name of logo
-    getLogoName(email: string): Promise<AxiosResponse<string>>,
-
-    //to update user themes
-    updateThemes(data: ModelUpdateThemes): Promise<AxiosResponse<IResponse>>,
+    getLogoName(): Promise<AxiosResponse<string>>,
 }

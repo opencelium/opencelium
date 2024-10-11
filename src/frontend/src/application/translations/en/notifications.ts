@@ -19,7 +19,7 @@ import {actions} from '../../redux_toolkit/slices/ApplicationSlice';
 const {
     login, getResources, getVersion,
     updateResources, getGlobalSearchData, getAllComponents,
-    addTicket, openExternalUrl, updateThemes,
+    addTicket, openExternalUrl,
     checkConnection, requestRemoteApi
 } = ActionCreators;
 
@@ -36,8 +36,8 @@ export default {
             "__DEFAULT__": "There is an error during the login",
             "UNSUPPORTED_HEADER_AUTH_TYPE": "Your session is expired",
             "Access Denied": "Your session is expired",
-            "UNAUTHORIZED": "Wrong email or password",
-            "Bad credentials": "Wrong email or password",
+            "UNAUTHORIZED": "Wrong username or password",
+            "Bad credentials": "Wrong username or password",
             "Network Error": "The server connection problem.",
             "NO_LICENSE": "Please, upload the license token to continue."
         },
@@ -52,11 +52,6 @@ export default {
         },*/
         [updateResources.rejected.type]: {
             "__DEFAULT__": ""
-        },
-        [updateThemes.rejected.type]: {
-            "WRONG_REQUEST_BODY": "Wrong data to update thr themes",
-            "USER_NOT_FOUND": "Wrong data to update the themes",
-            "__DEFAULT__": "There is an error updating the themes",
         },
     },
 }

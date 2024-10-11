@@ -19,6 +19,8 @@ import {disableTotp, enableTotp, validateTotp} from "@entity/totp/redux_toolkit/
 
 export default {
     fulfilled: {
+        [enableTotp.fulfilled.type]: "The TFA was successfully activated.",
+        [disableTotp.fulfilled.type]: "The TFA was successfully deactivated.",
     },
     rejected: {
         [validateTotp.rejected.type]: {

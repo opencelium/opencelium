@@ -26,8 +26,8 @@ import AuthCode from "@app_component/default_pages/login/AuthCode";
 const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?: boolean}) => {
     const {sessionId} = Auth.getReduxState();
     const LoginForm = Auth.createState<IAuth>();
-    const EmailInput = LoginForm.getText({
-        propertyName: "email", props: {/*
+    const UsernameInput = LoginForm.getText({
+        propertyName: "username", props: {/*
             icon: 'email', label: 'E-Mail',*/
             required: true,
             background: ColorTheme.White,
@@ -36,7 +36,7 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
             paddingTop: isAuth ? '0' : '20px',
             paddingLeft: '5px',
             paddingRight: '5px',
-            placeholder: 'E-Mail',
+            placeholder: 'Username',
             paddingLeftInput: '5px',
             paddingRightInput: '5px',
             errorBottom: '3px',
@@ -65,7 +65,7 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
     return(
         <LoginFormStyled isAuth={isAuth}>
             <HeaderStyled isAuth={isAuth}>Log In</HeaderStyled>
-            {EmailInput}
+            {UsernameInput}
             {PasswordInput}
             <LoginIcon hasAnimation={hasAnimation} login={() => LoginForm.login()}/>
             {!!sessionId && <AuthCode/>}
