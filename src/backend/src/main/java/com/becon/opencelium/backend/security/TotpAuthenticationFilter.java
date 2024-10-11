@@ -75,9 +75,9 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
         User user = ((UserPrincipals) auth.getPrincipal()).getUser();
         UserResource userResource = new UserResource(user);
 
-        // in first successful authentication via TOTP set flag to true
-        if (!user.isTotpEnabled()) {
-            user.setTotpEnabled(true);
+        if (!user.isTotpProcessCompleted()) {
+            // After first successful authentication via TOTP set this process as completed
+            user.setTotpProcessCompleted(true);
             userService.save(user);
         }
 

@@ -69,7 +69,7 @@ public class User {
     private AuthMethod authMethod = AuthMethod.BASIC;
 
     @Column(name = "totp_enabled", columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean totpEnabled;
+    private boolean totpProcessCompleted;
 
     @Column(name = "totp_secret_key")
     private String totpSecretKey;
@@ -145,12 +145,12 @@ public class User {
         this.authMethod = authMethod;
     }
 
-    public boolean isTotpEnabled() {
-        return totpEnabled;
+    public boolean isTotpProcessCompleted() {
+        return totpProcessCompleted;
     }
 
-    public void setTotpEnabled(boolean totpEnabled) {
-        this.totpEnabled = totpEnabled;
+    public void setTotpProcessCompleted(boolean totpProcessCompleted) {
+        this.totpProcessCompleted = totpProcessCompleted;
     }
 
     public String getTotpSecretKey() {

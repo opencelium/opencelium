@@ -115,12 +115,15 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         if (user.getTotpSecretKey() != null) {
             TotpResource resource;
-            if (user.isTotpEnabled()) {
-                resource = new TotpResource();
+            if (user.isTotpProcessCompleted()) {
+                // if TOTP process has been completed then just send sessionId
+                String sessionId = user.getSession().getId();
+
+                resource = new TotpResource(sessionId);
             } else {
-                resource = totpService.getTotpResource(user.getId());
+                // if TOTP has not been completed then send QR and secretKey
+                resource = totpService.getTotpResource(user);
             }
-            resource.setSessionId(user.getSession().getId());
 
             String payload = mapper.writeValueAsString(resource);
 

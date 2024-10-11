@@ -31,8 +31,8 @@ public class TotpServiceImpl implements TotpService {
 
     @Override
     @Transactional(readOnly = true)
-    public TotpResource getTotpResource(int userId) {
-        User user = userService.getById(userId);
+    public TotpResource getTotpResource(User user) {
+        String sessionId = user.getSession().getId();
         String secretKey = user.getTotpSecretKey();
 
         String issuer = "opencelium";
@@ -60,7 +60,7 @@ public class TotpServiceImpl implements TotpService {
             // Convert byte array to Base64
             String base64Image = Base64.getEncoder().encodeToString(qrCodeImage);
 
-            return new TotpResource(secretKey, "data:image/png;base64," + base64Image);
+            return new TotpResource(sessionId, secretKey, "data:image/png;base64," + base64Image);
         } catch (WriterException | IOException e) {
             throw new RuntimeException("Failed to generate QR code for TOTP");
         }
@@ -72,7 +72,7 @@ public class TotpServiceImpl implements TotpService {
         User user = userService.getById(userId);
 
         if ("enable".equals(action)) {
-            if (user.isTotpEnabled()) {
+            if (user.getTotpSecretKey() != null) {
                 return;
             }
 
@@ -83,7 +83,7 @@ public class TotpServiceImpl implements TotpService {
             // remove users' session if exists to force TOTP process completion by logging in again
             sessionService.deleteByUserId(userId);
         } else if ("disable".equals(action)) {
-            user.setTotpEnabled(false);
+            user.setTotpProcessCompleted(false);
             user.setTotpSecretKey(null);
         } else {
             throw new RuntimeException("Wrong TOTP action is supplied, available options: [enable, disable]");
