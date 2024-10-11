@@ -51,7 +51,7 @@ The *token* is the personal api token to make requests to Service Portal. You ca
 in your Service Portal account, in *Profile*.
 
 .. warning::
-    After updating the application.yml file, please build and rerun the server.
+    After updating the application.yml file, please build and restart the server.
 
 Now, you can choose your license and activate it.
 
