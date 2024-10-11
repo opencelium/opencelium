@@ -68,11 +68,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AuthMethod authMethod = AuthMethod.BASIC;
 
-    @Column(name = "totp_enabled", columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean totpProcessCompleted;
+    @Column(name = "totp_process_completed", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean totpProcessCompleted; // set to 'true' after first successful login with new TOTP secretKey
 
     @Column(name = "totp_secret_key")
-    private String totpSecretKey;
+    private String totpSecretKey; // created when admin does 'enable' action
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL,  mappedBy = "user")
