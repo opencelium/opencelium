@@ -59,19 +59,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public boolean isValid(Subscription sub) {
-        LicenseKey licenseKey = LicenseKeyUtility.decrypt(sub.getLicenseKey());
-        if (!LicenseKeyUtility.verify(licenseKey, sub.getActivationRequest())) {
-            return false;
+        if (sub == null) {
+//            logger.warn("");
+            throw new RuntimeException("No active subscription found. Please activate a free license or upload your license");
         }
+        LicenseKey licenseKey = LicenseKeyUtility.decrypt(sub.getLicenseKey());
+        boolean isValid = LicenseKeyUtility.verify(licenseKey, sub.getActivationRequest());
         if (!isCurrentUsageIsValid(sub)) {
-            logger.warn("Usage number of operation has been changed manually.");
-            return false;
+            throw new RuntimeException("Usage number of operation has been changed manually.");
         }
         if (licenseKey.getOperationUsage() != 0 && sub.getCurrentUsage() > licenseKey.getOperationUsage()) {
-            logger.warn("You have reached limit of operation usage: " + licenseKey.getOperationUsage());
-            return false;
+            throw new RuntimeException("You have reached limit of operation usage: " + licenseKey.getOperationUsage());
         }
-        return true;
+        return isValid;
     }
 
     private boolean isHmacValid(Subscription sub, String hmac) {
