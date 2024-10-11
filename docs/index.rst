@@ -29,6 +29,8 @@ This documentation is organized into a couple of sections:
    :caption: Management
    :maxdepth: 2
 
+   management/authentication
+   management/license_management
    management/template
    management/notification_template
    management/aggregator
@@ -61,8 +63,9 @@ This documentation is organized into a couple of sections:
    :caption: Sources
    :maxdepth: 2
 
-   Downloads <https://github.com/opencelium/opencelium/>
-   Changelogs <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
+   Download <https://packagecloud.io/becon/opencelium/>
+   Repository <https://github.com/opencelium/opencelium/>
+   Changelog <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
 
 .. toctree::
    :caption: REST API Reference

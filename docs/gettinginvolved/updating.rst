@@ -3,7 +3,49 @@ Updating
 ##################
 
 
-From OC 3.x to OC 4.0
+From OC 4.0 to latest
+"""""""""""""""""
+
+Update zip file installations
+==================
+
+| Log in to OpenCelium, open the *AdminPanel* and click on *Update Assistant*.
+| Click here to see, how to use `Update Assistant <https://docs.opencelium.io/en/prod/usage/admin.html#update-assistant>`_ 
+
+
+Update DEB package for Ubuntu 24.04 LTS
+==================
+
+.. code-block:: sh
+	:linenos:
+
+	apt update
+	apt install --only-upgrade -y opencelium
+	
+
+Update RPM package for SUSE Linux Enterprise Server 15 SP5
+==================
+
+.. code-block:: sh
+	:linenos:
+
+	zypper refresh
+	zypper update -y OpenCelium
+
+
+Update RPM package for RedHat 9.2
+==================
+
+.. code-block:: sh
+	:linenos:
+
+	yum update
+	yum update -y OpenCelium
+	
+| 
+| 
+
+From OC 3.x to 4.x (latest)
 """""""""""""""""
 
 .. note::
@@ -20,7 +62,7 @@ Prepare Update
         :linenos:
 
         oc stop_backend
-        service nginx stop
+        systemctl stop nginx
 
 
 **2. Install MongoDB:**
@@ -60,7 +102,7 @@ Configuration
 
 **1. MariaDB:**
 
-Create mysql user for OpenCelium. Older versions always used the MySQL root user, but now we are able to use a separate openlium db user.
+Create mysql user for OpenCelium. Older versions always used the MySQL root user, but now we use a separate openlium db user.
 
 .. note::
 	| Please change the password (secret1234) in the following command line!
@@ -167,10 +209,10 @@ Finally start OpenCelium backend and frontend.
               
 **5. Migration from Neo4j to MongoDB:**
 
-| - Log in to OpenCelium
-| - Click on "Admin Panel"
-| - Click on "Migration"
-| - Enter predefined Neo4j URL and add Neo4j credentials 
-|   (See old application.yml in /opt/openceliumOld/...)
-| - Click on "Migrate" to start migration
+| Log in to OpenCelium, open the *AdminPanel* and click on *Migration*.
+| Click here to see, how to use `Migration <https://docs.opencelium.io/en/prod/usage/admin.html#migration>`_ 
 
+
+.. |image0| image:: ../img/update_assistant/0.png
+   :align: middle
+   :width: 400
