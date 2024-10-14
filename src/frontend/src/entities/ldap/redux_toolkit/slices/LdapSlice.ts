@@ -33,7 +33,7 @@ const initialState: MigrationState = {
     gettingDefaultConfig: API_REQUEST_STATE.INITIAL,
     testingConfig: API_REQUEST_STATE.INITIAL,
     defaultConfig: null,
-    debugLogs: [{title: 'test', text: 'text'}, {title: 'text', text: 'fdsfd'}],
+    debugLogs: [],
     ...CommonState,
 }
 
