@@ -40,6 +40,7 @@ which allows for easier user management in corporate environments.
 
 To establish the LDAP authentication you need to configure the *application.yml* file.
 Under *spring* -> *security*, please set the required parameters:
+
 .. code-block:: yaml
 
    ldap:
@@ -84,7 +85,7 @@ Under *spring* -> *security*, please set the required parameters:
 Now you can check the ldap connection in *Admin Panel* -> *LDAP Check* and see the logs
 on the right side.
 
-|image2|
+|image1|
 
 
 .. |image1| image:: ../img/management/authentication/1.png
@@ -96,4 +97,4 @@ on the right side.
    :align: middle
 .. |image4| image:: ../img/management/authentication/4.png
    :align: middle
-   :width: 200
+   :width: 400

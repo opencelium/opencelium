@@ -33,9 +33,9 @@ the license file and upload it in OpenCelium.
 
 |image2|
 
-After you will see updated information about your subscription.
+After that you will see updated information about your subscription.
 
-Online
+Online (only for subscribers)
 =========
 
 The online process required the valid configuration inside of the *application.yml* file,
@@ -50,8 +50,12 @@ The *base_url* should be already set, if not then you can define it with: *https
 The *token* is the personal api token to make requests to Service Portal. You can generate it
 in your Service Portal account, in *Profile*.
 
-.. warning::
-    After updating the application.yml file, please build and restart the server.
+.. note::
+    After updating the application.yml file, please restart OpenCelium!
+
+.. code-block:: sh
+
+	service opencelium restart
 
 Now, you can choose your license and activate it.
 
@@ -62,7 +66,7 @@ Now, you can choose your license and activate it.
    :width: 200
 .. |image3| image:: ../img/management/license_management/3.png
    :align: middle
-   :width: 200
+   :width: 400
 .. |image4| image:: ../img/management/license_management/4.png
    :align: middle
    :width: 200
