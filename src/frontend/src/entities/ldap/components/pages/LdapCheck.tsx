@@ -69,6 +69,7 @@ const LdapCheck: FC<IForm> = ({}) => {
                 {!defaultConfig && <div style={{marginLeft: 10, marginTop: 20, marginBottom: 20}}><Hint message={'You can set configurations in application.yml file'}/></div>}
             </FormSection>,
             <FormSection dependencies={[debugLogs.length === 0]} label={{value: 'Debug'}}>
+                <h3 style={{marginLeft: 20}}>{"LDAP tests:"}</h3>
                 {debugLogs.map((log, index) => {
                     return (
                         <div key={index} style={{margin: '20px 0 0 20px'}}>{log}</div>

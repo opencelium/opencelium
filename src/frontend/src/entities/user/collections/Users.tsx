@@ -17,9 +17,9 @@ import React from "react";
 import ListCollection from "@application/classes/ListCollection";
 import {ListProp} from "@application/interfaces/IListCollection";
 import {AppDispatch} from "@application/utils/store";
-import {API_REQUEST_STATE, ComponentPermissionProps} from "@application/interfaces/IApplication";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {SortType} from "@app_component/collection/collection_view/interfaces";
-import {PermissionButton, PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
+import {PermissionButton} from "@app_component/base/button/PermissionButton";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import {deleteUsersById, uploadUserImage} from "../redux-toolkit/action_creators/UserCreators";
 import User from "../classes/User";
@@ -29,10 +29,7 @@ import { UserPermissions } from "../constants";
 import Gravatar from "react-gravatar";
 import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
 import {ColorTheme} from "@style/Theme";
-import {TextSize} from "@app_component/base/text/interfaces";
-import {ISchedule} from "@entity/schedule/interfaces/ISchedule";
 import InputSwitch from "@app_component/base/input/switch/InputSwitch";
-import {switchScheduleLogsStatus} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 import {disableTotp, enableTotp} from "@entity/totp/redux_toolkit/action_creators/TotpCreators";
 import EnableTFAButton from "@entity/user/components/enable_tfa_button/EnableTFAButton";
 
@@ -88,7 +85,7 @@ export default class Users extends ListCollection<UserProps>{
     };
     translations = {
         email: 'Email',
-        totpEnabled: 'TFA',
+        totpEnabled: '2FA',
         userGroupName: 'Group',
     };
     getTopActions = (viewType: ViewType, checkedIds: number[] = []) => {
@@ -96,7 +93,7 @@ export default class Users extends ListCollection<UserProps>{
         return(
             <React.Fragment>
                 <PermissionButton key={'add_button'} autoFocus={!hasSearch} icon={'add'} href={'add'} label={'Add User'} permission={UserPermissions.CREATE}/>
-                <EnableTFAButton checkedIds={checkedIds} permission={UserPermissions.UPDATE}/>
+                <EnableTFAButton checkedIds={checkedIds.map(id => +id)} permission={UserPermissions.UPDATE}/>
                 {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteUsersById(checkedIds))} permission={UserPermissions.DELETE}/>}
             </React.Fragment>
         );

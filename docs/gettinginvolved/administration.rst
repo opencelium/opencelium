@@ -71,3 +71,13 @@ Execute this command to create a backup.
 	oc backup -d /var/backups/opencelium -u username -p password
 
 
+
+Logging
+"""""""""""""""""
+
+| If you want to have a look into OpenCelium Logs please use:
+
+.. code-block:: sh
+	:linenos:
+	
+	journalctl -xe -u opencelium -f
