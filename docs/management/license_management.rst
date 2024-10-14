@@ -13,8 +13,16 @@ License Management page. You can find it in *Admin Panel*.
 This page provide you such information like *status*, *expiration date*, *current API calls
 amount*.
 
-On the right side you can see the detailed statistic of the api calls. The names of the
-connection, the time of schedules and request amount per schedule.
+The *Detail View* section is used to track the activity of API requests in terms of the number of operations executed
+between different services. You can see a list of connections that was triggered by schedule.
+*API Operations* column shows the summarized number of API operations has performed.
+
+|image5|
+
+Clicking on the corresponded connection, you can see the history of each execution: its time and
+number of calls.
+
+|image6|
 
 There are two ways of activating the licenses: online and offline. If the switcher on the
 *Profile* page is on, the license management works automatically, otherwise you need to
@@ -70,3 +78,7 @@ Now, you can choose your license and activate it.
 .. |image4| image:: ../img/management/license_management/4.png
    :align: middle
    :width: 200
+.. |image5| image:: ../img/management/license_management/5.png
+   :align: middle
+.. |image6| image:: ../img/management/license_management/6.png
+   :align: middle
