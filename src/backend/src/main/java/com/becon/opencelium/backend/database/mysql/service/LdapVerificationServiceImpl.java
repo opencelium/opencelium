@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.configuration.LdapProperties;
 import com.becon.opencelium.backend.resource.LdapConfigDTO;
+import com.becon.opencelium.backend.resource.LdapVerificationMessageDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,18 +48,18 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
         config.setUserSearchFilter(properties.getUserSearchFilter());
         config.setGroupSearchFilter(properties.getGroupSearchFilter());
 
-        List<String> messages = new ArrayList<>();
+        List<LdapVerificationMessageDTO> messages = new ArrayList<>();
         try {
             // verify timeout is not null
             checkTimeout(config.getTimeout(), messages);
 
             // host is reachable ?
             checkHost(config.getUrls(), config.getTimeout(), messages);
-            logger.info(messages.get(0));
+            logger.info(messages.get(0).getText());
 
             // user has read access to directory ?
             checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout(), messages);
-            logger.info(messages.get(1));
+            logger.info(messages.get(1).getText());
 
             // user exists ?
             logger.info(userExists(config, username));
@@ -68,8 +69,8 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
     }
 
     @Override
-    public List<String> collectMessages(LdapConfigDTO config) {
-        List<String> messages = new ArrayList<>();
+    public List<LdapVerificationMessageDTO> collectMessages(LdapConfigDTO config) {
+        List<LdapVerificationMessageDTO> messages = new ArrayList<>();
 
         try {
             // verify timeout is not null
@@ -84,7 +85,7 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             // count users under userDN
             countUsers(config, messages);
 
-            messages.add("to identity success and fail");
+            messages.add(new LdapVerificationMessageDTO("Removed", "to identity success and fail"));
         } catch (Throwable th) {
             logger.warn(th.getMessage());
         }
@@ -93,15 +94,15 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
     }
 
 
-    private void checkTimeout(String timeout, List<String> messages) {
+    private void checkTimeout(String timeout, List<LdapVerificationMessageDTO> messages) {
         if (timeout == null) {
-            messages.add("'timeout' in Ldap configuration should be not null");
+            messages.add(new LdapVerificationMessageDTO("Timeout","'timeout' in Ldap configuration should be not null"));
 
             throw new RuntimeException("'timeout' in Ldap configuration should be not null");
         }
     }
 
-    private void checkHost(String url, String timeout, List<String> messages) {
+    private void checkHost(String url, String timeout, List<LdapVerificationMessageDTO> messages) {
         Hashtable<String, String> env = new Hashtable<>();
         try {
             env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -113,14 +114,14 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             DirContext ctx = new InitialDirContext(env);
             ctx.getAttributes("");
             ctx.close();
-            messages.add("Host = '" + url + "' is reachable");
+            messages.add(new LdapVerificationMessageDTO("Host","Host = '" + url + "' is reachable"));
         } catch (NamingException e) {
-            messages.add("Host = '" + url + "' is not reachable");
+            messages.add(new LdapVerificationMessageDTO("Host","Host = '" + url + "' is not reachable"));
             throw new RuntimeException("Host = '" + url + "' is not reachable");
         }
     }
 
-    private void checkAdminCredentials(String url, String username, String password, String timeout, List<String> messages) throws NamingException {
+    private void checkAdminCredentials(String url, String username, String password, String timeout, List<LdapVerificationMessageDTO> messages) throws NamingException {
         Hashtable<String, String> env = new Hashtable<>();
         try {
             env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -134,14 +135,14 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             DirContext ctx = new InitialDirContext(env);
             ctx.close();
 
-            messages.add("User with username = '" + username + "' and password = '" + password + "' has access to host = '" + url + "'");
+            messages.add(new LdapVerificationMessageDTO("User credentials", "User with username = '" + username + "' and password = '" + password + "' has access to host = '" + url + "'"));
         } catch (NamingException e) {
-            messages.add("User with username = '" + username + "' and password = '" + password + "' does not have access to host = '" + url + "'");
+            messages.add(new LdapVerificationMessageDTO("User credentials", "User with username = '" + username + "' and password = '" + password + "' does not have access to host = '" + url + "'"));
             throw e;
         }
     }
 
-    private void countUsers(LdapConfigDTO config, List<String> messages) {
+    private void countUsers(LdapConfigDTO config, List<LdapVerificationMessageDTO> messages) {
         LdapTemplate ldapTemplate = createLdapTemplate(config);
         try {
             List<Object> users = ldapTemplate.search(
@@ -150,9 +151,9 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
                     Attributes::clone
             );
 
-            messages.add("Host = '" + config.getUrls() + "' has " + users.size() + " users under userDN = '" + config.getUserDN() + "'");
+            messages.add(new LdapVerificationMessageDTO("Found entries", "Host = '" + config.getUrls() + "' has " + users.size() + " users under userDN = '" + config.getUserDN() + "'"));
         } catch (NameNotFoundException e) {
-            messages.add("Could not count users in host = '" + config.getUrls() + "' under userDN = '" + config.getUserDN() + "'");
+            messages.add(new LdapVerificationMessageDTO("Found entries", "Could not count users in host = '" + config.getUrls() + "' under userDN = '" + config.getUserDN() + "'"));
             throw e;
         }
     }
