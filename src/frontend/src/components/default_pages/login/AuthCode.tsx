@@ -63,7 +63,7 @@ const AuthCode = () => {
                 </div>
                 }
             </div>
-            <div style={{display: 'flex', gap: '10px'}}>
+            <div style={{display: 'flex', gap: '10px', backgroundColor: "#fff",}}>
                 <div style={{width: '100%'}}>
                     <InputText
                         id={'code'}

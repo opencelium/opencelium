@@ -25,8 +25,6 @@ export default {
         [getDefaultConfig.rejected.type]: {
             "__DEFAULT__": "There is an error in fetching default config from application.yml file.",
         },
-        [testConfig.rejected.type]: {
-            "__NATIVE__": "-",
-        },
+        [testConfig.rejected.type]: "There is an error testing config.",
     },
 }
