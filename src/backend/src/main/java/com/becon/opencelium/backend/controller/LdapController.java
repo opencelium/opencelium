@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.configuration.LdapProperties;
 import com.becon.opencelium.backend.database.mysql.service.LdapVerificationService;
 import com.becon.opencelium.backend.resource.LdapConfigDTO;
+import com.becon.opencelium.backend.resource.LdapVerificationMessageDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -88,8 +89,8 @@ public class LdapController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping("/test")
-    public ResponseEntity<List<String>> testConnection(@RequestBody LdapConfigDTO dto) {
-        List<String> messages = service.collectMessages(dto);
+    public ResponseEntity<List<LdapVerificationMessageDTO>> testConnection(@RequestBody LdapConfigDTO dto) {
+        List<LdapVerificationMessageDTO> messages = service.collectMessages(dto);
 
         if (messages.size() < 4) {
             return ResponseEntity.badRequest().body(messages);
