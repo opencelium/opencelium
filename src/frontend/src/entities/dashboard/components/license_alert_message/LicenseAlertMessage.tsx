@@ -10,7 +10,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 const LicenseAlertMessage = () => {
     const dispatch = useAppDispatch();
     const {currentSubscription, gettingCurrentSubscription} = Subscription.getReduxState();
-    const hasApiLimit = !currentSubscription || currentSubscription.currentOperationUsage >= currentSubscription.totalOperationUsage;
+    const hasApiLimit = !currentSubscription || (currentSubscription.totalOperationUsage !== 0 && currentSubscription.currentOperationUsage >= currentSubscription.totalOperationUsage);
     useEffect(() => {
         dispatch(getCurrentSubscription())
     }, [])
