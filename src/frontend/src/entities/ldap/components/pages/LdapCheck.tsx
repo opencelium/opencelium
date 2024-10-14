@@ -72,7 +72,10 @@ const LdapCheck: FC<IForm> = ({}) => {
                 <h3 style={{marginLeft: 20}}>{"LDAP tests:"}</h3>
                 {debugLogs.map((log, index) => {
                     return (
-                        <div key={index} style={{margin: '20px 0 0 20px'}}>{log}</div>
+                        <div style={{margin: '20px 0 5px 20px'}}>
+                            <div key={index} style={{fontWeight: 'bold'}}>{`${index + 1}. ${log.title}`}</div>
+                            <div key={index}>{log.text}</div>
+                        </div>
                     );
                 })}
             </FormSection>

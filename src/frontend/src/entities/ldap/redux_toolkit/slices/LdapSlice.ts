@@ -19,21 +19,21 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {getDefaultConfig, testConfig} from "@entity/ldap/redux_toolkit/action_creators/LdapCreators";
-import LdapConfigModel from "@entity/ldap/requests/models/LdapConfigModel";
+import LdapConfigModel, {LdapLog} from "@entity/ldap/requests/models/LdapConfigModel";
 import {isArray} from "@application/utils/utils";
 
 export interface MigrationState extends ICommonState{
     gettingDefaultConfig: API_REQUEST_STATE,
     testingConfig: API_REQUEST_STATE,
     defaultConfig: LdapConfigModel,
-    debugLogs: string[],
+    debugLogs: LdapLog[],
 }
 
 const initialState: MigrationState = {
     gettingDefaultConfig: API_REQUEST_STATE.INITIAL,
     testingConfig: API_REQUEST_STATE.INITIAL,
     defaultConfig: null,
-    debugLogs: [],
+    debugLogs: [{title: 'test', text: 'text'}, {title: 'text', text: 'fdsfd'}],
     ...CommonState,
 }
 
@@ -61,12 +61,12 @@ export const ldapSlice = createSlice({
         [testConfig.pending.type]: (state) => {
             state.testingConfig = API_REQUEST_STATE.START;
         },
-        [testConfig.fulfilled.type]: (state, action: PayloadAction<string[]>) => {
+        [testConfig.fulfilled.type]: (state, action: PayloadAction<LdapLog[]>) => {
             state.testingConfig = API_REQUEST_STATE.FINISH;
             state.debugLogs = action.payload;
             state.error = null;
         },
-        [testConfig.rejected.type]: (state, action: PayloadAction<string[]>) => {
+        [testConfig.rejected.type]: (state, action: PayloadAction<LdapLog[]>) => {
             state.testingConfig = API_REQUEST_STATE.ERROR;
             if (isArray(action.payload)) {
                 state.debugLogs = action.payload;

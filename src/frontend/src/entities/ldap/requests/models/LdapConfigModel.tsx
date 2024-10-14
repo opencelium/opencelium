@@ -7,3 +7,9 @@ export default interface LdapConfigModel {
     userSearchFilter: string,
     groupSearchFilter: string,
 }
+
+
+export interface LdapLog {
+    title: string,
+    text: string,
+}
