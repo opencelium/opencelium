@@ -141,6 +141,11 @@ public class UserServiceImpl implements UserService{
         user.setSession(session);
         user.setEmail(userRequestResource.getEmail());
         user.setUserDetail(userDetail);
+        if (userDb != null) {
+            user.setAuthMethod(userDb.getAuthMethod());
+            user.setTotpProcessCompleted(userDb.isTotpProcessCompleted());
+            user.setTotpSecretKey(userDb.getTotpSecretKey());
+        }
 
         userDetail.setId(userRequestResource.getUserId());
         userDetail.setUser(user);
