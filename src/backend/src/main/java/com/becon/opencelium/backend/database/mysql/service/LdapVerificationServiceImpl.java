@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.NameNotFoundException;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
+import org.springframework.ldap.core.support.LookupAttemptingCallback;
 import org.springframework.ldap.query.LdapQuery;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,7 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
     private static final Logger logger = LoggerFactory.getLogger(LdapVerificationService.class);
 
     @Override
-    public void showLogs(LdapProperties properties, String username) {
+    public void validateAndLog(Object principal, Object credentials) {
         if (!properties.isShowLogs()) {
             return;
         }
@@ -48,21 +49,21 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
         config.setUserSearchFilter(properties.getUserSearchFilter());
         config.setGroupSearchFilter(properties.getGroupSearchFilter());
 
-        List<LdapVerificationMessageDTO> messages = new ArrayList<>();
         try {
             // verify timeout is not null
-            checkTimeout(config.getTimeout(), messages);
+            validateTimeout(config.getTimeout());
 
             // host is reachable ?
-            checkHost(config.getUrls(), config.getTimeout(), messages);
-            logger.info(messages.get(0).getText());
+            logger.info(checkHost(config.getUrls(), config.getTimeout()));
 
             // user has read access to directory ?
-            checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout(), messages);
-            logger.info(messages.get(1).getText());
+            logger.info(checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout()));
 
-            // user exists ?
-            logger.info(userExists(config, username));
+            // principal exists ?
+            logger.info(validateLoginPrincipal(config, principal));
+
+            // principals' password correct ?
+            logger.info(validateLoginCredential(config, principal, credentials));
         } catch (Throwable th) {
             logger.warn(th.getMessage());
         }
@@ -72,37 +73,44 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
     public List<LdapVerificationMessageDTO> collectMessages(LdapConfigDTO config) {
         List<LdapVerificationMessageDTO> messages = new ArrayList<>();
 
+        String title = null;
+        String message;
         try {
             // verify timeout is not null
-            checkTimeout(config.getTimeout(), messages);
+            title = "Timeout";
+            validateTimeout(config.getTimeout());
 
             // host is reachable ?
-            checkHost(config.getUrls(), config.getTimeout(), messages);
+            title = "Host";
+            message = checkHost(config.getUrls(), config.getTimeout());
+            messages.add(LdapVerificationMessageDTO.of(title, message));
 
             // user has read access to directory ?
-            checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout(), messages);
+            title = "User credentials";
+            message = checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout());
+            messages.add(LdapVerificationMessageDTO.of(title, message));
 
             // count users under userDN
-            countUsers(config, messages);
+            title = "Found entries";
+            message = countUsers(config);
+            messages.add(LdapVerificationMessageDTO.of(title, message));
 
-            messages.add(new LdapVerificationMessageDTO("Removed", "to identity success and fail"));
-        } catch (Throwable th) {
-            logger.warn(th.getMessage());
+            messages.add(new LdapVerificationMessageDTO("STATUS CODE", "To distinguish success or fail"));
+        } catch (RuntimeException e) {
+            messages.add(LdapVerificationMessageDTO.of(title, e.getMessage()));
         }
 
         return messages;
     }
 
 
-    private void checkTimeout(String timeout, List<LdapVerificationMessageDTO> messages) {
+    private void validateTimeout(String timeout) {
         if (timeout == null) {
-            messages.add(new LdapVerificationMessageDTO("Timeout","'timeout' in Ldap configuration should be not null"));
-
             throw new RuntimeException("'timeout' in Ldap configuration should be not null");
         }
     }
 
-    private void checkHost(String url, String timeout, List<LdapVerificationMessageDTO> messages) {
+    private String checkHost(String url, String timeout) {
         Hashtable<String, String> env = new Hashtable<>();
         try {
             env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -114,14 +122,14 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             DirContext ctx = new InitialDirContext(env);
             ctx.getAttributes("");
             ctx.close();
-            messages.add(new LdapVerificationMessageDTO("Host","Host = '" + url + "' is reachable"));
+
+            return "Host = '" + url + "' is reachable";
         } catch (NamingException e) {
-            messages.add(new LdapVerificationMessageDTO("Host","Host = '" + url + "' is not reachable"));
             throw new RuntimeException("Host = '" + url + "' is not reachable");
         }
     }
 
-    private void checkAdminCredentials(String url, String username, String password, String timeout, List<LdapVerificationMessageDTO> messages) throws NamingException {
+    private String checkAdminCredentials(String url, String username, String password, String timeout) {
         Hashtable<String, String> env = new Hashtable<>();
         try {
             env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -135,15 +143,15 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             DirContext ctx = new InitialDirContext(env);
             ctx.close();
 
-            messages.add(new LdapVerificationMessageDTO("User credentials", "User with username = '" + username + "' and password = '" + password + "' has access to host = '" + url + "'"));
+            return "username = '" + username + "' and password = '" + password + "' has access to host = '" + url + "'";
         } catch (NamingException e) {
-            messages.add(new LdapVerificationMessageDTO("User credentials", "User with username = '" + username + "' and password = '" + password + "' does not have access to host = '" + url + "'"));
-            throw e;
+            throw new RuntimeException("username = '" + username + "' and password = '" + password + "' does not have access to host = '" + url + "'");
         }
     }
 
-    private void countUsers(LdapConfigDTO config, List<LdapVerificationMessageDTO> messages) {
+    private String countUsers(LdapConfigDTO config) {
         LdapTemplate ldapTemplate = createLdapTemplate(config);
+
         try {
             List<Object> users = ldapTemplate.search(
                     config.getUserDN(),
@@ -151,26 +159,46 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
                     Attributes::clone
             );
 
-            messages.add(new LdapVerificationMessageDTO("Found entries", "Host = '" + config.getUrls() + "' has " + users.size() + " users under userDN = '" + config.getUserDN() + "'"));
+            return "Found " + users.size() + " users under userDN = '" + config.getUserDN() + "'";
         } catch (NameNotFoundException e) {
-            messages.add(new LdapVerificationMessageDTO("Found entries", "Could not count users in host = '" + config.getUrls() + "' under userDN = '" + config.getUserDN() + "'"));
-            throw e;
+            throw new RuntimeException("Could not count users under userDN = '" + config.getUserDN() + "'");
         }
     }
 
-    private String userExists(LdapConfigDTO config, String username) {
+    private String validateLoginPrincipal(LdapConfigDTO config, Object principal) {
         LdapTemplate ldapTemplate = createLdapTemplate(config);
+
         LdapQuery query = query()
                 .base(config.getUserDN())
-                .filter(config.getUserSearchFilter(), username);
+                .filter(config.getUserSearchFilter(), principal);
 
         List<Object> users = ldapTemplate.search(query, Attributes::clone);
 
         if (users == null || users.isEmpty()) {
-            throw new RuntimeException("User with username = '" + username + "' does not exist in host = '" + config.getUrls() + "' under userSearchBase = '" + config.getUserDN() + "'");
+            throw new RuntimeException("Principal = '" + principal + "' does not exist under userDN = '" + config.getUserDN() + "'");
         }
 
-        return "User with username = '" + username + "' exists in host = '" + config.getUrls() + "' under userSearchBase = '" + config.getUserDN() + "'";
+        if (users.size() == 1) {
+            return "One record with principal = '" + principal + "' under userDN = '" + config.getUserDN() + "'";
+        } else {
+            return users.size() + " records with principal = '" + principal + "' under userDN = '" + config.getUserDN() + "'";
+        }
+    }
+
+    private String validateLoginCredential(LdapConfigDTO config, Object principal, Object credential) {
+        LdapTemplate ldapTemplate = createLdapTemplate(config);
+
+        try {
+            LdapQuery query = query()
+                    .base(config.getUserDN())
+                    .filter(config.getUserSearchFilter(), principal);
+
+            ldapTemplate.authenticate(query, (String) credential, new LookupAttemptingCallback());
+
+            return "principal = '" + principal + "' and credential = '" + credential + "' is valid under userDN = '" + config.getUserDN() + "'";
+        } catch (Exception e) {
+            throw new RuntimeException("principal = '" + principal + "' and credential = '" + credential + "' is not valid under userDN = '" + config.getUserDN() + "'");
+        }
     }
 
     private static LdapTemplate createLdapTemplate(LdapConfigDTO config) {

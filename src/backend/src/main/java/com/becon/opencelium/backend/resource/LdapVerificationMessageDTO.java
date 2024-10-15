@@ -7,6 +7,10 @@ public class LdapVerificationMessageDTO {
     private String title;
     private String text;
 
+    public static LdapVerificationMessageDTO of(String title, String text) {
+        return new LdapVerificationMessageDTO(title, text);
+    }
+
     public LdapVerificationMessageDTO(String title, String text) {
         this.title = title;
         this.text = text;
