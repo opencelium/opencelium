@@ -123,7 +123,7 @@ export const licenseSlice = createSlice({
         },
         [getLicenseStatus.fulfilled.type]: (state, action: PayloadAction<StatusResponse>) => {
             state.gettingLicenseStatus = API_REQUEST_STATE.FINISH;
-            state.status = action.payload.status === true ? TRIPLET_STATE.TRUE : TRIPLET_STATE.FALSE;
+            state.status = action.payload.status === 'on' ? TRIPLET_STATE.TRUE : TRIPLET_STATE.FALSE;
             state.error = null;
         },
         [getLicenseStatus.rejected.type]: (state, action: PayloadAction<IResponse>) => {

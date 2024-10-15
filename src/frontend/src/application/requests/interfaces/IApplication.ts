@@ -78,7 +78,7 @@ export enum REQUEST_METHOD{
 }
 
 export interface StatusResponse {
-    status: boolean,
+    status: string,
 }
 
 export interface IApplicationRequest{
