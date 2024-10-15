@@ -183,12 +183,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             });
 
             Collection<? extends GrantedAuthority> authorities = ldapUserDetails.getAuthorities();
-            GrantedAuthority authority = authorities.stream()
-                    .filter(a -> userRoleService.existsByRole(a.getAuthority()))
+            String roleName = authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
                     .findFirst()
-                    .orElseThrow(() -> new EntityNotFoundException("LDAP group to OC role mapping does not exists."));
+                    .orElse(properties.getDefaultRole());
 
-            UserRole role = userRoleService.findByRole(authority.getAuthority()).orElseThrow();
+            UserRole role = userRoleService.findByRole(roleName)
+                    .orElseThrow(() -> new EntityNotFoundException("LDAP group mapped to role = '" + roleName + "', but it does not exists in OC system."));
             user.setUserRole(role);
 
             result = userService.save(user);
