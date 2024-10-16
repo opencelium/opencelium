@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CCondition from "./CCondition";
+import CCondition, {FUNCTIONAL_OPERATORS_FOR_LOOP} from "./CCondition";
 import CStatement, {DEFAULT_COLOR} from "./CStatement";
 import {RESPONSE_SUCCESS} from "@classes/content/invoker/response/CResponse";
 
@@ -279,6 +279,10 @@ export default class COperatorItem{
         indexes.pop();
         let rootIndex = indexes.join('_');
         return this.index > item.index && this.index.substring(0, rootIndex.length) === rootIndex;
+    }
+
+    isSplitString() {
+        return this.condition.relationalOperator === FUNCTIONAL_OPERATORS_FOR_LOOP[0].value;
     }
 
     getObject(){
