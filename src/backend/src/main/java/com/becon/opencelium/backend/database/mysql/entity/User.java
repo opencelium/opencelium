@@ -93,6 +93,10 @@ public class User {
         this.widgetSettings = widgetSettings;
     }
 
+    public String getPrincipal() {
+        return email != null ? email : username;
+    }
+
     public int getId() {
         return id;
     }

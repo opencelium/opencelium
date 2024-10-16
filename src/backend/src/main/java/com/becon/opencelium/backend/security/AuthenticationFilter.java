@@ -31,6 +31,7 @@ import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.TotpResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.utility.EmailUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
@@ -98,7 +99,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                     .readValue(request.getInputStream(), User.class);
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            user.getEmail(),
+                            user.getPrincipal(),
                             user.getPassword(),
                             new ArrayList<>()));
         }
@@ -161,14 +162,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private User getUser(Authentication authentication) {
         User result;
         Object principal = authentication.getPrincipal();
-        String authType;
 
         if (principal instanceof LdapUserDetails ldapUserDetails) {
-            String email = ldapUserDetails.getUsername();
+            String username = ldapUserDetails.getUsername();
 
-            User user = userService.findByEmail(email).orElseGet(() -> {
+            User user = userService.findByUsername(username).orElseGet(() -> {
                 User newUser = new User();
-                newUser.setEmail(email);
+                newUser.setUsername(username);
+                if (EmailUtility.isEmail(username)) {
+                    newUser.setEmail(username);
+                }
                 newUser.setAuthMethod(AuthMethod.LDAP);
 
                 // create details for new user
@@ -193,15 +196,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             user.setUserRole(role);
 
             result = userService.save(user);
-            authType = "LDAP server";
         } else {
             result = ((UserPrincipals) authentication.getPrincipal()).getUser();
-            authType = "OC system";
         }
         createNewSession(result);
 
         if (properties.isShowLogs()) {
-            logger.info("User " + result.getEmail() + " is authenticated via " + authType);
+            logger.info("User " + result.getPrincipal() + " is authenticated via " + result.getAuthMethod());
         }
 
         return result;

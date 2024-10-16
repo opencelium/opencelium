@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import com.becon.opencelium.backend.database.mysql.entity.WidgetSetting;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
+import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,11 @@ public class UserServiceImpl implements UserService{
     @Override
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsernameAndAuthMethod(username, AuthMethod.LDAP);
     }
 
     @Override
