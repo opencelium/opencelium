@@ -51,6 +51,9 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "username")
+    private String username;
+
     @Column(name = "password")
     private String password;
 
@@ -84,6 +87,7 @@ public class User {
     public User(UserResource userResource, List<WidgetSetting> widgetSettings) {
         this.id = userResource.getUserId();
         this.email = userResource.getEmail();
+        this.username = userResource.getUsername();
         this.userDetail = new UserDetail(userResource.getUserDetail());
         this.userRole = new UserRole(userResource.getUserGroup());
         this.widgetSettings = widgetSettings;
@@ -103,6 +107,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

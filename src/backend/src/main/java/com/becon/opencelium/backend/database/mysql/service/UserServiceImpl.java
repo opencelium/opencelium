@@ -145,6 +145,7 @@ public class UserServiceImpl implements UserService{
             user.setAuthMethod(userDb.getAuthMethod());
             user.setTotpProcessCompleted(userDb.isTotpProcessCompleted());
             user.setTotpSecretKey(userDb.getTotpSecretKey());
+            user.setUsername(userDb.getUsername());
         }
 
         userDetail.setId(userRequestResource.getUserId());
