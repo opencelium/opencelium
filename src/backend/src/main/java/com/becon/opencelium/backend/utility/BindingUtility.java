@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.utility;
 
 import com.becon.opencelium.backend.constant.RegExpression;
+import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
@@ -185,21 +186,25 @@ public class BindingUtility {
                 .ifPresent(entry -> entry.setValue(EndpointUtility.bindExactlyPlace(entry.getValue(), refs, id)));
     }
 
-    public static Map<String, Object> doWithBody(Map<String, Object> src, List<String> fieldPaths, String id, String format) {
+    public static Map<String, Object> doWithBody(BodyMng body, List<String> fieldPaths, String id, String format) {
         if (format.equals("xml")) {
-            return doWithXMLBody(src, fieldPaths, id);
+            return doWithXMLBody(body.getFields(), body.getType(), fieldPaths, id);
         } else {
-            return doWithJsonBody(src, fieldPaths, id);
+            return doWithJsonBody(body.getFields(), body.getType(), fieldPaths, id);
         }
     }
 
 //--------------------------------------------------------------------------------------------------------//
 //---------------------------------------------JSON(bind)-------------------------------------------------//
 
-    private static Map<String, Object> doWithJsonBody(Map<String, Object> src, List<String> fieldPaths, String id) {
+    private static Map<String, Object> doWithJsonBody(Map<String, Object> fields, String type, List<String> fieldPaths, String id) {
         String name = fieldPaths.get(0);
+        if (type.equals("array") && fieldPaths.size() > 1 && (name.matches("\\d+") || name.matches("\\[.*]"))) {
+            fieldPaths.remove(0);
+            name = fieldPaths.get(0);
+        }
         Map<String, Object> resultMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : src.entrySet()) {
+        for (Map.Entry<String, Object> entry : fields.entrySet()) {
             if (name.equals(entry.getKey()) && fieldPaths.size() == 1) {// the last field
                 resultMap.put(entry.getKey(), putIdToBody(entry.getValue(), id));
             } else if (name.equals(entry.getKey())) { // object or primitive
@@ -227,7 +232,7 @@ public class BindingUtility {
                 return putIdToBody(value, id);
             } else { // object
                 Map<String, Object> map = (Map<String, Object>) value;
-                return doWithJsonBody(map, fieldPaths, id);
+                return doWithJsonBody(map, "object", fieldPaths, id);
             }
         } else { // array
             if (index.isEmpty() || index.equals("*")) {
@@ -241,7 +246,7 @@ public class BindingUtility {
                 List<Object> list = (List<Object>) value;
                 if (list.get(idx) instanceof Map<?, ?>) { //array of objects
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
-                    mapList.set(idx, doWithJsonBody(mapList.get(idx), fieldPaths, id));
+                    mapList.set(idx, doWithJsonBody(mapList.get(idx), "object", fieldPaths, id));
                     return mapList;
                 } else { // array of primitives
                     list.set(idx, putIdToBody(list.get(idx), id));
@@ -254,7 +259,7 @@ public class BindingUtility {
                 if (list.get(0) instanceof Map<?, ?>) { // array of objects
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
                     return mapList.stream()
-                            .map(f -> doWithJsonBody(f, fieldPaths, id));
+                            .map(f -> doWithJsonBody(f, "object", fieldPaths, id));
                 } else { // array of primitives
                     return list.stream()
                             .map(f -> putIdToBody(f, id))
@@ -270,10 +275,14 @@ public class BindingUtility {
     private static final String ocValue = "__oc__value";
     private static final String ocAttributes = "__oc__attributes";
 
-    private static Map<String, Object> doWithXMLBody(Map<String, Object> src, List<String> fieldPaths, String id) {
+    private static Map<String, Object> doWithXMLBody(Map<String, Object> fields, String type, List<String> fieldPaths, String id) {
         String name = fieldPaths.get(0);
+        if (type.equals("array") && fieldPaths.size() > 1 && (name.matches("\\d+") || name.matches("\\[.*]"))) {
+            fieldPaths.remove(0);
+            name = fieldPaths.get(0);
+        }
         Map<String, Object> resultMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : src.entrySet()) {
+        for (Map.Entry<String, Object> entry : fields.entrySet()) {
             if (name.equals(entry.getKey())) { // object or primitive
                 fieldPaths.remove(0);
                 resultMap.put(entry.getKey(), processXML(entry.getValue(), fieldPaths, id, null));
@@ -308,7 +317,7 @@ public class BindingUtility {
                 return putIdToBody(value, id);
             } else { // object
                 Map<String, Object> map = (Map<String, Object>) value;
-                return doWithXMLBody(map, fieldPaths, id);
+                return doWithXMLBody(map, "object", fieldPaths, id);
             }
         } else { // array
             if (index.isEmpty()) {
@@ -322,7 +331,7 @@ public class BindingUtility {
                 List<Object> list = (List<Object>) value;
                 if (list.get(idx) instanceof Map<?, ?>) { //array of objects
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
-                    mapList.set(idx, doWithXMLBody(mapList.get(idx), fieldPaths, id));
+                    mapList.set(idx, doWithXMLBody(mapList.get(idx), "object", fieldPaths, id));
                     return mapList;
                 } else { // array of primitives
                     list.set(idx, putIdToBody(list.get(idx), id));
@@ -335,7 +344,7 @@ public class BindingUtility {
                 if (list.get(0) instanceof Map<?, ?>) { // array of objects
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
                     return mapList.stream()
-                            .map(f -> doWithXMLBody(f, fieldPaths, id));
+                            .map(f -> doWithXMLBody(f, "object", fieldPaths, id));
                 } else { // array of primitives
                     return list.stream()
                             .map(f -> putIdToBody(f, id))
