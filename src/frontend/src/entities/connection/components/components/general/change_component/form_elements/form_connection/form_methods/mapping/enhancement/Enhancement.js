@@ -112,7 +112,7 @@ class Enhancement extends Component {
 
 	renderExpertVar(input) {
 		const { connection } = this.props;
-		const regex = /var\s+(\w+)\s*=\s*#(\w+)\.\(\w+\)\.([\w\d.\[\]]+)/g;
+		const regex = /var\s+(\w+)\s*=\s*#(\w+)\.\(\w+\)\.([\w\d.\[\*\]\~]+)/g;
 		let match;
 		const result = [];
 

@@ -154,7 +154,20 @@ export default class CBody{
     _addFoundedProperty(result, fields, property, connector = null){
         let type = FIELD_TYPE_OBJECT;
         if(isString(fields[property])){
-            type = FIELD_TYPE_STRING
+            type = FIELD_TYPE_STRING;
+            if (connector !== null) {
+                const previousLoopOperators = connector.getPreviousLoopOperators();
+                for (let i = 0; i < previousLoopOperators.length; i++) {
+                    const loop = previousLoopOperators[i];
+                    if (loop.isSplitString() && loop.condition.leftStatement.field === property) {
+                        result.push({
+                            value: `${property}[${loop.iterator}]~`,
+                            type,
+                            label: `${property} (${loop.iterator} loop)`,
+                        });
+                    }
+                }
+            }
         }
         if(isArray(fields[property])){
             type = FIELD_TYPE_ARRAY;
@@ -226,6 +239,11 @@ export default class CBody{
                 if(indexOfCloseBracket === -1){
                     result = result.substr(0, indexOfOpenBracket);
                 } else {
+                    if(result.length > indexOfCloseBracket + 1) {
+                        if (result[indexOfCloseBracket + 1] === '~') {
+                            result = result.substr(0, indexOfOpenBracket + 1) + result.substr(indexOfCloseBracket + 1 + 1);
+                        }
+                    }
                     result = result.substr(0, indexOfOpenBracket) + result.substr(indexOfCloseBracket + 1);
                 }
             }
