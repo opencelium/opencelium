@@ -120,7 +120,6 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             env.put(LdapProperties.READ_TIMEOUT_KEY, timeout);
 
             DirContext ctx = new InitialDirContext(env);
-            ctx.getAttributes("");
             ctx.close();
 
             return "Host = '" + url + "' is reachable";
