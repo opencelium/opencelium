@@ -546,3 +546,6 @@ CREATE TABLE connection_editor_settings
 
 --changeset 4.2:11 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE user CHANGE totp_enabled totp_process_completed BOOLEAN DEFAULT FALSE;
+
+--changeset 4.2:12 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+DELETE FROM role_has_permission WHERE role_id=2 AND component_id=4;
