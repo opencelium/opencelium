@@ -549,3 +549,5 @@ ALTER TABLE user CHANGE totp_enabled totp_process_completed BOOLEAN DEFAULT FALS
 
 --changeset 4.2:12 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 DELETE FROM role_has_permission WHERE role_id=2 AND component_id=4;
+INSERT INTO role_has_permission (role_id,component_id,permission_id) VALUES (2,6,1),(2,6,2),(2,6,3),(2,6,4);
+
