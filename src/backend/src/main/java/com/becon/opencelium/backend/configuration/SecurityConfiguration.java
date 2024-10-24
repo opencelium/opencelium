@@ -22,6 +22,8 @@ import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
 import com.becon.opencelium.backend.security.DaoUserDetailsService;
 import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -90,6 +92,8 @@ public class SecurityConfiguration {
 
     @Autowired
     private LdapVerificationService ldapVerificationService;
+
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfiguration.class);
 
 
     @Bean
@@ -220,15 +224,15 @@ public class SecurityConfiguration {
 
     private GrantedAuthority ldapAuthorityMapper(Map<String, List<String>> userGroups) {
         List<String> groups = userGroups.get(SpringSecurityLdapTemplate.DN_KEY);
-        if (groups == null || groups.isEmpty()) {
-            throw new AuthenticationServiceException("User should be a member of at least one group");
-        }
 
         String ocRole = ldapProperties.getGroupRoleMapping().stream()
                 .filter(mapping -> Objects.equals(groups.get(0), mapping.getLdapGroup()))
                 .findFirst()
                 .map(LdapProperties.Group2Role::getOcRole)
-                .orElse(ldapProperties.getDefaultRole());
+                .orElseGet(() -> {
+                    logger.info("No mapping found for LDAP group = '" + groups.get(0) + "'");
+                    return ldapProperties.getDefaultRole();
+                });
 
         return new SimpleGrantedAuthority(ocRole);
     }
