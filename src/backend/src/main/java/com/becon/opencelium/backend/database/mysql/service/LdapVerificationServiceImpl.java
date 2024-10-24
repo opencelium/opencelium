@@ -57,13 +57,13 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             logger.info(checkHost(config.getUrls(), config.getTimeout()));
 
             // user has read access to directory ?
-            logger.info(checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout()));
+            logger.info(checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout(), true));
 
             // principal exists ?
             logger.info(validateLoginPrincipal(config, principal));
 
             // principals' password correct ?
-            logger.info(validateLoginCredential(config, principal, credentials));
+            logger.info(validateLoginCredential(config, principal, credentials, true));
         } catch (Throwable th) {
             logger.warn(th.getMessage());
         }
@@ -87,7 +87,7 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
 
             // user has read access to directory ?
             title = "User credentials";
-            message = checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout());
+            message = checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout(), false);
             messages.add(LdapVerificationMessageDTO.of(title, message));
 
             // count users under userDN
@@ -128,7 +128,7 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
         }
     }
 
-    private String checkAdminCredentials(String url, String username, String password, String timeout) {
+    private String checkAdminCredentials(String url, String username, String password, String timeout, boolean hidePassword) {
         Hashtable<String, String> env = new Hashtable<>();
         try {
             env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -142,9 +142,9 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
             DirContext ctx = new InitialDirContext(env);
             ctx.close();
 
-            return "username = '" + username + "' and password = '" + password + "' has access to host = '" + url + "'";
+            return "username = '" + username + "' and password = '" + (hidePassword ? "[PROTECTED]" : password) + "' has access to host = '" + url + "'";
         } catch (NamingException e) {
-            throw new RuntimeException("username = '" + username + "' and password = '" + password + "' does not have access to host = '" + url + "'");
+            throw new RuntimeException("username = '" + username + "' and password = '" + (hidePassword ? "[PROTECTED]" : password) + "' does not have access to host = '" + url + "'");
         }
     }
 
@@ -184,7 +184,7 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
         }
     }
 
-    private String validateLoginCredential(LdapConfigDTO config, Object principal, Object credential) {
+    private String validateLoginCredential(LdapConfigDTO config, Object principal, Object credential, boolean hidePassword) {
         LdapTemplate ldapTemplate = createLdapTemplate(config);
 
         try {
@@ -194,9 +194,9 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
 
             ldapTemplate.authenticate(query, (String) credential, new LookupAttemptingCallback());
 
-            return "principal = '" + principal + "' and credential = '" + credential + "' is valid under userDN = '" + config.getUserDN() + "'";
+            return "principal = '" + principal + "' and credential = '" + (hidePassword ? "[PROTECTED]" : credential) + "' is valid under userDN = '" + config.getUserDN() + "'";
         } catch (Exception e) {
-            throw new RuntimeException("principal = '" + principal + "' and credential = '" + credential + "' is not valid under userDN = '" + config.getUserDN() + "'");
+            throw new RuntimeException("principal = '" + principal + "' and credential = '" + (hidePassword ? "[PROTECTED]" : credential) + "' is not valid under userDN = '" + config.getUserDN() + "'");
         }
     }
 
