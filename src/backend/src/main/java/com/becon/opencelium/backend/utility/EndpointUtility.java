@@ -193,7 +193,7 @@ public class EndpointUtility {
                 i += PRE_WEBHOOK.length() - 1;
             } else if (i + PRE_BRACKET.length() < n && path.startsWith(PRE_BRACKET, i)) {
                 stack.push(SUF_BRACKET);
-                i += SUF_BRACKET.length() - 1;
+                i += PRE_BRACKET.length() - 1;
             } else if (i + SUF_DIRECT_REF.length() < n && path.startsWith(SUF_DIRECT_REF, i)) {
                 if (!stack.empty() && stack.peek().equals(SUF_DIRECT_REF)) {
                     stack.pop();

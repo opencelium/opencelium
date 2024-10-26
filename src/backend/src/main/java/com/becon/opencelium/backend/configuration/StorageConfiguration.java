@@ -127,8 +127,8 @@ public class StorageConfiguration {
         try {
             ActivationRequest ar = activationRequestService.readFreeAR().orElse(null);
             String initLicense = LicenseKeyUtility.readFreeLicense();
-            Subscription subscription = subscriptionService.convertToSub(initLicense,ar);
-            if(!subscriptionService.exists(subscription.getSubId())) {
+            Subscription subscription = subscriptionService.convertToSub(initLicense, ar);
+            if (!subscriptionService.exists(subscription.getSubId())) {
                 activationRequestService.save(ar);
                 subscriptionService.save(subscription);
             }
@@ -138,20 +138,23 @@ public class StorageConfiguration {
     }
 
     private void cleanOldFiles(String folder, Predicate<File> filter, String prefix) {
-        try (Stream<File> files = Files.list(Paths.get(folder)).map(Path::toFile).filter(filter)) {
+        Path directoryPath = Paths.get(folder);
+        if (Files.exists(directoryPath) && Files.isDirectory(directoryPath)) {
+            try (Stream<File> files = Files.list(directoryPath).map(Path::toFile).filter(filter)) {
 
-            Double ocVersion = environment.getProperty("opencelium.version", Double.class, 0.0);
-            int intValue = ocVersion.intValue();
+                Double ocVersion = environment.getProperty("opencelium.version", Double.class, 0.0);
+                int intValue = ocVersion.intValue();
 
-            files.filter(f -> !f.getName().startsWith(prefix + intValue + ".")).forEach(f -> {
-                if (forceDelete(f)) {
-                    System.out.println(f.getAbsolutePath() + " - file/folder is deleted");
-                } else {
-                    System.out.println(f.getAbsolutePath() + " - file/folder cannot be deleted");
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
+                files.filter(f -> !f.getName().startsWith(prefix + intValue + ".")).forEach(f -> {
+                    if (forceDelete(f)) {
+                        System.out.println(f.getAbsolutePath() + " - file/folder is deleted");
+                    } else {
+                        System.out.println(f.getAbsolutePath() + " - file/folder cannot be deleted");
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

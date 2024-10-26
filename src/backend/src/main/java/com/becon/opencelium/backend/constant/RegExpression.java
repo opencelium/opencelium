@@ -7,6 +7,7 @@ public interface RegExpression {
 
     // Another one
     String arrayWithLetterIndex = "\\[([a-z,*]+)\\]";
+    String array = "\\[.*\\]";
     String arrayWithNumberIndex = "\\[([0-9]+)\\]";
     String wholeArray = "\\[([*]){1}\\]";
     String isNumber = "^[+-]?\\d+(\\.\\d+)?$";
