@@ -20,7 +20,7 @@ public enum OperatorEnum {
     IS_NULL(5, "IsNull"),
     NOT_NULL(5, "NotNull"),
     IS_EMPTY(5, "IsEmpty"),
-    IS_NOT_EMPTY(5, "NotEmpty"),
+    NOT_EMPTY(5, "NotEmpty"),
     CONTAINS(5, "Contains"),
     NOT_CONTAINS(5, "NotContains"),
     PROPERTY_EXISTS(5, "PropertyExists"),

@@ -19,6 +19,7 @@ public class OperatorFactory {
             case GREATER_THAN_OR_EQUAL_TO -> new GreaterThanOrEqualTo();
             case IS_TYPE_OF -> new IsTypeOf();
             case IS_EMPTY -> new IsEmpty();
+            case NOT_EMPTY -> new NotEmpty();
             default -> throw new IllegalStateException("Unexpected value: " + operator);
         };
     }

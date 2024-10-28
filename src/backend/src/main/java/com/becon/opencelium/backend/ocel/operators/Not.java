@@ -5,6 +5,8 @@ import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
 import com.becon.opencelium.backend.ocel.exceptions.InvalidTypeException;
 
+import java.util.List;
+
 public class Not implements Operator {
 
     @Override
@@ -15,7 +17,7 @@ public class Not implements Operator {
     @Override
     public Object apply(Object o) throws InvalidTypeException {
         if (!(o instanceof Boolean oo))
-            throw new InvalidTypeException();
+            throw InvalidTypeException.mismatchTypeException(OperatorEnum.NOT, List.of(Boolean.class), o.getClass());
         return !oo;
     }
 

@@ -5,12 +5,16 @@ import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
 import com.becon.opencelium.backend.ocel.exceptions.InvalidTypeException;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 
+import java.util.List;
+
 public class And implements Operator {
 
     @Override
     public Boolean apply(Object o1, Object o2) throws InvalidTypeException {
-        if (!(o1 instanceof Boolean o11) || !(o2 instanceof Boolean o22))
-            throw new InvalidTypeException();
+        if (!(o1 instanceof Boolean o11))
+            throw InvalidTypeException.mismatchTypeException(OperatorEnum.AND, List.of(Boolean.class), o1.getClass());
+        if( !(o2 instanceof Boolean o22))
+            throw InvalidTypeException.mismatchTypeException(OperatorEnum.AND, List.of(Boolean.class), o2.getClass());
         return o11 && o22;
     }
 

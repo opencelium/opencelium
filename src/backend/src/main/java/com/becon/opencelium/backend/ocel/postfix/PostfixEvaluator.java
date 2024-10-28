@@ -7,7 +7,7 @@ import com.becon.opencelium.backend.ocel.base.Evaluator;
 import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.operators.Operator;
 import com.becon.opencelium.backend.ocel.exceptions.InvalidTypeException;
-import com.becon.opencelium.backend.ocel.exceptions.ParseRawValueException;
+import com.becon.opencelium.backend.ocel.exceptions.ValueParseException;
 import com.becon.opencelium.backend.ocel.postfix.convertor.ConverterToIntermediateNotation;
 import com.becon.opencelium.backend.ocel.postfix.convertor.RawValueParser;
 import com.becon.opencelium.backend.ocel.utils.Utils;
@@ -35,9 +35,8 @@ public class PostfixEvaluator implements Evaluator {
                     if (operand.isRaw()) {
                         try {
                             operand.setValue(getValueOfRaw(operand.getRawValue(), referenceExtractor));
-                        } catch (ParseRawValueException e) {
-                            e.printStackTrace();
-                            //FIXME: handle
+                        } catch (ValueParseException e) {
+                            throw InvalidExpressionException.valueParseException(e);
                         }
                     }
                     Object result;
@@ -54,15 +53,15 @@ public class PostfixEvaluator implements Evaluator {
                     if (left.isRaw()) {
                         try {
                             left.setValue(getValueOfRaw(left.getRawValue(), referenceExtractor));
-                        } catch (ParseRawValueException e) {
-                            //FIXME: handle
+                        } catch (ValueParseException e) {
+                            throw InvalidExpressionException.valueParseException(e);
                         }
                     }
                     if (right.isRaw()) {
                         try {
                             right.setValue(getValueOfRaw(right.getRawValue(), referenceExtractor));
-                        } catch (ParseRawValueException e) {
-                            //FIXME: handle
+                        } catch (ValueParseException e) {
+                            throw InvalidExpressionException.valueParseException(e);
                         }
                     }
                     Object result;
@@ -82,7 +81,7 @@ public class PostfixEvaluator implements Evaluator {
                 : (Boolean) operandStack.peek().getValue();
     }
 
-    private Object getValueOfRaw(String rawValue, Function<String, Object> referenceExtractor) throws ParseRawValueException {
+    private Object getValueOfRaw(String rawValue, Function<String, Object> referenceExtractor) throws ValueParseException {
         return Utils.isReference(rawValue)
                 ? referenceExtractor.apply(rawValue)
                 : RawValueParser.parse(rawValue);

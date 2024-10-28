@@ -7,6 +7,8 @@ import com.becon.opencelium.backend.ocel.exceptions.InvalidTypeException;
 import com.becon.opencelium.backend.ocel.utils.DateUtils;
 import com.becon.opencelium.backend.ocel.utils.NumberUtils;
 
+import java.util.List;
+
 public class GreaterThanOrEqualTo implements Operator {
     @Override
     public Object apply(Object o1, Object o2) throws InvalidTypeException {
@@ -18,7 +20,11 @@ public class GreaterThanOrEqualTo implements Operator {
                 return DateUtils.compareTo(s1, s2) >= 0;
             }
         }
-        throw new InvalidTypeException();
+        throw InvalidTypeException
+                .mismatchTypeException(
+                        OperatorEnum.GREATER_THAN_OR_EQUAL_TO,
+                        List.of(Number.class, String.class),
+                        o1.getClass());
     }
 
     @Override
