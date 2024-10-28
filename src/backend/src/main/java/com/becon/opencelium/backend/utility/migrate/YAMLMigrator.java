@@ -13,6 +13,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -483,6 +484,46 @@ public class YAMLMigrator {
                     String name = trim.substring(0, trim.indexOf(":"));
                     stack.push(name);
                     stack.push(headingTabs(line));
+                } else if (line.trim().startsWith("-")) {
+                    hasPrev = false;
+                    String tabs = headingTabs(line);
+                    int prevHeadTabs = Integer.parseInt(stack.peek());
+                    int currHeadTabs = Integer.parseInt(tabs);
+                    if (prevHeadTabs == currHeadTabs) { // prev line starts with '-' or first element of array
+                        String pop = stack.pop();
+                        String prevName = stack.pop();
+                        int prevIndex = -1;
+                        if (prevName.matches("\\d+")) {
+                            prevIndex = Integer.parseInt(prevName);
+                        } else {
+                            stack.push(pop);
+                            stack.push(prevName);
+                        }
+                        int currIndex = prevIndex + 1;
+                        stack.push(String.valueOf(currIndex));
+                        stack.push(tabs);
+                    } else if (currHeadTabs - prevHeadTabs == 2) { // first element of array
+                        stack.push("0");
+                        stack.push(tabs);
+                    } else if (prevHeadTabs > currHeadTabs) {
+                        String prevIndexStr = "-1";
+                        int diff = (prevHeadTabs - currHeadTabs) / 2 + 1;
+                        while (diff > 0) {
+                            diff--;
+                            stack.pop();
+                            prevIndexStr = stack.pop();
+                        }
+                        int prevIndex = Integer.parseInt(prevIndexStr);
+                        int currIndex = prevIndex + 1;
+                        stack.push(String.valueOf(currIndex));
+                        stack.push(tabs);
+                    }
+                    line = line.trim().substring(1); // without '-'
+                    if (!line.trim().startsWith("'") && line.contains(":")) { // it's object's field
+                        String name = line.substring(0, line.indexOf(":")).trim();
+                        stack.push(name);
+                        stack.push(currHeadTabs + 2 + "");
+                    }
                 }
             }
             return comments;
