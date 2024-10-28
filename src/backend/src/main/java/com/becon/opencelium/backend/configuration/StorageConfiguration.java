@@ -138,20 +138,23 @@ public class StorageConfiguration {
     }
 
     private void cleanOldFiles(String folder, Predicate<File> filter, String prefix) {
-        try (Stream<File> files = Files.list(Paths.get(folder)).map(Path::toFile).filter(filter)) {
+        Path path = Paths.get(folder);
+        if(Files.exists(path) && Files.isDirectory(path)){
+            try (Stream<File> files = Files.list(path).map(Path::toFile).filter(filter)) {
 
-            Double ocVersion = environment.getProperty("opencelium.version", Double.class, 0.0);
-            int intValue = ocVersion.intValue();
+                Double ocVersion = environment.getProperty("opencelium.version", Double.class, 0.0);
+                int intValue = ocVersion.intValue();
 
-            files.filter(f -> !f.getName().startsWith(prefix + intValue + ".")).forEach(f -> {
-                if (forceDelete(f)) {
-                    System.out.println(f.getAbsolutePath() + " - file/folder is deleted");
-                } else {
-                    System.out.println(f.getAbsolutePath() + " - file/folder cannot be deleted");
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
+                files.filter(f -> !f.getName().startsWith(prefix + intValue + ".")).forEach(f -> {
+                    if (forceDelete(f)) {
+                        System.out.println(f.getAbsolutePath() + " - file/folder is deleted");
+                    } else {
+                        System.out.println(f.getAbsolutePath() + " - file/folder cannot be deleted");
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

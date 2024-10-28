@@ -7,13 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.github.fge.jsonpatch.JsonPatch;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -468,10 +468,12 @@ public class YAMLMigrator {
                         int prev = Integer.parseInt(stack.peek());
                         String tabs = headingTabs(line);
                         int tabsInt = Integer.parseInt(tabs);
-                        if (prev == tabsInt) {
+                        while (prev == tabsInt) {
                             stack.pop();
                             stack.pop();
-                        } else if (prev > tabsInt) {
+                            prev = Integer.parseInt(stack.peek());
+                        }
+                        if (prev > tabsInt) {
                             int diff = (prev - tabsInt) / 2 + 1;
                             while (diff > 0) {
                                 diff--;
@@ -484,7 +486,7 @@ public class YAMLMigrator {
                     String name = trim.substring(0, trim.indexOf(":"));
                     stack.push(name);
                     stack.push(headingTabs(line));
-                } else if (line.trim().startsWith("-")) {
+                } else {
                     hasPrev = false;
                     String tabs = headingTabs(line);
                     int prevHeadTabs = Integer.parseInt(stack.peek());
@@ -496,8 +498,8 @@ public class YAMLMigrator {
                         if (prevName.matches("\\d+")) {
                             prevIndex = Integer.parseInt(prevName);
                         } else {
-                            stack.push(pop);
                             stack.push(prevName);
+                            stack.push(pop);
                         }
                         int currIndex = prevIndex + 1;
                         stack.push(String.valueOf(currIndex));
@@ -527,7 +529,7 @@ public class YAMLMigrator {
                 }
             }
             return comments;
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.warn("Unable to read comments from application.yaml file. Some comments may be ignored");
             return comments;
         }
@@ -548,53 +550,100 @@ public class YAMLMigrator {
                 .findAny()
                 .ifPresent(cc -> lines.addAll(0, cc.lines));
 
-        for (Comment comment : commentLines) {
-            if (comment.prev.isEmpty()) continue;
-            Stack<String> stack = new Stack<>();
-            boolean is = false;
-            for (int i = 0; i < lines.size(); i++) {
-                if (isCommentLine(lines.get(i))) {
-                    continue;
-                }
-                if (!lines.get(i).trim().startsWith("-")) {
-                    if (!stack.isEmpty()) {
-                        int prev = Integer.parseInt(stack.peek());
-                        String tabs = headingTabs(lines.get(i));
-                        int tabsInt = Integer.parseInt(tabs);
-                        if (prev == tabsInt) {
-                            stack.pop();
-                            stack.pop();
-                        } else if (prev > tabsInt) {
-                            int diff = (prev - tabsInt) / 2 + 1;
+        try {
+            for (Comment comment : commentLines) {
+                if (comment.prev.isEmpty()) continue;
+
+                Stack<String> stack = new Stack<>();
+                boolean is = false;
+                for (int i = 0; i < lines.size(); i++) {
+                    if (isCommentLine(lines.get(i))) {
+                        continue;
+                    }
+                    String line = lines.get(i);
+                    if (!line.trim().startsWith("-")) {
+                        if (!stack.isEmpty()) {
+                            int prev = Integer.parseInt(stack.peek());
+                            String tabs = headingTabs(line);
+                            int tabsInt = Integer.parseInt(tabs);
+                            while (prev == tabsInt) {
+                                stack.pop();
+                                stack.pop();
+                                prev = Integer.parseInt(stack.peek());
+                            }
+                            if (prev > tabsInt) {
+                                int diff = (prev - tabsInt) / 2 + 1;
+                                while (diff > 0) {
+                                    diff--;
+                                    stack.pop();
+                                    stack.pop();
+                                }
+                            }
+                        }
+                        String trim = line.trim();
+                        String name = trim.substring(0, trim.indexOf(":"));
+                        stack.push(name);
+                        stack.push(headingTabs(line));
+                    } else {
+                        String tabs = headingTabs(line);
+                        int prevHeadTabs = Integer.parseInt(stack.peek());
+                        int currHeadTabs = Integer.parseInt(tabs);
+                        if (prevHeadTabs == currHeadTabs) {
+                            String pop = stack.pop();
+                            String prevName = stack.pop();
+                            int prevIndex = -1;
+                            if (prevName.matches("\\d+")) {
+                                prevIndex = Integer.parseInt(prevName);
+                            } else {
+                                stack.push(prevName);
+                                stack.push(pop);
+                            }
+                            int currIndex = prevIndex + 1;
+                            stack.push(String.valueOf(currIndex));
+                            stack.push(tabs);
+                        } else if (currHeadTabs - prevHeadTabs == 2) {
+                            stack.push("0");
+                            stack.push(tabs);
+                        } else if (prevHeadTabs > currHeadTabs) {
+                            String prevIndexStr = "-1";
+                            int diff = (prevHeadTabs - currHeadTabs) / 2 + 1;
                             while (diff > 0) {
                                 diff--;
                                 stack.pop();
-                                stack.pop();
+                                prevIndexStr = stack.pop();
                             }
+                            int prevIndex = Integer.parseInt(prevIndexStr);
+                            int currIndex = prevIndex + 1;
+                            stack.push(String.valueOf(currIndex));
+                            stack.push(tabs);
+                        }
+                        line = line.trim().substring(1);
+                        if (!line.trim().startsWith("'") && line.contains(":")) {
+                            String name = line.substring(0, line.indexOf(":")).trim();
+                            stack.push(name);
+                            stack.push(currHeadTabs + 2 + "");
                         }
                     }
-                    String trim = lines.get(i).trim();
-                    String name = trim.substring(0, trim.indexOf(":"));
-                    stack.push(name);
-                    stack.push(headingTabs(lines.get(i)));
-                }
-                String path = getFullPath(stack);
-                String root = path.split("\\.")[0];
-                if (is && comment.prev.equals(path)) {
-                    lines.addAll(i + 1, comment.lines);
-                    break;
-                }
-                if (comment.prev.startsWith(root)) {
-                    is = true;
-                } else if (is) {
-                    lines.addAll(i, comment.lines);
-                    break;
-                }
+                    String path = getFullPath(stack);
+                    String root = path.split("\\.")[0];
+                    if (is && comment.prev.equals(path)) {
+                        lines.addAll(i + 1, comment.lines);
+                        break;
+                    }
+                    if (comment.prev.startsWith(root)) {
+                        is = true;
+                    } else if (is) {
+                        lines.addAll(i, comment.lines);
+                        break;
+                    }
 
-                if (lines.size() - 1 == i) {
-                    log.error("Cannot find this comment section's place to move:\n{}", comment.lines);
+                    if (lines.size() - 1 == i) {
+                        log.error("Cannot find this comment section's place to move:\n{}", StringUtils.join(comment.lines, "\n"));
+                    }
                 }
             }
+        } catch (Exception e) {
+            log.warn("Some exception occurred during writing comments. Some comments may be ignored");
         }
 
         StringBuilder sb = new StringBuilder();
