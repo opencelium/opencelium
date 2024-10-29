@@ -1,30 +1,19 @@
 package com.becon.opencelium.backend.subscription.utility;
 
-import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.constant.SubscriptionConstant;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.utility.crypto.HmacValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 
 import javax.crypto.Cipher;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.stream.Collectors;
 
 public class LicenseKeyUtility {
     private static final String ENCRYPTION_ALGO = "RSA";
