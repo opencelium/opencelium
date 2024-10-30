@@ -4,20 +4,19 @@ import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.DataType;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidTypeException;
+import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 
 public class IsTypeOf implements Operator {
     @Override
-    public Object apply(Object o1, Object o2) throws InvalidTypeException {
-        // null is considered as any type
+    public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         Class<?> clazz = DataType.getEnumClass((String) o2);
         if (clazz == null)
-            throw new InvalidTypeException(); //FIXME: detailed message
+            throw ApplyOperatorException.unknownException(OperatorEnum.IS_TYPE_OF, o1, o2);
         return o1 == null || clazz.isInstance(o1);
     }
 
     @Override
-    public Object apply(Object o) throws InvalidTypeException {
+    public Object apply(Object o) throws ApplyOperatorException {
         return Dummy.get();
     }
 

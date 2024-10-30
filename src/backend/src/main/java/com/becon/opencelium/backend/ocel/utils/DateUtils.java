@@ -9,7 +9,7 @@ public class DateUtils {
 
     public static boolean isDate(String dateStr) {
         try {
-            LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+            LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
             return true;
         } catch (DateTimeParseException e) {
             return false;

@@ -3,16 +3,27 @@ package com.becon.opencelium.backend.ocel.operators;
 import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidTypeException;
+import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
+import com.becon.opencelium.backend.ocel.utils.DateUtils;
+import com.becon.opencelium.backend.ocel.utils.NumberUtils;
 
 public class LessThanOrEqualTo implements Operator {
     @Override
-    public Object apply(Object o1, Object o2) throws InvalidTypeException {
-        return new GreaterThanOrEqualTo().apply(o2, o1);
+    public Object apply(Object o1, Object o2) throws ApplyOperatorException {
+        if (o1 instanceof Number n1 && o2 instanceof Number n2) {
+            return NumberUtils.compareTo(n1, n2) <= 0;
+        }
+        if (o1 instanceof String s1 && o2 instanceof String s2) {
+            if (DateUtils.isDate(s1) && DateUtils.isDate(s2)) {
+                return DateUtils.compareTo(s1, s2) <= 0;
+            }
+        }
+        throw ApplyOperatorException
+                .invalidTypePairs(OperatorEnum.LESS_THAN_OR_EQUAL_TO, o1, o2);
     }
 
     @Override
-    public Object apply(Object o) throws InvalidTypeException {
+    public Object apply(Object o) throws ApplyOperatorException {
         return Dummy.get();
     }
 

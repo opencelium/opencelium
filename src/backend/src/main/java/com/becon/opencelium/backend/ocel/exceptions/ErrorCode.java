@@ -5,7 +5,11 @@ public enum ErrorCode {
     UNKNOWN_OPERAND_VALUE("unknown.operand.value"),
     INVALID_ELEMENT_OF_ARRAY("invalid.element.of.array"),
     MISMATCH_ELEMENT_TYPE_OF_ARRAY("mismatch.element.type.of.array"),
-    UNSUPPORTED_NUMBER_VALUE("unsupported.number.value");
+    UNSUPPORTED_NUMBER_VALUE("unsupported.number.value"),
+    INVALID_TYPE_PAIRS("invalid.type.pairs"),
+    INVALID_TYPE("invalid.type"),
+    UNKNOWN_EXCEPTION("unknown.exception");
+
 
     private final String code;
 

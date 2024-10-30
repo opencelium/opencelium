@@ -3,20 +3,20 @@ package com.becon.opencelium.backend.ocel.operators;
 import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidTypeException;
+import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 
 import java.util.List;
 
 public class IsEmpty implements Operator {
     @Override
-    public Object apply(Object o1, Object o2) throws InvalidTypeException {
+    public Object apply(Object o1, Object o2) {
         return Dummy.get();
     }
 
     @Override
-    public Object apply(Object o) throws InvalidTypeException {
+    public Object apply(Object o) throws ApplyOperatorException {
         if (!(o instanceof List)) {
-            throw new InvalidTypeException();
+            throw ApplyOperatorException.invalidTypeException(OperatorEnum.IS_EMPTY, o);
         }
         return ((List<?>) o).isEmpty();
     }

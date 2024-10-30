@@ -3,16 +3,15 @@ package com.becon.opencelium.backend.ocel.operators;
 import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidTypeException;
-
-import java.util.List;
+import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 
 public class EqualTo implements Operator {
     @Override
-    public Object apply(Object o1, Object o2) throws InvalidTypeException {
+    public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         if (o1 == null) return o2 == null;
         if (o1.getClass() != o2.getClass())
-            throw InvalidTypeException.mismatchTypeException(OperatorEnum.EQUAL_TO, List.of(o1.getClass()), o2.getClass());
+            throw ApplyOperatorException
+                    .invalidTypePairs(OperatorEnum.EQUAL_TO, o1, o2);
 
         String value1 = o1.toString();
         String value2 = o2.toString();
@@ -21,7 +20,7 @@ public class EqualTo implements Operator {
     }
 
     @Override
-    public Object apply(Object o) throws InvalidTypeException {
+    public Object apply(Object o) {
         return Dummy.get();
     }
 

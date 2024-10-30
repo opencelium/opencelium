@@ -6,7 +6,7 @@ import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.base.Evaluator;
 import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.operators.Operator;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidTypeException;
+import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.exceptions.ValueParseException;
 import com.becon.opencelium.backend.ocel.postfix.convertor.ConverterToIntermediateNotation;
 import com.becon.opencelium.backend.ocel.postfix.convertor.RawValueParser;
@@ -42,8 +42,8 @@ public class PostfixEvaluator implements Evaluator {
                     Object result;
                     try {
                         result = operator.apply(operand.getValue());
-                    } catch (InvalidTypeException e) {
-                        throw new InvalidExpressionException(); // FIXME: detailed ex
+                    } catch (ApplyOperatorException e) {
+                        throw InvalidExpressionException.applyOperatorException(e);
                     }
                     operandStack.push(Operand.withValue(result));
                 } else if (arity == Arity.BINAR) {
@@ -67,8 +67,8 @@ public class PostfixEvaluator implements Evaluator {
                     Object result;
                     try {
                         result = operator.apply(left.getValue(), right.getValue());
-                    } catch (InvalidTypeException e) {
-                        throw new InvalidExpressionException(); // FIXME: detailed ex
+                    } catch (ApplyOperatorException e) {
+                        throw InvalidExpressionException.applyOperatorException(e);
                     }
                     operandStack.push(Operand.withValue(result));
                 }

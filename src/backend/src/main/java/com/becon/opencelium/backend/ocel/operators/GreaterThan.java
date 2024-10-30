@@ -3,15 +3,13 @@ package com.becon.opencelium.backend.ocel.operators;
 import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidTypeException;
+import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.utils.DateUtils;
 import com.becon.opencelium.backend.ocel.utils.NumberUtils;
 
-import java.util.List;
-
 public class GreaterThan implements Operator {
     @Override
-    public Object apply(Object o1, Object o2) throws InvalidTypeException {
+    public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         if (o1 instanceof Number n1 && o2 instanceof Number n2) {
             return NumberUtils.compareTo(n1, n2) > 0;
         }
@@ -20,11 +18,12 @@ public class GreaterThan implements Operator {
                 return DateUtils.compareTo(s1, s2) > 0;
             }
         }
-        throw InvalidTypeException.mismatchTypeException(OperatorEnum.GREATER_THAN, List.of(Number.class, String.class), o1.getClass());
+        throw ApplyOperatorException
+                .invalidTypePairs(OperatorEnum.GREATER_THAN, o1, o2);
     }
 
     @Override
-    public Object apply(Object o) throws InvalidTypeException {
+    public Object apply(Object o) {
         return Dummy.get();
     }
 
