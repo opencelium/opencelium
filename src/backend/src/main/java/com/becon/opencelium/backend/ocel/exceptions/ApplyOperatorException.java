@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.ocel.exceptions;
 
+import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
 
 public class ApplyOperatorException extends Exception {
@@ -7,24 +8,58 @@ public class ApplyOperatorException extends Exception {
     private final OperatorEnum operator;
     private final Object o1;
     private final Object o2;
+    private final Arity arity;
 
     public ApplyOperatorException(ErrorCode code, OperatorEnum operator, Object o1, Object o2) {
+        this(code, operator, o1, o2, Arity.BINAR);
+    }
+
+    public ApplyOperatorException(ErrorCode code, OperatorEnum operator, Object o1, Object o2, Arity arity) {
         this.code = code;
         this.operator = operator;
         this.o1 = o1;
         this.o2 = o2;
+        this.arity = arity;
     }
 
-    public static ApplyOperatorException invalidTypePairs(OperatorEnum operator, Object o1, Object o2) {
-        return new ApplyOperatorException(ErrorCode.INVALID_TYPE_PAIRS, operator, o1, o2);
+    public static ApplyOperatorException invalidTypePairsException(OperatorEnum operator, Object o1, Object o2) {
+        return new ApplyOperatorException(ErrorCode.AO_INVALID_TYPE_PAIRS, operator, o1, o2);
     }
 
     public static ApplyOperatorException invalidTypeException(OperatorEnum operator, Object o) {
-        return new ApplyOperatorException(ErrorCode.INVALID_TYPE, operator, o, null);
+        return new ApplyOperatorException(ErrorCode.AO_INVALID_TYPE, operator, o, null, Arity.UNAR);
     }
 
-    public static ApplyOperatorException unknownException(OperatorEnum operator, Object o1, Object o2) {
-        return new ApplyOperatorException(ErrorCode.UNKNOWN_EXCEPTION, operator, o1, o2);
+    public static ApplyOperatorException invalidOperandValueException(OperatorEnum operator, Object o1, Object o2) {
+        return invalidOperandValueException(operator, o1, o2, Arity.BINAR);
+    }
+
+    public static ApplyOperatorException invalidOperandValueException(OperatorEnum operator, Object o1, Object o2, Arity arity) {
+        return new ApplyOperatorException(ErrorCode.AO_INVALID_OPERAND_VALUE, operator, o1, o2, arity);
+    }
+
+    public static ApplyOperatorException unknownException(OperatorEnum operator, Object o1, Object o2, Arity arity) {
+        return new ApplyOperatorException(ErrorCode.UNKNOWN_EXCEPTION, operator, o1, o2, arity);
+    }
+
+    public String getMessage() {
+        return switch (this.code) {
+            case AO_INVALID_TYPE_PAIRS -> "'%s' operator doesn't support these type pairs. 1-type - '%s', 2-type - '%s'"
+                    .formatted(this.operator.getName(),
+                            this.o1 == null ? null : this.o1.getClass(),
+                            this.o2 == null ? null : this.o2.getClass());
+            case AO_INVALID_OPERAND_VALUE -> this.arity == Arity.UNAR
+                    ? "'%s' operator doesn't support this value - '%s'".formatted(this.operator, this.o1)
+                    : "'%s' operator doesn't support these value pairs. 1-value - '%s', 2-value - '%s'"
+                    .formatted(this.operator, this.o1, this.o2);
+            case AO_INVALID_TYPE -> "'%s' operator doesn't support this type: '%s'"
+                    .formatted(this.operator, this.o1 == null ? null : this.o1.getClass());
+            case UNKNOWN_EXCEPTION -> this.arity == Arity.UNAR
+                    ? "Unknown exception. Operator -'%s', value -'%s'".formatted(this.getOperator(), this.o1)
+                    : "Unknown exception. Operator -'%s', 1-value -'%s', 2-value - '%s'"
+                    .formatted(this.getOperator(), this.o1, this.o2);
+            default -> this.getMessage();
+        };
     }
 
     public OperatorEnum getOperator() {
@@ -39,7 +74,11 @@ public class ApplyOperatorException extends Exception {
         return o2;
     }
 
-    public ErrorCode getCode() {
-        return code;
+    public String getCode() {
+        return code.getCode();
+    }
+
+    public Arity getArity() {
+        return arity;
     }
 }

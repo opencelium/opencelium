@@ -13,7 +13,11 @@ public class NotEmpty implements Operator {
 
     @Override
     public Object apply(Object o) throws ApplyOperatorException {
-        return !((Boolean) new IsEmpty().apply(o));
+        try {
+            return !(Boolean) new IsEmpty().apply(o);
+        } catch (ApplyOperatorException e) {
+            throw ApplyOperatorException.invalidTypeException(OperatorEnum.NOT_EMPTY, o);
+        }
     }
 
     @Override

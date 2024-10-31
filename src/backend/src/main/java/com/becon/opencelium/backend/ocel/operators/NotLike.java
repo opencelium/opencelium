@@ -5,13 +5,14 @@ import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 
-public class Or implements Operator {
-
+public class NotLike implements Operator {
     @Override
-    public Boolean apply(Object o1, Object o2) throws ApplyOperatorException {
-        if (!(o1 instanceof Boolean o11) || !(o2 instanceof Boolean o22))
-            throw ApplyOperatorException.invalidTypePairsException(OperatorEnum.OR, o1, o2);
-        return o11 || o22;
+    public Object apply(Object o1, Object o2) throws ApplyOperatorException {
+        try {
+            return !(Boolean) new Like().apply(o1, o2);
+        } catch (ApplyOperatorException e) {
+            throw ApplyOperatorException.invalidTypePairsException(OperatorEnum.NOT_LIKE, o1, o2);
+        }
     }
 
     @Override
@@ -26,7 +27,7 @@ public class Or implements Operator {
 
     @Override
     public int getPrecedence() {
-        return OperatorEnum.OR.getPrecedence();
+        return OperatorEnum.NOT_LIKE.getPrecedence();
     }
 
     @Override
@@ -36,10 +37,7 @@ public class Or implements Operator {
 
     @Override
     public boolean applicable(String left, String right) {
-        return left != null
-                && right != null
-                && (left.equals("true") || left.equals("false"))
-                && (right.equals("true") || right.equals("false"));
+        return false;
     }
 
     @Override

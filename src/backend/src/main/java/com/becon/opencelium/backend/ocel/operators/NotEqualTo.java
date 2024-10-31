@@ -8,20 +8,15 @@ import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 public class NotEqualTo implements Operator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
-        if (o1 == null) return o2 != null;
-        if (o2 == null) return true;
-        if (o1.getClass() != o2.getClass())
-            throw ApplyOperatorException
-                    .invalidTypePairs(OperatorEnum.NOT_EQUAL_TO, o1, o2);
-
-        String value1 = o1.toString();
-        String value2 = o2.toString();
-
-        return !value1.equals(value2);
+        try {
+            return !(Boolean) new EqualTo().apply(o1, o2);
+        } catch (ApplyOperatorException e) {
+            throw ApplyOperatorException.invalidTypePairsException(OperatorEnum.NOT_EQUAL_TO, o1, o2);
+        }
     }
 
     @Override
-    public Object apply(Object o) throws ApplyOperatorException {
+    public Object apply(Object o) {
         return Dummy.get();
     }
 

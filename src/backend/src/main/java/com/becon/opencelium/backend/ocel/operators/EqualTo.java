@@ -8,10 +8,9 @@ import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 public class EqualTo implements Operator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
-        if (o1 == null) return o2 == null;
+        if (o1 == null || o2 == null) return o1 == o2;
         if (o1.getClass() != o2.getClass())
-            throw ApplyOperatorException
-                    .invalidTypePairs(OperatorEnum.EQUAL_TO, o1, o2);
+            throw ApplyOperatorException.invalidTypePairsException(OperatorEnum.EQUAL_TO, o1, o2);
 
         String value1 = o1.toString();
         String value2 = o2.toString();

@@ -11,7 +11,7 @@ public class IsTypeOf implements Operator {
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         Class<?> clazz = DataType.getEnumClass((String) o2);
         if (clazz == null)
-            throw ApplyOperatorException.unknownException(OperatorEnum.IS_TYPE_OF, o1, o2);
+            throw ApplyOperatorException.invalidOperandValueException(OperatorEnum.IS_TYPE_OF, o1, o2);
         return o1 == null || clazz.isInstance(o1);
     }
 

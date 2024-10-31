@@ -18,8 +18,7 @@ public class GreaterThan implements Operator {
                 return DateUtils.compareTo(s1, s2) > 0;
             }
         }
-        throw ApplyOperatorException
-                .invalidTypePairs(OperatorEnum.GREATER_THAN, o1, o2);
+        throw ApplyOperatorException.invalidTypePairsException(OperatorEnum.GREATER_THAN, o1, o2);
     }
 
     @Override

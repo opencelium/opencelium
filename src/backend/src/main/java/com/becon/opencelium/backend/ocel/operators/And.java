@@ -10,7 +10,7 @@ public class And implements Operator {
     @Override
     public Boolean apply(Object o1, Object o2) throws ApplyOperatorException {
         if (!(o1 instanceof Boolean o11) || !(o2 instanceof Boolean o22))
-            throw ApplyOperatorException.invalidTypePairs(OperatorEnum.AND, o1, o2);
+            throw ApplyOperatorException.invalidTypePairsException(OperatorEnum.AND, o1, o2);
         return o11 && o22;
     }
 

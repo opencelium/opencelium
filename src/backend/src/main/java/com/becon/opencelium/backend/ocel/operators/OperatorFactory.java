@@ -20,6 +20,10 @@ public class OperatorFactory {
             case IS_TYPE_OF -> new IsTypeOf();
             case IS_EMPTY -> new IsEmpty();
             case NOT_EMPTY -> new NotEmpty();
+            case LIKE -> new Like();
+            case NOT_LIKE -> new NotLike();
+            case REGEX -> new RegEx();
+            case MATCHES -> new Matches();
             default -> throw new IllegalStateException("Unexpected value: " + operator);
         };
     }
