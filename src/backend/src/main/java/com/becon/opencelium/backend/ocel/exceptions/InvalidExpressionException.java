@@ -9,11 +9,19 @@ public class InvalidExpressionException extends Exception {
     }
 
     public static InvalidExpressionException valueParseException(ValueParseException e) {
-        return new InvalidExpressionException(e.getCode(), e.getMessage());
+        return new InvalidExpressionException(e.getCodeString(), e.getMessage());
     }
 
     public static InvalidExpressionException applyOperatorException(ApplyOperatorException e) {
-        return new InvalidExpressionException(e.getCode(), e.getMessage());
+        return new InvalidExpressionException(e.getCodeString(), e.getMessage());
+    }
+
+    public static InvalidExpressionException invalidSyntaxException() {
+        return new InvalidExpressionException(ErrorCode.INVALID_SYNTAX.getCode(), "Invalid Expression");
+    }
+
+    public static InvalidExpressionException invalidSyntaxException(InvalidSyntaxException e) {
+        return new InvalidExpressionException(e.getErrorCode().getCode(), e.getMessage());
     }
 
     public String getErrorCode() {

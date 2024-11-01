@@ -11,8 +11,10 @@ public enum ErrorCode {
     AO_INVALID_TYPE("invalid.type"),
     AO_INVALID_OPERAND_VALUE("invalid.operand.value"),
 
-    UNKNOWN_EXCEPTION("unknown.exception")
-    ;
+    INVALID_SYNTAX("invalid.syntax"),
+    UNKNOWN_EXCEPTION("unknown.exception"),
+    INVALID_PARENTHESES("invalid.parentheses"),
+    INVALID_VALUE_FOUND("invalid.value.found"),;
 
     private final String code;
 

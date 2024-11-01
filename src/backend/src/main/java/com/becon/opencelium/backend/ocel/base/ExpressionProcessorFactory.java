@@ -13,7 +13,7 @@ public abstract class ExpressionProcessorFactory {
 
     public static ExpressionProcessor get(ProcessorType type) {
         return switch (type) {
-            case POSTFIX -> new PostfixExpressionProcessor(new ValidatorImpl());
+            case POSTFIX -> new PostfixExpressionProcessor(ValidatorFactory.get());
         };
     }
 }

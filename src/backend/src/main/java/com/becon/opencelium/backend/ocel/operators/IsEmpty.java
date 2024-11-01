@@ -23,7 +23,7 @@ public class IsEmpty implements Operator {
 
     @Override
     public Arity getArity() {
-        return Arity.UNAR;
+        return Arity.UNARY;
     }
 
     @Override

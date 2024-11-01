@@ -25,7 +25,7 @@ public class EqualTo implements Operator {
 
     @Override
     public Arity getArity() {
-        return Arity.BINAR;
+        return Arity.BINARY;
     }
 
     @Override

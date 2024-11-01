@@ -8,8 +8,7 @@ import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.operators.Operator;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.exceptions.ValueParseException;
-import com.becon.opencelium.backend.ocel.postfix.convertor.ConverterToIntermediateNotation;
-import com.becon.opencelium.backend.ocel.postfix.convertor.RawValueParser;
+import com.becon.opencelium.backend.ocel.utils.RawValueParser;
 import com.becon.opencelium.backend.ocel.utils.Utils;
 
 import java.util.Queue;
@@ -18,9 +17,19 @@ import java.util.function.Function;
 
 public class PostfixEvaluator implements Evaluator {
 
+    private static final PostfixEvaluator INSTANCE = new PostfixEvaluator();
+
+    private final ConverterToIntermediateNotation converterIN;
+    private final RawValueParser rawValueParser;
+
+    private PostfixEvaluator() {
+        this.converterIN = ConverterToIntermediateNotation.getInstance();
+        this.rawValueParser = RawValueParser.getInstance();
+    }
+
     @Override
     public boolean evaluate(String expression, Function<String, Object> referenceExtractor) throws InvalidExpressionException {
-        Queue<Token> tokens = ConverterToIntermediateNotation.convert(expression);
+        Queue<Token> tokens = converterIN.convert(expression);
         return evaluateInternal(tokens, referenceExtractor);
     }
 
@@ -30,7 +39,7 @@ public class PostfixEvaluator implements Evaluator {
             Token token = tokens.poll();
             if (token instanceof Operator operator) {
                 Arity arity = operator.getArity();
-                if (arity == Arity.UNAR) {
+                if (arity == Arity.UNARY) {
                     Operand operand = operandStack.pop();
                     if (operand.isRaw()) {
                         try {
@@ -46,7 +55,7 @@ public class PostfixEvaluator implements Evaluator {
                         throw InvalidExpressionException.applyOperatorException(e);
                     }
                     operandStack.push(Operand.withValue(result));
-                } else if (arity == Arity.BINAR) {
+                } else if (arity == Arity.BINARY) {
                     Operand right = operandStack.pop();
                     Operand left = operandStack.pop();
 
@@ -84,6 +93,10 @@ public class PostfixEvaluator implements Evaluator {
     private Object getValueOfRaw(String rawValue, Function<String, Object> referenceExtractor) throws ValueParseException {
         return Utils.isReference(rawValue)
                 ? referenceExtractor.apply(rawValue)
-                : RawValueParser.parse(rawValue);
+                : rawValueParser.parse(rawValue);
+    }
+
+    public static Evaluator getInstance() {
+        return INSTANCE;
     }
 }

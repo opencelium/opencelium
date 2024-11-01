@@ -25,7 +25,7 @@ public class Like implements Operator {
 
     @Override
     public Arity getArity() {
-        return Arity.BINAR;
+        return Arity.BINARY;
     }
 
     @Override

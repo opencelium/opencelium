@@ -21,7 +21,7 @@ public class Not implements Operator {
 
     @Override
     public Arity getArity() {
-        return Arity.UNAR;
+        return Arity.UNARY;
     }
 
     @Override

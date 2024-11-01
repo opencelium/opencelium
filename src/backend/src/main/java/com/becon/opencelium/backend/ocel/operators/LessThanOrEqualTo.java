@@ -22,7 +22,7 @@ public class LessThanOrEqualTo implements Operator {
 
     @Override
     public Arity getArity() {
-        return Arity.BINAR;
+        return Arity.BINARY;
     }
 
     @Override

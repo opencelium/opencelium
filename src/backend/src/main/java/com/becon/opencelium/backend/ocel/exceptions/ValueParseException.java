@@ -33,7 +33,11 @@ public class ValueParseException extends Exception {
         return message;
     }
 
-    public String getCode() {
+    public String getCodeString() {
         return code.getCode();
+    }
+
+    public ErrorCode getCode() {
+        return code;
     }
 }

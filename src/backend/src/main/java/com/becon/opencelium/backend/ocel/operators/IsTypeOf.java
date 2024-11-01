@@ -22,7 +22,7 @@ public class IsTypeOf implements Operator {
 
     @Override
     public Arity getArity() {
-        return Arity.BINAR;
+        return Arity.BINARY;
     }
 
     @Override

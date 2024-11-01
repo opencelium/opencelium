@@ -1,15 +1,18 @@
-package com.becon.opencelium.backend.ocel.postfix.convertor;
+package com.becon.opencelium.backend.ocel.utils;
 
 import com.becon.opencelium.backend.ocel.enums.DataType;
 import com.becon.opencelium.backend.ocel.exceptions.*;
-import com.becon.opencelium.backend.ocel.utils.NumberUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RawValueParser {
+    private static final RawValueParser INSTANCE = new RawValueParser();
 
-    public static Object parse(String val) throws ValueParseException {
+    private RawValueParser() {
+    }
+
+    public Object parse(String val) throws ValueParseException {
         if ("null".equals(val)) return null;
 
         if ("true".equals(val) || "false".equals(val)) {
@@ -42,7 +45,7 @@ public class RawValueParser {
         throw ValueParseException.unknownOperandValue(val);
     }
 
-    private static Object parseList(String[] elements) throws ValueParseException {
+    private Object parseList(String[] elements) throws ValueParseException {
         List<Object> parsedList = new ArrayList<>();
 
         if (elements.length == 1 && elements[0].isEmpty()) {
@@ -63,7 +66,7 @@ public class RawValueParser {
         return parsedList;
     }
 
-    private static Class<?> determineElementType(String element) throws ValueParseException {
+    private Class<?> determineElementType(String element) throws ValueParseException {
         if ("true".equals(element) || "false".equals(element)) {
             return Boolean.class;
         }
@@ -74,7 +77,7 @@ public class RawValueParser {
         throw ValueParseException.invalidElementOfArray(element);
     }
 
-    private static Object parseElementOfArray(String element, Class<?> elementType) throws ValueParseException {
+    private Object parseElementOfArray(String element, Class<?> elementType) throws ValueParseException {
         return switch (elementType.getSimpleName()) {
             case "Boolean" -> {
                 if ("true".equals(element) || "false".equals(element)) {
@@ -97,5 +100,9 @@ public class RawValueParser {
             }
             default -> element;
         };
+    }
+
+    public static RawValueParser getInstance() {
+        return INSTANCE;
     }
 }

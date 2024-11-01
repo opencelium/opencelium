@@ -47,7 +47,7 @@ public class Utils {
                 int inc = processPrefixAndSuffix(chars, i, stack);
                 if (i == chars.length - 1) {
                     if (!stack.empty()) {
-                        throw new InvalidExpressionException();
+                        throw InvalidExpressionException.invalidSyntaxException();
                     }
                     res.add(expression.substring(start));
                 }
@@ -115,5 +115,20 @@ public class Utils {
             }
         }
         return 0;
+    }
+
+    public static List<String> splitTokens(String expression) {
+        List<String> res = new ArrayList<>();
+        // TODO
+        return res;
+    }
+
+    public static boolean isRawValue(String token) {
+        return !token.equals(")") && !token.equals("(") && !Utils.isOperator(token) && !Utils.isReference(token);
+    }
+
+    public static boolean isValidToken(String token) {
+        // TODO
+        return false;
     }
 }

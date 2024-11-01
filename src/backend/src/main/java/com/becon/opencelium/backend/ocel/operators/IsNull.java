@@ -3,7 +3,6 @@ package com.becon.opencelium.backend.ocel.operators;
 import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
-import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 
 public class IsNull implements Operator {
     @Override
@@ -18,7 +17,7 @@ public class IsNull implements Operator {
 
     @Override
     public Arity getArity() {
-        return Arity.UNAR;
+        return Arity.UNARY;
     }
 
     @Override

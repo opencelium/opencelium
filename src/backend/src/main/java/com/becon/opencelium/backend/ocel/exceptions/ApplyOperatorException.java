@@ -11,7 +11,7 @@ public class ApplyOperatorException extends Exception {
     private final Arity arity;
 
     public ApplyOperatorException(ErrorCode code, OperatorEnum operator, Object o1, Object o2) {
-        this(code, operator, o1, o2, Arity.BINAR);
+        this(code, operator, o1, o2, Arity.BINARY);
     }
 
     public ApplyOperatorException(ErrorCode code, OperatorEnum operator, Object o1, Object o2, Arity arity) {
@@ -27,11 +27,11 @@ public class ApplyOperatorException extends Exception {
     }
 
     public static ApplyOperatorException invalidTypeException(OperatorEnum operator, Object o) {
-        return new ApplyOperatorException(ErrorCode.AO_INVALID_TYPE, operator, o, null, Arity.UNAR);
+        return new ApplyOperatorException(ErrorCode.AO_INVALID_TYPE, operator, o, null, Arity.UNARY);
     }
 
     public static ApplyOperatorException invalidOperandValueException(OperatorEnum operator, Object o1, Object o2) {
-        return invalidOperandValueException(operator, o1, o2, Arity.BINAR);
+        return invalidOperandValueException(operator, o1, o2, Arity.BINARY);
     }
 
     public static ApplyOperatorException invalidOperandValueException(OperatorEnum operator, Object o1, Object o2, Arity arity) {
@@ -48,13 +48,13 @@ public class ApplyOperatorException extends Exception {
                     .formatted(this.operator.getName(),
                             this.o1 == null ? null : this.o1.getClass(),
                             this.o2 == null ? null : this.o2.getClass());
-            case AO_INVALID_OPERAND_VALUE -> this.arity == Arity.UNAR
+            case AO_INVALID_OPERAND_VALUE -> this.arity == Arity.UNARY
                     ? "'%s' operator doesn't support this value - '%s'".formatted(this.operator, this.o1)
                     : "'%s' operator doesn't support these value pairs. 1-value - '%s', 2-value - '%s'"
                     .formatted(this.operator, this.o1, this.o2);
             case AO_INVALID_TYPE -> "'%s' operator doesn't support this type: '%s'"
                     .formatted(this.operator, this.o1 == null ? null : this.o1.getClass());
-            case UNKNOWN_EXCEPTION -> this.arity == Arity.UNAR
+            case UNKNOWN_EXCEPTION -> this.arity == Arity.UNARY
                     ? "Unknown exception. Operator -'%s', value -'%s'".formatted(this.getOperator(), this.o1)
                     : "Unknown exception. Operator -'%s', 1-value -'%s', 2-value - '%s'"
                     .formatted(this.getOperator(), this.o1, this.o2);
@@ -74,8 +74,11 @@ public class ApplyOperatorException extends Exception {
         return o2;
     }
 
-    public String getCode() {
+    public String getCodeString() {
         return code.getCode();
+    }
+    public ErrorCode getCode() {
+        return code;
     }
 
     public Arity getArity() {
