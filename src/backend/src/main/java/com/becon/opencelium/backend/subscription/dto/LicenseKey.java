@@ -75,4 +75,18 @@ public class LicenseKey {
     public void setLicenseId(String licenseId) {
         this.licenseId = licenseId;
     }
+
+    @Override
+    public String toString() {
+        return "LicenseKey{" +
+                "startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", operationUsage=" + operationUsage +
+                ", subId='" + subId + '\'' +
+                ", licenseId='" + licenseId + '\'' +
+                ", duration='" + duration + '\'' +
+                ", type='" + type + '\'' +
+                ", hmac='" + hmac + '\'' +
+                '}';
+    }
 }

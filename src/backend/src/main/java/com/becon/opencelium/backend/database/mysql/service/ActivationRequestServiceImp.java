@@ -48,6 +48,7 @@ public class ActivationRequestServiceImp implements ActivationRequestService{
         ar.setCreatedAt(LocalDateTime.now());
         ar.setStatus(ActivReqStatus.PENDING);
         ar.setTtl(3600);
+        ar.setActive(false);
         ar.setHmac(HmacUtility.encode(ar.getId()+ MachineUtility.getStringForHmacEncode()));
         return ar;
     }
@@ -55,24 +56,23 @@ public class ActivationRequestServiceImp implements ActivationRequestService{
     @Override
     public void activateTTL(ActivationRequest activationRequest) {
         scheduler.schedule(() -> {
-                    ActivationRequest toModify = activationRequestRepository.findById(activationRequest.getId())
-                            .orElse(null);
-                    if (toModify != null && !toModify.getStatus().equals(ActivReqStatus.PROCESSED)) {
-                        toModify.setStatus(ActivReqStatus.EXPIRED);
-                        activationRequestRepository.save(toModify);
-                    }
-                },
-                activationRequest.getTtl(),
-                TimeUnit.SECONDS);
+            activationRequestRepository.updateStatusIfNotProcessed(
+                    activationRequest.getId(),
+                    ActivReqStatus.EXPIRED,
+                    ActivReqStatus.PROCESSED
+            );
+        }, activationRequest.getTtl(), TimeUnit.SECONDS);
     }
 
     @Override
-    public void expireAll() {
+    public void deactivateAll() {
         activationRequestRepository.expireAllActivationRequests();
+        activationRequestRepository.deactivateAll();
     }
 
     @Override
     public ActivationRequest getActiveAR() {
+        // finds activation request that was successfully activated when user uploaded valid license key.
         return activationRequestRepository.findActiveAR().orElse(null);
     }
 

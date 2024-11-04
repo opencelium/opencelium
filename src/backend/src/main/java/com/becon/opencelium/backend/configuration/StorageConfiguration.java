@@ -25,6 +25,7 @@ import com.becon.opencelium.backend.database.mysql.service.ActivationRequestServ
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.RequestDataService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
+import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.storage.UserStorageService;
@@ -45,6 +46,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -129,6 +131,8 @@ public class StorageConfiguration {
             String initLicense = LicenseKeyUtility.readFreeLicense();
             Subscription subscription = subscriptionService.convertToSub(initLicense,ar);
             if(!subscriptionService.exists(subscription.getSubId())) {
+                Objects.requireNonNull(ar).setStatus(ActivReqStatus.PROCESSED);
+                ar.setActive(true);
                 activationRequestService.save(ar);
                 subscriptionService.save(subscription);
             }

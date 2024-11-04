@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.SubscriptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
+import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.quartz.ResetLimitsJob;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
@@ -68,7 +69,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (!isCurrentUsageIsValid(sub)) {
             throw new RuntimeException("Usage number of operation has been changed manually.");
         }
-        if (licenseKey.getOperationUsage() != 0 && sub.getCurrentUsage() > licenseKey.getOperationUsage()) {
+        if (licenseKey.getOperationUsage() != 0 && sub.getCurrentUsage() >= licenseKey.getOperationUsage()) {
             throw new RuntimeException("You have reached limit of operation usage: " + licenseKey.getOperationUsage());
         }
         return isValid;
@@ -85,6 +86,22 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .encode(subscription.getId() + subscription.getCurrentUsage()));
         initTask(subscription);
         subscriptionRepository.save(subscription);
+    }
+
+    @Override
+    public Subscription setSubscription(String licenseKey, ActivationRequest newAr) {
+        if (newAr.getStatus().equals(ActivReqStatus.EXPIRED)) {
+            throw new RuntimeException("Couldn't activate license. Activation request has been expired " +
+                    "and license is not valid anymore. Generate new Activation Request.");
+        }
+        activationRequestService.deactivateAll();
+        newAr.setStatus(ActivReqStatus.PROCESSED);
+        newAr.setActive(true);
+        activationRequestService.save(newAr);
+        Subscription subscription = convertToSub(licenseKey, newAr);
+        deactivateAll();
+        save(subscription);
+        return subscription;
     }
 
     @Override
