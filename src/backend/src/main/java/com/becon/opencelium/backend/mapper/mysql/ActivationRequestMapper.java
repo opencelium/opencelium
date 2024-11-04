@@ -18,6 +18,7 @@ import java.time.ZoneId;
 public interface ActivationRequestMapper extends Mapper<ActivationRequest, ActivationRequestDTO> {
     @Mapping(target = "ttl", ignore = true)
     @Mapping(source = "createdAt", target = "createdAt")
+    @Mapping(target = "status", ignore = true)
     ActivationRequest toEntity(ActivationRequestDTO dto);
 
     ActivationRequestDTO toDTO(ActivationRequest entity);

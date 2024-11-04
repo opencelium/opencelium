@@ -498,6 +498,7 @@ CREATE TABLE activation_request(
     hmac       VARCHAR(255) UNIQUE,
     ttl        INT UNSIGNED NOT NULL,
     status     ENUM ('PENDING', 'PROCESSED', 'EXPIRED') DEFAULT 'PENDING',
+    active     BOOLEAN      NOT NULL,
     INDEX idx_hmac (hmac)
 );
 
