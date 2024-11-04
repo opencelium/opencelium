@@ -451,7 +451,7 @@ ADD COLUMN IF NOT EXISTS totp_secret_key VARCHAR(255);
 
 --changeset 4.2:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 DROP TABLE IF EXISTS user_session;
-CREATE TABLE user_session (
+CREATE TABLE IF NOT EXISTS user_session (
     session_id VARCHAR(255) NOT NULL PRIMARY KEY,
     user_id int(11) NOT NULL,
     ip_address VARCHAR(45),
@@ -492,7 +492,7 @@ DROP TABLE IF EXISTS subscription;
 DROP TABLE IF EXISTS activation_request;
 DROP TABLE IF EXISTS operation_usage_history_detail;
 DROP TABLE IF EXISTS operation_usage_history;
-CREATE TABLE activation_request(
+CREATE TABLE IF NOT EXISTS activation_request(
     id         VARCHAR(255) PRIMARY KEY,
     created_at TIMESTAMP    NOT NULL,
     hmac       VARCHAR(255) UNIQUE,
@@ -503,7 +503,7 @@ CREATE TABLE activation_request(
 );
 
 --changeset 4.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-CREATE TABLE subscription(
+CREATE TABLE IF NOT EXISTS subscription(
     id                    VARCHAR(255) PRIMARY KEY,
     subId                 VARCHAR(255) UNIQUE NOT NULL,
     license_id            VARCHAR(255) UNIQUE NOT NULL,
@@ -517,7 +517,7 @@ CREATE TABLE subscription(
 );
 
 --changeset 4.2:8 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-CREATE TABLE operation_usage_history(
+CREATE TABLE IF NOT EXISTS operation_usage_history(
     id               BIGINT PRIMARY KEY AUTO_INCREMENT,
     subId            VARCHAR(255) NOT NULL,
     license_id       VARCHAR(255) NOT NULL,
@@ -527,7 +527,7 @@ CREATE TABLE operation_usage_history(
 );
 
 --changeset 4.2:9 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-CREATE TABLE operation_usage_history_detail(
+CREATE TABLE IF NOT EXISTS operation_usage_history_detail(
     id               BIGINT PRIMARY KEY AUTO_INCREMENT,
     start_date       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     operation_usage  BIGINT       NOT NULL,
@@ -536,7 +536,7 @@ CREATE TABLE operation_usage_history_detail(
 );
 
 --changeset 4.2:10 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-CREATE TABLE connection_editor_settings
+CREATE TABLE IF NOT EXISTS connection_editor_settings
 (
     id                BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id           INT       NOT NULL,
