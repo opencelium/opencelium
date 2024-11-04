@@ -17,20 +17,19 @@ import java.util.ArrayList;
 import java.util.Base64;
 
 public class LicenseKeyUtility {
-//    private static final String PUBLIC_KEY ="MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAnj2andeiYdgRAp1jkLej" +
-//            "/xgslVEN+qodRNjguHNBV2gKHim9VXCvakAZveUqXN7/L7R+wlDrlnjLDWV5cN4a" +
-//            "WDQFPKK0YcH+A1oSI7m/SbBaeyQSwH5PT/kYG0AU3C1FItoshhDKDhvSMk5iUJc6" +
-//            "6ZXRg4xBH9x3jOfKHRrvJlLRx8NX+WLPJNLpVog/an2lmDqWw2AsJYgf8p18baCa" +
-//            "vHKil39e8gDNizAQhQdC1yEK4RLgtsmGFGnrhCjNaZ/+NriYE4D/CK71QT4d//eF" +
-//            "4LNgBqIGEPRb4ekt9qUH2T6F5XqiR90BFRLTyMv0ASos+k25GQqHS7WRjUHUOu0F" +
-//            "1UL9POtjLCVj39q9U9ip6G3UYTNJ7gF6wUpzwmqQuLID4Bx3YOT7GeaiPc2AdlQl" +
-//            "T5MbFSBMqHXcsScHfEQU2IPb2iYowLoKH7nqrCHOtR83/CDbzKKCHm0R072QmFh+" +
-//            "67YPL3U1Vg+zrT4emlEYSM3gdOrcb4Wgm85+sUs3aoWmRPsDITUG+vqAbZ2C/gxg" +
-//            "EmlVZzbKgH4NpFIO/eh7oW7cWXyJ+2Fc07T/NRs1UBAR6cjpZBFeVKIgIsWay6sF" +
-//            "ffOyv1lUM0DRvtM53BgaXV2V5TUbOzKlM+d2jBqlrCeq6TpJVG6FCrJsaaOgSq6Z" +
-//            "gt5JLtdbtZqZtnYndk3FT78CAwEAAQ==";
+    private static final String PUBLIC_KEY ="MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAnj2andeiYdgRAp1jkLej" +
+            "/xgslVEN+qodRNjguHNBV2gKHim9VXCvakAZveUqXN7/L7R+wlDrlnjLDWV5cN4a" +
+            "WDQFPKK0YcH+A1oSI7m/SbBaeyQSwH5PT/kYG0AU3C1FItoshhDKDhvSMk5iUJc6" +
+            "6ZXRg4xBH9x3jOfKHRrvJlLRx8NX+WLPJNLpVog/an2lmDqWw2AsJYgf8p18baCa" +
+            "vHKil39e8gDNizAQhQdC1yEK4RLgtsmGFGnrhCjNaZ/+NriYE4D/CK71QT4d//eF" +
+            "4LNgBqIGEPRb4ekt9qUH2T6F5XqiR90BFRLTyMv0ASos+k25GQqHS7WRjUHUOu0F" +
+            "1UL9POtjLCVj39q9U9ip6G3UYTNJ7gF6wUpzwmqQuLID4Bx3YOT7GeaiPc2AdlQl" +
+            "T5MbFSBMqHXcsScHfEQU2IPb2iYowLoKH7nqrCHOtR83/CDbzKKCHm0R072QmFh+" +
+            "67YPL3U1Vg+zrT4emlEYSM3gdOrcb4Wgm85+sUs3aoWmRPsDITUG+vqAbZ2C/gxg" +
+            "EmlVZzbKgH4NpFIO/eh7oW7cWXyJ+2Fc07T/NRs1UBAR6cjpZBFeVKIgIsWay6sF" +
+            "ffOyv1lUM0DRvtM53BgaXV2V5TUbOzKlM+d2jBqlrCeq6TpJVG6FCrJsaaOgSq6Z" +
+            "gt5JLtdbtZqZtnYndk3FT78CAwEAAQ==";
     private static final int MAX_ENCRYPT_BLOCK = 245;  // Max block size for RSA/ECB/PKCS1Padding with a 2048-bit key
-    private static final String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArw2Ifyq70y82zx125vTQA0rMQwE7mncZRidmln5xXk6arn51AHrVKzlajHld5aCcapjHRH4x0e+55GlXtWDOOFW+2h7FkzZgpfdA1qJhL6AAX5WDhqedW60uabMygiSUiyoQHVbknezJJlDPgnXZB7246rArQOH09y5zx99HiVAXSNOFMnd9dYbSK7afUBup9cHJ90WGlhcToqBipKQH+tb3lM9iYmGbZcEFbdyrX+fxiPbMUseMCkOcteeNRO0Oj8JrklrD6iEwvx3xFgKP8QuwRdPhB7DslbNL7IvJk+CG0cgtHIzWa1WcqN+nuMG01WbZo35nTGCtuFcRdDL+AwIDAQAB";
     private final static Logger logger = LoggerFactory.getLogger(LicenseKeyUtility.class);
 
     // TODO: create chain of responsibility for different verifications.
