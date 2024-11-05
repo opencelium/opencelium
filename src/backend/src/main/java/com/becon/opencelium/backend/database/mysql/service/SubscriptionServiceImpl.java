@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -306,6 +307,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 Trigger newTrigger = TriggerBuilder.newTrigger()
                         .withIdentity(triggerKey)
                         .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                        .endAt(Date.from(Instant.ofEpochMilli(lk.getEndDate())))
                         .build();
 
                 // Reschedule the existing job with the new trigger
@@ -324,6 +326,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 Trigger trigger = TriggerBuilder.newTrigger()
                         .withIdentity("default", "default")
                         .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                        .endAt(Date.from(Instant.ofEpochMilli(lk.getEndDate())))
                         .build();
 
                 // Schedule the new job
