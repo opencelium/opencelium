@@ -230,7 +230,7 @@ public class SecurityConfiguration {
                 .findFirst()
                 .map(LdapProperties.Group2Role::getOcRole)
                 .orElseGet(() -> {
-                    logger.info("No mapping found for LDAP group = '" + groups.get(0) + "'");
+                    logger.info("No match found for LDAP group = '" + groups.get(0) + "' in OC mappings " + ldapProperties.getGroupNames());
                     return ldapProperties.getDefaultRole();
                 });
 
