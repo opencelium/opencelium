@@ -19,4 +19,5 @@ public interface SubscriptionService {
     Subscription getById(String id);
     void updateUsage(Subscription activeSub, long connectionId, long requestSize, long startTime);
     void createFreeLicenseFileIfNotExists();
+    void resetMonthlyUsageForLicense(String subId);
 }

@@ -10,6 +10,7 @@ import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
+import jakarta.transaction.Transactional;
 import org.quartz.*;
 import org.quartz.Scheduler;
 import org.quartz.impl.matchers.GroupMatcher;
@@ -22,8 +23,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -76,6 +79,34 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     private boolean isHmacValid(Subscription sub, String hmac) {
         return HmacUtility.verify(sub.getActivationRequest().getId() + MachineUtility.getStringForHmacEncode(), hmac);
+    }
+
+    @Override
+    @Transactional
+    public void resetMonthlyUsageForLicense(String subId) {
+        Optional<Subscription> optionalLicense = subscriptionRepository.findById(subId);
+
+        if (optionalLicense.isPresent()) {
+            Subscription subscription = optionalLicense.get();
+            LocalDate currentDate = LocalDate.now();
+            LicenseKey licenseKey = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
+            LocalDate startDate = Instant.ofEpochMilli(licenseKey.getStartDate())
+                    .atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate endDate = Instant.ofEpochMilli(licenseKey.getEndDate())
+                    .atZone(ZoneId.systemDefault()).toLocalDate();
+
+            if (currentDate.isAfter(startDate) && currentDate.isBefore(endDate)) {
+                // Reset current_usage
+                subscription.setCurrentUsage(0);
+
+                // Update current_usage_hmac
+                String newHmac = HmacUtility.encode(subscription.getSubId() + 0);
+                subscription.setCurrentUsageHmac(newHmac);
+
+                // Save updated license
+                subscriptionRepository.save(subscription);
+            }
+        }
     }
 
     @Override

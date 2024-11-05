@@ -18,11 +18,11 @@ public class ResetLimitsJob extends QuartzJobBean {
     @Override
     public void executeInternal(JobExecutionContext context) {
         JobKey key = context.getJobDetail().getKey();
-        String id = key.getName().split("-")[1];
-        Subscription subscription = subscriptionService.getById(id);
-        subscription.setCurrentUsage(0L);
-        subscription.setCurrentUsageHmac(HmacUtility
-                .encode(subscription.getId().toString() + subscription.getCurrentUsage()));
-        subscriptionService.save(subscription);
+        String subId = key.getName().split("-")[1];
+        subscriptionService.resetMonthlyUsageForLicense(subId);
+//        subscription.setCurrentUsage(0L);
+//        subscription.setCurrentUsageHmac(HmacUtility
+//                .encode(subscription.getId().toString() + subscription.getCurrentUsage()));
+//        subscriptionService.save(subscription);
     }
 }
