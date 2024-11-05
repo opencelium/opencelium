@@ -32,6 +32,8 @@ import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -53,6 +55,7 @@ import java.util.stream.Stream;
 @Configuration
 public class StorageConfiguration {
 
+    private static final Logger log = LoggerFactory.getLogger(StorageConfiguration.class);
     private final UserStorageService userStorageService;
     private final ConnectorService connectorService;
     private final InvokerContainer invokerContainer;
@@ -143,7 +146,7 @@ public class StorageConfiguration {
 
     private void cleanOldFiles(String folder, Predicate<File> filter, String prefix) {
         Path path = Paths.get(folder);
-        if(Files.exists(path) && Files.isDirectory(path)){
+        if (Files.exists(path) && Files.isDirectory(path)) {
             try (Stream<File> files = Files.list(path).map(Path::toFile).filter(filter)) {
 
                 Double ocVersion = environment.getProperty("opencelium.version", Double.class, 0.0);
@@ -151,9 +154,9 @@ public class StorageConfiguration {
 
                 files.filter(f -> !f.getName().startsWith(prefix + intValue + ".")).forEach(f -> {
                     if (forceDelete(f)) {
-                        System.out.println(f.getAbsolutePath() + " - file/folder is deleted");
+                        log.info("{} - file/folder is deleted", f.getAbsolutePath());
                     } else {
-                        System.out.println(f.getAbsolutePath() + " - file/folder cannot be deleted");
+                        log.warn("{} - file/folder cannot be deleted", f.getAbsolutePath());
                     }
                 });
             } catch (Exception e) {
@@ -204,9 +207,9 @@ public class StorageConfiguration {
         if (Files.notExists(filePath)) {
             File directory = new File(name);
             if (directory.mkdir()) {
-                System.out.println("Directory has been created: " + name);
+                log.info("Directory has been created: {}", name);
             } else {
-                System.out.println("Failed to create directory: " + name);
+                log.warn("Failed to create directory: {}", name);
             }
         }
     }
