@@ -186,7 +186,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             String roleName = authorities.stream()
                     .map(GrantedAuthority::getAuthority)
                     .findFirst()
-                    .orElse(properties.getDefaultRole());
+                    .orElseGet(() -> {
+                        logger.info("No groups found in LDAP server for configuration: group-search-base='" + properties.getGroupSearchBase() + "' group-search-filter='" + properties.getGroupSearchFilter() + "'");
+                        return properties.getDefaultRole();
+                    });
 
             UserRole role = userRoleService.findByRole(roleName)
                     .orElseThrow(() -> new EntityNotFoundException("LDAP group mapped to role = '" + roleName + "', but it does not exists in OC system."));
@@ -202,6 +205,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         if (properties.isShowLogs()) {
             logger.info("User " + result.getEmail() + " is authenticated via " + authType);
+            logger.info("Role '"+ result.getUserRole().getName() + "' has been assigned to " + result.getEmail());
         }
 
         return result;
