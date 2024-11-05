@@ -40,6 +40,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final ActivationRequestService activationRequestService;
     private final Logger logger = LoggerFactory.getLogger(SubscriptionServiceImpl.class);
 
+
+
     public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository,
                                    Scheduler scheduler,
                                    @Qualifier("connectionServiceImp") ConnectionService connectionService,
@@ -305,7 +307,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 // Create a new trigger with the updated schedule
                 Trigger newTrigger = TriggerBuilder.newTrigger()
                         .withIdentity(triggerKey)
-                        .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                        .startAt(Date.from(Instant.ofEpochMilli(lk.getStartDate())))
                         .endAt(Date.from(Instant.ofEpochMilli(lk.getEndDate())))
                         .build();
 
@@ -324,7 +326,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 // Create a new trigger for the job
                 Trigger trigger = TriggerBuilder.newTrigger()
                         .withIdentity(triggerName, triggerGroup)
-                        .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                        .startAt(Date.from(Instant.ofEpochMilli(lk.getStartDate())))
                         .endAt(Date.from(Instant.ofEpochMilli(lk.getEndDate())))
                         .build();
 
