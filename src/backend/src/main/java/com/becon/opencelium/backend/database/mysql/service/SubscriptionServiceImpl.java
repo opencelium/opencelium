@@ -85,8 +85,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public void resetMonthlyUsageForLicense(String subId) {
-        Optional<Subscription> optionalLicense = subscriptionRepository.findById(subId);
+    public void resetMonthlyUsageForLicense(String localSubId) {
+        Optional<Subscription> optionalLicense = subscriptionRepository.findById(localSubId);
 
         if (optionalLicense.isPresent()) {
             Subscription subscription = optionalLicense.get();
@@ -116,7 +116,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         deactivateAll();
         subscription.setCurrentUsageHmac(HmacUtility
                 .encode(subscription.getId() + subscription.getCurrentUsage()));
-        initTask(subscription);
+        initUsageResetJob(subscription);
         subscriptionRepository.save(subscription);
     }
 
@@ -287,16 +287,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     .verify(sub.getId() + sub.getCurrentUsage(), sub.getCurrentUsageHmac());
     }
 
-    private void initTask(Subscription subscription) {
-        String jobKey = "subs-" + subscription.getId();
-        String groupKey = "subs-group";
+    private void initUsageResetJob(Subscription subscription) {
+        String jobKey = "LicenseUsageResetJob-" + subscription.getId();
+        String groupKey = "LicenseJobs";
+        String triggerName = "LicenseTrigger-" + subscription.getId();
+        String triggerGroup = "LicenseTriggers";
         JobKey jobIdentity = new JobKey(jobKey, groupKey);
 
         try {
             // Check if the job already exists
             if (scheduler.checkExists(jobIdentity)) {
                 // If the job exists, retrieve and update the trigger
-                TriggerKey triggerKey = new TriggerKey("default", "default");
+                TriggerKey triggerKey = new TriggerKey(triggerName, triggerGroup);
 
                 LicenseKey lk = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
                 String cron = String.format("0 0 0 %d * ?", LocalDateTime
@@ -316,6 +318,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 // If the job does not exist, create a new one
                 JobDetail job = JobBuilder.newJob(ResetLimitsJob.class)
                         .withIdentity(jobKey, groupKey)
+                        .usingJobData("localSubId", subscription.getId())
                         .build();
 
                 LicenseKey lk = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
@@ -324,7 +327,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         .getDayOfMonth());
 
                 Trigger trigger = TriggerBuilder.newTrigger()
-                        .withIdentity("default", "default")
+                        .withIdentity(triggerName, triggerGroup)
                         .withSchedule(CronScheduleBuilder.cronSchedule(cron))
                         .endAt(Date.from(Instant.ofEpochMilli(lk.getEndDate())))
                         .build();
