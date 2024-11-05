@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
@@ -102,7 +99,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 subscription.setCurrentUsage(0);
 
                 // Update current_usage_hmac
-                String newHmac = HmacUtility.encode(subscription.getSubId() + 0);
+                String newHmac = HmacUtility.encode(subscription.getId() + 0);
                 subscription.setCurrentUsageHmac(newHmac);
 
                 // Save updated license
@@ -294,6 +291,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         String triggerGroup = "LicenseTriggers";
         JobKey jobIdentity = new JobKey(jobKey, groupKey);
 
+
+
         try {
             // Check if the job already exists
             if (scheduler.checkExists(jobIdentity)) {
@@ -301,9 +300,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 TriggerKey triggerKey = new TriggerKey(triggerName, triggerGroup);
 
                 LicenseKey lk = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
-                String cron = String.format("0 0 0 %d * ?", LocalDateTime
-                        .ofInstant(Instant.ofEpochMilli(lk.getStartDate()), ZoneId.systemDefault())
-                        .getDayOfMonth());
+                String cron = generateCronExpression(lk.getStartDate());
 
                 // Create a new trigger with the updated schedule
                 Trigger newTrigger = TriggerBuilder.newTrigger()
@@ -322,10 +319,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         .build();
 
                 LicenseKey lk = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
-                String cron = String.format("0 0 0 %d * ?", LocalDateTime
-                        .ofInstant(Instant.ofEpochMilli(lk.getStartDate()), ZoneId.systemDefault())
-                        .getDayOfMonth());
+                String cron = generateCronExpression(lk.getStartDate());
 
+                // Create a new trigger for the job
                 Trigger trigger = TriggerBuilder.newTrigger()
                         .withIdentity(triggerName, triggerGroup)
                         .withSchedule(CronScheduleBuilder.cronSchedule(cron))
@@ -336,7 +332,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 scheduler.scheduleJob(job, trigger);
             }
         } catch (SchedulerException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -374,5 +370,24 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 //        } catch (IOException e) {
 //            throw new RuntimeException("Failed to activate the default subscription due to an I/O error", e);
 //        }
+    }
+
+    /**
+     * Generate a cron expression based on the start date (epoch milliseconds).
+     * This handles edge cases where the day of the month may exceed the number of days in certain months (e.g., February).
+     */
+    private String generateCronExpression(long startDateMillis) {
+        LocalDateTime startDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneId.systemDefault());
+        int dayOfMonth = startDate.getDayOfMonth();
+
+        // Handle edge cases where the day of the month might exceed the max days in the current month
+        int currentMonthMaxDays = YearMonth.now().lengthOfMonth();
+        if (dayOfMonth > currentMonthMaxDays) {
+            logger.warn("Adjusting dayOfMonth {} to the last day of the current month ({} days).", dayOfMonth, currentMonthMaxDays);
+            dayOfMonth = currentMonthMaxDays; // Adjust to the last valid day of the current month
+        }
+
+        // Generate the cron expression for monthly execution on the given day of the month at midnight
+        return String.format("0 0 0 %d * ?", dayOfMonth);
     }
 }
