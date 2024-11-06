@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.ocel.postfix;
 
 import com.becon.opencelium.backend.ocel.commons.Operand;
 import com.becon.opencelium.backend.ocel.commons.Token;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.operators.Operator;
 import com.becon.opencelium.backend.ocel.utils.Utils;
 
@@ -11,19 +10,14 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
 
-public class ConverterToIntermediateNotation {
+public class PostfixNotationConvertor {
 
-    public static final ConverterToIntermediateNotation INSTANCE = new ConverterToIntermediateNotation();
+    private static final PostfixNotationConvertor INSTANCE = new PostfixNotationConvertor();
 
-    private ConverterToIntermediateNotation() {
+    private PostfixNotationConvertor() {
     }
 
-    public Queue<Token> convert(String expression) throws InvalidExpressionException {
-        List<String> stringTokens = Utils.splitBySpace(expression);
-        return intermediateNotation(stringTokens);
-    }
-
-    public Queue<Token> intermediateNotation(List<String> stringTokens) {
+    public Queue<Token> toPostfix(List<String> stringTokens) {
         Queue<Token> output = new LinkedList<>();
         Stack<Object> operators = new Stack<>();
 
@@ -64,7 +58,7 @@ public class ConverterToIntermediateNotation {
         return output;
     }
 
-    public static ConverterToIntermediateNotation getInstance() {
+    public static PostfixNotationConvertor getInstance() {
         return INSTANCE;
     }
 }

@@ -21,22 +21,7 @@ public class NotNull implements Operator {
     }
 
     @Override
-    public int getPrecedence() {
-        return OperatorEnum.NOT_NULL.getPrecedence();
-    }
-
-    @Override
-    public boolean isLeftSided() {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String left, String right) {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String val) {
-        return false;
+    public OperatorEnum getOperatorType() {
+        return OperatorEnum.NOT_NULL;
     }
 }

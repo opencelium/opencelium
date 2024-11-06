@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.ocel.operators;
 import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
+import com.becon.opencelium.backend.ocel.enums.SidesType;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public class IsEmpty implements Operator {
     @Override
     public Object apply(Object o) throws ApplyOperatorException {
         if (!(o instanceof List)) {
-            throw ApplyOperatorException.invalidTypeException(OperatorEnum.IS_EMPTY, o);
+            throw ApplyOperatorException.invalidTypeException(getOperatorType(), o);
         }
         return ((List<?>) o).isEmpty();
     }
@@ -27,22 +28,7 @@ public class IsEmpty implements Operator {
     }
 
     @Override
-    public int getPrecedence() {
-        return OperatorEnum.IS_EMPTY.getPrecedence();
-    }
-
-    @Override
-    public boolean isLeftSided() {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String left, String right) {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String val) {
-        return false;
+    public OperatorEnum getOperatorType() {
+        return OperatorEnum.IS_EMPTY;
     }
 }

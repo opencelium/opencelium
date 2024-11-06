@@ -15,7 +15,7 @@ public class Not implements Operator {
     @Override
     public Object apply(Object o) throws ApplyOperatorException {
         if (!(o instanceof Boolean oo))
-            throw ApplyOperatorException.invalidTypeException(OperatorEnum.NOT, o);
+            throw ApplyOperatorException.invalidTypeException(getOperatorType(), o);
         return !oo;
     }
 
@@ -25,22 +25,12 @@ public class Not implements Operator {
     }
 
     @Override
-    public int getPrecedence() {
-        return OperatorEnum.NOT.getPrecedence();
-    }
-
-    @Override
     public boolean isLeftSided() {
         return true;
     }
 
     @Override
-    public boolean applicable(String left, String right) {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String val) {
-        return val != null && (val.equals("true") || val.equals("false"));
+    public OperatorEnum getOperatorType() {
+        return OperatorEnum.NOT;
     }
 }

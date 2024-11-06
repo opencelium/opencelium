@@ -24,6 +24,18 @@ public class InvalidExpressionException extends Exception {
         return new InvalidExpressionException(e.getErrorCode().getCode(), e.getMessage());
     }
 
+    public static InvalidExpressionException invalidAssociationBetweenOperandAndOperators() {
+        return new InvalidExpressionException(ErrorCode.INVALID_ASSOCIATION_BETWEEN_OPERATOR_AND_OPERANDS.getCode(), "Invalid expression");
+    }
+
+    public static InvalidExpressionException resultValueIsNotBoolean(Object resultVal) {
+        return new InvalidExpressionException(ErrorCode.RESULT_VALUE_IS_NOT_BOOLEAN.getCode(), resultVal.toString());
+    }
+
+    public static InvalidExpressionException insufficientOperandException() {
+        return new InvalidExpressionException(ErrorCode.INSUFFICIENT_OPERAND.getCode(), "No sufficient operands");
+    }
+
     public String getErrorCode() {
         return errorCode;
     }

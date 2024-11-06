@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.ocel.operators;
 import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
+import com.becon.opencelium.backend.ocel.enums.SidesType;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 
 import java.util.regex.Pattern;
@@ -11,7 +12,7 @@ public class Matches implements Operator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         if (!(o1 instanceof String value) || !(o2 instanceof String regex))
-            throw ApplyOperatorException.invalidTypePairsException(OperatorEnum.MATCHES, o1, o2);
+            throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
 
         return Pattern.matches(regex, value);
     }
@@ -27,22 +28,12 @@ public class Matches implements Operator {
     }
 
     @Override
-    public int getPrecedence() {
-        return OperatorEnum.MATCHES.getPrecedence();
+    public boolean isValidOperand(SidesType sidesType, Object operand) {
+        return operand instanceof String;
     }
 
     @Override
-    public boolean isLeftSided() {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String left, String right) {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String val) {
-        return false;
+    public OperatorEnum getOperatorType() {
+        return OperatorEnum.MATCHES;
     }
 }

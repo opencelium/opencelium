@@ -1,7 +1,8 @@
-package com.becon.opencelium.backend.ocel.utils;
+package com.becon.opencelium.backend.ocel.base;
 
 import com.becon.opencelium.backend.ocel.enums.DataType;
 import com.becon.opencelium.backend.ocel.exceptions.*;
+import com.becon.opencelium.backend.ocel.utils.NumberUtils;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -11,7 +11,7 @@ public class NotEqualTo implements Operator {
         try {
             return !(Boolean) new EqualTo().apply(o1, o2);
         } catch (ApplyOperatorException e) {
-            throw ApplyOperatorException.invalidTypePairsException(OperatorEnum.NOT_EQUAL_TO, o1, o2);
+            throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
         }
     }
 
@@ -26,22 +26,7 @@ public class NotEqualTo implements Operator {
     }
 
     @Override
-    public int getPrecedence() {
-        return OperatorEnum.NOT_EQUAL_TO.getPrecedence();
-    }
-
-    @Override
-    public boolean isLeftSided() {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String left, String right) {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String val) {
-        return false;
+    public OperatorEnum getOperatorType() {
+        return OperatorEnum.NOT_EQUAL_TO;
     }
 }

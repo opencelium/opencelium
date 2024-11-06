@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.ocel.operators;
 import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
+import com.becon.opencelium.backend.ocel.enums.SidesType;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.utils.DateUtils;
 import com.becon.opencelium.backend.ocel.utils.NumberUtils;
@@ -18,7 +19,7 @@ public class GreaterThanOrEqualTo implements Operator {
                 return DateUtils.compareTo(s1, s2) >= 0;
             }
         }
-        throw ApplyOperatorException.invalidTypePairsException(OperatorEnum.GREATER_THAN_OR_EQUAL_TO, o1, o2);
+        throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
     }
 
     @Override
@@ -32,22 +33,12 @@ public class GreaterThanOrEqualTo implements Operator {
     }
 
     @Override
-    public int getPrecedence() {
-        return OperatorEnum.GREATER_THAN_OR_EQUAL_TO.getPrecedence();
+    public boolean isValidOperand(SidesType sidesType, Object operand) {
+        return new GreaterThan().isValidOperand(sidesType, operand);
     }
 
     @Override
-    public boolean isLeftSided() {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String left, String right) {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String val) {
-        return false;
+    public OperatorEnum getOperatorType() {
+        return OperatorEnum.GREATER_THAN_OR_EQUAL_TO;
     }
 }

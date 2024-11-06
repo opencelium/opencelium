@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.ocel.operators;
 
+import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
+import com.becon.opencelium.backend.ocel.enums.SidesType;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.commons.Token;
@@ -11,11 +13,17 @@ public interface Operator extends Token {
 
     Arity getArity();
 
-    int getPrecedence();
+    OperatorEnum getOperatorType();
 
-    boolean isLeftSided();
+    default int getPrecedence() {
+        return getOperatorType().getPrecedence();
+    }
 
-    boolean applicable(String left, String right);
+    default boolean isLeftSided() {
+        return false;
+    }
 
-    boolean applicable(String val);
+    default boolean isValidOperand(SidesType sidesType, Object operand) {
+        return false;
+    }
 }

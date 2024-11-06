@@ -4,14 +4,17 @@ import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.DataType;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
+import com.becon.opencelium.backend.ocel.enums.SidesType;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 
 public class IsTypeOf implements Operator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
-        Class<?> clazz = DataType.getEnumClass((String) o2);
+        if (!(o2 instanceof String str))
+            throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
+        Class<?> clazz = DataType.getEnumClass(str);
         if (clazz == null)
-            throw ApplyOperatorException.invalidOperandValueException(OperatorEnum.IS_TYPE_OF, o1, o2);
+            throw ApplyOperatorException.invalidOperandValueException(getOperatorType(), o1, o2);
         return o1 == null || clazz.isInstance(o1);
     }
 
@@ -26,22 +29,15 @@ public class IsTypeOf implements Operator {
     }
 
     @Override
-    public int getPrecedence() {
-        return OperatorEnum.IS_TYPE_OF.getPrecedence();
+    public boolean isValidOperand(SidesType sidesType, Object operand) {
+        return switch (sidesType) {
+            case LEFT -> true;
+            case RIGHT -> operand instanceof String s && DataType.getEnumClass(s) != null;
+        };
     }
 
     @Override
-    public boolean isLeftSided() {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String left, String right) {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String val) {
-        return false;
+    public OperatorEnum getOperatorType() {
+        return OperatorEnum.IS_TYPE_OF;
     }
 }

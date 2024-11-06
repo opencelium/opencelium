@@ -16,7 +16,7 @@ public class NotEmpty implements Operator {
         try {
             return !(Boolean) new IsEmpty().apply(o);
         } catch (ApplyOperatorException e) {
-            throw ApplyOperatorException.invalidTypeException(OperatorEnum.NOT_EMPTY, o);
+            throw ApplyOperatorException.invalidTypeException(getOperatorType(), o);
         }
     }
 
@@ -26,22 +26,7 @@ public class NotEmpty implements Operator {
     }
 
     @Override
-    public int getPrecedence() {
-        return OperatorEnum.NOT_EMPTY.getPrecedence();
-    }
-
-    @Override
-    public boolean isLeftSided() {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String left, String right) {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String val) {
-        return false;
+    public OperatorEnum getOperatorType() {
+        return OperatorEnum.NOT_EMPTY;
     }
 }

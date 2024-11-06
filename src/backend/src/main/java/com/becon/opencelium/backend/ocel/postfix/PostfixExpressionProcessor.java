@@ -2,8 +2,8 @@ package com.becon.opencelium.backend.ocel.postfix;
 
 import com.becon.opencelium.backend.ocel.base.Evaluator;
 import com.becon.opencelium.backend.ocel.base.ExpressionProcessor;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.base.Validator;
+import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.exceptions.InvalidSyntaxException;
 
 import java.util.function.Function;

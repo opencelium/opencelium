@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.ocel.utils;
 
 import com.becon.opencelium.backend.constant.RegExpression;
+import com.becon.opencelium.backend.ocel.enums.DataType;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operators.Operator;
 import com.becon.opencelium.backend.ocel.operators.OperatorFactory;
@@ -10,6 +11,7 @@ import java.util.*;
 
 public class Utils {
     private static final Map<String, String> prefixSuffixMap;
+    private static final List<String> independentOperators;
 
     static {
         prefixSuffixMap = new HashMap<>();
@@ -19,6 +21,17 @@ public class Utils {
         prefixSuffixMap.put("{", "}");
         prefixSuffixMap.put("\"", "\"");
         prefixSuffixMap.put("[", "]");
+
+        independentOperators = new ArrayList<>();
+        independentOperators.add(OperatorEnum.AND.getName());
+        independentOperators.add(OperatorEnum.OR.getName());
+        independentOperators.add(OperatorEnum.GREATER_THAN_OR_EQUAL_TO.getName());
+        independentOperators.add(OperatorEnum.GREATER_THAN.getName());
+        independentOperators.add(OperatorEnum.LESS_THAN_OR_EQUAL_TO.getName());
+        independentOperators.add(OperatorEnum.LESS_THAN.getName());
+        independentOperators.add(OperatorEnum.NOT_EQUAL_TO.getName());
+        independentOperators.add(OperatorEnum.EQUAL_TO.getName());
+        independentOperators.add(OperatorEnum.NOT.getName());
     }
 
     public static List<String> splitBySpace(String expression) throws InvalidExpressionException {
@@ -28,47 +41,35 @@ public class Utils {
         int start = 0;
         for (int i = 0; i < chars.length; i++) {
             if (stack.empty() && chars[i] == ' ') {
-                if (i > 0 && chars[i - 1] != ')') {
+                if (i != start && i > 0 && chars[i - 1] != ')') {
                     res.add(expression.substring(start, i));
                 }
                 start = i + 1;
             } else if (stack.empty() && chars[i] == '(') {
-                if (i > 0 && chars[i - 1] != '(' && start != i) {
+                if (start != i && i > 0 && chars[i - 1] != '(') {
                     res.add(expression.substring(start, i));
                 }
                 res.add("(");
                 start = i + 1;
             } else if (stack.empty() && chars[i] == ')') {
-                if (i > 0 && chars[i - 1] != ')' && start != i) {
+                if (start != i && i > 0 && chars[i - 1] != ')') {
                     res.add(expression.substring(start, i));
                 }
                 res.add(")");
             } else {
                 int inc = processPrefixAndSuffix(chars, i, stack);
+                if (inc > 0) {
+                    i += inc - 1;
+                }
                 if (i == chars.length - 1) {
                     if (!stack.empty()) {
                         throw InvalidExpressionException.invalidSyntaxException();
                     }
                     res.add(expression.substring(start));
                 }
-                if (inc > 0) {
-                    i += inc - 1;
-                }
             }
         }
         return res;
-    }
-
-    public static boolean isOperand(String token) {
-        return token.equals("null") // null
-                || token.equals("true") || token.equals("false") // boolean
-                || token.matches(RegExpression.isNumber) // numeric
-                || token.matches("\".*\"") // literal
-                || token.matches(RegExpression.array) // array
-                || token.matches(RegExpression.wrappedDirectRef)
-                || token.matches(RegExpression.enhancement)
-                || token.matches(RegExpression.requestData)
-                || token.matches(RegExpression.webhook);
     }
 
     public static boolean isOperator(String token) {
@@ -118,17 +119,75 @@ public class Utils {
     }
 
     public static List<String> splitTokens(String expression) {
+        char[] chars = expression.toCharArray();
+        Stack<String> stack = new Stack<>();
         List<String> res = new ArrayList<>();
-        // TODO
+
+        int start = 0;
+        for (int i = 0; i < chars.length; i++) {
+            if (stack.empty() && chars[i] == ' ') {
+                if (i != start && i > 0 && chars[i - 1] != ')') {
+                    res.add(expression.substring(start, i));
+                }
+                start = i + 1;
+            } else if (stack.empty() && chars[i] == '(') {
+                if (start != i && i > 0 && chars[i - 1] != '(') {
+                    res.add(expression.substring(start, i));
+                }
+                res.add("(");
+                start = i + 1;
+            } else if (stack.empty() && chars[i] == ')') {
+                if (start != i && i > 0 && chars[i - 1] != ')') {
+                    res.add(expression.substring(start, i));
+                }
+                res.add(")");
+                start = i + 1;
+            } else if (stack.empty() && tryToFindOperator(chars, i) != null) {
+                String op = tryToFindOperator(chars, i);
+                int len = op.length();
+                if (start != i)
+                    res.add(expression.substring(start, i));
+                res.add(op);
+                start = i + len;
+                i += len - 1;
+            } else {
+                int inc = processPrefixAndSuffix(chars, i, stack);
+                if (inc > 0) {
+                    i += inc - 1;
+                }
+                if (i == chars.length - 1) {
+                    if (!stack.empty()) {
+                        throw new RuntimeException("Unexpected end of expression");
+                    }
+                    res.add(expression.substring(start));
+                }
+            }
+        }
         return res;
     }
 
-    public static boolean isRawValue(String token) {
-        return !token.equals(")") && !token.equals("(") && !Utils.isOperator(token) && !Utils.isReference(token);
+    private static String tryToFindOperator(char[] chars, int i) {
+        for (String op : independentOperators)
+            if (startsWith(op, chars, i))
+                return op;
+        return null;
     }
 
     public static boolean isValidToken(String token) {
-        // TODO
-        return false;
+        return ")".equals(token)
+                || "(".equals(token)
+                || isOperand(token)
+                || isOperator(token);
+    }
+
+    public static boolean isOperand(String token) {
+        return "null".equals(token)
+                || "true".equals(token)
+                || "false".equals(token)
+                || isReference(token)
+                || token.startsWith("\"") && token.endsWith("\"")
+                || NumberUtils.isNumber(token)
+                || token.startsWith("[") && token.endsWith("]")
+                || DataType.checkTypeName(token);
     }
 }

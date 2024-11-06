@@ -23,7 +23,7 @@ public class ApplyOperatorException extends Exception {
     }
 
     public static ApplyOperatorException invalidTypePairsException(OperatorEnum operator, Object o1, Object o2) {
-        return new ApplyOperatorException(ErrorCode.AO_INVALID_TYPE_PAIRS, operator, o1, o2);
+        return new ApplyOperatorException(ErrorCode.UNSUPPORTED_OPERAND_PAIRS, operator, o1, o2);
     }
 
     public static ApplyOperatorException invalidTypeException(OperatorEnum operator, Object o) {
@@ -44,7 +44,7 @@ public class ApplyOperatorException extends Exception {
 
     public String getMessage() {
         return switch (this.code) {
-            case AO_INVALID_TYPE_PAIRS -> "'%s' operator doesn't support these type pairs. 1-type - '%s', 2-type - '%s'"
+            case UNSUPPORTED_OPERAND_PAIRS -> "'%s' operator doesn't support these type pairs. 1-type - '%s', 2-type - '%s'"
                     .formatted(this.operator.getName(),
                             this.o1 == null ? null : this.o1.getClass(),
                             this.o2 == null ? null : this.o2.getClass());

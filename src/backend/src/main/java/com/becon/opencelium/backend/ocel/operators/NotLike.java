@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.ocel.operators;
 import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
+import com.becon.opencelium.backend.ocel.enums.SidesType;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 
 public class NotLike implements Operator {
@@ -11,7 +12,7 @@ public class NotLike implements Operator {
         try {
             return !(Boolean) new Like().apply(o1, o2);
         } catch (ApplyOperatorException e) {
-            throw ApplyOperatorException.invalidTypePairsException(OperatorEnum.NOT_LIKE, o1, o2);
+            throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
         }
     }
 
@@ -26,22 +27,12 @@ public class NotLike implements Operator {
     }
 
     @Override
-    public int getPrecedence() {
-        return OperatorEnum.NOT_LIKE.getPrecedence();
+    public boolean isValidOperand(SidesType sidesType, Object operand) {
+        return operand instanceof String;
     }
 
     @Override
-    public boolean isLeftSided() {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String left, String right) {
-        return false;
-    }
-
-    @Override
-    public boolean applicable(String val) {
-        return false;
+    public OperatorEnum getOperatorType() {
+        return OperatorEnum.NOT_LIKE;
     }
 }
