@@ -10,7 +10,7 @@ import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/a
 const StartSchedule = ({entity, scheduleModel, componentPermission}: any) => {
     const dispatch = useAppDispatch();
     const {currentSubscription, gettingCurrentSubscription} = Subscription.getReduxState();
-    const isDisabled = !currentSubscription || currentSubscription.currentOperationUsage >= currentSubscription.totalOperationUsage;
+    const isDisabled = !currentSubscription || (currentSubscription.currentOperationUsage >= currentSubscription.totalOperationUsage && currentSubscription.totalOperationUsage !== 0);
     useEffect(() => {
         dispatch(getCurrentSubscription())
     }, []);
