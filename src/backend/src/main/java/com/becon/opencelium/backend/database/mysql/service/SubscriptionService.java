@@ -9,6 +9,7 @@ public interface SubscriptionService {
     LicenseKey decryptLicenseKey(String license);
     boolean isValid(Subscription subscription);
     void save(Subscription subscription);
+    Subscription setSubscription(String licenseKey, ActivationRequest ar);
     void deleteBySubId(String subId);
     void deleteByLicenseId(String licenseId);
     boolean exists(String subId);
@@ -19,4 +20,5 @@ public interface SubscriptionService {
     Subscription getById(String id);
     void updateUsage(Subscription activeSub, long connectionId, long requestSize, long startTime);
     void createFreeLicenseFileIfNotExists();
+    void resetMonthlyUsageForLicense(String subId);
 }

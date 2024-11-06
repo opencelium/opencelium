@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.resource.subs;
 
+import com.becon.opencelium.backend.constant.SubscriptionConstant;
+
 public class SubsDTO {
     private String subId;
     private String licenseId;
@@ -45,7 +47,7 @@ public class SubsDTO {
     }
 
     public long getEndDate() {
-        return endDate;
+        return endDate == SubscriptionConstant.freeLicenseEndDate ? 0 : endDate;
     }
 
     public void setEndDate(long endDate) {
