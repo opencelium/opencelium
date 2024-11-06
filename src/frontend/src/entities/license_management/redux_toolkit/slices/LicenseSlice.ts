@@ -70,15 +70,15 @@ export const licenseSlice = createSlice({
     },
     extraReducers: {
         [getLicenseList.pending.type]: (state) => {
-            state.gettingLicenseStatus = API_REQUEST_STATE.START;
+            state.gettingLicenseList = API_REQUEST_STATE.START;
         },
         [getLicenseList.fulfilled.type]: (state, action: PayloadAction<LicenseListItem[]>) => {
-            state.gettingLicenseStatus = API_REQUEST_STATE.FINISH;
+            state.gettingLicenseList = API_REQUEST_STATE.FINISH;
             state.licenseList = action.payload;
             state.error = null;
         },
         [getLicenseList.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.gettingLicenseStatus = API_REQUEST_STATE.ERROR;
+            state.gettingLicenseList = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [generateActivateRequest.pending.type]: (state) => {
