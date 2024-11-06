@@ -198,6 +198,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                         .map(GrantedAuthority::getAuthority)
                         .filter(groupDN -> {
                             if (groups.contains(groupDN)) {
+                                logger.info("Match found for LDAP group = '" + groupDN + "' in OC mappings " + groups.stream().collect(Collectors.joining("; ", "[", "]")));
                                 return true;
                             }
 
