@@ -58,7 +58,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -189,7 +188,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             String roleName;
 
             if (authorities.isEmpty()) {
-                logger.info("User is not a member of any group under group-search-base='" + properties.getGroupSearchBase() + "' with group-search-filter='" + properties.getGroupSearchFilter() + "'");
+                logInfo("User is not a member of any group under group-search-base='" + properties.getGroupSearchBase() + "' with group-search-filter='" + properties.getGroupSearchFilter() + "'");
+
                 roleName = properties.getDefaultRole();
             } else {
                 List<String> groups = properties.getGroups();
@@ -198,10 +198,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                         .map(GrantedAuthority::getAuthority)
                         .filter(groupDN -> {
                             if (groups.contains(groupDN)) {
+                                logInfo("Match found for LDAP group = '" + groupDN + "'");
+
                                 return true;
                             }
 
-                            logger.info("No match found for LDAP group = '" + groupDN + "' in OC mappings " + groups.stream().collect(Collectors.joining("; ", "[", "]")));
+                            logInfo("No match found for LDAP group = '" + groupDN + "' in OC mappings " + groups.stream().collect(Collectors.joining("; ", "[", "]")));
+
                             return false;
                         })
                         .map(properties::getRoleByGroup)
@@ -221,10 +224,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         }
         createNewSession(result);
 
-        if (properties.isShowLogs()) {
-            logger.info("User " + result.getEmail() + " is authenticated via " + authType);
-            logger.info("Role '"+ result.getUserRole().getName() + "' has been assigned to " + result.getEmail());
-        }
+        logInfo("User " + result.getEmail() + " is authenticated via " + authType);
+        logInfo("Role '"+ result.getUserRole().getName() + "' has been assigned to " + result.getEmail());
 
         return result;
     }
@@ -246,5 +247,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         sessionService.save(session);
 
         user.setSession(session);
+    }
+
+    private void logInfo(String message) {
+        if (!properties.isShowLogs()) {
+            return;
+        }
+
+        logger.info(message);
     }
 }
