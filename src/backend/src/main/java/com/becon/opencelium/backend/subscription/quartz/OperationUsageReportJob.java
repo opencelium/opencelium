@@ -20,7 +20,7 @@ import java.util.Map;
 @Component
 public class OperationUsageReportJob implements Job {
 
-    private RemoteApi remoteApi = RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL);
+    private final RemoteApi remoteApi = RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL);
 
     @Autowired
     private OperationUsageHistoryServiceImpl operationUsageHistoryService;
