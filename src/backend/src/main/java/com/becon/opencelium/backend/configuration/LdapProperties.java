@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @ConfigurationProperties(prefix = "spring.security.ldap")
 public class LdapProperties {
@@ -23,10 +23,18 @@ public class LdapProperties {
     private String defaultRole;
     private boolean showLogs = false;
 
-    public String getGroupNames() {
-        return "[" + groupRoleMapping.stream()
-                .map(Group2Role::getLdapGroup)
-                .collect(Collectors.joining("; ")) + "]";
+    public String getRoleByGroup(String groupDN) {
+        return groupRoleMapping.stream()
+                .filter(mapping -> Objects.equals(groupDN, mapping.ldapGroup))
+                .map(Group2Role::getOcRole)
+                .findFirst()
+                .orElseThrow();
+    }
+
+    public List<String> getGroups() {
+        return groupRoleMapping.stream()
+                .map(LdapProperties.Group2Role::getLdapGroup)
+                .toList();
     }
 
     public String getUrls() {
