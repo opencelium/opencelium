@@ -1,9 +1,10 @@
 package com.becon.opencelium.backend.subscription.remoteapi.enums;
 
-import com.becon.opencelium.backend.subscription.remoteapi.module.SubscriptionModule;
+import com.becon.opencelium.backend.subscription.remoteapi.module.*;
 
 public enum ApiModule {
-    SUBSCRIPTION(SubscriptionModule.class);
+    SUBSCRIPTION(SubscriptionModule.class),
+    OPERATION_USAGE(ReportModule.class);
 
     private final Class<?> moduleClass;
 

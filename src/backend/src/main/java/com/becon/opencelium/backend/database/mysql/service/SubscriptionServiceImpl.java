@@ -5,7 +5,7 @@ import com.becon.opencelium.backend.constant.SubscriptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
-import com.becon.opencelium.backend.quartz.ResetLimitsJob;
+import com.becon.opencelium.backend.subscription.quartz.ResetLimitsJob;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
