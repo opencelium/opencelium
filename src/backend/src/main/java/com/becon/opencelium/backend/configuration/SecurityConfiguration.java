@@ -169,6 +169,7 @@ public class SecurityConfiguration {
 
         DefaultLdapAuthoritiesPopulator authoritiesPopulator = new DefaultLdapAuthoritiesPopulator(ldapContextSource(), groupSearchBase);
         authoritiesPopulator.setGroupSearchFilter(searchFilter);
+        authoritiesPopulator.setSearchSubtree(true);
         authoritiesPopulator.setAuthorityMapper(this::ldapAuthorityMapper);
 
         return authoritiesPopulator;
@@ -225,15 +226,7 @@ public class SecurityConfiguration {
     private GrantedAuthority ldapAuthorityMapper(Map<String, List<String>> userGroups) {
         List<String> groups = userGroups.get(SpringSecurityLdapTemplate.DN_KEY);
 
-        String ocRole = ldapProperties.getGroupRoleMapping().stream()
-                .filter(mapping -> Objects.equals(groups.get(0), mapping.getLdapGroup()))
-                .findFirst()
-                .map(LdapProperties.Group2Role::getOcRole)
-                .orElseGet(() -> {
-                    logger.info("No match found for LDAP group = '" + groups.get(0) + "' in OC mappings " + ldapProperties.getGroupNames());
-                    return ldapProperties.getDefaultRole();
-                });
-
-        return new SimpleGrantedAuthority(ocRole);
+        // returns LDAP groupDN
+        return new SimpleGrantedAuthority(groups.get(0));
     }
 }
