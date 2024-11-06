@@ -14,19 +14,15 @@ public class ValueParseException extends Exception {
     }
 
     public static ValueParseException unknownOperandValue(String val) {
-        return new ValueParseException(ErrorCode.VP_UNKNOWN_OPERAND_VALUE, "Unknown operand : " + val);
+        return new ValueParseException(ErrorCode.INVALID_TOKEN_FOUND, "Unknown operand : " + val);
     }
 
     public static ValueParseException mismatchElementTypeOfArray(String element, Class<?> elementType) {
         return new ValueParseException(
-                ErrorCode.MISMATCH_ELEMENT_TYPE_OF_ARRAY,
+                ErrorCode.VP_MISMATCH_ELEMENT_TYPE_OF_ARRAY,
                 "An element's type is not matched with previous element(s) type. Expected type -'%s', Element - '%s'"
                         .formatted(elementType.getSimpleName(), element)
         );
-    }
-
-    public static ValueParseException unsupportedNumberValue(String val) {
-        return new ValueParseException(ErrorCode.UNSUPPORTED_NUMBER_VALUE, "Unsupported number value : " + val);
     }
 
     public String getMessage() {

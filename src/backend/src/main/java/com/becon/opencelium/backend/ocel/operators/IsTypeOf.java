@@ -2,17 +2,17 @@ package com.becon.opencelium.backend.ocel.operators;
 
 import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
-import com.becon.opencelium.backend.ocel.enums.DataType;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
 import com.becon.opencelium.backend.ocel.enums.SidesType;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
+import com.becon.opencelium.backend.ocel.utils.Utils;
 
 public class IsTypeOf implements Operator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         if (!(o2 instanceof String str))
             throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
-        Class<?> clazz = DataType.getEnumClass(str);
+        Class<?> clazz = Utils.getClassByType(str);
         if (clazz == null)
             throw ApplyOperatorException.invalidOperandValueException(getOperatorType(), o1, o2);
         return o1 == null || clazz.isInstance(o1);
@@ -32,7 +32,7 @@ public class IsTypeOf implements Operator {
     public boolean isValidOperand(SidesType sidesType, Object operand) {
         return switch (sidesType) {
             case LEFT -> true;
-            case RIGHT -> operand instanceof String s && DataType.getEnumClass(s) != null;
+            case RIGHT -> operand instanceof String s && Utils.getClassByType(s) != null;
         };
     }
 

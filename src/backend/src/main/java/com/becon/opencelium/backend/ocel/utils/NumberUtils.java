@@ -1,7 +1,5 @@
 package com.becon.opencelium.backend.ocel.utils;
 
-import com.becon.opencelium.backend.constant.RegExpression;
-
 import java.math.BigDecimal;
 
 public class NumberUtils {
@@ -21,9 +19,5 @@ public class NumberUtils {
 
         return bigDecimal.compareTo(BigDecimal.valueOf(Double.MAX_VALUE)) <= 0 &&
                 bigDecimal.compareTo(BigDecimal.valueOf(-Double.MAX_VALUE)) >= 0;
-    }
-
-    public static boolean isNumberStr(String element) {
-        return element.matches(RegExpression.isNumber);
     }
 }

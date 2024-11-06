@@ -1,8 +1,8 @@
-package com.becon.opencelium.backend.ocel.base;
+package com.becon.opencelium.backend.ocel.commons;
 
-import com.becon.opencelium.backend.ocel.enums.DataType;
 import com.becon.opencelium.backend.ocel.exceptions.*;
 import com.becon.opencelium.backend.ocel.utils.NumberUtils;
+import com.becon.opencelium.backend.ocel.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +25,8 @@ public class RawValueParser {
             return val.substring(1, val.length() - 1);
         }
 
-        if (NumberUtils.isNumberStr(val)) {
-            if (NumberUtils.isNumber(val)) {
-                return Double.valueOf(val);
-            }
-            throw ValueParseException.unsupportedNumberValue(val);
+        if (NumberUtils.isNumber(val)) {
+            return Double.valueOf(val);
         }
 
         // array
@@ -39,7 +36,7 @@ public class RawValueParser {
         }
 
         // NUM, ARR, OBJ, STR, BOOL
-        if (DataType.checkTypeName(val)) {
+        if (Utils.checkTypeAvailability(val)) {
             return val;
         }
 

@@ -23,7 +23,7 @@ public class ApplyOperatorException extends Exception {
     }
 
     public static ApplyOperatorException invalidTypePairsException(OperatorEnum operator, Object o1, Object o2) {
-        return new ApplyOperatorException(ErrorCode.UNSUPPORTED_OPERAND_PAIRS, operator, o1, o2);
+        return new ApplyOperatorException(ErrorCode.AO_INVALID_OPERAND_PAIRS, operator, o1, o2);
     }
 
     public static ApplyOperatorException invalidTypeException(OperatorEnum operator, Object o) {
@@ -38,13 +38,9 @@ public class ApplyOperatorException extends Exception {
         return new ApplyOperatorException(ErrorCode.AO_INVALID_OPERAND_VALUE, operator, o1, o2, arity);
     }
 
-    public static ApplyOperatorException unknownException(OperatorEnum operator, Object o1, Object o2, Arity arity) {
-        return new ApplyOperatorException(ErrorCode.UNKNOWN_EXCEPTION, operator, o1, o2, arity);
-    }
-
     public String getMessage() {
         return switch (this.code) {
-            case UNSUPPORTED_OPERAND_PAIRS -> "'%s' operator doesn't support these type pairs. 1-type - '%s', 2-type - '%s'"
+            case AO_INVALID_OPERAND_PAIRS -> "'%s' operator doesn't support these type pairs. 1-type - '%s', 2-type - '%s'"
                     .formatted(this.operator.getName(),
                             this.o1 == null ? null : this.o1.getClass(),
                             this.o2 == null ? null : this.o2.getClass());
@@ -54,10 +50,6 @@ public class ApplyOperatorException extends Exception {
                     .formatted(this.operator, this.o1, this.o2);
             case AO_INVALID_TYPE -> "'%s' operator doesn't support this type: '%s'"
                     .formatted(this.operator, this.o1 == null ? null : this.o1.getClass());
-            case UNKNOWN_EXCEPTION -> this.arity == Arity.UNARY
-                    ? "Unknown exception. Operator -'%s', value -'%s'".formatted(this.getOperator(), this.o1)
-                    : "Unknown exception. Operator -'%s', 1-value -'%s', 2-value - '%s'"
-                    .formatted(this.getOperator(), this.o1, this.o2);
             default -> this.getMessage();
         };
     }

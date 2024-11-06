@@ -1,11 +1,10 @@
 package com.becon.opencelium.backend.ocel.utils;
 
 import com.becon.opencelium.backend.constant.RegExpression;
-import com.becon.opencelium.backend.ocel.enums.DataType;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
+import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.operators.Operator;
 import com.becon.opencelium.backend.ocel.operators.OperatorFactory;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
 
 import java.util.*;
 
@@ -63,7 +62,7 @@ public class Utils {
                 }
                 if (i == chars.length - 1) {
                     if (!stack.empty()) {
-                        throw InvalidExpressionException.invalidSyntaxException();
+                        throw InvalidExpressionException.unexpectedEndOfExpression();
                     }
                     res.add(expression.substring(start));
                 }
@@ -72,53 +71,7 @@ public class Utils {
         return res;
     }
 
-    public static boolean isOperator(String token) {
-        return OperatorEnum.fromName(token) != null;
-    }
-
-    public static boolean isReference(String token) {
-        return token.matches(RegExpression.wrappedDirectRef)
-                || token.matches(RegExpression.enhancement)
-                || token.matches(RegExpression.requestData)
-                || token.matches(RegExpression.webhook);
-    }
-
-    public static Operator getOperator(String token) {
-        return OperatorFactory.getOperator(OperatorEnum.fromName(token));
-    }
-
-    private static boolean startsWith(String prefix, char[] chars, int i) {
-        int length = prefix.length();
-        if (chars.length < i + length) {
-            return false;
-        }
-        for (int j = 0; j < length; j++) {
-            if (chars[i + j] != prefix.charAt(j)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static int processPrefixAndSuffix(char[] chars, int index, Stack<String> stack) {
-        for (Map.Entry<String, String> entry : prefixSuffixMap.entrySet()) {
-            String prefix = entry.getKey();
-            String suffix = entry.getValue();
-
-            if (stack.empty() && startsWith(prefix, chars, index)) {
-                stack.push(suffix);
-                return prefix.length();
-            }
-
-            if (!stack.empty() && startsWith(suffix, chars, index) && stack.peek().equals(suffix)) {
-                stack.pop();
-                return suffix.length();
-            }
-        }
-        return 0;
-    }
-
-    public static List<String> splitTokens(String expression) {
+    public static List<String> splitTokens(String expression) throws InvalidExpressionException {
         char[] chars = expression.toCharArray();
         Stack<String> stack = new Stack<>();
         List<String> res = new ArrayList<>();
@@ -157,7 +110,7 @@ public class Utils {
                 }
                 if (i == chars.length - 1) {
                     if (!stack.empty()) {
-                        throw new RuntimeException("Unexpected end of expression");
+                        throw InvalidExpressionException.unexpectedEndOfExpression();
                     }
                     res.add(expression.substring(start));
                 }
@@ -166,18 +119,8 @@ public class Utils {
         return res;
     }
 
-    private static String tryToFindOperator(char[] chars, int i) {
-        for (String op : independentOperators)
-            if (startsWith(op, chars, i))
-                return op;
-        return null;
-    }
-
-    public static boolean isValidToken(String token) {
-        return ")".equals(token)
-                || "(".equals(token)
-                || isOperand(token)
-                || isOperator(token);
+    public static boolean isOperator(String token) {
+        return OperatorEnum.fromName(token) != null;
     }
 
     public static boolean isOperand(String token) {
@@ -188,6 +131,77 @@ public class Utils {
                 || token.startsWith("\"") && token.endsWith("\"")
                 || NumberUtils.isNumber(token)
                 || token.startsWith("[") && token.endsWith("]")
-                || DataType.checkTypeName(token);
+                || checkTypeAvailability(token);
+    }
+
+    public static boolean isValidToken(String token) {
+        return ")".equals(token)
+                || "(".equals(token)
+                || isOperand(token)
+                || isOperator(token);
+    }
+
+    public static boolean isReference(String token) {
+        return token.matches(RegExpression.wrappedDirectRef)
+                || token.matches(RegExpression.enhancement)
+                || token.matches(RegExpression.requestData)
+                || token.matches(RegExpression.webhook);
+    }
+
+    public static Operator getOperator(String token) {
+        return OperatorFactory.getOperator(OperatorEnum.fromName(token));
+    }
+
+    public static Class<?> getClassByType(String type) {
+        return switch (type) {
+            case "NUM" -> Number.class;
+            case "ARR" -> List.class;
+            case "OBJ" -> Object.class;
+            case "STR" -> String.class;
+            case "BOOL" -> Boolean.class;
+            default -> null;
+        };
+    }
+
+    public static boolean checkTypeAvailability(String typeName) {
+        return getClassByType(typeName) != null;
+    }
+
+    private static boolean startsWith(String prefix, char[] chars, int i) {
+        int length = prefix.length();
+        if (chars.length < i + length) {
+            return false;
+        }
+        for (int j = 0; j < length; j++) {
+            if (chars[i + j] != prefix.charAt(j)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static int processPrefixAndSuffix(char[] chars, int index, Stack<String> stack) {
+        for (Map.Entry<String, String> entry : prefixSuffixMap.entrySet()) {
+            String prefix = entry.getKey();
+            String suffix = entry.getValue();
+
+            if (stack.empty() && startsWith(prefix, chars, index)) {
+                stack.push(suffix);
+                return prefix.length();
+            }
+
+            if (!stack.empty() && startsWith(suffix, chars, index) && stack.peek().equals(suffix)) {
+                stack.pop();
+                return suffix.length();
+            }
+        }
+        return 0;
+    }
+
+    private static String tryToFindOperator(char[] chars, int i) {
+        for (String op : independentOperators)
+            if (startsWith(op, chars, i))
+                return op;
+        return null;
     }
 }

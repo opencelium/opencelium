@@ -1,42 +1,58 @@
 package com.becon.opencelium.backend.ocel.exceptions;
 
 public class InvalidExpressionException extends Exception {
-    private final String errorCode;
+    private final ErrorCode errorCode;
 
-    public InvalidExpressionException(String errorCode, String message) {
+    public InvalidExpressionException(ErrorCode errorCode, String message) {
         super(message);
         this.errorCode = errorCode;
     }
 
+    public static InvalidExpressionException invalidParentheses() {
+        return new InvalidExpressionException(ErrorCode.INVALID_PARENTHESES, "Parentheses are invalid");
+    }
+
+    public static InvalidExpressionException invalidTokenFound(String token) {
+        return new InvalidExpressionException(ErrorCode.INVALID_TOKEN_FOUND, "Invalid token found while reading expression: %s".formatted(token));
+    }
+
+    public static InvalidExpressionException unsupportedOperand(String operator, String operand) {
+        return new InvalidExpressionException(ErrorCode.UNSUPPORTED_OPERAND, "'%s' operator doesn't support this value : %s".formatted(operator, operand));
+    }
+
+    public static InvalidExpressionException invalidAssociationBetweenOperatorAndOperands() {
+        return new InvalidExpressionException(ErrorCode.INVALID_ASSOCIATION_BETWEEN_OPERATOR_AND_OPERANDS, "Invalid expression");
+    }
+
+    public static InvalidExpressionException resultValueIsNotBoolean(Object resultValue) {
+        return new InvalidExpressionException(ErrorCode.RESULT_VALUE_IS_NOT_BOOLEAN, resultValue.toString());
+    }
+
+    public static InvalidExpressionException insufficientOperand() {
+        return new InvalidExpressionException(ErrorCode.INSUFFICIENT_OPERAND, "No sufficient operands");
+    }
+
+    public static InvalidExpressionException insufficientOperand(String token) {
+        return new InvalidExpressionException(ErrorCode.INSUFFICIENT_OPERAND, "No sufficient operand found for '%s' operator".formatted(token));
+    }
+
     public static InvalidExpressionException valueParseException(ValueParseException e) {
-        return new InvalidExpressionException(e.getCodeString(), e.getMessage());
+        return new InvalidExpressionException(e.getCode(), e.getMessage());
     }
 
     public static InvalidExpressionException applyOperatorException(ApplyOperatorException e) {
-        return new InvalidExpressionException(e.getCodeString(), e.getMessage());
+        return new InvalidExpressionException(e.getCode(), e.getMessage());
     }
 
-    public static InvalidExpressionException invalidSyntaxException() {
-        return new InvalidExpressionException(ErrorCode.INVALID_SYNTAX.getCode(), "Invalid Expression");
+    public static InvalidExpressionException unexpectedEndOfExpression() {
+        return new InvalidExpressionException(ErrorCode.UNEXPECTED_END_OF_EXPRESSION, "Invalid end of expression");
     }
 
-    public static InvalidExpressionException invalidSyntaxException(InvalidSyntaxException e) {
-        return new InvalidExpressionException(e.getErrorCode().getCode(), e.getMessage());
+    public static InvalidExpressionException unexpectedException(RuntimeException e) {
+        return new InvalidExpressionException(ErrorCode.UNEXPECTED_EXCEPTION, e.getMessage());
     }
 
-    public static InvalidExpressionException invalidAssociationBetweenOperandAndOperators() {
-        return new InvalidExpressionException(ErrorCode.INVALID_ASSOCIATION_BETWEEN_OPERATOR_AND_OPERANDS.getCode(), "Invalid expression");
-    }
-
-    public static InvalidExpressionException resultValueIsNotBoolean(Object resultVal) {
-        return new InvalidExpressionException(ErrorCode.RESULT_VALUE_IS_NOT_BOOLEAN.getCode(), resultVal.toString());
-    }
-
-    public static InvalidExpressionException insufficientOperandException() {
-        return new InvalidExpressionException(ErrorCode.INSUFFICIENT_OPERAND.getCode(), "No sufficient operands");
-    }
-
-    public String getErrorCode() {
+    public ErrorCode getErrorCode() {
         return errorCode;
     }
 }

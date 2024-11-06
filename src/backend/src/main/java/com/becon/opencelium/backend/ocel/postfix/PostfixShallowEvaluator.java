@@ -2,14 +2,15 @@ package com.becon.opencelium.backend.ocel.postfix;
 
 import com.becon.opencelium.backend.ocel.base.ShallowEvaluator;
 import com.becon.opencelium.backend.ocel.commons.Operand;
+import com.becon.opencelium.backend.ocel.commons.PostfixNotationConvertor;
 import com.becon.opencelium.backend.ocel.commons.Token;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.SidesType;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidSyntaxException;
+import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.exceptions.ValueParseException;
 import com.becon.opencelium.backend.ocel.operators.Operator;
-import com.becon.opencelium.backend.ocel.base.RawValueParser;
+import com.becon.opencelium.backend.ocel.commons.RawValueParser;
 import com.becon.opencelium.backend.ocel.utils.Utils;
 
 import java.util.*;
@@ -26,7 +27,7 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
     }
 
     @Override
-    public void check(List<String> tokens) throws InvalidSyntaxException {
+    public void check(List<String> tokens) throws InvalidExpressionException {
         Queue<Token> queue = postfixConverter.toPostfix(tokens);
         Stack<Object> operandStack = new Stack<>();
 
@@ -45,13 +46,13 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                                 try {
                                     value = rawValueParser.parse(operand.getRawValue());
                                 } catch (ValueParseException e) {
-                                    throw InvalidSyntaxException.valueParseException(e);
+                                    throw InvalidExpressionException.valueParseException(e);
                                 }
                             }
                             try {
                                 operandStack.push(Operand.withValue(operator.apply(value)));
                             } catch (ApplyOperatorException e) {
-                                throw InvalidSyntaxException.applyOperatorException(e);
+                                throw InvalidExpressionException.applyOperatorException(e);
                             }
                         }
                     } else if (arity == Arity.BINARY) {
@@ -70,11 +71,11 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                                 try {
                                     value = rawValueParser.parse(operand.getRawValue());
                                 } catch (ValueParseException e) {
-                                    throw InvalidSyntaxException.valueParseException(e);
+                                    throw InvalidExpressionException.valueParseException(e);
                                 }
                             }
                             if (!operator.isValidOperand(SidesType.RIGHT, value)) {
-                                throw InvalidSyntaxException.unsupportedOperandException(operator.getOperatorType().getName(), operand.getRawValue());
+                                throw InvalidExpressionException.unsupportedOperand(operator.getOperatorType().getName(), operand.getRawValue());
                             }
                             operandStack.push(dummy);
                         } else if (secondIsRef) {
@@ -84,11 +85,11 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                                 try {
                                     value = rawValueParser.parse(operand.getRawValue());
                                 } catch (ValueParseException e) {
-                                    throw InvalidSyntaxException.valueParseException(e);
+                                    throw InvalidExpressionException.valueParseException(e);
                                 }
                             }
                             if (!operator.isValidOperand(SidesType.LEFT, value)) {
-                                throw InvalidSyntaxException.unsupportedOperandException(operator.getOperatorType().getName(), operand.getRawValue());
+                                throw InvalidExpressionException.unsupportedOperand(operator.getOperatorType().getName(), operand.getRawValue());
                             }
                             operandStack.push(dummy);
                         } else {
@@ -100,7 +101,7 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                                     Object parsed = rawValueParser.parse(rawValue);
                                     left.setValue(parsed);
                                 } catch (ValueParseException e) {
-                                    throw InvalidSyntaxException.valueParseException(e);
+                                    throw InvalidExpressionException.valueParseException(e);
                                 }
                             }
                             if (right.isRaw()) {
@@ -109,13 +110,13 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                                     Object parsed = rawValueParser.parse(rawValue);
                                     right.setValue(parsed);
                                 } catch (ValueParseException e) {
-                                    throw InvalidSyntaxException.valueParseException(e);
+                                    throw InvalidExpressionException.valueParseException(e);
                                 }
                             }
                             try {
                                 operandStack.push(Operand.withValue(operator.apply(left.getValue(), right.getValue())));
                             } catch (ApplyOperatorException e) {
-                                throw InvalidSyntaxException.applyOperatorException(e);
+                                throw InvalidExpressionException.applyOperatorException(e);
                             }
                         }
                     }
@@ -129,17 +130,17 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                 }
             }
         } catch (EmptyStackException e) {
-            throw InvalidSyntaxException.insufficientOperandException();
+            throw InvalidExpressionException.insufficientOperand();
         }
 
         if (operandStack.size() != 1) {
-            throw InvalidSyntaxException.invalidAssociationBetweenOperatorAndOperands();
+            throw InvalidExpressionException.invalidAssociationBetweenOperatorAndOperands();
         }
 
         Object peek = operandStack.peek();
         if (peek instanceof Operand operand) {
             if (!(operand.isRaw() && ("true".equals(operand.getRawValue()) || "false".equals(operand.getRawValue())) || operand.getValue() instanceof Boolean)) {
-                throw InvalidSyntaxException.resultValueIsNotBoolean(operand.isRaw() ? operand.getRawValue() : operand.getValue());
+                throw InvalidExpressionException.resultValueIsNotBoolean(operand.isRaw() ? operand.getRawValue() : operand.getValue());
             }
         }
     }
