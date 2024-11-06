@@ -57,7 +57,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -183,13 +186,28 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             });
 
             Collection<? extends GrantedAuthority> authorities = ldapUserDetails.getAuthorities();
-            String roleName = authorities.stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .findFirst()
-                    .orElseGet(() -> {
-                        logger.info("No groups found in LDAP server for configuration: group-search-base='" + properties.getGroupSearchBase() + "' group-search-filter='" + properties.getGroupSearchFilter() + "'");
-                        return properties.getDefaultRole();
-                    });
+            String roleName;
+
+            if (authorities.isEmpty()) {
+                logger.info("User is not a member of any group under group-search-base='" + properties.getGroupSearchBase() + "' with group-search-filter='" + properties.getGroupSearchFilter() + "'");
+                roleName = properties.getDefaultRole();
+            } else {
+                List<String> groups = properties.getGroups();
+
+                roleName = authorities.stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .filter(groupDN -> {
+                            if (groups.contains(groupDN)) {
+                                return true;
+                            }
+
+                            logger.info("No match found for LDAP group = '" + groupDN + "' in OC mappings " + groups.stream().collect(Collectors.joining("; ", "[", "]")));
+                            return false;
+                        })
+                        .map(properties::getRoleByGroup)
+                        .findFirst()
+                        .orElse(properties.getDefaultRole());
+            }
 
             UserRole role = userRoleService.findByRole(roleName)
                     .orElseThrow(() -> new EntityNotFoundException("LDAP group mapped to role = '" + roleName + "', but it does not exists in OC system."));
