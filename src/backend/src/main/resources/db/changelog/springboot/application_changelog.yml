@@ -47,3 +47,7 @@ versions:
         operation: add
         value: your-token-here
         path: opencelium.service_portal.token
+      - changeset: 4
+          operation: add
+          value: OFF
+          path: logging.level.org.springframework.data.ldap

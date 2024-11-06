@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.database.mysql.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,11 +26,22 @@ public class OperationUsageHistory {
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP", updatable = false)
     private LocalDateTime createdAt;
 
+    @JsonIgnore
+    @UpdateTimestamp
+    @Column(name = "modified_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP", updatable = false)
+    private LocalDateTime modifiedAt;
+
     @Column(name = "total_usage", nullable = false)
     private long totalUsage;
 
     @Column(name = "connection_title", nullable = false, length = 255)
     private String connectionTitle;
+
+    @Column(name = "from_invoker", nullable = false, length = 255)
+    private String fromInvoker;
+
+    @Column(name = "to_invoker", nullable = false, length = 255)
+    private String toInvoker;
 
     @OneToMany(mappedBy = "operationUsageHistory", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OperationUsageHistoryDetail> details;
@@ -68,6 +80,14 @@ public class OperationUsageHistory {
         this.createdAt = createdAt;
     }
 
+    public LocalDateTime getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(LocalDateTime modifiedAt) {
+        this.modifiedAt = modifiedAt;
+    }
+
     public long getTotalUsage() {
         return totalUsage;
     }
@@ -84,11 +104,43 @@ public class OperationUsageHistory {
         this.connectionTitle = connectionTitle;
     }
 
+    public String getFromInvoker() {
+        return fromInvoker;
+    }
+
+    public void setFromInvoker(String fromInvoker) {
+        this.fromInvoker = fromInvoker;
+    }
+
+    public String getToInvoker() {
+        return toInvoker;
+    }
+
+    public void setToInvoker(String toInvoker) {
+        this.toInvoker = toInvoker;
+    }
+
     public List<OperationUsageHistoryDetail> getDetails() {
         return details;
     }
 
     public void setDetails(List<OperationUsageHistoryDetail> details) {
         this.details = details;
+    }
+
+    @Override
+    public String toString() {
+        return "OperationUsageHistory{" +
+                "id=" + id +
+                ", licenseId='" + licenseId + '\'' +
+                ", subId='" + subId + '\'' +
+                ", createdAt=" + createdAt +
+                ", modifiedAt=" + modifiedAt +
+                ", totalUsage=" + totalUsage +
+                ", connectionTitle='" + connectionTitle + '\'' +
+                ", fromInvoker='" + fromInvoker + '\'' +
+                ", toInvoker='" + toInvoker + '\'' +
+                ", details=" + details +
+                '}';
     }
 }
