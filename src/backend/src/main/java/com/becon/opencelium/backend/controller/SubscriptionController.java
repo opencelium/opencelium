@@ -91,13 +91,7 @@ public class SubscriptionController {
         File arFile = activationRequestService.createFile(encodedAr, "activation-request");
         String response  = sModule.generateLicenseKey(arFile, subId).getBody();
         String licenseKey = extractLicenseKey(response);
-
-        activationRequestService.expireAll();
-        ar.setStatus(ActivReqStatus.PROCESSED);
-        ActivationRequest saved = activationRequestService.save(ar);
-        Subscription subscription = subscriptionService.convertToSub(licenseKey, saved);
-
-        subscriptionService.save(subscription);
+        Subscription subscription = subscriptionService.setSubscription(licenseKey, ar);
 
         SubsDTO subsDTO = subscriptionService.toDto(LicenseKeyUtility.decrypt(licenseKey), subscription);
         return ResponseEntity.ok().body(subsDTO);
@@ -116,7 +110,6 @@ public class SubscriptionController {
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=activation-request.txt");
         headers.add(HttpHeaders.CONTENT_TYPE, "text/plain");
 
-        activationRequestService.expireAll();
         activationRequestService.save(ar);
         activationRequestService.activateTTL(ar);
         return ResponseEntity.ok()
@@ -133,6 +126,9 @@ public class SubscriptionController {
         String initLicense = LicenseKeyUtility.readFreeLicense();
         Subscription subscription = subscriptionService.convertToSub(initLicense,ar);
         if(!subscriptionService.exists(subscription.getSubId())) {
+            activationRequestService.deactivateAll();
+            ar.setActive(true);
+            ar.setStatus(ActivReqStatus.PROCESSED);
             activationRequestService.save(ar);
             subscriptionService.save(subscription);
         }
@@ -158,11 +154,11 @@ public class SubscriptionController {
         if (!LicenseKeyUtility.verify(lk, ar)) {
             throw new RuntimeException("License file is not valid");
         } else {
-            activationRequestService.expireAll();
+            activationRequestService.deactivateAll();
             ar.setStatus(ActivReqStatus.PROCESSED);
-            ActivationRequest saved = activationRequestService.save(ar);
-
-            Subscription subscription = subscriptionService.convertToSub(content, saved);
+            ar.setActive(true);
+            activationRequestService.save(ar);
+            Subscription subscription = subscriptionService.convertToSub(content, ar);
             subscriptionService.save(subscription);
         }
         return ResponseEntity.ok().build();
