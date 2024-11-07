@@ -29,9 +29,14 @@ import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.storage.UserStorageService;
+import com.becon.opencelium.backend.subscription.quartz.OperationUsageReportJob;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +100,6 @@ public class StorageConfiguration {
     public void createStorageAfterStartup() {
         // upload freeLicense
         setInitialLicense();
-
         // creating 'src/main/resources/templates/' directory
         createDirectory(PathConstant.TEMPLATE);
         // creating 'src/main/resources/assistant/' directory
@@ -124,6 +128,21 @@ public class StorageConfiguration {
         cleanOldFiles(PathConstant.LIBS, f -> f.isFile() && f.getName().endsWith(JAR_EXTENSION), JAR_PREFIX);
         cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, File::isDirectory, "");
     }
+//
+//    private void setReportSchedule() {
+//        JobDetail jobDetail = JobBuilder.newJob(OperationUsageReportJob.class)
+//                .withIdentity("operationUsageReportJob")
+//                .storeDurably()
+//                .build();
+//
+//        CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule("00 00 23 * * ?");
+//
+//        TriggerBuilder.newTrigger()
+//                .forJob(jobDetail)
+//                .withIdentity("operationUsageReportJobTrigger")
+//                .withSchedule(scheduleBuilder)
+//                .build();
+//    }
 
     private void setInitialLicense() {
         if (!doesFileExist(PathConstant.LICENSE + "init-license.txt")) {

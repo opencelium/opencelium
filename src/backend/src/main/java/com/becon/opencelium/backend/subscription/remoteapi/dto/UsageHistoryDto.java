@@ -1,10 +1,11 @@
-package com.becon.opencelium.backend.resource.subs;
+package com.becon.opencelium.backend.subscription.remoteapi.dto;
 
 import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistory;
 
 import java.time.ZoneOffset;
 
-public class OperationUsageHistoryDto {
+public class UsageHistoryDto {
+
     private Long id;
     private String licenseId;
     private String subId;
@@ -15,10 +16,10 @@ public class OperationUsageHistoryDto {
     private String fromConnector;
     private String toConnector;
 
-    public OperationUsageHistoryDto() {
+    public UsageHistoryDto() {
     }
 
-    public OperationUsageHistoryDto(OperationUsageHistory operationUsageHistory) {
+    public UsageHistoryDto(OperationUsageHistory operationUsageHistory) {
         this.id = operationUsageHistory.getId();
         this.licenseId = operationUsageHistory.getLicenseId();
         this.subId = operationUsageHistory.getSubId();

@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.quartz;
+package com.becon.opencelium.backend.subscription.quartz;
 
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
