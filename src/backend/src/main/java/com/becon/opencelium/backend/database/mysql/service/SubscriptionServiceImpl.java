@@ -5,9 +5,11 @@ import com.becon.opencelium.backend.constant.SubscriptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
-import com.becon.opencelium.backend.subscription.quartz.ResetLimitsJob;
+import com.becon.opencelium.backend.quartz.ResetLimitsJob;
+import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
+import com.becon.opencelium.backend.subscription.quartz.QuartzCronUpdater;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
@@ -210,15 +212,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public void updateUsage(Subscription sub, long connectionId,long requestSize, long startTime) {
-        Connection connection = connectionService.getById(connectionId);
-
+    public void updateUsage(Subscription sub, ConnectionEx connectionEx, long requestSize, long startTime) {
         // Try to find existing operation usage history
         OperationUsageHistory operationUsageHistory = operationUsageHistoryService
-                .findByConnectionTitle(connection.getTitle())
+                .findByConnectionTitle(connectionEx.getConnectionName())
                 .map(history -> {
                     // If history exists, increment its total usage
                     history.setTotalUsage(history.getTotalUsage() + requestSize);
+                    history.setFromInvoker(connectionEx.getSource().getInvoker());
+                    history.setToInvoker(connectionEx.getTarget().getInvoker());
                     // Create and add a new OperationUsageHistoryDetail
                     OperationUsageHistoryDetail newDetail = new OperationUsageHistoryDetail();
                     newDetail.setOperationUsage(requestSize);
@@ -231,7 +233,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 })
                 .orElseGet(() -> {
                     // If no history exists, create a new one
-                    return operationUsageHistoryService.createNewEntity(sub, connection.getTitle(), requestSize, startTime);
+                    return operationUsageHistoryService.createNewEntity(sub, connectionEx.getConnectionName(),
+                            requestSize, startTime, connectionEx.getSource().getInvoker(), connectionEx.getTarget().getInvoker());
                 });
         operationUsageHistoryService.save(operationUsageHistory);
         if (!isCurrentUsageIsValid(sub)) {
@@ -292,22 +295,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         String triggerName = "LicenseTrigger-" + subscription.getId();
         String triggerGroup = "LicenseTriggers";
         JobKey jobIdentity = new JobKey(jobKey, groupKey);
+        TriggerKey triggerKey = new TriggerKey(triggerName, triggerGroup);
 
-
-
+        LicenseKey lk = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
+        String cron = generateCronExpression(lk.getStartDate());
         try {
             // Check if the job already exists
             if (scheduler.checkExists(jobIdentity)) {
-                // If the job exists, retrieve and update the trigger
-                TriggerKey triggerKey = new TriggerKey(triggerName, triggerGroup);
-
-                LicenseKey lk = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
-                String cron = generateCronExpression(lk.getStartDate());
-
                 // Create a new trigger with the updated schedule
                 Trigger newTrigger = TriggerBuilder.newTrigger()
                         .withIdentity(triggerKey)
                         .startAt(Date.from(Instant.ofEpochMilli(lk.getStartDate())))
+                        .withSchedule(CronScheduleBuilder.cronSchedule(cron))
                         .endAt(Date.from(Instant.ofEpochMilli(lk.getEndDate())))
                         .build();
 
@@ -320,13 +319,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         .usingJobData("localSubId", subscription.getId())
                         .build();
 
-                LicenseKey lk = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
-                String cron = generateCronExpression(lk.getStartDate());
-
                 // Create a new trigger for the job
                 Trigger trigger = TriggerBuilder.newTrigger()
                         .withIdentity(triggerName, triggerGroup)
                         .startAt(Date.from(Instant.ofEpochMilli(lk.getStartDate())))
+                        .withSchedule(CronScheduleBuilder.cronSchedule(cron))
                         .endAt(Date.from(Instant.ofEpochMilli(lk.getEndDate())))
                         .build();
 
@@ -340,11 +337,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     private void killAllTasks() {
         try {
-            for (String groupName : scheduler.getJobGroupNames()) {
-                Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName));
-                for (JobKey jobKey : jobKeys) {
-                    scheduler.deleteJob(jobKey);
-                }
+            Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals("LicenseJobs"));
+            for (JobKey jobKey : jobKeys) {
+                scheduler.deleteJob(jobKey);
             }
         } catch (SchedulerException e) {
             e.printStackTrace();

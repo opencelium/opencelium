@@ -58,7 +58,9 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     }
 
     @Override
-    public OperationUsageHistory createNewEntity(Subscription sub, String connectionName, long operationUsage, long startTime) {
+    public OperationUsageHistory createNewEntity(Subscription sub, String connectionName,
+                                                 long operationUsage, long startTime,
+                                                 String sourceInvoker, String targetInvoker) {
 
         // Create the parent object - OperationUsageHistory
         OperationUsageHistory operationUsageHistory = new OperationUsageHistory();
@@ -69,6 +71,8 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
         operationUsageHistory.setTotalUsage(operationUsage); // Initialize total usage with requestSize
         operationUsageHistory.setConnectionTitle(connectionName);
         operationUsageHistory.setCreatedAt(LocalDateTime.now());
+        operationUsageHistory.setFromInvoker(sourceInvoker);
+        operationUsageHistory.setToInvoker(targetInvoker);
 
         // Create the detail object - OperationUsageHistoryDetail
         OperationUsageHistoryDetail operationUsageHistoryDetail = new OperationUsageHistoryDetail();

@@ -14,6 +14,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModule {
@@ -59,7 +61,7 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
 
     @Override
     public <T> T getModule(ApiModule module) throws IllegalArgumentException {
-        if (module.getModuleClass().isAssignableFrom(SubscriptionModule.class)) {
+        if (module.getModuleClass().isInstance(this)) {
             return (T) this;
         } else {
             throw new IllegalArgumentException("Interface " + module.getModuleClass() + " not implemented by RemoteApi");
@@ -117,7 +119,7 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
     }
 
     @Override
-    public void sendReport(String payload) {
+    public void sendReport(Object payload) {
         httpRequestHelper.makePostRequest("/api/opencelium/history/save", createHeaders(), payload);
     }
 

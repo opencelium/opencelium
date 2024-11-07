@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
+import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 
@@ -18,7 +19,7 @@ public interface SubscriptionService {
     Subscription getActiveSubs();
     SubsDTO toDto(LicenseKey licenseKey, Subscription subscription);
     Subscription getById(String id);
-    void updateUsage(Subscription activeSub, long connectionId, long requestSize, long startTime);
+    void updateUsage(Subscription activeSub, ConnectionEx connectionEx, long requestSize, long startTime);
     void createFreeLicenseFileIfNotExists();
     void resetMonthlyUsageForLicense(String subId);
 }
