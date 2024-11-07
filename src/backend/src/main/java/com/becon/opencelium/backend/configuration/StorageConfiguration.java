@@ -101,7 +101,7 @@ public class StorageConfiguration {
         // upload freeLicense
         setInitialLicense();
         // updates report schedule
-//        updateReportSchedule();
+        updateReportSchedule();
         // creating 'src/main/resources/templates/' directory
         createDirectory(PathConstant.TEMPLATE);
         // creating 'src/main/resources/assistant/' directory
@@ -132,7 +132,7 @@ public class StorageConfiguration {
     }
 
     private void updateReportSchedule() {
-        String cron = "0 * * * * ?";
+        String cron = "0 0 23 * * ?";
         schedulerReport(cron);
     }
     private void schedulerReport(String cron){
