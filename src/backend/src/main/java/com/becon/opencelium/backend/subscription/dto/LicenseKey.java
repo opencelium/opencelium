@@ -14,8 +14,6 @@ public class LicenseKey {
     private String type;
     private String hmac;
 
-
-
     public long getStartDate() {
         return startDate;
     }

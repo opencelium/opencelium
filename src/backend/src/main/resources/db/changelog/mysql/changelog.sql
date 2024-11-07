@@ -552,3 +552,8 @@ ALTER TABLE user CHANGE totp_enabled totp_process_completed BOOLEAN DEFAULT FALS
 DELETE FROM role_has_permission WHERE role_id=2 AND component_id=4;
 INSERT IGNORE INTO role_has_permission (role_id,component_id,permission_id) VALUES (2,6,1),(2,6,2),(2,6,3),(2,6,4);
 
+--changeset 4.2:13 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE operation_usage_history ADD COLUMN from_invoker VARCHAR(255) NOT NULL;
+ALTER TABLE operation_usage_history ADD COLUMN to_invoker VARCHAR(255) NOT NULL;
+ALTER TABLE operation_usage_history ADD COLUMN modified_at TIMESTAMP NOT NULL;
+
