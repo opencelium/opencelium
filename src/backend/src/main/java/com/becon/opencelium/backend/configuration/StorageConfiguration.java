@@ -30,13 +30,11 @@ import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.subscription.quartz.OperationUsageReportJob;
+import com.becon.opencelium.backend.subscription.quartz.QuartzCronUpdater;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.TriggerBuilder;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +70,8 @@ public class StorageConfiguration {
 
     @Autowired
     private ResourceLoader resourceLoader;
+    @Autowired
+    private Scheduler quartzScheduler;
 
     private static final String JAR_PREFIX = "opencelium.backend-";
     private static final String JAR_EXTENSION = ".jar";
@@ -100,6 +100,8 @@ public class StorageConfiguration {
     public void createStorageAfterStartup() {
         // upload freeLicense
         setInitialLicense();
+        // updates report schedule
+//        updateReportSchedule();
         // creating 'src/main/resources/templates/' directory
         createDirectory(PathConstant.TEMPLATE);
         // creating 'src/main/resources/assistant/' directory
@@ -128,7 +130,40 @@ public class StorageConfiguration {
         cleanOldFiles(PathConstant.LIBS, f -> f.isFile() && f.getName().endsWith(JAR_EXTENSION), JAR_PREFIX);
         cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, File::isDirectory, "");
     }
-//
+
+    private void updateReportSchedule() {
+        String cron = "0 * * * * ?";
+        schedulerReport(cron);
+    }
+    private void schedulerReport(String cron){
+        String triggerName = "operationUsageReportJobTrigger";
+        String triggerGroup = "USAGE_REPORT";
+        JobKey jobKey = JobKey.jobKey("operationUsageReportJob", triggerGroup);
+        TriggerKey triggerKey = TriggerKey.triggerKey(triggerName, triggerGroup);
+
+        try {
+            if (quartzScheduler.checkExists(jobKey)) {
+                QuartzCronUpdater quartzCronUpdater = new QuartzCronUpdater(quartzScheduler);
+                quartzCronUpdater.updateCronExpression(triggerKey.getName(), triggerKey.getGroup(), cron);
+                return;
+            }
+
+            JobDetail jobDetail = JobBuilder.newJob(OperationUsageReportJob.class)
+                    .withIdentity(jobKey)
+                    .storeDurably()
+                    .build();
+            Trigger trigger = TriggerBuilder.newTrigger()
+                    .forJob(jobDetail)
+                    .withIdentity(triggerKey)
+                    .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                    .build();
+
+            quartzScheduler.scheduleJob(jobDetail, trigger);
+        } catch (SchedulerException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 //    private void setReportSchedule() {
 //        JobDetail jobDetail = JobBuilder.newJob(OperationUsageReportJob.class)
 //                .withIdentity("operationUsageReportJob")
@@ -136,7 +171,6 @@ public class StorageConfiguration {
 //                .build();
 //
 //        CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule("00 00 23 * * ?");
-//
 //        TriggerBuilder.newTrigger()
 //                .forJob(jobDetail)
 //                .withIdentity("operationUsageReportJobTrigger")

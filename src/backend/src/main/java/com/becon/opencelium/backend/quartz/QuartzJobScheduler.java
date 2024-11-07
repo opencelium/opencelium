@@ -72,7 +72,8 @@ public class QuartzJobScheduler implements SchedulingStrategy {
 
         try {
             if (!quartzScheduler.checkExists(jobKey))
-                throw new RuntimeException("JOB_NOT_FOUND");
+//                throw new RuntimeException("JOB_NOT_FOUND");
+                System.err.println("JOB_NOT_FOUND");
             quartzScheduler.deleteJob(jobKey); //Deleting a job and unScheduling all of its Triggers
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
@@ -208,6 +209,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
                     .stream()
                     .map(JobExecutionContext::getJobDetail)
                     .map(JobDetail::getKey)
+                    .filter(k -> k.getName().split("-")[0].matches("-?\\\\d+(\\\\.\\\\d+)?") && k.getName().split("-")[1].matches("-?\\\\d+(\\\\.\\\\d+)?"))
                     .collect(Collectors.toMap(e ->
                             Long.valueOf(e.getName().split("-")[0]), e -> Integer.parseInt(e.getName().split("-")[1])));
         } catch (SchedulerException e) {

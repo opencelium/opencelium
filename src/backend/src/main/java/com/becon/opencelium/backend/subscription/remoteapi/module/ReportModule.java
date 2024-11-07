@@ -18,7 +18,7 @@ public interface ReportModule {
      *                specifications (e.g., JSON, XML).
      * @param payload
      */
-    void sendReport(String payload);
+    void sendReport(Object payload);
 
     /**
      * Retrieves the usage history of the last performed operation.

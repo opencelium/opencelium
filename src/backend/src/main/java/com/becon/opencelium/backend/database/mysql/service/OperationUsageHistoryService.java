@@ -15,7 +15,9 @@ public interface OperationUsageHistoryService {
     Page<OperationUsageHistory> getAllUsage(int page, int size, String[] sort);
     Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(String usageId,int page, int size, String[] sort);
     Optional<OperationUsageHistory> findById(Long id);
-    OperationUsageHistory createNewEntity(Subscription subId, String connectionName, long requestSize, long startTime);
+    OperationUsageHistory createNewEntity(Subscription sub, String connectionName,
+                                          long operationUsage, long startTime,
+                                          String sourceInvoker, String targetInvoker);
 
     Optional<OperationUsageHistory> findByConnectionTitle(String title);
     PaginatedDto toPaginatedDto(Page<OperationUsageHistory> page);
