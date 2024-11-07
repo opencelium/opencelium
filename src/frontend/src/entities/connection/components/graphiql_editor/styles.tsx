@@ -16,11 +16,22 @@
 import styled from "styled-components";
 
 const GraphiQLEditorStyled = styled.div`
-    height: calc(100% - 10px);
+    height: calc(100% - 80px);
     margin-top: 10px;
     width: 100%;
 `;
 
+const ShortcutStyled = styled.span`
+    border: 1px solid #aaa;
+    border-radius: 0.2em;
+    box-shadow: 0.1em 0.1em 0.2em rgba(0,0,0,0.1);
+    background-color: #f9f9f9;
+    background-image: linear-gradient(to bottom,#eee,#f9f9f9,#eee);
+    color: #000;
+    padding: 0.1em 0.3em;
+`;
+
 export {
     GraphiQLEditorStyled,
+    ShortcutStyled
 }
