@@ -247,7 +247,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     private void logInfo(String message) {
-        if (!properties.isShowLogs()) {
+        if (properties.isShowLogs().equals("OFF")) {
             return;
         }
 
