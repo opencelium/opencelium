@@ -34,7 +34,7 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
 
     @Override
     public void validateAndLog(Object principal, Object credentials) {
-        if (!properties.isShowLogs()) {
+        if (properties.isShowLogs().contains("OFF")) {
             return;
         }
 

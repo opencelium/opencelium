@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.ArrayList;
@@ -21,7 +22,8 @@ public class LdapProperties {
     private String groupSearchFilter = "";
     private List<Group2Role> groupRoleMapping = new ArrayList<>();
     private String defaultRole;
-    private boolean showLogs = false;
+    @Value("${logging.level.org.springframework.security.ldap:OFF}")
+    private String showLogs;
 
     public String getRoleByGroup(String groupDN) {
         return groupRoleMapping.stream()
@@ -117,11 +119,11 @@ public class LdapProperties {
         this.defaultRole = defaultRole;
     }
 
-    public boolean isShowLogs() {
+    public String isShowLogs() {
         return showLogs;
     }
 
-    public void setShowLogs(boolean showLogs) {
+    public void setShowLogs(String showLogs) {
         this.showLogs = showLogs;
     }
 
