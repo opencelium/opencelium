@@ -52,6 +52,14 @@ public class InvalidExpressionException extends Exception {
         return new InvalidExpressionException(ErrorCode.UNEXPECTED_EXCEPTION, e.getMessage());
     }
 
+    public static InvalidExpressionException referenceExtractorNotFound(String reference) {
+        return new InvalidExpressionException(ErrorCode.REFERENCE_EXTRACTOR_NOT_FOUND, "No extractor found for this reference : '%s'".formatted(reference));
+    }
+
+    public static InvalidExpressionException cannotExtractReferenceValue(String reference, RuntimeException e) {
+        return new InvalidExpressionException(ErrorCode.CANNOT_EXTRACT_REFERENCE, "Exception occurred while getting a value of '%s'. Cause: '%s'".formatted(reference, e.getMessage()));
+    }
+
     public ErrorCode getErrorCode() {
         return errorCode;
     }

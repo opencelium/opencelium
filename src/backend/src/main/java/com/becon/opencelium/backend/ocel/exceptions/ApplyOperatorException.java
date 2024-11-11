@@ -42,14 +42,14 @@ public class ApplyOperatorException extends Exception {
         return switch (this.code) {
             case AO_INVALID_OPERAND_PAIRS -> "'%s' operator doesn't support these type pairs. 1-type - '%s', 2-type - '%s'"
                     .formatted(this.operator.getName(),
-                            this.o1 == null ? null : this.o1.getClass(),
-                            this.o2 == null ? null : this.o2.getClass());
+                            this.o1 == null ? null : this.o1.getClass().getName(),
+                            this.o2 == null ? null : this.o2.getClass().getName());
             case AO_INVALID_OPERAND_VALUE -> this.arity == Arity.UNARY
                     ? "'%s' operator doesn't support this value - '%s'".formatted(this.operator, this.o1)
                     : "'%s' operator doesn't support these value pairs. 1-value - '%s', 2-value - '%s'"
                     .formatted(this.operator, this.o1, this.o2);
             case AO_INVALID_TYPE -> "'%s' operator doesn't support this type: '%s'"
-                    .formatted(this.operator, this.o1 == null ? null : this.o1.getClass());
+                    .formatted(this.operator, this.o1 == null ? null : this.o1.getClass().getName());
             default -> this.getMessage();
         };
     }

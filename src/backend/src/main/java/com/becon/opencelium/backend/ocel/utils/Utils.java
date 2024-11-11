@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.ocel.utils;
 
 import com.becon.opencelium.backend.constant.RegExpression;
+import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
 import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.operators.Operator;
@@ -203,5 +204,17 @@ public class Utils {
             if (startsWith(op, chars, i))
                 return op;
         return null;
+    }
+
+    public static boolean isRightSidedOperator(String token) {
+        if (!isOperator(token)) return false;
+        Operator operator = getOperator(token);
+        return operator.getArity() == Arity.UNARY && !operator.isLeftSided();
+    }
+
+    public static boolean isLeftSidedOperator(String token) {
+        if (!isOperator(token)) return false;
+        Operator operator = getOperator(token);
+        return operator.getArity() == Arity.UNARY && operator.isLeftSided();
     }
 }

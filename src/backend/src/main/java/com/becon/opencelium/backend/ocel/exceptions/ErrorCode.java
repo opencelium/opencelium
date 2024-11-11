@@ -20,7 +20,10 @@ public enum ErrorCode {
 
     RESULT_VALUE_IS_NOT_BOOLEAN("result.value.is.not.bool"),
     UNEXPECTED_END_OF_EXPRESSION("unexpected.end.of.expression"),
-    UNEXPECTED_EXCEPTION("unexpected.exception");
+    UNEXPECTED_EXCEPTION("unexpected.exception"),
+
+    REFERENCE_EXTRACTOR_NOT_FOUND("reference.extractor.not.found"),
+    CANNOT_EXTRACT_REFERENCE("cannot.extract.reference");
 
     private final String code;
 

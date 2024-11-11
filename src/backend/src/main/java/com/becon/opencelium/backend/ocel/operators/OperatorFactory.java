@@ -24,7 +24,7 @@ public class OperatorFactory {
             case NOT_LIKE -> new NotLike();
             case REGEX -> new RegEx();
             case MATCHES -> new Matches();
-            default -> throw new IllegalStateException("Unexpected value: " + operator);
+            default -> null;
         };
     }
 }

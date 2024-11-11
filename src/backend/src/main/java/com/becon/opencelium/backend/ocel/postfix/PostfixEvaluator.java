@@ -49,8 +49,6 @@ public class PostfixEvaluator implements Evaluator {
                                     operand.setValue(getValueOfRaw(operand.getRawValue(), referenceExtractor));
                                 } catch (ValueParseException e) {
                                     throw InvalidExpressionException.valueParseException(e);
-                                } catch (Exception e) {
-                                    // handle exception from refExtractor
                                 }
                             }
                             Object result;
@@ -69,8 +67,6 @@ public class PostfixEvaluator implements Evaluator {
                                     left.setValue(getValueOfRaw(left.getRawValue(), referenceExtractor));
                                 } catch (ValueParseException e) {
                                     throw InvalidExpressionException.valueParseException(e);
-                                } catch (Exception e) {
-                                    // handle exception from refExtractor
                                 }
                             }
                             if (right.isRaw()) {
@@ -78,8 +74,6 @@ public class PostfixEvaluator implements Evaluator {
                                     right.setValue(getValueOfRaw(right.getRawValue(), referenceExtractor));
                                 } catch (ValueParseException e) {
                                     throw InvalidExpressionException.valueParseException(e);
-                                } catch (Exception e) {
-                                    // handle exception from refExtractor
                                 }
                             }
                             Object result;
@@ -114,10 +108,17 @@ public class PostfixEvaluator implements Evaluator {
         }
     }
 
-    private Object getValueOfRaw(String rawValue, Function<String, Object> referenceExtractor) throws ValueParseException {
-        return Utils.isReference(rawValue)
-                ? referenceExtractor.apply(rawValue)
-                : rawValueParser.parse(rawValue);
+    private Object getValueOfRaw(String rawValue, Function<String, Object> referenceExtractor) throws ValueParseException, InvalidExpressionException {
+        if (Utils.isReference(rawValue)) {
+            if (referenceExtractor == null)
+                throw InvalidExpressionException.referenceExtractorNotFound(rawValue);
+            try {
+                return referenceExtractor.apply(rawValue);
+            } catch (RuntimeException e) {
+                throw InvalidExpressionException.cannotExtractReferenceValue(rawValue, e);
+            }
+        }
+        return rawValueParser.parse(rawValue);
     }
 
     public static PostfixEvaluator getInstance() {

@@ -5,7 +5,6 @@ import com.becon.opencelium.backend.ocel.enums.ShallowEvaluatorType;
 import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.operators.Operator;
 import com.becon.opencelium.backend.ocel.utils.Utils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Stack;
@@ -45,7 +44,7 @@ public class Validator {
             List<String> tokens = Utils.splitTokens(expression);
             firstLevelCheck(tokens);
             secondLevelCheck(tokens);
-            return StringUtils.joinWith(" ", tokens);
+            return String.join(" ", tokens);
         } catch (RuntimeException e) {
             throw InvalidExpressionException.unexpectedException(e);
         }
@@ -111,20 +110,20 @@ public class Validator {
                 if (operator.getArity() == Arity.UNARY) {
                     if (operator.isLeftSided()) {
                         // Check for sufficient right operand for left-sided unary operators
-                        if (i == tokens.size() - 1 || (!tokens.get(i + 1).equals("(") && !Utils.isOperand(tokens.get(i + 1)))) {
+                        if (i == tokens.size() - 1 || (!tokens.get(i + 1).equals("(") && !Utils.isOperand(tokens.get(i + 1)) && !Utils.isLeftSidedOperator(tokens.get(i + 1)))) {
                             throw InvalidExpressionException.insufficientOperand(token);
                         }
                     } else {
                         // Check for sufficient left operand for right-sided unary operators
-                        if (i == 0 || (!tokens.get(i - 1).equals(")") && !Utils.isOperand(tokens.get(i - 1)))) {
+                        if (i == 0 || (!tokens.get(i - 1).equals(")") && !Utils.isOperand(tokens.get(i - 1)) && !Utils.isRightSidedOperator(tokens.get(i - 1)))) {
                             throw InvalidExpressionException.insufficientOperand(token);
                         }
                     }
                 }
                 // Handle binary operators
                 else if (operator.getArity() == Arity.BINARY) {
-                    boolean hasLeftOperand = i > 0 && (tokens.get(i - 1).equals(")") || Utils.isOperand(tokens.get(i - 1)));
-                    boolean hasRightOperand = i < tokens.size() - 1 && (tokens.get(i + 1).equals("(") || Utils.isOperand(tokens.get(i + 1)));
+                    boolean hasLeftOperand = i > 0 && (tokens.get(i - 1).equals(")") || Utils.isOperand(tokens.get(i - 1)) || Utils.isRightSidedOperator(tokens.get(i - 1)));
+                    boolean hasRightOperand = i < tokens.size() - 1 && (tokens.get(i + 1).equals("(") || Utils.isOperand(tokens.get(i + 1)) || Utils.isLeftSidedOperator(tokens.get(i + 1)));
 
                     if (!hasLeftOperand || !hasRightOperand) {
                         throw InvalidExpressionException.insufficientOperand(token);
