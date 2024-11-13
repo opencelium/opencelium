@@ -122,6 +122,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public void update(Subscription subscription) {
+        subscriptionRepository.save(subscription);
+    }
+
+    @Override
     public Subscription setSubscription(String licenseKey, ActivationRequest newAr) {
         if (newAr.getStatus().equals(ActivReqStatus.EXPIRED)) {
             throw new RuntimeException("Couldn't activate license. Activation request has been expired " +
@@ -245,7 +250,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         String newHmac = HmacUtility.encode(sub.getId() + updatedOperationUsage);
         sub.setCurrentUsage(updatedOperationUsage);
         sub.setCurrentUsageHmac(newHmac);
-        save(sub);
+        update(sub);
     }
 
     @Override

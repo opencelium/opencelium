@@ -36,7 +36,8 @@ public class OperationUsageReportJob extends QuartzJobBean {
         if (usageHistoryDtoList.isEmpty()) {
             return;
         }
-        Map<String, List<UsageHistoryDto>> request = Map.of("records", usageHistoryDtoList);
+
+        Map<String, Object> request = Map.of("records", usageHistoryDtoList);
         try {
             reportModule.sendReport(request);
         } catch (Exception e) {
