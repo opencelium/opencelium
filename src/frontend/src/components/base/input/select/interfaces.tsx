@@ -76,6 +76,7 @@ interface InputSelectProps extends InputElementProps{
     checkboxProps?: any,
     categoryList?: boolean,
     currentCategory?: CategoryModel | null,
+    emptyListText?: string,
 }
 
 interface OptionsStyledProps extends ElementProps{
