@@ -76,6 +76,7 @@ interface CollectionViewProps{
     paginationProps?: {
         totalPages: number,
         setPage: (page: number) => void,
+        page: number,
     } | undefined | null,
 }
 

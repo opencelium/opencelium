@@ -20,6 +20,7 @@ export const RoleNames: any = {
     professional: 'Professional',
     enterprise: 'Enterprise',
     enterprise_plus: 'Enterprise Plus',
+    starter_api: 'OpenCelium Starter',
     professional_api: 'OpenCelium Professional',
     enterprise_api: 'OpenCelium Enterprise',
     enterprise_plus_api: 'OpenCelium Enterprise Plus',

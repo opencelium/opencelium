@@ -58,6 +58,7 @@ const InputSelect: FC<InputSelectProps> = ({
     checkboxProps,
     categoryList,
     currentCategory,
+    emptyListText,
     ...props
 }) => {
     let source: OptionProps[];
@@ -303,7 +304,7 @@ const InputSelect: FC<InputSelectProps> = ({
                                 getOptionRightComponent={getOptionRightComponent}
                             />
                         );
-                    }) : <EmptyOptionsStyled>{'There are no options'}</EmptyOptionsStyled>
+                    }) : <EmptyOptionsStyled>{emptyListText || 'There are no options'}</EmptyOptionsStyled>
                 }
             </OptionsStyled>}
             {categoryList && <OptionsStyled categoryList={categoryList} ref={selectRef} isVisible={isHidden} height={height} color={ColorTheme.DarkBlue}>
@@ -321,7 +322,7 @@ const InputSelect: FC<InputSelectProps> = ({
                                 getOptionRightComponent={getOptionRightComponent}
                             />
                         );
-                    }) : <EmptyOptionsStyled>{'There are no options'}</EmptyOptionsStyled>
+                    }) : <EmptyOptionsStyled>{emptyListText || 'There are no options'}</EmptyOptionsStyled>
                 }
             </OptionsStyled>}
         </Input>
