@@ -97,7 +97,7 @@ and see the logs on the right side.
 
 |image1|
 
-For troubleshooting login with LDAP credentials, please have a look into OpenCelium Logs:
+For login using LDAP credentials, please have a look into OpenCelium Logs for troubleshooting:
 
 .. code-block:: sh
 	
