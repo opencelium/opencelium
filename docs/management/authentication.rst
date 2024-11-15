@@ -87,20 +87,21 @@ Under *spring* -> *security*, please set the required parameters:
     Usually, group-role-mapping for OpenLDAP requires lowercase letters for cn, ou and dc,
     while, Active Directory requires capital letters for CN, OU and DC
 
-|Now you can check the ldap connection in *Admin Panel* -> *LDAP Check* 
-|and see the logs on the right side.
-|You can also have a look into OpenCelium Logs:
+Now you can check the ldap connection in *Admin Panel* -> *LDAP Check* 
+and see the logs on the right side.
+
+|image1|
+
+You can also have a look into OpenCelium Logs:
 
 .. code-block:: sh
 	
 	journalctl -xe -u opencelium -f
  
 
-|image1|
-
-
 .. |image1| image:: ../img/management/authentication/1.png
    :align: middle
+   :width: 200
 .. |image2| image:: ../img/management/authentication/2.png
    :align: middle
    :width: 200
@@ -109,3 +110,5 @@ Under *spring* -> *security*, please set the required parameters:
 .. |image4| image:: ../img/management/authentication/4.png
    :align: middle
    :width: 400
+
+
