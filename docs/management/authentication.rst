@@ -76,9 +76,6 @@ Under *spring* -> *security*, please set the required parameters:
 
       # Default role if no mapping is found between LDAP and the application
       default-role: User
-
-      # Activate or deactivate logs during authentication
-      show-logs: false
       
       # Timeout for LDAP authentication (in milliseconds)
       timeout: 30000
