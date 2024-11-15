@@ -81,7 +81,12 @@ Under *spring* -> *security*, please set the required parameters:
       timeout: 30000
 
 .. warning::
-    After updating the application.yml file, please build and restart the server.
+    After updating the application.yml file, please restart the opencelium service.
+
+.. code-block:: sh
+
+        systemctl restart opencelium
+
 
 .. note::
     Usually, group-role-mapping for OpenLDAP requires lowercase letters for cn, ou and dc,
@@ -92,7 +97,7 @@ and see the logs on the right side.
 
 |image1|
 
-You can also have a look into OpenCelium Logs:
+For troubleshooting login with LDAP credentials, please have a look into OpenCelium Logs:
 
 .. code-block:: sh
 	
