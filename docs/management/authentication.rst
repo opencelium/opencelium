@@ -101,7 +101,7 @@ You can also have a look into OpenCelium Logs:
 
 .. |image1| image:: ../img/management/authentication/1.png
    :align: middle
-   :width: 200
+   :width: 400
 .. |image2| image:: ../img/management/authentication/2.png
    :align: middle
    :width: 200
