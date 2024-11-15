@@ -45,17 +45,17 @@ Under *spring* -> *security*, please set the required parameters:
 
    ldap:
       # LDAP server URL
-      urls: ldap://srvmucudcb01.becon.de:7389
+      urls: ldap://localhost:7389
 
       # User search base
-      user-search-base: ou=User,ou=BECON,dc=becon,dc=de
+      user-search-base: ou=User,ou=group,dc=domain,dc=de
 
       # Group search base
-      group-search-base: ou=Groups,ou=BECON,dc=becon,dc=de
+      group-search-base: ou=Groups,ou=group,dc=domain,dc=de
 
       # LDAP manager credentials
-      username: uid=otrs-ldap,ou=Special,ou=User,ou=BECON,dc=becon,dc=de
-      password: $Verzeichnis$
+      username: uid=super_user,ou=User,ou=group,dc=domain,dc=com
+      password: PASSWORD
 
       # Where to search for roles/groups
       # Usually, the unique identifier for OpenLDAP is uniqueMember={0},
@@ -69,10 +69,10 @@ Under *spring* -> *security*, please set the required parameters:
 
       # Maps groups between LDAP and the application
       group-role-mapping:
-        - ldap-group: cn=FUL-Intern,ou=Grouping Users,ou=Groups,ou=BECON,dc=becon,dc=de
-          oc-role: Admin
-        - ldap-group: cn=asdasFUL--Intern,ou=Grouping Users,ou=Groups,ou=BECON,dc=becon,dc=de
-          oc-role: User
+         - ldap-group: cn=AdminLdap, ou=Groups,ou=group,dc=domain,dc=com
+           oc-role: Admin
+         - ldap-group: cn=UserLdap,ou=Groups,ou=group,dc=domain,dc=com
+           oc-role: User
 
       # Default role if no mapping is found between LDAP and the application
       default-role: User
