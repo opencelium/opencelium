@@ -1,12 +1,14 @@
 package com.becon.opencelium.backend.subscription.remoteapi;
 
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.ReportModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.SubscriptionModule;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -26,9 +28,12 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
 
     public ServicePortal() {
         YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
-        yamlPropertiesFactoryBean.setResources(new ClassPathResource("application.yml"));
+        Resource yamlResource = new FileSystemResource(PathConstant.APP_YML);
+        yamlPropertiesFactoryBean.setResources(yamlResource);
         BASE_URL = Objects.requireNonNull(yamlPropertiesFactoryBean.getObject()).getProperty(AppYamlPath.SP_BASE_URL);
         AUTH_TOKEN = Objects.requireNonNull(yamlPropertiesFactoryBean.getObject()).getProperty(AppYamlPath.SP_TOKEN);
+        System.out.println(AUTH_TOKEN);
+        System.out.println(yamlPropertiesFactoryBean.getObject());
         this.httpRequestHelper = new HttpRequestHelper(BASE_URL);
     }
 
