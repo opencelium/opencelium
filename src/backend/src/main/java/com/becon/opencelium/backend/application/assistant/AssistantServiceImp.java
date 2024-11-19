@@ -296,7 +296,7 @@ public class AssistantServiceImp implements ApplicationService {
         }
         InputStream inputStream = Files.newInputStream(zipFile.toPath());
         Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
-        System.out.println(zipFile.toPath() + ", " + appRoot);
+        log.info(zipFile.toPath() + ", " + appRoot);
 //        unzipFolder(inputStream, appRoot);
         ZipUtils.extractZip(inputStream, appRoot);
     }
