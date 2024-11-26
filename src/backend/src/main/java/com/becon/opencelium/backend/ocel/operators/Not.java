@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.ocel.commons.Dummy;
 import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
 public class Not implements Operator {
 
@@ -14,9 +15,9 @@ public class Not implements Operator {
 
     @Override
     public Object apply(Object o) throws ApplyOperatorException {
-        if (!(o instanceof Boolean oo))
+        if (!ValueUtils.isBool(o))
             throw ApplyOperatorException.invalidTypeException(getOperatorType(), o);
-        return !oo;
+        return !ValueUtils.parseBoolean(o);
     }
 
     @Override

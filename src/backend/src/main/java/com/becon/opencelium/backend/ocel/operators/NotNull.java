@@ -12,7 +12,7 @@ public class NotNull implements Operator {
 
     @Override
     public Object apply(Object o) {
-        return o != null;
+        return o != null && !o.equals("null");
     }
 
     @Override

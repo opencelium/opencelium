@@ -5,17 +5,16 @@ import com.becon.opencelium.backend.ocel.enums.Arity;
 import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
 import com.becon.opencelium.backend.ocel.enums.SidesType;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
 public class EqualTo implements Operator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
-        if (o1 == null || o2 == null) return o1 == o2;
-        if (o1.getClass() != o2.getClass())
-            throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
-
-        String value1 = o1.toString();
-        String value2 = o2.toString();
-
+        if (ValueUtils.isNumber(o1) && ValueUtils.isNumber(o2)) {
+            return 0 == ValueUtils.compareTo(o1, o2);
+        }
+        String value1 = o1 == null ? "null" : o1.toString();
+        String value2 = o2 == null ? "null" : o2.toString();
         return value1.equals(value2);
     }
 

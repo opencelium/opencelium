@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.ocel.commons;
 
 import com.becon.opencelium.backend.ocel.exceptions.*;
-import com.becon.opencelium.backend.ocel.utils.NumberUtils;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 import com.becon.opencelium.backend.ocel.utils.Utils;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class RawValueParser {
             return val.substring(1, val.length() - 1);
         }
 
-        if (NumberUtils.isNumber(val)) {
+        if (ValueUtils.isNumberStr(val)) {
             return Double.valueOf(val);
         }
 
@@ -68,7 +68,7 @@ public class RawValueParser {
         if ("true".equals(element) || "false".equals(element)) {
             return Boolean.class;
         }
-        if (NumberUtils.isNumber(element)) return Number.class;
+        if (ValueUtils.isNumberStr(element)) return Number.class;
         if (element.startsWith("\"") && element.endsWith("\""))
             return String.class;
 

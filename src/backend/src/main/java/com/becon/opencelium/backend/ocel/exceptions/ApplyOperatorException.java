@@ -38,13 +38,18 @@ public class ApplyOperatorException extends Exception {
         return new ApplyOperatorException(ErrorCode.AO_INVALID_OPERAND_VALUE, operator, o1, o2, arity);
     }
 
+    public static ApplyOperatorException invalidOperandValueException(OperatorEnum operator, Object o) {
+        return new ApplyOperatorException(ErrorCode.AO_INVALID_OPERAND_VALUE, operator, o, null);
+    }
+
     public String getMessage() {
         return switch (this.code) {
-            case AO_INVALID_OPERAND_PAIRS -> "'%s' operator doesn't support these type pairs. 1-type - '%s', 2-type - '%s'"
-                    .formatted(this.operator.getName(),
-                            this.o1 == null ? null : this.o1.getClass().getName(),
-                            this.o2 == null ? null : this.o2.getClass().getName());
-            case AO_INVALID_OPERAND_VALUE -> this.arity == Arity.UNARY
+            case AO_INVALID_OPERAND_PAIRS ->
+                    "'%s' operator doesn't support these type pairs. 1-type - '%s', 2-type - '%s'"
+                            .formatted(this.operator.getName(),
+                                    this.o1 == null ? null : this.o1.getClass().getName(),
+                                    this.o2 == null ? null : this.o2.getClass().getName());
+            case AO_INVALID_OPERAND_VALUE -> this.arity == Arity.UNARY || this.arity == null
                     ? "'%s' operator doesn't support this value - '%s'".formatted(this.operator, this.o1)
                     : "'%s' operator doesn't support these value pairs. 1-value - '%s', 2-value - '%s'"
                     .formatted(this.operator, this.o1, this.o2);
@@ -69,6 +74,7 @@ public class ApplyOperatorException extends Exception {
     public String getCodeString() {
         return code.getCode();
     }
+
     public ErrorCode getCode() {
         return code;
     }

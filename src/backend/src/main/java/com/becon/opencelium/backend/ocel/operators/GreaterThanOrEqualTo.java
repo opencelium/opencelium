@@ -6,18 +6,16 @@ import com.becon.opencelium.backend.ocel.enums.OperatorEnum;
 import com.becon.opencelium.backend.ocel.enums.SidesType;
 import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.utils.DateUtils;
-import com.becon.opencelium.backend.ocel.utils.NumberUtils;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
 public class GreaterThanOrEqualTo implements Operator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
-        if (o1 instanceof Number n1 && o2 instanceof Number n2) {
-            return NumberUtils.compareTo(n1, n2) >= 0;
+        if (ValueUtils.isNumber(o1) && ValueUtils.isNumber(o2)) {
+            return ValueUtils.compareTo(o1, o2) >= 0;
         }
-        if (o1 instanceof String s1 && o2 instanceof String s2) {
-            if (DateUtils.isDate(s1) && DateUtils.isDate(s2)) {
-                return DateUtils.compareTo(s1, s2) >= 0;
-            }
+        if (DateUtils.isDate(o1) && DateUtils.isDate(o2)) {
+            return DateUtils.compareTo(o1, o2) >= 0;
         }
         throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
     }

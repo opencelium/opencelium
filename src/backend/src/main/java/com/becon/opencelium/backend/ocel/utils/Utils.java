@@ -130,7 +130,7 @@ public class Utils {
                 || "false".equals(token)
                 || isReference(token)
                 || token.startsWith("\"") && token.endsWith("\"")
-                || NumberUtils.isNumber(token)
+                || ValueUtils.isNumberStr(token)
                 || token.startsWith("[") && token.endsWith("]")
                 || checkTypeAvailability(token);
     }

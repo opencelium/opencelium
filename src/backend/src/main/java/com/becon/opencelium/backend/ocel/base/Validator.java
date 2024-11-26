@@ -20,7 +20,7 @@ public class Validator {
         return new Validator(ShallowEvaluatorType.POSTFIX);
     }
 
-    public static Validator withCustomEvaluator(ShallowEvaluatorType type) {
+    public static Validator withCustomShallowEvaluator(ShallowEvaluatorType type) {
         return new Validator(type);
     }
 
