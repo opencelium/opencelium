@@ -33,7 +33,6 @@ import org.neo4j.driver.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.env.Environment;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -71,6 +70,7 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Autowired
     private Environment env;
+
     @Autowired
     private MongoClient mongoClient;
 
@@ -81,13 +81,14 @@ public class AssistantServiceImp implements ApplicationService {
     private ConnectionServiceImp connectionService;
 
     @Autowired
-    private YamlPropertiesFactoryBean yamPropsFactory;
-    @Autowired
     private ConnectorServiceImp connectorServiceImp;
+
     @Autowired
     private ConnectionMngServiceImp connectionMngServiceImp;
+
     @Autowired
     private FieldBindingMngServiceImp fieldBindingMngServiceImp;
+
     @Autowired
     private InvokerServiceImp invokerServiceImp;
 
@@ -179,7 +180,7 @@ public class AssistantServiceImp implements ApplicationService {
     // TODO: test
     @Override
     public String getCurrentVersion() {
-        return systemOverviewRepository.getCurrentVersionFromDb();
+        return systemOverviewRepository.getCurrentVersion();
     }
 
     @Override
@@ -194,20 +195,6 @@ public class AssistantServiceImp implements ApplicationService {
             installType = env.getProperty(AppYamlPath.INSTALLATION + ".type");
         }
         return new InstallationDTO(installType);
-    }
-
-    // dir - assistant/version/{folder}
-    public String getVersionFromDir(String pathTodir) {
-
-        try {
-            Properties properties = yamPropsFactory.getObject();
-            if (Objects.requireNonNull(properties).containsKey("opencelium.version")) {
-                return properties.getProperty("opencelium.version");
-            }
-            return "NOT_SET";
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public void moveToTmpFolder(Path filePath, String folder, String fileExtension) throws IOException {

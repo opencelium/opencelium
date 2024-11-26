@@ -10,8 +10,8 @@ public class ConnectionStatusDto {
     private String error;
 
     public String getStatus() {
-        RemoteApi remoteApi = new ServicePortal();
-        SubscriptionModule sm = remoteApi.getModule(ApiModule.SUBSCRIPTION);
+//        RemoteApi remoteApi = new ServicePortal();
+//        SubscriptionModule sm = (SubscriptionModule)remoteApi.getModule(ApiModule.SUBSCRIPTION);
         return status;
     }
 
