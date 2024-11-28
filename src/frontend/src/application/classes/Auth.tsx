@@ -18,7 +18,7 @@ import {HookStateClass} from "../classes/HookStateClass";
 import {Application as App} from "./Application";
 import {
     IAuth,
-    IAuthText,
+    IAuthText, ICredentials,
 } from "../interfaces/IAuth";
 import {IInput} from "../interfaces/core";
 import {RootState, useAppSelector} from "../utils/store";
@@ -31,7 +31,7 @@ export class Auth extends HookStateClass implements IAuth{
     id: number;
 
     @App.inputType
-    email: string = '';
+    username: string = '';
 
     @App.inputType
     password: string = '';
@@ -41,7 +41,7 @@ export class Auth extends HookStateClass implements IAuth{
     constructor(authData?: Partial<IAuth> | null) {
         // @ts-ignore
         super(authData?.validations || {});
-        this.email = authData?.email || '';
+        this.username = authData?.username || '';
         this.password = authData?.password || '';
     }
 
@@ -63,21 +63,15 @@ export class Auth extends HookStateClass implements IAuth{
 
     validateEmail(){
         let isNotValid = false;
-        let isEmailRegExp = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-        if(this.email === ''){
+        if(this.username === ''){
             isNotValid = true;
-            this.validations['email'] = 'The email is a required field';
-        }
-        if(!isEmailRegExp.test(this.email) && !isNotValid){
-            this.validations['email'] = 'The email is invalid';
-            isNotValid = true;
+            this.validations['username'] = 'The username is a required field';
         }
         if(isNotValid){
             // @ts-ignore
-            this.updateEmail(this, this.email);
+            this.updateUsername(this, this.username);
             if(!this.isFocused){
-                document.getElementById('input_email').focus();
+                document.getElementById('input_username').focus();
                 this.isFocused = true;
             }
             return false;
@@ -109,12 +103,12 @@ export class Auth extends HookStateClass implements IAuth{
 
     validateLogin(): boolean {
         this.isFocused = false;
-        const isValidEmail = this.validateEmail();
+        const isValidUsername = this.validateEmail();
         const isValidPassword = this.validatePassword();
-        return isValidEmail && isValidPassword;
+        return isValidUsername && isValidPassword;
     }
 
-    @App.dispatch(login, {mapping: (authData: IAuth) => {return {email: authData.email, password: authData.password};}})
+    @App.dispatch(login, {mapping: (authData: IAuth): ICredentials => {return {email: authData.username, password: authData.password};}})
     login(): boolean{
         return this.validateLogin();
     }

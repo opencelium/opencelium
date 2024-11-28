@@ -42,12 +42,15 @@ import {
     TitleStyled,
     WidgetItemStyled
 } from './styles';
-import { Auth } from '@application/classes/Auth';
+import {SubscriptionOverviewWidget} from "@entity/dashboard/components/widgets/SubscriptionOverview";
+import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
+import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
 
 export const HAS_DASHBOARD_WIDGET_ENGINE = true;
 
 export const WIDGET_LIST = {
     'MONITORING_BOARDS': <MonitoringBoardsWidget/>,
+    'SUBSCRIPTION_OVERVIEW': <SubscriptionOverviewWidget/>,
     'CURRENT_SCHEDULER': <CurrentSchedulesWidget/>,
     'CONNECTION_OVERVIEW': <ConnectionOverviewWidget/>,
 }
@@ -59,9 +62,8 @@ const DashboardForm: FC<DashboardFormProps> =
         * TODO: implement get subscription update
         */
         const dispatch = useAppDispatch();
-        const {authUser} = Auth.getReduxState();
-        const {widgets, gettingAllWidgets} = Widget.getReduxState();
-        const {gettingAllWidgetSettings, updatingAllWidgetSettings, widgetSettings} = WidgetSetting.getReduxState();
+        const {widgets} = Widget.getReduxState();
+        const {updatingAllWidgetSettings, widgetSettings} = WidgetSetting.getReduxState();
         const [isWidgetEditOn, setIsWidgetEditOn] = useState<boolean>(false);
         const [currentWidget, setCurrentWidget] = useState(null);
         const [layout, setLayout] = useState<IWidgetSetting[]>([]);
@@ -70,6 +72,7 @@ const DashboardForm: FC<DashboardFormProps> =
         useEffect(() => {
             dispatch(getAllWidgets());
             dispatch(getAllWidgetSettings());
+            dispatch(getCurrentSubscription());
         }, [])
         useEffect(() => {
             let newLayout = widgetSettings.map(item => {
@@ -165,6 +168,7 @@ const DashboardForm: FC<DashboardFormProps> =
         return (
             <DashboardFormStyled>
                 <TitleStyled title={'Dashboard'} icon={EditDashboardIcon}/>
+                <LicenseAlertMessage/>
                 <DashboardViewStyled>
                     <div>
                         {isWidgetEditOn &&

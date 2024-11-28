@@ -35,7 +35,7 @@ export interface TokenProps extends JwtPayload{
 
 
 export interface IAuthText{
-    email: string;
+    username: string;
     password: string;
 }
 

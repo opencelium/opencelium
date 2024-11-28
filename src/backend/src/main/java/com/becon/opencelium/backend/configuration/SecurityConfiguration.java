@@ -16,30 +16,47 @@
 
 package com.becon.opencelium.backend.configuration;
 
-import com.becon.opencelium.backend.security.*;
+import com.becon.opencelium.backend.database.mysql.service.LdapVerificationService;
+import com.becon.opencelium.backend.security.AuthExceptionHandler;
+import com.becon.opencelium.backend.security.AuthenticationFilter;
+import com.becon.opencelium.backend.security.AuthorizationFilter;
+import com.becon.opencelium.backend.security.DaoUserDetailsService;
+import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.ldap.core.DirContextOperations;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.ProviderNotFoundException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.ldap.SpringSecurityLdapTemplate;
+import org.springframework.security.ldap.authentication.BindAuthenticator;
+import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
+import org.springframework.security.ldap.authentication.LdapAuthenticator;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
+import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Collections;
-
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -47,8 +64,6 @@ public class SecurityConfiguration {
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-    @Autowired
-    private JwtUserDetailsService authUserDetailsService;
 
     @Lazy
     @Autowired
@@ -65,33 +80,15 @@ public class SecurityConfiguration {
     @Autowired
     private AuthExceptionHandler authExceptionHandler;
 
-    @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception{
-        return new ProviderManager(authenticationProvider());
-    }
+    @Autowired
+    private DaoUserDetailsService daoUserDetailsService;
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addExposedHeader("GroupPermissionOperations, Authorization");
+    @Autowired
+    private LdapProperties ldapProperties;
 
-        corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.addAllowedHeader("*");
-        corsConfiguration.addAllowedMethod("*");
-        corsConfiguration.setAllowedOriginPatterns(Collections.singletonList("*"));
-        corsConfiguration.applyPermitDefaultValues();
-        source.registerCorsConfiguration("/**", corsConfiguration);
-        return source;
-    }
+    @Autowired
+    private LdapVerificationService ldapVerificationService;
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        final DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setPasswordEncoder(bCryptPasswordEncoder);
-        authenticationProvider.setUserDetailsService(authUserDetailsService);
-        return authenticationProvider;
-    }
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception{
@@ -114,6 +111,97 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder
+                .authenticationProvider(ldapAuthenticationProvider())
+                .authenticationProvider(daoAuthenticationProvider());
+
+        return authenticationManagerBuilder.build();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        final DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setPasswordEncoder(bCryptPasswordEncoder);
+        authenticationProvider.setUserDetailsService(daoUserDetailsService);
+
+        return authenticationProvider;
+    }
+
+    @Bean
+    public LdapAuthenticationProvider ldapAuthenticationProvider() {
+        return new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator()){
+            @Override
+            protected DirContextOperations doAuthentication(UsernamePasswordAuthenticationToken authentication) {
+                try {
+                    return super.doAuthentication(authentication);
+                } catch (Throwable e) {
+                    ldapVerificationService.validateAndLog(authentication.getPrincipal(), authentication.getCredentials());
+                    throw new ProviderNotFoundException(e.getMessage());
+                }
+            }
+        };
+    }
+
+    @Bean
+    public LdapAuthenticator ldapAuthenticator() {
+        String userSearchBase = ldapProperties.getUserSearchBase();
+        String searchFilter = ldapProperties.getUserSearchFilter();
+
+        BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
+        authenticator.setUserSearch(new FilterBasedLdapUserSearch(userSearchBase, searchFilter, ldapContextSource()));
+
+        return authenticator;
+    }
+
+    @Bean
+    public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() {
+        String groupSearchBase = ldapProperties.getGroupSearchBase();
+        String searchFilter = ldapProperties.getGroupSearchFilter();
+
+        DefaultLdapAuthoritiesPopulator authoritiesPopulator = new DefaultLdapAuthoritiesPopulator(ldapContextSource(), groupSearchBase);
+        authoritiesPopulator.setGroupSearchFilter(searchFilter);
+        authoritiesPopulator.setSearchSubtree(true);
+        authoritiesPopulator.setAuthorityMapper(this::ldapAuthorityMapper);
+
+        return authoritiesPopulator;
+    }
+
+    @Bean
+    public LdapContextSource ldapContextSource() {
+        LdapContextSource contextSource = new LdapContextSource();
+
+        contextSource.setUrl(ldapProperties.getUrls());
+        contextSource.setUserDn(ldapProperties.getUsername());
+        contextSource.setPassword(ldapProperties.getPassword());
+
+        // add timeout for connecting and reading to/from Ldap server
+        Hashtable<String, Object> env = new Hashtable<>();
+        env.put(LdapProperties.CONNECT_TIMEOUT_KEY, ldapProperties.getTimeout());
+        env.put(LdapProperties.READ_TIMEOUT_KEY, ldapProperties.getTimeout());
+        contextSource.setBaseEnvironmentProperties(env);
+
+        return contextSource;
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.addExposedHeader("GroupPermissionOperations, Authorization");
+
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.setAllowedOriginPatterns(Collections.singletonList("*"));
+        corsConfiguration.applyPermitDefaultValues();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+        return source;
+    }
+
+    @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         String[] enpoints = new String[] {
                 "/api/storage/files/**",
@@ -126,5 +214,13 @@ public class SecurityConfiguration {
                 "/docs"};
         return (web) -> web.ignoring()
                 .requestMatchers(enpoints);
+    }
+
+
+    private GrantedAuthority ldapAuthorityMapper(Map<String, List<String>> userGroups) {
+        List<String> groups = userGroups.get(SpringSecurityLdapTemplate.DN_KEY);
+
+        // returns LDAP groupDN
+        return new SimpleGrantedAuthority(groups.get(0));
     }
 }

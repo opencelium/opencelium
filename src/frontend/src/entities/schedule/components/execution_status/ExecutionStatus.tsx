@@ -29,9 +29,9 @@ const ExecutionStatus: FC<ExecutionStatusProps> =
             let newLastStatusColor = lastExecutionFailTime > lastExecutionSuccessTime ? '#f5c3c3' : '#c3f5c3';
             if (lastExecutionSuccessTime === 0 && lastExecutionFailTime === 0) {
                 newLastStatusColor = 'unset';
-            }
-            if (!schedule.cronExp) {
-                newLastStatusColor = '#cccccc';
+                if (!schedule.cronExp) {
+                    newLastStatusColor = '#cccccc';
+                }
             }
             setLastStatusColor(newLastStatusColor);
         }, [schedule?.lastExecution, schedule.status])

@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.execution.builder;
 
-import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.enums.execution.ParamLocation;
@@ -123,17 +122,18 @@ public class RequestEntityBuilder {
         getParamsByLocation(ParamLocation.HEADER).stream()
                 .map(ParameterDTOUtil::copy)
                 .peek(parameter -> replaceRefs(parameter.getSchema()))
-                .forEach(parameter -> headers.put(parameter.getName(), List.of(ParameterDTOUtil.toString(parameter))));
+                .forEach(parameter -> headers.add(parameter.getName(), ParameterDTOUtil.toString(parameter)));
 
-        // add Cookie parameter(s) if exists
-        String cookies = getParamsByLocation(ParamLocation.COOKIE).stream()
+        // collect Cookie parameter(s) in header if exists
+        getParamsByLocation(ParamLocation.COOKIE).stream()
                 .map(ParameterDTOUtil::copy)
                 .peek(parameter -> replaceRefs(parameter.getSchema()))
-                .map(ParameterDTOUtil::toString)
-                .collect(Collectors.joining("; "));
+                .forEach(parameter -> headers.add(HttpHeaders.COOKIE, ParameterDTOUtil.toString(parameter)));
+
+        String cookies = String.join("; ", headers.getOrDefault(HttpHeaders.COOKIE, List.of()));
 
         if (!cookies.isEmpty()) {
-            headers.add(HttpHeaders.COOKIE, cookies);
+            headers.put(HttpHeaders.COOKIE, List.of(cookies));
         }
 
         return headers;

@@ -1,11 +1,11 @@
 ###########################################################################
 #                                                                         #
-#   Webserver configuration section                                       # 
+#   Webserver configuration section                                       #
 #                                                                         #
 #   Find here the default port configuration of the backend server        #
 #   and the ssl configuration.                                            #
 #                                                                         #
-###########################################################################          
+###########################################################################
 server:
   port: 9090
 #  ssl:
@@ -18,7 +18,7 @@ server:
 
 ###########################################################################
 #                                                                         #
-#   Database configuration section of MariaDB and MongoDB                 # 
+#   Database configuration section of MariaDB and MongoDB                 #
 #                                                                         #
 ###########################################################################
 spring:
@@ -32,52 +32,52 @@ spring:
     mongodb:
       uri: mongodb://oc_admin:secretsecret@localhost:27017/opencelium
   #     Example - mongodb://<username>:<password>@<host>:<port>/<database>
-###########################################################################
-#                                                                         #
-#   Mail configuration section                                            #
-#                                                                         #
-###########################################################################
-#  mail:
-#    opencelium:
-#      from: noreply@opencelium.io
-#  #    enabled: false
-#    host: smtp.gmail.com
-#    port: 587
-#    username:
-#    password:
-#    properties:
-#      mail:
-#        smtp:
-#          auth: true
-#          connectiontimeout: 5000
-#          timeout: 5000
-#          writetimeout: 5000
-#          starttls:
-#            enable: true
+  ###########################################################################
+  #                                                                         #
+  #   Mail configuration section                                            #
+  #                                                                         #
+  ###########################################################################
+  #  mail:
+  #    opencelium:
+  #      from: noreply@opencelium.io
+  #  #    enabled: false
+  #    host: smtp.gmail.com
+  #    port: 587
+  #    username:
+  #    password:
+  #    properties:
+  #      mail:
+  #        smtp:
+  #          auth: true
+  #          connectiontimeout: 5000
+  #          timeout: 5000
+  #          writetimeout: 5000
+  #          starttls:
+  #            enable: true
   #        ssl:
   #          trust: example.host.de
-###########################################################################
-#                                                                         #
-#   Configuration of third part tools                                     #
-#                                                                         #
-###########################################################################
-#  ldap:
-#    embedded:
-#      base-dn: dc=springframework,dc=org
-#      ldif: classpath:test-server.ldif
-#      port: 8389
-#      url: ldap://localhost:8389/
-#  rabbitmq:
-#    host: localhost
-#    port: 5672
-#    username: guest
-#    password: guest
-###########################################################################
-#                                                                         #
-#   Basic configuration section. Do not change the following              #
-#   configuration.                                                        #
-#                                                                         #
-###########################################################################
+  ###########################################################################
+  #                                                                         #
+  #   Configuration of third part tools                                     #
+  #                                                                         #
+  ###########################################################################
+  #  ldap:
+  #    embedded:
+  #      base-dn: dc=springframework,dc=org
+  #      ldif: classpath:test-server.ldif
+  #      port: 8389
+  #      url: ldap://localhost:8389/
+  #  rabbitmq:
+  #    host: localhost
+  #    port: 5672
+  #    username: guest
+  #    password: guest
+  ###########################################################################
+  #                                                                         #
+  #   Basic configuration section. Do not change the following              #
+  #   configuration.                                                        #
+  #                                                                         #
+  ###########################################################################
   main:
     banner-mode: "off"
   jpa:
@@ -111,6 +111,42 @@ spring:
   web:
     resources:
       add-mappings=false:
+  ######################################################################
+  #                                                                    #
+  #   LDAP configuration section.                                      #
+  #   LDAP DEBUG mode can be enabled with the                          #
+  #   logging.level.org.springframework.data.ldap: DEBUG settings      #
+  #                                                                    #
+  ######################################################################
+  security:
+#    ldap:
+#      # LDAP server URL
+#      urls: ldap://localhost:7389
+#      # User search base
+#      user-search-base: ou=User,ou=group,dc=domain,dc=com
+#      # Group search base
+#      group-search-base: ou=Groups,ou=group,dc=domain,dc=com
+#      # LDAP manager credentials
+#      username: uid=super_user,ou=User,ou=group,dc=domain,dc=com
+#      password: PASSWORD
+#      # Where to search for roles/groups
+#      # Usually, the unique identifier for OpenLDAP is uniqueMember={0},
+#      # while for Active Directory, it is member={0} but check your LDAP settings
+#      group-search-filter: (member={0})
+#      # User search filter
+#      # Usually, the unique identifier for OpenLDAP is mailPrimaryAddress={0},
+#      # while for Active Directory, it is mail={0} but check your LDAP settings
+#      user-search-filter: (mailPrimaryAddress={0})
+#      # Maps groups between LDAP and the application
+#      group-role-mapping:
+#        - ldap-group: cn=AdminLdap, ou=Groups,ou=group,dc=domain,dc=com
+#          oc-role: Admin
+#        - ldap-group: cn=UserLdap,ou=Groups,ou=group,dc=domain,dc=com
+#          oc-role: User
+#      # Default role if no mapping is found between LDAP and the application
+#      default-role: User
+#      # Timeout for LDAP authentication (in milliseconds)
+#      timeout: 30000
 
 springdoc:
   swagger-ui:
@@ -138,7 +174,8 @@ logging:
     org:
       springframework:
         data:
-          neo4j: OFF
+          # Activate or deactivate logs during LDAP authentication
+          ldap: OFF # OFF or DEBUG;
 
 management:
   health:
@@ -153,12 +190,12 @@ management:
       show-details: always
 
 opencelium:
-  version: 4.1
-###########################################################################
-#                                                                         #
-#   Is customizable                                                       #
-#                                                                         #
-###########################################################################
+  version: 4.2
+  ###########################################################################
+  #                                                                         #
+  #   Is customizable                                                       #
+  #                                                                         #
+  ###########################################################################
   debug_mode: true
   token:
     secret: 84bbce3d33de467b47b7e76c2563769!3f9aff968def8ef2674856f67ae8a93f
@@ -178,9 +215,12 @@ opencelium:
   notification:
     tools:
       incoming_webhook:
-        url: {insert you webhook url here}
+        url: {insert your webhook url here}
   installation:
     type: sources
+  service_portal:
+    base_url: "https://api.serviceportal.com"
+    token: "your-token-here"
 #  rest_template:
 #    proxy:
 #      host: 127.0.0.1

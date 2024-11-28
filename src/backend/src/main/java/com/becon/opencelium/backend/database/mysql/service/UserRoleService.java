@@ -36,6 +36,8 @@ public interface UserRoleService {
 
     boolean existsByRole(String role);
 
+    Optional<UserRole> findByRole(String role);
+
     void deleteById(int id);
 
     UserRole toEntity(UserRoleResource resource);

@@ -257,14 +257,14 @@ export function TemplateForm(type) {
              * to validate name
              */
             validateName(entity){
-                const {t, template, checkTemplateName, checkNameResult} = this.props;
+                const {t, template, checkTemplateId, checkNameResult} = this.props;
                 if(entity.name.trim() === ''){
                     return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_REQUIRED`)};
                 } else{
                     if(!this.isUpdate || (this.isUpdate && template.name !== entity.title)) {
                         if(!(this.state.entity && entity.title === this.state.entity.title && checkNameResult === TRIPLET_STATE.TRUE)) {
                             this.startCheckingName = true;
-                            checkTemplateName(entity);
+                            checkTemplateId(entity.templateId);
                             return {value: false, message: ''};
                         }
                     }

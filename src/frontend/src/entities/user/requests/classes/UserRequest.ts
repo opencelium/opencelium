@@ -61,4 +61,5 @@ export default class UserRequest extends Request implements IUserRequest{
         this.url = 'storage/profilePicture';
         return super.post<ModelUser>(data);
     }
+
 }

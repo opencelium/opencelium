@@ -20,10 +20,13 @@ import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRoleRepository extends JpaRepository<UserRole, Integer> {
 
     boolean existsByName(String role);
+    Optional<UserRole> findByName(String role);
 
 //    @Query(value = "SELECT * FROM role", nativeQuery = true)
 //    List<UserRole> findAll();

@@ -195,6 +195,32 @@ export function onEnter(e, callback) {
         callback();
     }
 }
+
+export const formatOperationUsage = (operationUsage) => {
+    return new Intl.NumberFormat('de-DE').format(operationUsage);
+}
+
+export const convertTimeForSubscription = (timestamp, settings = {hasHours: true, hasMinutes: true, hasSeconds: true}) => {
+    if(!timestamp){
+        return '∞';
+    }
+    const date = new Date(timestamp);
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
+    ];
+    let hours = date.getHours();
+    if(hours < 10){
+        hours = `0${hours}`;
+    }
+    let minutes = date.getMinutes();
+    if(minutes < 10){
+        minutes = `0${minutes}`;
+    }
+    let seconds = date.getSeconds();
+    if(seconds < 10){
+        seconds = `0${seconds}`;
+    }
+    return `${date.getDate()}. ${monthNames[date.getMonth()]} ${date.getFullYear()} ${settings.hasHours ? hours : ''}${settings.hasMinutes ? `:${minutes}` : ''}${settings.hasSeconds ? `:${seconds}` : ''}`
+}
 export function convertTimeForSchedulerList(t, mode = 'short'){
     let date = new Date(t);
     let year = date.getFullYear();
@@ -742,7 +768,10 @@ export function convertCronExpForSchedulerlist(cronExp){
  *
  * @param timeStamp - time
  */
-export function convertTimeForCronExpression(timeStamp){
+export function convertTimeForTotalUsage(timeStamp){
+    if (!timeStamp) {
+        return '-';
+    }
     let date = new Date(timeStamp);
     let year = date.getFullYear();
     let month = date.getMonth() + 1;
@@ -912,10 +941,28 @@ export const generateSignature = (token, method, url, timestamp) => {
 }
 
 export const sortAlphabeticallyByKey = (array, key) => {
-    return array.sort(function(a, b) {
-        const x = a[key].toLowerCase();
-        const y = b[key].toLowerCase();
-        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    return array.sort((a, b) => {
+        const x = a[key];
+        const y = b[key];
+        if (x === undefined || x === null) return 1;
+        if (y === undefined || y === null) return -1;
+        if (isNumber(x) && isNumber(y)) {
+            return x - y;
+        }
+
+        const numA = isString(x) ? parseInt(x.match(/^\d+/)) || 0 : x;
+        const numB = isString(y) ? parseInt(y.match(/^\d+/)) || 0 : y;
+
+        // If both are numbers, compare numerically
+        if (isNumber(numA) && numA !== 0 && isNumber(numB) && numB !== 0) {
+            return numA - numB;
+        }
+        if (typeof x === 'string' && typeof y === 'string') {
+            return x.toLowerCase().localeCompare(y.toLowerCase());
+        }
+
+        // If one value is a string and the other is a number, or other types, convert both to strings and compare
+        return x.toString().localeCompare(y.toString());
     });
 }
 

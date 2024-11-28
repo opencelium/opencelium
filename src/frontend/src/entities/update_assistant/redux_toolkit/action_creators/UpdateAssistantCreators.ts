@@ -57,6 +57,19 @@ export const getInstallationInfo = createAsyncThunk(
     }
 )
 
+export const getChangelogInfo = createAsyncThunk(
+    'application/get/changelog',
+    async(url: string, thunkAPI) => {
+        try {
+            const request = new UpdateAssistantRequest({isFullUrl: true, url});
+            const response = await request.getChangelogInfo();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const uploadOnlineVersion = createAsyncThunk(
     'application/upload/online',
     async(version: string, thunkAPI) => {
@@ -174,4 +187,5 @@ export default {
     checkApplicationBeforeUpdate,
     updateApplication,
     checkForUpdates,
+    getChangelogInfo,
 }

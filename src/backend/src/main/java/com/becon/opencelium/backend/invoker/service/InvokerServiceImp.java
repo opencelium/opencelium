@@ -30,7 +30,10 @@ import com.becon.opencelium.backend.utility.ReferenceUtility;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -54,7 +57,10 @@ import java.util.stream.Stream;
 @Service
 public class InvokerServiceImp implements InvokerService {
 
+    private static final Logger log = LoggerFactory.getLogger(InvokerServiceImp.class);
+
     @Autowired
+    @Lazy
     private InvokerContainer invokerContainer;
 
     @Autowired
@@ -126,6 +132,35 @@ public class InvokerServiceImp implements InvokerService {
         }
     }
 
+    @Override
+    public void refresh() {
+        List<Document> invokers = getAllInvokerDocuments();
+        Map<String, Invoker> container = containerize(invokers);
+        invokerContainer.updateAll(container);
+    }
+
+    @Override
+    public List<Invoker> synchronise() {
+        refresh();
+        return findAll();
+    }
+
+    @Override
+    public Map<String, Invoker> containerize(List<Document> invokers) {
+        Map<String, Invoker> container = new HashMap<>();
+        invokers.forEach(document -> {
+            if (document == null) {
+                return;
+            }
+            InvokerParserImp parser = new InvokerParserImp(document);
+            File f = new File(document.getDocumentURI());
+            String invoker = FileNameUtils.removeExtension(f.getName());
+            invoker = invoker.replace("%20", " ");
+            container.put(invoker, parser.parse());
+        });
+        return container;
+    }
+
     // Deletes all entries from the database where the invoker is referenced.
 //    @Override
 //    public void forceDelete(String name) {
@@ -183,10 +218,10 @@ public class InvokerServiceImp implements InvokerService {
 
         Map<String, Object> fields = functionInvoker.getRequest().getBody().getFields();
 
-        return findFieldType(fields, hierarchy);
+        return findFieldType(fields, hierarchy, new ArrayList<>(hierarchy.size()));
     }
 
-    private DataType findFieldType(Object field, LinkedList<String> hierarchy) {
+    private DataType findFieldType(Object field, LinkedList<String> hierarchy, List<String> seen) {
 
         if (field == null) {
             return null;
@@ -208,7 +243,7 @@ public class InvokerServiceImp implements InvokerService {
                 return DataType.STRING;
             }
             if (field instanceof Number) {
-                if (field instanceof Long | field instanceof Integer | field instanceof Short) {
+                if (field instanceof Long || field instanceof Integer || field instanceof Short) {
                     return DataType.INTEGER;
                 }
                 return DataType.NUMBER;
@@ -220,17 +255,36 @@ public class InvokerServiceImp implements InvokerService {
                 return DataType.UNDEFINED;
 //                throw new RuntimeException("Field path is incorrect : " + hierarchy.getFirst());
             }
-            Object obj = map.get(hierarchy.pollFirst());
-            return findFieldType(obj, hierarchy);
+            Object obj = map.get(hierarchy.getFirst());
+            seen.add(hierarchy.pollFirst());
+            return findFieldType(obj, hierarchy, seen);
         }
 
         if (field instanceof List<?> list) {
             int index;
-            String idx = hierarchy.pollFirst();
+            String idx = hierarchy.getFirst();
             idx = idx.replaceAll("[\\[|\\]]", "");
             index = Integer.parseInt(idx);
+            if (list.isEmpty()) {
+                throw new RuntimeException(
+                        String.format(
+                                "No such element in list. You tried to reference the %s element of the '%s' array, but this array is empty in the invoker file. Please populate the array with at least %s elements or modify the reference path.",
+                                idx,
+                                String.join(".", seen),
+                                idx));
+            }
+            if (index >= list.size()) {
+                throw new RuntimeException(
+                        String.format(
+                                "No such element in list. You tried to reference the %s element of the '%s' array, but the array's size is %d in the invoker file. Please ensure the array has at least %s elements or modify the reference path.",
+                                idx,
+                                String.join(".", seen),
+                                list.size(),
+                                idx));
+            }
             Object obj = list.get(index);
-            return findFieldType(obj, hierarchy);
+            seen.set(seen.size() - 1, seen.get(seen.size() - 1) + hierarchy.pollFirst());
+            return findFieldType(obj, hierarchy, seen);
         }
         return DataType.OBJECT;
     }
@@ -325,13 +379,37 @@ public class InvokerServiceImp implements InvokerService {
 
     @Override
     public Document getDocument(String name) throws Exception {
-        File file = new File(filePath.toString() + "/" + name);
+        File file = new File(filePath + "/" + name);
 
         if (!FileNameUtils.getExtension(file.getName()).equals("xml")) {
             return null;
         }
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         return file.exists() ? dBuilder.parse(file) : null;
+    }
+
+    @Override
+    public List<Document> getAllInvokerDocuments() {
+        try {
+            Stream<Path> allInvokers = Files.walk(filePath, 1)
+                    .filter(path -> !path.equals(filePath))
+                    .map(filePath::relativize);
+
+            return allInvokers.map(p -> new File(filePath + "/" + p.getFileName()))
+                    .filter(f -> f.getName().endsWith(".xml"))
+                    .map(file -> {
+                        try {
+                            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                            return dBuilder.parse(file);
+                        } catch (Exception e) {
+                            log.error("Failed to parse Invoker[name: {}]", file.getName());
+                            e.printStackTrace();
+                            return null;
+                        }
+                    }).collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new StorageException("Failed to read stored files", e);
+        }
     }
 
     @Override

@@ -16,7 +16,6 @@
 import Socket, { Message, Subscription } from "./Socket";
 import {ConnectionLogProps} from "@root/interfaces/IConnection";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
-import CConnectorItem, {CONNECTOR_FROM} from "@classes/content/connection/CConnectorItem";
 
 export default class ConnectionLogs {
 

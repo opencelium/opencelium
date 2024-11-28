@@ -46,6 +46,7 @@ import SelectedNotificationButton
     from "@entity/schedule/components/selected_notification_button/SelectedNotificationButton";
 import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
 import InputSwitch from "@app_component/base/input/switch/InputSwitch";
+import StartSchedule from "@entity/schedule/components/start_schedule/StartSchedule";
 
 class Schedules extends ListCollection<ScheduleProps>{
     name: string = 'schedules';
@@ -172,7 +173,7 @@ class Schedules extends ListCollection<ScheduleProps>{
             <React.Fragment>
                 {/*<PermissionButton href={`${entity.id}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>*/}
                 <PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'top'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
-                <PermissionTooltipButton target={`start_entity_${entity.id.toString()}`} position={'top'} tooltip={'Start'} hasBackground={false} handleClick={() => this.dispatch(startSchedule(scheduleModel))} icon={'play_arrow'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
+                <StartSchedule entity={entity} scheduleModel={scheduleModel} componentPermission={componentPermission}/>
                 <PermissionTooltipButton target={`webhook_entity_${entity.id.toString()}`} position={'top'} tooltip={'Webhook'} hasBackground={false} handleClick={webhookAction} icon={entity.webhook ? 'link_off' : 'link'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
                 <ScheduleNotificationsIcon schedule={entity}/>
                 {hasDeleteButton && <PermissionTooltipButton target={`delete_entity_${entity.id.toString()}`} position={'top'} tooltip={'Delete'} hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}

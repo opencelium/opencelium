@@ -152,7 +152,7 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
         />);
     }
     const data = {
-        title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: formData.formTitle}],
+        title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Invokers', link: '/invokers'}, {name: formData.formTitle}],
         actions,
         formSections: [
             <FormSection label={{value: 'General Data'}}>

@@ -442,3 +442,118 @@ CREATE TABLE change_set_yml (
 CREATE TABLE secret_key_for_encoder (
     secret_key VARCHAR(1000) NOT NULL
 );
+
+--changeset 4.2:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE user
+ADD COLUMN IF NOT EXISTS auth_method ENUM('LDAP', 'BASIC') NOT NULL DEFAULT 'BASIC',
+ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS totp_secret_key VARCHAR(255);
+
+--changeset 4.2:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+DROP TABLE IF EXISTS user_session;
+CREATE TABLE IF NOT EXISTS user_session (
+    session_id VARCHAR(255) NOT NULL PRIMARY KEY,
+    user_id int(11) NOT NULL,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP NOT NULL,
+    last_accessed TIMESTAMP NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    attempts INT DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--changeset 4.2:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+LOCK TABLES `activity` READ, `user_session` WRITE;
+
+INSERT INTO user_session (session_id, user_id, ip_address, user_agent, created_at, last_accessed, is_active, attempts)
+SELECT
+    UUID(),
+    user_id,
+    NULL,
+    NULL,
+    COALESCE(request_time, NOW()),
+    COALESCE(request_time, NOW()),
+    CASE WHEN is_locked = '1' THEN FALSE ELSE TRUE END,
+    0
+FROM activity;
+
+UNLOCK TABLES;
+
+--changeset 4.2:4 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+DROP TABLE IF EXISTS activity;
+
+--changeset 4.2:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+INSERT INTO widget (id, name, icon, tooltipTranslationKey)
+VALUES (4, 'SUBSCRIPTION_OVERVIEW', 'local_police', 'Subscription Overview');
+
+--changeset 4.2:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+DROP TABLE IF EXISTS subscription;
+DROP TABLE IF EXISTS activation_request;
+DROP TABLE IF EXISTS operation_usage_history_detail;
+DROP TABLE IF EXISTS operation_usage_history;
+CREATE TABLE IF NOT EXISTS activation_request(
+    id         VARCHAR(255) PRIMARY KEY,
+    created_at TIMESTAMP    NOT NULL,
+    hmac       VARCHAR(255) UNIQUE,
+    ttl        INT UNSIGNED NOT NULL,
+    status     ENUM ('PENDING', 'PROCESSED', 'EXPIRED') DEFAULT 'PENDING',
+    active     BOOLEAN      NOT NULL,
+    INDEX idx_hmac (hmac)
+);
+
+--changeset 4.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE IF NOT EXISTS subscription(
+    id                    VARCHAR(255) PRIMARY KEY,
+    subId                 VARCHAR(255) UNIQUE NOT NULL,
+    license_id            VARCHAR(255) UNIQUE NOT NULL,
+    created_at            TIMESTAMP    NOT NULL,
+    license_key           VARCHAR(2048) NOT NULL,
+    current_usage         BIGINT       NOT NULL,
+    current_usage_hmac    VARCHAR(255) NOT NULL,
+    active                BOOLEAN      NOT NULL,
+    activation_request_id VARCHAR(255),
+    FOREIGN KEY (activation_request_id) REFERENCES activation_request (id)
+);
+
+--changeset 4.2:8 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE IF NOT EXISTS operation_usage_history(
+    id               BIGINT PRIMARY KEY AUTO_INCREMENT,
+    subId            VARCHAR(255) NOT NULL,
+    license_id       VARCHAR(255) NOT NULL,
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    total_usage      BIGINT       NOT NULL,
+    connection_title VARCHAR(255) NOT NULL
+);
+
+--changeset 4.2:9 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE IF NOT EXISTS operation_usage_history_detail(
+    id               BIGINT PRIMARY KEY AUTO_INCREMENT,
+    start_date       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    operation_usage  BIGINT       NOT NULL,
+    operation_usage_history_id BIGINT NOT NULL,
+    FOREIGN KEY (operation_usage_history_id) REFERENCES operation_usage_history (id) ON DELETE CASCADE
+);
+
+--changeset 4.2:10 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE IF NOT EXISTS connection_editor_settings
+(
+    id                BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id           INT       NOT NULL,
+    color_mode        VARCHAR(255) NOT NULL,
+    process_text_size INT          NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+);
+
+--changeset 4.2:11 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE user CHANGE totp_enabled totp_process_completed BOOLEAN DEFAULT FALSE;
+
+--changeset 4.2:12 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+DELETE FROM role_has_permission WHERE role_id=2 AND component_id=4;
+INSERT IGNORE INTO role_has_permission (role_id,component_id,permission_id) VALUES (2,6,1),(2,6,2),(2,6,3),(2,6,4);
+
+--changeset 4.2:13 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE operation_usage_history ADD COLUMN from_invoker VARCHAR(255) NOT NULL;
+ALTER TABLE operation_usage_history ADD COLUMN to_invoker VARCHAR(255) NOT NULL;
+ALTER TABLE operation_usage_history ADD COLUMN modified_at TIMESTAMP NOT NULL;
+

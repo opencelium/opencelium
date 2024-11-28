@@ -248,6 +248,10 @@ public class ConnectorExecutor {
             responseEntity = new ResponseEntity<>(paginatedBody,
                     responseEntity.getHeaders(),
                     responseEntity.getStatusCode());
+
+            // remove reference for used pagination
+            pagination = null;
+            executionManager.setPagination(pagination);
         }
         logger.logAndSend("Response : " + convertToStringIfNecessary(responseEntity.getBody()));
 
@@ -332,7 +336,7 @@ public class ConnectorExecutor {
     }
 
     private int getTailPointer(int headPointer) {
-        String index = getIndex(executables.get(headPointer));
+        String index = getIndex(executables.get(headPointer)) + "_";
 
         for (headPointer++; headPointer < executables.size(); headPointer++) {
             if (!getIndex(executables.get(headPointer)).startsWith(index)) {
@@ -375,7 +379,7 @@ public class ConnectorExecutor {
                 if (Objects.equals(arr1[i], arr2[i])) continue;
 
                 // if there is an unequal elements then return their difference
-                return arr1[i].compareTo(arr2[i]);
+                return Integer.parseInt(arr1[i]) - Integer.parseInt(arr2[i]);
             }
 
             // at this point one array contains the other one

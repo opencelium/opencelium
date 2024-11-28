@@ -27,15 +27,17 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 const cards = [
     {id: 1, name: 'Users', link: '/users'},
     {id: 2, name: 'Groups', link: '/usergroups'},
-    {id: 3, name: 'External Applications', link: '/apps'},
-    {id: 4, name: 'Invokers', link: '/invokers'},
-    {id: 5, name: 'Templates', link: '/templates'},
-    {id: 6, name: 'Data Aggregator', link: '/data_aggregator'},
-    {id: 7, name: 'Notification Templates', link: '/notification_templates'},
-    {id: 8, name: 'Update Assistant', link: '/update_assistant', isLoading: true, isDisabled: true},
-    {id: 9, name: 'Swagger API Docs', link: `${baseUrl}docs`, isExternalHref: true},
-    {id: 10, name: 'Migration', link: `/migration`},
-    {id: 11, name: 'Categories', link: `/categories`},
+    {id: 3, name: 'LDAP check', link: '/ldap'},
+    {id: 4, name: 'External Applications', link: '/apps'},
+    {id: 5, name: 'Invokers', link: '/invokers'},
+    {id: 6, name: 'Templates', link: '/templates'},
+    {id: 7, name: 'Data Aggregator', link: '/data_aggregator'},
+    {id: 8, name: 'Notification Templates', link: '/notification_templates'},
+    {id: 9, name: 'Update Assistant', link: '/update_assistant', isLoading: true, isDisabled: true},
+    {id: 10, name: 'Swagger API Docs', link: `${baseUrl}docs`, isExternalHref: true},
+    {id: 11, name: 'License Management', link: `/license_management`},
+    {id: 12, name: 'Migration', link: `/migration`},
+    {id: 13, name: 'Categories', link: `/categories`},
 ]
 const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
@@ -49,7 +51,7 @@ const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.RE
         switch (gettingInstallationInfo) {
             case API_REQUEST_STATE.FINISH:
                 setAdminCards([...adminCards].map((card) => {
-                    if (card.id === 8) {
+                    if (card.link === '/update_assistant') {
                         return {
                             ...card,
                             isLoading: false,
@@ -66,7 +68,7 @@ const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.RE
                 break;
             case API_REQUEST_STATE.ERROR:
                 setAdminCards([...adminCards].map((card) => {
-                    if (card.id === 8) {
+                    if (card.link === '/update_assistant') {
                         return {
                             ...card,
                             title: 'Update Assistant is not available for installation type: unknown',

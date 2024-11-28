@@ -23,4 +23,5 @@ export default interface ModelUserParent{
     repeatPassword?: string;
     userDetail: ModelUserDetail,
     widgetSettings: any[];
+    totpEnabled?: boolean,
 }

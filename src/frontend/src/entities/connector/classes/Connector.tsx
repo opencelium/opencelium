@@ -291,11 +291,15 @@ export class Connector extends HookStateClass implements IConnector{
     }
 
     getPoustModel(): ModelConnectorPoust{
+        const requestData: any = {};
+        for(let param in this.requestData) {
+            requestData[param] = this.requestData[param].trim();
+        }
         let mappedConnector: ModelConnectorPoust = {
             title: this.title,
             description: this.description,
             invoker: {name: this.invokerSelect.value.toString()},
-            requestData: this.requestData,
+            requestData: requestData,
             sslCert: this.sslCert,
             timeout: this.timeout,
         };

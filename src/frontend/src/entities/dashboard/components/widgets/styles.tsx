@@ -56,9 +56,23 @@ const MonitoringBoardsWidgetStyled = styled.div`
     }
 `;
 
+const SubscriptionOverviewWidgetStyled = styled.div`
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    width: 100%;
+    padding: 1vw 1.5vw 0.5vw 1vw;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+`;
+
 export {
     CurrentSchedulesWidgetStyled,
     ConnectionOverviewWidgetStyled,
     ConnectionOverviewTitle,
     MonitoringBoardsWidgetStyled,
+    SubscriptionOverviewWidgetStyled,
 }

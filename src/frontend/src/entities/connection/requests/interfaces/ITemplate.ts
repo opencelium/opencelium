@@ -29,8 +29,8 @@ export interface ImportTemplateResponse {
 
 export interface ITemplateRequest{
 
-    //to check if template with such name already exists
-    checkTemplateName(): Promise<AxiosResponse<IResponse>>,
+    //to check if template with such id already exists
+    checkTemplateId(): Promise<AxiosResponse<IResponse>>,
 
     //to import template as a json file
     importTemplate(data: FormData): Promise<AxiosResponse<ImportTemplateResponse>>,

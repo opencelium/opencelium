@@ -44,13 +44,17 @@ interface ViewProps{
     entitiesPerPage?: number,
     isRefreshing?: boolean,
     shouldBeUpdated?: boolean,
+    hasPaginationProps: boolean,
+    decreasePage: any,
 }
 
 interface ListViewProps extends ViewProps{
     checks: any[],
-    setChecks: (checks: any[]) => void;
+    setChecks: (checks: any[]) => void,
     filterData?: any,
     isCard?: boolean,
+    onListRowClick?: (entity: any) => void,
+    hasPaginationProps: boolean,
 }
 
 interface CollectionViewProps{
@@ -63,10 +67,17 @@ interface CollectionViewProps{
     hasTitle?: boolean,
     hasViewSection?: boolean,
     defaultViewType?: ViewType | '',
+    hasNotAlert?: boolean,
     hasError?: boolean,
     isListViewCard?: boolean,
     defaultFilterData?: any,
     loadingStyles?: any,
+    onListRowClick?: (entity: any) => void,
+    paginationProps?: {
+        totalPages: number,
+        setPage: (page: number) => void,
+        page: number,
+    } | undefined | null,
 }
 
 interface CheckProps{

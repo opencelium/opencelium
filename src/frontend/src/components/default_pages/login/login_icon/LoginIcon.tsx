@@ -20,6 +20,11 @@ import {Auth} from "@application/classes/Auth";
 import {Image} from "@app_component/base/image/Image";
 import {LoginIconProps} from "./interfaces";
 import {LoginIconStyled} from './styles';
+import Totp from "@entity/totp/classes/Totp";
+import Icon from "@app_component/base/icon/Icon";
+import {useAppDispatch} from "@application/utils/store";
+import {setQrCode, setSecretKey} from "@entity/totp/redux_toolkit/slices/TotpSlice";
+import {setSessionId} from "@application/redux_toolkit/slices/AuthSlice";
 
 const LoginIcon: FC<LoginIconProps> =
     ({
@@ -28,9 +33,13 @@ const LoginIcon: FC<LoginIconProps> =
      }) => {
         const {
             isAuth,
+            sessionId,
             logining,
         } = Auth.getReduxState();
+        const dispatch = useAppDispatch();
+        const {validatingTotp, qrCode, secretKey} = Totp.getReduxState();
         const [hasRotation, toggleRotation] = useState(false);
+        const hasSessionId = !!sessionId;
         const onClick = () => {
             if(hasAnimation){
                 toggleRotation(true);
@@ -41,6 +50,23 @@ const LoginIcon: FC<LoginIconProps> =
             } else{
                 login();
             }
+        }
+        const cancel = () => {
+            dispatch(setQrCode(''));
+            dispatch(setSecretKey(''));
+            dispatch(setSessionId(''));
+        }
+        if (hasSessionId && logining !== API_REQUEST_STATE.START) {
+            return <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '80px'
+            }}>
+                <span style={{cursor: 'pointer'}}>
+                    <Icon name={'cancel'} color={'#fff'} size={40} onClick={cancel}/>
+                </span>
+            </div>;
         }
         return (
             <LoginIconStyled hasRotation={hasRotation} isAuth={false}>

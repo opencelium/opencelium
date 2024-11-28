@@ -32,6 +32,8 @@ import {getAllConnectors} from "@entity/connector/redux_toolkit/action_creators/
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {ConnectionPermissions} from "@entity/connection/constants";
 import Loading from "@app_component/base/loading/Loading";
+import {Category} from "@entity/category/classes/Category";
+import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 
 const DuplicateIcon: FC<DuplicateIconProps> =
     ({
@@ -40,10 +42,13 @@ const DuplicateIcon: FC<DuplicateIconProps> =
     const dispatch = useAppDispatch();
     const {gettingConnection, currentConnection, checkingConnectionTitle, isCurrentConnectionHasUniqueTitle} = Connection.getReduxState();
     const {connectors, gettingConnectors} = Connector.getReduxState();
+    const {categories, gettingCategories} = Category.getReduxState();
     const [isOpened, setIsOpened] = useState<boolean>(false);
     const [title, setTitle] = useState<string>('');
     const [fromConnector, setFromConnector] = useState(null);
     const [toConnector, setToConnector] = useState(null);
+    const [category, setCategory] = useState(Category.getOptionsForCategorySelect(categories).find((c: any) => c.value === listConnection.categoryId) || null);
+    const [categoryOptions, setCategoryOptions] = useState([]);
     const [validateMessageTitle, setValidateMessageTitle] = useState('');
     const [validateMessageFromConnector, setValidateMessageFromConnector] = useState('');
     const [validateMessageToConnector, setValidateMessageToConnector] = useState('');
@@ -139,6 +144,9 @@ const DuplicateIcon: FC<DuplicateIconProps> =
             tmpToConnector.icon = toConnectorData.icon;
             connection.fromConnector = {...tmpFromConnector};
             connection.toConnector = {...tmpToConnector};
+            if (category) {
+                connection.categoryId = category.value;
+            }
             let fieldBinding: any = [];
             for(let i = 0; i < connection.fieldBinding.length; i++){
                 let fieldBindingItem = {...connection.fieldBinding[i]};
@@ -157,6 +165,16 @@ const DuplicateIcon: FC<DuplicateIconProps> =
             toggleDuplicateForm();
         }
     }
+    useEffect(() => {
+        getAllCategories();
+    }, [])
+    useEffect(() => {
+        if (gettingCategories === API_REQUEST_STATE.FINISH) {
+            const newCategory = listConnection.categoryId ? categories.find(c => c.id === listConnection.categoryId) : null;
+            setCategoryOptions(Category.getOptionsForCategorySelect(categories));
+            setCategory(newCategory ? {label: newCategory.name, value: newCategory.id} : null);
+        }
+    }, [gettingCategories]);
     useEffect(() => {
         if(isOpened) {
             dispatch(getConnectionById(listConnection.id));
@@ -215,6 +233,16 @@ const DuplicateIcon: FC<DuplicateIconProps> =
                             icon={'device_hub'}
                             label={'To Connector'}
                             options={toConnectorOptions}
+                        />
+                        <InputSelect
+                            id={'settings_input_category'}
+                            value={category}
+                            onChange={(a) => setCategory(a)}
+                            options={categoryOptions}
+                            placeholder={'Choose category'}
+                            icon={'category'}
+                            label={'Category'}
+                            categoryList={true}
                         />
                     </React.Fragment>
                 }

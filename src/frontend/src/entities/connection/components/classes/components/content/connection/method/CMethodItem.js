@@ -91,6 +91,7 @@ export default class CMethodItem{
         if(isFieldExist) {
             for(let i = 0;i < references.length; i++) {
                 current[keys[keys.length - 1]] = current[keys[keys.length - 1]].split(`${references[i]};`).join('');
+                current[keys[keys.length - 1]] = current[keys[keys.length - 1]].split(`;${references[i]}`).join('');
                 current[keys[keys.length - 1]] = current[keys[keys.length - 1]].split(`${references[i]}`).join('');
             }
         }

@@ -21,7 +21,7 @@ import {IResponse, ResponseMessages} from "@application/requests/interfaces/IRes
 import {ITemplate} from "@entity/connection/interfaces/ITemplate";
 import {
     addTemplate,
-    checkTemplateName,
+    checkTemplateId,
     deleteTemplateById,
     deleteTemplatesById,
     exportTemplate,
@@ -36,8 +36,8 @@ import {
 
 export interface TemplateState extends ICommonState{
     templates: ITemplate[],
-    isCurrentTemplateHasUniqueName: TRIPLET_STATE,
-    checkingTemplateName: API_REQUEST_STATE,
+    isCurrentTemplateHasUniqueId: TRIPLET_STATE,
+    checkingTemplateId: API_REQUEST_STATE,
     importingTemplate: API_REQUEST_STATE,
     exportingTemplate: API_REQUEST_STATE,
     addingTemplate: API_REQUEST_STATE,
@@ -53,8 +53,8 @@ export interface TemplateState extends ICommonState{
 
 const initialState: TemplateState = {
     templates: [],
-    isCurrentTemplateHasUniqueName: TRIPLET_STATE.INITIAL,
-    checkingTemplateName: API_REQUEST_STATE.INITIAL,
+    isCurrentTemplateHasUniqueId: TRIPLET_STATE.INITIAL,
+    checkingTemplateId: API_REQUEST_STATE.INITIAL,
     importingTemplate: API_REQUEST_STATE.INITIAL,
     exportingTemplate: API_REQUEST_STATE.INITIAL,
     addingTemplate: API_REQUEST_STATE.INITIAL,
@@ -75,17 +75,17 @@ export const templateSlice = createSlice({
     reducers: {
     },
     extraReducers: {
-        [checkTemplateName.pending.type]: (state) => {
-            state.checkingTemplateName = API_REQUEST_STATE.START;
-            state.isCurrentTemplateHasUniqueName = TRIPLET_STATE.INITIAL;
+        [checkTemplateId.pending.type]: (state) => {
+            state.checkingTemplateId = API_REQUEST_STATE.START;
+            state.isCurrentTemplateHasUniqueId = TRIPLET_STATE.INITIAL;
         },
-        [checkTemplateName.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
-            state.checkingTemplateName = API_REQUEST_STATE.FINISH;
-            state.isCurrentTemplateHasUniqueName = action.payload.message === ResponseMessages.NOT_EXISTS ? TRIPLET_STATE.TRUE : TRIPLET_STATE.FALSE;
+        [checkTemplateId.fulfilled.type]: (state, action: PayloadAction<boolean>) => {
+            state.checkingTemplateId = API_REQUEST_STATE.FINISH;
+            state.isCurrentTemplateHasUniqueId = action.payload === true ? TRIPLET_STATE.TRUE : TRIPLET_STATE.FALSE;
             state.error = null;
         },
-        [checkTemplateName.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.checkingTemplateName = API_REQUEST_STATE.ERROR;
+        [checkTemplateId.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.checkingTemplateId = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [importTemplate.pending.type]: (state, action: PayloadAction<ITemplate>) => {
@@ -93,7 +93,12 @@ export const templateSlice = createSlice({
         },
         [importTemplate.fulfilled.type]: (state, action: PayloadAction<ITemplate>) => {
             state.importingTemplate = API_REQUEST_STATE.FINISH;
-            state.templates.push(action.payload);
+            let existedTemplate = state.templates.find(t => t.templateId === action.payload.templateId);
+            if (existedTemplate) {
+                state.templates = state.templates.map(t => t.templateId === existedTemplate.templateId ? action.payload : t);
+            } else {
+                state.templates.push(action.payload);
+            }
             state.error = null;
         },
         [importTemplate.rejected.type]: (state, action: PayloadAction<IResponse>) => {

@@ -28,6 +28,10 @@ import IUser, {UserProps} from "../interfaces/IUser";
 import { UserPermissions } from "../constants";
 import Gravatar from "react-gravatar";
 import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
+import {ColorTheme} from "@style/Theme";
+import InputSwitch from "@app_component/base/input/switch/InputSwitch";
+import {disableTotp, enableTotp} from "@entity/totp/redux_toolkit/action_creators/TotpCreators";
+import EnableTFAButton from "@entity/user/components/enable_tfa_button/EnableTFAButton";
 
 
 export default class Users extends ListCollection<UserProps>{
@@ -38,7 +42,32 @@ export default class Users extends ListCollection<UserProps>{
     getListRawUrl = (entity: IUser) => `${entity.id}/update`;
     ListRawComponent = DefaultListRaw;
     sortingProps: UserProps[] = ['email'];
-    listProps: ListProp<UserProps>[] = [{propertyKey: 'email', width: '40%'}, {propertyKey: 'userGroup.name', width: '40%'}];
+    listProps: ListProp<UserProps>[] = [
+        {propertyKey: 'email', width: '30%'},
+        {propertyKey: 'userGroup.name', width: '30%'},
+        {
+            propertyKey: 'totpEnabled',
+            getValue: (user: IUser) => {
+                return  <InputSwitch
+                    readOnly={false}
+                    color={ColorTheme.Turquoise}
+                    isChecked={user.totpEnabled}
+                    position={'middle'}
+                    onClick={() => {
+                        if (user.totpEnabled) {
+                            this.dispatch(disableTotp(user.id));
+                        } else {
+                            this.dispatch(enableTotp(user.id));
+                        }
+                    }}
+                    title={`Two Factor Authentication is ${user.totpEnabled ? 'activated' : 'deactivated'}`}
+                    hasConfirmation={user.totpEnabled}
+                    confirmationText={'Do you really want to deactivate Two Factor Authentication?'}
+                />
+            },
+            width: '20%'
+        },
+    ];
     gridProps = {
         title: (user: IUser) => {return user.getFullName();},
         subtitle: 'email',
@@ -56,6 +85,7 @@ export default class Users extends ListCollection<UserProps>{
     };
     translations = {
         email: 'Email',
+        totpEnabled: '2FA',
         userGroupName: 'Group',
     };
     getTopActions = (viewType: ViewType, checkedIds: number[] = []) => {
@@ -63,6 +93,7 @@ export default class Users extends ListCollection<UserProps>{
         return(
             <React.Fragment>
                 <PermissionButton key={'add_button'} autoFocus={!hasSearch} icon={'add'} href={'add'} label={'Add User'} permission={UserPermissions.CREATE}/>
+                <EnableTFAButton checkedIds={checkedIds.map(id => +id)} permission={UserPermissions.UPDATE}/>
                 {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteUsersById(checkedIds))} permission={UserPermissions.DELETE}/>}
             </React.Fragment>
         );

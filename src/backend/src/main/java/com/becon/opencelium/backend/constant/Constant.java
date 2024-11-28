@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.constant;
 
+import com.becon.opencelium.backend.enums.ActivReqStatus;
+
 public interface Constant {
     String CONN_FROM = "CONN1";
     String CONN_TO = "CONN2";

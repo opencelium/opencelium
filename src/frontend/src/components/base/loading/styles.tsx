@@ -44,10 +44,14 @@ const ContentLoadingStyled = styled(Loading)`
     left: 50%;
     transform: translate(-50%,-50%);
 `;
+const CollectionLoadingStyled = styled(Loading)`
+    margin-top: 20%;
+`;
 
 export {
     LoadingStyled,
     LayoutLoadingStyled,
     ContentLoadingStyled,
+    CollectionLoadingStyled,
     GridImageLoadingStyled,
 }

@@ -16,20 +16,23 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.exception.EmailAlreadyExistException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
+import com.becon.opencelium.backend.exception.SessionNotFoundException;
 import com.becon.opencelium.backend.exception.UserNotFoundException;
-import com.becon.opencelium.backend.database.mysql.entity.Activity;
 import com.becon.opencelium.backend.database.mysql.entity.User;
-import com.becon.opencelium.backend.database.mysql.service.ActivityServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.security.UserPrincipals;
 import com.becon.opencelium.backend.storage.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -42,7 +45,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -65,10 +76,13 @@ public class UserController {
     private UserRoleServiceImpl userRoleService;
 
     @Autowired
-    private ActivityServiceImpl activityService;
+    private SessionServiceImpl sessionService;
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private TotpService totpService;
 
 
     @Operation(summary = "Retrieves user data from the database based on the provided user 'id'")
@@ -162,10 +176,6 @@ public class UserController {
         }
 
         User user = userService.requestToEntity(userRequestResource);
-        Activity activity = new Activity();
-        activity.setUser(user);
-        activity.setLocked(true);
-        user.setActivity(activity);
         userService.save(user);
 
         UserResource userResource = userService.toResource(user);
@@ -252,7 +262,7 @@ public class UserController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteUsersById(@RequestBody IdentifiersDTO<Integer> payload) {
         payload.getIdentifiers().forEach(id -> {
             User p = userService.findById(id).orElseThrow(() -> new UserNotFoundException(id));
@@ -278,16 +288,87 @@ public class UserController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/{id}/logout")
-    public ResponseEntity<?> logout(@PathVariable("id") int id) {
-        return activityService
-                .findById(id)
-                .map(
-                        p -> {
-                            p.setTokenId("");
-                            p.setLocked(true);
-                            activityService.save(p);
-                            return ResponseEntity.ok().build();
-                        })
-                .orElseThrow(() -> new UserNotFoundException(id));
+    public ResponseEntity<?> logout(@PathVariable("id") int userId) {
+        return sessionService
+                .findByUserId(userId)
+                .map(s -> {
+                    s.setActive(false);
+                    sessionService.save(s);
+
+                    return ResponseEntity.ok().build();
+                })
+                .orElseThrow(() -> new SessionNotFoundException(userId));
+    }
+
+    @Operation(summary = "Enables or disables TOTP to a user")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "TOTP is successfully enabled or disabled to user",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping(path = "/{id}/totp/{action}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> totpAction(@PathVariable("id") int userId, @PathVariable("action") String action) {
+        totpService.totpAction(userId, action);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Enables or disables TOTP to users by ids")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "204",
+                    description = "TOTP is successfully enabled or disabled to users",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = Integer.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping(path = "/list/totp/{action}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> totpsAction(@PathVariable("action") String action, @RequestBody IdentifiersDTO<Integer> payload) {
+        payload.getIdentifiers().forEach(userId -> totpService.totpAction(userId, action));
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Returns status of QR code by secretKey.")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "QR and Secret Key existed already.",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/totp-qr/exists")
+    public ResponseEntity<?> isQRCodeExists() {
+        // totp related actions should be done only by users themselves
+        int userId = getCurrentUserId();
+        User user = userService.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        ResultDTO<Boolean> resultDTO = new ResultDTO<>();
+        resultDTO.setResult(false);
+        if (user.getTotpSecretKey() != null) {
+            resultDTO.setResult(true);
+        }
+        return ResponseEntity.ok(resultDTO);
+    }
+
+    /*
+    Returns request sending users id
+    */
+    private int getCurrentUserId() {
+        UserPrincipals userPrincipals = (UserPrincipals) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+
+        return userPrincipals.getUser().getId();
     }
 }

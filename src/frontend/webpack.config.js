@@ -202,7 +202,7 @@ const getConfig = ({isBuild, envVar}) => {
                 "Access-Control-Allow-Origin": "*"
             },
             compress: true,
-            port: SETTINGS?.DEV?.PORT || 8888,
+            port: (SETTINGS && SETTINGS.DEV && SETTINGS.DEV.PORT) ? SETTINGS.DEV.PORT : 8888,
             open: true,
             liveReload: true,
             historyApiFallback: true,

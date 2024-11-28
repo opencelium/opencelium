@@ -46,6 +46,7 @@ interface FormProps{
     isLoading?: boolean,
     error?: any,
     gridTemplateColumns?: string,
+    hasNotAlert?: boolean,
 }
 
 export {

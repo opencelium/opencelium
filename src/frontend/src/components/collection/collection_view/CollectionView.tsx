@@ -24,7 +24,7 @@ import {
     setSearchFields, setCurrentPages
 } from "@application/redux_toolkit/slices/ApplicationSlice";
 import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
-import ContentLoading from "@app_component/base/loading/ContentLoading";
+import CollectionLoading from "@app_component/base/loading/CollectionLoading";
 import InputText from "@app_component/base/input/text/InputText";
 import { TooltipButton } from '@app_component/base/tooltip_button/TooltipButton';
 import Button from "@app_component/base/button/Button";
@@ -40,6 +40,7 @@ import Title from "../collection_title/Title";
 import {BadRequest} from "@app_component/default_pages/bad_request/BadRequest";
 import {debounce} from "@application/utils/utils";
 import CategoryTabs from '@entity/category/components/category_tabs/CategoryTabs';
+import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
 
 const LIST_VIEW_ENTITIES_NUMBER = 10;
 
@@ -61,6 +62,9 @@ const CollectionView: FC<CollectionViewProps> =
         hasError,
         isListViewCard,
         defaultFilterData,
+        onListRowClick,
+        paginationProps,
+        hasNotAlert,
     }) => {
         const dispatch = useAppDispatch();
         const {searchFields, currentPages, viewType, gridViewType} = Application.getReduxState();
@@ -72,7 +76,7 @@ const CollectionView: FC<CollectionViewProps> =
         const [checks, setChecks] = useState<any>({});
         const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER)
         const [currentPage, setCurrentPage] = useState(searchValuePropertyName ? currentPages[searchValuePropertyName] || 1 : 1);
-        const [totalPages, setTotalPages] = useState(Math.ceil(collection.entities.length / entitiesPerPage))
+        const [totalPages, setTotalPages] = useState(!!paginationProps ? paginationProps.totalPages : Math.ceil(collection.entities.length / entitiesPerPage))
         let applicationViewType = viewType;
         if(defaultViewType !== ''){
             applicationViewType = defaultViewType;
@@ -83,36 +87,55 @@ const CollectionView: FC<CollectionViewProps> =
             }
         }, [searchValue])
         useEffect(() => {
-            if(searchValuePropertyName){
-                debounce(() => {dispatch(setCurrentPages({[searchValuePropertyName]: currentPage}))})();
+            if (!!paginationProps) {
+                const newPage = currentPage - 1;
+                if (paginationProps.page !== newPage) {
+                    paginationProps.setPage(newPage);
+                }
+            } else {
+                if (searchValuePropertyName) {
+                    debounce(() => {dispatch(setCurrentPages({[searchValuePropertyName]: currentPage}))})();
+                }
             }
         }, [currentPage])
         useEffect(() => {
-            let newEntitiesPerPage = LIST_VIEW_ENTITIES_NUMBER;
-            if(applicationViewType === ViewType.GRID){
-                switch(gridViewType){
-                    case 2:
-                        newEntitiesPerPage = 6;
-                        break;
-                    case 3:
-                        newEntitiesPerPage = 9;
-                        break;
-                    case 4:
-                        newEntitiesPerPage = 12;
-                        break;
-                    case 5:
-                        newEntitiesPerPage = 15;
-                        break;
+            if (!paginationProps) {
+                let newEntitiesPerPage = LIST_VIEW_ENTITIES_NUMBER;
+                if(applicationViewType === ViewType.GRID){
+                    switch(gridViewType){
+                        case 2:
+                            newEntitiesPerPage = 6;
+                            break;
+                        case 3:
+                            newEntitiesPerPage = 9;
+                            break;
+                        case 4:
+                            newEntitiesPerPage = 12;
+                            break;
+                        case 5:
+                            newEntitiesPerPage = 15;
+                            break;
+                    }
                 }
+                setEntitiesPerPage(newEntitiesPerPage);
+                setTotalPages(Math.ceil(collection.filteredEntities.length / newEntitiesPerPage));
             }
-            setEntitiesPerPage(newEntitiesPerPage);
-            setTotalPages(Math.ceil(collection.filteredEntities.length / newEntitiesPerPage));
         }, [currentPage, searchValue, applicationViewType, gridViewType, collection.entities.length, shouldBeUpdated, filterData]);
+        useEffect(() => {
+            if (paginationProps?.totalPages && paginationProps.totalPages !== totalPages) {
+                setTotalPages(paginationProps.totalPages);
+            }
+        }, [paginationProps?.totalPages])
         useEffect(() => {
             if(collection.deletingEntitiesState === API_REQUEST_STATE.FINISH){
                 setChecks([]);
             }
         }, [collection.deletingEntitiesState]);
+        const decreasePage = () => {
+            if (currentPage > 1 && !paginationProps) {
+                setPage(currentPage - 1);
+            }
+        }
         const onChangeViewType = (newViewType: ViewType) => {
             setIsRefreshing(true);
             setTimeout(() => {
@@ -148,13 +171,14 @@ const CollectionView: FC<CollectionViewProps> =
         }
         if(isLoading){
             return(
-                <ContentLoading/>
+                <CollectionLoading/>
             )
         }
         return (
             <ErrorBoundary>
                 <CollectionViewStyled>
                     {hasTitle && <Title title={collection.title}/>}
+                    {!hasNotAlert ? <LicenseAlertMessage/> : null}
                     {hasTopBar && <TopSectionStyled hasViewSection={hasViewSection}>
                         <ActionsStyled>
                             {collection.getTopActions(applicationViewType, checkedIds)}
@@ -183,8 +207,8 @@ const CollectionView: FC<CollectionViewProps> =
                             {collection.getFilterComponents(filterData, (data: any) => setFilterData({...data}))}
                         </Filter>
                     }
-                    {collection.name === "schedules" && <CategoryTabs readOnly/>}
-                    {collection.name === "connections" && <CategoryTabs/>}
+                    {collection.name === "schedules" && <CategoryTabs setCurrentPage={setCurrentPage} readOnly/>}
+                    {collection.name === "connections" && <CategoryTabs setCurrentPage={setCurrentPage}/>}
                     <div style={{marginTop: hasTopBar ? '0' : '20px'}}>
                         {applicationViewType === ViewType.LIST &&
                             <List
@@ -199,6 +223,9 @@ const CollectionView: FC<CollectionViewProps> =
                                 isRefreshing={isRefreshing}
                                 shouldBeUpdated={shouldBeUpdated}
                                 filterData={filterData}
+                                onListRowClick={onListRowClick}
+                                hasPaginationProps={!!paginationProps}
+                                decreasePage={decreasePage}
                             />}
                         {applicationViewType === ViewType.GRID &&
                             <Grid
@@ -210,10 +237,12 @@ const CollectionView: FC<CollectionViewProps> =
                                 componentPermission={componentPermission}
                                 isRefreshing={isRefreshing}
                                 shouldBeUpdated={shouldBeUpdated}
+                                hasPaginationProps={!!paginationProps}
+                                decreasePage={decreasePage}
                             />
                         }
                     </div>
-                    <Pagination currentPage={currentPage} total={totalPages} setCurrentPage={setPage}/>
+                    <Pagination currentPage={currentPage} total={totalPages} setCurrentPage={paginationProps ? (newPage) => {setCurrentPage(newPage)} : setPage}/>
                 </CollectionViewStyled>
             </ErrorBoundary>
         )
@@ -229,6 +258,8 @@ CollectionView.defaultProps = {
     isListViewCard: true,
     defaultFilterData: null,
     loadingStyles: {},
+    onListRowClick: null,
+    paginationProps: null,
 }
 
 

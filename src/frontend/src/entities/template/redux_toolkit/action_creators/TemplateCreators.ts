@@ -20,12 +20,12 @@ import { ITemplate } from "@entity/connection/interfaces/ITemplate";
 import ModelTemplate from "@entity/connection/requests/models/Template";
 
 
-export const checkTemplateName = createAsyncThunk(
-    'template/exist/name',
-    async(template: ITemplate, thunkAPI) => {
+export const checkTemplateId = createAsyncThunk(
+    'template/exist/id',
+    async(templateId: string, thunkAPI) => {
         try {
-            const request = new TemplateRequest({endpoint: `/check/${template.name}`});
-            const response = await request.checkTemplateName();
+            const request = new TemplateRequest({endpoint: `/check/${templateId}`});
+            const response = await request.checkTemplateId();
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -183,6 +183,7 @@ export const deleteTemplatesById = createAsyncThunk(
 )
 
 export default {
+    checkTemplateId,
     importTemplate,
     exportTemplate,
     addTemplate,

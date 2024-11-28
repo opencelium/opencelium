@@ -7,6 +7,7 @@ import com.becon.opencelium.backend.enums.DataTypeEnum;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
+import com.becon.opencelium.backend.utility.EndpointUtility;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -125,8 +126,12 @@ public class ConditionExMapper {
         }
         last = rs.getField().endsWith("%");
 
-        rs.setField(rs.getField().replaceAll("%", ""));
-
+        if (first) {
+            rs.setField(rs.getField().replaceFirst("%", ""));
+        }
+        if (last) {
+            rs.setField(rs.getField().substring(0, rs.getField().length() - 1));
+        }
         return (first ? "%" : "") + rs.getColor() + ".(" + rs.getType() + ")." + rs.getField() + (last ? "%" : "");
     }
 
@@ -136,15 +141,15 @@ public class ConditionExMapper {
 
     private String stringify(String field, String rpv) {
         if (field.matches(RegExpression.webhook)) {
-            int index = field.indexOf(':');
-            int array = field.indexOf(DataType.ARRAY.getType());
+            int index = EndpointUtility.indexOf(field, ':', false, false);
+            int array = field.lastIndexOf(DataType.ARRAY.getType());
             if (index == -1) {
                 return field.substring(0, field.length() - 1) + "." + rpv + "}";
             }
             if (array == -1 || array < index) {
-                return field.substring(0, index) + "." + rpv + field.substring(index);
+                return field.substring(0, index).stripTrailing() + "." + rpv + field.substring(index);
             }
-            return field.substring(0, index) + "[*]." + rpv + ":" + DataType.ARRAY.getType() + "}";
+            return field.substring(0, index).stripTrailing() + "[*]." + rpv + ":" + DataType.ARRAY.getType() + "}";
         }
         return field + "." + rpv;
     }

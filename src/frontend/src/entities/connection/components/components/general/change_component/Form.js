@@ -31,6 +31,7 @@ import Title from "@app_component/collection/collection_title/Title";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import CSvg from "@classes/content/connection_overview_2/CSvg";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
 
 function mapStateToProps(state, props){
     const authUser = state.authReducer.authUser;
@@ -208,6 +209,7 @@ class Form extends React.Component{
         return(
             <div style={{margin: '20px 0', padding: 0, paddingBottom: '30px'}}>
                 <Title title={translations.header}/>
+                <LicenseAlertMessage/>
                 <div className={styles.buttons_panel}>
                     {type !== 'update' &&
                         <React.Fragment>

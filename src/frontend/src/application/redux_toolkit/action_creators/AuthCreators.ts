@@ -18,47 +18,26 @@ import {ICredentials} from "../../interfaces/IAuth";
 import {AuthRequest} from "../../requests/classes/Auth";
 import {errorHandler, timeout} from "../../utils/utils";
 import User from "@entity/user/classes/User";
-
-const HasLicenseCheck = false;
-export let AuthUser:any = null;
 export const login = createAsyncThunk(
     'login',
     async(data: ICredentials, thunkAPI) => {
         try {
             const request = new AuthRequest({hasAuthToken: false, isApi: false});
             const loginResponseData = await request.login(data);
-            const authUser = User.getUserFromLoginResponse(loginResponseData);
-            if (HasLicenseCheck && !loginResponseData.data.hasLicense) {
-                //todo: remove authUser when backend will be ready
-                AuthUser = authUser;
-                return thunkAPI.rejectWithValue(errorHandler({message: 'NO_LICENSE'}));
+            if (loginResponseData.data.sessionId) {
+                return thunkAPI.rejectWithValue({
+                    ...errorHandler({message: 'SESSION_ID_IS_REQUIRED'}),
+                    sessionId: loginResponseData.data.sessionId,
+                    secretKey: loginResponseData.data.secretKey,
+                    qr: loginResponseData.data.qr,
+                    settings: {withoutNotification: true}
+                });
             }
+            const authUser = User.getUserFromLoginResponse(loginResponseData);
             if(!authUser){
                 return thunkAPI.rejectWithValue(errorHandler({message: 'Your token is not valid'}));
             }
-            return {...authUser, hasLicense: true};
-        } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
-        }
-    }
-)
-export const uploadToken = createAsyncThunk(
-    'upload-token',
-    async(data: {token: string}, thunkAPI) => {
-        try {
-            await timeout();
-            if(data.token !== '1') {
-                return thunkAPI.rejectWithValue(errorHandler({message: 'WRONG_LICENSE_TOKEN'}));
-            }
-            //todo: uncomment when backend will be ready
-            //const request = new AuthRequest({hasAuthToken: false, isApi: false});
-            //const loginResponseData = await request.uploadToken(data.token);
-            //const authUser = User.getUserFromLoginResponse(loginResponseData);
-            //if(!authUser){
-           //     return thunkAPI.rejectWithValue(errorHandler({message: 'Your token is not valid'}));
-            //}
-            //return authUser;
-            return AuthUser;
+            return {...authUser};
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -67,5 +46,4 @@ export const uploadToken = createAsyncThunk(
 
 export default {
     login,
-    uploadToken,
 }

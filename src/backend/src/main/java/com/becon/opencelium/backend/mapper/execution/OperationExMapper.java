@@ -12,7 +12,9 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
+import com.becon.opencelium.backend.utility.EndpointUtility;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
@@ -25,7 +27,6 @@ public class OperationExMapper {
     private final InvokerService invokerService;
     private final ConnectionMngService connectionMngService;
     private final ConnectorService connectorService;
-    private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
 
@@ -95,8 +96,8 @@ public class OperationExMapper {
     }
 
     private MediaType getContentTypeFromHeader(Map<String, String> header) {
-        if (header != null && header.containsKey(HEADER_CONTENT_TYPE)) {
-            String contentType = header.get(HEADER_CONTENT_TYPE);
+        if (header != null && header.containsKey(HttpHeaders.CONTENT_TYPE)) {
+            String contentType = header.get(HttpHeaders.CONTENT_TYPE);
             if (contentType != null) {
                 try {
                     return MediaType.parseMediaType(contentType);
@@ -164,7 +165,7 @@ public class OperationExMapper {
         List<ParameterDTO> parameters = getHeaderParameters(request.getHeader(), mediaType);
 
         //add all query parameters
-        int indexOfQuestionSign = request.getEndpoint().indexOf("?");
+        int indexOfQuestionSign = EndpointUtility.findIndexOfQuesSign(request.getEndpoint());
         if (indexOfQuestionSign != -1) {
             String query = request.getEndpoint().substring(indexOfQuestionSign + 1); //get all queries
             parameters.addAll(getQueryParameters(query, mediaType));
@@ -198,7 +199,7 @@ public class OperationExMapper {
         }
         for (Map.Entry<String, String> entry : header.entrySet()) {
             ParameterDTO parameterDTO = new ParameterDTO();
-            if (entry.getKey().equals("Cookie")) {
+            if (entry.getKey().equals(HttpHeaders.COOKIE)) {
                 addCookieParams(entry.getValue(), parameters);
                 continue;
             }
@@ -243,24 +244,31 @@ public class OperationExMapper {
             return;
         }
         value = value.trim();
-        String[] split = value.split(";");
+        List<String> pairs = EndpointUtility.splitByDelimiter(value, ';');
 
-        for (String kv : split) {
-            if (kv.contains("=")) {
-                String[] pairs = kv.split("=");
-                if (pairs.length == 2) {
-                    SchemaDTO schemaDTO = new SchemaDTO();
-                    schemaDTO.setType(DataType.STRING);
-                    schemaDTO.setValue(pairs[1].trim());
+        for (String kv : pairs) {
+            List<String> keyVal = EndpointUtility.splitByDelimiter(kv, '=');
+            SchemaDTO schemaDTO = new SchemaDTO();
+            schemaDTO.setType(DataType.STRING);
+            ParameterDTO parameterDTO = new ParameterDTO();
+            if (keyVal.size() == 2) {
+                schemaDTO.setValue(keyVal.get(1).trim());
 
-                    ParameterDTO parameterDTO = new ParameterDTO();
-                    parameterDTO.setSchema(schemaDTO);
-                    parameterDTO.setIn(ParamLocation.COOKIE);
-                    parameterDTO.setStyle(ParamStyle.FORM);
-                    parameterDTO.setName(pairs[0].trim());
-                    parameters.add(parameterDTO);
-                }
+                parameterDTO.setStyle(ParamStyle.FORM);
+                parameterDTO.setIn(ParamLocation.COOKIE);
+                parameterDTO.setName(keyVal.get(0).trim());
+            } else if (keyVal.size() == 1) {
+                schemaDTO.setValue(keyVal.get(0).trim());
+
+                parameterDTO.setIn(ParamLocation.HEADER);
+                parameterDTO.setStyle(ParamStyle.SIMPLE);
+                parameterDTO.setName(HttpHeaders.COOKIE);
+            } else {
+                //ignore
+                continue;
             }
+            parameterDTO.setSchema(schemaDTO);
+            parameters.add(parameterDTO);
         }
     }
 
@@ -279,8 +287,8 @@ public class OperationExMapper {
             return Collections.emptyList();
         } else {
             List<ParameterDTO> list = new ArrayList<>();
-            String[] split = path.split("/");
-            for (String subPath : split) {
+            List<String> subPaths = EndpointUtility.splitByDelimiter(path, '/');
+            for (String subPath : subPaths) {
                 if (!subPath.contains("{") || !subPath.contains("}")) {
                     continue;
                 }
@@ -318,11 +326,10 @@ public class OperationExMapper {
         Map<String, String> parametersMap = new HashMap<>(); //stores string and array parameters only
         Tree objectParametersTree = new Tree(); //stores object parameters
 
-        String[] pairsRaw = query.split("&"); //stores all parameters as <k,v> temporary
+        List<String[]> pairs = EndpointUtility.getQueryVariables(query);
         //loop for storing all parameters to parametersMap
-        for (String p : pairsRaw) {
-            String[] split = p.split("=");
-            parametersMap.merge(split[0], split.length == 1 ? "" : split[1], (oldV, newV) -> oldV + "&" + newV);
+        for (String[] p : pairs) {
+            parametersMap.merge(p[0], p[1] == null ? "" : p[1], (oldV, newV) -> oldV + "&" + newV);
         }
 
         //main loop for making parameterDTO depending on param's style.
@@ -370,7 +377,7 @@ public class OperationExMapper {
     }
 
     private RequestBodyDTO getRequestBody(BodyMng body, Long connectionId, String methodName, MediaType mediaType) {
-        if (body == null || body.getFormat()==null || body.getFields()==null) {
+        if (body == null || body.getFormat() == null || body.getFields() == null) {
             return null;
         }
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
@@ -396,15 +403,35 @@ public class OperationExMapper {
             return null;
         }
         SchemaDTO schemaDTO = new SchemaDTO();
+
+
+        String type = body.getType();
+        if ("array".equals(type)) {
+            body.setType("object");
+            schemaDTO.setType(DataType.ARRAY);
+            schemaDTO.setItems(new ArrayList<>() {{
+                add(getSchema(body, connectionId, methodName));
+            }});
+            return schemaDTO;
+        }
+
         schemaDTO.setType(DataType.OBJECT);
+
         Map<String, SchemaDTO> props = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : fields.entrySet()) {
             LinkedList<String> hierarchy = new LinkedList<>();
             hierarchy.add(entry.getKey());
+            if (body.getData().equals("graphql")) {
+                String queryFieldName = "query"; // Is this the only field that could be used as a query?
+                Map<String, Object> map = body.getFields();
+                if (map.containsKey(queryFieldName) && map.get(queryFieldName) instanceof String query) {
+                    map.put(queryFieldName, query.replace("\n", ""));
+                }
+            }
             if (body.getFormat().equals("xml")) {
                 String name = entry.getKey();
-                if (name.contains(":")) {
-                    name = name.split(":")[1];
+                if (name.matches("^[a-zA-Z ]+:.*$")) {
+                    name = name.substring(name.indexOf(":") + 1);
                 }
                 props.put(name, getSchemaFromObjectXML(hierarchy, entry.getValue(), connectionId, methodName));
             } else {

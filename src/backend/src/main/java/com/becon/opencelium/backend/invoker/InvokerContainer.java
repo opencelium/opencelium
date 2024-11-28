@@ -28,17 +28,16 @@ public class InvokerContainer {
 
     public InvokerContainer(Map<String, Invoker> invokers) {
         this.invokers = invokers;
-//        this.name = name;
     }
 
     public Map<String, Invoker> getInvokers() {
         return invokers;
     }
 
-    public Invoker getByName(String name){
-        if (!invokers.containsKey(name)){
-            for (Invoker invoker : invokers.values()){
-                if (invoker.getName().equals(name)){
+    public Invoker getByName(String name) {
+        if (!invokers.containsKey(name)) {
+            for (Invoker invoker : invokers.values()) {
+                if (invoker.getName().equals(name)) {
                     return invoker;
                 }
             }
@@ -47,11 +46,11 @@ public class InvokerContainer {
         return invokers.get(name);
     }
 
-    public boolean existsByName(String name){
+    public boolean existsByName(String name) {
         return invokers.get(name) != null;
     }
 
-    public void updateAll(Map<String, Invoker> invokers){
+    public void updateAll(Map<String, Invoker> invokers) {
         this.invokers = invokers;
     }
 
@@ -59,7 +58,7 @@ public class InvokerContainer {
         invokers.put(name, invoker);
     }
 
-    public void remove(String name){
+    public void remove(String name) {
         invokers.remove(name);
     }
 }

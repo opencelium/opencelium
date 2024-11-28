@@ -43,6 +43,7 @@ const Grid: FC<ViewProps> =
         componentPermission,
         isRefreshing,
         shouldBeUpdated,
+        hasPaginationProps,
     }) => {
     let navigate = useNavigate();
     const [visibleEntities, setVisibleEntities] = useState<any[]>([]);
@@ -54,8 +55,10 @@ const Grid: FC<ViewProps> =
         }
     }, []);
     useEffect(() => {
-        let newVisibleEntities = collection.getEntitiesByPage(searchValue, currentPage, entitiesPerPage);
-        setVisibleEntities(newVisibleEntities);
+        if (!hasPaginationProps) {
+            let newVisibleEntities = collection.getEntitiesByPage(searchValue, currentPage, entitiesPerPage);
+            setVisibleEntities(newVisibleEntities);
+        }
     }, [currentPage, searchValue, entitiesPerPage, collection.entities.length, shouldBeUpdated]);
     if(visibleEntities.length === 0){
         return (

@@ -21,7 +21,7 @@ plugins {
 }
 
 group = 'com.becon'
-version = '4.1'
+version = '4.2'
 sourceCompatibility = '17'
 
 repositories {
@@ -41,10 +41,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
 	implementation 'org.springframework.boot:spring-boot-starter-quartz'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-data-ldap'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-web-services'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springframework.session:spring-session-core'
+	implementation 'org.springframework.security:spring-security-ldap'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.4'
@@ -61,6 +63,9 @@ dependencies {
 	implementation 'javax.json:javax.json-api:1.1.4'
 	implementation 'org.neo4j.driver:neo4j-java-driver:5.18.0'
 	implementation 'org.jsoup:jsoup:1.13.1'
+	implementation 'com.google.zxing:core:3.4.1'
+	implementation 'com.warrenstrange:googleauth:1.4.0'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2'
 	compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	runtimeOnly 'mysql:mysql-connector-java'

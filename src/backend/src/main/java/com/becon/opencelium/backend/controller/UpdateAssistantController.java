@@ -43,7 +43,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -55,11 +55,16 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 @RestController
 @Tag(name = "Update Assistant", description = "Manages version control operations.")
@@ -406,19 +411,42 @@ public class UpdateAssistantController {
     })
     @GetMapping("/changelog/file/{packageName}")
     public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String packageName) {
+        String path = PathConstant.ASSISTANT + PathConstant.VERSIONS + packageName + "/";
+        Path rootLocation = Paths.get(path);
 
-        try {
-            String path = PathConstant.ASSISTANT + PathConstant.VERSIONS + packageName + "/";
-            Path rootLocation = Paths.get(path);
-            Path filePath = rootLocation.resolve("CHANGELOG");
-            org.springframework.core.io.Resource file = new UrlResource(filePath.toUri());
-            if (!file.exists() || !file.isReadable()) {
-                throw new StorageFileNotFoundException("Could not read file: " + packageName + "/CHANGELOG");
+        if (!Files.exists(rootLocation)) {
+            throw new StorageFileNotFoundException("Folder not found with name: " + packageName);
+        }
+
+        try (Stream<Path> paths = Files.walk(rootLocation, 1)) {
+            File file = paths
+                    .filter(Files::isRegularFile)
+                    .filter(p -> p.toString().endsWith(".zip"))
+                    .findAny()
+                    .orElseThrow(() -> new StorageFileNotFoundException("Zip file not found within folder: " + packageName))
+                    .toFile();
+
+            try (ZipFile zipFile = new ZipFile(file)) {
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry zipEntry = entries.nextElement();
+                    String name = zipEntry.getName();
+                    if (!zipEntry.isDirectory() && name.equals("CHANGELOG.rst")) {
+                        try (InputStream inputStream = zipFile.getInputStream(zipEntry)) {
+                            byte[] content = inputStream.readAllBytes();
+                            ByteArrayResource resource = new ByteArrayResource(content);
+
+                            return ResponseEntity.ok()
+                                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"CHANGELOG.rst\"")
+                                    .contentType(MediaType.parseMediaType("application/octet-stream"))
+                                    .body(resource);
+                        }
+                    }
+                }
+                throw new StorageFileNotFoundException("CHANGELOG file is not found");
             }
-            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + file.getFilename() + "\"").body(file);
-        } catch (MalformedURLException e) {
-            throw new StorageFileNotFoundException("Could not read file: " + packageName + "/CHANGELOG", e);
+        } catch (IOException e) {
+            throw new StorageFileNotFoundException("Error accessing files: " + e.getMessage(), e);
         }
     }
 

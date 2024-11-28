@@ -72,7 +72,7 @@ public class EnhancementServiceImpl implements EnhancementService {
 
         // if 'result' is a primitive (Number, String, Boolean) type then just return
         boolean isPrimitive = result instanceof Number || result instanceof String || result instanceof Boolean;
-        if (isPrimitive) {
+        if (result == null || isPrimitive) {
             return result;
         }
 

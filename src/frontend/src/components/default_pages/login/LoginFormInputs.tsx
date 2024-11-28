@@ -21,14 +21,13 @@ import {InputTextType} from "@app_component/base/input/text/interfaces";
 import {ColorTheme} from "@style/Theme";
 import {HeaderStyled, LoginFormStyled} from "./styles";
 import {LoginIcon} from "./login_icon/LoginIcon";
-import UploadToken from "@app_component/default_pages/login/upload_token/UploadToken";
-import {TRIPLET_STATE} from "@application/interfaces/IApplication";
+import AuthCode from "@app_component/default_pages/login/AuthCode";
 
 const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?: boolean}) => {
-    const {hasLicense} = Auth.getReduxState();
+    const {sessionId} = Auth.getReduxState();
     const LoginForm = Auth.createState<IAuth>();
-    const EmailInput = LoginForm.getText({
-        propertyName: "email", props: {/*
+    const UsernameInput = LoginForm.getText({
+        propertyName: "username", props: {/*
             icon: 'email', label: 'E-Mail',*/
             required: true,
             background: ColorTheme.White,
@@ -37,7 +36,7 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
             paddingTop: isAuth ? '0' : '20px',
             paddingLeft: '5px',
             paddingRight: '5px',
-            placeholder: 'E-Mail',
+            placeholder: 'Username',
             paddingLeftInput: '5px',
             paddingRightInput: '5px',
             errorBottom: '3px',
@@ -66,10 +65,10 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
     return(
         <LoginFormStyled isAuth={isAuth}>
             <HeaderStyled isAuth={isAuth}>Log In</HeaderStyled>
-            {EmailInput}
+            {UsernameInput}
             {PasswordInput}
             <LoginIcon hasAnimation={hasAnimation} login={() => LoginForm.login()}/>
-            {hasLicense === TRIPLET_STATE.FALSE && <UploadToken/>}
+            {!!sessionId && <AuthCode/>}
         </LoginFormStyled>
     )
 }

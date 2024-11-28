@@ -21,7 +21,6 @@ import com.becon.opencelium.backend.database.mysql.entity.Webhook;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.WebhookServiceImp;
 import com.becon.opencelium.backend.enums.execution.DataType;
-import com.becon.opencelium.backend.enums.execution.WebhookDataType;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;

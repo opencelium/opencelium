@@ -29,7 +29,6 @@ import {
     addTicket, getAllComponents, getGlobalSearchData,
     getLogoName, getResources, getVersion,
     openExternalUrl, requestRemoteApi, updateResources,
-    updateThemes,
 } from "../../redux_toolkit/action_creators/ApplicationCreators";
 import {IApplicationResponse, IResponse} from "../../requests/interfaces/IResponse";
 import {INotification} from "../../interfaces/INotification";
@@ -48,7 +47,6 @@ export interface AuthState extends ICommonState{
     updatingResources: API_REQUEST_STATE,
     openingExternalUrl: API_REQUEST_STATE,
     requestingRemoteApi: API_REQUEST_STATE,
-    updatingThemes: API_REQUEST_STATE,
     remoteApiData: RemoteApiResponseProps,
     isNotificationPanelOpened: boolean,
     version: string,
@@ -96,7 +94,6 @@ const initialState: AuthState = {
     updatingResources: API_REQUEST_STATE.INITIAL,
     openingExternalUrl: API_REQUEST_STATE.INITIAL,
     requestingRemoteApi: API_REQUEST_STATE.INITIAL,
-    updatingThemes: API_REQUEST_STATE.INITIAL,
     remoteApiData: null,
     isNotificationPanelOpened: false,
     version: version || '',
@@ -173,17 +170,6 @@ export const applicationSlice = createSlice({
         }
     },
     extraReducers: {
-        [updateThemes.pending.type]: (state) => {
-            state.updatingThemes = API_REQUEST_STATE.START;
-        },
-        [updateThemes.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
-            state.updatingThemes = API_REQUEST_STATE.FINISH;
-            state.error = null;
-        },
-        [updateThemes.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.updatingThemes = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
-        },
         [getLogoName.pending.type]: (state) => {
             state.gettingLogoName = API_REQUEST_STATE.START;
         },

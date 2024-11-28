@@ -26,7 +26,6 @@ import {
 import {ITicket} from "../../interfaces/ITicket";
 import {IResponse} from "../interfaces/IResponse";
 import { IComponent } from "../../interfaces/IApplication";
-import ModelUpdateThemes from "../../requests/models/UpdateThemes";
 
 
 export class ApplicationRequest extends Request implements IApplicationRequest{
@@ -74,15 +73,9 @@ export class ApplicationRequest extends Request implements IApplicationRequest{
         return super.get<IResponse>();
     }
 
-    async getLogoName(email: string): Promise<AxiosResponse<string>>{
+    async getLogoName(): Promise<AxiosResponse<string>>{
         this.isFullUrl = true;
         this.hasAuthToken = false;
         return super.get<string>();
-    }
-
-    async updateThemes(data: ModelUpdateThemes): Promise<AxiosResponse<IResponse>>{
-        this.url = 'user'
-        this.endpoint = '/update/themes';
-        return super.put<IResponse>(data);
     }
 }

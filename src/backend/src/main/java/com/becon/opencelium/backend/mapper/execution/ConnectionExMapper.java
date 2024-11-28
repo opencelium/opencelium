@@ -15,6 +15,7 @@ public class ConnectionExMapper {
 
     public ConnectionEx toEntity(ConnectionMng dto){
         ConnectionEx connectionEx = new ConnectionEx();
+        connectionEx.setConnectionId(dto.getConnectionId());
         connectionEx.setSource(connectorExMapper.toEntity(dto.getFromConnector(), dto.getConnectionId()));
         connectionEx.setTarget(connectorExMapper.toEntity(dto.getToConnector(), dto.getConnectionId()));
         connectionEx.setFieldBind(fieldBindExMapper.toEntityAll(dto.getFieldBindings()));

@@ -18,7 +18,7 @@ import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
 import {addConnection, checkConnectionTitle} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
-import {getTemplateById as fetchTemplate, getAllTemplates as fetchTemplates, checkTemplateName} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
+import {getTemplateById as fetchTemplate, getAllTemplates as fetchTemplates, checkTemplateId} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {updateTemplate} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from '@entity/connector/redux_toolkit/action_creators/ConnectorCreators';
 import {permission} from "@entity/application/utils/permission";
@@ -49,7 +49,7 @@ function mapStateToProps(state){
 /**
  * Component to Update Template
  */
-@connect(mapStateToProps, {addConnection, checkConnectionTitle, updateTemplate, fetchTemplate, fetchConnectors, fetchTemplates, checkTemplateName})
+@connect(mapStateToProps, {addConnection, checkConnectionTitle, updateTemplate, fetchTemplate, fetchConnectors, fetchTemplates, checkTemplateId})
 @permission(ConnectionPermissions.UPDATE, true)
 @withTranslation(['templates', 'app', 'basic_components'])
 @TemplateForm('update')
