@@ -10,7 +10,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,13 +30,13 @@ public class SystemOverviewRepository {
 
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
-    private final Environment environment;
+    private final YamlPropertiesFactoryBean yamlPropertiesFactoryBean;
     private final MongoClient mongoClient;
 
-    public SystemOverviewRepository(DataSource dataSource, JdbcTemplate jdbcTemplate, Environment environment, MongoClient mongoClient) {
+    public SystemOverviewRepository(DataSource dataSource, JdbcTemplate jdbcTemplate, YamlPropertiesFactoryBean yamlPropertiesFactoryBean, MongoClient mongoClient) {
         this.dataSource = dataSource;
         this.jdbcTemplate = jdbcTemplate;
-        this.environment = environment;
+        this.yamlPropertiesFactoryBean = yamlPropertiesFactoryBean;
         this.mongoClient = mongoClient;
     }
 
@@ -70,12 +69,12 @@ public class SystemOverviewRepository {
     }
 
     // return current version
-    public String getCurrentVersion() {
+    public String getCurrentVersionFromDb() {
         try {
 //            return jdbcTemplate
 //                    .queryForList("select AUTHOR from DATABASECHANGELOG order by AUTHOR DESC LIMIT 1", String.class)
 //                    .get(0);
-            return Objects.requireNonNull(environment.getProperty(AppYamlPath.OC_VERSION));
+            return Objects.requireNonNull(yamlPropertiesFactoryBean.getObject()).getProperty(AppYamlPath.OC_VERSION);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

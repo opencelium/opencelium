@@ -18,5 +18,5 @@ public interface RemoteApi {
      * @return an implementation of the specified interface type
      * @throws IllegalArgumentException if the interface is not implemented by the class
      */
-    Object getModule(ApiModule module) throws IllegalArgumentException;
+    <T> T getModule(ApiModule module) throws IllegalArgumentException;
 }
