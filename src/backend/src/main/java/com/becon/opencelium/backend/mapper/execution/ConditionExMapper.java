@@ -136,7 +136,8 @@ public class ConditionExMapper {
     }
 
     private String stringify(StatementMng st) {
-        return st.getColor() + ".(" + st.getType() + ")." + st.getField();
+        return st.getColor() + ".(" + st.getType() + ")" + (st.getField() == null ? ""
+                        : st.getField().startsWith("[*]") ? st.getField() : "." + st.getField());
     }
 
     private String stringify(String field, String rpv) {

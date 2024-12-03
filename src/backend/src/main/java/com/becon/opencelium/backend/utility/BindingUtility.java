@@ -92,7 +92,7 @@ public class BindingUtility {
                             .append(".(")
                             .append(from.getType())
                             .append(")")
-                            .append(from.getField() == null ? "" : "." + from.getField())
+                            .append(handleFieldPath(from.getField()))
                             .append(";");
                 }
                 sb.deleteCharAt(sb.length() - 1);
@@ -109,7 +109,7 @@ public class BindingUtility {
                     .append(".(")
                     .append(from.getType())
                     .append(")")
-                    .append(from.getField() == null ? "" : "." + from.getField())
+                    .append(handleFieldPath(from.getField()))
                     .append(";");
         }
         sb.deleteCharAt(sb.length() - 1);
@@ -120,7 +120,7 @@ public class BindingUtility {
 //---------------------------------------------- bind ----------------------------------------------------//
 
     public static String doWithPath(String endpoint, String id, List<LinkedFieldMng> from) {
-        List<String> refs = from.stream().map(x -> x.getColor() + ".(" + x.getType() + ")" + (x.getField() == null ? "" : "." + x.getField())).toList();
+        List<String> refs = from.stream().map(x -> x.getColor() + ".(" + x.getType() + ")" + handleFieldPath(x.getField())).toList();
         int indexOfQuestionSign = EndpointUtility.findIndexOfQuesSign(endpoint);
         String query = null;
         if (indexOfQuestionSign != -1) {
@@ -128,7 +128,8 @@ public class BindingUtility {
             List<String[]> variables = EndpointUtility.getQueryVariables(query);
             out:
             for (String[] p : variables) {
-                if (p[1].matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
+                if (p[1].matches(".*" + RegExpression.wrappedDirectRef + ".*")
+                        || p[1].matches(".*" + RegExpression.responseListWrappedDirectRef + ".*")) {
                     // p[1] can be:
                     // pure ref - '{%#ffffff.(response).a.b%}'
                     // one enhancement having several references - '{%#ffffff.(response).a.b;#ffffff.(response).a.c%}'
@@ -157,7 +158,8 @@ public class BindingUtility {
         List<String> subPaths = EndpointUtility.splitByDelimiter(path, '/');
         out:
         for (int i = 0; i < subPaths.size(); i++) {
-            if (subPaths.get(i).matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
+            if (subPaths.get(i).matches(".*" + RegExpression.wrappedDirectRef + ".*")
+                    || subPaths.get(i).matches(".*" + RegExpression.responseListWrappedDirectRef + ".*")) {
                 for (String ref : refs) {
                     if (!subPaths.get(i).contains(ref)) {
                         continue out;
@@ -178,7 +180,7 @@ public class BindingUtility {
     }
 
     public static void doWithHeader(Map<String, String> header, String fieldName, String id, List<LinkedFieldMng> from) {
-        List<String> refs = from.stream().map(x -> x.getColor() + ".(" + x.getType() + ")" + (x.getField() == null ? "" : "." + x.getField())).toList();
+        List<String> refs = from.stream().map(x -> x.getColor() + ".(" + x.getType() + ")" + handleFieldPath(x.getField())).toList();
         header.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue().equals(fieldName))
@@ -360,5 +362,11 @@ public class BindingUtility {
     private static String putIdToBody(Object value, String id) {
         //just returns 'wrapped' id. Might be changed!
         return "#{%" + id + "%}";
+    }
+
+    private static String handleFieldPath(String fieldPath) {
+        return fieldPath == null
+                ? ""
+                : fieldPath.startsWith("[*]") ? fieldPath : "." + fieldPath;
     }
 }

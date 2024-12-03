@@ -699,7 +699,7 @@ public class OperationExMapper {
     }
 
     private String extractNameOfRef(String param) {
-        if (param.matches(RegExpression.wrappedDirectRef)) {
+        if (param.matches(RegExpression.wrappedDirectRef) || param.matches(RegExpression.responseListWrappedDirectRef)) {
             return param.substring(2, param.length() - 2);
         } else if (param.matches(RegExpression.enhancement)) {
             return param.substring(3, param.length() - 2);
