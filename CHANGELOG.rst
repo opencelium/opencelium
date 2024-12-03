@@ -2,6 +2,28 @@
 Changelog
 *********
 
+4.2
+========
+
+:Date: November 19, 2024
+
+Features
+--------
+
+* Licence Management integration
+* LDAP Integration (AD and OpenLDAP)
+* Multi-factor authentication with TOTP
+
+Fixes
+--------
+
+* GraphQL is missing when executing (OC-945)
+* Webhook Bug when executing Connection (OC-947)
+* Error in pagination when property nextLink is missing (OC-963)
+* Fix bug with drag and drop in connection editor (OC-932)
+* Error when downloading changelog.rst file (OC-920)
+* CHAR in property name(OC-948)
+
 4.1
 ========
 
@@ -457,4 +479,3 @@ Connector
 * Zabbix
 * Icinga2
 * OTRS/Znuny/OTOBO
-

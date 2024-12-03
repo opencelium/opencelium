@@ -23,6 +23,8 @@ release = 'latest'
 exclude_patterns = ['_build']
 htmlhelp_basename = 'openceliumapi'
 
+html_static_path = ['_static']
+
 html_js_files = [
     'js/custom.js',
 ]
