@@ -65,7 +65,7 @@ public class SubscriptionController {
 
     @GetMapping(path = "/all")
     public ResponseEntity<String> getAllSubscriptions() {
-        SubscriptionModule subsModule = remoteApi.getModule(ApiModule.SUBSCRIPTION);
+        SubscriptionModule subsModule = (SubscriptionModule) remoteApi.getModule(ApiModule.SUBSCRIPTION);
         return ResponseEntity.ok(subsModule.getAllSubs().getBody());
     }
 
@@ -76,7 +76,7 @@ public class SubscriptionController {
 
     @GetMapping(path = "/{subId}")
     public ResponseEntity<String> getSubById(@PathVariable String subId) {
-        SubscriptionModule module = remoteApi.getModule(ApiModule.SUBSCRIPTION);
+        SubscriptionModule module = (SubscriptionModule) remoteApi.getModule(ApiModule.SUBSCRIPTION);
         return ResponseEntity.ok(module.getAllSubs().getBody());
     }
 
@@ -87,7 +87,7 @@ public class SubscriptionController {
         String encodedAr = Base64Utility.encode(ar);
 
         // request Service Portal for a license
-        SubscriptionModule sModule = remoteApi.getModule(ApiModule.SUBSCRIPTION);
+        SubscriptionModule sModule = (SubscriptionModule) remoteApi.getModule(ApiModule.SUBSCRIPTION);
         File arFile = activationRequestService.createFile(encodedAr, "activation-request");
         String response  = sModule.generateLicenseKey(arFile, subId).getBody();
         String licenseKey = extractLicenseKey(response);

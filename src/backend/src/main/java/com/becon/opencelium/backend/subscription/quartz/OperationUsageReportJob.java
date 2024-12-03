@@ -30,7 +30,7 @@ public class OperationUsageReportJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         RemoteApi remoteApi = RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL);
-        ReportModule reportModule = remoteApi.getModule(ApiModule.OPERATION_USAGE);
+        ReportModule reportModule = (ReportModule) remoteApi.getModule(ApiModule.OPERATION_USAGE);
         List<UsageHistoryDto> usageHistoryDtoList = operationUsageHistoryService.findAll()
                 .stream().map(UsageHistoryDto::new).toList();
         if (usageHistoryDtoList.isEmpty()) {

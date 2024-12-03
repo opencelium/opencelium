@@ -38,13 +38,13 @@ public class AppConfiguration {
                 .setReadTimeout(Duration.ofMillis(SecurityConstant.READ_TIMEOUT)).build();
     }
 
-    @Bean
-    public YamlPropertiesFactoryBean getYamlProps() {
-        YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
-        Resource yamlResource = new FileSystemResource(PathConstant.APP_YML);
-        yamlFactory.setResources(yamlResource);
-        return yamlFactory;
-    }
+//    @Bean
+//    public YamlPropertiesFactoryBean getYamlProps() {
+//        YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
+//        Resource yamlResource = new FileSystemResource(PathConstant.APP_YML);
+//        yamlFactory.setResources(yamlResource);
+//        return yamlFactory;
+//    }
 
     @Bean
     public ObjectMapper objectMapper() {
