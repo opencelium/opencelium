@@ -577,7 +577,8 @@ public class OperationExMapper {
         if (value.matches(RegExpression.requiredData)
                 || value.matches(RegExpression.enhancement)
                 || value.matches(RegExpression.directRef)
-                || value.matches(RegExpression.webhook)) {
+                || value.matches(RegExpression.webhook)
+                || value.matches(RegExpression.responseListDirectRef)) {
 
             ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
             Connector fromConnector = connectorService.getById(connectionMng.getFromConnector().getConnectorId());

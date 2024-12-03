@@ -25,10 +25,12 @@ public class ConnectorExMapper {
     private final OperatorExMapper operatorExMapper;
     private final InvokerService invokerService;
 
-    public ConnectorExMapper(@Qualifier("connectorServiceImp") ConnectorService connectorService,
-                             OperationExMapper operationExMapper,
-                             OperatorExMapper operatorExMapper,
-                             @Qualifier("invokerServiceImp") InvokerService invokerService) {
+    public ConnectorExMapper(
+            @Qualifier("connectorServiceImp") ConnectorService connectorService,
+            OperationExMapper operationExMapper,
+            OperatorExMapper operatorExMapper,
+            @Qualifier("invokerServiceImp") InvokerService invokerService
+    ) {
         this.connectorService = connectorService;
         this.operationExMapper = operationExMapper;
         this.operatorExMapper = operatorExMapper;
