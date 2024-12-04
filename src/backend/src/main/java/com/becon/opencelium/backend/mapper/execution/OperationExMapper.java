@@ -577,8 +577,7 @@ public class OperationExMapper {
         if (value.matches(RegExpression.requiredData)
                 || value.matches(RegExpression.enhancement)
                 || value.matches(RegExpression.directRef)
-                || value.matches(RegExpression.webhook)
-                || value.matches(RegExpression.responseListDirectRef)) {
+                || value.matches(RegExpression.webhook)) {
 
             ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
             Connector fromConnector = connectorService.getById(connectionMng.getFromConnector().getConnectorId());
@@ -699,7 +698,7 @@ public class OperationExMapper {
     }
 
     private String extractNameOfRef(String param) {
-        if (param.matches(RegExpression.wrappedDirectRef) || param.matches(RegExpression.responseListWrappedDirectRef)) {
+        if (param.matches(RegExpression.wrappedDirectRef)) {
             return param.substring(2, param.length() - 2);
         } else if (param.matches(RegExpression.enhancement)) {
             return param.substring(3, param.length() - 2);

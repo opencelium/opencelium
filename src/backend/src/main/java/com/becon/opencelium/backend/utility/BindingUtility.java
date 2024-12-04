@@ -128,8 +128,7 @@ public class BindingUtility {
             List<String[]> variables = EndpointUtility.getQueryVariables(query);
             out:
             for (String[] p : variables) {
-                if (p[1].matches(".*" + RegExpression.wrappedDirectRef + ".*")
-                        || p[1].matches(".*" + RegExpression.responseListWrappedDirectRef + ".*")) {
+                if (p[1].matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
                     // p[1] can be:
                     // pure ref - '{%#ffffff.(response).a.b%}'
                     // one enhancement having several references - '{%#ffffff.(response).a.b;#ffffff.(response).a.c%}'
@@ -158,8 +157,7 @@ public class BindingUtility {
         List<String> subPaths = EndpointUtility.splitByDelimiter(path, '/');
         out:
         for (int i = 0; i < subPaths.size(); i++) {
-            if (subPaths.get(i).matches(".*" + RegExpression.wrappedDirectRef + ".*")
-                    || subPaths.get(i).matches(".*" + RegExpression.responseListWrappedDirectRef + ".*")) {
+            if (subPaths.get(i).matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
                 for (String ref : refs) {
                     if (!subPaths.get(i).contains(ref)) {
                         continue out;
