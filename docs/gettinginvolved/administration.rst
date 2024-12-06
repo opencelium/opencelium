@@ -61,17 +61,6 @@ Start opencelium services automatically on system start
 	systemctl enable opencelium
 
 
-Backup
-"""""""""""""""""
-
-Execute this command to create a backup.
-
-.. code-block:: sh
-
-	oc backup -d /var/backups/opencelium -u username -p password
-
-
-
 Logging
 """""""""""""""""
 
@@ -81,3 +70,51 @@ Logging
 	:linenos:
 	
 	journalctl -xe -u opencelium -f
+
+
+Backup
+"""""""""""""""""
+
+To create a local backup of your OpenCelium installation please execute the following command as root.
+Please change MySQL username and password to your needs. Old backups will be removed after 14 days.
+
+.. code-block:: sh
+
+	oc backup -d /var/backups/opencelium -u opencelium -p secret1234
+
+This will include:
+- MySQL database dump
+- MongoDB database dump
+- backup of the installation directory /opt/opencelium/
+
+
+Restore
+"""""""""""""""""
+
+We decided to not provide a automatic functionallity for the restore process, because its mostly not needed to restore everything
+at once.
+
+**Extract the backup of your choice:**
+
+.. code-block:: sh
+
+	tar xf /var/backups/opencelium/20241203.tar.gz -C /var/backups/opencelium/
+
+
+**Restore MySQL database:**
+
+.. code-block:: sh
+
+	mysql -uopencelium -psecret1234 opencelium < oc_data.sql
+
+
+**Restore MongoDB database (folder opencelium within backup):**
+
+.. code-block:: sh
+
+	mongorestore --drop --db opencelium opencelium/
+
+
+Restore files and folders:
+In case you have to replace single files and folders, you will have all backuped files within the extracted
+backup in opt-backup.
