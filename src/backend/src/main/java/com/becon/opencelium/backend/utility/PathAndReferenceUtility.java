@@ -2,7 +2,9 @@ package com.becon.opencelium.backend.utility;
 
 import java.util.*;
 
-public class EndpointUtility {
+import static com.becon.opencelium.backend.constant.RegExpression.referencePath;
+
+public class PathAndReferenceUtility {
     private static final String PRE_DIRECT_REF = "{%#";
     private static final String SUF_DIRECT_REF = "%}";
     private static final String PRE_WEBHOOK = "${";
@@ -10,7 +12,7 @@ public class EndpointUtility {
     private static final String PRE_BRACKET = "['";
     private static final String SUF_BRACKET = "']";
 
-    public static int indexOf(String path, char ch, boolean hasWebHook, boolean hasDirectRef){
+    public static int indexOf(String path, char ch, boolean hasWebHook, boolean hasDirectRef) {
         return indexOf(path, ch, true, hasWebHook, hasDirectRef);
     }
 
@@ -258,5 +260,29 @@ public class EndpointUtility {
     private static boolean isSpecialRegexChar(char delim) {
         String specialChars = ".^$*+?()[]{}\\|/";
         return specialChars.indexOf(delim) != -1;
+    }
+
+    public static boolean isBody(String path) {
+        return path != null && path.startsWith("body.$.");
+    }
+
+    public static String getActualPathOfBody(String path) {
+        return path.substring(7);
+    }
+
+    public static String getHeaderParameterName(String path) {
+        return path.substring(9);
+    }
+
+    public static String getPlaceTypeOfRef(String field) {
+        return field == null ? null
+                : !field.matches(referencePath) ? null
+                : field.equals("path") ? field
+                : isBody(field) ? "body"
+                : field;
+    }
+
+    public static String rebuildReference(String color, String type, String field) {
+        return color + ".(" + type + ")" + (field == null ? "" : "." + field);
     }
 }

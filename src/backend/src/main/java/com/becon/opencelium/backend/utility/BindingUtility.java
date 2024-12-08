@@ -8,6 +8,8 @@ import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 
 import java.util.*;
 
+import static com.becon.opencelium.backend.utility.PathAndReferenceUtility.rebuildReference;
+
 public class BindingUtility {
 
 //---------------------------------------------- detach --------------------------------------------------//
@@ -88,12 +90,7 @@ public class BindingUtility {
             if (fb.getId().equals(id)) {
                 StringBuilder sb = new StringBuilder();
                 for (LinkedFieldMng from : fb.getFrom()) {
-                    sb.append(from.getColor())
-                            .append(".(")
-                            .append(from.getType())
-                            .append(")")
-                            .append(handleFieldPath(from.getField()))
-                            .append(";");
+                    sb.append(rebuildReference(from.getColor(), from.getType(), from.getField())).append(";");
                 }
                 sb.deleteCharAt(sb.length() - 1);
                 return sb.toString();
@@ -105,12 +102,7 @@ public class BindingUtility {
     private static String getRefOfFBForPathOrHeader(List<LinkedFieldMng> froms) {
         StringBuilder sb = new StringBuilder();
         for (LinkedFieldMng from : froms) {
-            sb.append(from.getColor())
-                    .append(".(")
-                    .append(from.getType())
-                    .append(")")
-                    .append(handleFieldPath(from.getField()))
-                    .append(";");
+            sb.append(rebuildReference(from.getColor(), from.getType(), from.getField())).append(";");
         }
         sb.deleteCharAt(sb.length() - 1);
         return "{%" + sb + "%}";
@@ -120,25 +112,25 @@ public class BindingUtility {
 //---------------------------------------------- bind ----------------------------------------------------//
 
     public static String doWithPath(String endpoint, String id, List<LinkedFieldMng> from) {
-        List<String> refs = from.stream().map(x -> x.getColor() + ".(" + x.getType() + ")" + handleFieldPath(x.getField())).toList();
-        int indexOfQuestionSign = EndpointUtility.findIndexOfQuesSign(endpoint);
+        List<String> refs = from.stream().map(x -> rebuildReference(x.getColor(), x.getType(), x.getField())).toList();
+        int indexOfQuestionSign = PathAndReferenceUtility.findIndexOfQuesSign(endpoint);
         String query = null;
         if (indexOfQuestionSign != -1) {
             query = endpoint.substring(indexOfQuestionSign + 1);
-            List<String[]> variables = EndpointUtility.getQueryVariables(query);
+            List<String[]> variables = PathAndReferenceUtility.getQueryVariables(query);
             out:
             for (String[] p : variables) {
                 if (p[1].matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
                     // p[1] can be:
-                    // pure ref - '{%#ffffff.(response).a.b%}'
-                    // one enhancement having several references - '{%#ffffff.(response).a.b;#ffffff.(response).a.c%}'
-                    // more than one enhancement - 'userId_{%#ffffff.(response).user.id%}, username_{%#ffffff.(response).user.name%}'
+                    // pure ref - '{%#ffffff.(response).body.$.a.b%}'
+                    // one enhancement having several references - '{%#ffffff.(response).body.$.a.b;#ffffff.(response).a.c%}'
+                    // more than one enhancement - 'userId_{%#ffffff.(response).body.$.user.id%}, username_{%#ffffff.(response).body.$.user.name%}'
                     for (String ref : refs) {
                         if (!p[1].contains(ref)) {
                             continue out;
                         }
                     }
-                    p[1] = EndpointUtility.bindExactlyPlace(p[1], refs, id);
+                    p[1] = PathAndReferenceUtility.bindExactlyPlace(p[1], refs, id);
                 }
             }
             StringJoiner sj = new StringJoiner("&");
@@ -154,7 +146,7 @@ public class BindingUtility {
             path = endpoint.substring(0, indexOfQuestionSign);
         }
 
-        List<String> subPaths = EndpointUtility.splitByDelimiter(path, '/');
+        List<String> subPaths = PathAndReferenceUtility.splitByDelimiter(path, '/');
         out:
         for (int i = 0; i < subPaths.size(); i++) {
             if (subPaths.get(i).matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
@@ -163,7 +155,7 @@ public class BindingUtility {
                         continue out;
                     }
                 }
-                subPaths.set(i, EndpointUtility.bindExactlyPlace(subPaths.get(i), refs, id));
+                subPaths.set(i, PathAndReferenceUtility.bindExactlyPlace(subPaths.get(i), refs, id));
             }
         }
         StringJoiner sj = new StringJoiner("/");
@@ -178,12 +170,12 @@ public class BindingUtility {
     }
 
     public static void doWithHeader(Map<String, String> header, String fieldName, String id, List<LinkedFieldMng> from) {
-        List<String> refs = from.stream().map(x -> x.getColor() + ".(" + x.getType() + ")" + handleFieldPath(x.getField())).toList();
+        List<String> refs = from.stream().map(x -> rebuildReference(x.getColor(), x.getType(), x.getField())).toList();
         header.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue().equals(fieldName))
                 .findFirst()
-                .ifPresent(entry -> entry.setValue(EndpointUtility.bindExactlyPlace(entry.getValue(), refs, id)));
+                .ifPresent(entry -> entry.setValue(PathAndReferenceUtility.bindExactlyPlace(entry.getValue(), refs, id)));
     }
 
     public static Map<String, Object> doWithBody(BodyMng body, List<String> fieldPaths, String id, String format) {
@@ -300,7 +292,7 @@ public class BindingUtility {
     @SuppressWarnings("unchecked")
     private static Object processXML(Object value, List<String> fieldPaths, String id, String index) {
         if (index == null) {
-            if (fieldPaths.isEmpty() || fieldPaths.size() == 1 && EndpointUtility.startsWith(fieldPaths.get(0), "@")) { // primitive type
+            if (fieldPaths.isEmpty() || fieldPaths.size() == 1 && PathAndReferenceUtility.startsWith(fieldPaths.get(0), "@")) { // primitive type
                 if (value instanceof Map<?, ?>) {
                     Map<String, Object> map = (Map<String, Object>) value;
                     if (map.size() == 2 && map.containsKey(ocValue) && map.containsKey(ocAttributes)) {
@@ -360,11 +352,5 @@ public class BindingUtility {
     private static String putIdToBody(Object value, String id) {
         //just returns 'wrapped' id. Might be changed!
         return "#{%" + id + "%}";
-    }
-
-    private static String handleFieldPath(String fieldPath) {
-        return fieldPath == null
-                ? ""
-                : fieldPath.startsWith("[*]") ? fieldPath : "." + fieldPath;
     }
 }

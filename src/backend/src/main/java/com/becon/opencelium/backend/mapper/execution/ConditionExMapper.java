@@ -1,14 +1,15 @@
 package com.becon.opencelium.backend.mapper.execution;
 
-import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.ConditionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.StatementMng;
 import com.becon.opencelium.backend.enums.DataTypeEnum;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
-import com.becon.opencelium.backend.utility.EndpointUtility;
 import org.springframework.stereotype.Component;
+
+import static com.becon.opencelium.backend.constant.RegExpression.*;
+import static com.becon.opencelium.backend.utility.PathAndReferenceUtility.*;
 
 @Component
 public class ConditionExMapper {
@@ -56,7 +57,7 @@ public class ConditionExMapper {
             return ls.getField();
         }
         if (containsRelated && !webHook) {
-            return stringify(ls) + "." + rs.getRightPropertyValue();
+            return rebuildReference(rs.getColor(), rs.getType(), rs.getField()) + "." + rs.getRightPropertyValue();
         }
         if (webHook) {
             return stringify(ls.getField(), rs.getRightPropertyValue());
@@ -66,7 +67,7 @@ public class ConditionExMapper {
             throw new RuntimeException("Invalid leftStatement[color: %s, type: %s, field: %s]".formatted(ls.getColor(), ls.getType(), ls.getField()));
         }
 
-        return stringify(ls);
+        return rebuildReference(ls.getColor(), ls.getType(), ls.getField());
     }
 
     private String composeRight(StatementMng rs, RelationalOperator ro) {
@@ -86,7 +87,7 @@ public class ConditionExMapper {
 
         if (ro == RelationalOperator.IS_TYPE_OF) {
             try {
-                return DataTypeEnum.getEnumType(rs.getField()).name();
+                return DataTypeEnum.getEnumType(getActualPathOfBody(rs.getField())).name();
             } catch (Exception ignored) {
             }
         }
@@ -111,20 +112,15 @@ public class ConditionExMapper {
             return composeForLikeAndNotLikeOperators(rs);
         }
 
-        return stringify(rs);
+        return rebuildReference(rs.getColor(), rs.getType(), rs.getField());
     }
 
     private String composeForLikeAndNotLikeOperators(StatementMng rs) {
         if (!rs.getField().contains("%")) {
-            return stringify(rs);
+            return rebuildReference(rs.getColor(), rs.getType(), rs.getField());
         }
-        boolean first, last;
-        if (rs.getType().equals("response")) {
-            first = rs.getField().startsWith("success.%") || rs.getField().startsWith("fail.%");
-        } else {
-            first = rs.getField().startsWith("%");
-        }
-        last = rs.getField().endsWith("%");
+        boolean first = rs.getField().startsWith("body.$.%") || rs.getField().startsWith("header.$.%");
+        boolean last = rs.getField().endsWith("%");
 
         if (first) {
             rs.setField(rs.getField().replaceFirst("%", ""));
@@ -132,16 +128,14 @@ public class ConditionExMapper {
         if (last) {
             rs.setField(rs.getField().substring(0, rs.getField().length() - 1));
         }
-        return (first ? "%" : "") + rs.getColor() + ".(" + rs.getType() + ")." + rs.getField() + (last ? "%" : "");
-    }
-
-    private String stringify(StatementMng st) {
-        return st.getColor() + ".(" + st.getType() + ")" + (st.getField() == null ? "" : "." + st.getField());
+        return (first ? "%" : "")
+                + rebuildReference(rs.getColor(), rs.getType(), rs.getField())
+                + (last ? "%" : "");
     }
 
     private String stringify(String field, String rpv) {
-        if (field.matches(RegExpression.webhook)) {
-            int index = EndpointUtility.indexOf(field, ':', false, false);
+        if (field.matches(webhook)) {
+            int index = indexOf(field, ':', false, false);
             int array = field.lastIndexOf(DataType.ARRAY.getType());
             if (index == -1) {
                 return field.substring(0, field.length() - 1) + "." + rpv + "}";
@@ -161,7 +155,7 @@ public class ConditionExMapper {
     private boolean isWebHookParam(StatementMng st) {
         return st.getField() != null
                 && areColorAndOrTypeNullOrEmpty(st)
-                && (st.getField().matches(RegExpression.webhook)
-                || st.getField().matches(RegExpression.requestData));
+                && (st.getField().matches(webhook)
+                || st.getField().matches(requestData));
     }
 }
