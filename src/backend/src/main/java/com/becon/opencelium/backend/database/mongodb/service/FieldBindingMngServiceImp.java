@@ -93,7 +93,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     public List<FieldBindingMng> getAllByConnectionId(Long connectionId) {
         List<FieldBindingMng> fieldBindingMngs = new ArrayList<>();
         List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
-        if (enhancements!=null) {
+        if (enhancements != null) {
             for (Enhancement enhancement : enhancements) {
                 fieldBindingMngs.add(enhancementService.toFieldBinding(enhancement));
             }
@@ -196,6 +196,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         }
 
         for (int i = 0; i < fieldBindings.size(); i++) {
+            fieldBindings.get(i).setId(null);
             FieldBindingMng savedFB = save(fieldBindings.get(i)); // savepoint
             try {
                 bindIds(savedFB, methods);
@@ -255,7 +256,8 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
                             endpoint = BindingUtility.doWithPath(endpoint, fb.getId(), fb.getFrom());
                             method.getRequest().setEndpoint(endpoint);
                         }
-                        case "header" -> BindingUtility.doWithHeader(method.getRequest().getHeader(), toField.getField(), fb.getId(), fb.getFrom());
+                        case "header" ->
+                                BindingUtility.doWithHeader(method.getRequest().getHeader(), toField.getField(), fb.getId(), fb.getFrom());
                         case "request" -> {
                             List<String> fieldPaths = EndpointUtility.splitByDelimiter(toField.getField(), '.', true);
                             Map<String, Object> fields = method.getRequest().getBody().getFields();
