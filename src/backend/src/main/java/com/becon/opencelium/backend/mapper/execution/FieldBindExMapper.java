@@ -33,7 +33,13 @@ public class FieldBindExMapper {
         if (enhancement.getArgs() == null) {
             enhancementEx.setArgs(new HashMap<>());
         } else {
-            List<String> vars = PathAndReferenceUtility.splitByDelimiter(enhancement.getArgs().substring(0, enhancement.getArgs().length() - 1), ';');
+            List<String> vars = PathAndReferenceUtility.splitByDelimiter(
+                    enhancement.getArgs().endsWith(";")
+                            ? enhancement.getArgs().substring(0, enhancement.getArgs().length() - 1)
+                            : enhancement.getArgs(),
+                    ';'
+            );
+
             for (int i = 0; i < vars.size(); i++) {
                 vars.set(i, vars.get(i).trim());
                 if (vars.get(i).startsWith("//")) {
