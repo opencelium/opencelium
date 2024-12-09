@@ -76,16 +76,19 @@ Backup
 """""""""""""""""
 
 To create a local backup of your OpenCelium installation please execute the following command as root.
-Please change MySQL username and password to your needs. Old backups will be removed after 14 days.
+Old backups will be removed after 14 days.
+
+.. note::
+	Please change MySQL username and password (opencelium/secret1234) to your needs in the following command line!
 
 .. code-block:: sh
 
 	oc backup -d /var/backups/opencelium -u opencelium -p secret1234
 
-This will include:
-- MySQL database dump
-- MongoDB database dump
-- backup of the installation directory /opt/opencelium/
+|This will include:
+|- MySQL database dump
+|- MongoDB database dump
+|- backup of the installation directory /opt/opencelium/
 
 
 Restore
@@ -102,6 +105,9 @@ at once.
 
 
 **Restore MySQL database:**
+
+.. note::
+	Please change MySQL username and password (opencelium/secret1234) to your needs in the following command line!
 
 .. code-block:: sh
 
