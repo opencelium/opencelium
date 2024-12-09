@@ -85,10 +85,10 @@ Old backups will be removed after 14 days.
 
 	oc backup -d /var/backups/opencelium -u opencelium -p secret1234
 
-|This will include:
-|- MySQL database dump
-|- MongoDB database dump
-|- backup of the installation directory /opt/opencelium/
+| This will include:
+| - MySQL database dump
+| - MongoDB database dump
+| - backup of the installation directory /opt/opencelium/
 
 
 Restore
