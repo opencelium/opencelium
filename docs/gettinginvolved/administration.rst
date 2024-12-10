@@ -75,11 +75,11 @@ Logging
 Backup
 """""""""""""""""
 
-To create a local backup of your OpenCelium installation please execute the following command as root.
+To create a local backup of your OpenCelium installation, please execute the following command as root.
 Old backups will be removed after 14 days.
 
 .. note::
-	Please change MySQL username and password (opencelium/secret1234) to your needs in the following command line!
+	Please change the password (secret1234) in the following command line!
 
 .. code-block:: sh
 
@@ -94,14 +94,21 @@ Old backups will be removed after 14 days.
 Restore
 """""""""""""""""
 
-We decided not to provide a automatic functionallity for the restore process, because it's mostly not needed to restore everything
+We decided not to provide an automatic functionallity for the restore process, because it's mostly not needed to restore everything
 at once.
 
-**Extract the backup of your choice:**
+**Extract the backup:**
 
 .. code-block:: sh
 
-	tar xf /var/backups/opencelium/20241203.tar.gz -C /var/backups/opencelium/
+	mkdir /var/backups/opencelium/restore
+	ls -l /var/backups/opencelium
+
+Choose your backup filename.
+
+.. code-block:: sh	
+	
+	tar xf /var/backups/opencelium/<backupfile>.tar.gz -C /var/backups/opencelium/restore/ --strip-components=4
 
 
 **Restore MySQL database:**
@@ -111,17 +118,17 @@ at once.
 
 .. code-block:: sh
 
-	mysql -uopencelium -psecret1234 opencelium < oc_data.sql
+	mysql -uopencelium -psecret1234 opencelium < /var/backups/opencelium/restore/oc_data.sql
 
 
 **Restore MongoDB database (folder opencelium within backup):**
 
 .. code-block:: sh
 
-	mongorestore --drop --db opencelium opencelium/
+	mongorestore --drop --db opencelium /var/backups/opencelium/restore/opencelium/
 
 
 **Restore files and folders:**
 
 In case you have to replace single files and folders, you will find all backuped files within the extracted
-backup in opt-backup.
+backup in /var/backups/opencelium/restore/opt-backup .
