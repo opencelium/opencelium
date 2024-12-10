@@ -5,7 +5,8 @@ Installation
 .. note::
 	| Please check the software requirements, before installing OC.
 	| 
-	| If you have changed the original umask on you linux server, please set additional permissions to /opt/opencelium. 
+	| If you have changed the original umask on you linux server, 
+	| please set additional permissions to /opt/opencelium. 
 	| Otherwise nginx is not able to access the files. 
 
 Debian/Ubuntu (example for 24.04 LTS)

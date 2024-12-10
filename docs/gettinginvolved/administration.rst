@@ -94,7 +94,7 @@ Old backups will be removed after 14 days.
 Restore
 """""""""""""""""
 
-We decided to not provide a automatic functionallity for the restore process, because its mostly not needed to restore everything
+We decided not to provide a automatic functionallity for the restore process, because it's mostly not needed to restore everything
 at once.
 
 **Extract the backup of your choice:**
@@ -121,6 +121,7 @@ at once.
 	mongorestore --drop --db opencelium opencelium/
 
 
-Restore files and folders:
-In case you have to replace single files and folders, you will have all backuped files within the extracted
+**Restore files and folders:**
+
+In case you have to replace single files and folders, you will find all backuped files within the extracted
 backup in opt-backup.

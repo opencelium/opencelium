@@ -3,7 +3,7 @@ Updating
 ##################
 
 
-From OC 4.0 to latest
+From OC 4.x to latest
 """""""""""""""""
 
 Update zip file installations
@@ -45,7 +45,7 @@ Update RPM package for RedHat 9.2
 | 
 | 
 
-From OC 3.x to 4.x (latest)
+From OC 3.x to 4.1 
 """""""""""""""""
 
 .. note::
@@ -89,9 +89,9 @@ Download and unzip application, and create a link for it.
 .. code-block:: sh
         :linenos:
 
-        wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
-        unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
-        rm /opt/opencelium/oc_latest.zip
+        wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_4.1.zip/download?distro_version_id=230" -P /opt/opencelium/
+        unzip -o -d /opt/opencelium/ /opt/opencelium/oc_4.1.zip
+        rm /opt/opencelium/oc_4.1.zip
         rm /usr/bin/oc
         ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
         chmod +x /usr/bin/oc
