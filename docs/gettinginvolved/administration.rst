@@ -104,17 +104,18 @@ at once.
 	mkdir /var/backups/opencelium/restore
 	ls -l /var/backups/opencelium
 
-Choose your backup filename.
+.. note::
+	Please change the <backup filename> in the following command line!
 
 .. code-block:: sh	
 	
-	tar xf /var/backups/opencelium/<backupfile>.tar.gz -C /var/backups/opencelium/restore/ --strip-components=4
+	tar xf /var/backups/opencelium/<backup filename>.tar.gz -C /var/backups/opencelium/restore/ --strip-components=4
 
 
 **Restore MySQL database:**
 
 .. note::
-	Please change MySQL username and password (opencelium/secret1234) to your needs in the following command line!
+	Please change the password (secret1234) in the following command line!
 
 .. code-block:: sh
 
