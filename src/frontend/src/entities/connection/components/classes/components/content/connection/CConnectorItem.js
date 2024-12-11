@@ -1374,6 +1374,24 @@ export default class CConnectorItem{
         return previousOperators;
     }
 
+    getPreviousLoopOperators() {
+        const previousOperators = [];
+        let currentItem = this._currentItem;
+        if(currentItem) {
+            let splitMethodIndex = currentItem.index.split('_');
+            while(true) {
+                let previousOperatorIndex = splitMethodIndex.length === 1 ? -1 : splitMethodIndex.slice(0, -1).join('_');
+                let previousOperator = this.operators.find(operator => operator.index === previousOperatorIndex && operator.type === LOOP_OPERATOR);
+                if (!previousOperator) {
+                    break;
+                }
+                previousOperators.push(previousOperator);
+                splitMethodIndex = previousOperator.index.split('_');
+            }
+        }
+        return previousOperators;
+    }
+
     getPreviousIterators(){
         let previousIterators = [];
         let currentItem = this._currentItem;

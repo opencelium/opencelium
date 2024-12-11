@@ -1,33 +1,22 @@
 package com.becon.opencelium.backend.subscription.utility;
 
-import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.constant.SubscriptionConstant;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.utility.crypto.HmacValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 
 import javax.crypto.Cipher;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Base64;
-import java.util.stream.Collectors;
 
 public class LicenseKeyUtility {
-    private static final String ENCRYPTION_ALGO = "RSA";
     private static final String PUBLIC_KEY ="MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAnj2andeiYdgRAp1jkLej" +
             "/xgslVEN+qodRNjguHNBV2gKHim9VXCvakAZveUqXN7/L7R+wlDrlnjLDWV5cN4a" +
             "WDQFPKK0YcH+A1oSI7m/SbBaeyQSwH5PT/kYG0AU3C1FItoshhDKDhvSMk5iUJc6" +
@@ -40,6 +29,7 @@ public class LicenseKeyUtility {
             "EmlVZzbKgH4NpFIO/eh7oW7cWXyJ+2Fc07T/NRs1UBAR6cjpZBFeVKIgIsWay6sF" +
             "ffOyv1lUM0DRvtM53BgaXV2V5TUbOzKlM+d2jBqlrCeq6TpJVG6FCrJsaaOgSq6Z" +
             "gt5JLtdbtZqZtnYndk3FT78CAwEAAQ==";
+    private static final int MAX_ENCRYPT_BLOCK = 245;  // Max block size for RSA/ECB/PKCS1Padding with a 2048-bit key
     private final static Logger logger = LoggerFactory.getLogger(LicenseKeyUtility.class);
 
     // TODO: create chain of responsibility for different verifications.
@@ -55,16 +45,14 @@ public class LicenseKeyUtility {
 
     public static boolean verify(LicenseKey licenseKey, HmacValidator hmacValidator) {
         if (!hmacValidator.verify(licenseKey.getHmac())) {
-            logger.warn("License key is not Valid");
+            logger.error("License key is not Valid");
             return false;
         }
         if (licenseKey.getStartDate() > System.currentTimeMillis()) {
-            logger.warn("Subscription will start at " + Instant.ofEpochMilli(licenseKey.getStartDate()));
-            return false;
+            throw new RuntimeException("Subscription will start at " + Instant.ofEpochMilli(licenseKey.getStartDate()));
         }
         if (licenseKey.getEndDate() != 0 && licenseKey.getEndDate() < System.currentTimeMillis()) {
-            logger.warn("You subscription has been expired at " + Instant.ofEpochMilli(licenseKey.getEndDate()));
-            return false;
+            throw new RuntimeException("You subscription has been expired at " + Instant.ofEpochMilli(licenseKey.getEndDate()));
         }
         return true;
     }
@@ -82,13 +70,23 @@ public class LicenseKeyUtility {
         }
         try {
             // Remove any extra characters (such as header, footer, or newlines) from the public key
-            PublicKey publicKey = stringToPublicKey(PUBLIC_KEY);
+            PublicKey publicKey = loadPublicKey(PUBLIC_KEY);
 
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, publicKey);
-            byte[] licenseKeyBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedLicense));
+
+            byte[] dataBytes = Base64.getDecoder().decode(encryptedLicense);
+            ArrayList<byte[]> decryptedChunks = new ArrayList<>();
+
+            for (int i = 0; i < dataBytes.length; i += cipher.getOutputSize(MAX_ENCRYPT_BLOCK)) {
+                int length = Math.min(cipher.getOutputSize(MAX_ENCRYPT_BLOCK), dataBytes.length - i);
+                byte[] chunk = cipher.doFinal(dataBytes, i, length);
+                decryptedChunks.add(chunk);
+            }
+
+            byte[] decryptedData = concatChunks(decryptedChunks);
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(licenseKeyBytes, LicenseKey.class);
+            return objectMapper.readValue(decryptedData, LicenseKey.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -111,11 +109,26 @@ public class LicenseKeyUtility {
     }
 
     // Convert String to PublicKey
-    private static PublicKey stringToPublicKey(String publicKeyStr) throws Exception {
+    private static PublicKey loadPublicKey(String publicKeyStr) throws Exception {
         byte[] byteKey = Base64.getDecoder().decode(publicKeyStr);
         X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         return keyFactory.generatePublic(X509publicKey);
+    }
+
+    private static byte[] concatChunks(ArrayList<byte[]> chunks) {
+        int totalLength = 0;
+        for (byte[] chunk : chunks) {
+            totalLength += chunk.length;
+        }
+
+        byte[] result = new byte[totalLength];
+        int offset = 0;
+        for (byte[] chunk : chunks) {
+            System.arraycopy(chunk, 0, result, offset, chunk.length);
+            offset += chunk.length;
+        }
+        return result;
     }
 
     public static String readFreeLicense() {

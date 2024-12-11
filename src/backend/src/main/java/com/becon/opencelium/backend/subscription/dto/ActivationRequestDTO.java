@@ -4,7 +4,7 @@ import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.utility.crypto.HmacValidator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class ActivationRequestDTO implements HmacValidator {
+public class ActivationRequestDTO {
 
     private String id;
     private String machineUuid;
@@ -15,6 +15,7 @@ public class ActivationRequestDTO implements HmacValidator {
     private String hmac;
     @JsonIgnore
     private long ttl;
+    @JsonIgnore
     private ActivReqStatus status;
 
     public String getId() {
@@ -87,11 +88,6 @@ public class ActivationRequestDTO implements HmacValidator {
 
     public void setStatus(ActivReqStatus status) {
         this.status = status;
-    }
-
-    @Override
-    public boolean verify(String hmac) {
-        return false;
     }
 
     @Override

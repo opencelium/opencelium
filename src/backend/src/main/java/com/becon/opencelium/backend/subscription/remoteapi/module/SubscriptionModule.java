@@ -8,7 +8,7 @@ import java.util.List;
 public interface SubscriptionModule {
 
     /**
-     * Retrieves all subscriptions from the ServicePortal.
+     * Retrieves all subscriptions from a remote API.
      *
      * @return a list of all subscriptions
      */

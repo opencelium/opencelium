@@ -4,12 +4,16 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.SubscriptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
+import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.quartz.ResetLimitsJob;
+import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
+import com.becon.opencelium.backend.subscription.quartz.QuartzCronUpdater;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
+import jakarta.transaction.Transactional;
 import org.quartz.*;
 import org.quartz.Scheduler;
 import org.quartz.impl.matchers.GroupMatcher;
@@ -21,9 +25,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
+import java.util.Date;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -37,6 +41,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final OperationUsageHistoryDetailService operationUsageHistoryDetailService;
     private final ActivationRequestService activationRequestService;
     private final Logger logger = LoggerFactory.getLogger(SubscriptionServiceImpl.class);
+
+
 
     public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository,
                                    Scheduler scheduler,
@@ -68,7 +74,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (!isCurrentUsageIsValid(sub)) {
             throw new RuntimeException("Usage number of operation has been changed manually.");
         }
-        if (licenseKey.getOperationUsage() != 0 && sub.getCurrentUsage() > licenseKey.getOperationUsage()) {
+        if (licenseKey.getOperationUsage() != 0 && sub.getCurrentUsage() >= licenseKey.getOperationUsage()) {
             throw new RuntimeException("You have reached limit of operation usage: " + licenseKey.getOperationUsage());
         }
         return isValid;
@@ -79,12 +85,61 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    @Transactional
+    public void resetMonthlyUsageForLicense(String localSubId) {
+        Optional<Subscription> optionalLicense = subscriptionRepository.findById(localSubId);
+
+        if (optionalLicense.isPresent()) {
+            Subscription subscription = optionalLicense.get();
+            LocalDate currentDate = LocalDate.now();
+            LicenseKey licenseKey = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
+            LocalDate startDate = Instant.ofEpochMilli(licenseKey.getStartDate())
+                    .atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate endDate = Instant.ofEpochMilli(licenseKey.getEndDate())
+                    .atZone(ZoneId.systemDefault()).toLocalDate();
+
+            if (currentDate.isAfter(startDate) && currentDate.isBefore(endDate)) {
+                // Reset current_usage
+                subscription.setCurrentUsage(0);
+
+                // Update current_usage_hmac
+                String newHmac = HmacUtility.encode(subscription.getId() + 0);
+                subscription.setCurrentUsageHmac(newHmac);
+
+                // Save updated license
+                subscriptionRepository.save(subscription);
+            }
+        }
+    }
+
+    @Override
     public void save(Subscription subscription) {
         deactivateAll();
         subscription.setCurrentUsageHmac(HmacUtility
                 .encode(subscription.getId() + subscription.getCurrentUsage()));
-        initTask(subscription);
+        initUsageResetJob(subscription);
         subscriptionRepository.save(subscription);
+    }
+
+    @Override
+    public void update(Subscription subscription) {
+        subscriptionRepository.save(subscription);
+    }
+
+    @Override
+    public Subscription setSubscription(String licenseKey, ActivationRequest newAr) {
+        if (newAr.getStatus().equals(ActivReqStatus.EXPIRED)) {
+            throw new RuntimeException("Couldn't activate license. Activation request has been expired " +
+                    "and license is not valid anymore. Generate new Activation Request.");
+        }
+        activationRequestService.deactivateAll();
+        newAr.setStatus(ActivReqStatus.PROCESSED);
+        newAr.setActive(true);
+        activationRequestService.save(newAr);
+        Subscription subscription = convertToSub(licenseKey, newAr);
+        deactivateAll();
+        save(subscription);
+        return subscription;
     }
 
     @Override
@@ -162,15 +217,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public void updateUsage(Subscription sub, long connectionId,long requestSize, long startTime) {
-        Connection connection = connectionService.getById(connectionId);
-
+    public void updateUsage(Subscription sub, ConnectionEx connectionEx, long requestSize, long startTime) {
         // Try to find existing operation usage history
         OperationUsageHistory operationUsageHistory = operationUsageHistoryService
-                .findByConnectionTitle(connection.getTitle())
+                .findByConnectionTitle(connectionEx.getConnectionName())
                 .map(history -> {
                     // If history exists, increment its total usage
                     history.setTotalUsage(history.getTotalUsage() + requestSize);
+                    history.setFromInvoker(connectionEx.getSource().getInvoker());
+                    history.setToInvoker(connectionEx.getTarget().getInvoker());
                     // Create and add a new OperationUsageHistoryDetail
                     OperationUsageHistoryDetail newDetail = new OperationUsageHistoryDetail();
                     newDetail.setOperationUsage(requestSize);
@@ -183,7 +238,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 })
                 .orElseGet(() -> {
                     // If no history exists, create a new one
-                    return operationUsageHistoryService.createNewEntity(sub, connection.getTitle(), requestSize, startTime);
+                    return operationUsageHistoryService.createNewEntity(sub, connectionEx.getConnectionName(),
+                            requestSize, startTime, connectionEx.getSource().getInvoker(), connectionEx.getTarget().getInvoker());
                 });
         operationUsageHistoryService.save(operationUsageHistory);
         if (!isCurrentUsageIsValid(sub)) {
@@ -194,7 +250,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         String newHmac = HmacUtility.encode(sub.getId() + updatedOperationUsage);
         sub.setCurrentUsage(updatedOperationUsage);
         sub.setCurrentUsageHmac(newHmac);
-        save(sub);
+        update(sub);
     }
 
     @Override
@@ -238,26 +294,25 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     .verify(sub.getId() + sub.getCurrentUsage(), sub.getCurrentUsageHmac());
     }
 
-    private void initTask(Subscription subscription) {
-        String jobKey = "subs-" + subscription.getId();
-        String groupKey = "subs-group";
+    private void initUsageResetJob(Subscription subscription) {
+        String jobKey = "LicenseUsageResetJob-" + subscription.getId();
+        String groupKey = "LicenseJobs";
+        String triggerName = "LicenseTrigger-" + subscription.getId();
+        String triggerGroup = "LicenseTriggers";
         JobKey jobIdentity = new JobKey(jobKey, groupKey);
+        TriggerKey triggerKey = new TriggerKey(triggerName, triggerGroup);
 
+        LicenseKey lk = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
+        String cron = generateCronExpression(lk.getStartDate());
         try {
             // Check if the job already exists
             if (scheduler.checkExists(jobIdentity)) {
-                // If the job exists, retrieve and update the trigger
-                TriggerKey triggerKey = new TriggerKey("default", "default");
-
-                LicenseKey lk = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
-                String cron = String.format("0 0 0 %d * ?", LocalDateTime
-                        .ofInstant(Instant.ofEpochMilli(lk.getStartDate()), ZoneId.systemDefault())
-                        .getDayOfMonth());
-
                 // Create a new trigger with the updated schedule
                 Trigger newTrigger = TriggerBuilder.newTrigger()
                         .withIdentity(triggerKey)
+                        .startAt(Date.from(Instant.ofEpochMilli(lk.getStartDate())))
                         .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                        .endAt(Date.from(Instant.ofEpochMilli(lk.getEndDate())))
                         .build();
 
                 // Reschedule the existing job with the new trigger
@@ -266,33 +321,30 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 // If the job does not exist, create a new one
                 JobDetail job = JobBuilder.newJob(ResetLimitsJob.class)
                         .withIdentity(jobKey, groupKey)
+                        .usingJobData("localSubId", subscription.getId())
                         .build();
 
-                LicenseKey lk = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
-                String cron = String.format("0 0 0 %d * ?", LocalDateTime
-                        .ofInstant(Instant.ofEpochMilli(lk.getStartDate()), ZoneId.systemDefault())
-                        .getDayOfMonth());
-
+                // Create a new trigger for the job
                 Trigger trigger = TriggerBuilder.newTrigger()
-                        .withIdentity("default", "default")
+                        .withIdentity(triggerName, triggerGroup)
+                        .startAt(Date.from(Instant.ofEpochMilli(lk.getStartDate())))
                         .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                        .endAt(Date.from(Instant.ofEpochMilli(lk.getEndDate())))
                         .build();
 
                 // Schedule the new job
                 scheduler.scheduleJob(job, trigger);
             }
         } catch (SchedulerException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
     private void killAllTasks() {
         try {
-            for (String groupName : scheduler.getJobGroupNames()) {
-                Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName));
-                for (JobKey jobKey : jobKeys) {
-                    scheduler.deleteJob(jobKey);
-                }
+            Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals("LicenseJobs"));
+            for (JobKey jobKey : jobKeys) {
+                scheduler.deleteJob(jobKey);
             }
         } catch (SchedulerException e) {
             e.printStackTrace();
@@ -320,5 +372,24 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 //        } catch (IOException e) {
 //            throw new RuntimeException("Failed to activate the default subscription due to an I/O error", e);
 //        }
+    }
+
+    /**
+     * Generate a cron expression based on the start date (epoch milliseconds).
+     * This handles edge cases where the day of the month may exceed the number of days in certain months (e.g., February).
+     */
+    private String generateCronExpression(long startDateMillis) {
+        LocalDateTime startDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneId.systemDefault());
+        int dayOfMonth = startDate.getDayOfMonth();
+
+        // Handle edge cases where the day of the month might exceed the max days in the current month
+        int currentMonthMaxDays = YearMonth.now().lengthOfMonth();
+        if (dayOfMonth > currentMonthMaxDays) {
+            logger.warn("Adjusting dayOfMonth {} to the last day of the current month ({} days).", dayOfMonth, currentMonthMaxDays);
+            dayOfMonth = currentMonthMaxDays; // Adjust to the last valid day of the current month
+        }
+
+        // Generate the cron expression for monthly execution on the given day of the month at midnight
+        return String.format("0 0 0 %d * ?", dayOfMonth);
     }
 }

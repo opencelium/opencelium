@@ -31,7 +31,6 @@ import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.TotpResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
-import com.becon.opencelium.backend.utility.EmailUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
@@ -58,7 +57,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -99,11 +100,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                     .readValue(request.getInputStream(), User.class);
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            user.getPrincipal(),
+                            user.getEmail(),
                             user.getPassword(),
                             new ArrayList<>()));
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -162,16 +162,14 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private User getUser(Authentication authentication) {
         User result;
         Object principal = authentication.getPrincipal();
+        String authType;
 
         if (principal instanceof LdapUserDetails ldapUserDetails) {
-            String username = ldapUserDetails.getUsername();
+            String email = ldapUserDetails.getUsername();
 
-            User user = userService.findByUsername(username).orElseGet(() -> {
+            User user = userService.findByEmail(email).orElseGet(() -> {
                 User newUser = new User();
-                newUser.setUsername(username);
-                if (EmailUtility.isEmail(username)) {
-                    newUser.setEmail(username);
-                }
+                newUser.setEmail(email);
                 newUser.setAuthMethod(AuthMethod.LDAP);
 
                 // create details for new user
@@ -186,24 +184,44 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             });
 
             Collection<? extends GrantedAuthority> authorities = ldapUserDetails.getAuthorities();
-            String roleName = authorities.stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .findFirst()
-                    .orElse(properties.getDefaultRole());
+            String roleName;
+
+            if (authorities.isEmpty()) {
+                logInfo("User is not a member of any group under group-search-base='" + properties.getGroupSearchBase() + "' with group-search-filter='" + properties.getGroupSearchFilter() + "'");
+
+                roleName = properties.getDefaultRole();
+            } else {
+                List<String> groups = properties.getGroups();
+
+                roleName = authorities.stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .filter(groupDN -> {
+                            if (groups.contains(groupDN)) {
+                                logInfo("Match found for LDAP group = '" + groupDN + "'");
+                                return true;
+                            }
+                            logInfo("No match found for LDAP group = '" + groupDN + "' in OC mappings " + groups.stream().collect(Collectors.joining("; ", "[", "]")));
+                            return false;
+                        })
+                        .map(properties::getRoleByGroup)
+                        .findFirst()
+                        .orElse(properties.getDefaultRole());
+            }
 
             UserRole role = userRoleService.findByRole(roleName)
                     .orElseThrow(() -> new EntityNotFoundException("LDAP group mapped to role = '" + roleName + "', but it does not exists in OC system."));
             user.setUserRole(role);
 
             result = userService.save(user);
+            authType = "LDAP server";
         } else {
             result = ((UserPrincipals) authentication.getPrincipal()).getUser();
+            authType = "OC system";
         }
         createNewSession(result);
 
-        if (properties.isShowLogs()) {
-            logger.info("User " + result.getPrincipal() + " is authenticated via " + result.getAuthMethod());
-        }
+        logInfo("User " + result.getEmail() + " is authenticated via " + authType);
+        logInfo("Role '" + result.getUserRole().getName() + "' has been assigned to " + result.getEmail());
 
         return result;
     }
@@ -225,5 +243,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         sessionService.save(session);
 
         user.setSession(session);
+    }
+
+    private void logInfo(String message) {
+        if (properties.isShowLogs().equals("OFF")) {
+            return;
+        }
+
+        logger.info(message);
     }
 }

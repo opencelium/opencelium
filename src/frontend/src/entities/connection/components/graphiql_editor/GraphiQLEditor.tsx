@@ -22,10 +22,11 @@ import {graphQLLogin} from "@entity/connection/redux_toolkit/action_creators/Gra
 // @ts-ignore
 import {GraphQLRequestProps} from "../@requestInterface/graphql/IGraphQL";
 import {GraphiQLEditorProps} from "@entity/connection/components/graphiql_editor/interfaces";
-import {GraphiQLEditorStyled} from "@entity/connection/components/graphiql_editor/styles";
+import {GraphiQLEditorStyled, ShortcutStyled} from "@entity/connection/components/graphiql_editor/styles";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import Loading from "@app_component/base/loading/Loading";
 import GraphiQLContext from "@root/components/classes/graphiql/GraphiQLContext";
+import Hint from "@app_component/base/hint/Hint";
 
 const GraphiQLEditor: FC<GraphiQLEditorProps> =
     ({
@@ -59,7 +60,7 @@ const GraphiQLEditor: FC<GraphiQLEditorProps> =
             const requestProps: GraphQLRequestProps = {url: connector.requestData.url, accessToken, sslOn, ...graphQLParams};
             let request = new GraphiQLContext(connector);
             const response = await request.query(requestProps);
-            const result = JSON.parse(response.data.body);
+            const result: any = response.data;
             if(result && result.errors && result.errors.length > 0 && result.errors[0].extensions && result.errors[0].extensions.causes && result.errors[0].extensions.causes.length > 0 &&  result.errors[0].extensions.causes[0].error){
                 if(result.errors[0].extensions.causes[0].error === 'AccessDeniedException'){
                     setShouldRevokeToken(true);
@@ -81,6 +82,14 @@ const GraphiQLEditor: FC<GraphiQLEditorProps> =
         return (
             <GraphiQLEditorStyled>
                 <GraphiQL query={query} fetcher={graphQLFetcher} onEditQuery={generateQuery} readOnly={readOnly}/>
+                <Hint style={{marginTop: 15}} message={<span>
+                    <span>{`Press `}</span>
+                    <ShortcutStyled>{`Ctrl`}</ShortcutStyled>
+                    <span>{` + `}</span>
+                    <ShortcutStyled>{`Space`}</ShortcutStyled>
+                    <span>{` to see the autocomplete.`}</span>
+                </span>
+                }/>
             </GraphiQLEditorStyled>
         )
     }

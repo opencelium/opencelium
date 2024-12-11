@@ -403,7 +403,20 @@ public class OperationExMapper {
             return null;
         }
         SchemaDTO schemaDTO = new SchemaDTO();
+
+
+        String type = body.getType();
+        if ("array".equals(type)) {
+            body.setType("object");
+            schemaDTO.setType(DataType.ARRAY);
+            schemaDTO.setItems(new ArrayList<>() {{
+                add(getSchema(body, connectionId, methodName));
+            }});
+            return schemaDTO;
+        }
+
         schemaDTO.setType(DataType.OBJECT);
+
         Map<String, SchemaDTO> props = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : fields.entrySet()) {
             LinkedList<String> hierarchy = new LinkedList<>();

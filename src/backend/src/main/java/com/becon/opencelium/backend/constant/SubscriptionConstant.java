@@ -8,7 +8,6 @@ public interface SubscriptionConstant {
             "oiTUFDSElORV9VVUlEIiwibWFjQWRkcmVzcyI6Ik1BQ19BRERSRVNTIiwic3lzdGVtVVVJRCI6IlNZU1RFTV9VVUlEIiwiY29tcHV" +
             "0ZXJOYW1lIjoiQ09NUFVURVJfTkFNRSJ9";
 
-    // License for free Subscription
     String FREE_LICENSE = "TYidZve2brv337lPLRaQ7cUM6Xm2ecPTeodbmBjlBURwxhhWwcziT6kiTJgHCpfN6SRfXx+CdK4rhvaSh3BBFqh" +
             "EhoRhdSWS5BCjMLKZQ2oQVS/kzckvF7igA3kEGjZDmdYBmvv+pFXZk7RZurBS3qUix2arH2nlmYavPqiWPV4UBKPsemMUJilCZ51j" +
             "3l36UBPq7aX96wQKz5EeKOFQCg8GsNnVMjI4Tk6CYelesrBrlm1B3uULiuSnzxAvrLqi9cgmkIrIbqTagCnM9dgHCRNec7EinvHFS" +
@@ -16,4 +15,5 @@ public interface SubscriptionConstant {
             "1tc3R9+7pucRaCCtmYhaGtRYuieH0dBNYGQQuwnpBlq3f8yrVHL0X6aMVvdXHf3kspWvbw/r+zffqbLOYcKWRqz2Zsiz0YMBLaujz" +
             "TVIBRQiLDOHNqgOR05zJ4qx0U7v6vub4hLdOdqtHAc0WvxSbehrqa8fRa9GYlBG7f8McfgfOgMj+IJAWIuV8Nb6PAJYeElBaXA2ML" +
             "jusIid5ZbX096nBuNX1hyoG8+Q5i6NWsOwHD7eurfMwU4WwZfTYfu0S+3dOcg9CCoj5lcen1NbCj5dpopjEIFhI9pZo=";
+    long freeLicenseEndDate = 4102441199000L;
 }

@@ -1,9 +1,11 @@
 package com.becon.opencelium.backend.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @ConfigurationProperties(prefix = "spring.security.ldap")
 public class LdapProperties {
@@ -20,7 +22,22 @@ public class LdapProperties {
     private String groupSearchFilter = "";
     private List<Group2Role> groupRoleMapping = new ArrayList<>();
     private String defaultRole;
-    private boolean showLogs = false;
+    @Value("${logging.level.org.springframework.security.ldap:OFF}")
+    private String showLogs;
+
+    public String getRoleByGroup(String groupDN) {
+        return groupRoleMapping.stream()
+                .filter(mapping -> Objects.equals(groupDN, mapping.ldapGroup))
+                .map(Group2Role::getOcRole)
+                .findFirst()
+                .orElseThrow();
+    }
+
+    public List<String> getGroups() {
+        return groupRoleMapping.stream()
+                .map(LdapProperties.Group2Role::getLdapGroup)
+                .toList();
+    }
 
     public String getUrls() {
         return urls;
@@ -102,11 +119,11 @@ public class LdapProperties {
         this.defaultRole = defaultRole;
     }
 
-    public boolean isShowLogs() {
+    public String isShowLogs() {
         return showLogs;
     }
 
-    public void setShowLogs(boolean showLogs) {
+    public void setShowLogs(String showLogs) {
         this.showLogs = showLogs;
     }
 

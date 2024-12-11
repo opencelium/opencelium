@@ -2,6 +2,8 @@ package com.becon.opencelium.backend.subscription.dto;
 
 import com.becon.opencelium.backend.utility.crypto.HmacValidator;
 
+import static com.becon.opencelium.backend.constant.SubscriptionConstant.freeLicenseEndDate;
+
 public class LicenseKey {
     private long startDate;
     private long endDate;
@@ -21,7 +23,7 @@ public class LicenseKey {
     }
 
     public long getEndDate() {
-        return endDate;
+        return endDate == 0 ? freeLicenseEndDate : endDate;
     }
 
     public void setEndDate(long endDate) {
@@ -74,5 +76,19 @@ public class LicenseKey {
 
     public void setLicenseId(String licenseId) {
         this.licenseId = licenseId;
+    }
+
+    @Override
+    public String toString() {
+        return "LicenseKey{" +
+                "startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", operationUsage=" + operationUsage +
+                ", subId='" + subId + '\'' +
+                ", licenseId='" + licenseId + '\'' +
+                ", duration='" + duration + '\'' +
+                ", type='" + type + '\'' +
+                ", hmac='" + hmac + '\'' +
+                '}';
     }
 }
