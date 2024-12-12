@@ -58,7 +58,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -100,7 +99,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                     .readValue(request.getInputStream(), User.class);
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            user.getEmail(),
+                            user.getPrincipal(),
                             user.getPassword(),
                             new ArrayList<>()));
         } catch (IOException e) {
@@ -218,7 +217,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             result = ((UserPrincipals) authentication.getPrincipal()).getUser();
             authType = "OC system";
         }
-        createNewSession(result);
+
+        // replace old session
+        Session session = sessionService.replace(result.getId());
+        result.setSession(session);
 
         logInfo("User " + result.getEmail() + " is authenticated via " + authType);
         logInfo("Role '" + result.getUserRole().getName() + "' has been assigned to " + result.getEmail());
@@ -226,24 +228,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         return result;
     }
 
-    private void createNewSession(User user) {
-        int userId = user.getId();
-        String sessionId = UUID.randomUUID().toString();
-
-        // if 'user' already has a 'session' then delete it and create new one
-        sessionService.deleteByUserId(userId);
-
-        Session session = new Session();
-
-        session.setId(sessionId);
-        session.setUserId(userId);
-        session.setActive(true);
-        session.setAttempts(0);
-
-        sessionService.save(session);
-
-        user.setSession(session);
-    }
 
     private void logInfo(String message) {
         if (properties.isShowLogs().equals("OFF")) {

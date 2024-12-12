@@ -29,7 +29,6 @@ import org.apache.hc.core5.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -78,10 +77,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         response.setHeader("Content-Type", "application/json");
     }
 
-//    private boolean containsInIgnoreList(String s) {
-//        return ignorList.stream().anyMatch(s::contains);
-//    }
-
     private static String extractTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (token == null) {
@@ -92,6 +87,8 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 
     private UsernamePasswordAuthenticationToken getAuthentication(String token) {
         String principal = jwtTokenUtil.extractPrincipal(token);
+        String sessionId = jwtTokenUtil.extractSessionId(token);
+
         Optional<User> optionalUser;
         if (EmailUtility.isEmail(principal)) {
             optionalUser = userService.findByEmail(principal);
@@ -108,7 +105,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             throw new RuntimeException(e);
         }
 
-        sessionService.updateLastAccessedTime(user.getSession());
+        sessionService.updateLastAccessedTime(sessionId);
 
         UserPrincipals userDetail = new UserPrincipals(user);
 
