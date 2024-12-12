@@ -112,7 +112,7 @@ at once.
 	tar xf /var/backups/opencelium/<backup filename>.tar.gz -C /var/backups/opencelium/restore/ --strip-components=4
 
 
-**Restore MySQL database:**
+**Restore MySQL database: (Connectors, Connections and Schedules)**
 
 .. note::
 	Please change the password (secret1234) in the following command line!
@@ -122,14 +122,14 @@ at once.
 	mysql -uopencelium -psecret1234 opencelium < /var/backups/opencelium/restore/oc_data.sql
 
 
-**Restore MongoDB database (folder opencelium within backup):**
+**Restore MongoDB database (Connection details)**
 
 .. code-block:: sh
 
 	mongorestore --drop --db opencelium /var/backups/opencelium/restore/opencelium/
 
 
-**Restore files and folders:**
+**Restore files and folders: (all programm files, invokers and templates)**
 
 In case you have to replace single files and folders, you will find all backuped files within the extracted
 backup in /var/backups/opencelium/restore/opt-backup .
