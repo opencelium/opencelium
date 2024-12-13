@@ -117,7 +117,7 @@ Templates
 """""""""""""""""
 
 These are business templates. In other words, they are connections that are saved as templates for
-often use. :ref:`Business Template`
+often use. :ref:`management-buisiness_template`
 
 `Here
 <https://docs.opencelium.io/en/prod/management/template.html>`_, you can read how to manage with them.
