@@ -1,5 +1,3 @@
-.. _getting_started-administration:
-
 ##################
 Administration
 ##################
@@ -61,6 +59,7 @@ Start opencelium services automatically on system start
 
 	systemctl enable nginx
 	systemctl enable opencelium
+	
 
 .. _getting_started-administration-logging:
 
