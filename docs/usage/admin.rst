@@ -151,7 +151,7 @@ system before update.
 |image_update_assistant_1|
 
 After choosing the right version click on the *Update OC* to finish the procedure. If you want to see logs, please
-read the  :ref:`Logging <getting_started-administration-logging>`paragraph.
+read the  :ref:`Here <getting_started-administration-logging>` paragraph.
 
 
 Migration from 3.x to 4.x
