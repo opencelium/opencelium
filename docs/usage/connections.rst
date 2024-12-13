@@ -1,3 +1,5 @@
+.. _usage-connection:
+
 ##################
 Connections
 ##################

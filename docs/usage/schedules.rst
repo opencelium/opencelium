@@ -18,8 +18,7 @@ be triggered. Setting all data, you will see a list of the nearest triggering ti
 The list of schedules displays next information: *status, connection title, cron*,
 time of *last success* trigger, time of *last failed* trigger, *duration* time, *logs*
 and *webhook*. Above the list you can see the categories. These are categories defined
-on the `connection page
-<https://docs.opencelium.io/en/prod/usage/connections.html>`_. You cannot modify them
+on the :ref:`connection page <usage-connection>`. You cannot modify them
 here. All displayed schedules are filtered by the corresponded connection category.
 
 |image0|
@@ -63,8 +62,7 @@ press on the notification button |image24|
 
 |image5|
 
-Before you create a notification, you need to create a template that is described `here
-<https://docs.opencelium.io/en/prod/management/notification_template.html>`_.
+Before you create a notification, you need to create a template that is described  :ref:`here <management-notification_template>`.
 After clicking on add, provide *name*, *event*, *notification type* and after *template*.
 
 |image6|

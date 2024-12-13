@@ -130,6 +130,8 @@ Notification Templates
 Notification Templates are templates that are used in scheduler jobs to notify users for three event
 types: *pre*, *post*, and *alert*.  :ref:`Here <management-notification_template>`, you can read how to manage with them.
 
+.. _admin_panel-update_assistant:
+
 Update Assistant
 """""""""""""""""
 
@@ -149,7 +151,7 @@ system before update.
 |image_update_assistant_1|
 
 After choosing the right version click on the *Update OC* to finish the procedure. If you want to see logs, please
-read the :ref:`Administration <getting_started-administration-logging>`paragraph.
+read the :ref:`Administration <getting_started-administration>`paragraph.
 
 
 Migration from 3.x to 4.x
