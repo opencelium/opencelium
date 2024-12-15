@@ -6,10 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Service
 public class SupportFileServiceImp implements SupportFileService {
@@ -30,5 +32,25 @@ public class SupportFileServiceImp implements SupportFileService {
         } catch (IOException e) {
             logger.error("Failed to setup base folder for support files, path = " + baseFolder);
         }
+    }
+
+    @Override
+    public List<ConnectionSupportFiles> supportFileList() {
+        return null;
+    }
+
+    @Override
+    public ConnectionSupportFiles connectionSupportFileList(Long connectionId) {
+        return null;
+    }
+
+    @Override
+    public File getSupportFile(Long connectionId, String zipFileName) {
+        return null;
+    }
+
+    @Override
+    public File getSupportFile(Long connectionId) {
+        return null;
     }
 }
