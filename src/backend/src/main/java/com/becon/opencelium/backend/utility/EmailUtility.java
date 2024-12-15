@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.utility;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class EmailUtility {

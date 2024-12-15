@@ -31,6 +31,7 @@ import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.TotpResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.utility.EmailUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
@@ -164,11 +165,15 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String authType;
 
         if (principal instanceof LdapUserDetails ldapUserDetails) {
-            String email = ldapUserDetails.getUsername();
+            String username = ldapUserDetails.getUsername();
 
-            User user = userService.findByEmail(email).orElseGet(() -> {
+            User user = userService.findByUsername(username).orElseGet(() -> {
                 User newUser = new User();
-                newUser.setEmail(email);
+
+                if (EmailUtility.isEmail(username)) {
+                    newUser.setEmail(username);
+                }
+                newUser.setUsername(username);
                 newUser.setAuthMethod(AuthMethod.LDAP);
 
                 // create details for new user
@@ -222,8 +227,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         Session session = sessionService.replace(result.getId());
         result.setSession(session);
 
-        logInfo("User " + result.getEmail() + " is authenticated via " + authType);
-        logInfo("Role '" + result.getUserRole().getName() + "' has been assigned to " + result.getEmail());
+        logInfo("User " + result.getPrincipal() + " is authenticated via " + authType);
+        logInfo("Role '" + result.getUserRole().getName() + "' has been assigned to " + result.getPrincipal());
 
         return result;
     }

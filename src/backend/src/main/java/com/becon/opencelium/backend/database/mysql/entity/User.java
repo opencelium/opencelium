@@ -47,7 +47,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Email
     @Column(name = "email")
     private String email;
 
