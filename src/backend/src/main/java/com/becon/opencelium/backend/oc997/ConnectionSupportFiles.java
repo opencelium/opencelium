@@ -13,9 +13,9 @@ public class ConnectionSupportFiles {
     public ConnectionSupportFiles() {
     }
 
-    public ConnectionSupportFiles(Long connectionId, List<String> supportFiles) {
+    public ConnectionSupportFiles(Long connectionId, List<String> fileUrls) {
         this.connectionId = connectionId;
-        this.supportFiles = supportFiles;
+        this.supportFiles = fileUrls;
     }
 
     public Long getConnectionId() {

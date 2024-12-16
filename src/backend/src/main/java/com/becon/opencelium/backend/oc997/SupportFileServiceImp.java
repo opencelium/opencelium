@@ -15,11 +15,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class SupportFileServiceImp implements SupportFileService {
     @Value("${support.files.directory:src/main/resources/support-files}")
     private String baseFolder;
+
+    public static final String GET_URL = "/api/connection/support-file/%d/%s"; // /api/connection/support-file/{connectionId}/{zipFileName}
+    public static final String FILE_NAME = "%d_%s_support_%d"; // {connectionId}_{e | s}_support_{timestamp}
+    public static final String SUCCESS_PATTERN = "%d_s_support_*.zip"; // {connectionId}_s_support_*.zip
 
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
 
@@ -40,27 +45,34 @@ public class SupportFileServiceImp implements SupportFileService {
 
     @Override
     public List<ConnectionSupportFiles> supportFileList() {
-        return null;
+        Path path = getPath();
+
+        List<ConnectionSupportFiles> result = new ArrayList<>();
+
+        try (Stream<Path> files = Files.list(path)) {
+            files.forEach(file -> {
+                if (Files.isDirectory(file)) {
+                    Long connectionId = Long.parseLong(file.getFileName().toString());
+                    List<String> urls = getZipUrls(connectionId, file);
+
+                    result.add(new ConnectionSupportFiles(connectionId, urls));
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
     }
 
     @Override
     public ConnectionSupportFiles connectionSupportFileList(Long connectionId) {
-        // TODO: validate connectionId existance
-
         Path path = getPath(connectionId.toString());
-        List<String> names = new ArrayList<>();
 
         if (Files.exists(path) && Files.isDirectory(path)) {
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(path, "*.zip")) {
-                for (Path p : stream) {
-                    if (!Files.isDirectory(p)) {
-                        names.add(p.getFileName().toString());
-                    }
-                }
+            List<String> urls = getZipUrls(connectionId, path);
 
-                return new ConnectionSupportFiles(connectionId, names);
-            } catch (IOException e) {
-            }
+            return new ConnectionSupportFiles(connectionId, urls);
         }
 
         throw new EntityNotFoundException("write description");
@@ -74,14 +86,40 @@ public class SupportFileServiceImp implements SupportFileService {
 
     @Override
     public File getSupportFile(Long connectionId) {
-        return null;
+        String filePattern = String.format(SUCCESS_PATTERN, connectionId);
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(getPath(connectionId.toString()), filePattern)) {
+            for (Path path : stream) {
+                return path.toFile();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        throw new RuntimeException("e");
     }
 
 
-    private Path getPath(String ... sub) {
+    private Path getPath(String... sub) {
         // Returns absolute path to base directory and/or its subdirectories
         Path path = Paths.get(baseFolder, sub);
 
         return path.isAbsolute() ? path : Paths.get(System.getProperty("user.dir")).resolve(path).normalize();
+    }
+
+    private List<String> getZipUrls(Long connectionId, Path path) {
+        List<String> names = new ArrayList<>();
+
+        try (DirectoryStream<Path> zips = Files.newDirectoryStream(path, "*.zip")) {
+            zips.forEach(zip -> {
+                if (Files.isRegularFile(zip)) {
+                    names.add(String.format(GET_URL, connectionId, zip.getFileName().toString()));
+                }
+            });
+
+            return names;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
