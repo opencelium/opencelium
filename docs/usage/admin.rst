@@ -153,6 +153,7 @@ system before update.
 After choosing the right version click on the *Update OC* to finish the procedure. If you want to see logs, please
 read the  :ref:`Logging <getting_started-administration-logging>` paragraph.
 
+.. _admin_panel-migration:
 
 Migration from 3.x to 4.x
 """""""""""""""""

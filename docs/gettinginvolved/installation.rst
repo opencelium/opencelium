@@ -510,7 +510,7 @@ This repo is meant to be the starting point for somebody who likes to use
 dockerized multi-container OpenCelium in production. The OpenCelium Docker image uses 
 the stable branch of OpenCelium's Git repo.
 
-The Docker images are hosted on `Dockerhub <https://hub.docker.com/u/opencelium>`_.
+The Docker images are hosted on `Dockerhub <https://hub.docker.com/u/becongmbh>`_.
 
 **Install Docker Environment:**
 
@@ -518,8 +518,9 @@ The Docker images are hosted on `Dockerhub <https://hub.docker.com/u/opencelium>
 
 Use default Docker installation guide.
 
-   * `Docker Engine <https://docs.docker.com/engine/installation/>`_
-   * `Docker Compose <https://docs.docker.com/compose/install/>`_
+   * `Docker Engine <https://docs.docker.com/engine/installation/>`_ 
+   * `Docker Compose <https://docs.docker.com/compose/install/>`_ 
+       (opt. Docker Engine installation usually already includes Docker Compose Plugin)
 
 2. Getting started with opencelium-docker-compose:
 

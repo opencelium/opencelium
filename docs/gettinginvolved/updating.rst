@@ -210,7 +210,7 @@ Finally start OpenCelium backend and frontend.
 **5. Migration from Neo4j to MongoDB:**
 
 | Log in to OpenCelium, open the *AdminPanel* and click on *Migration*.
-| Click here to see, how to use `Migration <https://docs.opencelium.io/en/prod/usage/admin.html#migration>`_ 
+| Click here to see, how to use  :ref:`Migration <admin_panel-migration>`  
 
 
 .. |image0| image:: ../img/update_assistant/0.png
