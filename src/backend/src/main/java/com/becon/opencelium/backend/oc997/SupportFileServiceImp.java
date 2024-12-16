@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.oc997;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,14 +9,16 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class SupportFileServiceImp implements SupportFileService {
-    @Value("${support.files.directory}")
+    @Value("${support.files.directory:src/main/resources/support-files}")
     private String baseFolder;
 
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
@@ -23,7 +26,10 @@ public class SupportFileServiceImp implements SupportFileService {
     @PostConstruct
     public void setup() {
         try {
-            Path path = Paths.get(baseFolder);
+            Path path = Paths.get(baseFolder).isAbsolute()
+                    ? Paths.get(baseFolder)
+                    : Paths.get(System.getProperty("user.dir")).resolve(baseFolder).normalize();
+
             if (!Files.exists(path)) {
                 Files.createDirectories(path);
             }
@@ -41,12 +47,30 @@ public class SupportFileServiceImp implements SupportFileService {
 
     @Override
     public ConnectionSupportFiles connectionSupportFileList(Long connectionId) {
-        return null;
+        // TODO: validate connectionId existance
+        Path path = Paths.get(baseFolder, connectionId.toString());
+        List<String> names = new ArrayList<>();
+
+        if (Files.exists(path) && Files.isDirectory(path)) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(path, "*.zip")) {
+                for (Path p : stream) {
+                    if (!Files.isDirectory(p)) {
+                        names.add(p.getFileName().toString());
+                    }
+                }
+
+                return new ConnectionSupportFiles(connectionId, names);
+            } catch (IOException e) {
+            }
+        }
+
+        throw new EntityNotFoundException("write description");
     }
 
     @Override
     public File getSupportFile(Long connectionId, String zipFileName) {
-        return null;
+        Path path = Paths.get(baseFolder, connectionId.toString(), zipFileName);
+        return path.toFile();
     }
 
     @Override
