@@ -1,9 +1,12 @@
 package com.becon.opencelium.backend.oc997;
 
+import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import jakarta.annotation.PostConstruct;
-import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,11 @@ import java.util.stream.Stream;
 
 @Service
 public class SupportFileServiceImp implements SupportFileService {
+    @Autowired
+    private ConnectionService sqlService;
+    @Autowired
+    private ConnectionMngService mongoService;
+
     @Value("${support.files.directory:src/main/resources/support-files}")
     private String baseFolder;
 
@@ -51,8 +59,10 @@ public class SupportFileServiceImp implements SupportFileService {
 
         try (Stream<Path> files = Files.list(path)) {
             files.forEach(file -> {
-                if (Files.isDirectory(file)) {
-                    Long connectionId = Long.parseLong(file.getFileName().toString());
+                String fileName = file.getFileName().toString();
+
+                if (Files.isDirectory(file) && fileName.matches("\\d+")) {
+                    Long connectionId = Long.parseLong(fileName);
                     List<String> urls = getZipUrls(connectionId, file);
 
                     result.add(new ConnectionSupportFiles(connectionId, urls));
@@ -67,25 +77,42 @@ public class SupportFileServiceImp implements SupportFileService {
 
     @Override
     public ConnectionSupportFiles connectionSupportFileList(Long connectionId) {
+        // check whether connection exists in both DBs
+        throwIfConnectionNotExistsById(connectionId);
+
+        // check whether directory exists for this connection
         Path path = getPath(connectionId.toString());
 
-        if (Files.exists(path) && Files.isDirectory(path)) {
+        if (Files.isDirectory(path)) {
             List<String> urls = getZipUrls(connectionId, path);
 
             return new ConnectionSupportFiles(connectionId, urls);
+        } else {
+            return new ConnectionSupportFiles(connectionId);
         }
-
-        throw new EntityNotFoundException("write description");
     }
 
     @Override
     public File getSupportFile(Long connectionId, String zipFileName) {
+        // check whether connection exists in both DBs
+        throwIfConnectionNotExistsById(connectionId);
+
+        // check whether file exists for this connection
         Path path = getPath(connectionId.toString(), zipFileName);
-        return path.toFile();
+
+        if (Files.isRegularFile(path)) {
+            return path.toFile();
+        } else {
+            throw new RuntimeException("Support file with name ='" + zipFileName + "' not found");
+        }
     }
 
     @Override
     public File getSupportFile(Long connectionId) {
+        // check whether connection exists in both DBs
+        throwIfConnectionNotExistsById(connectionId);
+
+        // try to find successful execution support file by pattern
         String filePattern = String.format(SUCCESS_PATTERN, connectionId);
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(getPath(connectionId.toString()), filePattern)) {
@@ -96,9 +123,16 @@ public class SupportFileServiceImp implements SupportFileService {
             throw new RuntimeException(e);
         }
 
-        throw new RuntimeException("e");
+        throw new RuntimeException("Support file for successful execution not found for connectionId = " + connectionId);
     }
 
+    private void throwIfConnectionNotExistsById(Long connectionId) {
+        boolean exists = sqlService.existsById(connectionId) && mongoService.existsByConnectionId(connectionId);
+
+        if (!exists) {
+            throw new ConnectionNotFoundException(connectionId);
+        }
+    }
 
     private Path getPath(String... sub) {
         // Returns absolute path to base directory and/or its subdirectories

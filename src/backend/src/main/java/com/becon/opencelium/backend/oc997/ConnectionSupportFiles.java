@@ -13,6 +13,10 @@ public class ConnectionSupportFiles {
     public ConnectionSupportFiles() {
     }
 
+    public ConnectionSupportFiles(Long connectionId) {
+        this.connectionId = connectionId;
+    }
+
     public ConnectionSupportFiles(Long connectionId, List<String> fileUrls) {
         this.connectionId = connectionId;
         this.supportFiles = fileUrls;
