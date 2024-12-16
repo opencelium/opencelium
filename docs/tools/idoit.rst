@@ -9,7 +9,7 @@ The opencelium addon for i-doit provides functionalities to manage opencelium we
 
 Follow the steps of the i-doit documentation to install the addon. 
 
-	https://kb.i-doit.com/display/de/Add-ons#Add-ons-Installation
+	https://kb.i-doit.com/de/software-entwicklung/add-ons-entwickeln/add-ons-installieren-aktualisieren-und-entwickeln.html
 
 Configure all webhooks.
 
