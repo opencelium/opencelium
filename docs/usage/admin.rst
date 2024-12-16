@@ -118,6 +118,8 @@ Templates
 These are business templates. In other words, they are connections that are saved as templates for
 often use. :ref:`Here <management-business_template>`, you can read how to manage with them.
 
+.. _admin_panel-data_aggregator:
+
 Data Aggregator
 """""""""""""""""
 

@@ -113,8 +113,7 @@ also you can set a color mode of the method and its name/label font size.
 
 |image37|
 
-|image38| - toggle data `aggregator
-<https://docs.opencelium.io/en/prod/usage/admin.html#data-aggregator>`_.
+|image38| - toggle :ref:`data aggregator <admin_panel-data_aggregator>`: 
 
 |image39| - template options: create a new template or load existing one (correspondingly |image14|).
 
