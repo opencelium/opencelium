@@ -26,9 +26,7 @@ public class SupportFileServiceImp implements SupportFileService {
     @PostConstruct
     public void setup() {
         try {
-            Path path = Paths.get(baseFolder).isAbsolute()
-                    ? Paths.get(baseFolder)
-                    : Paths.get(System.getProperty("user.dir")).resolve(baseFolder).normalize();
+            Path path = getPath();
 
             if (!Files.exists(path)) {
                 Files.createDirectories(path);
@@ -48,7 +46,8 @@ public class SupportFileServiceImp implements SupportFileService {
     @Override
     public ConnectionSupportFiles connectionSupportFileList(Long connectionId) {
         // TODO: validate connectionId existance
-        Path path = Paths.get(baseFolder, connectionId.toString());
+
+        Path path = getPath(connectionId.toString());
         List<String> names = new ArrayList<>();
 
         if (Files.exists(path) && Files.isDirectory(path)) {
@@ -69,12 +68,20 @@ public class SupportFileServiceImp implements SupportFileService {
 
     @Override
     public File getSupportFile(Long connectionId, String zipFileName) {
-        Path path = Paths.get(baseFolder, connectionId.toString(), zipFileName);
+        Path path = getPath(connectionId.toString(), zipFileName);
         return path.toFile();
     }
 
     @Override
     public File getSupportFile(Long connectionId) {
         return null;
+    }
+
+
+    private Path getPath(String ... sub) {
+        // Returns absolute path to base directory and/or its subdirectories
+        Path path = Paths.get(baseFolder, sub);
+
+        return path.isAbsolute() ? path : Paths.get(System.getProperty("user.dir")).resolve(path).normalize();
     }
 }
