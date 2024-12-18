@@ -18,7 +18,6 @@ import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Path;
 import java.util.*;
 
 @Service
@@ -197,6 +196,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         }
 
         for (int i = 0; i < fieldBindings.size(); i++) {
+            fieldBindings.get(i).setId(null);
             FieldBindingMng savedFB = save(fieldBindings.get(i)); // savepoint
             try {
                 bindIds(savedFB, methods);
