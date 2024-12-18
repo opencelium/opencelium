@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class SessionServiceImpl implements SessionService {
@@ -48,15 +49,31 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     @Transactional
-    public boolean deleteByUserId(int userId) {
-        return sessionRepository.deleteByUserId(userId) > 0;
+    public void deleteByUserId(int userId) {
+        sessionRepository.deleteByUserId(userId);
     }
 
     @Override
-    public void updateLastAccessedTime(Session session) {
-        session.setActive(true);
-        session.setLastAccessed(new Date());
+    @Transactional
+    public synchronized Session replace(int userId) {
+        // delete existing session for this user
+        sessionRepository.deleteByUserId(userId);
 
-        sessionRepository.save(session);
+        // create new session
+        String sessionId = UUID.randomUUID().toString();
+
+        Session session = new Session();
+        session.setId(sessionId);
+        session.setUserId(userId);
+        session.setActive(true);
+        session.setAttempts(0);
+
+        return sessionRepository.save(session);
+    }
+
+    @Override
+    @Transactional
+    public synchronized void updateLastAccessedTime(String sessionId) {
+        sessionRepository.updateLastAccessed(sessionId, new Date());
     }
 }

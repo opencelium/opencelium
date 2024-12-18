@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import com.becon.opencelium.backend.database.mysql.entity.WidgetSetting;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
+import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -63,6 +64,11 @@ public class UserServiceImpl implements UserService{
     @Override
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsernameAndAuthMethod(username, AuthMethod.LDAP);
     }
 
     @Override
@@ -112,19 +118,19 @@ public class UserServiceImpl implements UserService{
         User user = new User();
         User userDb = userRepository.findById(userRequestResource.getUserId()).orElse(null);
         UserRole userRole = userRoleRepository.findById(userRequestResource.getUserGroup()).orElse(null);
-        if ((userDb == null) && (userRequestResource.getPassword() == null || userRequestResource.getPassword().isEmpty())){
+        if ((userDb == null) && (userRequestResource.getPassword() == null || userRequestResource.getPassword().isEmpty())) {
             throw new RuntimeException("PASSWORD_IS_NULL");
         }
 
-        if ((userDb != null) && (userRequestResource.getPassword() != null && !userRequestResource.getPassword().isEmpty())){
+        if ((userDb != null) && (userRequestResource.getPassword() != null && !userRequestResource.getPassword().isEmpty())) {
             user.setPassword(encodePassword(userRequestResource.getPassword()));
         }
 
-        if (userDb != null && (userRequestResource.getPassword() == null || userRequestResource.getPassword().isEmpty())){
+        if (userDb != null && (userRequestResource.getPassword() == null || userRequestResource.getPassword().isEmpty())) {
             user.setPassword(userDb.getPassword());
         }
 
-        if (userDb != null){
+        if (userDb != null) {
             userRequestResource.getUserDetail().setProfilePicture(userDb.getUserDetail().getProfilePicture());
         }
 
@@ -145,6 +151,7 @@ public class UserServiceImpl implements UserService{
             user.setAuthMethod(userDb.getAuthMethod());
             user.setTotpProcessCompleted(userDb.isTotpProcessCompleted());
             user.setTotpSecretKey(userDb.getTotpSecretKey());
+            user.setUsername(userDb.getUsername());
         }
 
         userDetail.setId(userRequestResource.getUserId());

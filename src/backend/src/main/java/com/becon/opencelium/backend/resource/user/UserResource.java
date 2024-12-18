@@ -27,6 +27,7 @@ public class UserResource {
 
     private int userId;
     private String email;
+    private String username;
     private boolean totpEnabled;
     private UserRoleResource userGroup; // TODO: should be  userRole
     private UserDetailResource userDetail;
@@ -38,6 +39,7 @@ public class UserResource {
     public UserResource(User user) {
         this.userId = user.getId();
         this.email = user.getEmail();
+        this.username = user.getUsername();
         this.totpEnabled = user.getTotpSecretKey() != null;
         this.userGroup = new UserRoleResource(user.getUserRole());
         this.userDetail = new UserDetailResource(user.getUserDetail());
@@ -59,6 +61,14 @@ public class UserResource {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public boolean isTotpEnabled() {
