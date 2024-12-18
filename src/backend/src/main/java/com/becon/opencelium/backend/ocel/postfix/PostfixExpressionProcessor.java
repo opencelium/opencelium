@@ -1,9 +1,9 @@
 package com.becon.opencelium.backend.ocel.postfix;
 
-import com.becon.opencelium.backend.ocel.base.Evaluator;
-import com.becon.opencelium.backend.ocel.base.ExpressionProcessor;
-import com.becon.opencelium.backend.ocel.base.Validator;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
+import com.becon.opencelium.backend.ocel.Evaluator;
+import com.becon.opencelium.backend.ocel.ExpressionProcessor;
+import com.becon.opencelium.backend.ocel.Validator;
+import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 
 import java.util.function.Function;
 
@@ -17,12 +17,12 @@ public class PostfixExpressionProcessor implements ExpressionProcessor {
     }
 
     @Override
-    public boolean evaluate(String expression) throws InvalidExpressionException {
+    public Object evaluate(String expression) throws InvalidExpressionException {
         return evaluate(expression, null);
     }
 
     @Override
-    public boolean evaluate(String expression, Function<String, Object> refExtractor) throws InvalidExpressionException {
-        return evaluator.evaluate(validator.validateAndStandardize(expression), refExtractor);
+    public Object evaluate(String expression, Function<String, Object> refExtractor) throws InvalidExpressionException {
+        return evaluator.evaluate(validator.validateAndTokenize(expression), refExtractor);
     }
 }

@@ -1,17 +1,16 @@
 package com.becon.opencelium.backend.ocel.postfix;
 
-import com.becon.opencelium.backend.ocel.base.ShallowEvaluator;
-import com.becon.opencelium.backend.ocel.commons.Operand;
-import com.becon.opencelium.backend.ocel.commons.PostfixNotationConvertor;
-import com.becon.opencelium.backend.ocel.commons.Token;
-import com.becon.opencelium.backend.ocel.enums.Arity;
-import com.becon.opencelium.backend.ocel.enums.SidesType;
-import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
-import com.becon.opencelium.backend.ocel.exceptions.ValueParseException;
-import com.becon.opencelium.backend.ocel.operators.Operator;
-import com.becon.opencelium.backend.ocel.commons.RawValueParser;
-import com.becon.opencelium.backend.ocel.utils.Utils;
+import com.becon.opencelium.backend.ocel.ShallowEvaluator;
+import com.becon.opencelium.backend.ocel.common.Component;
+import com.becon.opencelium.backend.ocel.common.ReferenceUtils;
+import com.becon.opencelium.backend.ocel.operand.Operand;
+import com.becon.opencelium.backend.ocel.operator.Arity;
+import com.becon.opencelium.backend.ocel.operator.SidesType;
+import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
+import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
+import com.becon.opencelium.backend.ocel.exception.ValueParseException;
+import com.becon.opencelium.backend.ocel.operator.Operator;
+import com.becon.opencelium.backend.ocel.common.RawValueParser;
 
 import java.util.*;
 
@@ -27,14 +26,14 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
     }
 
     @Override
-    public void check(List<String> tokens) throws InvalidExpressionException {
-        Queue<Token> queue = postfixConverter.toPostfix(tokens);
+    public void check(List<Component> components) throws InvalidExpressionException {
+        Queue<Component> queue = postfixConverter.toPostfix(components);
         Stack<Object> operandStack = new Stack<>();
 
         try {
             while (!queue.isEmpty()) {
-                Token token = queue.poll();
-                if (token instanceof Operator operator) {
+                Component component = queue.poll();
+                if (component instanceof Operator operator) {
                     Arity arity = operator.getArity();
                     if (arity == Arity.UNARY) {
                         Object pop = operandStack.pop();
@@ -120,9 +119,9 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                             }
                         }
                     }
-                } else if (token instanceof Operand operand) {
+                } else if (component instanceof Operand operand) {
                     String rawValue = operand.getRawValue();
-                    if (Utils.isReference(rawValue)) {
+                    if (ReferenceUtils.isReference(rawValue)) {
                         operandStack.push(dummy);
                     } else {
                         operandStack.push(operand);

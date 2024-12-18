@@ -1,21 +1,21 @@
 package com.becon.opencelium.backend.ocel.postfix;
 
-import com.becon.opencelium.backend.ocel.commons.Operand;
-import com.becon.opencelium.backend.ocel.commons.PostfixNotationConvertor;
-import com.becon.opencelium.backend.ocel.commons.Token;
-import com.becon.opencelium.backend.ocel.enums.Arity;
-import com.becon.opencelium.backend.ocel.base.Evaluator;
-import com.becon.opencelium.backend.ocel.exceptions.InvalidExpressionException;
-import com.becon.opencelium.backend.ocel.operators.Operator;
-import com.becon.opencelium.backend.ocel.exceptions.ApplyOperatorException;
-import com.becon.opencelium.backend.ocel.exceptions.ValueParseException;
-import com.becon.opencelium.backend.ocel.commons.RawValueParser;
-import com.becon.opencelium.backend.ocel.utils.Utils;
+import com.becon.opencelium.backend.ocel.common.ReferenceUtils;
+import com.becon.opencelium.backend.ocel.exception.ApplyFunctionException;
+import com.becon.opencelium.backend.ocel.function.FunctionFactory;
+import com.becon.opencelium.backend.ocel.operand.Operand;
+import com.becon.opencelium.backend.ocel.operator.Arity;
+import com.becon.opencelium.backend.ocel.Evaluator;
+import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
+import com.becon.opencelium.backend.ocel.operator.Operator;
+import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
+import com.becon.opencelium.backend.ocel.exception.ValueParseException;
+import com.becon.opencelium.backend.ocel.common.RawValueParser;
+import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
+import com.becon.opencelium.backend.ocel.token.Token;
+import com.becon.opencelium.backend.ocel.token.TokenType;
 
-import java.util.EmptyStackException;
-import java.util.List;
-import java.util.Queue;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.Function;
 
 public class PostfixEvaluator implements Evaluator {
@@ -31,16 +31,16 @@ public class PostfixEvaluator implements Evaluator {
     }
 
     @Override
-    public boolean evaluate(String expression, Function<String, Object> referenceExtractor) throws InvalidExpressionException {
+    public Object evaluate(List<Token> tokens, Function<String, Object> referenceExtractor) throws InvalidExpressionException {
         try {
-            List<String> strings = Utils.splitBySpace(expression);
-            Queue<Token> tokens = postfixConverter.toPostfix(strings);
+            Queue<Token> tokenQueue = postfixConverter.toPostfix(tokens);
             Stack<Operand> operandStack = new Stack<>();
 
             try {
-                while (!tokens.isEmpty()) {
-                    Token token = tokens.poll();
-                    if (token instanceof Operator operator) {
+                while (!tokenQueue.isEmpty()) {
+                    Token token = tokenQueue.poll();
+                    if (Objects.equals(token.getType(), TokenType.OPERATOR)) {
+                        Operator operator = OperatorUtils.getOperator(token.getLexeme());
                         Arity arity = operator.getArity();
                         if (arity == Arity.UNARY) {
                             Operand operand = operandStack.pop();
@@ -84,8 +84,25 @@ public class PostfixEvaluator implements Evaluator {
                             }
                             operandStack.push(Operand.withValue(result));
                         }
-                    } else if (token instanceof Operand operand) {
-                        operandStack.push(operand);
+                    } else if (Objects.equals(token.getType(), TokenType.OPERAND)) {
+                        operandStack.push(Operand.withRawValue(token.getLexeme()));
+                    } else if (Objects.equals(token.getType(), TokenType.FUNCTION)) {
+                        List<List<Token>> parameters = token.getFunctionParameters();
+                        String lexeme = token.getLexeme();
+                        Object[] parameterValues = new Object[parameters.size()];
+                        for (int i = 0; i < parameters.size(); i++) {
+                            List<Token> parameter = parameters.get(i);
+                            parameterValues[i++] = evaluate(parameter, referenceExtractor);
+                        }
+                        var function = FunctionFactory.function(lexeme, parameterValues);
+                        if (Objects.isNull(function)) {
+                            throw InvalidExpressionException.functionNotFound(lexeme, parameterValues);
+                        }
+                        try {
+                            operandStack.add(Operand.withValue(function.call(parameterValues)));
+                        } catch (ApplyFunctionException e) {
+                            throw InvalidExpressionException.applyFunctionException(e);
+                        }
                     }
                 }
             } catch (EmptyStackException e) {
@@ -109,7 +126,7 @@ public class PostfixEvaluator implements Evaluator {
     }
 
     private Object getValueOfRaw(String rawValue, Function<String, Object> referenceExtractor) throws ValueParseException, InvalidExpressionException {
-        if (Utils.isReference(rawValue)) {
+        if (ReferenceUtils.isReference(rawValue)) {
             if (referenceExtractor == null)
                 throw InvalidExpressionException.referenceExtractorNotFound(rawValue);
             try {
