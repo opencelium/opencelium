@@ -26,6 +26,7 @@ import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.utility.EmailUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -84,7 +85,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User save(User user) {
-        return userRepository.save(user);
+        if (EmailUtility.isEmail(user.getEmail())) {
+            return userRepository.save(user);
+        } else {
+            throw new IllegalArgumentException("Invalid email is supplied to User dto");
+        }
     }
 
     @Override
