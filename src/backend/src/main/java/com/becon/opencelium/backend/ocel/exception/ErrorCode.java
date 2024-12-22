@@ -24,7 +24,8 @@ public enum ErrorCode {
     REFERENCE_EXTRACTOR_NOT_FOUND("reference.extractor.not.found"),
     CANNOT_EXTRACT_REFERENCE("cannot.extract.reference"),
     FUNC_INVALID_PARAM_LIST("invalid.param.list"),
-    FUNCTION_NOT_FOUND("function.not.found"),;
+    FUNCTION_NOT_FOUND("function.not.found"),
+    FUNC_INVALID_PARAMETER("invalid.function.parameter");
 
     private final String code;
 

@@ -13,8 +13,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CurrentDateProvider implements FunctionProvider {
-    private static final Set<CurrentDate> INSTANCES = new HashSet<>();
+    private static final Set<CurrentDate> FUNCTION_INSTANCES = new HashSet<>();
     private static final CurrentDateProvider INSTANCE = new CurrentDateProvider();
+
+    public static FunctionProvider getInstance() {
+        return INSTANCE;
+    }
+
+    private CurrentDateProvider() {
+    }
+
+    @Override
+    public Function tryFind(Object[] args) {
+        return FUNCTION_INSTANCES.stream()
+                .filter(x -> x.parameterListMatches(args))
+                .findFirst()
+                .orElse(null);
+    }
 
     private static final CurrentDate WITH_NO_PARAMETERS = new CurrentDate() {
         @Override
@@ -67,20 +82,8 @@ public class CurrentDateProvider implements FunctionProvider {
     };
 
     static {
-        INSTANCES.add(WITH_NO_PARAMETERS);
-        INSTANCES.add(WITH_TIME_ZONE);
-        INSTANCES.add(WITH_ZONE_OFFSET);
-    }
-
-    public static FunctionProvider getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public Function tryFind(Object[] args) {
-        return INSTANCES.stream()
-                .filter(x -> x.parameterListMatches(args))
-                .findFirst()
-                .orElse(null);
+        FUNCTION_INSTANCES.add(WITH_NO_PARAMETERS);
+        FUNCTION_INSTANCES.add(WITH_TIME_ZONE);
+        FUNCTION_INSTANCES.add(WITH_ZONE_OFFSET);
     }
 }

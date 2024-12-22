@@ -13,10 +13,19 @@ public class CurrentDateTimeProvider implements FunctionProvider {
     public static final CurrentDateTimeProvider INSTANCE = new CurrentDateTimeProvider();
     private static final Set<CurrentDateTime> FUNCTION_INSTANCES = new HashSet<>();
 
+    private CurrentDateTimeProvider() {}
+
     public static FunctionProvider getInstance() {
         return INSTANCE;
     }
 
+    @Override
+    public Function tryFind(Object[] args) {
+        return FUNCTION_INSTANCES.stream()
+                .filter(x -> x.parameterListMatches(args))
+                .findFirst()
+                .orElse(null);
+    }
 
     private static final CurrentDateTime WITH_NO_PARAMETERS = new CurrentDateTime() {
         @Override
@@ -78,13 +87,5 @@ public class CurrentDateTimeProvider implements FunctionProvider {
         FUNCTION_INSTANCES.add(WITH_NO_PARAMETERS);
         FUNCTION_INSTANCES.add(WITH_TIME_ZONE);
         FUNCTION_INSTANCES.add(WITH_ZONE_OFFSET);
-    }
-
-    @Override
-    public Function tryFind(Object[] args) {
-        return FUNCTION_INSTANCES.stream()
-                .filter(x -> x.parameterListMatches(args))
-                .findFirst()
-                .orElse(null);
     }
 }

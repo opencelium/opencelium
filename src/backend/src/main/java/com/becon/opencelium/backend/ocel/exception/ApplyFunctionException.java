@@ -14,6 +14,10 @@ public class ApplyFunctionException extends Exception {
         return new ApplyFunctionException(ErrorCode.FUNC_INVALID_PARAM_LIST, StringUtils.join(args) + " - parameter list is not compatible for '%s' function".formatted(functionEnum.name()));
     }
 
+    public static ApplyFunctionException invalidParameterValue(FunctionEnum functionEnum, String var, int index, String message) {
+        return new ApplyFunctionException(ErrorCode.FUNC_INVALID_PARAMETER, "%d-parameter, '%s', is invalid for %s function : %s".formatted(index, var, functionEnum.getName(), message));
+    }
+
     public ErrorCode getCode() {
         return code;
     }
