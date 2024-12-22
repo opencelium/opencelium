@@ -1,10 +1,12 @@
 package com.becon.opencelium.backend.ocel.token;
 
-import com.becon.opencelium.backend.ocel.common.ReferenceUtils;
-import com.becon.opencelium.backend.ocel.common.Utils;
+import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
+import com.becon.opencelium.backend.ocel.utils.Utils;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
+import com.becon.opencelium.backend.ocel.function.FunctionEnum;
 import com.becon.opencelium.backend.ocel.function.FunctionUtils;
 import com.becon.opencelium.backend.ocel.operand.OperandUtils;
+import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
 
 import java.util.*;
@@ -20,44 +22,6 @@ public class Tokenizer {
         prefixSuffixMap.putAll(ReferenceUtils.getPreSufMap());
         prefixSuffixMap.put("\"", "\"");
         prefixSuffixMap.put("[", "]");
-    }
-
-    public static List<Token> splitBySpace(String expression) throws InvalidExpressionException {
-        char[] chars = expression.toCharArray();
-        List<String> res = new ArrayList<>();
-
-        int start = 0;
-        for (int i = 0; i < chars.length; i++) {
-            if (stack.empty() && chars[i] == ' ') {
-                if (i != start && i > 0 && chars[i - 1] != ')') {
-                    res.add(expression.substring(start, i));
-                }
-                start = i + 1;
-            } else if (stack.empty() && chars[i] == '(') {
-                if (start != i && i > 0 && chars[i - 1] != '(') {
-                    res.add(expression.substring(start, i));
-                }
-                res.add("(");
-                start = i + 1;
-            } else if (stack.empty() && chars[i] == ')') {
-                if (start != i && i > 0 && chars[i - 1] != ')') {
-                    res.add(expression.substring(start, i));
-                }
-                res.add(")");
-            } else {
-                int inc = tryToFindPrefix(chars, i, stack);
-                if (inc > 0) {
-                    i += inc - 1;
-                }
-                if (i == chars.length - 1) {
-                    if (!stack.empty()) {
-                        throw InvalidExpressionException.unexpectedEndOfExpression(expression.substring(start));
-                    }
-                    res.add(expression.substring(start));
-                }
-            }
-        }
-        return res;
     }
 
     /**
@@ -122,8 +86,9 @@ public class Tokenizer {
                     }
 
                     if (!done) {
-                        String op = OperatorUtils.findStartingOperator(chars, i);
-                        if (op != null) {
+                        OperatorEnum operatorEnum = OperatorUtils.findStartingOperator(chars, i);
+                        if (operatorEnum != null) {
+                            String op = operatorEnum.getName();
                             int len = op.length();
                             if (start != i)
                                 res.add(Token.of(expression.substring(start, i), TokenType.OPERAND));
@@ -135,7 +100,7 @@ public class Tokenizer {
                     }
 
                     if (!done) {
-                        String function = FunctionUtils.findStartingFunction(chars, i);
+                        FunctionEnum function = FunctionUtils.findStartingFunction(chars, i);
                         if (function != null) {
                             int end = indexOfFirstOutermostClosingParentheses(chars, i);
                             if (end == -1) {
@@ -145,13 +110,13 @@ public class Tokenizer {
                             if (start != i)
                                 res.add(Token.of(expression.substring(start, i), TokenType.OPERAND));
 
-                            List<String> expressions = splitParametersOfFunction(chars, i + function.length() + 1, end);
+                            List<String> expressions = splitParametersOfFunction(chars, i + function.getName().length() + 1, end);
                             List<List<Token>> parameters = new ArrayList<>();
                             for (String token : expressions) {
                                 List<Token> tokenizedParam = splitTokens(token);
                                 parameters.add(tokenizedParam);
                             }
-                            res.add(Token.of(function, TokenType.FUNCTION, parameters));
+                            res.add(Token.of(function.getName(), TokenType.FUNCTION, parameters));
 
                             start = end + 1;
                             i = end;
@@ -162,13 +127,14 @@ public class Tokenizer {
                     if (suffix != null) {
                         prefix = null;
                         i += suffix.length() - 1;
+                    } else {
+                        if (i >= chars.length - 1) {
+                            throw InvalidExpressionException.unexpectedEndOfExpression(expression.substring(start));
+                        }
                     }
                 }
 
-                if (i == chars.length - 1) {
-                    if (prefix != null) {
-                        throw InvalidExpressionException.unexpectedEndOfExpression(expression.substring(start));
-                    }
+                if (i >= chars.length - 1 && start <= chars.length - 1) {
                     res.add(Token.of(expression.substring(start), TokenType.OPERAND));
                 }
             }
@@ -180,11 +146,11 @@ public class Tokenizer {
         List<String> res = new ArrayList<>();
 
         String prefix = null;
-        int left = 0;
+        int left = start;
         int depth = 0;
         for (int i = start; i < end; i++) {
             if (prefix == null && depth == 0 && chars[i] == ',') {
-                res.add(new String(chars, left, i));
+                res.add(new String(chars, left, i - left));
                 left = i + 1;
             } else if (prefix == null && chars[i] == '(') {
                 depth++;
@@ -199,12 +165,19 @@ public class Tokenizer {
                     if (newPrefix != null) {
                         prefix = newPrefix;
                         i += prefix.length() - 1;
+                    } else {
+                        if (i >= end - 1) {
+                            throw InvalidExpressionException.unexpectedEndOfExpression(new String(chars, start, end));
+                        }
                     }
                 } else {
                     String suffix = tryToFindSuffix(chars, i, prefix);
                     if (suffix != null) {
                         prefix = null;
                         i += suffix.length() - 1;
+                    }
+                    if (i >= end - 1 && left != end - 1) {
+                        res.add(new String(chars, left, end - left));
                     }
                 }
             }

@@ -1,16 +1,20 @@
 package com.becon.opencelium.backend.ocel.postfix;
 
 import com.becon.opencelium.backend.ocel.ShallowEvaluator;
-import com.becon.opencelium.backend.ocel.common.Component;
-import com.becon.opencelium.backend.ocel.common.ReferenceUtils;
+import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
+import com.becon.opencelium.backend.ocel.exception.ApplyFunctionException;
+import com.becon.opencelium.backend.ocel.function.FunctionFactory;
 import com.becon.opencelium.backend.ocel.operand.Operand;
 import com.becon.opencelium.backend.ocel.operator.Arity;
+import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.exception.ValueParseException;
 import com.becon.opencelium.backend.ocel.operator.Operator;
 import com.becon.opencelium.backend.ocel.common.RawValueParser;
+import com.becon.opencelium.backend.ocel.token.Token;
+import com.becon.opencelium.backend.ocel.token.TokenType;
 
 import java.util.*;
 
@@ -25,15 +29,14 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
         this.rawValueParser = RawValueParser.getInstance();
     }
 
-    @Override
-    public void check(List<Component> components) throws InvalidExpressionException {
-        Queue<Component> queue = postfixConverter.toPostfix(components);
+    private void check(Queue<Token> queue) throws InvalidExpressionException {
         Stack<Object> operandStack = new Stack<>();
 
         try {
             while (!queue.isEmpty()) {
-                Component component = queue.poll();
-                if (component instanceof Operator operator) {
+                Token token = queue.poll();
+                if (Objects.equals(token.getType(), TokenType.OPERATOR)) {
+                    Operator operator = OperatorUtils.getOperator(token.getLexeme());
                     Arity arity = operator.getArity();
                     if (arity == Arity.UNARY) {
                         Object pop = operandStack.pop();
@@ -119,12 +122,31 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                             }
                         }
                     }
-                } else if (component instanceof Operand operand) {
-                    String rawValue = operand.getRawValue();
+                } else if (Objects.equals(token.getType(), TokenType.OPERAND)) {
+                    String rawValue = token.getLexeme();
                     if (ReferenceUtils.isReference(rawValue)) {
                         operandStack.push(dummy);
                     } else {
-                        operandStack.push(operand);
+                        operandStack.push(Operand.withRawValue(rawValue));
+                    }
+                } else if (Objects.equals(token.getType(), TokenType.FUNCTION)) {
+                    List<List<Token>> parameters = token.getFunctionParameters();
+                    String lexeme = token.getLexeme();
+                    Object[] parameterValues = new Object[parameters.size()];
+                    for (int i = 0; i < parameters.size(); i++) {
+                        List<Token> parameter = parameters.get(i);
+                        Queue<Token> postfix = postfixConverter.toPostfix(parameter);
+                        check(postfix);
+                    }
+                    //TODO: check an availability of the function that matches the parameters list.
+                    var function = FunctionFactory.function(lexeme, parameterValues);
+                    if (Objects.isNull(function)) {
+                        throw InvalidExpressionException.functionNotFound(lexeme, parameterValues);
+                    }
+                    try {
+                        operandStack.add(Operand.withValue(function.call(parameterValues)));
+                    } catch (ApplyFunctionException e) {
+                        throw InvalidExpressionException.applyFunctionException(e);
                     }
                 }
             }
@@ -135,13 +157,12 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
         if (operandStack.size() != 1) {
             throw InvalidExpressionException.invalidAssociationBetweenOperatorAndOperands();
         }
+    }
 
-        Object peek = operandStack.peek();
-        if (peek instanceof Operand operand) {
-            if (!(operand.isRaw() && ("true".equals(operand.getRawValue()) || "false".equals(operand.getRawValue())) || operand.getValue() instanceof Boolean)) {
-                throw InvalidExpressionException.resultValueIsNotBoolean(operand.isRaw() ? operand.getRawValue() : operand.getValue());
-            }
-        }
+    @Override
+    public void check(List<Token> tokens) throws InvalidExpressionException {
+        Queue<Token> queue = postfixConverter.toPostfix(tokens);
+        check(queue);
     }
 
     public static PostfixShallowEvaluator getInstance() {

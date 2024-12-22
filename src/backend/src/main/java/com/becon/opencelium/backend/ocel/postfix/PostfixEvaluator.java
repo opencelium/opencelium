@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.ocel.postfix;
 
-import com.becon.opencelium.backend.ocel.common.ReferenceUtils;
+import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
 import com.becon.opencelium.backend.ocel.exception.ApplyFunctionException;
 import com.becon.opencelium.backend.ocel.function.FunctionFactory;
 import com.becon.opencelium.backend.ocel.operand.Operand;
@@ -92,7 +92,7 @@ public class PostfixEvaluator implements Evaluator {
                         Object[] parameterValues = new Object[parameters.size()];
                         for (int i = 0; i < parameters.size(); i++) {
                             List<Token> parameter = parameters.get(i);
-                            parameterValues[i++] = evaluate(parameter, referenceExtractor);
+                            parameterValues[i] = evaluate(parameter, referenceExtractor);
                         }
                         var function = FunctionFactory.function(lexeme, parameterValues);
                         if (Objects.isNull(function)) {
@@ -112,14 +112,15 @@ public class PostfixEvaluator implements Evaluator {
             if (operandStack.size() != 1) {
                 throw InvalidExpressionException.invalidAssociationBetweenOperatorAndOperands();
             }
-            Operand peek = operandStack.peek();
-            try {
-                return peek.isRaw()
-                        ? Boolean.parseBoolean(peek.getRawValue())
-                        : (Boolean) peek.getValue();
-            } catch (Exception e) {
-                throw InvalidExpressionException.resultValueIsNotBoolean(peek.isRaw() ? peek.getRawValue() : peek.getValue());
+            Operand last = operandStack.pop();
+            if (last.isRaw()) {
+                try {
+                    return rawValueParser.parse(last.getRawValue());
+                } catch (ValueParseException e) {
+                    throw InvalidExpressionException.valueParseException(e);
+                }
             }
+            return last.getValue();
         } catch (RuntimeException e) {
             throw InvalidExpressionException.unexpectedException(e);
         }

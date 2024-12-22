@@ -100,21 +100,27 @@ public class Validator {
                     if (operator.getArity() == Arity.UNARY) {
                         if (operator.isLeftSided()) {
                             // Check for sufficient right operand for left-sided unary operators
-                            if (hasValidNeighbor(tokens, i, true)) {
+                            if (insufficientNeighbor(tokens, i, true)) {
                                 throw InvalidExpressionException.insufficientOperand(token.getLexeme());
                             }
                         } else {
                             // Check for sufficient left operand for right-sided unary operators
-                            if (hasValidNeighbor(tokens, i, false)) {
+                            if (insufficientNeighbor(tokens, i, false)) {
                                 throw InvalidExpressionException.insufficientOperand(token.getLexeme());
                             }
                         }
                     }
                     // Handle binary operators
                     else if (operator.getArity() == Arity.BINARY) {
-                        if (!hasValidNeighbor(tokens, i, true) || !hasValidNeighbor(tokens, i, false)) {
+                        if (insufficientNeighbor(tokens, i, true) || insufficientNeighbor(tokens, i, false)) {
                             throw InvalidExpressionException.insufficientOperand(token.getLexeme());
                         }
+                    }
+                }
+                case FUNCTION -> {
+                    List<List<Token>> parameters = token.getFunctionParameters();
+                    for (List<Token> parameter : parameters) {
+                        firstLevelCheck(parameter);
                     }
                 }
             }
@@ -124,20 +130,18 @@ public class Validator {
         }
     }
 
-    private boolean hasValidNeighbor(List<Token> tokens, int i, boolean right) {
+    private boolean insufficientNeighbor(List<Token> tokens, int i, boolean right) {
         return right
-                ? i < tokens.size() - 1 && (
-                tokens.get(i + 1).getType() == TokenType.OPEN_PARENTHESES
-                        || tokens.get(i + 1).getType() == TokenType.OPERAND
-                        || tokens.get(i + 1).getType() == TokenType.FUNCTION
-                        || OperatorUtils.isLeftSidedOperator(tokens.get(i + 1).getLexeme())
-        )
-                : i > 0 && (
-                tokens.get(i - 1).getType() == TokenType.CLOSE_PARENTHESES
-                        || tokens.get(i - 1).getType() == TokenType.OPERAND
-                        || tokens.get(i - 1).getType() == TokenType.FUNCTION
-                        || OperatorUtils.isRightSidedOperator(tokens.get(i - 1).getLexeme())
-        );
+                ? i >= tokens.size() - 1
+                || (tokens.get(i + 1).getType() != TokenType.OPEN_PARENTHESES
+                && tokens.get(i + 1).getType() != TokenType.OPERAND
+                && tokens.get(i + 1).getType() != TokenType.FUNCTION
+                && !OperatorUtils.isLeftSidedOperator(tokens.get(i + 1).getLexeme()))
+                : i <= 0
+                || (tokens.get(i - 1).getType() != TokenType.CLOSE_PARENTHESES
+                && tokens.get(i - 1).getType() != TokenType.OPERAND
+                && tokens.get(i - 1).getType() != TokenType.FUNCTION
+                && !OperatorUtils.isRightSidedOperator(tokens.get(i - 1).getLexeme()));
     }
 
     /**

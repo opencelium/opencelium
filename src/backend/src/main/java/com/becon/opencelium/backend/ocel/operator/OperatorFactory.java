@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.ocel.operator;
 
+import com.becon.opencelium.backend.execution.operator.Contains;
 import com.becon.opencelium.backend.ocel.operator.operators.*;
 
 public class OperatorFactory {

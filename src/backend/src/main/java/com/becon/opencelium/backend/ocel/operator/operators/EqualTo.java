@@ -5,7 +5,7 @@ import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
-import com.becon.opencelium.backend.ocel.common.ValueUtils;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
 public class EqualTo implements BinaryOperator {
     @Override

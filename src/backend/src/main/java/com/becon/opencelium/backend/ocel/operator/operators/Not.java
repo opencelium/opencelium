@@ -4,7 +4,7 @@ import com.becon.opencelium.backend.ocel.operator.Arity;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.operator.UnaryOperator;
-import com.becon.opencelium.backend.ocel.common.ValueUtils;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
 public class Not implements UnaryOperator {
 

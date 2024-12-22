@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.ocel.common;
+package com.becon.opencelium.backend.ocel.utils;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 

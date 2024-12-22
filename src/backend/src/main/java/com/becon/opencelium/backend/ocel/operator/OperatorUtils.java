@@ -1,26 +1,10 @@
 package com.becon.opencelium.backend.ocel.operator;
 
-import com.becon.opencelium.backend.ocel.common.Utils;
+import com.becon.opencelium.backend.ocel.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 public class OperatorUtils {
-    private static final List<String> independentOperators;
-
-    static {
-        independentOperators = new ArrayList<>();
-        independentOperators.add(OperatorEnum.AND.getName());
-        independentOperators.add(OperatorEnum.OR.getName());
-        independentOperators.add(OperatorEnum.GREATER_THAN_OR_EQUAL_TO.getName());
-        independentOperators.add(OperatorEnum.GREATER_THAN.getName());
-        independentOperators.add(OperatorEnum.LESS_THAN_OR_EQUAL_TO.getName());
-        independentOperators.add(OperatorEnum.LESS_THAN.getName());
-        independentOperators.add(OperatorEnum.NOT_EQUAL_TO.getName());
-        independentOperators.add(OperatorEnum.EQUAL_TO.getName());
-        independentOperators.add(OperatorEnum.NOT.getName());
-    }
-
     public static boolean isOperator(String token) {
         return OperatorEnum.fromName(token) != null;
     }
@@ -41,14 +25,11 @@ public class OperatorUtils {
         return operator.getArity() == Arity.UNARY && operator.isLeftSided();
     }
 
-    public static String findStartingOperator(char[] chars, int i) {
-        for (String op : independentOperators)
-            if (Utils.startsWith(op, chars, i))
-                return op;
-        return null;
-    }
-
-    public static boolean startsWithOperator(char[] chars, int i) {
-        return findStartingOperator(chars, i) != null;
+    public static OperatorEnum findStartingOperator(char[] chars, int i) {
+        return Arrays.stream(OperatorEnum.values())
+                .sorted((a, b) -> b.getName().length() - a.getName().length())
+                .filter(x -> Utils.startsWith(x.getName(), chars, i))
+                .findFirst()
+                .orElse(null);
     }
 }

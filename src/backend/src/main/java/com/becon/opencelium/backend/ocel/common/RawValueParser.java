@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.ocel.common;
 
 import com.becon.opencelium.backend.ocel.exception.*;
 import com.becon.opencelium.backend.ocel.operand.OperandUtils;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
 import java.util.ArrayList;
 import java.util.List;

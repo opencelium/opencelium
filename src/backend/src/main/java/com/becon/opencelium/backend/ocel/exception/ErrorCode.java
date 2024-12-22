@@ -18,7 +18,6 @@ public enum ErrorCode {
     INSUFFICIENT_OPERAND("insufficient.operand"),
     INVALID_ASSOCIATION_BETWEEN_OPERATOR_AND_OPERANDS("invalid.association.between.operator.and.operand"),
 
-    RESULT_VALUE_IS_NOT_BOOLEAN("result.value.is.not.bool"),
     UNEXPECTED_END_OF_EXPRESSION("unexpected.end.of.expression"),
     UNEXPECTED_EXCEPTION("unexpected.exception"),
 

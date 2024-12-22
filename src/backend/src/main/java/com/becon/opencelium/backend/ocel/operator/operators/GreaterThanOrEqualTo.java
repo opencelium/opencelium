@@ -5,8 +5,8 @@ import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
-import com.becon.opencelium.backend.ocel.common.DateUtils;
-import com.becon.opencelium.backend.ocel.common.ValueUtils;
+import com.becon.opencelium.backend.ocel.utils.DateUtils;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
 public class GreaterThanOrEqualTo implements BinaryOperator {
     @Override
@@ -15,6 +15,9 @@ public class GreaterThanOrEqualTo implements BinaryOperator {
             return ValueUtils.compareTo(o1, o2) >= 0;
         }
         if (DateUtils.isDate(o1) && DateUtils.isDate(o2)) {
+            return DateUtils.compareTo(o1, o2) >= 0;
+        }
+        if (DateUtils.isDateTime(o1) && DateUtils.isDateTime(o2)) {
             return DateUtils.compareTo(o1, o2) >= 0;
         }
         throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);

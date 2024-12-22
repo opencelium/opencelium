@@ -27,10 +27,6 @@ public class InvalidExpressionException extends Exception {
         return new InvalidExpressionException(ErrorCode.INVALID_ASSOCIATION_BETWEEN_OPERATOR_AND_OPERANDS, "Invalid expression");
     }
 
-    public static InvalidExpressionException resultValueIsNotBoolean(Object resultValue) {
-        return new InvalidExpressionException(ErrorCode.RESULT_VALUE_IS_NOT_BOOLEAN, resultValue.toString());
-    }
-
     public static InvalidExpressionException insufficientOperand() {
         return new InvalidExpressionException(ErrorCode.INSUFFICIENT_OPERAND, "No sufficient operands");
     }

@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.ocel.operand;
 
-import com.becon.opencelium.backend.ocel.common.ReferenceUtils;
-import com.becon.opencelium.backend.ocel.common.ValueUtils;
+import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
 import java.util.List;
 

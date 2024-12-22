@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.ocel.common;
+package com.becon.opencelium.backend.ocel.utils;
 
 public class Utils {
 

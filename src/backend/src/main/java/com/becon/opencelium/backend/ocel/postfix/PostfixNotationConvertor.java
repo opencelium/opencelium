@@ -30,7 +30,7 @@ public class PostfixNotationConvertor {
                         if (top.getType() != TokenType.OPERATOR) {
                             break;
                         } else {
-                            output.add(token);
+                            output.add(top);
                         }
                     }
                 }
