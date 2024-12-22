@@ -1,12 +1,17 @@
 package com.becon.opencelium.backend.oc997;
 
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.invoker.service.InvokerService;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,25 +21,37 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 @Service
 public class SupportFileServiceImp implements SupportFileService {
-    @Autowired
-    private ConnectionService sqlService;
-    @Autowired
-    private ConnectionMngService mongoService;
+    private final ConnectionService connectionSqlService;
+    private final ConnectionMngService connectionMngService;
+    private final ConnectorService connectorSqlService;
+    private final InvokerService invokerService;
 
     @Value("${support.files.directory:src/main/resources/support-files}")
     private String baseFolder;
 
     public static final String GET_URL = "/api/connection/support-file/%d/%s"; // /api/connection/support-file/{connectionId}/{zipFileName}
-    public static final String FILE_NAME = "%d_%s_support_%d"; // {connectionId}_{e | s}_support_{timestamp}
     public static final String SUCCESS_PATTERN = "%d_s_support_*.zip"; // {connectionId}_s_support_*.zip
 
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
+
+    public SupportFileServiceImp(
+            ConnectionService connectionSqlService,
+            ConnectionMngService connectionMngService,
+            ConnectorService connectorSqlService,
+            InvokerService invokerService
+    ) {
+        this.connectionSqlService = connectionSqlService;
+        this.connectionMngService = connectionMngService;
+        this.connectorSqlService = connectorSqlService;
+        this.invokerService = invokerService;
+    }
 
     @PostConstruct
     public void setup() {
@@ -126,8 +143,42 @@ public class SupportFileServiceImp implements SupportFileService {
         throw new RuntimeException("Support file for successful execution not found for connectionId = " + connectionId);
     }
 
+    @Override
+    public void createSupportFile(Long connectionId, String type) {
+        Connection connection = connectionSqlService.getById(connectionId);
+
+        // create temporary file collection directory:
+        String directory = connectionId + "_" + type + "_support";
+
+        try {
+            Files.createDirectories(getPath(connectionId.toString(), directory));
+
+            // copy invoker files:
+            Connector from = connectorSqlService.getById(connection.getFromConnector());
+            File fromInvoker = invokerService.findFileByInvokerName(from.getInvoker());
+            Path fromDestination = getPath(connectionId.toString(), directory, from.getInvoker() + ".xml");
+            Files.copy(fromInvoker.toPath(), fromDestination, StandardCopyOption.REPLACE_EXISTING);
+
+            Connector to = connectorSqlService.getById(connection.getToConnector());
+            File toInvoker = invokerService.findFileByInvokerName(to.getInvoker());
+            Path toDestination = getPath(connectionId.toString(), directory, to.getInvoker() + ".xml");
+            Files.copy(toInvoker.toPath(), toDestination, StandardCopyOption.REPLACE_EXISTING);
+
+            // create json copy of connection
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            ConnectionDTO cdto = connectionSqlService.getFullConnection(connectionId);
+            Path path = getPath(connectionId.toString(), directory, "connection_template.json");
+            File json = path.toFile();
+            objectMapper.writeValue(json, cdto);
+        } catch (IOException e) {
+            logger.error("Failed to create support file for connectionId = '" + connection + "'");
+            throw new RuntimeException(e);
+        }
+    }
+
     private void throwIfConnectionNotExistsById(Long connectionId) {
-        boolean exists = sqlService.existsById(connectionId) && mongoService.existsByConnectionId(connectionId);
+        boolean exists = connectionSqlService.existsById(connectionId) && connectionMngService.existsByConnectionId(connectionId);
 
         if (!exists) {
             throw new ConnectionNotFoundException(connectionId);
