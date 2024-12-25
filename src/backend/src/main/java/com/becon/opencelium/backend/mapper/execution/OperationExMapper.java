@@ -12,7 +12,7 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
-import com.becon.opencelium.backend.utility.EndpointUtility;
+import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -165,7 +165,7 @@ public class OperationExMapper {
         List<ParameterDTO> parameters = getHeaderParameters(request.getHeader(), mediaType);
 
         //add all query parameters
-        int indexOfQuestionSign = EndpointUtility.findIndexOfQuesSign(request.getEndpoint());
+        int indexOfQuestionSign = PathAndReferenceUtility.findIndexOfQuesSign(request.getEndpoint());
         if (indexOfQuestionSign != -1) {
             String query = request.getEndpoint().substring(indexOfQuestionSign + 1); //get all queries
             parameters.addAll(getQueryParameters(query, mediaType));
@@ -244,10 +244,10 @@ public class OperationExMapper {
             return;
         }
         value = value.trim();
-        List<String> pairs = EndpointUtility.splitByDelimiter(value, ';');
+        List<String> pairs = PathAndReferenceUtility.splitByDelimiter(value, ';');
 
         for (String kv : pairs) {
-            List<String> keyVal = EndpointUtility.splitByDelimiter(kv, '=');
+            List<String> keyVal = PathAndReferenceUtility.splitByDelimiter(kv, '=');
             SchemaDTO schemaDTO = new SchemaDTO();
             schemaDTO.setType(DataType.STRING);
             ParameterDTO parameterDTO = new ParameterDTO();
@@ -287,7 +287,7 @@ public class OperationExMapper {
             return Collections.emptyList();
         } else {
             List<ParameterDTO> list = new ArrayList<>();
-            List<String> subPaths = EndpointUtility.splitByDelimiter(path, '/');
+            List<String> subPaths = PathAndReferenceUtility.splitByDelimiter(path, '/');
             for (String subPath : subPaths) {
                 if (!subPath.contains("{") || !subPath.contains("}")) {
                     continue;
@@ -326,7 +326,7 @@ public class OperationExMapper {
         Map<String, String> parametersMap = new HashMap<>(); //stores string and array parameters only
         Tree objectParametersTree = new Tree(); //stores object parameters
 
-        List<String[]> pairs = EndpointUtility.getQueryVariables(query);
+        List<String[]> pairs = PathAndReferenceUtility.getQueryVariables(query);
         //loop for storing all parameters to parametersMap
         for (String[] p : pairs) {
             parametersMap.merge(p[0], p[1] == null ? "" : p[1], (oldV, newV) -> oldV + "&" + newV);
@@ -403,7 +403,20 @@ public class OperationExMapper {
             return null;
         }
         SchemaDTO schemaDTO = new SchemaDTO();
+
+
+        String type = body.getType();
+        if ("array".equals(type)) {
+            body.setType("object");
+            schemaDTO.setType(DataType.ARRAY);
+            schemaDTO.setItems(new ArrayList<>() {{
+                add(getSchema(body, connectionId, methodName));
+            }});
+            return schemaDTO;
+        }
+
         schemaDTO.setType(DataType.OBJECT);
+
         Map<String, SchemaDTO> props = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : fields.entrySet()) {
             LinkedList<String> hierarchy = new LinkedList<>();
@@ -687,8 +700,8 @@ public class OperationExMapper {
     private String extractNameOfRef(String param) {
         if (param.matches(RegExpression.wrappedDirectRef)) {
             return param.substring(2, param.length() - 2);
-        } else if (param.matches(RegExpression.enhancement)) {
-            return param.substring(3, param.length() - 2);
+        } else if (("#" + param).matches(RegExpression.enhancement)) {
+            return param.substring(2, param.length() - 2);
         } else if (param.matches(RegExpression.requestData)) {
             return param.substring(1, param.length() - 1);
         } else if (param.matches(RegExpression.webhook)) {

@@ -29,7 +29,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -58,7 +57,6 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Configuration
 @EnableWebSecurity
@@ -165,6 +163,7 @@ public class SecurityConfiguration {
 
         DefaultLdapAuthoritiesPopulator authoritiesPopulator = new DefaultLdapAuthoritiesPopulator(ldapContextSource(), groupSearchBase);
         authoritiesPopulator.setGroupSearchFilter(searchFilter);
+        authoritiesPopulator.setSearchSubtree(true);
         authoritiesPopulator.setAuthorityMapper(this::ldapAuthorityMapper);
 
         return authoritiesPopulator;
@@ -220,16 +219,8 @@ public class SecurityConfiguration {
 
     private GrantedAuthority ldapAuthorityMapper(Map<String, List<String>> userGroups) {
         List<String> groups = userGroups.get(SpringSecurityLdapTemplate.DN_KEY);
-        if (groups == null || groups.isEmpty()) {
-            throw new AuthenticationServiceException("User should be a member of at least one group");
-        }
 
-        String ocRole = ldapProperties.getGroupRoleMapping().stream()
-                .filter(mapping -> Objects.equals(groups.get(0), mapping.getLdapGroup()))
-                .findFirst()
-                .map(LdapProperties.Group2Role::getOcRole)
-                .orElse(ldapProperties.getDefaultRole());
-
-        return new SimpleGrantedAuthority(ocRole);
+        // returns LDAP groupDN
+        return new SimpleGrantedAuthority(groups.get(0));
     }
 }

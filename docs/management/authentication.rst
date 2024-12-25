@@ -45,37 +45,41 @@ Under *spring* -> *security*, please set the required parameters:
 
    ldap:
       # LDAP server URL
-      urls: ldap://ldap.forumsys.com:389
+      urls: ldap://srvmucudcb01.becon.de:7389
 
       # User search base
-      user-search-base: dc=example
+      user-search-base: ou=User,ou=BECON,dc=becon,dc=de
 
       # Group search base
-      group-search-base: dc=example
+      group-search-base: ou=Groups,ou=BECON,dc=becon,dc=de
 
       # LDAP manager credentials
-      username: cn=read-only-admin,dc=example,dc=com
-      password: password
+      username: uid=otrs-ldap,ou=Special,ou=User,ou=BECON,dc=becon,dc=de
+      password: $Verzeichnis$
 
       # Where to search for roles/groups
-      group-search-filter: (uniquemember={0})
+      # Usually, the unique identifier for OpenLDAP is uniqueMember={0},
+      # while for Active Directory, it is member={0} but check your LDAP settings
+      group-search-filter: (member={0})
 
       # User search filter
-      user-search-filter: (uuid={0})
+      # Usually, the unique identifier for OpenLDAP is mailPrimaryAddress={0},
+      # while for Active Directory, it is mail={0} but check your LDAP settings
+      user-search-filter: (mailPrimaryAddress={0})
 
       # Maps groups between LDAP and the application
       group-role-mapping:
-        - ldap-group: ou=mathematicians,dc=example,dc=com
+        - ldap-group: cn=FUL-Intern,ou=Grouping Users,ou=Groups,ou=BECON,dc=becon,dc=de
           oc-role: Admin
-        - ldap-group: ou=scientists,dc=example,dc=com
+        - ldap-group: cn=asdasFUL--Intern,ou=Grouping Users,ou=Groups,ou=BECON,dc=becon,dc=de
           oc-role: User
 
       # Default role if no mapping is found between LDAP and the application
       default-role: User
 
       # Activate or deactivate logs during authentication
-      show-logs: true
-
+      show-logs: false
+      
       # Timeout for LDAP authentication (in milliseconds)
       timeout: 30000
 

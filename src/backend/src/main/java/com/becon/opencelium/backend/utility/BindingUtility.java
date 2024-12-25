@@ -1,11 +1,14 @@
 package com.becon.opencelium.backend.utility;
 
 import com.becon.opencelium.backend.constant.RegExpression;
+import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 
 import java.util.*;
+
+import static com.becon.opencelium.backend.utility.PathAndReferenceUtility.rebuildReference;
 
 public class BindingUtility {
 
@@ -87,12 +90,7 @@ public class BindingUtility {
             if (fb.getId().equals(id)) {
                 StringBuilder sb = new StringBuilder();
                 for (LinkedFieldMng from : fb.getFrom()) {
-                    sb.append(from.getColor())
-                            .append(".(")
-                            .append(from.getType())
-                            .append(")")
-                            .append(from.getField() == null ? "" : "." + from.getField())
-                            .append(";");
+                    sb.append(rebuildReference(from.getColor(), from.getType(), from.getField())).append(";");
                 }
                 sb.deleteCharAt(sb.length() - 1);
                 return sb.toString();
@@ -104,12 +102,7 @@ public class BindingUtility {
     private static String getRefOfFBForPathOrHeader(List<LinkedFieldMng> froms) {
         StringBuilder sb = new StringBuilder();
         for (LinkedFieldMng from : froms) {
-            sb.append(from.getColor())
-                    .append(".(")
-                    .append(from.getType())
-                    .append(")")
-                    .append(from.getField() == null ? "" : "." + from.getField())
-                    .append(";");
+            sb.append(rebuildReference(from.getColor(), from.getType(), from.getField())).append(";");
         }
         sb.deleteCharAt(sb.length() - 1);
         return "{%" + sb + "%}";
@@ -119,25 +112,25 @@ public class BindingUtility {
 //---------------------------------------------- bind ----------------------------------------------------//
 
     public static String doWithPath(String endpoint, String id, List<LinkedFieldMng> from) {
-        List<String> refs = from.stream().map(x -> x.getColor() + ".(" + x.getType() + ")" + (x.getField() == null ? "" : "." + x.getField())).toList();
-        int indexOfQuestionSign = EndpointUtility.findIndexOfQuesSign(endpoint);
+        List<String> refs = from.stream().map(x -> rebuildReference(x.getColor(), x.getType(), x.getField())).toList();
+        int indexOfQuestionSign = PathAndReferenceUtility.findIndexOfQuesSign(endpoint);
         String query = null;
         if (indexOfQuestionSign != -1) {
             query = endpoint.substring(indexOfQuestionSign + 1);
-            List<String[]> variables = EndpointUtility.getQueryVariables(query);
+            List<String[]> variables = PathAndReferenceUtility.getQueryVariables(query);
             out:
             for (String[] p : variables) {
                 if (p[1].matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
                     // p[1] can be:
-                    // pure ref - '{%#ffffff.(response).a.b%}'
-                    // one enhancement having several references - '{%#ffffff.(response).a.b;#ffffff.(response).a.c%}'
-                    // more than one enhancement - 'userId_{%#ffffff.(response).user.id%}, username_{%#ffffff.(response).user.name%}'
+                    // pure ref - '{%#ffffff.(response).body.$.a.b%}'
+                    // one enhancement having several references - '{%#ffffff.(response).body.$.a.b;#ffffff.(response).a.c%}'
+                    // more than one enhancement - 'userId_{%#ffffff.(response).body.$.user.id%}, username_{%#ffffff.(response).body.$.user.name%}'
                     for (String ref : refs) {
                         if (!p[1].contains(ref)) {
                             continue out;
                         }
                     }
-                    p[1] = EndpointUtility.bindExactlyPlace(p[1], refs, id);
+                    p[1] = PathAndReferenceUtility.bindExactlyPlace(p[1], refs, id);
                 }
             }
             StringJoiner sj = new StringJoiner("&");
@@ -153,7 +146,7 @@ public class BindingUtility {
             path = endpoint.substring(0, indexOfQuestionSign);
         }
 
-        List<String> subPaths = EndpointUtility.splitByDelimiter(path, '/');
+        List<String> subPaths = PathAndReferenceUtility.splitByDelimiter(path, '/');
         out:
         for (int i = 0; i < subPaths.size(); i++) {
             if (subPaths.get(i).matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
@@ -162,7 +155,7 @@ public class BindingUtility {
                         continue out;
                     }
                 }
-                subPaths.set(i, EndpointUtility.bindExactlyPlace(subPaths.get(i), refs, id));
+                subPaths.set(i, PathAndReferenceUtility.bindExactlyPlace(subPaths.get(i), refs, id));
             }
         }
         StringJoiner sj = new StringJoiner("/");
@@ -177,29 +170,33 @@ public class BindingUtility {
     }
 
     public static void doWithHeader(Map<String, String> header, String fieldName, String id, List<LinkedFieldMng> from) {
-        List<String> refs = from.stream().map(x -> x.getColor() + ".(" + x.getType() + ")" + (x.getField() == null ? "" : "." + x.getField())).toList();
+        List<String> refs = from.stream().map(x -> rebuildReference(x.getColor(), x.getType(), x.getField())).toList();
         header.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue().equals(fieldName))
                 .findFirst()
-                .ifPresent(entry -> entry.setValue(EndpointUtility.bindExactlyPlace(entry.getValue(), refs, id)));
+                .ifPresent(entry -> entry.setValue(PathAndReferenceUtility.bindExactlyPlace(entry.getValue(), refs, id)));
     }
 
-    public static Map<String, Object> doWithBody(Map<String, Object> src, List<String> fieldPaths, String id, String format) {
+    public static Map<String, Object> doWithBody(BodyMng body, List<String> fieldPaths, String id, String format) {
         if (format.equals("xml")) {
-            return doWithXMLBody(src, fieldPaths, id);
+            return doWithXMLBody(body.getFields(), body.getType(), fieldPaths, id);
         } else {
-            return doWithJsonBody(src, fieldPaths, id);
+            return doWithJsonBody(body.getFields(), body.getType(), fieldPaths, id);
         }
     }
 
 //--------------------------------------------------------------------------------------------------------//
 //---------------------------------------------JSON(bind)-------------------------------------------------//
 
-    private static Map<String, Object> doWithJsonBody(Map<String, Object> src, List<String> fieldPaths, String id) {
+    private static Map<String, Object> doWithJsonBody(Map<String, Object> fields, String type, List<String> fieldPaths, String id) {
         String name = fieldPaths.get(0);
+        if (type.equals("array") && fieldPaths.size() > 1 && (name.matches("\\d+") || name.matches("\\[.*]"))) {
+            fieldPaths.remove(0);
+            name = fieldPaths.get(0);
+        }
         Map<String, Object> resultMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : src.entrySet()) {
+        for (Map.Entry<String, Object> entry : fields.entrySet()) {
             if (name.equals(entry.getKey()) && fieldPaths.size() == 1) {// the last field
                 resultMap.put(entry.getKey(), putIdToBody(entry.getValue(), id));
             } else if (name.equals(entry.getKey())) { // object or primitive
@@ -227,7 +224,7 @@ public class BindingUtility {
                 return putIdToBody(value, id);
             } else { // object
                 Map<String, Object> map = (Map<String, Object>) value;
-                return doWithJsonBody(map, fieldPaths, id);
+                return doWithJsonBody(map, "object", fieldPaths, id);
             }
         } else { // array
             if (index.isEmpty() || index.equals("*")) {
@@ -241,7 +238,7 @@ public class BindingUtility {
                 List<Object> list = (List<Object>) value;
                 if (list.get(idx) instanceof Map<?, ?>) { //array of objects
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
-                    mapList.set(idx, doWithJsonBody(mapList.get(idx), fieldPaths, id));
+                    mapList.set(idx, doWithJsonBody(mapList.get(idx), "object", fieldPaths, id));
                     return mapList;
                 } else { // array of primitives
                     list.set(idx, putIdToBody(list.get(idx), id));
@@ -254,7 +251,7 @@ public class BindingUtility {
                 if (list.get(0) instanceof Map<?, ?>) { // array of objects
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
                     return mapList.stream()
-                            .map(f -> doWithJsonBody(f, fieldPaths, id));
+                            .map(f -> doWithJsonBody(f, "object", fieldPaths, id));
                 } else { // array of primitives
                     return list.stream()
                             .map(f -> putIdToBody(f, id))
@@ -270,10 +267,14 @@ public class BindingUtility {
     private static final String ocValue = "__oc__value";
     private static final String ocAttributes = "__oc__attributes";
 
-    private static Map<String, Object> doWithXMLBody(Map<String, Object> src, List<String> fieldPaths, String id) {
+    private static Map<String, Object> doWithXMLBody(Map<String, Object> fields, String type, List<String> fieldPaths, String id) {
         String name = fieldPaths.get(0);
+        if (type.equals("array") && fieldPaths.size() > 1 && (name.matches("\\d+") || name.matches("\\[.*]"))) {
+            fieldPaths.remove(0);
+            name = fieldPaths.get(0);
+        }
         Map<String, Object> resultMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : src.entrySet()) {
+        for (Map.Entry<String, Object> entry : fields.entrySet()) {
             if (name.equals(entry.getKey())) { // object or primitive
                 fieldPaths.remove(0);
                 resultMap.put(entry.getKey(), processXML(entry.getValue(), fieldPaths, id, null));
@@ -291,7 +292,7 @@ public class BindingUtility {
     @SuppressWarnings("unchecked")
     private static Object processXML(Object value, List<String> fieldPaths, String id, String index) {
         if (index == null) {
-            if (fieldPaths.isEmpty() || fieldPaths.size() == 1 && EndpointUtility.startsWith(fieldPaths.get(0), "@")) { // primitive type
+            if (fieldPaths.isEmpty() || fieldPaths.size() == 1 && PathAndReferenceUtility.startsWith(fieldPaths.get(0), "@")) { // primitive type
                 if (value instanceof Map<?, ?>) {
                     Map<String, Object> map = (Map<String, Object>) value;
                     if (map.size() == 2 && map.containsKey(ocValue) && map.containsKey(ocAttributes)) {
@@ -308,7 +309,7 @@ public class BindingUtility {
                 return putIdToBody(value, id);
             } else { // object
                 Map<String, Object> map = (Map<String, Object>) value;
-                return doWithXMLBody(map, fieldPaths, id);
+                return doWithXMLBody(map, "object", fieldPaths, id);
             }
         } else { // array
             if (index.isEmpty()) {
@@ -322,7 +323,7 @@ public class BindingUtility {
                 List<Object> list = (List<Object>) value;
                 if (list.get(idx) instanceof Map<?, ?>) { //array of objects
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
-                    mapList.set(idx, doWithXMLBody(mapList.get(idx), fieldPaths, id));
+                    mapList.set(idx, doWithXMLBody(mapList.get(idx), "object", fieldPaths, id));
                     return mapList;
                 } else { // array of primitives
                     list.set(idx, putIdToBody(list.get(idx), id));
@@ -335,7 +336,7 @@ public class BindingUtility {
                 if (list.get(0) instanceof Map<?, ?>) { // array of objects
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
                     return mapList.stream()
-                            .map(f -> doWithXMLBody(f, fieldPaths, id));
+                            .map(f -> doWithXMLBody(f, "object", fieldPaths, id));
                 } else { // array of primitives
                     return list.stream()
                             .map(f -> putIdToBody(f, id))

@@ -9,47 +9,24 @@ import java.util.Map;
 
 public class MachineUtility {
 
-    private static final String CMD_GET_UUID_WIN = "wmic csproduct get UUID";
-    private static final String CMD_GET_UUID_LIN_OR_MAC = "cat /etc/machine-id";
-
-    private static final String CMD_GET_SYS_ID_WIN = "wmic csproduct get UUID";
-//    public static final String CMD_GET_Proc_ID_LINUX = "lscpu | grep 'Serial'";
-    private static final String CMD_GET_SYS_ID_LINUX = "dmidecode -s system-uuid";
-    private static final String CMD_GET_SYS_ID_MAC = "ioreg -rd1 -c IOPlatformExpertDevice | grep IOPlatformUUID";
-
     private MachineUtility() {}
     public static String getMachineUUID() {
 //        return "MACHINE_UUID";
-        String uuid = null;
         String os = System.getProperty("os.name").toLowerCase();
+        String command;
 
-        try {
-            Process process = null;
-            if (os.contains("win")) {
-                // Windows command to get the UUID
-                process = Runtime.getRuntime().exec(CMD_GET_UUID_WIN);
-            } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
-                // Linux/Mac command to get the UUID
-                process = Runtime.getRuntime().exec(CMD_GET_UUID_LIN_OR_MAC);
-            }
-
-            if (process != null) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // For Windows, skip the first line
-                    if (!line.isEmpty() && !line.contains("UUID")) {
-                        uuid = line.trim();
-                        break;
-                    }
-                }
-                reader.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (os.contains("win")) {
+            command = "wmic csproduct get UUID";
+        } else if (os.contains("mac")) {
+            command = "system_profiler SPHardwareDataType | grep 'Hardware UUID' | awk '{print $3}'";
+        } else if (os.contains("nix") || os.contains("nux")) {
+            command = "sudo dmidecode -s system-uuid";
+        } else {
+            throw new UnsupportedOperationException("Unsupported OS: " + os);
         }
 
-        return uuid == null ? "" : uuid;
+        return executeCommand(command);
+//        return uuid == null ? "" : uuid;
     }
 
     public static String getMacAddress() {
@@ -84,20 +61,19 @@ public class MachineUtility {
     public static String getSystemUuid() {
 //        return "PROCESSOR_ID";
         String os = System.getProperty("os.name").toLowerCase();
-        try {
-            if (os.contains("win")) {
-                return getWindowsUUID();
-            } else if (os.contains("nix") || os.contains("nux")) {
-                return getLinuxUUID();
-            } else if (os.contains("mac")) {
-                return getMacUUID();
-            } else {
-                throw new UnsupportedOperationException("Operating system not supported for fetching System UUID.");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        String command;
+
+        if (os.contains("win")) {
+            command = "wmic bios get serialnumber";
+        } else if (os.contains("mac")) {
+            command = "system_profiler SPHardwareDataType | awk '/Serial/ {print $4}'";
+        } else if (os.contains("nix") || os.contains("nux")) {
+            command = "sudo dmidecode -s system-serial-number";
+        } else {
+            throw new UnsupportedOperationException("Unsupported OS: " + os);
         }
 
+        return executeCommand(command);
     }
 
     public static String getComputerName() {
@@ -116,7 +92,7 @@ public class MachineUtility {
         Map<String, String> parameters = new LinkedHashMap<>();
         parameters.put("Machine UUID", MachineUtility.getMachineUUID());
         parameters.put("MAC Address", MachineUtility.getMacAddress());
-        parameters.put("System ID", MachineUtility.getSystemUuid());
+        parameters.put("System UUID", MachineUtility.getSystemUuid());
         parameters.put("Computer Name", MachineUtility.getComputerName());
 
         StringBuilder missingParameters = new StringBuilder();
@@ -134,49 +110,46 @@ public class MachineUtility {
 
         // Throw exception if any parameters are missing
         if (missingParameters.length() > 0) {
-            throw new IllegalArgumentException(missingParameters.toString() + "Please fill them or grant permissions.");
+            throw new IllegalArgumentException(missingParameters + "Please grant permissions.");
         }
 
         return result.toString();
     }
 
-
-    private static String getWindowsUUID() throws Exception {
-        Process process = Runtime.getRuntime().exec("wmic csproduct get UUID");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line != null && !line.isEmpty() && !line.startsWith("UUID")) {
-                return line.trim();  // Return the UUID from Windows command
+    private static String executeCommand(String command) {
+        StringBuilder result = new StringBuilder();
+        try {
+            ProcessBuilder builder = new ProcessBuilder();
+            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                builder.command("cmd.exe", "/c", command);
+            } else {
+                builder.command("sh", "-c", command);
             }
+            Process process = builder.start();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line).append("\n");
+                }
+            }
+
+            process.waitFor();
+            String output = result.toString().trim();
+
+            // Handle specific parsing if needed for commands with headers, e.g., Windows wmic
+            if (command.contains("wmic")) {
+                String[] lines = output.split("\\R");
+                if (lines.length > 1) {
+                    output = lines[1].trim();
+                }
+            }
+
+            return output.isEmpty() ? "" : output;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
         }
-        return "";  // Return null if UUID is not found
     }
 
-    private static String getLinuxUUID() throws Exception {
-        String[] cmd = { "/bin/sh", "-c", "dmidecode -s system-uuid" };
-        Process process = Runtime.getRuntime().exec(cmd);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line != null && !line.isEmpty()) {
-                return line.trim();  // Return the UUID from Linux command
-            }
-        }
-        return "";  // Return null if UUID is not found
-    }
-
-    private static String getMacUUID() throws Exception {
-        String[] cmd = { "/bin/sh", "-c", "ioreg -rd1 -c IOPlatformExpertDevice | grep IOPlatformUUID" };
-        Process process = Runtime.getRuntime().exec(cmd);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.contains("IOPlatformUUID")) {
-                String[] parts = line.split("\"");  // Extract UUID from the output
-                return parts[3].trim();  // Return the UUID from macOS command
-            }
-        }
-        return "";  // Return null if UUID is not found
-    }
 }

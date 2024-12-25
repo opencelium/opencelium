@@ -1,12 +1,15 @@
 package com.becon.opencelium.backend.database.mysql.entity;
 
 import com.becon.opencelium.backend.enums.ActivReqStatus;
+import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacValidator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -33,6 +36,9 @@ public class ActivationRequest implements HmacValidator {
     @Column(name = "status", columnDefinition = "ENUM('PENDING', 'PROCESSED', 'EXPIRED')", nullable = false)
     private ActivReqStatus status = ActivReqStatus.PENDING;
 
+    @Column(name = "active", nullable = false)
+    private boolean active;
+
     @Transient
     private String machineUuid = MachineUtility.getMachineUUID();
 
@@ -44,6 +50,8 @@ public class ActivationRequest implements HmacValidator {
 
     @Transient
     private String computerName = MachineUtility.getComputerName();
+
+    private final static Logger logger = LoggerFactory.getLogger(ActivationRequest.class);
 
     public String getId() {
         return id;
@@ -75,6 +83,14 @@ public class ActivationRequest implements HmacValidator {
 
     public void setTtl(int ttl) {
         this.ttl = ttl;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public ActivReqStatus getStatus() {
@@ -120,6 +136,11 @@ public class ActivationRequest implements HmacValidator {
     @Override
     public boolean verify(String anotherHmac) {
         if (this.id == null) {
+            return false;
+        }
+        if (this.status != null && getStatus().equals(ActivReqStatus.EXPIRED)) {
+            logger.error("Couldn't activate license. Activation request(" + hmac + ") has been expired and " +
+                    "license is not valid anymore. Generate new Activation Request.");
             return false;
         }
         if (this.hmac == null) {

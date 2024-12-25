@@ -23,6 +23,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Repository
@@ -32,4 +33,8 @@ public interface SessionRepository extends JpaRepository<Session, String> {
     @Modifying
     @Query("DELETE FROM Session s WHERE s.userId = :userId")
     int deleteByUserId(@Param("userId") int userId);
+
+    @Modifying
+    @Query("UPDATE Session s SET s.lastAccessed = :lastAccessed WHERE s.id = :sessionId")
+    void updateLastAccessed(@Param("sessionId") String sessionId, @Param("lastAccessed") Date lastAccessed);
 }

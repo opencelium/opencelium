@@ -17,4 +17,5 @@ public interface RegExpression {
     String enhancement = "#\\{%[0-9a-fA-F]{24}%\\}";
     String requestData = "\\{(.*?)\\}";
     String pageRef = "@\\{([^}]+)\\}";
+    String referencePath = "(body\\.\\$\\..+)|(header\\.\\$\\..+)|(path)";
 }

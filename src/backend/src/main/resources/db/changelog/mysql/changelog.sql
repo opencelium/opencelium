@@ -451,7 +451,7 @@ ADD COLUMN IF NOT EXISTS totp_secret_key VARCHAR(255);
 
 --changeset 4.2:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 DROP TABLE IF EXISTS user_session;
-CREATE TABLE user_session (
+CREATE TABLE IF NOT EXISTS user_session (
     session_id VARCHAR(255) NOT NULL PRIMARY KEY,
     user_id int(11) NOT NULL,
     ip_address VARCHAR(45),
@@ -492,17 +492,18 @@ DROP TABLE IF EXISTS subscription;
 DROP TABLE IF EXISTS activation_request;
 DROP TABLE IF EXISTS operation_usage_history_detail;
 DROP TABLE IF EXISTS operation_usage_history;
-CREATE TABLE activation_request(
+CREATE TABLE IF NOT EXISTS activation_request(
     id         VARCHAR(255) PRIMARY KEY,
     created_at TIMESTAMP    NOT NULL,
     hmac       VARCHAR(255) UNIQUE,
     ttl        INT UNSIGNED NOT NULL,
     status     ENUM ('PENDING', 'PROCESSED', 'EXPIRED') DEFAULT 'PENDING',
+    active     BOOLEAN      NOT NULL,
     INDEX idx_hmac (hmac)
 );
 
 --changeset 4.2:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-CREATE TABLE subscription(
+CREATE TABLE IF NOT EXISTS subscription(
     id                    VARCHAR(255) PRIMARY KEY,
     subId                 VARCHAR(255) UNIQUE NOT NULL,
     license_id            VARCHAR(255) UNIQUE NOT NULL,
@@ -516,7 +517,7 @@ CREATE TABLE subscription(
 );
 
 --changeset 4.2:8 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-CREATE TABLE operation_usage_history(
+CREATE TABLE IF NOT EXISTS operation_usage_history(
     id               BIGINT PRIMARY KEY AUTO_INCREMENT,
     subId            VARCHAR(255) NOT NULL,
     license_id       VARCHAR(255) NOT NULL,
@@ -526,7 +527,7 @@ CREATE TABLE operation_usage_history(
 );
 
 --changeset 4.2:9 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-CREATE TABLE operation_usage_history_detail(
+CREATE TABLE IF NOT EXISTS operation_usage_history_detail(
     id               BIGINT PRIMARY KEY AUTO_INCREMENT,
     start_date       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     operation_usage  BIGINT       NOT NULL,
@@ -535,7 +536,7 @@ CREATE TABLE operation_usage_history_detail(
 );
 
 --changeset 4.2:10 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-CREATE TABLE connection_editor_settings
+CREATE TABLE IF NOT EXISTS connection_editor_settings
 (
     id                BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id           INT       NOT NULL,
@@ -546,3 +547,18 @@ CREATE TABLE connection_editor_settings
 
 --changeset 4.2:11 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE user CHANGE totp_enabled totp_process_completed BOOLEAN DEFAULT FALSE;
+
+--changeset 4.2:12 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+DELETE FROM role_has_permission WHERE role_id=2 AND component_id=4;
+INSERT IGNORE INTO role_has_permission (role_id,component_id,permission_id) VALUES (2,6,1),(2,6,2),(2,6,3),(2,6,4);
+
+--changeset 4.2:13 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE operation_usage_history ADD COLUMN from_invoker VARCHAR(255) NOT NULL;
+ALTER TABLE operation_usage_history ADD COLUMN to_invoker VARCHAR(255) NOT NULL;
+ALTER TABLE operation_usage_history ADD COLUMN modified_at TIMESTAMP NOT NULL;
+
+--changeset 4.2:14 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE user ADD COLUMN IF NOT EXISTS username VARCHAR(255) DEFAULT NULL;
+ALTER TABLE user DROP PRIMARY KEY;
+ALTER TABLE user ADD PRIMARY KEY (id);
+ALTER TABLE user MODIFY email varchar(45) DEFAULT NULL;

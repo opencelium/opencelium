@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.openapi;
 
 public class UserCredentialDTO {
     private String email;
+    private String username;
     private String password;
 
     public String getEmail() {
@@ -10,6 +11,14 @@ public class UserCredentialDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

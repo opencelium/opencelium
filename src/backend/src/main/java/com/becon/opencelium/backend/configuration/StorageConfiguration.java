@@ -25,12 +25,18 @@ import com.becon.opencelium.backend.database.mysql.service.ActivationRequestServ
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.RequestDataService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
+import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.storage.UserStorageService;
+import com.becon.opencelium.backend.subscription.quartz.OperationUsageReportJob;
+import com.becon.opencelium.backend.subscription.quartz.QuartzCronUpdater;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
+import org.quartz.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -45,12 +51,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Configuration
 public class StorageConfiguration {
 
+    private static final Logger log = LoggerFactory.getLogger(StorageConfiguration.class);
     private final UserStorageService userStorageService;
     private final ConnectorService connectorService;
     private final InvokerContainer invokerContainer;
@@ -62,6 +70,8 @@ public class StorageConfiguration {
 
     @Autowired
     private ResourceLoader resourceLoader;
+    @Autowired
+    private Scheduler quartzScheduler;
 
     private static final String JAR_PREFIX = "opencelium.backend-";
     private static final String JAR_EXTENSION = ".jar";
@@ -90,7 +100,8 @@ public class StorageConfiguration {
     public void createStorageAfterStartup() {
         // upload freeLicense
         setInitialLicense();
-
+        // updates report schedule
+        updateReportSchedule();
         // creating 'src/main/resources/templates/' directory
         createDirectory(PathConstant.TEMPLATE);
         // creating 'src/main/resources/assistant/' directory
@@ -120,6 +131,53 @@ public class StorageConfiguration {
         cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, File::isDirectory, "");
     }
 
+    private void updateReportSchedule() {
+        String cron = "0 0 23 * * ?";
+        schedulerReport(cron);
+    }
+    private void schedulerReport(String cron){
+        String triggerName = "operationUsageReportJobTrigger";
+        String triggerGroup = "USAGE_REPORT";
+        JobKey jobKey = JobKey.jobKey("operationUsageReportJob", triggerGroup);
+        TriggerKey triggerKey = TriggerKey.triggerKey(triggerName, triggerGroup);
+
+        try {
+            if (quartzScheduler.checkExists(jobKey)) {
+                QuartzCronUpdater quartzCronUpdater = new QuartzCronUpdater(quartzScheduler);
+                quartzCronUpdater.updateCronExpression(triggerKey.getName(), triggerKey.getGroup(), cron);
+                return;
+            }
+
+            JobDetail jobDetail = JobBuilder.newJob(OperationUsageReportJob.class)
+                    .withIdentity(jobKey)
+                    .storeDurably()
+                    .build();
+            Trigger trigger = TriggerBuilder.newTrigger()
+                    .forJob(jobDetail)
+                    .withIdentity(triggerKey)
+                    .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                    .build();
+
+            quartzScheduler.scheduleJob(jobDetail, trigger);
+        } catch (SchedulerException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+//    private void setReportSchedule() {
+//        JobDetail jobDetail = JobBuilder.newJob(OperationUsageReportJob.class)
+//                .withIdentity("operationUsageReportJob")
+//                .storeDurably()
+//                .build();
+//
+//        CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule("00 00 23 * * ?");
+//        TriggerBuilder.newTrigger()
+//                .forJob(jobDetail)
+//                .withIdentity("operationUsageReportJobTrigger")
+//                .withSchedule(scheduleBuilder)
+//                .build();
+//    }
+
     private void setInitialLicense() {
         if (!doesFileExist(PathConstant.LICENSE + "init-license.txt")) {
             return;
@@ -127,8 +185,10 @@ public class StorageConfiguration {
         try {
             ActivationRequest ar = activationRequestService.readFreeAR().orElse(null);
             String initLicense = LicenseKeyUtility.readFreeLicense();
-            Subscription subscription = subscriptionService.convertToSub(initLicense, ar);
-            if (!subscriptionService.exists(subscription.getSubId())) {
+            Subscription subscription = subscriptionService.convertToSub(initLicense,ar);
+            if(!subscriptionService.exists(subscription.getSubId())) {
+                Objects.requireNonNull(ar).setStatus(ActivReqStatus.PROCESSED);
+                ar.setActive(true);
                 activationRequestService.save(ar);
                 subscriptionService.save(subscription);
             }
@@ -138,18 +198,18 @@ public class StorageConfiguration {
     }
 
     private void cleanOldFiles(String folder, Predicate<File> filter, String prefix) {
-        Path directoryPath = Paths.get(folder);
-        if (Files.exists(directoryPath) && Files.isDirectory(directoryPath)) {
-            try (Stream<File> files = Files.list(directoryPath).map(Path::toFile).filter(filter)) {
+        Path path = Paths.get(folder);
+        if (Files.exists(path) && Files.isDirectory(path)) {
+            try (Stream<File> files = Files.list(path).map(Path::toFile).filter(filter)) {
 
                 Double ocVersion = environment.getProperty("opencelium.version", Double.class, 0.0);
                 int intValue = ocVersion.intValue();
 
                 files.filter(f -> !f.getName().startsWith(prefix + intValue + ".")).forEach(f -> {
                     if (forceDelete(f)) {
-                        System.out.println(f.getAbsolutePath() + " - file/folder is deleted");
+                        log.info("{} - file/folder is deleted", f.getAbsolutePath());
                     } else {
-                        System.out.println(f.getAbsolutePath() + " - file/folder cannot be deleted");
+                        log.warn("{} - file/folder cannot be deleted", f.getAbsolutePath());
                     }
                 });
             } catch (Exception e) {
@@ -200,9 +260,9 @@ public class StorageConfiguration {
         if (Files.notExists(filePath)) {
             File directory = new File(name);
             if (directory.mkdir()) {
-                System.out.println("Directory has been created: " + name);
+                log.info("Directory has been created: {}", name);
             } else {
-                System.out.println("Failed to create directory: " + name);
+                log.warn("Failed to create directory: {}", name);
             }
         }
     }

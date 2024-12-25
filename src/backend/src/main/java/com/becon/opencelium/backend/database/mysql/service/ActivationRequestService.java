@@ -10,7 +10,7 @@ public interface ActivationRequestService {
     boolean verify(ActivationRequest activationRequest, String hmac);
     ActivationRequest generateActivReq();
     void activateTTL(ActivationRequest activationRequest);
-    void expireAll();
+    void deactivateAll();
     ActivationRequest getActiveAR();
     File createFile(String ar, String fileName);
     ActivationRequest findByHmac(String hmac);

@@ -13,7 +13,7 @@ import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.utility.BindingUtility;
-import com.becon.opencelium.backend.utility.EndpointUtility;
+import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -93,7 +93,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     public List<FieldBindingMng> getAllByConnectionId(Long connectionId) {
         List<FieldBindingMng> fieldBindingMngs = new ArrayList<>();
         List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
-        if (enhancements!=null) {
+        if (enhancements != null) {
             for (Enhancement enhancement : enhancements) {
                 fieldBindingMngs.add(enhancementService.toFieldBinding(enhancement));
             }
@@ -196,6 +196,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         }
 
         for (int i = 0; i < fieldBindings.size(); i++) {
+            fieldBindings.get(i).setId(null);
             FieldBindingMng savedFB = save(fieldBindings.get(i)); // savepoint
             try {
                 bindIds(savedFB, methods);
@@ -249,20 +250,24 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
         for (LinkedFieldMng toField : fb.getTo()) {
             for (MethodMng method : methods) {
                 if (toField.getColor().equals(method.getColor())) {
-                    switch (toField.getType()) {
+                    String type = PathAndReferenceUtility.getPlaceTypeOfRef(toField.getField());
+                    switch (type) {
                         case "path" -> {
                             String endpoint = method.getRequest().getEndpoint();
                             endpoint = BindingUtility.doWithPath(endpoint, fb.getId(), fb.getFrom());
                             method.getRequest().setEndpoint(endpoint);
                         }
-                        case "header" -> BindingUtility.doWithHeader(method.getRequest().getHeader(), toField.getField(), fb.getId(), fb.getFrom());
-                        case "request" -> {
-                            List<String> fieldPaths = EndpointUtility.splitByDelimiter(toField.getField(), '.', true);
-                            Map<String, Object> fields = method.getRequest().getBody().getFields();
-                            Map<String, Object> boundFields = BindingUtility.doWithBody(fields, fieldPaths, fb.getId(), method.getRequest().getBody().getFormat());
+                        case "header" -> {
+                            String fieldName = PathAndReferenceUtility.getHeaderParameterName(toField.getField());
+                            BindingUtility.doWithHeader(method.getRequest().getHeader(), fieldName, fb.getId(), fb.getFrom());
+                        }
+                        case "body" -> {
+                            String field = PathAndReferenceUtility.getActualPathOfBody(toField.getField());
+                            List<String> fieldPaths = PathAndReferenceUtility.splitByDelimiter(field, '.', true);
+                            Map<String, Object> boundFields = BindingUtility.doWithBody(method.getRequest().getBody(), fieldPaths, fb.getId(), method.getRequest().getBody().getFormat());
                             method.getRequest().getBody().setFields(boundFields);
                         }
-                        default -> throw new RuntimeException("UNSUPPORTED_TYPE: " + toField.getType());
+                        default -> throw new RuntimeException("UNSUPPORTED_TYPE: " + type);
                     }
                     break;
                 }
