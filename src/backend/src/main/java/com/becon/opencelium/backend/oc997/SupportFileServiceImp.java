@@ -7,28 +7,40 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
+import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
+import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class SupportFileServiceImp implements SupportFileService {
     private final ConnectionService connectionSqlService;
+    private final Mapper<ConnectionOldDTO, CtionTemplateResource> oldDto2ResourceMapper;
+    private final Mapper<ConnectionDTO, ConnectionOldDTO> dto2OldDtoMapper;
     private final ConnectionMngService connectionMngService;
     private final ConnectorService connectorSqlService;
     private final InvokerService invokerService;
@@ -43,11 +55,14 @@ public class SupportFileServiceImp implements SupportFileService {
 
     public SupportFileServiceImp(
             ConnectionService connectionSqlService,
+            Mapper<ConnectionOldDTO, CtionTemplateResource> oldDto2ResourceMapper,
+            Mapper<ConnectionDTO, ConnectionOldDTO> dto2OldDtoMapper,
             ConnectionMngService connectionMngService,
-            ConnectorService connectorSqlService,
-            InvokerService invokerService
+            ConnectorService connectorSqlService, InvokerService invokerService
     ) {
         this.connectionSqlService = connectionSqlService;
+        this.oldDto2ResourceMapper = oldDto2ResourceMapper;
+        this.dto2OldDtoMapper = dto2OldDtoMapper;
         this.connectionMngService = connectionMngService;
         this.connectorSqlService = connectorSqlService;
         this.invokerService = invokerService;
@@ -144,6 +159,7 @@ public class SupportFileServiceImp implements SupportFileService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void createSupportFile(Long connectionId, String type) {
         Connection connection = connectionSqlService.getById(connectionId);
 
@@ -153,27 +169,39 @@ public class SupportFileServiceImp implements SupportFileService {
         try {
             Files.createDirectories(getPath(connectionId.toString(), directory));
 
-            // copy invoker files:
-            Connector from = connectorSqlService.getById(connection.getFromConnector());
-            File fromInvoker = invokerService.findFileByInvokerName(from.getInvoker());
-            Path fromDestination = getPath(connectionId.toString(), directory, from.getInvoker() + ".xml");
-            Files.copy(fromInvoker.toPath(), fromDestination, StandardCopyOption.REPLACE_EXISTING);
-
-            Connector to = connectorSqlService.getById(connection.getToConnector());
-            File toInvoker = invokerService.findFileByInvokerName(to.getInvoker());
-            Path toDestination = getPath(connectionId.toString(), directory, to.getInvoker() + ".xml");
-            Files.copy(toInvoker.toPath(), toDestination, StandardCopyOption.REPLACE_EXISTING);
-
             // create json copy of connection
             ObjectMapper objectMapper = new ObjectMapper();
 
-            ConnectionDTO cdto = connectionSqlService.getFullConnection(connectionId);
+            ConnectionDTO dto = connectionSqlService.getFullConnection(connectionId);
+            ConnectionOldDTO oldDTO = dto2OldDtoMapper.toDTO(dto);
             Path path = getPath(connectionId.toString(), directory, "connection_template.json");
             File json = path.toFile();
-            objectMapper.writeValue(json, cdto);
+            objectMapper.writeValue(json, oldDto2ResourceMapper.toDTO(oldDTO));
+
+            // copy invoker files:
+            int fromConnectorId = dto.getFromConnector().getConnectorId();
+            Connector fromConnector = connectorSqlService.getById(fromConnectorId);
+            File fromInvoker = invokerService.findFileByInvokerName(fromConnector.getInvoker());
+            Path fromDestination = getPath(connectionId.toString(), directory, fromConnector.getInvoker() + ".xml");
+            Files.copy(fromInvoker.toPath(), fromDestination, StandardCopyOption.REPLACE_EXISTING);
+
+            int toConnectorId = dto.getToConnector().getConnectorId();
+            Connector toConnector = connectorSqlService.getById(toConnectorId);
+            File toInvoker = invokerService.findFileByInvokerName(toConnector.getInvoker());
+            Path toDestination = getPath(connectionId.toString(), directory, toConnector.getInvoker() + ".xml");
+            Files.copy(toInvoker.toPath(), toDestination, StandardCopyOption.REPLACE_EXISTING);
+
+            // convert collected files directory to .zip
+            long time = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+
+            Path source = getPath(connectionId.toString(), directory);
+            Path destination = getPath(connectionId.toString(), directory + "_" + time);
+            zip(source, destination);
         } catch (IOException e) {
             logger.error("Failed to create support file for connectionId = '" + connection + "'");
             throw new RuntimeException(e);
+        } finally {
+            cleanup();
         }
     }
 
@@ -206,5 +234,50 @@ public class SupportFileServiceImp implements SupportFileService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void zip(Path source, Path destination) throws IOException {
+        File sourceDir = source.toFile();
+
+        try (
+                FileOutputStream fos = new FileOutputStream(destination.toFile());
+                ZipOutputStream zipOut = new ZipOutputStream(fos)
+        ) {
+            zip(sourceDir, "", zipOut);
+        }
+    }
+
+    private void zip(File input, String parent, ZipOutputStream output) throws IOException {
+        File[] files = input.listFiles();
+        if (files == null) {
+            return;
+        }
+
+        for (File file : files) {
+            String zipEntryName = parent + file.getName();
+
+            if (file.isDirectory()) {
+                output.putNextEntry(new ZipEntry(zipEntryName + "/"));
+                output.closeEntry();
+
+                zip(file, zipEntryName + "/", output);
+            } else {
+                try (FileInputStream fis = new FileInputStream(file)) {
+                    output.putNextEntry(new ZipEntry(zipEntryName));
+
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = fis.read(buffer)) >= 0) {
+                        output.write(buffer, 0, length);
+                    }
+
+                    output.closeEntry();
+                }
+            }
+        }
+    }
+
+    private void cleanup() {
+
     }
 }
