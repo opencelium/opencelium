@@ -192,11 +192,7 @@ public class SupportFileServiceImp implements SupportFileService {
             Files.copy(toInvoker.toPath(), toDestination, StandardCopyOption.REPLACE_EXISTING);
 
             // convert collected files directory to .zip
-            long time = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
-
-            Path source = getPath(connectionId.toString(), directory);
-            Path destination = getPath(connectionId.toString(), directory + "_" + time);
-            zip(source, destination);
+            zip(connectionId, directory);
         } catch (IOException e) {
             logger.error("Failed to create support file for connectionId = '" + connection + "'");
             throw new RuntimeException(e);
@@ -236,43 +232,49 @@ public class SupportFileServiceImp implements SupportFileService {
         }
     }
 
-    private void zip(Path source, Path destination) throws IOException {
-        File sourceDir = source.toFile();
+    private void zip(Long connectionId, String directory) throws IOException {
+        long time = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+        String zipName = directory + "_" + time;
+
+        File source = getPath(connectionId.toString(), directory).toFile();
+        File destination = getPath(connectionId.toString(), zipName + ".zip").toFile();
 
         try (
-                FileOutputStream fos = new FileOutputStream(destination.toFile());
+                FileOutputStream fos = new FileOutputStream(destination);
                 ZipOutputStream zipOut = new ZipOutputStream(fos)
         ) {
-            zip(sourceDir, "", zipOut);
+            zip(source, zipName, zipOut);
         }
     }
 
-    private void zip(File input, String parent, ZipOutputStream output) throws IOException {
-        File[] files = input.listFiles();
-        if (files == null) {
+    private static void zip(File file, String fileName, ZipOutputStream zipOut) throws IOException {
+        if (file.isDirectory()) {
+            if (fileName.endsWith("/")) {
+                zipOut.putNextEntry(new ZipEntry(fileName));
+                zipOut.closeEntry();
+            } else {
+                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
+                zipOut.closeEntry();
+            }
+
+            File[] children = file.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    zip(child, fileName + "/" + child.getName(), zipOut);
+                }
+            }
+
             return;
         }
 
-        for (File file : files) {
-            String zipEntryName = parent + file.getName();
+        try (FileInputStream fis = new FileInputStream(file)) {
+            ZipEntry zipEntry = new ZipEntry(fileName);
+            zipOut.putNextEntry(zipEntry);
+            byte[] bytes = new byte[1024];
+            int length;
 
-            if (file.isDirectory()) {
-                output.putNextEntry(new ZipEntry(zipEntryName + "/"));
-                output.closeEntry();
-
-                zip(file, zipEntryName + "/", output);
-            } else {
-                try (FileInputStream fis = new FileInputStream(file)) {
-                    output.putNextEntry(new ZipEntry(zipEntryName));
-
-                    byte[] buffer = new byte[1024];
-                    int length;
-                    while ((length = fis.read(buffer)) >= 0) {
-                        output.write(buffer, 0, length);
-                    }
-
-                    output.closeEntry();
-                }
+            while ((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
             }
         }
     }
