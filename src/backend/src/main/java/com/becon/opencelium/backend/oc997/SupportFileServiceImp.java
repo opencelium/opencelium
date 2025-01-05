@@ -316,28 +316,59 @@ public class SupportFileServiceImp implements SupportFileService {
                     String dirName = dir.getFileName().toString();
 
                     if (dirName.equals(connectionId + "_e_support") || dirName.equals(connectionId + "_s_support")) {
-                        Files.walkFileTree(dir, new SimpleFileVisitor<>() {
-                            @Override
-                            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                                Files.delete(file);
-
-                                return FileVisitResult.CONTINUE;
-                            }
-
-                            @Override
-                            public FileVisitResult postVisitDirectory(Path innerDir, IOException exc) throws IOException {
-                                Files.delete(innerDir);
-
-                                return FileVisitResult.CONTINUE;
-                            }
-                        });
+                        deleteDirectory(dir);
                     }
 
                     return FileVisitResult.CONTINUE;
                 }
             });
+
+            enforceLimit(base, connectionId + "_e_support", 5);
+            enforceLimit(base, connectionId + "_s_support", 1);
         } catch (IOException e) {
             logger.error("Failed to cleanup temporary support file directory for connectionId = '" + connectionId + "'");
         }
+    }
+
+    private void enforceLimit(Path base, String prefix, int limit) throws IOException {
+        try (Stream<Path> stream = Files.list(base)) {
+            List<Path> matchingDirs = stream
+                    .filter(path -> Files.isRegularFile(path) && path.getFileName().toString().startsWith(prefix))
+                    .sorted((p1, p2) -> {
+                        long time1 = extractTime(p1.getFileName().toString(), prefix);
+                        long time2 = extractTime(p2.getFileName().toString(), prefix);
+
+                        return Long.compare(time1, time2);
+                    })
+                    .toList();
+
+            for (int i = 0; i < matchingDirs.size() - limit; i++) {
+                deleteDirectory(matchingDirs.get(i));
+            }
+        }
+    }
+
+    private long extractTime(String dirName, String prefix) {
+        try {
+            return Long.parseLong(dirName.substring(prefix.length()));
+        } catch (NumberFormatException e) {
+            return Long.MAX_VALUE;
+        }
+    }
+
+    private void deleteDirectory(Path dir) throws IOException {
+        Files.walkFileTree(dir, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path innerDir, IOException exc) throws IOException {
+                Files.delete(innerDir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }
