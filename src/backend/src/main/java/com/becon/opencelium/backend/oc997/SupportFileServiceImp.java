@@ -24,10 +24,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -49,8 +52,6 @@ public class SupportFileServiceImp implements SupportFileService {
     private String baseFolder;
 
     public static final String GET_URL = "/api/connection/support-file/%d/%s"; // /api/connection/support-file/{connectionId}/{zipFileName}
-    public static final String SUCCESS_PATTERN = "%d_s_support_*.zip"; // {connectionId}_s_support_*.zip
-
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
 
     public SupportFileServiceImp(
@@ -78,6 +79,9 @@ public class SupportFileServiceImp implements SupportFileService {
             }
 
             logger.info("Base folder has been setup for support files, path = " + baseFolder);
+
+            // do cleanup
+            cleanup();
         } catch (IOException e) {
             logger.error("Failed to setup base folder for support files, path = " + baseFolder);
         }
@@ -145,7 +149,7 @@ public class SupportFileServiceImp implements SupportFileService {
         throwIfConnectionNotExistsById(connectionId);
 
         // try to find successful execution support file by pattern
-        String filePattern = String.format(SUCCESS_PATTERN, connectionId);
+        String filePattern = connectionId + "_s_support_*.zip";
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(getPath(connectionId.toString()), filePattern)) {
             for (Path path : stream) {
@@ -194,10 +198,10 @@ public class SupportFileServiceImp implements SupportFileService {
             // convert collected files directory to .zip
             zip(connectionId, directory);
         } catch (IOException e) {
-            logger.error("Failed to create support file for connectionId = '" + connection + "'");
+            logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
         } finally {
-            cleanup();
+            cleanup(connectionId);
         }
     }
 
@@ -280,6 +284,60 @@ public class SupportFileServiceImp implements SupportFileService {
     }
 
     private void cleanup() {
+        Path path = getPath();
 
+        try (Stream<Path> files = Files.list(path)) {
+            files.forEach(file -> {
+                String fileName = file.getFileName().toString();
+
+                if (Files.isDirectory(file) && fileName.matches("\\d+")) {
+                    Long connectionId = Long.parseLong(fileName);
+                    cleanup(connectionId);
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private void cleanup(Long connectionId) {
+        Path base = getPath(connectionId.toString());
+
+        try {
+            Files.walkFileTree(base, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    String dirName = dir.getFileName().toString();
+
+                    if (dirName.equals(connectionId + "_e_support") || dirName.equals(connectionId + "_s_support")) {
+                        Files.walkFileTree(dir, new SimpleFileVisitor<>() {
+                            @Override
+                            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                                Files.delete(file);
+
+                                return FileVisitResult.CONTINUE;
+                            }
+
+                            @Override
+                            public FileVisitResult postVisitDirectory(Path innerDir, IOException exc) throws IOException {
+                                Files.delete(innerDir);
+
+                                return FileVisitResult.CONTINUE;
+                            }
+                        });
+                    }
+
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            logger.error("Failed to cleanup temporary support file directory for connectionId = '" + connectionId + "'");
+        }
     }
 }
