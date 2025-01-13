@@ -50,6 +50,8 @@ public class SupportFileServiceImp implements SupportFileService {
 
     @Value("${support.files.directory:src/main/resources/support-files}")
     private String baseFolder;
+    @Value("${logging.file.name:src/main/resources/logs/application.log}")
+    private String logFilePath;
 
     public static final String GET_URL = "/api/connection/support-file/%d/%s"; // /api/connection/support-file/{connectionId}/{zipFileName}
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
@@ -165,6 +167,8 @@ public class SupportFileServiceImp implements SupportFileService {
     @Override
     @Transactional(readOnly = true)
     public void createSupportFile(Long connectionId, String type) {
+        long time = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+
         Connection connection = connectionSqlService.getById(connectionId);
 
         // create temporary file collection directory:
@@ -195,8 +199,13 @@ public class SupportFileServiceImp implements SupportFileService {
             Path toDestination = getPath(connectionId.toString(), directory, toConnector.getInvoker() + ".xml");
             Files.copy(toInvoker.toPath(), toDestination, StandardCopyOption.REPLACE_EXISTING);
 
+            // copy log file:
+            Path logPath = getLogPath();
+            Path destination = getPath(connectionId.toString(), directory, connectionId + "_" + time + ".log");
+            Files.copy(logPath, destination, StandardCopyOption.REPLACE_EXISTING);
+
             // convert collected files directory to .zip
-            zip(connectionId, directory);
+            zip(time, connectionId, directory);
         } catch (IOException e) {
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
@@ -236,8 +245,7 @@ public class SupportFileServiceImp implements SupportFileService {
         }
     }
 
-    private void zip(Long connectionId, String directory) throws IOException {
-        long time = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+    private void zip(long time, Long connectionId, String directory) throws IOException {
         String zipName = directory + "_" + time;
 
         File source = getPath(connectionId.toString(), directory).toFile();
@@ -370,5 +378,12 @@ public class SupportFileServiceImp implements SupportFileService {
                 return FileVisitResult.CONTINUE;
             }
         });
+    }
+
+    private Path getLogPath() {
+        // Returns absolute path to base directory and/or its subdirectories
+        Path path = Paths.get(logFilePath);
+
+        return path.isAbsolute() ? path : Paths.get(System.getProperty("user.dir")).resolve(path).normalize();
     }
 }
