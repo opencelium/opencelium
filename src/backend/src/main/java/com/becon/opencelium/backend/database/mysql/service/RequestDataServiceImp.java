@@ -96,7 +96,7 @@ public class RequestDataServiceImp implements RequestDataService {
             }
             try {
                 decrypt(requestData);
-            } catch (WrongDecryptException e) {
+            } catch (Exception e) {
                 encrypt(requestData);
                 requestDataRepository.save(requestData);
             }
