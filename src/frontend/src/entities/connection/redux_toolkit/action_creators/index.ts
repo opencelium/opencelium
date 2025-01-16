@@ -16,6 +16,8 @@
 import ConnectionCreators from "./ConnectionCreators";
 import GraphQLCreators from './GraphQLCreators';
 import EditorCreators from "./EditorCreators";
+import RuleCreators from "./RuleCreators";
+import SupportFileCreators from "./SupportFileCreators";
 
 /*
 * TODO: check graphql action creator
@@ -24,5 +26,7 @@ import EditorCreators from "./EditorCreators";
 export default {
     ...ConnectionCreators,
     ...GraphQLCreators,
-    ...EditorCreators
+    ...EditorCreators,
+    ...RuleCreators,
+    ...SupportFileCreators,
 }

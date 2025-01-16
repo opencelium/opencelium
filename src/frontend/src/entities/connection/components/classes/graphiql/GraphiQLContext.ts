@@ -16,7 +16,7 @@
 import GraphiQLRequest from "@root/components/classes/graphiql/GraphiQLRequest";
 import GraphiQLRequestWithDynamicToken from "@root/components/classes/graphiql/GraphiQLRequestWithDynamicToken";
 import GraphiQLRequestWithStaticToken from "@root/components/classes/graphiql/GraphiQLRequestWithStaticToken";
-import { GraphQLRequestProps } from "@entity/connection/requests/interfaces/IGraphQL";
+import { GraphQLRequestProps } from "@root/requests/interfaces/IGraphQL";
 
 export default class GraphiQLContext {
 
