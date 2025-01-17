@@ -14,12 +14,21 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {getLogs} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import Button from "@basic_components/buttons/Button";
 import Rule from "@root/classes/Rule";
+import FormSelect from "@change_component/form_elements/FormSelect";
+import InputSelect from "@app_component/base/input/select/InputSelect";
 
 const LogsButton = ({schedule}: {schedule: ISchedule}) => {
     const dispatch = useAppDispatch();
     const {gettingLogs} = useAppSelector((state: RootState) => state.connectionReducer);
     const [startAction, toggleAction] = useState<boolean>(false);
     const [isToggled, toggle] = useState<boolean>(false);
+    const [level, setLevel] = useState<any>( {label: 'Light', value: 'light'});
+    const levelOptions = [
+        {label: 'Custom', value: 'custom'},
+        {label: 'Light', value: 'light'},
+        {label: 'Medium', value: 'medium'},
+        {label: 'Strict', value: 'strict'}
+    ]
     const [maskedUrl, toggleUrl] = useState<boolean>(false);
     const [maskedHeader, toggleHeader] = useState<boolean>(false);
     const [maskedRequest, toggleRequest] = useState<boolean>(false);
@@ -40,6 +49,47 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
         }))
     }
     useEffect(() => {
+        switch(level?.value) {
+            case 'light':
+                toggleUrl(true);
+                toggleHeader(false);
+                toggleRequest(false);
+                toggleResponse(false);
+                break;
+            case 'medium':
+                toggleUrl(true);
+                toggleHeader(true);
+                toggleRequest(false);
+                toggleResponse(false);
+                break;
+            case 'strict':
+                toggleUrl(true);
+                toggleHeader(true);
+                toggleRequest(true);
+                toggleResponse(false);
+                break;
+        }
+    }, [level])
+    useEffect(() => {
+        if (maskedUrl && !maskedHeader && !maskedRequest && !maskedResponse) {
+            if (level?.value !== 'light') {
+                setLevel( {label: 'Light', value: 'light'});
+            }
+        } else if (maskedUrl && maskedHeader && !maskedRequest && !maskedResponse) {
+            if (level?.value !== 'medium') {
+                setLevel( {label: 'Medium', value: 'medium'});
+            }
+        } else if (maskedUrl && maskedHeader && maskedRequest && !maskedResponse) {
+            if (level?.value !== 'strict') {
+                setLevel( {label: 'Strict', value: 'strict'});
+            }
+        } else {
+            if (level?.value !== 'custom') {
+                setLevel( {label: 'Custom', value: 'custom'});
+            }
+        }
+    }, [maskedUrl, maskedHeader, maskedRequest, maskedResponse])
+    useEffect(() => {
         if (gettingLogs === API_REQUEST_STATE.FINISH || gettingLogs === API_REQUEST_STATE.ERROR){
             toggleAction(false);
         }
@@ -56,13 +106,19 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                 size={TextSize.Size_20}
             />
             <Dialog
-                actions={[{label: 'Start collection logs', isLoading: startAction && gettingLogs === API_REQUEST_STATE.START, onClick: startCollectingLogs, id: 'get_logs_button'}, {label: 'Cancel', onClick: toggle, id: 'cancel_button'}]}
+                actions={[{label: 'Start collection logs', isLoading: startAction && gettingLogs === API_REQUEST_STATE.START, onClick: startCollectingLogs, id: 'get_logs_button'}, {label: 'Cancel', onClick: () => toggle(false), id: 'cancel_button'}]}
                 active={isToggled}
-                toggle={toggle}
+                toggle={() => toggle(!isToggled)}
                 title={"Get Logs"}
                 styles={{modal: {minWidth: '650px'}, body: {minHeight: '400px'}}}
             >
                 <LogsButtonStyled>
+                    <InputSelect
+                        label={'Level of masking'}
+                        icon={'filter_list'}
+                        value={level}
+                        onChange={(value) => setLevel(value)}
+                        options={levelOptions}/>
                     <Label>
                         {"URL"}
                         <Button iconSize={20} handleClick={() => toggleUrl(!maskedUrl)} hasBackground={false} icon={maskedUrl ? 'visibility_off' : 'visibility'} />

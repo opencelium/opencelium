@@ -1,9 +1,11 @@
 import {AxiosResponse} from "axios";
 
 export interface SupportFileResponse {
-    connectionId: string,
+    connectionId: number,
     supportFiles: string[],
 }
+
+export type SupportFileResponseProps = keyof SupportFileResponse | string;
 
 export default interface ISupportFileRequest {
     //to download support file by connection id and zip filename

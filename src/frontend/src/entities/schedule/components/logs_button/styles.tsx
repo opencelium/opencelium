@@ -37,14 +37,14 @@ export const HeaderStyled = styled.div`
     border: 1px solid #aaa;
     border-radius: 5px;
     margin-bottom: 10px;
-    padding-left: 10px;
-    padding-top: 10px;
+    padding: 10px 0 0;
     &>table{
         padding: 10px 10px 5px;
         width: 100%;
         &>tr {
             &>td {
                 width: 50%;
+                padding-left: 10px;
             }
         }
     }

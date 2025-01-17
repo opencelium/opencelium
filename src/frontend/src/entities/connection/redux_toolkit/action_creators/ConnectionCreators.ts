@@ -40,11 +40,6 @@ export const getLogs = createAsyncThunk(
             }
             const startScheduleRequest = new ScheduleRequest({endpoint: `/execute/${schedulerId}`});
             await startScheduleRequest.startSchedule();
-            //todo:
-            // need to know that the job has finished
-            // get support files by connection
-            // download file by filename and connection
-
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

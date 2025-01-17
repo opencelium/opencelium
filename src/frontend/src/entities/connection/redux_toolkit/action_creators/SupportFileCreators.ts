@@ -1,9 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { RemoteApiRequestProps } from "@application/requests/interfaces/IApplication";
-import { ApplicationRequest } from "@application/requests/classes/Application";
 import { errorHandler } from "@application/utils/utils";
-import {RuleRequest} from "@root/requests/classes/Rule";
-import {RuleBaseModel, RuleRecordModel} from "@root/requests/models/Rule";
 import {SupportFileRequest} from "@root/requests/classes/SupportFile";
 
 export const downloadSupportFile = createAsyncThunk(
@@ -33,7 +29,8 @@ export const getSupportFilesByConnection = createAsyncThunk(
     async(data: {connectionId: number}, thunkAPI) => {
         try{
             const request = new SupportFileRequest({endpoint: `/${data.connectionId}/list`});
-            await request.getSupportFilesByConnection();
+            const response = await request.getSupportFilesByConnection();
+            return response.data?.supportFiles.length > 0 ? response.data : undefined;
         }catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -43,8 +40,10 @@ export const getSupportFiles = createAsyncThunk(
     'connection/get/all/support-file',
     async(data: never, thunkAPI) => {
         try{
+            return [{connectionId: 1, supportFiles: ['filename1']}]
             const request = new SupportFileRequest({endpoint: `/list`});
-            await request.getSupportFiles();
+            const response = await request.getSupportFiles();
+            return response.data.filter(r => r.supportFiles.length > 0);
         }catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
