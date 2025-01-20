@@ -562,3 +562,14 @@ ALTER TABLE user ADD COLUMN IF NOT EXISTS username VARCHAR(255) DEFAULT NULL;
 ALTER TABLE user DROP PRIMARY KEY;
 ALTER TABLE user ADD PRIMARY KEY (id);
 ALTER TABLE user MODIFY email varchar(45) DEFAULT NULL;
+
+--changeset 4.2:15 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE IF NOT EXISTS masking_rule (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rule_type ENUM ('REGEX', 'JSON_PATH', 'X_PATH') DEFAULT 'REGEX',
+    expression TEXT,
+    mask_pattern TEXT DEFAULT '[MASKED]',
+    connection_id INT(11) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (connection_id) REFERENCES connection(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
