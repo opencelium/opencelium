@@ -1,5 +1,8 @@
 package com.becon.opencelium.backend.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum RuleType {
     REGEX("regex"),
     JSON_PATH("JSONPath"),
@@ -11,20 +14,19 @@ public enum RuleType {
         this.type = type;
     }
 
-    public static RuleType fromValue(String value)  {
-        if (value == null || value.isEmpty()) {
-            return null;
-        }
-
-        return switch (value) {
-            case "regex" -> RuleType.REGEX;
-            case "JSONPath" -> RuleType.JSON_PATH;
-            case "XPath" -> RuleType.X_PATH;
-            default -> throw new RuntimeException("Unknown Rule type was supplied, it should be 'regex' or 'JSONPath' or 'XPath'");
-        };
+    @JsonValue
+    public String getValue() {
+        return type;
     }
 
-    public String getType() {
-        return type;
+    @JsonCreator
+    public static RuleType fromValue(String value) {
+        for (RuleType ruleType : RuleType.values()) {
+            if (ruleType.type.equalsIgnoreCase(value)) {
+                return ruleType;
+            }
+        }
+
+        throw new IllegalArgumentException("Unknown Rule type was supplied, it should be 'regex' or 'JSONPath' or 'XPath'");
     }
 }

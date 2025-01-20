@@ -29,11 +29,11 @@ import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
+import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
@@ -520,4 +520,133 @@ public class ConnectionController {
         }
     }
 
+    @Operation(summary = "Retrieves all masking rules of connection from database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "All rules of a connection have been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionOldDTO.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/{connectionId}/rule/all")
+    public ResponseEntity<List<RuleDTO>> getAllRules(@PathVariable long connectionId) {
+        return ResponseEntity.ok(connectionService.getAllRules(connectionId));
+    }
+
+
+    @Operation(summary = "Retrieves specified masking rule of connection from database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Specified rule of a connection has been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/{connectionId}/rule/{ruleId}")
+    public ResponseEntity<RuleDTO> getOneRule(@PathVariable long connectionId, @PathVariable long ruleId) {
+        return ResponseEntity.ok(connectionService.getOneRule(connectionId, ruleId));
+    }
+
+    @Operation(summary = "Creates set of masking rules for a connection")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Masking rules for a connection have been created successfully",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path="/{connectionId}/rule/list", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<RuleDTO>> saveRuleList(@PathVariable long connectionId, @RequestBody List<RuleDTO> dtos) throws Exception {
+        final URI uri = MvcUriComponentsBuilder
+                .fromController(getClass())
+                .buildAndExpand().toUri();
+
+        return ResponseEntity.created(uri).body(connectionService.saveRuleList(connectionId, dtos));
+    }
+
+    @Operation(summary = "Creates a masking rule for a connection")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Masking rule for a connection has been created successfully",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path="/{connectionId}/rule", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<RuleDTO> saveRule(@PathVariable long connectionId, @RequestBody RuleDTO dto) throws Exception {
+        final URI uri = MvcUriComponentsBuilder
+                .fromController(getClass())
+                .buildAndExpand().toUri();
+
+        return ResponseEntity.created(uri).body(connectionService.saveRule(connectionId, dto));
+    }
+
+    @Operation(summary = "Updates masking rule for a connection")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Masking rule for a connection has been updated successfully",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping(path = "/{connectionId}/rule/{ruleId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateRule(@PathVariable long connectionId, @PathVariable long ruleId, @RequestBody RuleDTO dto) throws Exception {
+        return ResponseEntity.ok(connectionService.updateRule(connectionId, ruleId, dto));
+    }
+
+    @Operation(summary = "Deletes masking rules of a connection by provided connection ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Masking rules of a connection have been deleted successfully.",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping(path = "/{connectionId}/rule/all")
+    public ResponseEntity<?> deleteRuleList(@PathVariable long connectionId) {
+        connectionService.deleteRuleList(connectionId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Deletes a masking rule of a connection by provided connection ID and rule ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Masking rule of a connection has been deleted successfully.",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping(path = "/{connectionId}/rule/{ruleId}")
+    public ResponseEntity<?> deleteRule(@PathVariable long connectionId, @PathVariable long ruleId) {
+        connectionService.deleteRule(connectionId, ruleId);
+        return ResponseEntity.noContent().build();
+    }
 }
