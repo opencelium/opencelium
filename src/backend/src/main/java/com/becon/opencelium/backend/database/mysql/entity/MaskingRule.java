@@ -32,7 +32,7 @@ public class MaskingRule {
     private String expression;
 
     @Column(name = "mask_pattern")
-    private String mask;
+    private String mask = "[MASKED]";
 
     @ManyToOne
     @JoinColumn(name = "connection_id")
