@@ -412,6 +412,7 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RuleDTO> getAllRules(long connectionId) {
         throwIfConnectionNotExists(connectionId);
 
@@ -421,6 +422,7 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RuleDTO getOneRule(long connectionId, long ruleId) {
         throwIfConnectionNotExists(connectionId);
 
@@ -431,6 +433,7 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    @Transactional
     public List<RuleDTO> saveRuleList(long connectionId, List<RuleDTO> dtos) {
         throwIfConnectionNotExists(connectionId);
 
@@ -440,6 +443,7 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    @Transactional
     public RuleDTO saveRule(long connectionId, RuleDTO dto) {
         Connection connection = getById(connectionId);
 
@@ -453,6 +457,7 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    @Transactional
     public RuleDTO updateRule(long connectionId, long ruleId, RuleDTO dto) {
         throwIfConnectionNotExists(connectionId);
 
@@ -466,6 +471,7 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    @Transactional
     public void deleteRuleList(long connectionId) {
         throwIfConnectionNotExists(connectionId);
 
@@ -473,6 +479,7 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    @Transactional
     public void deleteRule(long connectionId, long ruleId) {
         throwIfConnectionNotExists(connectionId);
 
