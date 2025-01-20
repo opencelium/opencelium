@@ -36,7 +36,6 @@ const SupportFilesList: FC<SupportFilesListProps> = permission(ConnectionPermiss
     const CSupportFiles = new SupportFiles(supportFileResponses);
     return (
         <CollectionView
-            hasTopBar={false}
             hasViewSection={false}
             collection={CSupportFiles}
             shouldBeUpdated={shouldBeUpdated}

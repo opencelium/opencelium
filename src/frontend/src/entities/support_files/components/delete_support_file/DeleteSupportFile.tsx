@@ -15,58 +15,60 @@
 
 import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
-import {DownloadSupportFileProps} from './interfaces';
+import {DeleteSupportFileProps} from './interfaces';
 import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
 import {ConnectionPermissions} from "@entity/connection/constants";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {downloadSupportFile} from "@root/redux_toolkit/action_creators/SupportFileCreators";
+import {deleteSupportFile, downloadSupportFile} from "@root/redux_toolkit/action_creators/SupportFileCreators";
 
 
 
-const DownloadSupportFile: FC<DownloadSupportFileProps> =
+const DeleteSupportFile: FC<DeleteSupportFileProps> =
     ({
          supportFileResponse,
      }) => {
         const dispatch = useAppDispatch();
-        const {downloadingSupportFile} = useAppSelector((state: RootState) => state.supportFileReducer);
-        const [isDownloading, setIsDownloading] = useState<boolean>(false);
-        const download = () => {
-            setIsDownloading(true);
-            dispatch(downloadSupportFile({connectionId: supportFileResponse.connection.connectionId, zipFileName: supportFileResponse.supportFiles[0]}));
+        const {deletingSupportFile} = useAppSelector((state: RootState) => state.supportFileReducer);
+        const [isDeleting, setIsDeleting] = useState<boolean>(false);
+        const deleteFile = () => {
+            setIsDeleting(true);
+            dispatch(deleteSupportFile(supportFileResponse.supportFiles[0]));
         }
         useEffect(() => {
-            switch (downloadingSupportFile) {
+            switch (deletingSupportFile) {
                 case API_REQUEST_STATE.FINISH:
                 case API_REQUEST_STATE.ERROR:
-                    if(isDownloading) {
-                        setIsDownloading(false);
+                    if(isDeleting) {
+                        setIsDeleting(false);
                     }
                     break;
             }
-        }, [downloadingSupportFile]);
+        }, [deletingSupportFile]);
         return (
             <PermissionTooltipButton
-                isLoading={isDownloading}
-                target={`download_${supportFileResponse.connection.connectionId.toString()}`}
+                hasConfirmation
+                confirmationText={'Do you really want to delete?'}
+                isLoading={isDeleting}
+                target={`delete_${supportFileResponse.connection.connectionId.toString()}`}
                 position={'top'}
-                tooltip={'Download'}
+                tooltip={'Delete'}
                 hasBackground={false}
-                handleClick={download}
-                icon={'download'}
+                handleClick={deleteFile}
+                icon={'delete'}
                 size={TextSize.Size_20}
-                permission={ConnectionPermissions.UPDATE}
+                permission={ConnectionPermissions.DELETE}
             />
         )
     }
 
-DownloadSupportFile.defaultProps = {
+DeleteSupportFile.defaultProps = {
 }
 
 
 export {
-    DownloadSupportFile,
+    DeleteSupportFile,
 };
 
-export default withTheme(DownloadSupportFile);
+export default withTheme(DeleteSupportFile);

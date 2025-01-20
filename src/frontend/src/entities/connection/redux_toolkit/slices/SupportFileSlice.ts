@@ -27,6 +27,7 @@ import {
 import {RuleRecordModel} from "@root/requests/models/Rule";
 import {SupportFileResponse} from "@root/requests/interfaces/ISupportFile";
 import {
+    deleteSupportFile, deleteSupportFiles,
     downloadSuccessSupportFile,
     downloadSupportFile, getSupportFiles,
     getSupportFilesByConnection
@@ -37,6 +38,8 @@ export interface SupportFileState extends ICommonState{
     downloadingSuccessSupportFile: API_REQUEST_STATE,
     gettingSupportFilesByConnection: API_REQUEST_STATE,
     gettingSupportFiles: API_REQUEST_STATE,
+    deletingSupportFile: API_REQUEST_STATE,
+    deletingSupportFiles: API_REQUEST_STATE,
     currentSupportFileResponse: SupportFileResponse,
     supportFileResponses: SupportFileResponse[],
 }
@@ -45,6 +48,8 @@ const initialState: SupportFileState = {
     downloadingSuccessSupportFile: API_REQUEST_STATE.INITIAL,
     gettingSupportFilesByConnection: API_REQUEST_STATE.INITIAL,
     gettingSupportFiles: API_REQUEST_STATE.INITIAL,
+    deletingSupportFile: API_REQUEST_STATE.INITIAL,
+    deletingSupportFiles: API_REQUEST_STATE.INITIAL,
     currentSupportFileResponse: undefined,
     supportFileResponses: [],
     ...CommonState,
@@ -103,6 +108,30 @@ export const supportFileSlice = createSlice({
         },
         [getSupportFiles.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingSupportFilesByConnection = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [deleteSupportFile.pending.type]: (state) => {
+            state.deletingSupportFile= API_REQUEST_STATE.START;
+        },
+        [deleteSupportFile.fulfilled.type]: (state, action: PayloadAction<string>) => {
+            state.deletingSupportFile= API_REQUEST_STATE.FINISH;
+            state.supportFileResponses = state.supportFileResponses.filter(supportFile => supportFile.supportFiles.findIndex(path => path === action.payload) === -1);
+            state.error = null;
+        },
+        [deleteSupportFile.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.deletingSupportFile = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [deleteSupportFiles.pending.type]: (state) => {
+            state.deletingSupportFiles= API_REQUEST_STATE.START;
+        },
+        [deleteSupportFiles.fulfilled.type]: (state, action: PayloadAction<string[]>) => {
+            state.deletingSupportFiles= API_REQUEST_STATE.FINISH;
+            state.supportFileResponses = state.supportFileResponses.filter(supportFile => action.payload.findIndex(path => supportFile.supportFiles.findIndex(supportFilePath => supportFilePath === path) !== -1) === -1);
+            state.error = null;
+        },
+        [deleteSupportFiles.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.deletingSupportFiles = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }
