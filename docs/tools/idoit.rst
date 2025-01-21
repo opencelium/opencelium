@@ -7,6 +7,8 @@ OpenCelium addon
 
 The opencelium addon for i-doit provides functionalities to manage opencelium webhooks inside of config items or categories.
 
+Download from `Packagecloud <https://packagecloud.io/becon/opencelium_addons>`_.
+
 Follow the steps of the i-doit documentation to install the addon. 
 
 	https://kb.i-doit.com/de/i-doit-add-ons/index.html#installation
