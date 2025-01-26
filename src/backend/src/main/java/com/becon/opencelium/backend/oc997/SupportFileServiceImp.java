@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.oc997;
 
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
@@ -84,6 +85,7 @@ public class SupportFileServiceImp implements SupportFileService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ConnectionSupportFiles> supportFileList() {
         Path path = toPath(base);
 
@@ -95,9 +97,10 @@ public class SupportFileServiceImp implements SupportFileService {
 
                 if (Files.isDirectory(file) && fileName.matches("\\d+")) {
                     Long connectionId = Long.parseLong(fileName);
+                    Connection connection = connectionSqlService.getById(connectionId);
                     List<String> urls = getZipUrls(connectionId, file);
 
-                    result.add(new ConnectionSupportFiles(connectionId, urls));
+                    result.add(new ConnectionSupportFiles(connectionId, connection.getTitle(), urls));
                 }
             });
         } catch (IOException e) {
@@ -116,9 +119,10 @@ public class SupportFileServiceImp implements SupportFileService {
         Path path = toPath(base, connectionId.toString());
 
         if (Files.isDirectory(path)) {
+            Connection connection = connectionSqlService.getById(connectionId);
             List<String> urls = getZipUrls(connectionId, path);
 
-            return new ConnectionSupportFiles(connectionId, urls);
+            return new ConnectionSupportFiles(connectionId, connection.getTitle(), urls);
         } else {
             return new ConnectionSupportFiles(connectionId);
         }
@@ -199,7 +203,7 @@ public class SupportFileServiceImp implements SupportFileService {
 
             // Add log file, then delete it from temporary location:
             String fileName = String.format("%d_%d.log", connectionId, timestamp);
-            Path filePath = toPath(base, fileName);
+            Path filePath = toPath(LOG_LOCATION, fileName);
             addToZip(zipOutputStream, filePath.toFile(), fileName);
             delete(filePath);
         } catch (IOException e) {

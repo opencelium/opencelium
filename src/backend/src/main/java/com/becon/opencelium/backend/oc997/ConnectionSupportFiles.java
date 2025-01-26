@@ -8,6 +8,7 @@ import java.util.List;
 @Resource
 public class ConnectionSupportFiles {
     private Long connectionId;
+    private String connectionTitle;
     private List<String> supportFiles = new ArrayList<>();
 
     public ConnectionSupportFiles() {
@@ -17,8 +18,9 @@ public class ConnectionSupportFiles {
         this.connectionId = connectionId;
     }
 
-    public ConnectionSupportFiles(Long connectionId, List<String> fileUrls) {
+    public ConnectionSupportFiles(Long connectionId, String connectionTitle, List<String> fileUrls) {
         this.connectionId = connectionId;
+        this.connectionTitle = connectionTitle;
         this.supportFiles = fileUrls;
     }
 
@@ -28,6 +30,14 @@ public class ConnectionSupportFiles {
 
     public void setConnectionId(Long connectionId) {
         this.connectionId = connectionId;
+    }
+
+    public String getConnectionTitle() {
+        return connectionTitle;
+    }
+
+    public void setConnectionTitle(String connectionTitle) {
+        this.connectionTitle = connectionTitle;
     }
 
     public List<String> getSupportFiles() {
