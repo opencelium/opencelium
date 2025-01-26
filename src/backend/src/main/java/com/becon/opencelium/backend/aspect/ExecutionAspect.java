@@ -137,7 +137,8 @@ public class ExecutionAspect {
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
         Long connectionId = (Long) context.get("connectionId");
-        supportFileService.createSupportFile(connectionId ,"s");
+        long timestamp = (long) context.get("timestamp");
+        supportFileService.collectFiles(connectionId ,timestamp, "s");
     }
 
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
@@ -155,7 +156,8 @@ public class ExecutionAspect {
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
         Long connectionId = (Long) context.get("connectionId");
-        supportFileService.createSupportFile(connectionId ,"e");
+        long timestamp = (long) context.get("timestamp");
+        supportFileService.collectFiles(connectionId, timestamp, "e");
     }
 
     private long initExecutionObj(int schedulerId) {

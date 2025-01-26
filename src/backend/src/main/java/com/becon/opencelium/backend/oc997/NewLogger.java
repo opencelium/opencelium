@@ -6,14 +6,12 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import com.becon.opencelium.backend.execution.logger.LogMessage;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.utility.LogUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.function.Consumer;
 
 public class NewLogger<T extends LogMessage> {
@@ -23,19 +21,6 @@ public class NewLogger<T extends LogMessage> {
     private final SimpMessagingTemplate simpMessagingTemplate; // sends messages to user via websocket
     private final Logger logger;
 
-    public static final String LOG_LOCATION = "src/main/resources/logs";
-    static {
-        try {
-            Path path = getPath();
-
-            if (!Files.exists(path)) {
-                Files.createDirectories(path);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public NewLogger(boolean isWebsocket, SimpMessagingTemplate simpMessagingTemplate, T logEntity, Long connectionId, long timestamp) {
         this.isWebsocket = isWebsocket;
         this.simpMessagingTemplate = simpMessagingTemplate;
@@ -44,7 +29,7 @@ public class NewLogger<T extends LogMessage> {
         // setup logger to create separate files:
         String id = String.format("%d-%d", connectionId, timestamp);
 
-        Path filePath = getPath(String.format("%d_%d.log", connectionId, timestamp));
+        Path filePath = LogUtility.getPath(connectionId, timestamp);
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
         fileAppender.setName("FileAppender-" + id);
@@ -64,6 +49,18 @@ public class NewLogger<T extends LogMessage> {
         logger.setAdditive(true);
 
         this.logger = logger;
+    }
+
+    public void close() {
+        if (logger instanceof ch.qos.logback.classic.Logger classicLogger) {
+            classicLogger.iteratorForAppenders().forEachRemaining(appender -> {
+                if (appender instanceof FileAppender) {
+                    appender.stop();
+                }
+            });
+
+            classicLogger.detachAndStopAllAppenders();
+        }
     }
 
     public T getLogEntity() {
@@ -94,24 +91,6 @@ public class NewLogger<T extends LogMessage> {
         if (isWebsocket) {
             logEntity.setMessage(message);
             simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, logEntity);
-        }
-    }
-
-    private static Path getPath(String... sub) {
-        // Returns absolute path to base directory and/or its subdirectories
-        Path path = Paths.get(LOG_LOCATION, sub);
-        return path.isAbsolute() ? path : Paths.get(System.getProperty("user.dir")).resolve(path).normalize();
-    }
-
-    public void close() {
-        if (logger instanceof ch.qos.logback.classic.Logger classicLogger) {
-            classicLogger.iteratorForAppenders().forEachRemaining(appender -> {
-                if (appender instanceof FileAppender) {
-                    appender.stop();
-                }
-            });
-
-            classicLogger.detachAndStopAllAppenders();
         }
     }
 }

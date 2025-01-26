@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.oc997;
 
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
@@ -11,6 +10,7 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
+import com.becon.opencelium.backend.utility.LogUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -29,10 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -50,13 +47,11 @@ public class SupportFileServiceImp implements SupportFileService {
 
     @Value("${support.files.directory:src/main/resources/support-files}")
     private String baseFolder;
-    @Value("${logging.file.name:src/main/resources/logs/application.log}")
-    private String logFilePath;
 
     public static final String GET_URL = "/api/connection/support-file/%d/%s"; // /api/connection/support-file/{connectionId}/{zipFileName}
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
 
-    public SupportFileServiceImp(
+    public SupportFileServiceImp (
             ConnectionService connectionSqlService,
             Mapper<ConnectionOldDTO, CtionTemplateResource> oldDto2ResourceMapper,
             Mapper<ConnectionDTO, ConnectionOldDTO> dto2OldDtoMapper,
@@ -74,16 +69,17 @@ public class SupportFileServiceImp implements SupportFileService {
     @PostConstruct
     public void setup() {
         try {
+            // Create base directory to store support files:
             Path path = getPath();
 
             if (!Files.exists(path)) {
                 Files.createDirectories(path);
             }
 
-            logger.info("Base folder has been setup for support files, path = " + baseFolder);
+            // Create base directory to store log files temporarily:
+            LogUtility.setup();
 
-            // do cleanup
-            cleanup();
+            logger.info("Base folders have been setup for support and log files, path = " + baseFolder);
         } catch (IOException e) {
             logger.error("Failed to setup base folder for support files, path = " + baseFolder);
         }
@@ -166,51 +162,52 @@ public class SupportFileServiceImp implements SupportFileService {
 
     @Override
     @Transactional(readOnly = true)
-    public void createSupportFile(Long connectionId, String type) {
-        long time = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
-
-        Connection connection = connectionSqlService.getById(connectionId);
-
+    public void collectFiles(Long connectionId, long timestamp, String type) {
         // create temporary file collection directory:
-        String directory = connectionId + "_" + type + "_support";
+        String zipFileName = connectionId + "_" + type + "_support_" + timestamp + ".zip";
+        Path zipFilePath = getPath(connectionId.toString(), zipFileName);
 
+        // create parent directories if not exists:
         try {
-            Files.createDirectories(getPath(connectionId.toString(), directory));
+            Files.createDirectories(zipFilePath.getParent());
+        } catch (IOException e) {
+            logger.error("Failed to create support file directory connectionId = '" + connectionId + "'");
+            throw new RuntimeException(e);
+        }
 
-            // create json copy of connection
-            ObjectMapper objectMapper = new ObjectMapper();
-
+        try (
+                FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
+                ZipOutputStream zipOutputStream = new ZipOutputStream(fos)
+        ) {
             ConnectionDTO dto = connectionSqlService.getFullConnection(connectionId);
-            ConnectionOldDTO oldDTO = dto2OldDtoMapper.toDTO(dto);
-            Path path = getPath(connectionId.toString(), directory, "connection_template.json");
-            File json = path.toFile();
-            objectMapper.writeValue(json, oldDto2ResourceMapper.toDTO(oldDTO));
 
-            // copy invoker files:
+            // Add Connection resource template as a JSON file:
+            ConnectionOldDTO oldDTO = dto2OldDtoMapper.toDTO(dto);
+            CtionTemplateResource template = oldDto2ResourceMapper.toDTO(oldDTO);
+            addToZip(zipOutputStream, template, "connection_template.json");
+
+            // Add invoker files:
             int fromConnectorId = dto.getFromConnector().getConnectorId();
             Connector fromConnector = connectorSqlService.getById(fromConnectorId);
             File fromInvoker = invokerService.findFileByInvokerName(fromConnector.getInvoker());
-            Path fromDestination = getPath(connectionId.toString(), directory, fromConnector.getInvoker() + ".xml");
-            Files.copy(fromInvoker.toPath(), fromDestination, StandardCopyOption.REPLACE_EXISTING);
+            addToZip(zipOutputStream, fromInvoker, fromConnector.getInvoker() + ".xml");
 
             int toConnectorId = dto.getToConnector().getConnectorId();
-            Connector toConnector = connectorSqlService.getById(toConnectorId);
-            File toInvoker = invokerService.findFileByInvokerName(toConnector.getInvoker());
-            Path toDestination = getPath(connectionId.toString(), directory, toConnector.getInvoker() + ".xml");
-            Files.copy(toInvoker.toPath(), toDestination, StandardCopyOption.REPLACE_EXISTING);
+            if (fromConnectorId != toConnectorId) {
+                Connector toConnector = connectorSqlService.getById(toConnectorId);
+                File toInvoker = invokerService.findFileByInvokerName(toConnector.getInvoker());
+                addToZip(zipOutputStream, toInvoker, toConnector.getInvoker() + ".xml");
+            }
 
-            // copy log file:
-            Path logPath = getLogPath();
-            Path destination = getPath(connectionId.toString(), directory, connectionId + "_" + time + ".log");
-            Files.copy(logPath, destination, StandardCopyOption.REPLACE_EXISTING);
-
-            // convert collected files directory to .zip
-            zip(time, connectionId, directory);
+            // Add log file:
+            File logFile = LogUtility.getPath(connectionId, timestamp).toFile();
+            addToZip(zipOutputStream, logFile, logFile.getName());
         } catch (IOException e) {
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
         } finally {
-            cleanup(connectionId);
+            int fileLimit = "s".equals(type) ? 1 : 5; // 1 for successful execution and 5 for failed execution
+            enforceLimit(zipFilePath.getParent(), connectionId + "_" + type + "_support", fileLimit);
         }
     }
 
@@ -245,100 +242,33 @@ public class SupportFileServiceImp implements SupportFileService {
         }
     }
 
-    private void zip(long time, Long connectionId, String directory) throws IOException {
-        String zipName = directory + "_" + time;
+    private void addToZip(ZipOutputStream zipOutputStream, Object object, String zipEntryName) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        byte[] jsonBytes = objectMapper.writeValueAsBytes(object);
 
-        File source = getPath(connectionId.toString(), directory).toFile();
-        File destination = getPath(connectionId.toString(), zipName + ".zip").toFile();
+        ZipEntry zipEntry = new ZipEntry(zipEntryName);
+        zipOutputStream.putNextEntry(zipEntry);
+        zipOutputStream.write(jsonBytes);
 
-        try (
-                FileOutputStream fos = new FileOutputStream(destination);
-                ZipOutputStream zipOut = new ZipOutputStream(fos)
-        ) {
-            zip(source, zipName, zipOut);
-        }
+        zipOutputStream.closeEntry();
     }
 
-    private static void zip(File file, String fileName, ZipOutputStream zipOut) throws IOException {
-        if (file.isDirectory()) {
-            if (fileName.endsWith("/")) {
-                zipOut.putNextEntry(new ZipEntry(fileName));
-                zipOut.closeEntry();
-            } else {
-                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
-                zipOut.closeEntry();
-            }
-
-            File[] children = file.listFiles();
-            if (children != null) {
-                for (File child : children) {
-                    zip(child, fileName + "/" + child.getName(), zipOut);
-                }
-            }
-
-            return;
-        }
-
+    private void addToZip(ZipOutputStream zipOutputStream, File file, String zipEntryName) throws IOException {
         try (FileInputStream fis = new FileInputStream(file)) {
-            ZipEntry zipEntry = new ZipEntry(fileName);
-            zipOut.putNextEntry(zipEntry);
-            byte[] bytes = new byte[1024];
+            ZipEntry zipEntry = new ZipEntry(zipEntryName);
+            zipOutputStream.putNextEntry(zipEntry);
+
+            byte[] buffer = new byte[1024];
             int length;
-
-            while ((length = fis.read(bytes)) >= 0) {
-                zipOut.write(bytes, 0, length);
+            while ((length = fis.read(buffer)) > 0) {
+                zipOutputStream.write(buffer, 0, length);
             }
+
+            zipOutputStream.closeEntry();
         }
     }
 
-    private void cleanup() {
-        Path path = getPath();
-
-        try (Stream<Path> files = Files.list(path)) {
-            files.forEach(file -> {
-                String fileName = file.getFileName().toString();
-
-                if (Files.isDirectory(file) && fileName.matches("\\d+")) {
-                    Long connectionId = Long.parseLong(fileName);
-                    cleanup(connectionId);
-                }
-            });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    private void cleanup(Long connectionId) {
-        Path base = getPath(connectionId.toString());
-
-        try {
-            Files.walkFileTree(base, new SimpleFileVisitor<>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    String dirName = dir.getFileName().toString();
-
-                    if (dirName.equals(connectionId + "_e_support") || dirName.equals(connectionId + "_s_support")) {
-                        deleteDirectory(dir);
-                    }
-
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-
-            enforceLimit(base, connectionId + "_e_support", 5);
-            enforceLimit(base, connectionId + "_s_support", 1);
-        } catch (IOException e) {
-            logger.error("Failed to cleanup temporary support file directory for connectionId = '" + connectionId + "'");
-        }
-    }
-
-    private void enforceLimit(Path base, String prefix, int limit) throws IOException {
+    private void enforceLimit(Path base, String prefix, int limit) {
         try (Stream<Path> stream = Files.list(base)) {
             List<Path> matchingDirs = stream
                     .filter(path -> Files.isRegularFile(path) && path.getFileName().toString().startsWith(prefix))
@@ -353,6 +283,9 @@ public class SupportFileServiceImp implements SupportFileService {
             for (int i = 0; i < matchingDirs.size() - limit; i++) {
                 deleteDirectory(matchingDirs.get(i));
             }
+        } catch (IOException e) {
+            logger.error("Failed to enforce file limit for folder = " + base);
+            throw new RuntimeException(e);
         }
     }
 
@@ -378,12 +311,5 @@ public class SupportFileServiceImp implements SupportFileService {
                 return FileVisitResult.CONTINUE;
             }
         });
-    }
-
-    private Path getLogPath() {
-        // Returns absolute path to base directory and/or its subdirectories
-        Path path = Paths.get(logFilePath);
-
-        return path.isAbsolute() ? path : Paths.get(System.getProperty("user.dir")).resolve(path).normalize();
     }
 }
