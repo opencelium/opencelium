@@ -6,7 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import com.becon.opencelium.backend.execution.logger.LogMessage;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
-import com.becon.opencelium.backend.utility.LogUtility;
+import com.becon.opencelium.backend.utility.FileUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -21,6 +21,8 @@ public class NewLogger<T extends LogMessage> {
     private final SimpMessagingTemplate simpMessagingTemplate; // sends messages to user via websocket
     private final Logger logger;
 
+    public static final String LOG_LOCATION = "src/main/resources/logs";
+
     public NewLogger(boolean isWebsocket, SimpMessagingTemplate simpMessagingTemplate, T logEntity, Long connectionId, long timestamp) {
         this.isWebsocket = isWebsocket;
         this.simpMessagingTemplate = simpMessagingTemplate;
@@ -29,7 +31,7 @@ public class NewLogger<T extends LogMessage> {
         // setup logger to create separate files:
         String id = String.format("%d-%d", connectionId, timestamp);
 
-        Path filePath = LogUtility.getPath(connectionId, timestamp);
+        Path filePath = FileUtility.toPath(LOG_LOCATION, String.format("%d_%d.log", connectionId, timestamp));
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
         fileAppender.setName("FileAppender-" + id);

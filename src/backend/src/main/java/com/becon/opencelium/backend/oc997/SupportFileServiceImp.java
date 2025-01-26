@@ -10,7 +10,6 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
-import com.becon.opencelium.backend.utility.LogUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -24,17 +23,19 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import static com.becon.opencelium.backend.oc997.NewLogger.LOG_LOCATION;
+import static com.becon.opencelium.backend.utility.FileUtility.clear;
+import static com.becon.opencelium.backend.utility.FileUtility.create;
+import static com.becon.opencelium.backend.utility.FileUtility.delete;
+import static com.becon.opencelium.backend.utility.FileUtility.toPath;
 
 @Service
 public class SupportFileServiceImp implements SupportFileService {
@@ -46,9 +47,9 @@ public class SupportFileServiceImp implements SupportFileService {
     private final InvokerService invokerService;
 
     @Value("${support.files.directory:src/main/resources/support-files}")
-    private String baseFolder;
+    private String base;
 
-    public static final String GET_URL = "/api/connection/support-file/%d/%s"; // /api/connection/support-file/{connectionId}/{zipFileName}
+    public static final String GET_URL = "/api/connection/support-file/%d/%s";
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
 
     public SupportFileServiceImp (
@@ -70,24 +71,21 @@ public class SupportFileServiceImp implements SupportFileService {
     public void setup() {
         try {
             // Create base directory to store support files:
-            Path path = getPath();
-
-            if (!Files.exists(path)) {
-                Files.createDirectories(path);
-            }
+            create(base);
 
             // Create base directory to store log files temporarily:
-            LogUtility.setup();
+            create(LOG_LOCATION);
+            clear(LOG_LOCATION);
 
-            logger.info("Base folders have been setup for support and log files, path = " + baseFolder);
+            logger.info("Base folders have been setup for support and log files.");
         } catch (IOException e) {
-            logger.error("Failed to setup base folder for support files, path = " + baseFolder);
+            logger.error("Failed to setup base folder for support and log files.");
         }
     }
 
     @Override
     public List<ConnectionSupportFiles> supportFileList() {
-        Path path = getPath();
+        Path path = toPath(base);
 
         List<ConnectionSupportFiles> result = new ArrayList<>();
 
@@ -115,7 +113,7 @@ public class SupportFileServiceImp implements SupportFileService {
         throwIfConnectionNotExistsById(connectionId);
 
         // check whether directory exists for this connection
-        Path path = getPath(connectionId.toString());
+        Path path = toPath(base, connectionId.toString());
 
         if (Files.isDirectory(path)) {
             List<String> urls = getZipUrls(connectionId, path);
@@ -132,7 +130,7 @@ public class SupportFileServiceImp implements SupportFileService {
         throwIfConnectionNotExistsById(connectionId);
 
         // check whether file exists for this connection
-        Path path = getPath(connectionId.toString(), zipFileName);
+        Path path = toPath(base, connectionId.toString(), zipFileName);
 
         if (Files.isRegularFile(path)) {
             return path.toFile();
@@ -149,7 +147,7 @@ public class SupportFileServiceImp implements SupportFileService {
         // try to find successful execution support file by pattern
         String filePattern = connectionId + "_s_support_*.zip";
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(getPath(connectionId.toString()), filePattern)) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(toPath(base, connectionId.toString()), filePattern)) {
             for (Path path : stream) {
                 return path.toFile();
             }
@@ -165,7 +163,7 @@ public class SupportFileServiceImp implements SupportFileService {
     public void collectFiles(Long connectionId, long timestamp, String type) {
         // create temporary file collection directory:
         String zipFileName = connectionId + "_" + type + "_support_" + timestamp + ".zip";
-        Path zipFilePath = getPath(connectionId.toString(), zipFileName);
+        Path zipFilePath = toPath(base, connectionId.toString(), zipFileName);
 
         // create parent directories if not exists:
         try {
@@ -199,9 +197,11 @@ public class SupportFileServiceImp implements SupportFileService {
                 addToZip(zipOutputStream, toInvoker, toConnector.getInvoker() + ".xml");
             }
 
-            // Add log file:
-            File logFile = LogUtility.getPath(connectionId, timestamp).toFile();
-            addToZip(zipOutputStream, logFile, logFile.getName());
+            // Add log file, then delete it from temporary location:
+            String fileName = String.format("%d_%d.log", connectionId, timestamp);
+            Path filePath = toPath(base, fileName);
+            addToZip(zipOutputStream, filePath.toFile(), fileName);
+            delete(filePath);
         } catch (IOException e) {
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
@@ -219,17 +219,10 @@ public class SupportFileServiceImp implements SupportFileService {
         }
     }
 
-    private Path getPath(String... sub) {
-        // Returns absolute path to base directory and/or its subdirectories
-        Path path = Paths.get(baseFolder, sub);
-
-        return path.isAbsolute() ? path : Paths.get(System.getProperty("user.dir")).resolve(path).normalize();
-    }
-
-    private List<String> getZipUrls(Long connectionId, Path path) {
+    private List<String> getZipUrls(Long connectionId, Path directory) {
         List<String> names = new ArrayList<>();
 
-        try (DirectoryStream<Path> zips = Files.newDirectoryStream(path, "*.zip")) {
+        try (DirectoryStream<Path> zips = Files.newDirectoryStream(directory, "*.zip")) {
             zips.forEach(zip -> {
                 if (Files.isRegularFile(zip)) {
                     names.add(String.format(GET_URL, connectionId, zip.getFileName().toString()));
@@ -281,7 +274,7 @@ public class SupportFileServiceImp implements SupportFileService {
                     .toList();
 
             for (int i = 0; i < matchingDirs.size() - limit; i++) {
-                deleteDirectory(matchingDirs.get(i));
+                delete(matchingDirs.get(i));
             }
         } catch (IOException e) {
             logger.error("Failed to enforce file limit for folder = " + base);
@@ -295,21 +288,5 @@ public class SupportFileServiceImp implements SupportFileService {
         } catch (NumberFormatException e) {
             return Long.MAX_VALUE;
         }
-    }
-
-    private void deleteDirectory(Path dir) throws IOException {
-        Files.walkFileTree(dir, new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.delete(file);
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path innerDir, IOException exc) throws IOException {
-                Files.delete(innerDir);
-                return FileVisitResult.CONTINUE;
-            }
-        });
     }
 }
