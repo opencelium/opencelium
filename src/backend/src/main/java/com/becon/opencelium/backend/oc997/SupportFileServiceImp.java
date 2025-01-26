@@ -114,17 +114,17 @@ public class SupportFileServiceImp implements SupportFileService {
     public ConnectionSupportFiles connectionSupportFileList(Long connectionId) {
         // check whether connection exists in both DBs
         throwIfConnectionNotExistsById(connectionId);
+        Connection connection = connectionSqlService.getById(connectionId);
 
         // check whether directory exists for this connection
         Path path = toPath(base, connectionId.toString());
 
         if (Files.isDirectory(path)) {
-            Connection connection = connectionSqlService.getById(connectionId);
             List<String> urls = getZipUrls(connectionId, path);
 
             return new ConnectionSupportFiles(connectionId, connection.getTitle(), urls);
         } else {
-            return new ConnectionSupportFiles(connectionId);
+            return new ConnectionSupportFiles(connectionId, connection.getTitle());
         }
     }
 
