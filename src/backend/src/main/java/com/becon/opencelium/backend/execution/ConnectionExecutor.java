@@ -1,11 +1,11 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
-import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.oc997.NewLogger;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
@@ -21,16 +21,16 @@ import java.util.stream.Collectors;
 public class ConnectionExecutor {
     private final Map<String, Object> webhookVars;
     private final ConnectionEx connection;
-    private final OcLogger<ExecutionLog> logger;
+    private final NewLogger<ExecutionLog> logger;
     private final ProxyEx proxy;
     private ExecutionManager executionManager;
 
-    public ConnectionExecutor(ExecutionObj executionObj, SimpMessagingTemplate simpMessagingTemplate) {
+    public ConnectionExecutor(ExecutionObj executionObj, long timestamp, SimpMessagingTemplate simpMessagingTemplate) {
         this.webhookVars = executionObj.getWebhookVars();
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
 
-        this.logger = new OcLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), ConnectionExecutor.class);
+        this.logger = new NewLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), executionObj.getConnection().getConnectionId(), timestamp);
 
         if (!executionObj.getLogger().isDebugMode()) {
             logger.disable();
@@ -44,11 +44,15 @@ public class ConnectionExecutor {
 
         executionManager = new ExecutionManagerImpl(webhookVars, source, target, fieldBind);
 
-        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), logger, "from");
-        ConnectorExecutor toEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), logger, "to");
+        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), logger, "CONN1");
+        ConnectorExecutor toEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), logger, "CONN2");
 
-        sourceEx.start();
-        toEx.start();
+        try {
+            sourceEx.start();
+            toEx.start();
+        } finally {
+            logger.close(); // release resources
+        }
     }
 
     public List<Operation> getOperations() {

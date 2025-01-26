@@ -17,7 +17,6 @@
 package com.becon.opencelium.backend.quartz;
 
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
-import com.becon.opencelium.backend.database.mysql.service.OperationUsageHistoryService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
@@ -31,8 +30,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.util.LinkedHashMap;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 
 @Component
@@ -60,6 +59,8 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             throw new RuntimeException("Subscription is not valid");
         }
         try {
+            long timestamp = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC); // execution start time
+
             JobDataMap dataMap = context.getMergedJobDataMap();
             QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
             // old schedulers do not have 'data' object.
@@ -68,10 +69,14 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 context.getMergedJobDataMap().put("data", data);
             }
             ExecutionObj executionObj = executionObjectService.buildObj(data);
-            ConnectionExecutor executor = new ConnectionExecutor(executionObj, simpMessagingTemplate);
+            ConnectionExecutor executor = new ConnectionExecutor(executionObj, timestamp, simpMessagingTemplate);
+
+            context.put("connectionId", executionObj.getConnection().getConnectionId());
+            context.put("timestamp", timestamp);
             long startTime = System.currentTimeMillis();
             executor.start();
             context.put("operationsEx", executor.getOperations());
+
             // increments current_usage in subscription and saves entity in current_usage_history.
             String connectionName = executionObj.getConnection().getConnectionName();
             if (connectionName != null && !connectionName.contains("!*test_connection_")) {
