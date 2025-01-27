@@ -4,34 +4,29 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
-import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.execution.logger.LogMessage;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.utility.FileUtility;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class NewLogger<T extends LogMessage> {
     private boolean isWebsocket; // if true then sends logs through websocket;
     private boolean enable = true; // if false then disables logs;
     private final T logEntity; // log entity
-    private final List<MaskingRule> rules;
     private final SimpMessagingTemplate simpMessagingTemplate; // sends messages to user via websocket
     private final Logger logger;
 
     public static final String LOG_LOCATION = "src/main/resources/logs";
 
-    public NewLogger(boolean isWebsocket, SimpMessagingTemplate simpMessagingTemplate, T logEntity, List<MaskingRule> rules, String loggerId) {
+    public NewLogger(boolean isWebsocket, SimpMessagingTemplate simpMessagingTemplate, T logEntity, String loggerId) {
         this.isWebsocket = isWebsocket;
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.logEntity = logEntity;
-        this.rules = rules;
 
         // setup logger to create separate files:
         Path filePath = FileUtility.toPath(LOG_LOCATION, loggerId + ".log");
@@ -82,10 +77,6 @@ public class NewLogger<T extends LogMessage> {
         return this;
     }
 
-    public void maskAndSend(Object message, Part part) {
-
-    }
-
     public void logAndSend(String message){
         Consumer<String> printStrategy = logger::info;
         logAndSend(printStrategy, message);
@@ -101,27 +92,5 @@ public class NewLogger<T extends LogMessage> {
             logEntity.setMessage(message);
             simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, logEntity);
         }
-    }
-
-    private String convertToStringIfNecessary(Object body) {
-        if (body == null) {
-            return "";
-        } else if (body instanceof String result) {
-            return result;
-        }
-
-        try {
-            return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public enum Part {
-        VALUE,
-        URL, // "URL: "
-        HEADER, // "Header: "
-        BODY, // "Body: "
-        RESPONSE // "Response: "
     }
 }

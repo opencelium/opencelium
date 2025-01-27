@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.enums.LogType;
+import com.becon.opencelium.backend.enums.MaskPart;
 import com.becon.opencelium.backend.enums.OpType;
 import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.enums.RelationalOperator;
@@ -15,6 +16,7 @@ import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
+import com.becon.opencelium.backend.oc950.MaskingService;
 import com.becon.opencelium.backend.oc997.NewLogger;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
@@ -46,13 +48,15 @@ public class ConnectorExecutor {
     private final RestTemplate restTemplate;
     private final List<Object> executables;
     private final NewLogger<ExecutionLog> logger;
+    private final MaskingService masking;
     private final String direction;
     private static final String BREAK = "======================= %s %s -- INDEX: %s =======================";
 
-    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, NewLogger<ExecutionLog> logger, String direction) {
+    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, NewLogger<ExecutionLog> logger, MaskingService masking, String direction) {
         this.executionManager = executionManager;
         this.restTemplate = restTemplate;
         this.logger = logger;
+        this.masking = masking;
         this.direction = direction;
 
         this.executables = new ArrayList<>();
@@ -226,9 +230,9 @@ public class ConnectorExecutor {
             }
 
             logger.logAndSend("Http Method: " + requestEntity.getMethod());
-            logger.maskAndSend(uri, NewLogger.Part.URL);
-            logger.maskAndSend(requestEntity.getHeaders(), NewLogger.Part.HEADER);
-            logger.maskAndSend(requestEntity.getBody(), NewLogger.Part.BODY);
+            logger.logAndSend("URL: " + masking.applyMask(uri, MaskPart.URL));
+            logger.logAndSend("Header: " + masking.applyMask(requestEntity.getHeaders(), MaskPart.HEADER));
+            logger.logAndSend("Body: " + masking.applyMask(requestEntity.getBody(), MaskPart.BODY));
             logger.logAndSend("============================================================================");
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
@@ -252,7 +256,7 @@ public class ConnectorExecutor {
             pagination = null;
             executionManager.setPagination(pagination);
         }
-        logger.maskAndSend(responseEntity.getBody(), NewLogger.Part.RESPONSE);
+        logger.logAndSend("Response: " + masking.applyMask(responseEntity.getBody(), MaskPart.RESPONSE));
 
         Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
