@@ -109,7 +109,8 @@ public class ConnectorExecutor {
                 throw new RuntimeException("Methods cannot have body");
             }
 
-            // set up logger for the current operation
+            // set up logger and masking for the current operation
+            masking.setOperationId(operation.getOperationId());
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
             logger.logAndSend(String.format(BREAK, "API OPERATION", "START", index));
             logger.logAndSend(String.format(
@@ -122,6 +123,7 @@ public class ConnectorExecutor {
             logger.logAndSend(String.format(BREAK, "API OPERATION", "END", index));
             // clean up after operation execution
             logger.getLogEntity().setMethodData(null);
+            masking.setOperationId(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
                 logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "START", index));

@@ -2,12 +2,12 @@ package com.becon.opencelium.backend.oc950;
 
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.enums.MaskPart;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
 public class MaskingServiceImp implements MaskingService {
     private final List<MaskingRule> rules;
+    private String operationId;
 
     public MaskingServiceImp(List<MaskingRule> rules) {
         this.rules = rules;
@@ -15,21 +15,21 @@ public class MaskingServiceImp implements MaskingService {
 
     @Override
     public String applyMask(Object message, MaskPart part) {
-        return null;
+        String prefix = part.toRef(operationId);
+
+        String result = part.toString(message);
+
+        for (MaskingRule rule : rules) {
+            if (rule.getExpression().startsWith(prefix) || rule.getExpression().startsWith("#[*].")) {
+                result = rule.getType().apply(result, rule);
+            }
+        }
+
+        return result;
     }
 
-
-    private String convertToStringIfNecessary(Object body) {
-        if (body == null) {
-            return "";
-        } else if (body instanceof String result) {
-            return result;
-        }
-
-        try {
-            return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    public void setOperationId(String operationId) {
+        this.operationId = operationId;
     }
 }
