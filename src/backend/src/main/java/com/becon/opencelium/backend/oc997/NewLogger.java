@@ -8,6 +8,7 @@ import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.execution.logger.LogMessage;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.utility.FileUtility;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -81,6 +82,10 @@ public class NewLogger<T extends LogMessage> {
         return this;
     }
 
+    public void maskAndSend(Object message, Part part) {
+
+    }
+
     public void logAndSend(String message){
         Consumer<String> printStrategy = logger::info;
         logAndSend(printStrategy, message);
@@ -96,5 +101,27 @@ public class NewLogger<T extends LogMessage> {
             logEntity.setMessage(message);
             simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, logEntity);
         }
+    }
+
+    private String convertToStringIfNecessary(Object body) {
+        if (body == null) {
+            return "";
+        } else if (body instanceof String result) {
+            return result;
+        }
+
+        try {
+            return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public enum Part {
+        VALUE,
+        URL, // "URL: "
+        HEADER, // "Header: "
+        BODY, // "Body: "
+        RESPONSE // "Response: "
     }
 }

@@ -23,7 +23,6 @@ import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.becon.opencelium.backend.utility.ReferenceUtility;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -227,9 +226,9 @@ public class ConnectorExecutor {
             }
 
             logger.logAndSend("Http Method: " + requestEntity.getMethod());
-            logger.logAndSend("URL: " + uri);
-            logger.logAndSend("Header: " + requestEntity.getHeaders());
-            logger.logAndSend("Body: " + requestEntity.getBody());
+            logger.maskAndSend(uri, NewLogger.Part.URL);
+            logger.maskAndSend(requestEntity.getHeaders(), NewLogger.Part.HEADER);
+            logger.maskAndSend(requestEntity.getBody(), NewLogger.Part.BODY);
             logger.logAndSend("============================================================================");
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
@@ -253,7 +252,7 @@ public class ConnectorExecutor {
             pagination = null;
             executionManager.setPagination(pagination);
         }
-        logger.logAndSend("Response : " + convertToStringIfNecessary(responseEntity.getBody()));
+        logger.maskAndSend(responseEntity.getBody(), NewLogger.Part.RESPONSE);
 
         Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
@@ -319,20 +318,6 @@ public class ConnectorExecutor {
         }
 
         return MediaTypeUtility.isJsonCompatible(mediaType) ? Object.class : String.class;
-    }
-
-    private String convertToStringIfNecessary(Object body) {
-        if (body == null) {
-            return "";
-        } else if (body instanceof String result) {
-            return result;
-        }
-
-        try {
-            return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private int getTailPointer(int headPointer) {
