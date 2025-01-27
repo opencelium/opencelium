@@ -413,12 +413,10 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<RuleDTO> getAllRules(long connectionId) {
+    public List<MaskingRule> getAllRules(long connectionId) {
         throwIfConnectionNotExists(connectionId);
 
-        return ruleRepository.findRulesByConnectionId(connectionId).stream()
-                .map(RuleDTO::fromEntity)
-                .collect(Collectors.toList());
+        return ruleRepository.findRulesByConnectionId(connectionId);
     }
 
     @Override

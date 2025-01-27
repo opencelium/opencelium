@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
@@ -56,6 +57,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/connection", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -534,7 +536,11 @@ public class ConnectionController {
     })
     @GetMapping(path = "/{connectionId}/rule/all")
     public ResponseEntity<List<RuleDTO>> getAllRules(@PathVariable long connectionId) {
-        return ResponseEntity.ok(connectionService.getAllRules(connectionId));
+        List<RuleDTO> rules = connectionService.getAllRules(connectionId).stream()
+                .map(RuleDTO::fromEntity)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(rules);
     }
 
 

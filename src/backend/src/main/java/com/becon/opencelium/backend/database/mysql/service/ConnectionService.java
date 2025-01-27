@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
@@ -76,7 +77,7 @@ public interface ConnectionService {
 
     List<WebhookParamDTO> extractVarsFromJson(String json) throws IOException;
 
-    List<RuleDTO> getAllRules(long connectionId);
+    List<MaskingRule> getAllRules(long connectionId);
 
     RuleDTO getOneRule(long connectionId, long ruleId);
 

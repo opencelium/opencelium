@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
+import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
@@ -25,12 +26,13 @@ public class ConnectionExecutor {
     private final ProxyEx proxy;
     private ExecutionManager executionManager;
 
-    public ConnectionExecutor(ExecutionObj executionObj, long timestamp, SimpMessagingTemplate simpMessagingTemplate) {
+    public ConnectionExecutor(ExecutionObj executionObj, List<MaskingRule> rules, long timestamp, SimpMessagingTemplate simpMessagingTemplate) {
         this.webhookVars = executionObj.getWebhookVars();
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
 
-        this.logger = new NewLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), executionObj.getConnection().getConnectionId(), timestamp);
+        String loggerId = String.format("%d_%d", executionObj.getConnection().getConnectionId(), timestamp);
+        this.logger = new NewLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), rules, loggerId);
 
         if (!executionObj.getLogger().isDebugMode()) {
             logger.disable();
