@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.oc950;
 
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.enums.MaskPart;
+import com.becon.opencelium.backend.enums.RuleType;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class MaskingServiceImp implements MaskingService {
         String result = part.toString(message);
 
         for (MaskingRule rule : rules) {
-            if (rule.getExpression().startsWith(prefix) || rule.getExpression().startsWith("#[*].")) {
+            if (rule.getType() ==  RuleType.REGEX || rule.getExpression().startsWith(prefix) || rule.getExpression().startsWith("#[*].")) {
                 result = rule.getType().apply(result, rule);
             }
         }
