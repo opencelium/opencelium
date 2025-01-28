@@ -82,6 +82,9 @@ public class Connection {
     @Column(name = "category_id")
     private Integer categoryId;
 
+    @Column(name = "oc_version")
+    private String ocVersion;
+
     public Connection() {
     }
 
@@ -199,6 +202,14 @@ public class Connection {
 
     public void setCategoryId(Integer categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public String getOcVersion() {
+        return ocVersion;
+    }
+
+    public void setOcVersion(String version) {
+        this.ocVersion = version;
     }
 
     @Override

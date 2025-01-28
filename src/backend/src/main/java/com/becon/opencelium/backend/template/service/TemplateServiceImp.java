@@ -26,6 +26,8 @@ import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.utility.FileNameUtils;
+import com.becon.opencelium.backend.version_manager.EntityUpdater;
+import com.becon.opencelium.backend.version_manager.EntityVersionManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
@@ -50,12 +52,14 @@ public class TemplateServiceImp implements TemplateService {
     private final Mapper<ConnectionOldDTO, CtionTemplateResource> mapper;
     private final Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper;
     private final Environment environment;
+    private final EntityUpdater<Template> templateUpdater;
 
-    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionOldDTO, CtionTemplateResource> mapper, Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper, Environment environment) {
+    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionOldDTO, CtionTemplateResource> mapper, Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper, Environment environment, EntityVersionManager entityVersionManager) {
         this.connectionService = connectionService;
         this.mapper = mapper;
         this.oldDTOMapper = oldDTOMapper;
         this.environment = environment;
+        this.templateUpdater = entityVersionManager.getUpdater(Template.class);
     }
 
     @Override
@@ -177,6 +181,8 @@ public class TemplateServiceImp implements TemplateService {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
+            templateUpdater.updateFrom(template, template.getVersion())
+                    .ifUpdated(this::save);
             return Optional.of(template);
         } catch (Exception e){
             throw new RuntimeException("ERROR while converting from json to Template object");
@@ -196,7 +202,10 @@ public class TemplateServiceImp implements TemplateService {
                         try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {
                             stream.forEach(s -> contentBuilder.append(s).append("\n"));
 //                            System.out.println(Paths.get(path.toString()).getFileName().toString());
-                            return objectMapper.readValue(contentBuilder.toString(), Template.class);
+                            Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
+                            templateUpdater.updateFrom(template, template.getVersion())
+                                    .ifUpdated(this::save);
+                            return template;
                         } catch (Exception e) {
                             e.printStackTrace();
                             throw new WrongEncode("UTF8");
@@ -219,8 +228,10 @@ public class TemplateServiceImp implements TemplateService {
                 Path filePath = Paths.get(path.toString());
                 try (Stream<String> stream = Files.lines(filePath, StandardCharsets.UTF_8)) {
                     stream.forEach(s -> contentBuilder.append(s).append("\n"));
-                    files.put(filePath.getFileName().toString(), objectMapper.readValue(contentBuilder.toString(), Template.class));
-                    return;
+                    Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
+                    templateUpdater.updateFrom(template, template.getVersion())
+                                    .ifChanged(this::save);
+                    files.put(filePath.getFileName().toString(), template);
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new WrongEncode("UTF8");

@@ -562,3 +562,6 @@ ALTER TABLE user ADD COLUMN IF NOT EXISTS username VARCHAR(255) DEFAULT NULL;
 ALTER TABLE user DROP PRIMARY KEY;
 ALTER TABLE user ADD PRIMARY KEY (id);
 ALTER TABLE user MODIFY email varchar(45) DEFAULT NULL;
+
+--changeset 4.2:15 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connection ADD COLUMN IF NOT EXISTS oc_version VARCHAR(20) DEFAULT NULL;

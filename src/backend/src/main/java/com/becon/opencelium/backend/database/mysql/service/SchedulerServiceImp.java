@@ -165,8 +165,7 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public Scheduler toEntity(SchedulerRequestResource resource) {
-        Connection connection = connectionService.findById(resource.getConnectionId())
-                .orElseThrow(() -> new RuntimeException("Connection with id=" + resource.getConnectionId() + " not found"));
+        Connection connection = connectionService.getById(resource.getConnectionId());
         Scheduler scheduler = new Scheduler();
         scheduler.setId(resource.getSchedulerId());
         scheduler.setTitle(resource.getTitle());

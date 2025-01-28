@@ -308,8 +308,7 @@ public class ExecutionAspect {
         }
         Scheduler scheduler = schedulerService.findById(en.getScheduler()
                 .getId()).orElseThrow(() -> new RuntimeException("SCHEDULER_NOT_FOUND"));
-        Connection connection = connectionServiceImp.findById(scheduler.getConnection().getId())
-                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
+        Connection connection = connectionServiceImp.getById(scheduler.getConnection().getId());
         Map<String, String> cValues = new HashMap<>();
         constants.forEach(c -> {
             switch (c) {

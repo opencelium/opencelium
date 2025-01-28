@@ -71,7 +71,7 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
     }
 
     private String getConnectionName(Long connectionId) {
-        Connection connection = connectionService.findById(connectionId).orElseThrow();
+        Connection connection = connectionService.getById(connectionId);
         return connection.getTitle();
     }
 }
