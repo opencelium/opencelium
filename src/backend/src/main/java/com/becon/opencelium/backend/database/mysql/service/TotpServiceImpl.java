@@ -36,7 +36,7 @@ public class TotpServiceImpl implements TotpService {
         String secretKey = user.getTotpSecretKey();
 
         String issuer = "opencelium";
-        String account = user.getEmail();
+        String account = user.getPrincipal();
         String data = String.format("otpauth://totp/%s:%s?secret=%s&issuer=%s", issuer, account, secretKey, issuer);
 
         QRCodeWriter qrCodeWriter = new QRCodeWriter();

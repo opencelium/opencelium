@@ -4,14 +4,14 @@ import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.execution.ExecutionManager;
+import com.becon.opencelium.backend.resource.execution.ResponseEx;
 import com.becon.opencelium.backend.utility.ReferenceUtility;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -26,10 +26,12 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,10 +60,27 @@ public class ReferenceExtractor implements Extractor {
         Object result = null;
 
         if (ref.matches(directRef) || ref.matches(wrappedDirectRef)) {
-            // extract direct reference if necessary
-            // '{%#ababab.(response).success.field[*]%}'
-            // '#ababab.(response).success.field[*]
-            // '#ababab.(request).field[*]
+            // remove wrapper if necessary = {%ref%}
+            // CASE 1: collect all data from Operation:
+            //'#ababab.(response).[*]'
+            //'#ababab.(response).[*].status'
+            //'#ababab.(response).[*].header'
+            //'#ababab.(response).[*].body'
+
+            // CASE 2: return 'status' code of Operation
+            //'#ababab.(response).status',
+
+            // CASE 3: return 'header' of Operation
+            //'#ababab.(response).header.$.Content-Type',
+            //'#ababab.(request).header.$.Content-Type',
+
+            // CASE 4: return targeted field of 'HttpEntity.body'
+            //'#ababab.(response).body.$.field[*]',
+            //'{%#ababab.(request).body.$.field[*]%}',
+            //'#ababab.(response).body.$.field1.['field2_with_special_symbol'].field3',
+            //'#ababab.(response).body.$.[*]',
+            //'#ababab.(request).body.$.[*]',
+
             ref = ReferenceUtility.extractDirectRef(ref);
 
             result = extractFromOperation(ref);
@@ -153,42 +172,92 @@ public class ReferenceExtractor implements Extractor {
 
     private Object extractFromOperation(String ref) {
         // find operation by color
-        String color = ReferenceUtility.getColor(ref);
+        String color = ref.substring(0, 7);
 
         Operation operation = executionManager.findOperationByColor(color)
                 .orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
 
-        // extract value
-        String exchangeType = ReferenceUtility.getExchangeType(ref);
+        // CASE 1:
+        // 'ref' always starts with '#colour.(response).[*]',
+        // and '#colour' and '(response)' are used in this order in all cases,
+        // so we can directly target '[*]' to check if 'ref' is in CASE 1:
+        if ("[*]".equals(ref.substring(19, 22))) {
+            if (ref.length() == 22) {
+                TreeMap<String, ResponseEx> responses = new TreeMap<>(getComparator());
+                operation.getResponses().forEach((K, V) -> responses.put(K, ResponseEx.of(V)));
+
+                return responses;
+            }
+
+            // collect only specified response part
+            String part = ref.substring(23); // can be in ['header', 'status', 'body']
+            if (part.equals("status")) {
+                TreeMap<String, Integer> statuses = new TreeMap<>(getComparator());
+
+                operation.getResponses().forEach((K, V) -> statuses.put(K, V.getStatusCode().value()));
+
+                return statuses;
+            }
+
+            if (part.equals("header")) {
+                TreeMap<String, Map<String, List<String>>> headers = new TreeMap<>(getComparator());
+
+                operation.getResponses().forEach((K, V) -> headers.put(K, V.getHeaders()));
+
+                return headers;
+            }
+
+            if (part.equals("body")) {
+                TreeMap<String, Object> bodies = new TreeMap<>(getComparator());
+
+                operation.getResponses().forEach((K, V) -> bodies.put(K, V.getBody()));
+
+                return bodies;
+            }
+        }
+
+        // at this point we work on a specific HttpEntity (Response or Request)
         String key = executionManager.generateKey(operation.getLoopDepth());
 
-        Object entityBody;
-        MediaType mediaType;
+        // CASE 2:
+        // only ResponseEntity can have status
+        // so 'ref' is always in form '#colour.(response).status',
+        // so we can directly target 'status' to check if 'ref' is in CASE 2:
+        if ("status".equals(ref.substring(19, 25))) {
+            return operation.getResponses().get(key).getStatusCode().value();
+        }
+
+        String exchangeType = ReferenceUtility.extractExchangeType(ref);
+        String path = ref.substring(ref.indexOf('$') + 2); // remove operation info
+        HttpEntity<?> entity;
+        String part;
 
         if (exchangeType.equals("response")) {
-            ResponseEntity<?> responseEntity = operation.getResponses().get(key);
-
-            mediaType = responseEntity.getHeaders().getContentType();
-            entityBody = responseEntity.getBody();
+            entity = operation.getResponses().get(key);
+            part = ref.substring(19, ref.indexOf('$') - 1);
         } else {
-            RequestEntity<?> requestEntity = operation.getRequests().get(key);
-
-            mediaType = requestEntity.getHeaders().getContentType();
-            entityBody = requestEntity.getBody();
+            entity = operation.getRequests().get(key);
+            part = ref.substring(18, ref.indexOf('$') - 1);
         }
 
-        Object result;
-        String paths = ReferenceUtility.removeOperationInfo(ref);
+        // CASE 3:
+        //'#ababab.(response).header.$.Content-Type',
+        //'#ababab.(request).header.$.Content-Type',
+        if ("header".equals(part)) {
+            return entity.getHeaders().get(path);
+        }
+
+        // CASE 4:
+        Object body = entity.getBody();
+        MediaType mediaType = entity.getHeaders().getContentType();
 
         if (MediaTypeUtility.isJsonCompatible(mediaType)) {
-            result = getFromJSON(entityBody, paths);
+            return getFromJSON(body, path);
         } else if (MediaTypeUtility.isXmlCompatible(mediaType)) {
-            result = getFromXML(entityBody, paths);
+            return getFromXML(body, path);
         } else {
-            result = bodyToString(entityBody);
+            return bodyToString(body);
         }
-
-        return result;
     }
 
     public static String bodyToString(Object body) {
@@ -454,5 +523,24 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return result;
+    }
+
+    private static Comparator<String> getComparator() {
+        return (String idx1, String idx2) -> {
+            String[] arr1 = idx1.split(", ");
+            String[] arr2 = idx2.split(", ");
+
+            for (int i = 0; i < arr1.length && i < arr2.length; i++) {
+                // skip equal elements until there is a difference found
+                if (Objects.equals(arr1[i], arr2[i])) continue;
+
+                // if there is an unequal elements then return their difference
+                return Integer.parseInt(arr1[i]) - Integer.parseInt(arr2[i]);
+            }
+
+            // at this point one array contains the other one
+            // so array with greater length is greater
+            return arr1.length - arr2.length;
+        };
     }
 }

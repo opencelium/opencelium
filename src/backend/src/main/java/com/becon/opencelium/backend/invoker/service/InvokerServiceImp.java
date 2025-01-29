@@ -294,8 +294,8 @@ public class InvokerServiceImp implements InvokerService {
 
         path = path.replace("@", "__oc__attributes.");
 
-        String exchangeType = ReferenceUtility.getExchangeType(path);
-        String result = ReferenceUtility.getResult(path);
+        String exchangeType = ReferenceUtility.extractExchangeType(path);
+        String result = ReferenceUtility.getResult(path); // TODO: we will not have 'success' or 'fail'
 
         Invoker invoker = findByName(invokerName);
         FunctionInvoker functionInvoker = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))

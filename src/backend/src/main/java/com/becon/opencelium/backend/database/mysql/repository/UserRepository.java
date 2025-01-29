@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.database.mysql.repository;
 
 import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.enums.AuthMethod;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
 //    @Query(value = "SELECT * FROM user WHERE email=?1", nativeQuery = true)
     Optional<User> findByEmail(String email);
+    Optional<User> findByUsernameAndAuthMethod(String username, AuthMethod authMethod);
     Optional<User> findOneById(int id);
     @Transactional
     void deleteOneById(int id);

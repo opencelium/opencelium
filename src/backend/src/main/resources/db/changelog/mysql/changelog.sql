@@ -557,3 +557,8 @@ ALTER TABLE operation_usage_history ADD COLUMN from_invoker VARCHAR(255) NOT NUL
 ALTER TABLE operation_usage_history ADD COLUMN to_invoker VARCHAR(255) NOT NULL;
 ALTER TABLE operation_usage_history ADD COLUMN modified_at TIMESTAMP NOT NULL;
 
+--changeset 4.2:14 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE user ADD COLUMN IF NOT EXISTS username VARCHAR(255) DEFAULT NULL;
+ALTER TABLE user DROP PRIMARY KEY;
+ALTER TABLE user ADD PRIMARY KEY (id);
+ALTER TABLE user MODIFY email varchar(45) DEFAULT NULL;

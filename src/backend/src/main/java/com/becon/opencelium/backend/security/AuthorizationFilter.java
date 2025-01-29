@@ -17,7 +17,10 @@
 package com.becon.opencelium.backend.security;
 
 import com.becon.opencelium.backend.constant.SecurityConstant;
+import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.UserService;
+import com.becon.opencelium.backend.utility.EmailUtility;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,11 +29,12 @@ import org.apache.hc.core5.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 public class AuthorizationFilter extends OncePerRequestFilter {
@@ -39,7 +43,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private UserService userService;
 
     @Autowired
     private SessionServiceImpl sessionService;
@@ -73,10 +77,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         response.setHeader("Content-Type", "application/json");
     }
 
-//    private boolean containsInIgnoreList(String s) {
-//        return ignorList.stream().anyMatch(s::contains);
-//    }
-
     private static String extractTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (token == null) {
@@ -86,18 +86,29 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(String token) {
-        String email = jwtTokenUtil.extractEmail(token);
-        UserPrincipals userDetail = (UserPrincipals) userDetailsService.loadUserByUsername(email);
+        String principal = jwtTokenUtil.extractPrincipal(token);
+        String sessionId = jwtTokenUtil.extractSessionId(token);
+
+        Optional<User> optionalUser;
+        if (EmailUtility.isEmail(principal)) {
+            optionalUser = userService.findByEmail(principal);
+        } else {
+            optionalUser = userService.findByUsername(principal);
+        }
+        User user = optionalUser.orElseThrow(() -> new UsernameNotFoundException(principal));
 
         try {
-            if (!jwtTokenUtil.validateToken(token, userDetail)){
+            if (!jwtTokenUtil.validateToken(token, user)){
                 return null;
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        sessionService.updateLastAccessedTime(userDetail.getUser().getSession());
+        sessionService.updateLastAccessedTime(sessionId);
+
+        UserPrincipals userDetail = new UserPrincipals(user);
+
         return new UsernamePasswordAuthenticationToken(userDetail,
                                                        null,
                                                        userDetail.getAuthorities());

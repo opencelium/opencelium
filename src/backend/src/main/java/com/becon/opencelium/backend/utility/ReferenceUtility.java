@@ -46,44 +46,25 @@ public class ReferenceUtility {
         return result;
     }
 
-    public static String removeOperationInfo(String ref) {
-        String[] refParts = ref.split("\\.");
-        String exchangeType = getExchangeType(ref);
-
-        // remove method color and exchange type
-        ref = ref.replace(refParts[0] + ".", "")
-                .replace(refParts[1] + ".", "");
-
-        if ("response".equals(exchangeType)) {
-            // remove 'fail' or 'success' for 'response' type
-            ref = ref.replace(refParts[2] + ".", "");
-        }
-
-        return ref;
-    }
-
     public static String extractDirectRef(String ref) {
-        // '{%#ababab.(response).success.field[*]%}'
+        // '{%#ababab.(response).body.$.field[*]%}'
         if (ref.startsWith("{%") && ref.endsWith("%}")) {
             ref = ref.substring(2, ref.length() - 2);
         }
 
-        // '#ababab.(response).success.field[*]
-        // '#ababab.(request).field[*]
+        // '#ababab.(response).body.$.field[*]'
+        // '#ababab.(request).body.$.field[*]'
         return ref;
     }
 
-    public static String getColor(String ref){
-        return ref.substring(ref.indexOf('#'), ref.indexOf('.'));
-    }
-
-    public static String getExchangeType(String ref){
-        // #ffffff.(response | request). ...
-        return ref.substring(ref.indexOf('(') + 1, ref.indexOf(')'));
+    public static String extractExchangeType(String ref) {
+        // '#ababab.(response)...'
+        // '#ababab.(request)...'
+        return ref.charAt(11) == 's' ? "response" : "request";
     }
 
     public static String getResult(String ref) {
-        String exchange = getExchangeType(ref);
+        String exchange = extractExchangeType(ref);
         String res = "";
 
         if (exchange.equals("response")){
