@@ -80,8 +80,8 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             List<MaskingRule> rules = connectionService.getAllRules(executionObj.getConnection().getConnectionId());
             ConnectionExecutor executor = new ConnectionExecutor(executionObj, rules, timestamp, simpMessagingTemplate);
 
-            context.put("connectionId", executionObj.getConnection().getConnectionId());
-            context.put("timestamp", timestamp);
+//            context.put("connectionId", executionObj.getConnection().getConnectionId());
+//            context.put("timestamp", timestamp);
             long startTime = System.currentTimeMillis();
             executor.start();
             context.put("operationsEx", executor.getOperations());
