@@ -11,7 +11,7 @@ public class EntityVersionManager {
     private final UpdaterVersion currentVersion;
 
     public EntityVersionManager(OpenCeliumProps ocProps) {
-        currentVersion = UpdaterVersion.getVersionOrElseDefault(ocProps.getVersion());
+        currentVersion = UpdaterVersion.getByVersionOrStartsWith(ocProps.getVersion());
     }
 
     public <T> EntityUpdater<T> getUpdater(Class<T> clazz) {

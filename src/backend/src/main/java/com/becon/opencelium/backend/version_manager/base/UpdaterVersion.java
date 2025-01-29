@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.version_manager.base;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Arrays;
 
 public enum UpdaterVersion {
@@ -9,11 +11,16 @@ public enum UpdaterVersion {
 
     private final String version;
 
-    public static UpdaterVersion getVersionOrElseDefault(final String name) {
+    public static UpdaterVersion getByVersionOrStartsWith(final String version) {
+        if (version == null) return NO_VERSION;
+
         return Arrays.stream(values())
-                .filter(v -> v.version.equals(name))
+                .filter(v -> StringUtils.equals(version, v.getVersion()))
                 .findFirst()
-                .orElse(NO_VERSION);
+                .orElseGet(() -> Arrays.stream(values())
+                        .filter(v -> version.startsWith(v.getVersion()))
+                        .findFirst()
+                        .orElse(NO_VERSION));
     }
 
     UpdaterVersion(String version) {
