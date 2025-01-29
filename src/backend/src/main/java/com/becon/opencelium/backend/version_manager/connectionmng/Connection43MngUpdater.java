@@ -82,7 +82,7 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
             method.getRequest().setEndpoint(replace(method.getRequest().getEndpoint(), changed));
 
             // replacing in body
-            if (!Objects.isNull(body.getFields())) {
+            if (Objects.nonNull(body) && Objects.nonNull(body.getFields())) {
                 body.setFields(update(body.getFields(), changed));
             }
         }
@@ -154,6 +154,10 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
         if (onlyField) {
             if (!rawStr.startsWith("body.$.") && !rawStr.startsWith("header.$.") && !rawStr.equals("status")) {
                 changed.setValue(true);
+                if(rawStr.startsWith("success"))
+                    rawStr = rawStr.replaceFirst("success.", "");
+                else if(rawStr.startsWith("fail"))
+                    rawStr = rawStr.replaceFirst("fail.", "");
                 return isHeader ? "header.$." + rawStr : "body.$." + rawStr;
             } else {
                 String updatedStr = Utils.updateRefWith43Version(rawStr);
