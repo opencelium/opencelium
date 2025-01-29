@@ -8,5 +8,4 @@ public interface SupportFileService {
     ConnectionSupportFiles connectionSupportFileList(Long connectionId);
     File getSupportFile(Long connectionId, String zipFileName);
     File getSupportFile(Long connectionId);
-    void createSupportFile(Long connectionId, String type);
 }

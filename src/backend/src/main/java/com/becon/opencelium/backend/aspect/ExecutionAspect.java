@@ -26,7 +26,6 @@ import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.execution.oc721.Operation;
-import com.becon.opencelium.backend.oc997.SupportFileService;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,7 +61,6 @@ public class ExecutionAspect {
     private final Environment env;
     private final LastExecutionService lastExecutionService;
     private final DataAggregatorService dataAggregatorService;
-    private final SupportFileService supportFileService;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -72,8 +70,7 @@ public class ExecutionAspect {
             @Qualifier("dataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
             IncomingWebhookService incomingWebhookService,
             EmailServiceImpl emailService,
-            Environment env,
-            SupportFileService supportFileService
+            Environment env
     ) {
         this.schedulerService = schedulerService;
         this.userService = userService;
@@ -83,7 +80,6 @@ public class ExecutionAspect {
         this.env = env;
         this.lastExecutionService = lastExecutionService;
         this.dataAggregatorService = dataAggregatorService;
-        this.supportFileService = supportFileService;
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -114,8 +110,6 @@ public class ExecutionAspect {
         executeAggregator(operations, execId);
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
-        Long connectionId = (Long) context.get("connectionId");
-        supportFileService.createSupportFile(connectionId ,"s");
     }
 
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
@@ -132,8 +126,6 @@ public class ExecutionAspect {
         executeAggregator(operations, execId);
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
-        Long connectionId = (Long) context.get("connectionId");
-        supportFileService.createSupportFile(connectionId ,"e");
     }
 
     private long initExecutionObj(int schedulerId) {
