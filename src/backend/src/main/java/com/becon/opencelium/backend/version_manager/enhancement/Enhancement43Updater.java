@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.version_manager.enhancement;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.version_manager.Wrapper;
 import com.becon.opencelium.backend.version_manager.base.UpdaterVersion;
-import com.becon.opencelium.backend.version_manager.base.Utils;
+import com.becon.opencelium.backend.version_manager.base.Version43Utils;
 
 import java.util.Objects;
 
@@ -29,7 +29,7 @@ public class Enhancement43Updater implements EnhancementUpdater {
 
         boolean changed = false;
         if (Objects.nonNull(enhancement) && Objects.nonNull(enhancement.getArgs())) {
-            String replaced = Utils.updateRefWith43Version(enhancement.getArgs());
+            String replaced = Version43Utils.updateRef(enhancement.getArgs());
             if (Objects.equals(replaced, enhancement.getArgs())) {
                 changed = true;
             }
