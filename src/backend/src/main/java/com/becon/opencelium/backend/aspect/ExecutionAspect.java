@@ -136,9 +136,14 @@ public class ExecutionAspect {
         executeAggregator(operations, execId);
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
-//        Long connectionId = (Long) context.get("connectionId");
-//        long timestamp = (long) context.get("timestamp");
-//        supportFileService.collectFiles(connectionId ,timestamp, "s");
+        if (data.isCreateZip()) {
+            Long connectionId = (Long) context.get("connectionId");
+            long timestamp = (long) context.get("timestamp");
+            supportFileService.collectFiles(connectionId ,timestamp, "s");
+
+            // delete temporarily created scheduler
+            schedulerService.deleteById(schedulerId);
+        }
     }
 
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
@@ -155,9 +160,14 @@ public class ExecutionAspect {
         executeAggregator(operations, execId);
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
-//        Long connectionId = (Long) context.get("connectionId");
-//        long timestamp = (long) context.get("timestamp");
-//        supportFileService.collectFiles(connectionId, timestamp, "e");
+        if (data.isCreateZip()) {
+            Long connectionId = (Long) context.get("connectionId");
+            long timestamp = (long) context.get("timestamp");
+            supportFileService.collectFiles(connectionId, timestamp, "e");
+
+            // delete temporarily created scheduler
+            schedulerService.deleteById(schedulerId);
+        }
     }
 
     private long initExecutionObj(int schedulerId) {

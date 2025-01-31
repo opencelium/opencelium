@@ -210,8 +210,9 @@ public class SupportFileServiceImp implements SupportFileService {
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
         } finally {
-            int fileLimit = "s".equals(type) ? 1 : 5; // 1 for successful execution and 5 for failed execution
-            enforceLimit(zipFilePath.getParent(), connectionId + "_" + type + "_support", fileLimit);
+            String reverse = "s".equals(type) ? "e" : "s";
+            enforceLimit(zipFilePath.getParent(), connectionId + "_" + type + "_support", 1);
+            enforceLimit(zipFilePath.getParent(), connectionId + "_" + reverse + "_support", 0);
         }
     }
 
