@@ -2,27 +2,26 @@ package com.becon.opencelium.backend.version_manager.enhancement;
 
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.version_manager.Wrapper;
+import com.becon.opencelium.backend.version_manager.base.SuspendException;
 import com.becon.opencelium.backend.version_manager.base.UpdaterVersion;
 import com.becon.opencelium.backend.version_manager.base.Version43Utils;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+@Component
 public class Enhancement43Updater implements EnhancementUpdater {
 
     private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_3;
 
-    private static final Enhancement43Updater instance = new Enhancement43Updater();
-
-    public static Enhancement43Updater getInstance() {
-        return instance;
-    }
-
     @Override
+    @SuspendException
     public Wrapper<Enhancement> updateToCurrentVersion(Enhancement enhancement) {
         return updateFrom(enhancement, null);
     }
 
     @Override
+    @SuspendException
     public Wrapper<Enhancement> updateFrom(Enhancement enhancement, String oldVersion) {
         if (Objects.equals(currentVersion.getVersion(), oldVersion))
             return Wrapper.notUpdated(enhancement);

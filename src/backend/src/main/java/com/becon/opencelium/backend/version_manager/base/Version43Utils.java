@@ -22,9 +22,9 @@ public class Version43Utils {
             Matcher requestMatcher = REQUEST_PATTERN.matcher(rawStr);
             Matcher responseMatcher = RESPONSE_PATTERN.matcher(rawStr);
             if (requestMatcher.matches()) {
-                return requestMatcher.group(1) + "." + requestMatcher.group(2) + ".body." + requestMatcher.group(3);
+                return requestMatcher.group(1) + "." + requestMatcher.group(2) + ".body.$." + requestMatcher.group(3);
             } else if (responseMatcher.matches()) {
-                return responseMatcher.group(1) + "." + responseMatcher.group(2) + ".body." + responseMatcher.group(4);
+                return responseMatcher.group(1) + "." + responseMatcher.group(2) + ".body.$." + responseMatcher.group(4);
             }
         }
 

@@ -7,6 +7,7 @@ import java.util.Arrays;
 public enum UpdaterVersion {
 
     NO_VERSION("-1"), // default
+    VERSION_4_0("4.0"),
     VERSION_4_3("4.3");
 
     private final String version;

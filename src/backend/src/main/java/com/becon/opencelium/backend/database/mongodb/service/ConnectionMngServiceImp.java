@@ -15,6 +15,7 @@ import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -124,7 +125,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 .orElseThrow(() -> new ConnectionNotFoundException(connectionId));
 
         connectionMngUpdater.updateToCurrentVersion(connectionMng)
-                .ifChangedOrElseIfUpdated(this::save, this::saveDirectly);
+                .ifChangedOrElseIfUpdated(this::updateWithoutBinding, this::saveDirectly);
 
         setEnhancements(connectionMng);
         return connectionMng;
@@ -133,14 +134,48 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public List<ConnectionMng> getAll() {
         List<ConnectionMng> all = connectionMngRepository.findAll();
-        all.forEach(x -> connectionMngUpdater.updateToCurrentVersion(x).ifChangedOrElseIfUpdated(this::save, this::saveDirectly));
+        all.forEach(x -> connectionMngUpdater.updateToCurrentVersion(x)
+                .ifChangedOrElseIfUpdated(this::updateWithoutBinding, this::saveDirectly));
         return all;
+    }
+
+    @Transactional
+    public void updateWithoutBinding(ConnectionMng connectionMng) {
+        if (Objects.isNull(connectionMng)) return;
+        if (Objects.isNull(connectionMng.getId()) || !connectionMngRepository.existsById(connectionMng.getId())) {
+            throw new RuntimeException("CONNECTION_NOT_FOUND");
+        }
+        try {
+            if (Objects.nonNull(connectionMng.getFromConnector())) {
+                if (Objects.nonNull(connectionMng.getFromConnector().getMethods())) {
+                    connectionMng.getFromConnector().setMethods(methodMngService.saveAll(connectionMng.getFromConnector().getMethods()));
+                }
+                if (Objects.nonNull(connectionMng.getFromConnector().getOperators())) {
+                    connectionMng.getFromConnector().setOperators(operatorMngService.saveAll(connectionMng.getFromConnector().getOperators()));
+                }
+            }
+            if (Objects.nonNull(connectionMng.getToConnector())) {
+                if (Objects.nonNull(connectionMng.getToConnector().getMethods())) {
+                    connectionMng.getToConnector().setMethods(methodMngService.saveAll(connectionMng.getToConnector().getMethods()));
+                }
+                if (Objects.nonNull( connectionMng.getToConnector().getOperators())) {
+                    connectionMng.getToConnector().setOperators(operatorMngService.saveAll(connectionMng.getToConnector().getOperators()));
+                }
+            }
+            if (Objects.nonNull(connectionMng.getFieldBindings())) {
+                fieldBindingMngService.saveAll(connectionMng.getFieldBindings());
+            }
+        } catch (Exception e) {
+            deleteChildren(connectionMng);
+            throw e;
+        }
+        connectionMngRepository.save(connectionMng);
     }
 
     @Override
     public List<ConnectionMng> getAllById(List<Long> ids) {
         List<ConnectionMng> all = connectionMngRepository.findAllByConnectionIdIn(ids);
-        all.forEach(x -> connectionMngUpdater.updateToCurrentVersion(x).ifChangedOrElseIfUpdated(this::save, this::saveDirectly));
+        all.forEach(x -> connectionMngUpdater.updateToCurrentVersion(x).ifChangedOrElseIfUpdated(this::updateWithoutBinding, this::saveDirectly));
         return all;
     }
 

@@ -28,7 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.becon.opencelium.backend")
 @EnableScheduling
 @EnableAsync
 @EnableConfigurationProperties

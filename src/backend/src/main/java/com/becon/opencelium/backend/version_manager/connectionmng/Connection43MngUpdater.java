@@ -3,12 +3,15 @@ package com.becon.opencelium.backend.version_manager.connectionmng;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.version_manager.Wrapper;
 import com.becon.opencelium.backend.version_manager.base.Reference;
+import com.becon.opencelium.backend.version_manager.base.SuspendException;
 import com.becon.opencelium.backend.version_manager.base.UpdaterVersion;
 import com.becon.opencelium.backend.version_manager.base.Version43Utils;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Objects;
 
+@Component
 public class Connection43MngUpdater implements ConnectionMngUpdater {
 
     private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_3;
@@ -17,6 +20,7 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
     }
 
     @Override
+    @SuspendException
     public Wrapper<ConnectionMng> updateToCurrentVersion(ConnectionMng connection) {
         return Objects.isNull(connection)
                 ? Wrapper.notUpdated(null)
@@ -24,6 +28,7 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
     }
 
     @Override
+    @SuspendException
     public Wrapper<ConnectionMng> updateFrom(ConnectionMng connection, String oldVersion) {
         if (Objects.isNull(connection) || Objects.equals(oldVersion, currentVersion.getVersion()))
             return Wrapper.notUpdated(connection);
@@ -109,11 +114,5 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
                 }
             }
         }
-    }
-
-    private static final Connection43MngUpdater instance = new Connection43MngUpdater();
-
-    public static Connection43MngUpdater getInstance() {
-        return instance;
     }
 }

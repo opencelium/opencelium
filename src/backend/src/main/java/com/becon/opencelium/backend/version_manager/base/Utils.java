@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.version_manager.base;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Arrays;
 
 public class Utils {
@@ -17,6 +19,13 @@ public class Utils {
         }
         return 0; // Versions are equal
     }
+
+    public static String lowerFirstChar(String value) {
+        return !StringUtils.isBlank(value)
+                ? value.substring(0, 1).toLowerCase() + value.substring(1)
+                : value;
+    }
+
 
     private static int[] parseVersion(String version) {
         return Arrays.stream(version.split("\\."))
