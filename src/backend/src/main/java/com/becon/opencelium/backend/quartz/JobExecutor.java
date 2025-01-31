@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.quartz;
 
-import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
@@ -37,7 +36,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -77,11 +75,11 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 context.getMergedJobDataMap().put("data", data);
             }
             ExecutionObj executionObj = executionObjectService.buildObj(data);
-            List<MaskingRule> rules = connectionService.getAllRules(executionObj.getConnection().getConnectionId());
-            ConnectionExecutor executor = new ConnectionExecutor(executionObj, rules, timestamp, simpMessagingTemplate);
+//            List<MaskingRule> rules = connectionService.getAllRules(executionObj.getConnection().getConnectionId());
+            ConnectionExecutor executor = new ConnectionExecutor(executionObj, data.getRules(), data.isCreateZip(), timestamp, simpMessagingTemplate);
 
-//            context.put("connectionId", executionObj.getConnection().getConnectionId());
-//            context.put("timestamp", timestamp);
+            context.put("connectionId", executionObj.getConnection().getConnectionId());
+            context.put("timestamp", timestamp);
             long startTime = System.currentTimeMillis();
             executor.start();
             context.put("operationsEx", executor.getOperations());

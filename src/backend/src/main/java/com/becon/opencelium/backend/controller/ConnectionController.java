@@ -22,7 +22,9 @@ import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
@@ -33,6 +35,7 @@ import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,6 +60,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -67,6 +71,7 @@ public class ConnectionController {
     private final Environment environment;
     private final ConnectionService connectionService;
     private final ConnectionMngService connectionMngService;
+    private final SchedulerService schedulerService;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final Mapper<Connection, ConnectionResource> connectionResourceMapper;
@@ -75,7 +80,7 @@ public class ConnectionController {
 
     public ConnectionController(
             Environment environment,
-            Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
+            SchedulerService schedulerService, Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             Mapper<Connection, ConnectionResource> connectionResourceMapper,
             Mapper<ConnectionDTO, ConnectionOldDTO> connectionOldDTOMapper,
@@ -84,6 +89,7 @@ public class ConnectionController {
             PatchHelper patchHelper
     ) {
         this.environment = environment;
+        this.schedulerService = schedulerService;
         this.connectionService = connectionService;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
@@ -654,5 +660,44 @@ public class ConnectionController {
     public ResponseEntity<?> deleteRule(@PathVariable long connectionId, @PathVariable long ruleId) {
         connectionService.deleteRule(connectionId, ruleId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Create support file with given masking for connection execution")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Process started successfully.",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/execute/{connectionId}/support-file")
+    public ResponseEntity<?> executeWithSupportFile(@PathVariable long connectionId, @RequestBody List<RuleDTO> ruleDTOs) {
+        // create temporary scheduler, will be deleted after execution finished
+        SchedulerRequestResource resource = new SchedulerRequestResource();
+        resource.setConnectionId(connectionId);
+        resource.setTitle("To_be_deleted_"+ UUID.randomUUID());
+        resource.setStatus(true);
+        resource.setCronExp("59 59 23 31 12 ? 2123");
+        resource.setDebugMode(true);
+
+        Scheduler scheduler = schedulerService.toEntity(resource);
+        schedulerService.save(scheduler);
+
+        // map rule dtos
+        List<MaskingRule> rules = ruleDTOs.stream().map(dto -> {
+            MaskingRule rule = new MaskingRule();
+            rule.setType(dto.getType());
+            rule.setExpression(dto.getExpression());
+
+            return rule;
+        }).toList();
+
+        schedulerService.startNow(scheduler, rules);
+
+        return ResponseEntity.ok().build();
     }
 }

@@ -29,14 +29,14 @@ public class ConnectionExecutor {
     private final ProxyEx proxy;
     private ExecutionManager executionManager;
 
-    public ConnectionExecutor(ExecutionObj executionObj, List<MaskingRule> rules, long timestamp, SimpMessagingTemplate simpMessagingTemplate) {
+    public ConnectionExecutor(ExecutionObj executionObj, List<MaskingRule> rules, boolean createZip, long timestamp, SimpMessagingTemplate simpMessagingTemplate) {
         this.webhookVars = executionObj.getWebhookVars();
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
         this.masking = new MaskingServiceImp(rules);
 
         String loggerId = String.format("%d_%d", executionObj.getConnection().getConnectionId(), timestamp);
-        this.logger = new NewLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), loggerId);
+        this.logger = new NewLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), createZip, loggerId, ConnectionExecutor.class);
 
         if (!executionObj.getLogger().isDebugMode()) {
             logger.disable();

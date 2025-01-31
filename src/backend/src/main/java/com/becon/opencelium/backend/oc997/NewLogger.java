@@ -18,41 +18,47 @@ public class NewLogger<T extends LogMessage> {
     private boolean isWebsocket; // if true then sends logs through websocket;
     private boolean enable = true; // if false then disables logs;
     private final T logEntity; // log entity
+    private final boolean createZip;
     private final SimpMessagingTemplate simpMessagingTemplate; // sends messages to user via websocket
     private final Logger logger;
 
     public static final String LOG_LOCATION = "src/main/resources/logs";
 
-    public NewLogger(boolean isWebsocket, SimpMessagingTemplate simpMessagingTemplate, T logEntity, String loggerId) {
+    public NewLogger(boolean isWebsocket, SimpMessagingTemplate simpMessagingTemplate, T logEntity, boolean createZip, String loggerId, Class<?> c) {
         this.isWebsocket = isWebsocket;
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.logEntity = logEntity;
+        this.createZip = createZip;
 
-        // setup logger to create separate files:
-        Path filePath = FileUtility.toPath(LOG_LOCATION, loggerId + ".log");
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
-        fileAppender.setName("FileAppender-" + loggerId);
-        fileAppender.setContext(context);
-        fileAppender.setFile(filePath.toString());
+        if (createZip) {
+            // setup logger to create separate files:
+            Path filePath = FileUtility.toPath(LOG_LOCATION, loggerId + ".log");
+            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+            FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+            fileAppender.setName("FileAppender-" + loggerId);
+            fileAppender.setContext(context);
+            fileAppender.setFile(filePath.toString());
 
-        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-        encoder.setContext(context);
-        encoder.setPattern("%d{dd-MM-yyyy HH:mm:ss.SSS} %highlight(%-5level) - %msg%n");
-        encoder.start();
+            PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+            encoder.setContext(context);
+            encoder.setPattern("%d{dd-MM-yyyy HH:mm:ss.SSS} %highlight(%-5level) - %msg%n");
+            encoder.start();
 
-        fileAppender.setEncoder(encoder);
-        fileAppender.start();
+            fileAppender.setEncoder(encoder);
+            fileAppender.start();
 
-        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("NewLogger-" + loggerId);
-        logger.addAppender(fileAppender);
-        logger.setAdditive(true);
+            ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("NewLogger-" + loggerId);
+            logger.addAppender(fileAppender);
+            logger.setAdditive(true);
 
-        this.logger = logger;
+            this.logger = logger;
+        } else {
+            this.logger = LoggerFactory.getLogger(c);
+        }
     }
 
     public void close() {
-        if (logger instanceof ch.qos.logback.classic.Logger classicLogger) {
+        if (createZip && logger instanceof ch.qos.logback.classic.Logger classicLogger) {
             classicLogger.iteratorForAppenders().forEachRemaining(appender -> {
                 if (appender instanceof FileAppender) {
                     appender.stop();
@@ -86,11 +92,11 @@ public class NewLogger<T extends LogMessage> {
         if (!enable) {
             return;
         }
-        t.accept(message);
-
         if (isWebsocket) {
             logEntity.setMessage(message);
             simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, logEntity);
+        } else {
+            t.accept(message);
         }
     }
 }
