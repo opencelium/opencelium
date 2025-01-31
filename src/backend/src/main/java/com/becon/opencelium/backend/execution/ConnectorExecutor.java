@@ -1,11 +1,11 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.enums.LogType;
+import com.becon.opencelium.backend.enums.MaskPart;
 import com.becon.opencelium.backend.enums.OpType;
 import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
-import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
@@ -16,6 +16,8 @@ import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
+import com.becon.opencelium.backend.execution.masking.MaskingService;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
@@ -23,7 +25,6 @@ import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.becon.opencelium.backend.utility.ReferenceUtility;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -47,13 +48,15 @@ public class ConnectorExecutor {
     private final RestTemplate restTemplate;
     private final List<Object> executables;
     private final OcLogger<ExecutionLog> logger;
+    private final MaskingService masking;
     private final String direction;
     private static final String BREAK = "======================= %s %s -- INDEX: %s =======================";
 
-    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, String direction) {
+    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, MaskingService masking, String direction) {
         this.executionManager = executionManager;
         this.restTemplate = restTemplate;
         this.logger = logger;
+        this.masking = masking;
         this.direction = direction;
 
         this.executables = new ArrayList<>();
@@ -106,7 +109,8 @@ public class ConnectorExecutor {
                 throw new RuntimeException("Methods cannot have body");
             }
 
-            // set up logger for the current operation
+            // set up logger and masking for the current operation
+            masking.setOperationId(operation.getOperationId());
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
             logger.logAndSend(String.format(BREAK, "API OPERATION", "START", index));
             logger.logAndSend(String.format(
@@ -119,6 +123,7 @@ public class ConnectorExecutor {
             logger.logAndSend(String.format(BREAK, "API OPERATION", "END", index));
             // clean up after operation execution
             logger.getLogEntity().setMethodData(null);
+            masking.setOperationId(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
                 logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "START", index));
@@ -227,9 +232,9 @@ public class ConnectorExecutor {
             }
 
             logger.logAndSend("Http Method: " + requestEntity.getMethod());
-            logger.logAndSend("URL: " + uri);
-            logger.logAndSend("Header: " + requestEntity.getHeaders());
-            logger.logAndSend("Body: " + requestEntity.getBody());
+            logger.logAndSend("URL: " + masking.applyMask(uri, MaskPart.URL));
+            logger.logAndSend("Header: " + masking.applyMask(requestEntity.getHeaders(), MaskPart.HEADER));
+            logger.logAndSend("Body: " + masking.applyMask(requestEntity.getBody(), MaskPart.BODY));
             logger.logAndSend("============================================================================");
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
@@ -253,7 +258,7 @@ public class ConnectorExecutor {
             pagination = null;
             executionManager.setPagination(pagination);
         }
-        logger.logAndSend("Response : " + convertToStringIfNecessary(responseEntity.getBody()));
+        logger.logAndSend("Response: " + masking.applyMask(responseEntity.getBody(), MaskPart.RESPONSE));
 
         Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
@@ -319,20 +324,6 @@ public class ConnectorExecutor {
         }
 
         return MediaTypeUtility.isJsonCompatible(mediaType) ? Object.class : String.class;
-    }
-
-    private String convertToStringIfNecessary(Object body) {
-        if (body == null) {
-            return "";
-        } else if (body instanceof String result) {
-            return result;
-        }
-
-        try {
-            return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private int getTailPointer(int headPointer) {

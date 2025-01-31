@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.quartz;
 
 import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
@@ -9,7 +10,9 @@ import org.quartz.*;
 
 import java.io.Serializable;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -177,6 +180,32 @@ public class QuartzJobScheduler implements SchedulingStrategy {
     }
 
     @Override
+    public void runJob(Scheduler scheduler, List<MaskingRule> rules) {
+        final String jobName = getJobName(scheduler);
+        final JobKey jobKey = new JobKey(jobName, "connection");
+
+        ScheduleData data = new ScheduleData(scheduler.getId(), TriggerType.SCHEDULER, rules);
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("data", data);
+
+        TriggerKey triggerKey = new TriggerKey("FIRES_ONCE-" + System.currentTimeMillis() + "-" + scheduler.getId(),
+                String.valueOf(scheduler.getConnection().getId()));
+
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .forJob(jobKey)
+                .withIdentity(triggerKey)
+                .usingJobData(jobDataMap)
+                .startNow()
+                .build();
+
+        try {
+            quartzScheduler.scheduleJob(trigger);
+        } catch (SchedulerException e) {
+            throw new RuntimeException("Error scheduling job", e);
+        }
+    }
+
+    @Override
     public void resumeJob(Scheduler scheduler) {
         final String jobName = getJobName(scheduler);
         JobKey jobKey = new JobKey(jobName, "connection");
@@ -258,6 +287,8 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         private int scheduleId;
         private TriggerType execType;
         private Map<String, Object> queryParams;
+        private List<MaskingRule> rules = new ArrayList<>();
+        private boolean createZip;
 
         public ScheduleData(int scheduleId, TriggerType execType) {
             this(scheduleId, execType, new HashMap<>());
@@ -267,6 +298,13 @@ public class QuartzJobScheduler implements SchedulingStrategy {
             this.queryParams = webhookVars;
             this.scheduleId = scheduleId;
             this.execType = execType;
+        }
+
+        public ScheduleData(int scheduleId, TriggerType execType, List<MaskingRule> rules) {
+            this.scheduleId = scheduleId;
+            this.execType = execType;
+            this.rules = rules;
+            this.createZip = true;
         }
 
         public int getScheduleId() {
@@ -291,6 +329,14 @@ public class QuartzJobScheduler implements SchedulingStrategy {
 
         public void setQueryParams(Map<String, Object> queryParams) {
             this.queryParams = queryParams;
+        }
+
+        public List<MaskingRule> getRules() {
+            return rules;
+        }
+
+        public boolean isCreateZip() {
+            return createZip;
         }
     }
 }

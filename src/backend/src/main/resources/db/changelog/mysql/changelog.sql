@@ -565,3 +565,14 @@ ALTER TABLE user MODIFY email varchar(45) DEFAULT NULL;
 
 --changeset 4.2:15 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE connection ADD COLUMN IF NOT EXISTS oc_version VARCHAR(20) DEFAULT NULL;
+
+--changeset 4.3:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE IF NOT EXISTS masking_rule (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rule_type ENUM ('REGEX', 'JSON_PATH', 'X_PATH') DEFAULT 'REGEX',
+    expression TEXT,
+    mask_pattern TEXT NOT NULL DEFAULT '[MASKED]',
+    connection_id INT(11) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (connection_id) REFERENCES connection(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
