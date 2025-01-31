@@ -15,11 +15,12 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity
 @Table(name = "masking_rule")
-public class MaskingRule {
+public class MaskingRule implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
