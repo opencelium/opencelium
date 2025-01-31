@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.enums;
 
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
-import com.becon.opencelium.backend.oc950.JsonPathMaskingRule;
-import com.becon.opencelium.backend.oc950.RegexMaskingRule;
+import com.becon.opencelium.backend.execution.masking.JsonPathMaskingRule;
+import com.becon.opencelium.backend.execution.masking.RegexMaskingRule;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 

@@ -16,7 +16,7 @@ import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
-import com.becon.opencelium.backend.oc950.MaskingService;
+import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
