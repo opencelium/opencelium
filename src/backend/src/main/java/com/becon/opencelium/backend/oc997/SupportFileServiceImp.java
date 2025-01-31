@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static com.becon.opencelium.backend.oc997.NewLogger.LOG_LOCATION;
+import static com.becon.opencelium.backend.execution.logger.OcLogger.LOG_LOCATION;
 import static com.becon.opencelium.backend.utility.FileUtility.clear;
 import static com.becon.opencelium.backend.utility.FileUtility.create;
 import static com.becon.opencelium.backend.utility.FileUtility.delete;

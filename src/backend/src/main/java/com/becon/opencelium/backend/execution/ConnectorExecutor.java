@@ -17,7 +17,7 @@ import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractF
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.oc950.MaskingService;
-import com.becon.opencelium.backend.oc997.NewLogger;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
@@ -47,12 +47,12 @@ public class ConnectorExecutor {
     private final ExecutionManager executionManager;
     private final RestTemplate restTemplate;
     private final List<Object> executables;
-    private final NewLogger<ExecutionLog> logger;
+    private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
     private final String direction;
     private static final String BREAK = "======================= %s %s -- INDEX: %s =======================";
 
-    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, NewLogger<ExecutionLog> logger, MaskingService masking, String direction) {
+    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, MaskingService masking, String direction) {
         this.executionManager = executionManager;
         this.restTemplate = restTemplate;
         this.logger = logger;

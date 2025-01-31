@@ -8,7 +8,7 @@ import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.oc950.MaskingService;
 import com.becon.opencelium.backend.oc950.MaskingServiceImp;
-import com.becon.opencelium.backend.oc997.NewLogger;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class ConnectionExecutor {
     private final Map<String, Object> webhookVars;
     private final ConnectionEx connection;
-    private final NewLogger<ExecutionLog> logger;
+    private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
     private final ProxyEx proxy;
     private ExecutionManager executionManager;
@@ -36,7 +36,7 @@ public class ConnectionExecutor {
         this.masking = new MaskingServiceImp(rules);
 
         String loggerId = String.format("%d_%d", executionObj.getConnection().getConnectionId(), timestamp);
-        this.logger = new NewLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), createZip, loggerId, ConnectionExecutor.class);
+        this.logger = new OcLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), createZip, loggerId, ConnectionExecutor.class);
 
         if (!executionObj.getLogger().isDebugMode()) {
             logger.disable();
