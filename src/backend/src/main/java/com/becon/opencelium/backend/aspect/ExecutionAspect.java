@@ -16,20 +16,38 @@
 
 package com.becon.opencelium.backend.aspect;
 
-
 import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.AppYamlPath;
-import com.becon.opencelium.backend.database.mysql.entity.*;
-import com.becon.opencelium.backend.database.mysql.service.*;
+import com.becon.opencelium.backend.database.mysql.entity.Argument;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
+import com.becon.opencelium.backend.database.mysql.entity.EventContent;
+import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
+import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
+import com.becon.opencelium.backend.database.mysql.entity.Execution;
+import com.becon.opencelium.backend.database.mysql.entity.ExecutionArgument;
+import com.becon.opencelium.backend.database.mysql.entity.LastExecution;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.DataAggregatorService;
+import com.becon.opencelium.backend.database.mysql.service.ExecutionService;
+import com.becon.opencelium.backend.database.mysql.service.LastExecutionService;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
+import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.execution.support_file.SupportFileService;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.openjdk.nashorn.api.scripting.JSObject;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -43,7 +61,13 @@ import org.springframework.stereotype.Component;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -61,6 +85,7 @@ public class ExecutionAspect {
     private final Environment env;
     private final LastExecutionService lastExecutionService;
     private final DataAggregatorService dataAggregatorService;
+    private final SupportFileService supportFileService;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -70,8 +95,8 @@ public class ExecutionAspect {
             @Qualifier("dataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
             IncomingWebhookService incomingWebhookService,
             EmailServiceImpl emailService,
-            Environment env
-    ) {
+            Environment env,
+            SupportFileService supportFileService) {
         this.schedulerService = schedulerService;
         this.userService = userService;
         this.incomingWebhookService = incomingWebhookService;
@@ -80,6 +105,7 @@ public class ExecutionAspect {
         this.env = env;
         this.lastExecutionService = lastExecutionService;
         this.dataAggregatorService = dataAggregatorService;
+        this.supportFileService = supportFileService;
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -110,6 +136,14 @@ public class ExecutionAspect {
         executeAggregator(operations, execId);
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
+        if (data.isCreateZip()) {
+            Long connectionId = (Long) context.get("connectionId");
+            long timestamp = (long) context.get("timestamp");
+            supportFileService.collectFiles(connectionId ,timestamp, "s");
+
+            // delete temporarily created scheduler
+            schedulerService.deleteById(schedulerId);
+        }
     }
 
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
@@ -126,6 +160,14 @@ public class ExecutionAspect {
         executeAggregator(operations, execId);
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
+        if (data.isCreateZip()) {
+            Long connectionId = (Long) context.get("connectionId");
+            long timestamp = (long) context.get("timestamp");
+            supportFileService.collectFiles(connectionId, timestamp, "e");
+
+            // delete temporarily created scheduler
+            schedulerService.deleteById(schedulerId);
+        }
     }
 
     private long initExecutionObj(int schedulerId) {

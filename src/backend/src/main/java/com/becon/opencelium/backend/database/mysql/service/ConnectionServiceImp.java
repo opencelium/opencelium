@@ -27,16 +27,20 @@ import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngServ
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
+import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
+import com.becon.opencelium.backend.database.mysql.repository.MaskingRuleRepository;
 import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
+import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.github.fge.jsonpatch.JsonPatch;
+import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -63,6 +67,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ConnectionUpdateTracker updateTracker;
+    private final MaskingRuleRepository ruleRepository;
     private final PatchHelper patchHelper;
     private final WebhookService webhookService;
 
@@ -80,7 +85,7 @@ public class ConnectionServiceImp implements ConnectionService {
             Mapper<Connector, ConnectorDTO> connectorMapper,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
-            ConnectionUpdateTracker updateTracker) {
+            ConnectionUpdateTracker updateTracker, MaskingRuleRepository ruleRepository) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -95,6 +100,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.connectionHistoryService = connectionHistoryService;
         this.schedulerService = schedulerService;
         this.webhookService = webhookService;
+        this.ruleRepository = ruleRepository;
     }
 
 
@@ -405,6 +411,83 @@ public class ConnectionServiceImp implements ConnectionService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<MaskingRule> getAllRules(long connectionId) {
+        throwIfConnectionNotExists(connectionId);
+
+        return ruleRepository.findRulesByConnectionId(connectionId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RuleDTO getOneRule(long connectionId, long ruleId) {
+        throwIfConnectionNotExists(connectionId);
+
+        MaskingRule rule = ruleRepository.findRuleByConnectionIdAndId(connectionId, ruleId)
+                .orElseThrow(() -> new EntityNotFoundException("MaskingRule with ruleId = '" + ruleId + "' for connection with id = '" + connectionId + "' non exists."));
+
+        return RuleDTO.fromEntity(rule);
+    }
+
+    @Override
+    @Transactional
+    public List<RuleDTO> saveRuleList(long connectionId, List<RuleDTO> dtos) {
+        throwIfConnectionNotExists(connectionId);
+
+        return dtos.stream()
+                .map(dto -> saveRule(connectionId, dto))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public RuleDTO saveRule(long connectionId, RuleDTO dto) {
+        Connection connection = getById(connectionId);
+
+        MaskingRule rule = new MaskingRule();
+
+        rule.setType(dto.getType());
+        rule.setExpression(dto.getExpression());
+        rule.setConnection(connection);
+
+        return RuleDTO.fromEntity(ruleRepository.save(rule));
+    }
+
+    @Override
+    @Transactional
+    public RuleDTO updateRule(long connectionId, long ruleId, RuleDTO dto) {
+        throwIfConnectionNotExists(connectionId);
+
+        MaskingRule rule = ruleRepository.findRuleByConnectionIdAndId(connectionId, ruleId)
+                .orElseThrow(() -> new EntityNotFoundException("MaskingRule with ruleId = '" + ruleId + "' for connection with id = '" + connectionId + "' non exists."));
+
+        rule.setType(dto.getType());
+        rule.setExpression(dto.getExpression());
+
+        return RuleDTO.fromEntity(rule);
+    }
+
+    @Override
+    @Transactional
+    public void deleteRuleList(long connectionId) {
+        throwIfConnectionNotExists(connectionId);
+
+        ruleRepository.deleteByConnectionId(connectionId);
+    }
+
+    @Override
+    @Transactional
+    public void deleteRule(long connectionId, long ruleId) {
+        throwIfConnectionNotExists(connectionId);
+
+        ruleRepository.deleteByConnectionIdAndId(connectionId, ruleId);
+    }
+
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------
+    // private methods
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------
     private void extractVars(Object json, List<String> varList) {
         if (json instanceof JSONObject jsonObject) {
             for (String key : jsonObject.keySet()) {
@@ -423,10 +506,6 @@ public class ConnectionServiceImp implements ConnectionService {
         }
     }
 
-
-    // --------------------------------------------------------------------------------------------------------------------------------------------------------
-    // private methods
-    // --------------------------------------------------------------------------------------------------------------------------------------------------------
     private ConnectionDTO patchUpdateInternal(ConnectionDTO connectionDTO, JsonPatch patch, PatchConnectionDetails details) {
         ConnectionDTO patched = patchHelper.patch(patch, connectionDTO, ConnectionDTO.class);
 
@@ -516,5 +595,11 @@ public class ConnectionServiceImp implements ConnectionService {
             return;
         }
         connection.getSchedulers().forEach(s -> schedulerService.deleteById(s.getId()));
+    }
+
+    private void throwIfConnectionNotExists(Long connectionId) {
+        if (!connectionRepository.existsById(connectionId)) {
+            throw new ConnectionNotFoundException(connectionId);
+        }
     }
 }

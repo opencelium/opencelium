@@ -17,13 +17,16 @@
 package com.becon.opencelium.backend.quartz;
 
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
-import com.becon.opencelium.backend.database.mysql.service.OperationUsageHistoryService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
-import org.quartz.*;
+import org.quartz.InterruptableJob;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,8 +34,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.util.LinkedHashMap;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 
 @Component
@@ -40,16 +43,18 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final SubscriptionService subscriptionService;
+    private final ConnectionService connectionService;
     private final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
 
     private Thread thread;
 
     public JobExecutor(@Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
                        @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
-                       SimpMessagingTemplate simpMessagingTemplate) {
+                       SimpMessagingTemplate simpMessagingTemplate, ConnectionService connectionService) {
         this.executionObjectService = executionObjectService;
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.subscriptionService = subscriptionService;
+        this.connectionService = connectionService;
     }
 
     @Override
@@ -60,6 +65,8 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             throw new RuntimeException("Subscription is not valid");
         }
         try {
+            long timestamp = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC); // execution start time
+
             JobDataMap dataMap = context.getMergedJobDataMap();
             QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
             // old schedulers do not have 'data' object.
@@ -68,10 +75,15 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 context.getMergedJobDataMap().put("data", data);
             }
             ExecutionObj executionObj = executionObjectService.buildObj(data);
-            ConnectionExecutor executor = new ConnectionExecutor(executionObj, simpMessagingTemplate);
+//            List<MaskingRule> rules = connectionService.getAllRules(executionObj.getConnection().getConnectionId());
+            ConnectionExecutor executor = new ConnectionExecutor(executionObj, data.getRules(), data.isCreateZip(), timestamp, simpMessagingTemplate);
+
+            context.put("connectionId", executionObj.getConnection().getConnectionId());
+            context.put("timestamp", timestamp);
             long startTime = System.currentTimeMillis();
             executor.start();
             context.put("operationsEx", executor.getOperations());
+
             // increments current_usage in subscription and saves entity in current_usage_history.
             String connectionName = executionObj.getConnection().getConnectionName();
             if (connectionName != null && !connectionName.contains("!*test_connection_")) {

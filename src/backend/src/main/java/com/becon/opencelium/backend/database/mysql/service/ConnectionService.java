@@ -18,8 +18,10 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.github.fge.jsonpatch.JsonPatch;
 
@@ -72,5 +74,20 @@ public interface ConnectionService {
     List<Connection> findAllNotCompleted();
 
     void updateCategory(Connection connection, Integer newCategory);
+
     List<WebhookParamDTO> extractVarsFromJson(String json) throws IOException;
+
+    List<MaskingRule> getAllRules(long connectionId);
+
+    RuleDTO getOneRule(long connectionId, long ruleId);
+
+    List<RuleDTO> saveRuleList(long connectionId, List<RuleDTO> dtos);
+
+    RuleDTO saveRule(long connectionId, RuleDTO dto);
+
+    RuleDTO updateRule(long connectionId, long ruleId, RuleDTO dto);
+
+    void deleteRuleList(long connectionId);
+
+    void deleteRule(long connectionId, long ruleId);
 }
