@@ -12,11 +12,6 @@ public class NotNull implements UnaryOperator {
     }
 
     @Override
-    public Arity getArity() {
-        return Arity.UNARY;
-    }
-
-    @Override
     public OperatorEnum getOperatorType() {
         return OperatorEnum.NOT_NULL;
     }

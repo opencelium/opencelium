@@ -17,11 +17,6 @@ public class NotLike implements BinaryOperator {
     }
 
     @Override
-    public Arity getArity() {
-        return Arity.BINARY;
-    }
-
-    @Override
     public boolean isValidOperand(SidesType sidesType, Object operand) {
         return operand instanceof String;
     }

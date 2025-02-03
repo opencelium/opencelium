@@ -18,11 +18,6 @@ public class And implements BinaryOperator {
     }
 
     @Override
-    public Arity getArity() {
-        return Arity.BINARY;
-    }
-
-    @Override
     public boolean isValidOperand(SidesType sidesType, Object operand) {
         return operand instanceof Boolean || (operand instanceof String str && (str.equals("true") || str.equals("false")));
     }

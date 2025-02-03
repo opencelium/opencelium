@@ -22,4 +22,9 @@ public interface UnaryOperator extends Operator {
     default boolean isLeftSided() {
         return false;
     }
+
+    @Override
+    default Arity getArity() {
+        return Arity.UNARY;
+    }
 }

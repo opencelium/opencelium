@@ -16,11 +16,6 @@ public class Not implements UnaryOperator {
     }
 
     @Override
-    public Arity getArity() {
-        return Arity.UNARY;
-    }
-
-    @Override
     public boolean isLeftSided() {
         return true;
     }

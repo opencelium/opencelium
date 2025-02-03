@@ -19,11 +19,6 @@ public class IsTypeOf implements BinaryOperator {
     }
 
     @Override
-    public Arity getArity() {
-        return Arity.BINARY;
-    }
-
-    @Override
     public boolean isValidOperand(SidesType sidesType, Object operand) {
         return switch (sidesType) {
             case LEFT -> true;

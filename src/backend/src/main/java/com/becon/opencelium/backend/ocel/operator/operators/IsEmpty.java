@@ -18,11 +18,6 @@ public class IsEmpty implements UnaryOperator {
     }
 
     @Override
-    public Arity getArity() {
-        return Arity.UNARY;
-    }
-
-    @Override
     public OperatorEnum getOperatorType() {
         return OperatorEnum.IS_EMPTY;
     }

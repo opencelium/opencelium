@@ -17,4 +17,9 @@ public interface BinaryOperator extends Operator {
     default boolean isLeftSided() {
         return false;
     }
+
+    @Override
+    default Arity getArity() {
+        return Arity.BINARY;
+    }
 }

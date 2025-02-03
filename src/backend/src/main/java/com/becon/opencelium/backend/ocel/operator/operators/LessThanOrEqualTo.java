@@ -17,11 +17,6 @@ public class LessThanOrEqualTo implements BinaryOperator {
     }
 
     @Override
-    public Arity getArity() {
-        return Arity.BINARY;
-    }
-
-    @Override
     public boolean isValidOperand(SidesType sidesType, Object operand) {
         return new GreaterThan().isValidOperand(sidesType, operand);
     }

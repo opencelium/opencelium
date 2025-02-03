@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.ocel.operator.operators;
 
-import com.becon.opencelium.backend.ocel.operator.Arity;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
@@ -21,11 +20,6 @@ public class GreaterThan implements BinaryOperator {
             return DateUtils.compareTo(o1, o2) > 0;
         }
         throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
-    }
-
-    @Override
-    public Arity getArity() {
-        return Arity.BINARY;
     }
 
     @Override

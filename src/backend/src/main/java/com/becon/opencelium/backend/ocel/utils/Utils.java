@@ -1,8 +1,11 @@
 package com.becon.opencelium.backend.ocel.utils;
 
+import java.util.Objects;
+
 public class Utils {
 
-    private Utils() {}
+    private Utils() {
+    }
 
     public static boolean startsWith(String prefix, char[] chars, int i) {
         int length = prefix.length();
@@ -15,5 +18,18 @@ public class Utils {
             }
         }
         return true;
+    }
+
+    public static boolean isPrimitiveType(Class<?> type) {
+        return Objects.nonNull(type) && (type.equals(String.class)
+                || type.equals(Number.class)
+                || type.equals(Boolean.class)
+        );
+    }
+
+    public static boolean isPrimitiveType(Object operand) {
+        return operand instanceof String
+                || operand instanceof Number
+                || operand instanceof Boolean;
     }
 }
