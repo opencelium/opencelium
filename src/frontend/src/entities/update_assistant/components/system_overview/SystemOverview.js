@@ -20,12 +20,12 @@ import { Row, Col, Container } from "react-grid-system";
 import {ListComponent} from "@entity/connection/components/decorators/ListComponent";
 import styles from "@entity/connection/components/themes/default/content/update_assistant/main";
 import Translate from "@entity/connection/components/components/general/app/Translate";
-import {APP_STATUS_DOWN, APP_STATUS_UP} from "@entity/connection/components/utils/constants/url";
 import theme from "react-toolbox/lib/input/theme.css";
 import basicComponentsStyles from "@entity/connection/components/themes/default/general/basic_components";
 import {checkAllExternalApplications as fetchSystemRequirements} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 import {checkApplicationBeforeUpdate as checkResetFiles} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {API_REQUEST_STATE, OC_NAME} from "@application/interfaces/IApplication";
+import {APP_STATUS_DOWN} from "@entity/application/requests/classes/url";
 
 
 function mapStateToProps(state){
