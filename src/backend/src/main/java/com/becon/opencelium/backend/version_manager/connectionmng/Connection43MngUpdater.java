@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.version_manager.base.Reference;
 import com.becon.opencelium.backend.version_manager.base.SuspendException;
 import com.becon.opencelium.backend.version_manager.base.UpdaterVersion;
 import com.becon.opencelium.backend.version_manager.base.Version43Utils;
+import io.micrometer.common.util.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -62,10 +63,14 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
             StatementMng leftStatement = condition.getLeftStatement();
             StatementMng rightStatement = condition.getRightStatement();
             if (!Objects.isNull(leftStatement)) {
-                leftStatement.setField(Version43Utils.replace(leftStatement.getField(), changed, true, Objects.equals(leftStatement.getType(), "header")));
+                if (!StringUtils.isBlank(leftStatement.getType())) {
+                    leftStatement.setField(Version43Utils.replace(leftStatement.getField(), changed, true, Objects.equals(leftStatement.getType(), "header")));
+                }
             }
             if (!Objects.isNull(rightStatement)) {
-                rightStatement.setField(Version43Utils.replace(rightStatement.getField(), changed, true, Objects.equals(rightStatement.getType(), "header")));
+                if (!StringUtils.isBlank(rightStatement.getType())){
+                    rightStatement.setField(Version43Utils.replace(rightStatement.getField(), changed, true, Objects.equals(rightStatement.getType(), "header")));
+                }
             }
         }
     }
@@ -94,14 +99,18 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
             if (Objects.nonNull(fieldBindingMng.getFrom())) {
                 fieldBindingMng.getFrom().forEach(x -> {
                     if (Objects.nonNull(x)) {
-                        x.setField(Version43Utils.replace(x.getField(), changed, true, Objects.equals(x.getType(), "header")));
+                        if (!StringUtils.isBlank(x.getType())){
+                            x.setField(Version43Utils.replace(x.getField(), changed, true, Objects.equals(x.getType(), "header")));
+                        }
                     }
                 });
             }
             if (Objects.nonNull(fieldBindingMng.getTo())) {
                 fieldBindingMng.getTo().forEach(x -> {
                     if (Objects.nonNull(x)) {
-                        x.setField(Version43Utils.replace(x.getField(), changed, true, Objects.equals(x.getType(), "header")));
+                        if (!StringUtils.isBlank(x.getType())){
+                            x.setField(Version43Utils.replace(x.getField(), changed, true, Objects.equals(x.getType(), "header")));
+                        }
                     }
                 });
             }

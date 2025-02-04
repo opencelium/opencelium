@@ -110,14 +110,18 @@ public class Template43Updater implements TemplateUpdater {
             if (Objects.nonNull(fieldBinding.getFrom())) {
                 fieldBinding.getFrom().forEach(x -> {
                     if (Objects.nonNull(x)) {
-                        x.setField(Version43Utils.replace(x.getField(), changed, true, Objects.equals(x.getType(), "header")));
+                        if (!StringUtils.isBlank(x.getType())){
+                            x.setField(Version43Utils.replace(x.getField(), changed, true, Objects.equals(x.getType(), "header")));
+                        }
                     }
                 });
             }
             if (Objects.nonNull(fieldBinding.getTo())) {
                 fieldBinding.getTo().forEach(x -> {
                     if (Objects.nonNull(x)) {
-                        x.setField(Version43Utils.replace(x.getField(), changed, true, Objects.equals(x.getType(), "header")));
+                        if (!StringUtils.isBlank(x.getType())){
+                            x.setField(Version43Utils.replace(x.getField(), changed, true, Objects.equals(x.getType(), "header")));
+                        }
                     }
                 });
             }
@@ -135,10 +139,14 @@ public class Template43Updater implements TemplateUpdater {
             StatementDTO leftStatement = condition.getLeftStatement();
             StatementDTO rightStatement = condition.getRightStatement();
             if (Objects.nonNull(leftStatement)) {
-                leftStatement.setField(Version43Utils.replace(leftStatement.getField(), changed, true, Objects.equals(leftStatement.getType(), "header")));
+                if (!StringUtils.isBlank(leftStatement.getType())){
+                    leftStatement.setField(Version43Utils.replace(leftStatement.getField(), changed, true, Objects.equals(leftStatement.getType(), "header")));
+                }
             }
             if (Objects.nonNull(rightStatement)) {
-                rightStatement.setField(Version43Utils.replace(rightStatement.getField(), changed, true, Objects.equals(rightStatement.getType(), "header")));
+                if (!StringUtils.isBlank(rightStatement.getType())){
+                    rightStatement.setField(Version43Utils.replace(rightStatement.getField(), changed, true, Objects.equals(rightStatement.getType(), "header")));
+                }
             }
         }
     }
