@@ -16,9 +16,6 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
 
     private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_3;
 
-    private Connection43MngUpdater() {
-    }
-
     @Override
     @SuspendException
     public Wrapper<ConnectionMng> updateToCurrentVersion(ConnectionMng connection) {
