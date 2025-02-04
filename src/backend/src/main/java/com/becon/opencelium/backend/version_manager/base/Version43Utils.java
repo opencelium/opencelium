@@ -17,19 +17,25 @@ public class Version43Utils {
 
     public static String updateRef(String rawStr) {
         Matcher referenceMatcher = REFERENCE_REGEX.matcher(rawStr);
+        StringBuilder result = new StringBuilder();
 
-        if (referenceMatcher.matches()) {
-            Matcher requestMatcher = REQUEST_PATTERN.matcher(rawStr);
-            Matcher responseMatcher = RESPONSE_PATTERN.matcher(rawStr);
+        while (referenceMatcher.find()) {
+            String match = referenceMatcher.group();
+            Matcher requestMatcher = REQUEST_PATTERN.matcher(match);
+            Matcher responseMatcher = RESPONSE_PATTERN.matcher(match);
+            String replacement = match; // Default to original
+
             if (requestMatcher.matches()) {
-                return requestMatcher.group(1) + "." + requestMatcher.group(2) + ".body.$." + requestMatcher.group(3);
+                replacement = requestMatcher.group(1) + "." + requestMatcher.group(2) + ".body.$." + requestMatcher.group(3);
             } else if (responseMatcher.matches()) {
-                return responseMatcher.group(1) + "." + responseMatcher.group(2) + ".body.$." + responseMatcher.group(4);
+                replacement = responseMatcher.group(1) + "." + responseMatcher.group(2) + ".body.$." + responseMatcher.group(4);
             }
+
+            referenceMatcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
         }
 
-        // Return original if no match
-        return rawStr;
+        referenceMatcher.appendTail(result);
+        return result.toString();
     }
 
     public static String updateField(String rawStr, boolean isHeader) {
