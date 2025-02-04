@@ -29,7 +29,7 @@ public class Enhancement43Updater implements EnhancementUpdater {
         boolean changed = false;
         if (Objects.nonNull(enhancement) && Objects.nonNull(enhancement.getArgs())) {
             String replaced = Version43Utils.updateRef(enhancement.getArgs());
-            if (Objects.equals(replaced, enhancement.getArgs())) {
+            if (!Objects.equals(replaced, enhancement.getArgs())) {
                 changed = true;
             }
             enhancement.setArgs(replaced);
