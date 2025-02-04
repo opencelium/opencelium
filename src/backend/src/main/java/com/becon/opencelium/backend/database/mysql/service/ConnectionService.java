@@ -41,8 +41,6 @@ public interface ConnectionService {
 
     void deleteAndTrackIt(Long id);
 
-    Optional<Connection> findById(Long id);
-
     List<Connection> findAll();
 
     boolean existsByName(String name);

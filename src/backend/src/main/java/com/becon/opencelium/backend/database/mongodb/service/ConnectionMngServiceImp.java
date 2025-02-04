@@ -11,10 +11,14 @@ import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
+import com.becon.opencelium.backend.version_manager.EntityUpdater;
+import com.becon.opencelium.backend.version_manager.EntityVersionManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -27,6 +31,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final EnhancementService enhancementService;
     private final MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper;
     private final Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper;
+    private final EntityUpdater<ConnectionMng> connectionMngUpdater;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
@@ -35,7 +40,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             @Qualifier("operatorMngServiceImp") OperatorMngService operatorMngService,
             @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
-            Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper
+            Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper,
+            EntityVersionManager entityVersionManager
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -44,6 +50,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         this.enhancementService = enhancementService;
         this.enhancementMapper = enhancementMapper;
         this.enhancementMngMapper = enhancementMngMapper;
+        this.connectionMngUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
     }
 
     @Override
@@ -53,9 +60,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public ConnectionMng save(ConnectionMng connectionMng) {
-        if (connectionMng == null){
-            return null;
-        }
+        if (Objects.isNull(connectionMng)) return null;
         if (connectionMng.getConnectionId() != null && existsByConnectionId(connectionMng.getConnectionId())) {
             throw new RuntimeException("CONNECTION_ALREADY_EXISTS");
         }
@@ -86,9 +91,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public ConnectionMng saveDirectly(ConnectionMng connectionMng) {
-        if (connectionMng == null){
-            return null;
-        }
+        if (Objects.isNull(connectionMng)) return null;
+
         if (connectionMng.getConnectionId() != null && existsByConnectionId(connectionMng.getConnectionId())) {
             throw new RuntimeException("CONNECTION_ALREADY_EXISTS");
         }
@@ -97,8 +101,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public void updateAndBind(ConnectionMng old, ConnectionMng connectionMng) {
-        if (connectionMng == null)
-            return;
+        if (Objects.isNull(connectionMng)) return;
 
         try {
             updateWithoutRollback(old, connectionMng);
@@ -120,18 +123,60 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     public ConnectionMng getByConnectionId(Long connectionId) {
         ConnectionMng connectionMng = connectionMngRepository.findByConnectionId(connectionId)
                 .orElseThrow(() -> new ConnectionNotFoundException(connectionId));
+
+        connectionMngUpdater.updateToCurrentVersion(connectionMng)
+                .ifChangedOrElseIfUpdated(this::updateWithoutBinding, this::saveDirectly);
+
         setEnhancements(connectionMng);
         return connectionMng;
     }
 
     @Override
     public List<ConnectionMng> getAll() {
-        return connectionMngRepository.findAll();
+        List<ConnectionMng> all = connectionMngRepository.findAll();
+        all.forEach(x -> connectionMngUpdater.updateToCurrentVersion(x)
+                .ifChangedOrElseIfUpdated(this::updateWithoutBinding, this::saveDirectly));
+        return all;
+    }
+
+    @Transactional
+    public void updateWithoutBinding(ConnectionMng connectionMng) {
+        if (Objects.isNull(connectionMng)) return;
+        if (Objects.isNull(connectionMng.getId()) || !connectionMngRepository.existsById(connectionMng.getId())) {
+            throw new RuntimeException("CONNECTION_NOT_FOUND");
+        }
+        try {
+            if (Objects.nonNull(connectionMng.getFromConnector())) {
+                if (Objects.nonNull(connectionMng.getFromConnector().getMethods())) {
+                    connectionMng.getFromConnector().setMethods(methodMngService.saveAll(connectionMng.getFromConnector().getMethods()));
+                }
+                if (Objects.nonNull(connectionMng.getFromConnector().getOperators())) {
+                    connectionMng.getFromConnector().setOperators(operatorMngService.saveAll(connectionMng.getFromConnector().getOperators()));
+                }
+            }
+            if (Objects.nonNull(connectionMng.getToConnector())) {
+                if (Objects.nonNull(connectionMng.getToConnector().getMethods())) {
+                    connectionMng.getToConnector().setMethods(methodMngService.saveAll(connectionMng.getToConnector().getMethods()));
+                }
+                if (Objects.nonNull( connectionMng.getToConnector().getOperators())) {
+                    connectionMng.getToConnector().setOperators(operatorMngService.saveAll(connectionMng.getToConnector().getOperators()));
+                }
+            }
+            if (Objects.nonNull(connectionMng.getFieldBindings())) {
+                fieldBindingMngService.saveAll(connectionMng.getFieldBindings());
+            }
+        } catch (Exception e) {
+            deleteChildren(connectionMng);
+            throw e;
+        }
+        connectionMngRepository.save(connectionMng);
     }
 
     @Override
     public List<ConnectionMng> getAllById(List<Long> ids) {
-        return connectionMngRepository.findAllByConnectionIdIn(ids);
+        List<ConnectionMng> all = connectionMngRepository.findAllByConnectionIdIn(ids);
+        all.forEach(x -> connectionMngUpdater.updateToCurrentVersion(x).ifChangedOrElseIfUpdated(this::updateWithoutBinding, this::saveDirectly));
+        return all;
     }
 
     @Override

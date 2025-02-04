@@ -39,6 +39,8 @@ import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
+import com.becon.opencelium.backend.version_manager.EntityUpdater;
+import com.becon.opencelium.backend.version_manager.EntityVersionManager;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
@@ -70,6 +72,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final MaskingRuleRepository ruleRepository;
     private final PatchHelper patchHelper;
     private final WebhookService webhookService;
+    private final EntityUpdater<Enhancement> enhancementUpdater;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -85,7 +88,9 @@ public class ConnectionServiceImp implements ConnectionService {
             Mapper<Connector, ConnectorDTO> connectorMapper,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
-            ConnectionUpdateTracker updateTracker, MaskingRuleRepository ruleRepository) {
+            ConnectionUpdateTracker updateTracker, MaskingRuleRepository ruleRepository,
+            EntityVersionManager entityVersionManager
+    ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -101,6 +106,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.schedulerService = schedulerService;
         this.webhookService = webhookService;
         this.ruleRepository = ruleRepository;
+        this.enhancementUpdater = entityVersionManager.getUpdater(Enhancement.class);
     }
 
 
@@ -125,7 +131,6 @@ public class ConnectionServiceImp implements ConnectionService {
         if (connection.getCategoryId() != null) {
             categoryService.get(connection.getCategoryId());
         }
-
 
         List<Enhancement> enhancements = connection.getEnhancements();
         connection.setEnhancements(null);
@@ -293,35 +298,58 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionRepository.deleteById(id);
     }
 
-    @Override
     public Optional<Connection> findById(Long id) {
         return connectionRepository.findById(id);
     }
 
     @Override
     public Connection getById(Long id) {
-        return connectionRepository.findById(id)
+        Connection connection = connectionRepository.findById(id)
                 .orElseThrow(() -> new ConnectionNotFoundException(id));
+        connection.getEnhancements()
+                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save));
+        return connection;
     }
 
     @Override
     public List<Connection> findAll() {
-        return connectionRepository.findAll();
+        List<Connection> all = connectionRepository.findAll();
+
+        all.forEach(c -> c.getEnhancements()
+                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save)));
+
+        return all;
     }
 
     @Override
     public List<Connection> findAllByConnectorId(int connectorId) {
-        return connectionRepository.findAllByConnectorId(connectorId);
+        LinkedList<Connection> connections = connectionRepository.findAllByConnectorId(connectorId);
+
+        connections.forEach(c -> c.getEnhancements()
+                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save)));
+
+        return connections;
     }
 
     @Override
     public List<Connection> findAllByNameContains(String name) {
-        return connectionRepository.findAllByTitleContains(name);
+        List<Connection> connections = connectionRepository.findAllByTitleContains(name);
+
+        connections.forEach(c -> c.getEnhancements()
+                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save)));
+
+
+        return connections;
     }
 
     @Override
     public List<Connection> getAllConnectionsNotContains(List<Long> ids) {
-        return connectionRepository.findAllByIdNotIn(ids);
+        List<Connection> connections = connectionRepository.findAllByIdNotIn(ids);
+
+        connections.forEach(c -> c.getEnhancements()
+                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save)));
+
+        return connections;
     }
 
     @Override
@@ -371,12 +399,17 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public List<Connection> getAllByCategoryId(Integer categoryId) {
-        return connectionRepository.findAllByCategoryId(categoryId);
+        List<Connection> connections = connectionRepository.findAllByCategoryId(categoryId);
+
+        connections.forEach(c -> c.getEnhancements()
+                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save)));
+
+        return connections;
     }
 
     @Override
     public List<ConnectionDTO> getAllFullConnection() {
-        List<Connection> all = connectionRepository.findAll();
+        List<Connection> all = findAll();
         List<ConnectionDTO> res = new ArrayList<>();
         for (Connection connection : all) {
             res.add(getFullConnection(connection.getId()));
@@ -389,7 +422,7 @@ public class ConnectionServiceImp implements ConnectionService {
         List<Connection> all = findAll();
         List<Connection> res = new ArrayList<>();
         for (Connection connection : all) {
-            if(!connectionMngService.existsByConnectionId(connection.getId())){
+            if (!connectionMngService.existsByConnectionId(connection.getId())) {
                 res.add(connection);
             }
         }
@@ -406,7 +439,7 @@ public class ConnectionServiceImp implements ConnectionService {
     public List<WebhookParamDTO> extractVarsFromJson(String json) throws IOException {
         ArrayList<String> webhookVarList = new ArrayList<>();
         extractVars(json, webhookVarList);
-        return  webhookVarList.stream()
+        return webhookVarList.stream()
                 .map(webhookService::toParamResource)
                 .collect(Collectors.toList());
     }

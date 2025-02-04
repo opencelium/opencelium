@@ -19,6 +19,7 @@ package com.becon.opencelium.backend;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -27,9 +28,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.becon.opencelium.backend")
 @EnableScheduling
 @EnableAsync
+@EnableConfigurationProperties
 public class Application {
 
 	public static void main(String[] args) {
