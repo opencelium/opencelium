@@ -1,0 +1,22 @@
+import {OperatorBuilderProps} from "@app_component/operator_builder/props";
+
+export interface ReferenceGeneratorProps {
+    setValue: (newValue: string) => void,
+    addField?: any,
+    reference: string,
+    builderProps: OperatorBuilderProps,
+    id?: string,
+}
+
+export interface MethodSelectProps {
+    onMethodSelect: (color: string) => void,
+    methodColor: string,
+    builderProps: OperatorBuilderProps,
+}
+
+export interface DeepSelectProps {
+    onValueSelect: (value: string) => void,
+    field: string,
+    hasColor: boolean,
+    options: any,
+}

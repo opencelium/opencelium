@@ -43,6 +43,7 @@ import GetModalProp from '@entity/connection/components/decorators/GetModalProp'
 import WebhookGenerator from "@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator";
 import Webhook from "@root/classes/Webhook";
 import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
+import OperatorBuilder from "@app_component/operator_builder/OperatorBuilder";
 
 export const TransitionEffect = 'width 0.3s ease 0s';
 
@@ -427,6 +428,11 @@ class Condition extends React.Component{
         const operatorOptions = isLoopOperator ? FUNCTIONAL_OPERATORS_FOR_LOOP : FUNCTIONAL_OPERATORS_FOR_IF;
         let functionalOperator = operatorOptions.find(o => o.value === relationalOperatorValue);
         const placeholder = functionalOperator?.placeholder || '';
+        if(isIfOperator) {
+            return (
+                <OperatorBuilder connection={connection} connector={connector} operator={operator}/>
+            )
+        }
         return(
             <React.Fragment>
                 {this.renderType('left')}

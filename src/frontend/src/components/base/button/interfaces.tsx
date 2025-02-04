@@ -82,6 +82,7 @@ interface ButtonProps {
     loadingSize?: string,
     isExternalHref?: boolean,
     title?: string,
+    style?: any,
 }
 
 

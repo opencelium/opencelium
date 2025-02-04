@@ -636,7 +636,7 @@ $DASHED_COLOR: #58854d;
 	}
 }
 .condition_dialog {
-	min-width: 750px;
+	min-width: 90%;
 }
 .condition_content {
 	min-height: 250px;
@@ -743,7 +743,7 @@ $DASHED_COLOR: #58854d;
 		position: absolute;
 		height: calc(100% - 40px);
 	}
-	
+
 }
 .body_reference_not_selected_message {
 	font-size: 24px;
