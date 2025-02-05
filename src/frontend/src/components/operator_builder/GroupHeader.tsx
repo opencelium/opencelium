@@ -6,11 +6,11 @@ import {
     ActionsContainer,
     ConjunctionAndButton,
     ConjunctionContainer,
-    ConjunctionOrButton,
+    ConjunctionOrButton, DeleteButton,
     GroupHeaderContainer
 } from "@app_component/operator_builder/styles";
 
-const GroupHeader = ({updateGroup, group}: GroupHeaderUIProps) => {
+const GroupHeader = ({updateGroup, deleteGroup, group}: GroupHeaderUIProps) => {
     const [showActions, toggleActions] = useState<boolean>(false);
     const unselectedStyles = {
         backgroundColor: '#aaa',
@@ -76,6 +76,7 @@ const GroupHeader = ({updateGroup, group}: GroupHeaderUIProps) => {
             {showActions && <ActionsContainer>
                 <ActionButton label={'Add Rule'} handleClick={addRule}/>
                 <ActionButton label={'Add Group'} handleClick={addGroup}/>
+                {deleteGroup && <DeleteButton icon={'delete'} tooltip={'Delete'} target={`delete_${group.id}`} handleClick={() => deleteGroup(group.id)} hasBackground={false}/>}
             </ActionsContainer>}
         </GroupHeaderContainer>
     )

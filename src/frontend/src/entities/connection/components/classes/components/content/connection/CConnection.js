@@ -67,13 +67,14 @@ export const ALL_COLORS = [
  */
 export default class CConnection{
 
-    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false, categoryId = null){
+    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false, categoryId = null, ui = null){
         if(connectionId !== 0){
             this._id = isId(connectionId) ? connectionId : 0;
         }
         this._title = title;
         this._description = description;
         this._categoryId = categoryId;
+        this._ui = ui;
         if(fromConnector !== null){
             fromConnector.connectorType = CONNECTOR_FROM;
         }
@@ -146,7 +147,8 @@ export default class CConnection{
         const error = connection && connection.hasOwnProperty('error') ? connection.error : null;
         const readOnly = connection && connection.hasOwnProperty('readOnly') ? connection.readOnly : false;
         const categoryId = connection && connection.hasOwnProperty('categoryId') ? connection.categoryId : null;
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly, categoryId);
+        const ui = connection && connection.hasOwnProperty('ui') ? connection.ui : null;
+        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly, categoryId, ui);
     }
 
     static duplicateConnection(connection){
@@ -452,6 +454,14 @@ export default class CConnection{
         this._categoryId = categoryId;
     }
 
+    get ui(){
+        return this._ui;
+    }
+
+    set ui(ui){
+        this._ui = ui;
+    }
+
     get fromConnector(){
         return this._fromConnector;
     }
@@ -662,12 +672,21 @@ export default class CConnection{
             let operatorIndex = operators[i].index;
             let subIndex = operatorIndex.substring(0, operator.index.length);
             if(subIndex === operator.index && operatorIndex.length !== operator.index.length){
+                this.removeUiOperator(operators[i]);
                 connector.removeOperator(operators[i], false);
             }
         }
+        this.removeUiOperator(operator);
         connector.removeOperator(operator, true, true);
     }
-
+    removeUiOperator(operator) {
+        const uiOperators = this._ui?.operators ? [...this._ui?.operators] : [];
+        const index = uiOperators.findIndex(o => o.id === operator.uiId)
+        if (index !== -1) {
+            uiOperators.splice(index, 1)
+            this._ui = {operators: uiOperators};
+        }
+    }
     addFromConnectorOperator(operator, mode = OUTSIDE_ITEM){
         const newOperator = this.fromConnector.addOperator(operator, mode);
         this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
@@ -979,6 +998,7 @@ export default class CConnection{
             toConnector,
             fieldBinding,
             categoryId: this._categoryId,
+            ui: this._ui,
         };
         if(this.hasOwnProperty('_id')){
             obj.id = this._id;

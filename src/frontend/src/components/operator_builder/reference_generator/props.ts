@@ -17,6 +17,17 @@ export interface MethodSelectProps {
 export interface DeepSelectProps {
     onValueSelect: (value: string) => void,
     field: string,
-    hasColor: boolean,
-    options: any,
+    color: string,
+    builderProps: OperatorBuilderProps,
+}
+export type ReferenceType = 'direct' | 'webhook';
+export interface ReferenceSwitcherProps {
+    referenceType: ReferenceType;
+    changeReferenceType: (referenceType: ReferenceType) => void,
+}
+export interface ReferenceSwitcherStyleProps {
+    isHidden?: boolean;
+}
+export interface ReferenceGeneratorStyleProps {
+    referenceType: ReferenceType,
 }

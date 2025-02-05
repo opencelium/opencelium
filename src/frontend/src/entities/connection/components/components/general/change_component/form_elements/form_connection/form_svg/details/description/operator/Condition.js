@@ -418,7 +418,7 @@ class Condition extends React.Component{
 
     renderInfo(){
         const {condition, referenceTypeLeft, referenceTypeRight} = this.state;
-        const {connection, details, readOnly, isExtended} = this.props;
+        const {connection, details, readOnly, isExtended, updateConnection, toggleConditionDialog} = this.props;
         const operator = details.entity;
         const isLoopOperator = operator.type === LOOP_OPERATOR;
         const connector = connection.getConnectorByType(details.connectorType);
@@ -430,7 +430,15 @@ class Condition extends React.Component{
         const placeholder = functionalOperator?.placeholder || '';
         if(isIfOperator) {
             return (
-                <OperatorBuilder connection={connection} connector={connector} operator={operator}/>
+                <OperatorBuilder
+                    updateConnection={(c) => {
+                        updateConnection(c);
+                        toggleConditionDialog();
+                    }}
+                    connection={connection}
+                    connector={connector}
+                    operator={operator}
+                />
             )
         }
         return(
@@ -506,6 +514,7 @@ class Condition extends React.Component{
         const {isMouseOver} = this.state;
         const {details, isExtended, isCurrentInfo, readOnly, theme, connection, isConditionDialogOpened} = this.props;
         const operator = details.entity;
+        const isIfOperator = operator.type === IF_OPERATOR;
         const conditionText = operator.condition.generateStatementText();
         const conditionTextTitle = operator.condition.generateStatementText(true);
         const label = readOnly ? 'Ok' : 'Apply';
@@ -525,7 +534,7 @@ class Condition extends React.Component{
                         )
                     }
                     <Dialog
-                        actions={[{label, onClick: (a) => this.updateConnection(a), id: 'condition_apply'}]}
+                        actions={isIfOperator ? [] : [{label, onClick: (a) => this.updateConnection(a), id: 'condition_apply'}]}
                         active={isConditionDialogOpened && !isExtended}
                         toggle={(a) => this.toggleEdit(a)}
                         title={'Condition'}

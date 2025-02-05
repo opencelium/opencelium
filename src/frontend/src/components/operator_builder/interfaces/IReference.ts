@@ -4,3 +4,7 @@ export interface DirectReferenceData {
     type: SourceType,
     field: string,
 }
+export interface WebhookReferenceData {
+    name: string,
+    type: string,
+}

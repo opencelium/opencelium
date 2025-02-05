@@ -1,13 +1,24 @@
-import React from 'react';
+import React, {useState} from 'react';
 import ReferenceGenerator from './reference_generator/ReferenceGenerator'
 import {RuleUIProps} from './props'
 import OperatorSelect from "./operator_select/OperatorSelect";
-import {RuleContainer} from "@app_component/operator_builder/styles";
+import {DeleteButton, DeleteButtonContainer, RuleContainer} from "@app_component/operator_builder/styles";
 import {isBinaryOperator} from "@app_component/operator_builder/utils";
 
-const Rule = ({rule, updateRule, hasNext, builderProps}: RuleUIProps) => {
+const Rule = ({rule, updateRule, deleteRule, hasNext, builderProps}: RuleUIProps) => {
+    const [showActions, toggleActions] = useState<boolean>(false);
+    const onMouseOver = () => {
+        if (!showActions){
+            toggleActions(true);
+        }
+    }
+    const onMouseLeave = () => {
+        if (showActions){
+            toggleActions(false);
+        }
+    }
     return (
-        <RuleContainer hasNext={hasNext}>
+        <RuleContainer hasNext={hasNext} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave}>
             <ReferenceGenerator builderProps={builderProps} reference={rule?.properties?.leftField || ''} setValue={(leftField) => {
                 updateRule({...rule, properties: {...rule?.properties, leftField, operator: '', rightField: ''}})
             }}/>
@@ -29,6 +40,11 @@ const Rule = ({rule, updateRule, hasNext, builderProps}: RuleUIProps) => {
                         />
                     }
                 </React.Fragment>
+            }
+            {showActions &&
+                <DeleteButtonContainer>
+                    <DeleteButton icon={'delete'} tooltip={'Delete'} target={`delete_${rule.id}`} handleClick={() => deleteRule(rule.id)} hasBackground={false}/>
+                </DeleteButtonContainer>
             }
         </RuleContainer>
     )

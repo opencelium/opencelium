@@ -31,7 +31,7 @@ export default class Webhook implements WebhookProps{
     }
 
     static isWebhookSnippet(webhookSnippet: string): boolean {
-        if(webhookSnippet.length > 2) {
+        if(webhookSnippet?.length > 2) {
             return webhookSnippet[0] === '$' && webhookSnippet[1] === '{' && webhookSnippet[webhookSnippet.length - 1] === '}';
         }
         return false;

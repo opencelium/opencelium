@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import Button from "@app_component/base/button/Button";
 import {GroupHeaderStyleProps, GroupStyleProps, RuleStyleProps} from "@app_component/operator_builder/props";
+import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 
 export const RuleContainer = styled.div<RuleStyleProps>`
     position: relative;
@@ -44,7 +45,7 @@ export const GroupContainer = styled.div<GroupStyleProps>`
     border: 1px solid #DCC896;
     border-radius: 5px;
     padding-bottom: 10px;
-    
+    overflow-x: auto;
     ${({isInitial}) => !isInitial ? `
     &:before {
         border-width: 0 0 2px 2px;
@@ -104,7 +105,14 @@ export const ActionsContainer = styled.div`
     gap: 20px;
 `;
 export const ActionButton = styled(Button)`
-    
+
+`;
+export const DeleteButtonContainer = styled.div`
+    flex: 1;
+    display: flex;
+    justify-content: right;
+`;
+export const DeleteButton = styled(TooltipButton)`
 `;
 export const ConjunctionAndButton = styled(Button)`
     z-index: 1;
@@ -113,6 +121,10 @@ export const ConjunctionAndButton = styled(Button)`
 export const ConjunctionOrButton = styled(Button)`
     z-index: 1;
     border-radius: 0 5px 5px 0;
+`;
+export const SaveOperatorButton = styled(Button)`
+    float: right;
+    margin-top: 30px;
 `;
 export const GroupItemsContainer = styled.div`
     padding-left: 24px;

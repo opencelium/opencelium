@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import Select from "react-select";
 import {DeepSelectProps} from "@app_component/operator_builder/reference_generator/props";
+import DeepSelectOption from "@app_component/operator_builder/reference_generator/DeepSelectOption";
 
 // Define the structure of nested data
 type DataStructure = {
@@ -21,11 +22,11 @@ const data: DataStructure = {
 };
 
 
-const DeepSelect: React.FC<DeepSelectProps> = ({onValueSelect, field, hasColor, options}) => {
+const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, builderProps}) => {
     const [searchValue, setSearchValue] = useState<string>(field);
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(null);
-    const [filteredOptions, setFilteredOptions] = useState<OptionType[]>(options);
-
+    const [filteredOptions, setFilteredOptions] = useState<OptionType[]>([]);
+    const [allOptions, setAllOptions] = useState<OptionType[]>([]);
     /**
      * Recursively find sub-options from the nested data based on the given path.
      * @param path The current input value representing a search path.
@@ -87,7 +88,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({onValueSelect, field, hasColor, 
             } else {
                 // Filter from top-level options
                 setFilteredOptions(
-                    options.filter((option: any) =>
+                    allOptions.filter((option: any) =>
                         option.label.toLowerCase().startsWith(input.toLowerCase())
                     )
                 );
@@ -107,6 +108,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({onValueSelect, field, hasColor, 
             setFilteredOptions(getNestedOptions(selectedOption.value));
         } else {
             setSearchValue('')
+            setFilteredOptions(allOptions);
         }
     };
     useEffect(() => {
@@ -122,8 +124,20 @@ const DeepSelect: React.FC<DeepSelectProps> = ({onValueSelect, field, hasColor, 
         }
     }, [field])
     useEffect(() => {
-        setFilteredOptions(options);
-    }, [options]);
+        setFilteredOptions(allOptions);
+    }, [allOptions]);
+
+    useEffect(() => {
+        if (color && builderProps.connection) {
+            const newOptions = builderProps
+                .connection
+                .getMethodByColor(color)
+                .response
+                .success
+                .getFields(searchValue, builderProps.connector)
+            setAllOptions(newOptions);
+        }
+    }, [color]);
     return (
         <div>
             <Select
@@ -134,7 +148,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({onValueSelect, field, hasColor, 
                 onChange={handleChange}
                 value={selectedOption}
                 isClearable
-                isDisabled={!hasColor}
+                isDisabled={!color}
                 styles={{
                     control: (base) => ({
                         ...base,
@@ -154,6 +168,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({onValueSelect, field, hasColor, 
                 }}
                 menuPortalTarget={document.body}
                 menuPosition="absolute"
+                //components={{ Option: DeepSelectOption }}
             />
         </div>
     );

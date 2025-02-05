@@ -30,11 +30,13 @@ export interface RuleStyleProps {
 }
 export interface UpdateRuleProps {
     updateRule: (newRule: RuleProps) => void,
+    deleteRule: (ruleId: string) => void,
 }
 export interface OperatorBuilderProps {
     connection: CConnection,
     connector: CConnectorItem,
     operator: COperatorItem,
+    updateConnection: any,
 }
 export interface GroupProps {
     id: string,
@@ -50,9 +52,8 @@ export interface GroupUIProps extends UpdateGroupProps, GroupStyleProps{
     group: GroupProps,
     builderProps: OperatorBuilderProps
 }
-export interface GroupHeaderUIProps {
+export interface GroupHeaderUIProps extends UpdateGroupProps{
     group: GroupProps,
-    updateGroup: (newGroup: GroupProps) => void;
 }
 export interface GroupStyleProps {
     isInitial?: boolean,
@@ -60,6 +61,7 @@ export interface GroupStyleProps {
 }
 export interface UpdateGroupProps {
     updateGroup: (newGroup: GroupProps) => void;
+    deleteGroup?: (groupId: string) => void,
 }
 
 export interface OperatorSelectProps {

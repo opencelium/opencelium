@@ -9,8 +9,12 @@ interface OptionType {
 }
 
 const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor, builderProps}) => {
-    const options = useMemo(() => builderProps.connection.getOptionsForMethods(builderProps.connector, builderProps.operator, {statement: 'leftStatement', isKeyConsidered: false, exceptCurrent: false}),
-        [builderProps]);
+    const options = useMemo(() => {
+        if (!builderProps.connection){
+            return [];
+        }
+        return builderProps.connection.getOptionsForMethods(builderProps.connector, builderProps.operator, {statement: 'leftStatement', isKeyConsidered: false, exceptCurrent: false})
+    },[builderProps]);
     console.log(options);
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(methodColor ? options.find((o: any) => o.color === methodColor) : null);
     const customStyles: StylesConfig<OptionType, false> = {
@@ -57,9 +61,16 @@ const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor,
 
     useEffect(() => {
         if (selectedOption) {
-            onMethodSelect(selectedOption.color)
+            if (methodColor !== selectedOption.color) {
+                onMethodSelect(selectedOption.color)
+            }
         }
     }, [selectedOption])
+    useEffect(() => {
+        if (methodColor) {
+            setSelectedOption(options.find((o: OptionType) => o.color === methodColor));
+        }
+    }, [methodColor])
     return (
         <Select
             placeholder={'Select Method...'}

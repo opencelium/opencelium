@@ -7,10 +7,10 @@ import {GroupUIProps} from './props';
 import GroupHeader from "@app_component/operator_builder/GroupHeader";
 import Rule from "@app_component/operator_builder/Rule";
 
-const Group = ({updateGroup, group, isInitial, hasNext, builderProps}: GroupUIProps) => {
+const Group = ({updateGroup, deleteGroup, group, isInitial, hasNext, builderProps}: GroupUIProps) => {
     return (
         <GroupContainer isInitial={isInitial} hasNext={hasNext}>
-            <GroupHeader group={group} updateGroup={updateGroup}/>
+            <GroupHeader group={group} updateGroup={updateGroup} deleteGroup={deleteGroup}/>
             {group?.items?.length > 0 && <GroupItemsContainer>
                 {
                     group?.items.map((item, index) => {
@@ -28,6 +28,14 @@ const Group = ({updateGroup, group, isInitial, hasNext, builderProps}: GroupUIPr
                                             })
                                         })
                                     }}
+                                    deleteGroup={(groupId) => {
+                                        updateGroup({
+                                            ...group,
+                                            items: group.items.filter(i => {
+                                                return i.id !== groupId;
+                                            })
+                                        })
+                                    }}
                                     group={item}
                                 />;
                             case "rule":
@@ -41,6 +49,14 @@ const Group = ({updateGroup, group, isInitial, hasNext, builderProps}: GroupUIPr
                                             ...group,
                                             items: group.items.map((i) => {
                                                 return i.id === item.id ? {...newRule} : i;
+                                            })
+                                        })
+                                    }}
+                                    deleteRule={(ruleId) => {
+                                        updateGroup({
+                                            ...group,
+                                            items: group.items.filter((i) => {
+                                                return i.id !== ruleId;
                                             })
                                         })
                                     }}

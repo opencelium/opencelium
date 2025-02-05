@@ -1,31 +1,22 @@
 import {DirectReferenceData, SourceType} from "@app_component/operator_builder/interfaces/IReference";
+import BaseReference from "@app_component/operator_builder/classes/references/BaseReference";
+import ReferenceFactory from "@app_component/operator_builder/classes/references/ReferenceFactory";
 
-export default class DirectReference {
-    reference: string;
-    constructor(referenceOrColor: string, type?: SourceType, field?: string) {
-        if (type && field) {
-            this.reference = this.generateReference({color: referenceOrColor, type, field});
-        } else {
-            this.reference = referenceOrColor;
-        }
+export default class DirectReference extends BaseReference {
+    constructor(referenceOrField: string, color?: string, type?: SourceType) {
+        super(color && type ? DirectReference.generateReference(referenceOrField, color, type) : referenceOrField);
+        this.type = "direct";
     }
 
-    extractData(): DirectReferenceData {
+    extractData(): DirectReferenceData | null {
         const regex = /\{%(#[0-9A-Fa-f]{6})\.\((request|response)\)\.body\.\$\.(.*?)%\}/;
         const match = this.reference.match(regex);
-
-        if (match) {
-            return {
-                color: match[1],
-                type: match[2] as SourceType,
-                field: match[3]
-            };
-        }
-
-        return null;
+        return match ? { color: match[1], type: match[2] as SourceType, field: match[3] } : null;
     }
 
-    generateReference(data: DirectReferenceData): string {
-        return `{%${data.color}.(${data.type}).body.$.${data.field}%}`;
+    static generateReference(field: string, color: string, type: SourceType): string {
+        return `{%${color}.(${type}).body.$.${field}%}`;
     }
 }
+
+ReferenceFactory.registerType(DirectReference);
