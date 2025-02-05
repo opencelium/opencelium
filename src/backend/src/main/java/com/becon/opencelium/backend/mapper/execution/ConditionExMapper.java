@@ -16,12 +16,16 @@ public class ConditionExMapper {
     public ConditionEx toEntity(ConditionMng dto, String type) {
         ConditionEx condition = new ConditionEx();
 
+        if (dto.getExpression() != null) {
+            condition.setExpression(dto.getExpression());
+            return condition;
+        }
+
         RelationalOperator ro = identifyRelationalOperator(dto.getRelationalOperator(), type);
-        condition.setRelationalOperator(ro);
+        String left = composeLeft(dto.getLeftStatement(), dto.getRightStatement(), ro);
+        String right = composeRight(dto.getRightStatement(), ro);
 
-        condition.setLeft(composeLeft(dto.getLeftStatement(), dto.getRightStatement(), ro));
-        condition.setRight(composeRight(dto.getRightStatement(), ro));
-
+        condition.setExpression(left + ro + right);
         return condition;
     }
 
