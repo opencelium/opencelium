@@ -13,14 +13,14 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 import Input from '@entity/connection/components/components/general/basic_components/inputs/Input';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
-import styles from '@entity/connection/components/themes/default/general/change_component.scss';
 import COperation from "@entity/connection/components/classes/components/content/invoker/COperation";
+import styles from '@entity/connection/components/themes/default/general/change_component.scss';
 
-
+import { transformFieldFormat } from '../../form_connection/form_svg/utils';
 /**
  * Component for Path in Invoker.RequestItem
  */
@@ -30,7 +30,7 @@ class Endpoint extends Component{
         super(props);
 
         this.state = {
-            endpoint: props.operation.request.endpoint,
+            endpoint: transformFieldFormat(props.operation.request.endpoint),
         };
     }
 
@@ -38,7 +38,7 @@ class Endpoint extends Component{
         let endpoint = this.props.operation.request.endpoint;
         if(endpoint === ''){
             this.setState({
-                endpoint,
+                endpoint: transformFieldFormat(endpoint) 
             });
         }
     }
@@ -49,7 +49,8 @@ class Endpoint extends Component{
 
     onBlur(){
         const {operation, updateEntity} = this.props;
-        const {endpoint} = this.state;
+        let {endpoint} = this.state;
+        endpoint = transformFieldFormat(endpoint);
         if(operation.request.endpoint !== endpoint) {
             operation.request.endpoint = endpoint;
             updateEntity();

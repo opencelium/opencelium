@@ -13,25 +13,26 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
-import styles from '@entity/connection/components/themes/default/general/form_methods.scss';
-import SelectSearch from "@entity/connection/components/components/general/basic_components/inputs/SelectSearch";
+import { findTopLeft, setFocusById } from "@application/utils/utils";
+import WebhookGenerator from "@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator";
+import { CONNECTOR_FROM } from "@classes/content/connection/CConnectorItem";
+import CBody from "@classes/content/invoker/CBody";
+import CStatement, { STATEMENT_RESPONSE } from "@entity/connection/components/classes/components/content/connection/operator/CStatement";
 import {
     RESPONSE_FAIL,
     RESPONSE_SUCCESS
 } from "@entity/connection/components/classes/components/content/invoker/response/CResponse";
 import Input from "@entity/connection/components/components/general/basic_components/inputs/Input";
-import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
-import CStatement, {STATEMENT_RESPONSE} from "@entity/connection/components/classes/components/content/connection/operator/CStatement";
-import {findTopLeft, setFocusById} from "@application/utils/utils";
-import ReactDOM from "react-dom";
 import RadioButtons from "@entity/connection/components/components/general/basic_components/inputs/RadioButtons";
 import Select from "@entity/connection/components/components/general/basic_components/inputs/Select";
-import {addCloseParamGeneratorNavigation, removeCloseParamGeneratorNavigation} from "@entity/connection/components/utils/key_navigation";
-import WebhookGenerator from "@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator";
-import CBody from "@classes/content/invoker/CBody";
-import {CONNECTOR_FROM} from "@classes/content/connection/CConnectorItem";
+import SelectSearch from "@entity/connection/components/components/general/basic_components/inputs/SelectSearch";
+import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
+import styles from '@entity/connection/components/themes/default/general/form_methods.scss';
+import { addCloseParamGeneratorNavigation, removeCloseParamGeneratorNavigation } from "@entity/connection/components/utils/key_navigation";
+import ReactDOM from "react-dom";
+import { transformFieldFormat } from '../../form_svg/utils';
 
 
 class ParamGenerator extends Component {
@@ -214,15 +215,25 @@ class ParamGenerator extends Component {
         return paramSource;
     }
 
-    addParam(){
-        const {color, responseType, field} = this.state;
-        const {addParam, isVisible} = this.props;
-
-        let statement = CStatement.createStatement({color, field: `${responseType}.${field}`, type: STATEMENT_RESPONSE, parent: this.getParamSource()});
+    addParam() {
+        const { color, responseType, field } = this.state;
+        const { addParam, isVisible } = this.props;
+            let statement = CStatement.createStatement({
+            color,
+            field: `${responseType}.${field}`,
+            type: STATEMENT_RESPONSE,
+            parent: this.getParamSource()
+        });
         statement = statement.getObject();
-        addParam(`${statement.color}.(${statement.type}).${statement.field}`);
-        if(!isVisible) {
-            this.setState({showGenerator: !this.state.showGenerator});
+    
+        let finalRef = `${statement.color}.(${statement.type}).${statement.field}`;
+    
+        finalRef = transformFieldFormat(finalRef);
+    
+        addParam(finalRef);
+    
+        if (!isVisible) {
+            this.setState({ showGenerator: !this.state.showGenerator });
         }
     }
 

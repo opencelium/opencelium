@@ -13,7 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {colorRegex} from "@entity/connection/components/utils/constants/regular_expressions";
+import { transformFieldFormat } from '@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/utils';
+import { colorRegex } from "@entity/connection/components/utils/constants/regular_expressions";
 
 export default class CEndpoint{
     static divideEndpointValueByReferences(endpointValue, requiredInvokerData){
@@ -103,41 +104,49 @@ export default class CEndpoint{
         return splitResult;
     }
 
-    static isCaretPositionFocusedOnReference(caretPosition = 0, endpointValue = '', requiredInvokerData = [], shouldReturnIndex = false){
+    static isCaretPositionFocusedOnReference(caretPosition = 0, endpointValue = '', requiredInvokerData = [], shouldReturnIndex = false) {
+        endpointValue = transformFieldFormat(endpointValue);
+        
         let dividedByReferences = CEndpoint.divideEndpointValueByReferences(endpointValue, requiredInvokerData);
-        for(let i = 0; i < dividedByReferences.length; i++){
-            if(caretPosition <= 0){
-                if(i === 0 && (dividedByReferences[0].isInvokerReference || dividedByReferences[0].isLocalReference)){
-                    if(shouldReturnIndex){
+        for (let i = 0; i < dividedByReferences.length; i++) {
+            if (caretPosition <= 0) {
+                if (i === 0 && (dividedByReferences[0].isInvokerReference || dividedByReferences[0].isLocalReference)) {
+                    if (shouldReturnIndex) {
                         return 0;
                     }
                     return true;
                 }
                 break;
             }
-            if(dividedByReferences[i].isInvokerReference){
+            if (dividedByReferences[i].isInvokerReference) {
                 caretPosition -= dividedByReferences[i].value.length - 2;
-                if(caretPosition <= 0){
-                    if(shouldReturnIndex){
+                if (caretPosition <= 0) {
+                    if (shouldReturnIndex) {
                         return i;
                     }
                     return true;
                 }
-            } else if(dividedByReferences[i].isLocalReference){
-                let value = dividedByReferences[i].value.split('.').slice(3).join('.');
-                value = value.substr(0, value.length - 2);
-                caretPosition -= value.length;
-                if(caretPosition <= 0){
-                    if(shouldReturnIndex){
+            } else if (dividedByReferences[i].isLocalReference) {
+                let parts = dividedByReferences[i].value.split('.');
+                let localRef = '';
+                if (parts.length >= 5 && parts[2] === 'body' && parts[3] === '$') {
+                    localRef = parts.slice(4).join('.');
+                } else {
+                    localRef = parts.slice(3).join('.');
+                }
+                localRef = localRef.substr(0, localRef.length - 2);
+                caretPosition -= localRef.length;
+                if (caretPosition <= 0) {
+                    if (shouldReturnIndex) {
                         return i;
                     }
                     return true;
                 }
-            } else{
+            } else {
                 caretPosition -= dividedByReferences[i].value.length;
             }
         }
-        if(shouldReturnIndex){
+        if (shouldReturnIndex) {
             return -1;
         }
         return false;

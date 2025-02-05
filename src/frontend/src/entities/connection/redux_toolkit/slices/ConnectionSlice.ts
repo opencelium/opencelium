@@ -13,11 +13,20 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {CaseReducers, createSlice, current, PayloadAction, SliceCaseReducers} from "@reduxjs/toolkit";
-import {API_REQUEST_STATE, TRIPLET_STATE,} from "@application/interfaces/IApplication";
-import {IResponse, ResponseMessages,} from "@application/requests/interfaces/IResponse";
-import {CommonState} from "@application/utils/store";
-import {ICommonState} from "@application/interfaces/core";
+import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
+import { ICommonState } from "@application/interfaces/core";
+import { API_REQUEST_STATE, TRIPLET_STATE, } from "@application/interfaces/IApplication";
+import { IResponse, ResponseMessages, } from "@application/requests/interfaces/IResponse";
+import { CommonState } from "@application/utils/store";
+import { COLOR_MODE } from "@classes/content/connection_overview_2/CSvg";
+import { WebhookProps } from "@entity/connection/classes/Webhook";
+import AnimationFunctionSteps from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/AnimationFunctionSteps";
+import { deepTransformFields, transformFieldFormat } from '@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/utils';
+import { getWebhookTypes } from "@entity/schedule/redux_toolkit/action_creators/WebhookCreators";
+import { CaseReducers, createSlice, current, PayloadAction, SliceCaseReducers } from "@reduxjs/toolkit";
+import { NoInfer } from "@reduxjs/toolkit/dist/tsHelpers";
+import { PANEL_LOCATION } from "../../components/utils/constants/app";
+import { ConnectionLogProps, IConnection } from "../../interfaces/IConnection";
 import {
   addConnection,
   addTestConnection,
@@ -34,15 +43,6 @@ import {
   testConnection,
   updateConnection,
 } from "../action_creators/ConnectionCreators";
-import {ConnectionLogProps, IConnection} from "../../interfaces/IConnection";
-import {PANEL_LOCATION} from "../../components/utils/constants/app";
-import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
-import {NoInfer} from "@reduxjs/toolkit/dist/tsHelpers";
-import {COLOR_MODE} from "@classes/content/connection_overview_2/CSvg";
-import AnimationFunctionSteps
-  from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/AnimationFunctionSteps";
-import {WebhookProps} from "@entity/connection/classes/Webhook";
-import {getWebhookTypes} from "@entity/schedule/redux_toolkit/action_creators/WebhookCreators";
 
 
 export const LogPanelHeight = {
@@ -319,16 +319,37 @@ const connectionReducers = (isModal: boolean = false) => {
         state.processTextSize = action.payload.processTextSize;
       }
     },
-    setConnectionData: (state, action: PayloadAction<any>) => {
-      state.connection = action.payload.connection;
+    setConnectionData: (state: any, action: PayloadAction<any>) => {
+      const connection: any = JSON.parse(JSON.stringify(action.payload.connection));
+    
+      const transformedConnection = deepTransformFields(connection);
+    
+      state.connection = transformedConnection;
       if (action.payload.updateConnection) {
         state.updateConnection = action.payload.updateConnection;
       }
     },
     setCurrentTechnicalItem: (state, action: PayloadAction<any>) => {
+      if (
+        action.payload &&
+        action.payload.entity &&
+        action.payload.entity.request &&
+        action.payload.entity.request.body &&
+        action.payload.entity.request.body.fields
+      ) {
+        const fields = { ...action.payload.entity.request.body.fields };
+        for (const key in fields) {
+          if (fields.hasOwnProperty(key)) {
+            fields[key] = transformFieldFormat(fields[key]);
+          }
+        }
+        action.payload.entity.request.body.fields = fields;
+      }
+    
       state.currentTechnicalItem = action.payload;
       state.isCreateElementPanelOpened = action.payload !== null;
     },
+    
     setDetailsLocation: (state, action: PayloadAction<any>) => {
       state.detailsLocation = action.payload.location;
     },

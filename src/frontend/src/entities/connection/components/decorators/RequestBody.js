@@ -13,21 +13,21 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import {isJsonString, subArrayToString, isString, isNumber} from "@application/utils/utils";
-import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
-import Dialog from "@entity/connection/components/components/general/basic_components/Dialog";
+import { isJsonString, isNumber, isString, subArrayToString } from "@application/utils/utils";
+import { markFieldNameAsArray } from "@change_component//form_elements/form_connection/form_methods/help";
 import Enhancement from "@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Enhancement";
-import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 import ParamGenerator from "@change_component/form_elements/form_connection/form_methods/method/ParamGenerator";
-import styles from '@entity/connection/components/themes/default/general/form_methods.scss';
-import Input from "@entity/connection/components/components/general/basic_components/inputs/Input";
-import CRequest from "@entity/connection/components/classes/components/content/invoker/request/CRequest";
-import ToolboxThemeInput from "../hocs/ToolboxThemeInput";
-import {markFieldNameAsArray} from "@change_component//form_elements/form_connection/form_methods/help";
 import Pointer from "@change_component/form_elements/form_connection/form_methods/method/Pointer";
-import Webhook from '@entity/connection/classes/Webhook';
 import WebhookElement from "@change_component/form_elements/form_connection/form_methods/method/WebhookElement";
+import Webhook from '@entity/connection/classes/Webhook';
+import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
+import CRequest from "@entity/connection/components/classes/components/content/invoker/request/CRequest";
+import Dialog from "@entity/connection/components/components/general/basic_components/Dialog";
+import Input from "@entity/connection/components/components/general/basic_components/inputs/Input";
+import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
+import styles from '@entity/connection/components/themes/default/general/form_methods.scss';
+import React from 'react';
+import ToolboxThemeInput from "../hocs/ToolboxThemeInput";
 
 //[POST params|header|GET params].$.result:array
 export function RequestBody(CRequestType){
@@ -298,6 +298,7 @@ export function RequestBody(CRequestType){
                                 updateBody={(a) => this.updateBody(a)}
                                 PointerComponent={{
                                     getComponent: (params) => {
+                                        console.log(params, connection)
                                         return (
                                             <Pointer
                                                 {...params}

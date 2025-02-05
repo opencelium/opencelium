@@ -13,14 +13,14 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import ReactJson from 'react-json-view';
-import {withTranslation} from "react-i18next";
-import {RequestBody} from "@entity/connection/components/decorators/RequestBody";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import CConnectorItem from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
-import {CJsonEditor} from "@entity/connection/components/classes/components/general/basic_components/json_editor/CJsonEditor";
+import { CJsonEditor } from "@entity/connection/components/classes/components/general/basic_components/json_editor/CJsonEditor";
+import { RequestBody } from "@entity/connection/components/decorators/RequestBody";
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { withTranslation } from "react-i18next";
+import ReactJson from 'react-json-view';
 
 @withTranslation('basic_components')
 @RequestBody(CJsonEditor)
