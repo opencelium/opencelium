@@ -11,7 +11,7 @@ public class ConnectionStatusDto {
 
     public String getStatus() {
         RemoteApi remoteApi = new ServicePortal();
-        SubscriptionModule sm = remoteApi.getModule(ApiModule.SUBSCRIPTION);
+        SubscriptionModule sm = (SubscriptionModule) remoteApi.getModule(ApiModule.SUBSCRIPTION);
         return status;
     }
 

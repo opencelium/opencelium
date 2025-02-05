@@ -45,22 +45,23 @@ Under *spring* -> *security*, please set the required parameters:
 
    ldap:
       # LDAP server URL
-      urls: ldap://srvmucudcb01.becon.de:7389
+      urls: ldap://localhost:7389
 
       # User search base
-      user-search-base: ou=User,ou=BECON,dc=becon,dc=de
+      user-search-base: ou=User,ou=group,dc=domain,dc=com
 
       # Group search base
-      group-search-base: ou=Groups,ou=BECON,dc=becon,dc=de
+      group-search-base: ou=Groups,ou=group,dc=domain,dc=com
+
 
       # LDAP manager credentials
-      username: uid=otrs-ldap,ou=Special,ou=User,ou=BECON,dc=becon,dc=de
-      password: $Verzeichnis$
+      username: uid=super_user,ou=User,ou=group,dc=domain,dc=com
+      password: PASSWORD
 
       # Where to search for roles/groups
       # Usually, the unique identifier for OpenLDAP is uniqueMember={0},
       # while for Active Directory, it is member={0} but check your LDAP settings
-      group-search-filter: (member={0})
+      group-search-filter: (member={0})      
 
       # User search filter
       # Usually, the unique identifier for OpenLDAP is mailPrimaryAddress={0},
@@ -69,31 +70,43 @@ Under *spring* -> *security*, please set the required parameters:
 
       # Maps groups between LDAP and the application
       group-role-mapping:
-        - ldap-group: cn=FUL-Intern,ou=Grouping Users,ou=Groups,ou=BECON,dc=becon,dc=de
+        - ldap-group: cn=AdminLdap, ou=Groups,ou=group,dc=domain,dc=com
           oc-role: Admin
-        - ldap-group: cn=asdasFUL--Intern,ou=Grouping Users,ou=Groups,ou=BECON,dc=becon,dc=de
+        - ldap-group: cn=UserLdap,ou=Groups,ou=group,dc=domain,dc=com
           oc-role: User
 
       # Default role if no mapping is found between LDAP and the application
       default-role: User
-
-      # Activate or deactivate logs during authentication
-      show-logs: false
-      
       # Timeout for LDAP authentication (in milliseconds)
       timeout: 30000
 
 .. warning::
-    After updating the application.yml file, please build and restart the server.
+    After updating the application.yml file, please restart the opencelium service.
 
-Now you can check the ldap connection in *Admin Panel* -> *LDAP Check* and see the logs
-on the right side.
+.. code-block:: sh
+
+        systemctl restart opencelium
+
+
+.. note::
+    Usually, group-role-mapping for OpenLDAP requires lowercase letters for cn, ou and dc,
+    while, Active Directory requires capital letters for CN, OU and DC
+
+Now you can check the ldap connection in *Admin Panel* -> *LDAP Check* 
+and see the logs on the right side.
 
 |image1|
 
+For login using LDAP credentials, please have a look into OpenCelium Logs for troubleshooting:
+
+.. code-block:: sh
+	
+	journalctl -xe -u opencelium -f
+ 
 
 .. |image1| image:: ../img/management/authentication/1.png
    :align: middle
+   :width: 400
 .. |image2| image:: ../img/management/authentication/2.png
    :align: middle
    :width: 200
@@ -102,3 +115,5 @@ on the right side.
 .. |image4| image:: ../img/management/authentication/4.png
    :align: middle
    :width: 400
+
+

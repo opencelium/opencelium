@@ -1,12 +1,16 @@
 package com.becon.opencelium.backend.subscription.remoteapi;
 
+import com.becon.opencelium.backend.configuration.ApplicationContextProvider;
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.ReportModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.SubscriptionModule;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -25,10 +29,9 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
     private final HttpRequestHelper httpRequestHelper;
 
     public ServicePortal() {
-        YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
-        yamlPropertiesFactoryBean.setResources(new ClassPathResource("application.yml"));
-        BASE_URL = Objects.requireNonNull(yamlPropertiesFactoryBean.getObject()).getProperty(AppYamlPath.SP_BASE_URL);
-        AUTH_TOKEN = Objects.requireNonNull(yamlPropertiesFactoryBean.getObject()).getProperty(AppYamlPath.SP_TOKEN);
+        Environment env = ApplicationContextProvider.getApplicationContext().getEnvironment();
+        BASE_URL = env.getProperty(AppYamlPath.SP_BASE_URL);
+        AUTH_TOKEN = env.getProperty(AppYamlPath.SP_TOKEN);
         this.httpRequestHelper = new HttpRequestHelper(BASE_URL);
     }
 
@@ -60,9 +63,9 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
     }
 
     @Override
-    public <T> T getModule(ApiModule module) throws IllegalArgumentException {
+    public Object getModule(ApiModule module) throws IllegalArgumentException {
         if (module.getModuleClass().isInstance(this)) {
-            return (T) this;
+            return this;
         } else {
             throw new IllegalArgumentException("Interface " + module.getModuleClass() + " not implemented by RemoteApi");
         }

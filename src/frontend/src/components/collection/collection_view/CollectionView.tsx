@@ -88,10 +88,14 @@ const CollectionView: FC<CollectionViewProps> =
         }, [searchValue])
         useEffect(() => {
             if (!!paginationProps) {
-                paginationProps.setPage(currentPage);
-            }
-            if(searchValuePropertyName){
-                debounce(() => {dispatch(setCurrentPages({[searchValuePropertyName]: currentPage}))})();
+                const newPage = currentPage - 1;
+                if (paginationProps.page !== newPage) {
+                    paginationProps.setPage(newPage);
+                }
+            } else {
+                if (searchValuePropertyName) {
+                    debounce(() => {dispatch(setCurrentPages({[searchValuePropertyName]: currentPage}))})();
+                }
             }
         }, [currentPage])
         useEffect(() => {
@@ -128,7 +132,7 @@ const CollectionView: FC<CollectionViewProps> =
             }
         }, [collection.deletingEntitiesState]);
         const decreasePage = () => {
-            if (currentPage > 1) {
+            if (currentPage > 1 && !paginationProps) {
                 setPage(currentPage - 1);
             }
         }

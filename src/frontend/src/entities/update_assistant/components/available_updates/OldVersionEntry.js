@@ -85,7 +85,7 @@ class OldVersionEntry extends React.Component{
 
     render(){
         const {isMouseOver} = this.state;
-        const {t, version, deletingVersion, currentVersion, activeMode} = this.props;
+        const {t, version, deletingVersion, currentVersion, activeMode, onChangelogClick} = this.props;
         const isVisibleDeleteIcon = isMouseOver && activeMode === OFFLINE_UPDATE;
         let icon = 'delete';
         if(currentVersion && currentVersion.name === version.name && deletingVersion === API_REQUEST_STATE.START){
@@ -94,8 +94,19 @@ class OldVersionEntry extends React.Component{
         return(
             <tr className={styles.disable_version_entry} onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}>
                 <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}>{`v${version.name}`}</td>
-                <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
-                <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)} style={{position: 'relative'}}>
+                <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}>
+                    {version.changelogLink ?
+                        <span onClick={onChangelogClick} style={{
+                            cursor: 'pointer',
+                            color: '#000',
+                            textDecoration: 'underline'
+                        }}>{t('FORM.CHANGELOG')}</span>
+                        :
+                        <span style={{}}>{t('FORM.CHANGELOG')}</span>
+                    }
+                </td>
+                <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}
+                    style={{position: 'relative'}}>
                     <span>{t('FORM.OLD_VERSION')}</span>
                     {isVisibleDeleteIcon &&
                         <TooltipFontIcon

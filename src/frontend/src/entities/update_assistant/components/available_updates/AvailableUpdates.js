@@ -260,7 +260,7 @@ class AvailableUpdates extends React.Component{
                         }
                     }
                     return (
-                        <OldVersionEntry key={version.name} version={version} activeMode={activeMode}/>
+                        <OldVersionEntry key={version.name} version={version} activeMode={activeMode} onChangelogClick={() => this.getChangelog(version.changelogLink)}/>
                     );
                 })}
             </React.Fragment>
@@ -325,14 +325,18 @@ class AvailableUpdates extends React.Component{
                         <tbody>
                             {this.renderOldUpdates()}
                             {updates.available.map(version => {
+                                console.log(version);
                                 const isAlreadyDownloaded = activeMode === ONLINE_UPDATE && offlineUpdates.findIndex(u => u.name === version.name) !== -1;
                                 return (
                                     <tr key={version.name}>
                                         <td>{`v${version.name}`}</td>
                                         <td>
-                                            <div style={{textDecoration: 'underline', cursor: 'pointer'}} title={'Show changelog'} onClick={() => this.getChangelog(version.changelogLink)}>
+                                            {version?.changelogLink ? <div style={{color: '#000', textDecoration: 'underline', cursor: 'pointer'}} title={'Show changelog'} onClick={() => this.getChangelog(version.changelogLink)}>
                                                 {t('FORM.CHANGELOG')}
                                             </div>
+                                                :
+                                                <div style={{}}>{t('FORM.CHANGELOG')}</div>
+                                            }
                                         </td>
                                         <td>
                                             {version.status !== VERSION_STATUS.CURRENT
