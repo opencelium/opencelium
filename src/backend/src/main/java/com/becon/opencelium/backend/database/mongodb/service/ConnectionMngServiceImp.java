@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
+import com.becon.opencelium.backend.configuration.OpenCeliumProps;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
@@ -32,6 +33,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper;
     private final Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper;
     private final EntityUpdater<ConnectionMng> connectionMngUpdater;
+    private final OpenCeliumProps ocProps;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
@@ -41,7 +43,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
             Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper,
-            EntityVersionManager entityVersionManager
+            EntityVersionManager entityVersionManager, OpenCeliumProps ocProps
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -51,6 +53,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         this.enhancementMapper = enhancementMapper;
         this.enhancementMngMapper = enhancementMngMapper;
         this.connectionMngUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
+        this.ocProps = ocProps;
     }
 
     @Override
@@ -64,6 +67,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         if (connectionMng.getConnectionId() != null && existsByConnectionId(connectionMng.getConnectionId())) {
             throw new RuntimeException("CONNECTION_ALREADY_EXISTS");
         }
+        connectionMng.setVersion(ocProps.getVersion());
         try {
             fieldBindingMngService.bind(connectionMng); // also saves to db
             if (connectionMng.getFromConnector() != null) {
@@ -93,9 +97,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     public ConnectionMng saveDirectly(ConnectionMng connectionMng) {
         if (Objects.isNull(connectionMng)) return null;
 
-        if (connectionMng.getConnectionId() != null && existsByConnectionId(connectionMng.getConnectionId())) {
-            throw new RuntimeException("CONNECTION_ALREADY_EXISTS");
-        }
         return connectionMngRepository.save(connectionMng);
     }
 
@@ -139,7 +140,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         return all;
     }
 
-    @Transactional
     public void updateWithoutBinding(ConnectionMng connectionMng) {
         if (Objects.isNull(connectionMng)) return;
         if (Objects.isNull(connectionMng.getId()) || !connectionMngRepository.existsById(connectionMng.getId())) {

@@ -71,11 +71,6 @@ public class Template40Updater implements EntityUpdater<Template> {
             });
             connection.getToConnector().setOperators(operatorOldDTOMapper.toEntityAll(toOperators));
         }
-        if (Objects.nonNull(connection.getFieldBinding())) {
-            List<FieldBindingOldDTO> fieldBindings = objectMapper.convertValue(connection.getFieldBinding(), new TypeReference<>() {
-            });
-            connection.setFieldBinding(fieldBindingOldDTOMapper.toEntityAll(fieldBindings));
-        }
 
         return Wrapper.updated(template)
                 .changed(true)
