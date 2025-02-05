@@ -38,6 +38,7 @@ public class Pagination implements Cloneable {
 
     private List<PageParamRule> pageParamRules;
     private int currentSize;
+    private boolean isLastResultEmpty;
 
     public Pagination(List<PageParamRule> pageParamRules) {
         this.pageParamRules = pageParamRules;
@@ -66,6 +67,10 @@ public class Pagination implements Cloneable {
     }
 
     public boolean hasMore() {
+        if (this.isLastResultEmpty) {
+            return false;
+        }
+
         this.currentSize = getCurrentSize();
         if (existsParam(PageParam.HAS_MORE)) {
             String result = findParam(PageParam.HAS_MORE).getValue();
@@ -97,6 +102,7 @@ public class Pagination implements Cloneable {
                 }
             }
         }
+
         return false;
     }
 
@@ -145,6 +151,8 @@ public class Pagination implements Cloneable {
                     }
 
                     if (paramRule.getParam().equals(PageParam.RESULT)) {
+                        this.isLastResultEmpty = isEmptyJsonArray(value);
+
                         if (paramRule.getValue() == null || paramRule.getValue().isEmpty()) {
                             paramRule.setValue(response.getBody());
                             return;
@@ -322,7 +330,21 @@ public class Pagination implements Cloneable {
         }
     }
 
-    public static String mergeArrayIntoObject(String obj, String arr, String jsonPath) {
+    private static boolean isEmptyJsonArray(String jsonArray) {
+        if ("[]".equals(jsonArray)) {
+            return true;
+        }
+
+        try {
+            ArrayNode arrNode = (ArrayNode) new ObjectMapper().readTree(jsonArray);
+
+            return arrNode.isEmpty();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String mergeArrayIntoObject(String obj, String arr, String jsonPath) {
         try {
             String jsonPointer = convertJSONPathToPointer(jsonPath);
             ObjectMapper mapper = new ObjectMapper();
@@ -341,7 +363,7 @@ public class Pagination implements Cloneable {
         }
     }
 
-    public static String convertJSONPathToPointer(String jsonPath) {
+    private static String convertJSONPathToPointer(String jsonPath) {
         if(jsonPath == null || jsonPath.isEmpty()) {
             return "";
         }
