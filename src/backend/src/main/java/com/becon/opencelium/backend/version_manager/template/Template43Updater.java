@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import com.becon.opencelium.backend.resource.connection.StatementDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
+import com.becon.opencelium.backend.resource.connection.old.FieldBindingOldDTO;
 import com.becon.opencelium.backend.resource.connector.BodyDTO;
 import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
@@ -92,7 +93,7 @@ public class Template43Updater implements TemplateUpdater {
             connection.getToConnector().setOperators(toOperators);
         }
         if (Objects.nonNull(connection.getFieldBinding())) {
-            List<FieldBindingDTO> fieldBindings = objectMapper.convertValue(connection.getFieldBinding(), new TypeReference<>() {
+            List<FieldBindingOldDTO> fieldBindings = objectMapper.convertValue(connection.getFieldBinding(), new TypeReference<>() {
             });
 
             fieldBindings.forEach(x -> update(x, changed));
@@ -105,7 +106,7 @@ public class Template43Updater implements TemplateUpdater {
                 .withNewVersion(currentVersion.getVersion());
     }
 
-    private void update(FieldBindingDTO fieldBinding, Reference<Boolean> changed) {
+    private void update(FieldBindingOldDTO fieldBinding, Reference<Boolean> changed) {
         if (Objects.nonNull(fieldBinding)) {
             if (Objects.nonNull(fieldBinding.getFrom())) {
                 fieldBinding.getFrom().forEach(x -> {
@@ -126,8 +127,8 @@ public class Template43Updater implements TemplateUpdater {
                 });
             }
             if (Objects.nonNull(fieldBinding.getEnhancement())) {
-                if (Objects.nonNull(fieldBinding.getEnhancement().getArgs())) {
-                    fieldBinding.getEnhancement().setArgs(Version43Utils.replace(fieldBinding.getEnhancement().getArgs(), changed));
+                if (Objects.nonNull(fieldBinding.getEnhancement().getExpertVar())) {
+                    fieldBinding.getEnhancement().setExpertVar(Version43Utils.replace(fieldBinding.getEnhancement().getExpertVar(), changed));
                 }
             }
         }
