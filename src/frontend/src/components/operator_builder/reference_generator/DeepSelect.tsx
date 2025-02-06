@@ -14,19 +14,18 @@ interface OptionType {
     value: string;
 }
 
-// Nested data structure
-const data: DataStructure = {
-    car: { wheels: { disk: null, rub: null }, engine: null },
-    ship: null,
-    persons: [{name: '', age: 0}]
-};
-
-
 const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, builderProps}) => {
     const [searchValue, setSearchValue] = useState<string>(field);
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(null);
     const [filteredOptions, setFilteredOptions] = useState<OptionType[]>([]);
     const [allOptions, setAllOptions] = useState<OptionType[]>([]);
+    const [iterators, setIterators] = useState<string[]>([]);
+    useEffect(() => {
+        setIterators(builderProps.connector.getPreviousIterators());
+    }, [builderProps.connector]);
+    useEffect(() => {
+        setAllOptions(getNestedOptions(''));
+    }, []);
     /**
      * Recursively find sub-options from the nested data based on the given path.
      * @param path The current input value representing a search path.
@@ -34,7 +33,11 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
      */
     const getNestedOptions = (path: string): OptionType[] => {
         const keys = path.split(".");
-        let currentData: DataStructure | null = data;
+        let currentData: DataStructure | null = !color ? {} : builderProps
+            .connection
+            .getMethodByColor(color)
+            .response
+            .success.body.fields;
         let lastValidPath = "";
         let lastKeyPart = "";
 
@@ -50,20 +53,35 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
                 lastKeyPart = key;
             }
 
-            if (currentData && typeof currentData === "object" && currentData[key]) {
+            if (currentData && typeof currentData === "object" && key in currentData) {
                 currentData = currentData[key];
-                lastValidPath += (lastValidPath ? "." : "") + key; // Build the valid path
+                lastValidPath += (lastValidPath ? "." : "") + key;
+            } else if (Array.isArray(currentData) && (key === "[0]" || key === "[*]" || iterators.includes(key.slice(1, -1)))) {
+                // Navigate into the first element if `[0]` is selected
+                currentData = key === "[*]" ? currentData : currentData[0];
+                lastValidPath += (lastValidPath ? "." : "") + key;
             } else {
                 break;
             }
         }
 
+        if (Array.isArray(currentData)) {
+            // If the current data is an array, show special options
+            return [
+                { label: "First element of the array", value: `${lastValidPath ? `${lastValidPath}.` : ''}[0]` },
+                { label: "The whole array", value: `${lastValidPath ? `${lastValidPath}.` : ''}[*]` },
+                ...iterators.map((it) => ({
+                    label: `(${it} loop)`,
+                    value: `${lastValidPath ? `${lastValidPath}.` : ''}[${it}]`,
+                })),
+            ];
+        }
         if (currentData && typeof currentData === "object") {
             return Object.keys(currentData)
                 .filter((key) => key.startsWith(lastKeyPart)) // Partial match filtering
                 .map((key) => ({
                     label: key,
-                    value: `${lastValidPath}.${key}`,
+                    value: lastValidPath === '' ? key : `${lastValidPath}.${key}`,
                 }));
         }
 
@@ -135,9 +153,9 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
                 .response
                 .success
                 .getFields(searchValue, builderProps.connector)
-            setAllOptions(newOptions);
+            setAllOptions(getNestedOptions(''));
         }
-    }, [color]);
+    }, [color/*, searchValue*/]);
     return (
         <div>
             <Select

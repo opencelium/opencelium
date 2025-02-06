@@ -11,7 +11,7 @@ interface OptionType {
 const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor, builderProps}) => {
     const options = useMemo(() => {
         if (!builderProps.connection){
-            return [];
+            return [{label: 'Test', value: 'test', color: '#231'}];
         }
         return builderProps.connection.getOptionsForMethods(builderProps.connector, builderProps.operator, {statement: 'leftStatement', isKeyConsidered: false, exceptCurrent: false})
     },[builderProps]);

@@ -15,6 +15,9 @@ const initialTree: GroupProps = {
 };
 const OperatorBuilder = (props: OperatorBuilderProps) => {
     const existedTree = useMemo(() => {
+        if (!props.operator) {
+            return {};
+        }
         const operator = props.connector.getOperatorByIndex(props.operator.index);
         const foundTree = props.connection.ui?.operators.find((o: any) => o.id === operator?.uiId);
         return foundTree || {...initialTree, id: generateUUID()};
