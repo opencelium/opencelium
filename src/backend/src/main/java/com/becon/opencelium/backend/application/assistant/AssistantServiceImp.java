@@ -81,8 +81,6 @@ public class AssistantServiceImp implements ApplicationService {
     private ConnectionServiceImp connectionService;
 
     @Autowired
-    private YamlPropertiesFactoryBean yamPropsFactory;
-    @Autowired
     private ConnectorServiceImp connectorServiceImp;
     @Autowired
     private ConnectionMngServiceImp connectionMngServiceImp;
@@ -179,7 +177,7 @@ public class AssistantServiceImp implements ApplicationService {
     // TODO: test
     @Override
     public String getCurrentVersion() {
-        return systemOverviewRepository.getCurrentVersionFromDb();
+        return systemOverviewRepository.getCurrentVersion();
     }
 
     @Override
@@ -194,20 +192,6 @@ public class AssistantServiceImp implements ApplicationService {
             installType = env.getProperty(AppYamlPath.INSTALLATION + ".type");
         }
         return new InstallationDTO(installType);
-    }
-
-    // dir - assistant/version/{folder}
-    public String getVersionFromDir(String pathTodir) {
-
-        try {
-            Properties properties = yamPropsFactory.getObject();
-            if (Objects.requireNonNull(properties).containsKey("opencelium.version")) {
-                return properties.getProperty("opencelium.version");
-            }
-            return "NOT_SET";
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public void moveToTmpFolder(Path filePath, String folder, String fileExtension) throws IOException {
@@ -296,7 +280,7 @@ public class AssistantServiceImp implements ApplicationService {
         }
         InputStream inputStream = Files.newInputStream(zipFile.toPath());
         Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
-        System.out.println(zipFile.toPath() + ", " + appRoot);
+        log.info(zipFile.toPath() + ", " + appRoot);
 //        unzipFolder(inputStream, appRoot);
         ZipUtils.extractZip(inputStream, appRoot);
     }

@@ -89,7 +89,8 @@ const DetailView = () => {
                 totalPages: entriesTotalPages,
                 setPage: (newPage: number) => {
                     setEntryPage(newPage);
-                }
+                },
+                page: entryPage,
             }}
         />;
     const DetailsCollection =
@@ -106,7 +107,8 @@ const DetailView = () => {
                 totalPages: detailsTotalPages,
                 setPage: (newPage: number) => {
                     setDetailsPage(newPage);
-                }
+                },
+                page: detailsPage,
             }}
         />;
     const collection = page === 'entries' ? EntriesCollection : DetailsCollection;

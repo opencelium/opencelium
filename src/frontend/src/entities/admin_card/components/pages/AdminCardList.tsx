@@ -51,7 +51,7 @@ const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.RE
         switch (gettingInstallationInfo) {
             case API_REQUEST_STATE.FINISH:
                 setAdminCards([...adminCards].map((card) => {
-                    if (card.id === 8) {
+                    if (card.link === '/update_assistant') {
                         return {
                             ...card,
                             isLoading: false,
@@ -68,7 +68,7 @@ const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.RE
                 break;
             case API_REQUEST_STATE.ERROR:
                 setAdminCards([...adminCards].map((card) => {
-                    if (card.id === 8) {
+                    if (card.link === '/update_assistant') {
                         return {
                             ...card,
                             title: 'Update Assistant is not available for installation type: unknown',

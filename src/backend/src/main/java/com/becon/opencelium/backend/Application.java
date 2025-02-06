@@ -23,8 +23,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 

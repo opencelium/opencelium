@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.configuration.OpenCeliumProps;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
@@ -73,6 +74,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final PatchHelper patchHelper;
     private final WebhookService webhookService;
     private final EntityUpdater<Enhancement> enhancementUpdater;
+    private final OpenCeliumProps ocProps;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -89,7 +91,7 @@ public class ConnectionServiceImp implements ConnectionService {
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             ConnectionUpdateTracker updateTracker, MaskingRuleRepository ruleRepository,
-            EntityVersionManager entityVersionManager
+            EntityVersionManager entityVersionManager, OpenCeliumProps ocProps
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -107,6 +109,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.webhookService = webhookService;
         this.ruleRepository = ruleRepository;
         this.enhancementUpdater = entityVersionManager.getUpdater(Enhancement.class);
+        this.ocProps = ocProps;
     }
 
 
@@ -133,6 +136,7 @@ public class ConnectionServiceImp implements ConnectionService {
         }
 
         List<Enhancement> enhancements = connection.getEnhancements();
+        connection.setOcVersion(ocProps.getVersion());
         connection.setEnhancements(null);
 
         Connection savedConnection = connectionRepository.save(connection);
@@ -157,6 +161,7 @@ public class ConnectionServiceImp implements ConnectionService {
     @Transactional
     public void update(Connection connection, ConnectionMng connectionMng) {
         Connection sCon = getById(connection.getId());
+
         if (!Objects.equals(sCon.getTitle(), connection.getTitle())) {
             if (existsByName(connection.getTitle())) {
                 throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
@@ -207,9 +212,12 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public Long createEmptyConnection() {
-        Connection saved = connectionRepository.save(new Connection());
+        Connection connection = new Connection();
+        connection.setOcVersion(ocProps.getVersion());
+        Connection saved = connectionRepository.save(connection);
         ConnectionMng connectionMng = new ConnectionMng();
         connectionMng.setConnectionId(saved.getId());
+        connectionMng.setVersion(ocProps.getVersion());
         connectionMngService.saveDirectly(connectionMng);
         connectionHistoryService.makeHistoryAndSave(saved, null, Action.CREATE);
         return saved.getId();
@@ -298,16 +306,13 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionRepository.deleteById(id);
     }
 
-    public Optional<Connection> findById(Long id) {
-        return connectionRepository.findById(id);
-    }
-
     @Override
     public Connection getById(Long id) {
         Connection connection = connectionRepository.findById(id)
                 .orElseThrow(() -> new ConnectionNotFoundException(id));
-        connection.getEnhancements()
-                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save));
+
+        updateWithVersion(connection);
+
         return connection;
     }
 
@@ -315,8 +320,7 @@ public class ConnectionServiceImp implements ConnectionService {
     public List<Connection> findAll() {
         List<Connection> all = connectionRepository.findAll();
 
-        all.forEach(c -> c.getEnhancements()
-                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save)));
+        all.forEach(this::updateWithVersion);
 
         return all;
     }
@@ -325,8 +329,7 @@ public class ConnectionServiceImp implements ConnectionService {
     public List<Connection> findAllByConnectorId(int connectorId) {
         LinkedList<Connection> connections = connectionRepository.findAllByConnectorId(connectorId);
 
-        connections.forEach(c -> c.getEnhancements()
-                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save)));
+        connections.forEach(this::updateWithVersion);
 
         return connections;
     }
@@ -335,9 +338,7 @@ public class ConnectionServiceImp implements ConnectionService {
     public List<Connection> findAllByNameContains(String name) {
         List<Connection> connections = connectionRepository.findAllByTitleContains(name);
 
-        connections.forEach(c -> c.getEnhancements()
-                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save)));
-
+        connections.forEach(this::updateWithVersion);
 
         return connections;
     }
@@ -346,8 +347,7 @@ public class ConnectionServiceImp implements ConnectionService {
     public List<Connection> getAllConnectionsNotContains(List<Long> ids) {
         List<Connection> connections = connectionRepository.findAllByIdNotIn(ids);
 
-        connections.forEach(c -> c.getEnhancements()
-                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save)));
+        connections.forEach(this::updateWithVersion);
 
         return connections;
     }
@@ -401,8 +401,7 @@ public class ConnectionServiceImp implements ConnectionService {
     public List<Connection> getAllByCategoryId(Integer categoryId) {
         List<Connection> connections = connectionRepository.findAllByCategoryId(categoryId);
 
-        connections.forEach(c -> c.getEnhancements()
-                .forEach(x -> enhancementUpdater.updateToCurrentVersion(x).ifUpdated(enhancementService::save)));
+        connections.forEach(this::updateWithVersion);
 
         return connections;
     }
@@ -517,10 +516,21 @@ public class ConnectionServiceImp implements ConnectionService {
         ruleRepository.deleteByConnectionIdAndId(connectionId, ruleId);
     }
 
-
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private void updateWithVersion(Connection connection) {
+        for (Enhancement enhancement : connection.getEnhancements()) {
+            enhancementUpdater.updateFrom(enhancement, connection.getOcVersion())
+                    .ifUpdated(enhancementService::save);
+        }
+        if (!Objects.equals(connection.getOcVersion(), ocProps.getVersion())) {
+            connection.setOcVersion(ocProps.getVersion());
+            connectionRepository.save(connection);
+        }
+    }
+
     private void extractVars(Object json, List<String> varList) {
         if (json instanceof JSONObject jsonObject) {
             for (String key : jsonObject.keySet()) {

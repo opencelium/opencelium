@@ -21,13 +21,17 @@ public class ZipUtils {
         File f = new File("../frontend");
         FileUtils.deleteDirectory(f);
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(zipInputStream))) {
-            ZipEntry zipEntry = zis.getNextEntry();
+//            ZipEntry zipEntry = zis.getNextEntry();
+            ZipEntry zipEntry;
 
-            while (zipEntry != null) {
+            while ((zipEntry = zis.getNextEntry()) != null) {
                 // Use only the file name, discarding any leading directories
                 String entryName = zipEntry.getName();
                 Path targetPath = rootPath.resolve(entryName).normalize();
-
+                //skip license creation/modification during update process. License folder must be created during installation.
+                if (entryName.contains("src/backend/src/main/resources/license")){
+                    continue;
+                }
                 // Ensure the entry does not escape the target directory
                 if (!targetPath.startsWith(rootPath)) {
                     throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
@@ -45,7 +49,6 @@ public class ZipUtils {
                         log.info("\"" + targetPath.normalize() + "\" has been replaced or added successfully");
                     }
                 }
-                zipEntry = zis.getNextEntry();
             }
         }
     }

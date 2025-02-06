@@ -20,6 +20,7 @@ export const RoleNames: any = {
     professional: 'Professional',
     enterprise: 'Enterprise',
     enterprise_plus: 'Enterprise Plus',
+    starter_api: 'OpenCelium Starter',
     professional_api: 'OpenCelium Professional',
     enterprise_api: 'OpenCelium Enterprise',
     enterprise_plus_api: 'OpenCelium Enterprise Plus',
@@ -140,7 +141,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                 </p>
                 <p style={{textAlign: 'center', marginBottom: 0}}>
                     {"Since 4.2 we have a license management integration. Click "}
-                    <a target={'_blank'} href={"https://docs.opencelium.io/en/prod/"}>{"here"}</a>
+                    <a target={'_blank'} href={"https://docs.opencelium.io/en/prod/management/license_management.html"}>{"here"}</a>
                     {" to read how to enable license."}
                 </p>
             </Dialog>

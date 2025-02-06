@@ -941,10 +941,28 @@ export const generateSignature = (token, method, url, timestamp) => {
 }
 
 export const sortAlphabeticallyByKey = (array, key) => {
-    return array.sort(function(a, b) {
-        const x = a[key].toLowerCase();
-        const y = b[key].toLowerCase();
-        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    return array.sort((a, b) => {
+        const x = a[key];
+        const y = b[key];
+        if (x === undefined || x === null) return 1;
+        if (y === undefined || y === null) return -1;
+        if (isNumber(x) && isNumber(y)) {
+            return x - y;
+        }
+
+        const numA = isString(x) ? parseInt(x.match(/^\d+/)) || 0 : x;
+        const numB = isString(y) ? parseInt(y.match(/^\d+/)) || 0 : y;
+
+        // If both are numbers, compare numerically
+        if (isNumber(numA) && numA !== 0 && isNumber(numB) && numB !== 0) {
+            return numA - numB;
+        }
+        if (typeof x === 'string' && typeof y === 'string') {
+            return x.toLowerCase().localeCompare(y.toLowerCase());
+        }
+
+        // If one value is a string and the other is a number, or other types, convert both to strings and compare
+        return x.toString().localeCompare(y.toString());
     });
 }
 

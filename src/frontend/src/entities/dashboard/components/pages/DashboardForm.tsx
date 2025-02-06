@@ -42,10 +42,8 @@ import {
     TitleStyled,
     WidgetItemStyled
 } from './styles';
-import { Auth } from '@application/classes/Auth';
 import {SubscriptionOverviewWidget} from "@entity/dashboard/components/widgets/SubscriptionOverview";
 import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
-import Subscription from "@entity/license_management/classes/Subscription";
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
 
 export const HAS_DASHBOARD_WIDGET_ENGINE = true;
@@ -64,10 +62,8 @@ const DashboardForm: FC<DashboardFormProps> =
         * TODO: implement get subscription update
         */
         const dispatch = useAppDispatch();
-        const {authUser} = Auth.getReduxState();
-        const {widgets, gettingAllWidgets} = Widget.getReduxState();
-        const {gettingAllWidgetSettings, updatingAllWidgetSettings, widgetSettings} = WidgetSetting.getReduxState();
-        const {currentSubscription, gettingCurrentSubscription} = Subscription.getReduxState();
+        const {widgets} = Widget.getReduxState();
+        const {updatingAllWidgetSettings, widgetSettings} = WidgetSetting.getReduxState();
         const [isWidgetEditOn, setIsWidgetEditOn] = useState<boolean>(false);
         const [currentWidget, setCurrentWidget] = useState(null);
         const [layout, setLayout] = useState<IWidgetSetting[]>([]);
@@ -172,7 +168,7 @@ const DashboardForm: FC<DashboardFormProps> =
         return (
             <DashboardFormStyled>
                 <TitleStyled title={'Dashboard'} icon={EditDashboardIcon}/>
-                {(!currentSubscription && gettingCurrentSubscription === API_REQUEST_STATE.FINISH) && <div style={{marginLeft: 20, marginRight: 20}}><LicenseAlertMessage/></div>}
+                <LicenseAlertMessage/>
                 <DashboardViewStyled>
                     <div>
                         {isWidgetEditOn &&

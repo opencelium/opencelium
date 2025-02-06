@@ -1,5 +1,9 @@
 package com.becon.opencelium.backend.utility;
 
+import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -8,7 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MachineUtility {
-
+    private final static Logger logger = LoggerFactory.getLogger(MachineUtility.class);
     private MachineUtility() {}
     public static String getMachineUUID() {
 //        return "MACHINE_UUID";
@@ -22,17 +26,18 @@ public class MachineUtility {
         } else if (os.contains("nix") || os.contains("nux")) {
             command = "sudo dmidecode -s system-uuid";
         } else {
-            throw new UnsupportedOperationException("Unsupported OS: " + os);
+            logger.error("Unsupported OS: " + os);
+            return "0";
         }
-
-        return executeCommand(command);
-//        return uuid == null ? "" : uuid;
+        String machineUuid = executeCommand(command);
+        return machineUuid == null || machineUuid.isEmpty() ? "0" : machineUuid; //OC-994
     }
 
     public static String getMacAddress() {
 //        return "MAC_ADDRESS";
         try {
             InetAddress localHost = InetAddress.getLocalHost();
+            if (localHost == null) return "0";
             NetworkInterface networkInterface = NetworkInterface.getByInetAddress(localHost);
 
             byte[] macBytes = networkInterface.getHardwareAddress();
@@ -50,11 +55,11 @@ public class MachineUtility {
                 }
             }
 
-            return macAddress.toString();
+            return macAddress.isEmpty() ? "0" : macAddress.toString(); // OC-994
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return "";
+            logger.error(e.getMessage());
+            return "0";
         }
     }
 
@@ -73,17 +78,18 @@ public class MachineUtility {
             throw new UnsupportedOperationException("Unsupported OS: " + os);
         }
 
-        return executeCommand(command);
+        String systemUuid = executeCommand(command);
+        return systemUuid == null || systemUuid.isEmpty() ? "0" : systemUuid; //OC-994
     }
 
     public static String getComputerName() {
 //        return "COMPUTER_NAME";
         try {
             InetAddress localHost = InetAddress.getLocalHost();
-            return localHost.getHostName() == null ? "" : localHost.getHostName();
+            return localHost.getHostName() == null ? "ComputerName n/a" : localHost.getHostName(); //OC-994
         } catch (Exception e) {
             e.printStackTrace();
-            return "";
+            return "ComputerName n/a"; //OC-994
         }
     }
 

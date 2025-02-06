@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -17,6 +18,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
@@ -35,12 +38,13 @@ public class AppConfiguration {
                 .setReadTimeout(Duration.ofMillis(SecurityConstant.READ_TIMEOUT)).build();
     }
 
-    @Bean
-    public YamlPropertiesFactoryBean getYamlProps() {
-        YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
-        yamlFactory.setResources(new ClassPathResource("application.yml"));
-        return yamlFactory;
-    }
+//    @Bean
+//    public YamlPropertiesFactoryBean getYamlProps() {
+//        YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
+//        Resource yamlResource = new FileSystemResource(PathConstant.APP_YML);
+//        yamlFactory.setResources(yamlResource);
+//        return yamlFactory;
+//    }
 
     @Bean
     public ObjectMapper objectMapper() {
