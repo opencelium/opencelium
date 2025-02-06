@@ -39,6 +39,7 @@ class JsonBody extends Component {
 			WebhookComponent,
 			onReferenceClick,
 			source,
+			target,
 		} = this.props;
 		console.log(this.props);
 		const src =

@@ -82,7 +82,7 @@ class Body extends React.Component {
 				item.to.findIndex((elem) => {
 					let name = elem.field.split('[]').join('');
 					name = name.split('[*]').join('');
-					return elem.color === method.color && name === fieldName;
+					return elem.color === method.color && name === `body.$.${fieldName}`;
 				}) !== -1
 			);
 		});

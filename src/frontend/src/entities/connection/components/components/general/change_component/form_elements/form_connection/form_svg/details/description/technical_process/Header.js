@@ -150,7 +150,7 @@ class Header extends React.Component {
 		} = this.props;
 		return (
 			<JsonBody
-        target='header'
+        		target='header'
 				ref={this.JsonBodyRef}
 				id={'description_body'}
 				isDraft={isDraft}
