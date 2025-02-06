@@ -227,7 +227,7 @@ class ParamGenerator extends Component {
         statement = statement.getObject();
     
         let finalRef = `${statement.color}.(${statement.type}).${statement.field}`;
-    
+        
         finalRef = transformFieldFormat(finalRef, headerParamGenerator === true ? 'header' : 'body');
         addParam(finalRef);
         if (!isVisible) {
@@ -448,6 +448,7 @@ class ParamGenerator extends Component {
         const {showGenerator, color, field, referenceType} = this.state;
         const hasMethod = color !== '' && field !== '';
         const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue, readOnly, hasNotType, headerParamGenerator} = this.props;
+        console.log(headerParamGenerator)
         let themeParamGenerator = '';
         let themeParamGeneratorForm = '';
         if(theme){
@@ -455,7 +456,7 @@ class ParamGenerator extends Component {
             if(theme.hasOwnProperty('paramGeneratorForm')) themeParamGeneratorForm = theme.paramGeneratorForm;
         }
         return(
-            <div ref={this.paramGeneratorRef} className={`${isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} ${themeParamGenerator} ${headerParamGenerator ? styles.header_param_generator : ''}`} style={parent ? {left: this.left, top: this.top} : {}}>
+            <div ref={this.paramGeneratorRef} className={`${isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} ${themeParamGenerator} `} style={parent ? {left: this.left, top: this.top} : {}}>
                 {this.renderArrowIcon()}
                 {
                     showGenerator || isVisible || isAlwaysVisible
@@ -532,6 +533,7 @@ ParamGenerator.defaultProps = {
     isArrowVisible: true,
     isAlwaysVisible: false,
     updateConnection: null,
+    headerParamGenerator: 'body'
 };
 
 export default ParamGenerator;

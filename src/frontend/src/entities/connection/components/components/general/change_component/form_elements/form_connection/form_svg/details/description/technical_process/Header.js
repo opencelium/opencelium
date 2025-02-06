@@ -13,6 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CEnhancement from '@entity/connection/components/classes/components/content/connection/field_binding/CEnhancement';
+import Button from '@entity/connection/components/components/general/basic_components/buttons/Button';
 import Dialog from '@entity/connection/components/components/general/basic_components/Dialog';
 import Table from '@entity/connection/components/components/general/basic_components/table/Table';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
@@ -22,7 +24,6 @@ import ReactDOM from 'react-dom';
 import { Col, Row } from 'react-grid-system';
 import Enhancement from '../../../../form_methods/mapping/enhancement/Enhancement';
 import JsonBody from '../../../../form_methods/method/JsonBody';
-import ParamGenerator from '../../../../form_methods/method/ParamGenerator';
 import ReferenceInformation from './reference_information/ReferenceInformation';
 
 class Header extends React.Component {
@@ -35,7 +36,10 @@ class Header extends React.Component {
 			currentFieldName: '',
 			currentEnhancement: null,
 			isOpenedEnhancement: false,
+			isToggledIcon: true,
 		};
+		this.JsonBodyRef = React.createRef();
+		this.enhancementRef = React.createRef();
 	}
 
 	toggleHeaderVisible() {
@@ -59,13 +63,14 @@ class Header extends React.Component {
 				item.to.findIndex((elem) => {
 					let name = elem.field.split('[]').join('');
 					name = name.split('[*]').join('');
-					return elem.color === method.color && name === fieldName;
+					return elem.color === method.color && name === `body.$.${fieldName}`;
 				}) !== -1
 			);
 		});
 	}
 
 	setCurrentEnhancementClickingOnPointer(e, value, fieldName = '') {
+		
 		const { connection, connector, method } = this.props;
 		/*if(connector.getConnectorType() === CONNECTOR_FROM){
               return;
@@ -150,7 +155,7 @@ class Header extends React.Component {
 		} = this.props;
 		return (
 			<JsonBody
-        		target='header'
+        target='header'
 				ref={this.JsonBodyRef}
 				id={'description_body'}
 				isDraft={isDraft}
@@ -166,66 +171,6 @@ class Header extends React.Component {
 					this.setCurrentEnhancementClickingOnPointer(a, b)
 				}
 			/>
-		);
-	}
-
-	renderItems() {
-		const {
-			items,
-			connection,
-			connector,
-			updateEntity,
-			method,
-			readOnly,
-			theme,
-		} = this.props;
-		if (items.length === 0) {
-			return <div>{'The header is empty'}</div>;
-		}
-		return (
-			<React.Fragment>
-				<div className={styles.header_info}>
-					<Table className={styles.header_head}>
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Value</th>
-								<th>Enhancement</th>
-							</tr>
-						</thead>
-					</Table>
-					<div className={styles.header_body}>
-						<Table>
-							<tbody>
-								{items.map((item) => (
-									<tr key={item.name}>
-										<td>{item.name}</td>
-										<td style={{ width: '40%' }}>{item.value}</td>
-										<td style={{ position: 'relative', width: '30%' }}>
-											<ParamGenerator
-												updateConnection={(a) => updateEntity(a)}
-												connection={connection}
-												connector={connector}
-												method={method}
-												addParam={(a) => this.addParam(a)}
-												readOnly={readOnly}
-												actionButtonTooltip={'Add'}
-												actionButtonValue={'add'}
-												theme={theme}
-												isArrowVisible={false}
-												isAlwaysVisible={true}
-												ref={this.paramGeneratorRef}
-												hasNotType={true}
-												headerParamGenerator={true}
-											/>
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</Table>
-					</div>
-				</div>
-			</React.Fragment>
 		);
 	}
 

@@ -41,7 +41,6 @@ class JsonBody extends Component {
 			source,
 			target,
 		} = this.props;
-		console.log(this.props);
 		const src =
 			source === null
 				? target === 'header'

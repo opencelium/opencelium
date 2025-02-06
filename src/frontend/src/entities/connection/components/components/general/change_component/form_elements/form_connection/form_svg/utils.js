@@ -56,100 +56,111 @@ export function putAsterixInEmptyBrackets(data){
 
 
 function isDirectReference(str) {
-  if (typeof str !== 'string') return false;
-  const regex = /^#[0-9a-fA-F]{6}\.\((?:response|request)\)\./;
-  return regex.test(str);
+	if (typeof str !== 'string') return false;
+	const regex = /^#[0-9a-fA-F]{6}\.\((?:response|request)\)\./;
+	return regex.test(str);
 }
 
 export function transformFieldFormat(field, from = 'body') {
-  if (typeof field !== 'string' || field.trim() === '') return field;
-  
-  if (field.includes(';')) {
-    return field
-      .split(';')
-      .map(ref => transformFieldFormat(ref.trim()))
-      .join(';');
-  }
-  
-  if (field.includes(from === 'body' ? 'body.$' : 'header.$')) return field;
-  
-  if (/\b(success|fail)\b/.test(field)) {
-    field = field.replace(/\b(success|fail)\.?/g, from === 'body' ? 'body.$.' : 'header.$.');
-    return field;
-  }
-  
-  if (field.startsWith('#')) {
-    const match = field.match(/^(#[0-9a-fA-F]{6}\.\((?:response|request)\)\.)/);
-    if (match) {
-      return field.replace(match[1], from ===  'body' ? `${match[1]}body.$.` : `${match[1]}header.$.`);
-    }
-  }
-  
-  return from === 'body' ? `body.$.${field}` : `header.$.${field}`;
+	if (typeof field !== 'string' || field.trim() === '') return field;
+
+	if (!from) {
+		if (field.includes('.header.')) {
+			from = 'header';
+		} else {
+			from = 'body';
+		}
+	}
+
+	if (field.includes('body.$') || field.includes('header.$')) {
+		return field;
+	}
+
+	field = field.replace(/\b(success|fail)\b/g, from === 'header' ? 'header.$' : 'body.$');
+
+	return field;
 }
 
-export function transformExpertVar(expertVar) {
-  if (typeof expertVar !== 'string' || expertVar.trim() === '') return expertVar;
-  const regex = /(#[0-9a-fA-F]{6}\.\((?:response|request)\)\.)(?!body\.\$\.)([\w\[\]\.\-]+)/g;
-  return expertVar.replace(regex, (match, prefix, fieldPart) => {
-    let newFieldPart = fieldPart;
-    if (newFieldPart.startsWith('success.')) {
-      newFieldPart = newFieldPart.substring('success.'.length);
-    } else if (newFieldPart.startsWith('fail.')) {
-      newFieldPart = newFieldPart.substring('fail.'.length);
-    }
-    return `${prefix}body.$.${newFieldPart}`;
-  });
+export function transformExpertVar(expertVar, from = 'body') {
+	if (typeof expertVar !== 'string' || expertVar.trim() === '') return expertVar;
+
+	const regex = /(#[0-9a-fA-F]{6}\.\((?:response|request)\)\.)((?:success|fail)\.[\w\[\]\.\-]+)/g;
+
+	return expertVar.replace(regex, (match, prefix, fieldPart) => {
+		let newFieldPart = fieldPart.replace(/\b(success|fail)\b/g, from === 'header' ? 'header.$' : 'body.$');
+		return `${prefix}${newFieldPart}`;
+	});
 }
 
-export function transformEndpointReferences(endpoint) {
-  if (typeof endpoint !== 'string' || endpoint.trim() === '') return endpoint;
-  return endpoint.replace(/{%([^%]+)%}/g, (match, content) => {
-    return `{%${transformFieldFormat(content.trim())}%}`;
-  });
+export function transformEndpointReferences(endpoint, from = 'body') {
+	if (typeof endpoint !== 'string' || endpoint.trim() === '') return endpoint;
+
+	return endpoint.replace(/{%([^%]+)%}/g, (match, content) => {
+		const transformedContent = transformFieldFormat(content.trim(), from);
+		return `{%${transformedContent}%}`;
+	});
 }
 
-export function deepTransformFields(obj, keysToTransform = ['endpoint', 'expertVar', 'field', 'fields']) {
-  if (typeof obj === 'string') {
-    if (isDirectReference(obj)) {
-      return transformFieldFormat(obj);
-    }
-    return obj;
-  }
-  if (Array.isArray(obj)) {
-    return obj.map(item => deepTransformFields(item, keysToTransform));
-  }
-  if (obj !== null && typeof obj === 'object') {
-    const newObj = {};
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        if (keysToTransform.includes(key) && typeof obj[key] === 'string') {
-          if (key === 'endpoint') {
-            newObj[key] = transformEndpointReferences(obj[key]);
-          } else if (key === 'expertVar') {
-            newObj[key] = transformExpertVar(obj[key]);
-          } else {
-            newObj[key] = transformFieldFormat(obj[key]);
-          }
-        } else if (key === 'fields' && obj[key] !== null && typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
-          const newFields = {};
-          for (const subKey in obj[key]) {
-            if (Object.prototype.hasOwnProperty.call(obj[key], subKey)) {
-              if (typeof obj[key][subKey] === 'string') {
-                newFields[subKey] = transformFieldFormat(obj[key][subKey]);
-              } else {
-                newFields[subKey] = deepTransformFields(obj[key][subKey], keysToTransform);
-              }
-            }
-          }
-          newObj[key] = newFields;
-        } else {
-          newObj[key] = deepTransformFields(obj[key], keysToTransform);
-        }
-      }
-    }
-    return newObj;
-  }
-  return obj;
-}
+export function deepTransformFields(obj, from = 'body') {
+	if (typeof obj === 'string') {
+		if (isDirectReference(obj)) {
+			return transformFieldFormat(obj, from);
+		}
+		return obj;
+	}
 
+	if (Array.isArray(obj)) {
+		return obj.map((item) => deepTransformFields(item, from));
+	}
+
+	if (obj !== null && typeof obj === 'object') {
+		const newObj = {};
+		for (const key in obj) {
+			if (Object.prototype.hasOwnProperty.call(obj, key)) {
+				let newFrom = from;
+
+				if (key === 'header') {
+					newFrom = 'header';
+				} else if (key === 'body' || key === 'fields') {
+					newFrom = 'body';
+				}
+
+				if (typeof obj[key] === 'string') {
+					if (key === 'endpoint') {
+						newObj[key] = transformEndpointReferences(obj[key], newFrom);
+					} else if (key === 'expertVar') {
+						newObj[key] = transformExpertVar(obj[key], newFrom);
+					} else {
+						newObj[key] = transformFieldFormat(obj[key], newFrom);
+					}
+				} else if (
+					(key === 'header' || key === 'fields') &&
+					obj[key] !== null &&
+					typeof obj[key] === 'object'
+				) {
+					const transformedObj = {};
+					for (const subKey in obj[key]) {
+						if (Object.prototype.hasOwnProperty.call(obj[key], subKey)) {
+							if (typeof obj[key][subKey] === 'string') {
+								transformedObj[subKey] = transformFieldFormat(
+									obj[key][subKey],
+									newFrom
+								);
+							} else {
+								transformedObj[subKey] = deepTransformFields(
+									obj[key][subKey],
+									newFrom
+								);
+							}
+						}
+					}
+					newObj[key] = transformedObj;
+				} else {
+					newObj[key] = deepTransformFields(obj[key], newFrom);
+				}
+			}
+		}
+		return newObj;
+	}
+	return obj;
+}

@@ -42,7 +42,7 @@ export function RequestBody(CRequestType){
                     this.state = {
                         showImportJson: false,
                         isBodyEditOpened: false,
-                        importJsonBody: JSON.stringify( props.method.request instanceof CRequest ? props.method.request.getBodyFields() : {}),
+                        importJsonBody: JSON.stringify( props.method.request instanceof CRequest ? (props.target === 'header' ? props.method.request.getHeaderFields() : props.method.request.getBodyFields()) : {}),
                         showEnhancement: false,
                         currentEnhancement: null,
                     };
@@ -89,7 +89,7 @@ export function RequestBody(CRequestType){
                     if(isJsonString(importJsonBody)) {
                         //const referenceRegExp = /\"\#[0-9a-fA-F]{6}\.\((request|response)\)\.[^\"]*\"/g;
                         //importJsonBody = JSON.parse(JSON.stringify(importJsonBody).replace(referenceRegExp, '"\\"'));
-                        this.updateBody({updated_src: JSON.parse(importJsonBody)});
+                        this.updateData({updated_src: JSON.parse(importJsonBody)});
                         this.toggleImportJson();
                     } else{
                         alert('Not JSON format');
@@ -156,13 +156,18 @@ export function RequestBody(CRequestType){
                 }
 
                 /**
-                 * to update body
+                 * to update body or header
                  */
-                updateBody(bodyData){
+                updateData(data){
                     const {connection, connector, method, updateEntity, target} = this.props;
                     connector.setCurrentItem(method);
-                    CRequestType.updateFieldsBinding(connection, connector, method, CRequestType.convertForFieldBinding(bodyData));
-                    method.setRequestBodyFields(CRequestType.convertToBodyFormat(bodyData));
+                    CRequestType.updateFieldsBinding(connection, connector, method, CRequestType.convertForFieldBinding(data));
+                    if(target === 'header'){
+                        method.setRequestHeaderFields(CRequestType.convertToBodyFormat(data));
+                    }
+                    else {
+                        method.setRequestBodyFields(CRequestType.convertToBodyFormat(data));
+                    }
                     updateEntity();
                 }
 
@@ -278,7 +283,7 @@ export function RequestBody(CRequestType){
                 render(){
                     const {isBodyEditOpened} = this.state;
                     const {requestBodyClassName, ...componentProps} = this.props;
-                    const {id, readOnly, method, connector, connection, bodyStyles, isDraft, noPlaceholder, openEnhancement, updateEntity, isFullHeight} = this.props;
+                    const {id, readOnly, method, connector, connection, bodyStyles, isDraft, noPlaceholder, openEnhancement, updateEntity, isFullHeight, target} = this.props;
                     if(!isBodyEditOpened && !noPlaceholder){
                         return this.renderPlaceholder();
                     }
@@ -295,10 +300,9 @@ export function RequestBody(CRequestType){
                             <Component
                                 {...componentProps}
                                 openEnhancement={(a, b) => this.openEnhancement(a, b)}
-                                updateBody={(a) => this.updateBody(a)}
+                                updateBody={(a) => this.updateData(a)}
                                 PointerComponent={{
                                     getComponent: (params) => {
-                                        console.log(params, connection)
                                         return (
                                             <Pointer
                                                 {...params}
@@ -330,7 +334,7 @@ export function RequestBody(CRequestType){
                                                 connector={connector}
                                                 method={method}
                                                 readOnly={readOnly}
-                                                addParam={(a) => this.updateBody(a)}
+                                                addParam={(a) => this.updateData(a)}
                                                 isVisible={true}
                                                 submitEdit={submitEdit}
                                                 editCancel={editCancel}
@@ -339,6 +343,7 @@ export function RequestBody(CRequestType){
                                                 parent={CRequestType.getParent(textarea)}
                                                 hasArrowIcon={true}
                                                 updateConnection={updateEntity}
+                                                headerParamGenerator={target}
                                             />
                                         );},
                                     id: `${id}_reference_component`,

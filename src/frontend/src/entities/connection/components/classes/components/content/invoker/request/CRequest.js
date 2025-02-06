@@ -92,12 +92,20 @@ export default class CRequest{
         return this._body.fields;
     }
 
+    setBodyFields(fields){
+        this._body.fields = fields;
+    }
+
     getHeaderFields(){
         const result = this._header.reduce((acc, item) => {
             acc[item.name] = item.value;
             return acc;
         }, {});
         return result;
+    }
+
+    setHeaderFields(fields){
+        this._header = fields;
     }
 
     setBodyFields(fields){
@@ -118,6 +126,10 @@ export default class CRequest{
 
     get header(){
         return this._header;
+    }
+
+    set header(header) {
+        this._header = header;
     }
 
     get operation(){
@@ -181,8 +193,14 @@ export default class CRequest{
             body: params.bodyOnlyConvert ? this._body.convertToObject() : this._body.getObject(),
             method: this._method,
         };
-        if(this._header && this._header.length > 0){
-            obj.header = convertHeaderFormatToObject(this._header);
+        if (this._header && Object.keys(this._header).length > 0) {
+            
+            if (typeof this._header === 'object' && !Array.isArray(this._header)) {
+                obj.header = this._header;
+            }
+            else{
+                obj.header = convertHeaderFormatToObject(this._header);
+            }
         }
         return obj;
     }
