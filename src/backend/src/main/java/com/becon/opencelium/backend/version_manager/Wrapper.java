@@ -81,4 +81,8 @@ public class Wrapper<T> {
     public String getNewVersion() {
         return newVersion;
     }
+
+    public boolean isChanged() {
+        return changed;
+    }
 }

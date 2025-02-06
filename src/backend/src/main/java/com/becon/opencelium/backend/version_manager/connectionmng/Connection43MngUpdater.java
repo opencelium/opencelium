@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.version_manager.connectionmng;
 
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.version_manager.Wrapper;
+import com.becon.opencelium.backend.version_manager.backup.Backup;
 import com.becon.opencelium.backend.version_manager.base.Reference;
 import com.becon.opencelium.backend.version_manager.base.SuspendException;
 import com.becon.opencelium.backend.version_manager.base.UpdaterVersion;
@@ -18,16 +19,22 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
     private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_3;
 
     @Override
+    @Backup
     @SuspendException
     public Wrapper<ConnectionMng> updateToCurrentVersion(ConnectionMng connection) {
         return Objects.isNull(connection)
                 ? Wrapper.notUpdated(null)
-                : updateFrom(connection, connection.getVersion());
+                : updateFromInternal(connection, connection.getVersion());
     }
 
     @Override
+    @Backup
     @SuspendException
     public Wrapper<ConnectionMng> updateFrom(ConnectionMng connection, String oldVersion) {
+        return updateFromInternal(connection, oldVersion);
+    }
+
+    private Wrapper<ConnectionMng> updateFromInternal(ConnectionMng connection, String oldVersion){
         if (Objects.isNull(connection) || Objects.equals(oldVersion, currentVersion.getVersion()))
             return Wrapper.notUpdated(connection);
 
