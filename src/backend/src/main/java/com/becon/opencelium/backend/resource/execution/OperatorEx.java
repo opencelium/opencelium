@@ -6,6 +6,7 @@ public class OperatorEx {
     private String index;
     private String iterator;
     private ConditionEx condition;
+    private String expression;
 
     public OperatorEx() {
     }
@@ -48,5 +49,13 @@ public class OperatorEx {
 
     public void setCondition(ConditionEx condition) {
         this.condition = condition;
+    }
+
+    public String getExpression() {
+        return expression;
+    }
+
+    public void setExpression(String expression) {
+        this.expression = expression;
     }
 }

@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.database.mongodb.service;
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.repository.OperatorMngRepository;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.ocel.Validator;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
@@ -16,20 +17,30 @@ public class OperatorMngServiceImp implements OperatorMngService {
     private final OperatorMngRepository operatorMngRepository;
     private final PatchHelper patchHelper;
     private final Mapper<OperatorMng, OperatorDTO> operatorMngMapper;
+    private final Validator ocelValidator;
 
     public OperatorMngServiceImp(OperatorMngRepository operatorMngRepository, PatchHelper patchHelper, Mapper<OperatorMng, OperatorDTO> operatorMngMapper) {
         this.operatorMngRepository = operatorMngRepository;
         this.patchHelper = patchHelper;
         this.operatorMngMapper = operatorMngMapper;
+        this.ocelValidator = Validator.defaultValidator();
     }
 
     @Override
     public List<OperatorMng> saveAll(List<OperatorMng> operators) {
+        for (OperatorMng operator : operators) {
+            if("if".equals(operator.getType())){
+                ocelValidator.validate(operator.getExpression());
+            }
+        }
         return operatorMngRepository.saveAll(operators);
     }
 
     @Override
     public OperatorMng save(OperatorMng operatorMng) {
+        if("if".equals(operatorMng.getType())){
+            ocelValidator.validate(operatorMng.getExpression());
+        }
         return operatorMngRepository.save(operatorMng);
     }
 
@@ -60,6 +71,9 @@ public class OperatorMngServiceImp implements OperatorMngService {
             int idx = patchHelper.getIndexOfList(opDetail.getIndexOfOperator(), patched.getOperators().size());
             OperatorDTO toSave = patched.getOperators().get(idx);
             toSave.setId(null);
+            if("if".equals(toSave.getType())){
+                ocelValidator.validate(toSave.getExpression());
+            }
             OperatorMng saved = save(operatorMngMapper.toEntity(toSave));
             patched.getOperators().get(idx).setId(saved.getId());
         } else if (opDetail.isOperatorDeleted()) {
@@ -72,12 +86,18 @@ public class OperatorMngServiceImp implements OperatorMngService {
 
             //saving new operator
             OperatorDTO toSave = patched.getOperators().get(idx);
+            if("if".equals(toSave.getType())){
+                ocelValidator.validate(toSave.getExpression());
+            }
             OperatorMng saved = save(operatorMngMapper.toEntity(toSave));
             patched.getOperators().get(idx).setId(saved.getId());
         } else if (opDetail.isOperatorModified()) {
             int idx = patchHelper.getIndexOfList(opDetail.getIndexOfOperator(), patched.getOperators().size());
             List<OperatorDTO> operators = patched.getOperators();
             OperatorDTO toModify = operators.get(idx);
+            if("if".equals(toModify.getType())){
+                ocelValidator.validate(toModify.getExpression());
+            }
             try {
                 getById(toModify.getId());
             } catch (RuntimeException e) {
@@ -93,6 +113,9 @@ public class OperatorMngServiceImp implements OperatorMngService {
             //saving new operators
             if (patched != null && patched.getOperators() != null) {
                 patched.getOperators().forEach(o -> {
+                    if("if".equals(o.getType())){
+                        ocelValidator.validate(o.getExpression());
+                    }
                     OperatorMng saved = save(operatorMngMapper.toEntity(o));
                     o.setId(saved.getId());
                 });
