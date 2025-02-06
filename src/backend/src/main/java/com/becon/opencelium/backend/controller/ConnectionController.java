@@ -690,7 +690,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping(path = "/execute/{connectionId}/support-file")
+    @PostMapping(path = "/execute/{connectionId}/support-file")
     public ResponseEntity<?> executeWithSupportFile(@PathVariable long connectionId, @RequestBody List<RuleDTO> ruleDTOs) {
         // create temporary scheduler, will be deleted after execution finished
         SchedulerRequestResource resource = new SchedulerRequestResource();

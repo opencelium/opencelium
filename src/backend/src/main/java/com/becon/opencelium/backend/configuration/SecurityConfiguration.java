@@ -211,7 +211,8 @@ public class SecurityConfiguration {
                 "/swagger-ui.html",
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
-                "/docs"};
+                "/docs",
+                "/api/assistant/oc/test"};
         return (web) -> web.ignoring()
                 .requestMatchers(enpoints);
     }
