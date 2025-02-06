@@ -10,7 +10,7 @@ export const isUnaryOperator = (operator: string): operator is UnaryOperatorName
 
 export const isBinaryOperator = (operator: string): operator is BinaryOperatorName => {
     return Object.values(BinaryOperatorName).includes(operator as BinaryOperatorName);
-};
+};/*
 export function jsonToString(json: GroupProps | RuleProps): string {
     if (json.type === 'rule') {
         const { leftField, operator, rightField } = json.properties || {};
@@ -25,6 +25,28 @@ export function jsonToString(json: GroupProps | RuleProps): string {
     }
 
     return '';
+}*/
+export function jsonToString(json: GroupProps | RuleProps): { result: string; isNotValid: boolean } {
+    if (json.type === 'rule') {
+        const { leftField, operator, rightField } = json.properties || {};
+        const operatorName = getEnumKeyByValue(AllOperatorNames, operator);
+        const isNotValid = !leftField || !operator || (rightField === undefined && operator !== "is_empty" && operator !== "is_not_null");
+        const result = rightField ? `'${leftField}' ${operatorName} '${rightField}'` : `'${leftField}' ${operatorName}`;
+        return { result, isNotValid };
+    }
+
+    if (json.type === 'group' && json.items) {
+        const conjunction = json.properties?.conjunction.toUpperCase();
+        let isNotValid = false;
+        const itemsString = json.items.map(item => {
+            const { result, isNotValid: itemInvalid } = jsonToString(item);
+            if (itemInvalid) isNotValid = true;
+            return result;
+        }).join(` ${conjunction} `);
+        return { result: `(${itemsString})`, isNotValid };
+    }
+
+    return { result: '', isNotValid: true };
 }
 
 

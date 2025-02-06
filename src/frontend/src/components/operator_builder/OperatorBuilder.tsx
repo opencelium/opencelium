@@ -1,8 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import Group from './Group';
 import {Conjunction, GroupProps, OperatorBuilderProps} from './props';
-import {generateUUID, jsonToString, stringToJson} from "./utils";
-import Button from "@basic_components/buttons/Button";
+import {generateUUID, jsonToString} from "./utils";
 import {SaveOperatorButton} from "@app_component/operator_builder/styles";
 
 const initialTree: GroupProps = {
@@ -26,7 +25,8 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
     const updateOperator = () => {
         const connector = props.connection.getConnectorByType(props.connector.getConnectorType());
         const operatorItem = connector.getOperatorByIndex(props.operator.index);
-        operatorItem.expression = jsonToString(tree);
+        const jsonToStringResult = jsonToString(tree);
+        operatorItem.expression = jsonToStringResult.result;
         operatorItem.uiId = tree.id;
         let operators: any = props.connection?.ui?.operators || [];
         const isOperatorExist = operators.findIndex((o: any) => o.id === tree.id) !== -1;
@@ -34,13 +34,23 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
         props.connection.ui = {
             operators,
         }
+        if (jsonToStringResult.isNotValid) {
+            props.connection.setError({
+                data: {
+                    connectorId: props.connector.id,
+                    index: props.operator.index,
+                    location: '',
+                    message: 'Invalid data'
+                }
+            })
+        }
         props.updateConnection(props.connection);
     }
     return (
         <div style={{margin: 20}}>
             <Group builderProps={props} isInitial={true} hasNext={false} updateGroup={(newGroup) => setTree({...newGroup})} group={tree}/>
             <p>
-                {jsonToString(tree)}
+                {jsonToString(tree).result}
             </p>
             {/*<pre>
                 {JSON.stringify(tree, null, 2)}
