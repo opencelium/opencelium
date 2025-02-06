@@ -217,7 +217,7 @@ class ParamGenerator extends Component {
 
     addParam() {
         const { color, responseType, field } = this.state;
-        const { addParam, isVisible } = this.props;
+        const { addParam, isVisible, headerParamGenerator } = this.props;
             let statement = CStatement.createStatement({
             color,
             field: `${responseType}.${field}`,
@@ -228,10 +228,8 @@ class ParamGenerator extends Component {
     
         let finalRef = `${statement.color}.(${statement.type}).${statement.field}`;
     
-        finalRef = transformFieldFormat(finalRef);
-    
+        finalRef = transformFieldFormat(finalRef, headerParamGenerator === true ? 'header' : 'body');
         addParam(finalRef);
-    
         if (!isVisible) {
             this.setState({ showGenerator: !this.state.showGenerator });
         }
@@ -449,7 +447,7 @@ class ParamGenerator extends Component {
     renderGenerator(){
         const {showGenerator, color, field, referenceType} = this.state;
         const hasMethod = color !== '' && field !== '';
-        const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue, readOnly, hasNotType} = this.props;
+        const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue, readOnly, hasNotType, headerParamGenerator} = this.props;
         let themeParamGenerator = '';
         let themeParamGeneratorForm = '';
         if(theme){
@@ -457,7 +455,7 @@ class ParamGenerator extends Component {
             if(theme.hasOwnProperty('paramGeneratorForm')) themeParamGeneratorForm = theme.paramGeneratorForm;
         }
         return(
-            <div ref={this.paramGeneratorRef} className={`${isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} ${themeParamGenerator}`} style={parent ? {left: this.left, top: this.top} : {}}>
+            <div ref={this.paramGeneratorRef} className={`${isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} ${themeParamGenerator} ${headerParamGenerator ? styles.header_param_generator : ''}`} style={parent ? {left: this.left, top: this.top} : {}}>
                 {this.renderArrowIcon()}
                 {
                     showGenerator || isVisible || isAlwaysVisible

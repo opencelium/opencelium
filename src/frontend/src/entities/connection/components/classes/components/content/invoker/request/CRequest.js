@@ -13,15 +13,15 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isArray, isString} from "@application/utils/utils";
-import CBody from "@entity/connection/components/classes/components/content/invoker/CBody";
-import {instanceOf} from "prop-types";
-import {API_METHOD} from "@entity/connection/components/utils/constants/app";
-import COperation from "@entity/connection/components/classes/components/content/invoker/COperation";
+import { consoleLog, isArray, isString } from "@application/utils/utils";
 import {
     convertHeaderFormatToObject,
     parseHeader
 } from "@change_component//form_elements/form_connection/form_methods/help";
+import CBody from "@entity/connection/components/classes/components/content/invoker/CBody";
+import COperation from "@entity/connection/components/classes/components/content/invoker/COperation";
+import { API_METHOD } from "@entity/connection/components/utils/constants/app";
+import { instanceOf } from "prop-types";
 export const METHOD_TYPES = [
     {value: API_METHOD.POST, label: 'POST'},
     {value: API_METHOD.GET, label: 'GET'},
@@ -90,6 +90,14 @@ export default class CRequest{
 
     getBodyFields(){
         return this._body.fields;
+    }
+
+    getHeaderFields(){
+        const result = this._header.reduce((acc, item) => {
+            acc[item.name] = item.value;
+            return acc;
+        }, {});
+        return result;
     }
 
     setBodyFields(fields){

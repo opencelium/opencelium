@@ -194,6 +194,7 @@ class Body extends React.Component {
 			case BODY_FORMAT.JSON:
 				return (
 					<JsonBody
+						target='body'
 						ref={this.JsonBodyRef}
 						id={'description_body'}
 						isDraft={isDraft}

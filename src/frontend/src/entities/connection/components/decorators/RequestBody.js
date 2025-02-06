@@ -159,7 +159,7 @@ export function RequestBody(CRequestType){
                  * to update body
                  */
                 updateBody(bodyData){
-                    const {connection, connector, method, updateEntity} = this.props;
+                    const {connection, connector, method, updateEntity, target} = this.props;
                     connector.setCurrentItem(method);
                     CRequestType.updateFieldsBinding(connection, connector, method, CRequestType.convertForFieldBinding(bodyData));
                     method.setRequestBodyFields(CRequestType.convertToBodyFormat(bodyData));

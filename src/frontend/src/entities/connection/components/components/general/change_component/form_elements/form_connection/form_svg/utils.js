@@ -61,7 +61,7 @@ function isDirectReference(str) {
   return regex.test(str);
 }
 
-export function transformFieldFormat(field) {
+export function transformFieldFormat(field, from = 'body') {
   if (typeof field !== 'string' || field.trim() === '') return field;
   
   if (field.includes(';')) {
@@ -71,21 +71,21 @@ export function transformFieldFormat(field) {
       .join(';');
   }
   
-  if (field.includes('body.$')) return field;
+  if (field.includes(from === 'body' ? 'body.$' : 'header.$')) return field;
   
   if (/\b(success|fail)\b/.test(field)) {
-    field = field.replace(/\b(success|fail)\.?/g, 'body.$.');
+    field = field.replace(/\b(success|fail)\.?/g, from === 'body' ? 'body.$.' : 'header.$.');
     return field;
   }
   
   if (field.startsWith('#')) {
     const match = field.match(/^(#[0-9a-fA-F]{6}\.\((?:response|request)\)\.)/);
     if (match) {
-      return field.replace(match[1], `${match[1]}body.$.`);
+      return field.replace(match[1], from ===  'body' ? `${match[1]}body.$.` : `${match[1]}header.$.`);
     }
   }
   
-  return `body.$.${field}`;
+  return from === 'body' ? `body.$.${field}` : `header.$.${field}`;
 }
 
 export function transformExpertVar(expertVar) {

@@ -230,6 +230,10 @@ export default class CMethodItem{
         this._request.body.fields = fields;
     }
 
+    setRequestHeaderFields(header){
+        this._request.header = header;
+    }
+
     setResponseSuccessBodyFields(fields){
         this._response.success.body.fields = fields;
     }

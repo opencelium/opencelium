@@ -267,16 +267,16 @@ class Endpoint extends Component{
             switch(action.name){
                 case 'put':
                     if(dividedByReferences[action.index].value.length === action.position){
-                        dividedByReferences.splice(action.index + 1, 0, {value: `{%${param}%}`});
+                        dividedByReferences.splice(action.index + 1, 0, {value: `{%${transformedParam}%}`});
                     } else{
-                        dividedByReferences[action.index].value = `${dividedByReferences[action.index].value.substr(0, action.position)}{%${param}%}${dividedByReferences[action.index].value.substr(action.position)}`;
+                        dividedByReferences[action.index].value = `${dividedByReferences[action.index].value.substr(0, action.position)}{%${transformedParam}%}${dividedByReferences[action.index].value.substr(action.position)}`;
                     }
                     break;
                 case 'after':
-                    dividedByReferences.splice(action.index, 0, {value: `{%${param}%}`});
+                    dividedByReferences.splice(action.index, 0, {value: `{%${transformedParam}%}`});
                     break;
                 case 'replace':
-                    dividedByReferences[action.index].value = `{%${param}%}`;
+                    dividedByReferences[action.index].value = `{%${transformedParam}%}`;
                     break;
             }
             contentEditableValue = dividedByReferences.map(ref => ref.value).join('');
