@@ -13,20 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ConnectionCreators from "./ConnectionCreators";
-import GraphQLCreators from './GraphQLCreators';
-import EditorCreators from "./EditorCreators";
-import RuleCreators from "./RuleCreators";
-import SupportFileCreators from "./SupportFileCreators";
+import React from "react";
+import {Route} from "react-router-dom";
+import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
+import {SupportFilesList} from "@entity/support_files/components/pages/SupportFilesList";
 
-/*
-* TODO: check graphql action creator
-*/
-
-export default {
-    ...ConnectionCreators,
-    ...GraphQLCreators,
-    ...EditorCreators,
-    ...RuleCreators,
-    ...SupportFileCreators,
-}
+export default (
+    <Route path="/support_files" key={'support_files'}>
+        <Route index element={<ErrorBoundary><SupportFilesList/></ErrorBoundary>}/>
+    </Route>
+)

@@ -20,6 +20,31 @@ import { IConnection } from "../../interfaces/IConnection";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {ScheduleRequest} from "@entity/schedule/requests/classes/Schedule";
 import {GetConnectionWebhooksResponse} from "@root/requests/interfaces/IConnection";
+import {RuleRequest} from "@root/requests/classes/Rule";
+import {RuleBaseModel} from "@root/requests/models/Rule";
+
+
+export const getLogs = createAsyncThunk(
+    'connection/get/logs',
+    async({schedulerId, connectionId, rules}: {connectionId: number, schedulerId: number, rules: RuleBaseModel[]}, thunkAPI) => {
+        try {
+            const getAllRulesRequest = new RuleRequest({endpoint: `/${connectionId}/rule/all`});
+            const allRulesResponse = await getAllRulesRequest.getRulesByConnection();
+            if (allRulesResponse.data.length !== 0) {
+                const deleteAllRulesRequest = new RuleRequest({endpoint: `/${connectionId}/rule/all`});
+                await deleteAllRulesRequest.getRulesByConnection();
+            }
+            for(let i = 0; i < rules.length; i++) {
+                const createRuleRequest = new RuleRequest({endpoint: `/${connectionId}/rule`});
+                await createRuleRequest.createRule(rules[i]);
+            }
+            const startScheduleRequest = new ScheduleRequest({endpoint: `/execute/${schedulerId}`});
+            await startScheduleRequest.startSchedule();
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 
 export const testConnection = createAsyncThunk(
     'connection/test',
