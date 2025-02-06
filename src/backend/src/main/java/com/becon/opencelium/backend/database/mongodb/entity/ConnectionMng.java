@@ -20,6 +20,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Document(collection = "connection")
 public class ConnectionMng {
@@ -41,6 +42,8 @@ public class ConnectionMng {
 
     @DBRef
     private List<FieldBindingMng> fieldBindings;
+
+    private Map<String, Object> ui;
 
     public ConnectionMng() {
     }
@@ -91,5 +94,13 @@ public class ConnectionMng {
 
     public void setFieldBindings(List<FieldBindingMng> fieldBindings) {
         this.fieldBindings = fieldBindings;
+    }
+
+    public Map<String, Object> getUi() {
+        return ui;
+    }
+
+    public void setUi(Map<String, Object> ui) {
+        this.ui = ui;
     }
 }
