@@ -17,7 +17,7 @@ export default class ReferenceFactory {
                 return instance;
             }
         }
-        throw new Error("Invalid reference format");
+        return null;
     }
 
     static getReference(referenceType: ReferenceType, referenceOrColor: string, type?: string, field?: string): string {
@@ -27,6 +27,6 @@ export default class ReferenceFactory {
                 return instance.reference;
             }
         }
-        throw new Error("Invalid reference type or data");
+        return referenceOrColor
     }
 }

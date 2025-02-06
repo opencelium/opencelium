@@ -1,13 +1,15 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import Select from "react-select";
-import OperatorsConfigGenerator from "../classes/OperatorsConfigGenerator";
 import {OperatorSelectProps} from "@app_component/operator_builder/props";
 import {OptionType} from "@app_component/operator_builder/interfaces/IBaseOperator";
 import {OperatorName} from "@app_component/operator_builder/interfaces/OperatorName";
+import OperatorTypeFactory from "@app_component/operator_builder/classes/OperatorTypeFactory";
 
-const operatorsGenerator = new OperatorsConfigGenerator();
-const options = operatorsGenerator.getAllOptions();
-const OperatorSelect: React.FC<OperatorSelectProps> = ({operator, updateOperator}) => {
+
+const OperatorSelect: React.FC<OperatorSelectProps> = ({type, operator, updateOperator}) => {
+    const options = useMemo(() => {
+        return (new OperatorTypeFactory(type)).getOptions();
+    }, [type])
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(operator ? options.find(o => o.value === operator) : null);
     useEffect(() => {
         const newOperator = selectedOption?.value as OperatorName || '';

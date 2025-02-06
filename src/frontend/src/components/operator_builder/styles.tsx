@@ -6,10 +6,16 @@ import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 export const RuleContainer = styled.div<RuleStyleProps>`
     position: relative;
     display: flex;
-    padding: 10px;
     background: #fff;
     border-radius: 5px;
     gap: 10px;
+    ${({isLoop}) => isLoop ?
+    `
+    justify-content: center;
+    `
+    :        
+    `
+    padding: 10px;
     &:before {
         border-width: 0 0 2px 2px;
         top: -1px;
@@ -23,7 +29,9 @@ export const RuleContainer = styled.div<RuleStyleProps>`
         left: -13px;
         width: 13px;
     }
-    ${({hasNext}) => hasNext ? `
+    `
+    }
+    ${({hasNext, isLoop}) => hasNext && !isLoop ? `
     &:after {
         content: "";
         position: absolute;
@@ -37,7 +45,10 @@ export const RuleContainer = styled.div<RuleStyleProps>`
     }` : ''}
 `;
 
-export const GroupContainer = styled.div<GroupStyleProps>`
+export const LoopGroupContainer = styled.div<GroupStyleProps>`
+`;
+
+export const IfGroupContainer = styled.div<GroupStyleProps>`
     position: relative;
     display: grid;
     gap: 10px;
@@ -126,9 +137,13 @@ export const SaveOperatorButton = styled(Button)`
     float: right;
     margin-top: 30px;
 `;
-export const GroupItemsContainer = styled.div`
+export const GroupItemsContainer = styled.div<{isLoop: boolean}>`
+    ${({isLoop}) => isLoop ? `
+    
+    ` : `
     padding-left: 24px;
     padding-right: 10px;
+    `}
     position: relative;
     display: grid;
     gap: 10px;

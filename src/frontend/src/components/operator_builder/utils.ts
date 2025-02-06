@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import {UnaryOperatorName, BinaryOperatorName, AllOperatorNames, OperatorName} from './interfaces/OperatorName';
-import {Conjunction, GroupProps, RuleProps} from './props';
+import {Conjunction, GroupProps, OperatorType, RuleProps} from './props';
+import OperatorTypeFactory from "@app_component/operator_builder/classes/OperatorTypeFactory";
 export const generateUUID = (): string => {
     return uuidv4();
 };
@@ -10,39 +11,28 @@ export const isUnaryOperator = (operator: string): operator is UnaryOperatorName
 
 export const isBinaryOperator = (operator: string): operator is BinaryOperatorName => {
     return Object.values(BinaryOperatorName).includes(operator as BinaryOperatorName);
-};/*
-export function jsonToString(json: GroupProps | RuleProps): string {
+};
+export function jsonToString(json: GroupProps | RuleProps, type: OperatorType): { result: string; isNotValid: boolean } {
     if (json.type === 'rule') {
         const { leftField, operator, rightField } = json.properties || {};
-        const operatorName = getEnumKeyByValue(AllOperatorNames, operator)
-        return rightField ? `'${leftField}' ${operatorName} '${rightField}'` : `'${leftField}' ${operatorName}`;
-    }
-
-    if (json.type === 'group' && json.items) {
-        const conjunction = json.properties?.conjunction.toUpperCase();
-        const itemsString = json.items.map(jsonToString).join(` ${conjunction} `);
-        return `(${itemsString})`;
-    }
-
-    return '';
-}*/
-export function jsonToString(json: GroupProps | RuleProps): { result: string; isNotValid: boolean } {
-    if (json.type === 'rule') {
-        const { leftField, operator, rightField } = json.properties || {};
-        const operatorName = getEnumKeyByValue(AllOperatorNames, operator);
-        const isNotValid = !leftField || !operator || (rightField === undefined && operator !== "is_empty" && operator !== "is_not_null");
-        const result = rightField ? `'${leftField}' ${operatorName} '${rightField}'` : `'${leftField}' ${operatorName}`;
+        const isNotValid = (new OperatorTypeFactory(type)).isExpressionNotValid({leftField, operator, rightField});
+        const result = (new OperatorTypeFactory(type)).getExpressionFormat({leftField, operator, rightField});
         return { result, isNotValid };
     }
 
     if (json.type === 'group' && json.items) {
-        const conjunction = json.properties?.conjunction.toUpperCase();
+        const conjunction = json.properties?.conjunction?.toUpperCase();
         let isNotValid = false;
-        const itemsString = json.items.map(item => {
-            const { result, isNotValid: itemInvalid } = jsonToString(item);
+        let itemsString: string | string[] = json.items.map(item => {
+            const { result, isNotValid: itemInvalid } = jsonToString(item, type);
             if (itemInvalid) isNotValid = true;
             return result;
-        }).join(` ${conjunction} `);
+        });
+        if (conjunction) {
+            itemsString = itemsString.join(` ${conjunction} `);
+        } else {
+            itemsString = itemsString.join('');
+        }
         return { result: `(${itemsString})`, isNotValid };
     }
 
@@ -100,7 +90,7 @@ export function stringToJson(input: string): GroupProps | RuleProps | any {
     return input.includes("(") ? parseGroup(input) : parseRule(input);
 }
 
-function getEnumKeyByValue(enumData: any, value: string): string | undefined {
+export function getEnumKeyByValue(enumData: any, value: string): string | undefined {
     const entry = Object.entries(enumData).find(([key, val]) => val === value);
     return entry ? entry[0] : undefined;
 }

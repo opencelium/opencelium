@@ -53,7 +53,7 @@ const GroupHeader = ({updateGroup, deleteGroup, group}: GroupHeaderUIProps) => {
             ...group,
             properties: {
                 ...group.properties,
-                conjunction,
+                conjunction: group.properties.conjunction === conjunction ? undefined : conjunction,
             }
         })
     }

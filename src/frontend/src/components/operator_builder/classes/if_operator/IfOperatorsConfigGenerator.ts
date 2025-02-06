@@ -1,29 +1,29 @@
-import IsEmpty from "./IsEmpty";
-import IsNotEmpty from "./IsNotEmpty";
-import IsNull from "./IsNull";
-import IsNotNull from "./IsNotNull";
-import Contains from "./Contains";
-import NotContains from "./NotContains";
-import Equal from "./Equal";
-import ContainsSubStr from "./ContainsSubStr";
-import NotContainsSubStr from "./NotContainsSubStr";
+import IsEmpty from "./types/IsEmpty";
+import IsNotEmpty from "./types/IsNotEmpty";
+import IsNull from "./types/IsNull";
+import IsNotNull from "./types/IsNotNull";
+import Contains from "./types/Contains";
+import NotContains from "./types/NotContains";
+import Equal from "./types/Equal";
+import ContainsSubStr from "./types/ContainsSubStr";
+import NotContainsSubStr from "./types/NotContainsSubStr";
 import {
     AllOperatorNames,
     BinaryOperatorName, OperatorName,
     UnaryOperatorName
-} from "../interfaces/OperatorName";
-import DenyList from "./DenyList";
-import IsTypeOf from "./IsTypeOf";
-import Like from "./Like";
-import Matches from "./Matches";
-import AllowList from "./AllowList";
-import NotLike from "./NotLike";
-import RegEx from "./RegEx";
-import PropertyExists from "./PropertyExists";
-import PropertyNotExists from "./PropertyNotExists";
+} from "../../interfaces/OperatorName";
+import DenyList from "./types/DenyList";
+import IsTypeOf from "./types/IsTypeOf";
+import Like from "./types/Like";
+import Matches from "./types/Matches";
+import AllowList from "./types/AllowList";
+import NotLike from "./types/NotLike";
+import RegEx from "./types/RegEx";
+import PropertyExists from "./types/PropertyExists";
+import PropertyNotExists from "./types/PropertyNotExists";
 import {OptionType} from "@app_component/operator_builder/interfaces/IBaseOperator";
 
-export default class OperatorsConfigGenerator{
+export default class IfOperatorsConfigGenerator {
 
     constructor() {
     }

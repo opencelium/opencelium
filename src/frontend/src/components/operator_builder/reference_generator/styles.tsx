@@ -13,6 +13,10 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
     justify-content: center;
     align-items: center;
     min-width: 420px;
+    ${({referenceType}) => referenceType === 'constant' &&
+            `
+        grid-template-columns: 30px 380px;
+    `}
     ${({referenceType}) => referenceType === 'direct' &&
     `
         grid-template-columns: 30px 180px 200px;
@@ -24,11 +28,14 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
     gap: 10px;
 `;
 
+export const ConstantContainer = styled.div`
+`;
+
 export const ReferenceSwitcherContainer = styled.div<ReferenceSwitcherStyleProps>`
     float: left;
     display: ${({isHidden}) => isHidden ? 'none' : 'grid'};
-    height: 39px;
-    margin-top: -1px;
+    height: 47px;
+    margin-top: -10px;
     padding-bottom: 9px;
     overflow: hidden;
     transition: ${TransitionEffect},

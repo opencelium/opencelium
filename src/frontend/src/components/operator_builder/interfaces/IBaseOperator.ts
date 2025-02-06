@@ -1,10 +1,10 @@
-import {OperatorName} from "@app_component/operator_builder/interfaces/OperatorName";
+import {LoopOperatorName, OperatorName} from "@app_component/operator_builder/interfaces/OperatorName";
 
-export default interface BaseOperatorProps {
-    name: OperatorName;
+export default interface BaseOperatorProps<Operator> {
+    name: Operator;
 }
 
-export interface OperatorProps extends Omit<BaseOperatorProps, "name"> {
+export interface OperatorProps<Operator> extends Omit<BaseOperatorProps<Operator>, "name"> {
 
 }
 

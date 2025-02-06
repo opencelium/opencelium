@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import DeepSelect from "./DeepSelect";
 import MethodSelect from "./MethodSelect";
-import {ReferenceGeneratorContainer} from "./styles";
+import {ConstantContainer, ReferenceGeneratorContainer} from "./styles";
 import {ReferenceGeneratorProps, ReferenceType} from './props';
 import DirectReference from "../classes/references/DirectReference";
 import Webhook from "@root/classes/Webhook";
@@ -9,11 +9,12 @@ import WebhookGenerator from "@change_component/form_elements/form_connection/fo
 import ReferenceSwitcher from "@app_component/operator_builder/reference_generator/ReferenceSwitcher";
 import ReferenceFactory from "@app_component/operator_builder/classes/references/ReferenceFactory";
 import WebhookReference from "@app_component/operator_builder/classes/references/WebhookReference";
+import InputText from "@app_component/base/input/text/InputText";
 
 const ReferenceGenerator = ({reference, setValue, builderProps}: ReferenceGeneratorProps) => {
     const [color, setColor] = useState<string>('');
     const [currentField, setCurrentField] = useState<string>('');
-    const [referenceType, updateReferenceType] = useState<ReferenceType>('direct');
+    const [referenceType, updateReferenceType] = useState<ReferenceType>('constant');
     const changeReferenceType = (newReferenceType: ReferenceType) => {
         updateReferenceType(newReferenceType);
         setColor('');
@@ -41,19 +42,27 @@ const ReferenceGenerator = ({reference, setValue, builderProps}: ReferenceGenera
     useEffect(() => {
         if (reference) {
             const referenceInstance = ReferenceFactory.createReferenceInstance(reference);
-            const referenceData = referenceInstance.extractData();
-            if (referenceInstance instanceof DirectReference) {
-                setColor(prevState => referenceData.color);
-                setCurrentField(prevState => referenceData.field);
-                if (referenceType !== 'direct') {
-                    changeReferenceType('direct');
+            if (referenceInstance) {
+                const referenceData = referenceInstance.extractData();
+                if (referenceInstance instanceof DirectReference) {
+                    setColor(prevState => referenceData.color);
+                    setCurrentField(prevState => referenceData.field);
+                    if (referenceType !== 'direct') {
+                        changeReferenceType('direct');
+                    }
                 }
-            }
-            if (referenceInstance instanceof WebhookReference) {
+                if (referenceInstance instanceof WebhookReference) {
+                    setColor('');
+                    setCurrentField(referenceInstance.reference)
+                    if (referenceType !== 'webhook') {
+                        changeReferenceType('webhook');
+                    }
+                }
+            } else {
                 setColor('');
-                setCurrentField(referenceInstance.reference)
-                if (referenceType !== 'webhook') {
-                    changeReferenceType('webhook');
+                setCurrentField(reference)
+                if (referenceType !== 'constant') {
+                    changeReferenceType('constant');
                 }
             }
         }
@@ -70,6 +79,16 @@ const ReferenceGenerator = ({reference, setValue, builderProps}: ReferenceGenera
             {referenceType === 'webhook' && <WebhookGenerator value={Webhook.extractFromSnippet(currentField)} style={{float: 'left'}} onSelect={(webhookValue) => {
                 onFieldSelect(Webhook.embraceWithSnippet(webhookValue))
             }}/>}
+            {referenceType === 'constant' &&
+                <ConstantContainer>
+                    <InputText
+                        minHeight={'35px'}
+                        value={currentField}
+                        onChange={(e) => setCurrentField(e.target.value)}
+                        placeholder={'Constant'}
+                    />
+                </ConstantContainer>
+            }
         </ReferenceGeneratorContainer>
     )
 }

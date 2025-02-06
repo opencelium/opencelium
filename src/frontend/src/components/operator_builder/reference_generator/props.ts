@@ -20,7 +20,7 @@ export interface DeepSelectProps {
     color: string,
     builderProps: OperatorBuilderProps,
 }
-export type ReferenceType = 'direct' | 'webhook';
+export type ReferenceType = 'constant' | 'direct' | 'webhook';
 export interface ReferenceSwitcherProps {
     referenceType: ReferenceType;
     changeReferenceType: (referenceType: ReferenceType) => void,

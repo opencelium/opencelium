@@ -1,17 +1,10 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import Group from './Group';
-import {Conjunction, GroupProps, OperatorBuilderProps} from './props';
+import {GroupProps, OperatorBuilderProps} from './props';
 import {generateUUID, jsonToString} from "./utils";
 import {SaveOperatorButton} from "@app_component/operator_builder/styles";
+import OperatorTypeFactory from "@app_component/operator_builder/classes/OperatorTypeFactory";
 
-const initialTree: GroupProps = {
-    id: generateUUID(),
-    type: 'group',
-    properties: {
-        conjunction: Conjunction.AND,
-        not: false,
-    }
-};
 const OperatorBuilder = (props: OperatorBuilderProps) => {
     const existedTree = useMemo(() => {
         if (!props.operator) {
@@ -19,13 +12,14 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
         }
         const operator = props.connector.getOperatorByIndex(props.operator.index);
         const foundTree = props.connection.ui?.operators.find((o: any) => o.id === operator?.uiId);
+        const initialTree = (new OperatorTypeFactory(props.type)).getInitialTree();
         return foundTree || {...initialTree, id: generateUUID()};
     }, [props.operator, props.connection]);
     const [tree, setTree] = useState<GroupProps>(existedTree);
     const updateOperator = () => {
         const connector = props.connection.getConnectorByType(props.connector.getConnectorType());
         const operatorItem = connector.getOperatorByIndex(props.operator.index);
-        const jsonToStringResult = jsonToString(tree);
+        const jsonToStringResult = jsonToString(tree, props.type);
         operatorItem.expression = jsonToStringResult.result;
         operatorItem.uiId = tree.id;
         let operators: any = props.connection?.ui?.operators || [];
@@ -49,10 +43,10 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
     return (
         <div style={{margin: 20}}>
             <Group builderProps={props} isInitial={true} hasNext={false} updateGroup={(newGroup) => setTree({...newGroup})} group={tree}/>
-            <p>
-                {jsonToString(tree).result}
+            {/*<p>
+                {jsonToString(tree, props.type).result}
             </p>
-            {/*<pre>
+            <pre>
                 {JSON.stringify(tree, null, 2)}
             </pre>*/}
             <SaveOperatorButton

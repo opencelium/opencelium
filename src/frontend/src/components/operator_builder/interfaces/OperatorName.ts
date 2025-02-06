@@ -1,3 +1,8 @@
+export enum LoopOperatorName {
+    For= 'for',
+    ForIn= 'forin',
+    SplitString= 'SplitString',
+}
 export enum UnaryOperatorName {
     IsEmpty= 'is_empty',
     IsNotEmpty= 'is_not_empty',
@@ -28,6 +33,11 @@ export const AllOperatorNames = {
 } as const;
 export type OperatorName = UnaryOperatorName | BinaryOperatorName;
 
+export const LoopOperatorLabel: {[name in LoopOperatorName]: string} = {
+    [LoopOperatorName.For]: 'For',
+    [LoopOperatorName.ForIn]: 'ForIn',
+    [LoopOperatorName.SplitString]: 'SplitString',
+}
 export const OperatorLabel: {[name in OperatorName]: string} = {
     [BinaryOperatorName.AllowList]: 'Allow List',
     [BinaryOperatorName.DenyList]: 'Deny List',

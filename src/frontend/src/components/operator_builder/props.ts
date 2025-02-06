@@ -1,11 +1,11 @@
-import {OperatorName} from "./interfaces/OperatorName";
+import {LoopOperatorName, OperatorName} from "./interfaces/OperatorName";
 import CConnection from "@classes/content/connection/CConnection";
 import CConnectorItem from "@classes/content/connection/CConnectorItem";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 
 export interface RulePropertyProps {
     leftField: string,
-    operator: OperatorName | '',
+    operator: OperatorName | LoopOperatorName | '',
     rightField?: string,
 }
 export enum Conjunction {
@@ -13,7 +13,7 @@ export enum Conjunction {
     OR= '||',
 }
 export interface GroupPropertyProps {
-    conjunction: Conjunction,
+    conjunction?: Conjunction,
     not?: boolean,
 }
 export interface RuleProps {
@@ -21,22 +21,29 @@ export interface RuleProps {
     type: 'rule',
     properties?: RulePropertyProps,
 }
-export interface RuleUIProps extends UpdateRuleProps, RuleStyleProps{
+export interface RuleUIProps extends UpdateRuleProps, Omit<RuleStyleProps, "isLoop">{
     rule: RuleProps,
     builderProps: OperatorBuilderProps
 }
 export interface RuleStyleProps {
     hasNext: boolean,
+    isLoop: boolean,
 }
 export interface UpdateRuleProps {
     updateRule: (newRule: RuleProps) => void,
     deleteRule: (ruleId: string) => void,
+}
+export enum OperatorType {
+    Loop= 'loop',
+    If= 'if'
 }
 export interface OperatorBuilderProps {
     connection: CConnection,
     connector: CConnectorItem,
     operator: COperatorItem,
     updateConnection: any,
+    type: OperatorType,
+
 }
 export interface GroupProps {
     id: string,
@@ -65,6 +72,7 @@ export interface UpdateGroupProps {
 }
 
 export interface OperatorSelectProps {
-    operator: OperatorName | '',
+    type: OperatorType,
+    operator: OperatorName | LoopOperatorName | '',
     updateOperator: (newOperatorName: OperatorName | '') => void,
 }

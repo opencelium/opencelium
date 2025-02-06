@@ -44,6 +44,7 @@ import WebhookGenerator from "@change_component/form_elements/form_connection/fo
 import Webhook from "@root/classes/Webhook";
 import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
 import OperatorBuilder from "@app_component/operator_builder/OperatorBuilder";
+import {OperatorType} from "@app_component/operator_builder/props";
 
 export const TransitionEffect = 'width 0.3s ease 0s';
 
@@ -428,19 +429,18 @@ class Condition extends React.Component{
         const operatorOptions = isLoopOperator ? FUNCTIONAL_OPERATORS_FOR_LOOP : FUNCTIONAL_OPERATORS_FOR_IF;
         let functionalOperator = operatorOptions.find(o => o.value === relationalOperatorValue);
         const placeholder = functionalOperator?.placeholder || '';
-        if(isIfOperator) {
-            return (
-                <OperatorBuilder
-                    updateConnection={(c) => {
-                        updateConnection(c);
-                        toggleConditionDialog();
-                    }}
-                    connection={connection}
-                    connector={connector}
-                    operator={operator}
-                />
-            )
-        }
+        return (
+            <OperatorBuilder
+                type={isIfOperator ? OperatorType.If : OperatorType.Loop}
+                updateConnection={(c) => {
+                    updateConnection(c);
+                    toggleConditionDialog();
+                }}
+                connection={connection}
+                connector={connector}
+                operator={operator}
+            />
+        )/*
         return(
             <React.Fragment>
                 {this.renderType('left')}
@@ -507,7 +507,7 @@ class Condition extends React.Component{
                     />
                 }
             </React.Fragment>
-        );
+        );*/
     }
 
     render(){
@@ -526,7 +526,7 @@ class Condition extends React.Component{
             <React.Fragment>
                 <Col id='condition_name' xs={4} className={styles.col} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{`Condition`}</Col>
                 <Col id="condition_label" xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
-                    <span className={styles.value} title={conditionTextTitle} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{isIfOperator ? expression : conditionText}</span>
+                    <span className={styles.value} title={conditionTextTitle} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{expression}</span>
                     {isMouseOver && !isConditionDialogOpened && !readOnly && <EditIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isMouseOver && !isConditionDialogOpened && readOnly && <ViewIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isExtended && isCurrentInfo &&
@@ -535,12 +535,12 @@ class Condition extends React.Component{
                         )
                     }
                     <Dialog
-                        actions={isIfOperator ? [] : [{label, onClick: (a) => this.updateConnection(a), id: 'condition_apply'}]}
+                        actions={/*[{label, onClick: (a) => this.updateConnection(a), id: 'condition_apply'}]*/[]}
                         active={isConditionDialogOpened && !isExtended}
                         toggle={(a) => this.toggleEdit(a)}
                         title={'Condition'}
                         theme={{
-                            dialog: styles.condition_dialog,
+                            dialog: styles[`${operator.type}_condition_dialog`],
                             content: styles.condition_content,
                             body: styles.condition_body,
                         }}

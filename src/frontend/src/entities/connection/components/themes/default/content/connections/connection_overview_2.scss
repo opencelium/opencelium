@@ -635,8 +635,11 @@ $DASHED_COLOR: #58854d;
 		height: 50px;
 	}
 }
-.condition_dialog {
+.if_condition_dialog {
 	min-width: 90%;
+}
+.loop_condition_dialog {
+	min-width: 1200px;
 }
 .condition_content {
 	min-height: 250px;

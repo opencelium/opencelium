@@ -1,17 +1,15 @@
 import React from 'react';
-import {
-    GroupContainer,
-    GroupItemsContainer
-} from "./styles";
-import {GroupUIProps} from './props';
+import {GroupItemsContainer, IfGroupContainer, LoopGroupContainer} from "./styles";
+import {GroupUIProps, OperatorType} from './props';
 import GroupHeader from "@app_component/operator_builder/GroupHeader";
 import Rule from "@app_component/operator_builder/Rule";
 
 const Group = ({updateGroup, deleteGroup, group, isInitial, hasNext, builderProps}: GroupUIProps) => {
+    const GroupComponent = builderProps.type === OperatorType.Loop ? LoopGroupContainer : IfGroupContainer;
     return (
-        <GroupContainer isInitial={isInitial} hasNext={hasNext}>
-            <GroupHeader group={group} updateGroup={updateGroup} deleteGroup={deleteGroup}/>
-            {group?.items?.length > 0 && <GroupItemsContainer>
+        <GroupComponent isInitial={isInitial} hasNext={hasNext}>
+            {builderProps.type === OperatorType.If && <GroupHeader group={group} updateGroup={updateGroup} deleteGroup={deleteGroup}/>}
+            {group?.items?.length > 0 && <GroupItemsContainer isLoop={builderProps.type === OperatorType.Loop}>
                 {
                     group?.items.map((item, index) => {
                         switch (item.type){
@@ -66,7 +64,7 @@ const Group = ({updateGroup, deleteGroup, group, isInitial, hasNext, builderProp
                 }
             </GroupItemsContainer>
             }
-        </GroupContainer>
+        </GroupComponent>
     )
 }
 

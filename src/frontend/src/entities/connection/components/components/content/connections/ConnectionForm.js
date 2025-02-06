@@ -43,6 +43,7 @@ import SyncInvokers from "@change_component/form_elements/form_connection/form_m
 import { Category } from "@entity/category/classes/Category";
 import Webhook from "@root/classes/Webhook";
 import {jsonToString} from "@app_component/operator_builder/utils";
+import {OperatorType} from "@app_component/operator_builder/props";
 
 /**
  * common component to add and update Connection
@@ -387,20 +388,18 @@ export function ConnectionForm(type) {
                     connector.forEach((operator) => {
                         const condition = operator.condition;
                         let operatorErrors = [];
-                        if (operator.type === LOOP_OPERATOR) {
+                        /*if (operator.type === LOOP_OPERATOR) {
                             if(!condition.leftStatement || !condition.leftStatement.color || !condition.leftStatement.field){
                                 if (!Webhook.isWebhookSnippet(condition.leftStatement.field)){
                                     operatorErrors.push('Left Statement is missing');
                                 }
                             }
-                        }
-                        if(operator.type === IF_OPERATOR){
-                            const uiTree = entity.ui?.operators.find(o => o.id === operator.uiId);
-                            if (uiTree) {
-                                const jsonToStringResult = jsonToString(uiTree);
-                                if (jsonToStringResult.isNotValid){
-                                    operatorErrors.push('Some data is undefined.');
-                                }
+                        }*/
+                        const uiTree = entity.ui?.operators.find(o => o.id === operator.uiId);
+                        if (uiTree) {
+                            const jsonToStringResult = jsonToString(uiTree, operator.type);
+                            if (jsonToStringResult.isNotValid){
+                                operatorErrors.push('Some data is undefined.');
                             }
                         }
                         if(operatorErrors.length > 0){
