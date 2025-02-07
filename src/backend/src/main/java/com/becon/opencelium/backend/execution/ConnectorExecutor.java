@@ -137,7 +137,7 @@ public class ConnectorExecutor {
                         operator.getCondition().getRelationalOperator(), next[0], next[1], index
                 ));
 
-                boolean result = executeIfOperator(operator);
+                boolean result = (Boolean) expressionProcessor.evaluate(operator.getExpression(), executionManager::getValue);
                 logger.logAndSend("OPERATOR_RESULT: " + (result ? "TRUE" : "FALSE") + " -- index: " + index);
 
                 if (result) {
@@ -279,10 +279,6 @@ public class ConnectorExecutor {
 
         operation.addRequest(key, requestEntity);
         operation.addResponse(key, responseEntity);
-    }
-
-    private boolean executeIfOperator(OperatorEx operator) {
-        return (Boolean) expressionProcessor.evaluate(operator.getExpression());
     }
 
     private Class<?> getResponseType(OperationDTO dto) {

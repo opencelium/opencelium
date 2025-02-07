@@ -23,7 +23,7 @@ public class Loop {
 
         result.setIterator(operatorEx.getIterator());
 
-        String expression = operatorEx.getCondition().getExpression();
+        String expression = operatorEx.getExpression();
 
         String ref = ReferenceUtility.extractRef(expression, RegExpression.wrappedDirectRef);
         if (expression.startsWith(FOR_IN.getName())) {
