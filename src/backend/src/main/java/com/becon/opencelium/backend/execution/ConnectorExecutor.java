@@ -18,6 +18,9 @@ import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.ocel.ExpressionProcessor;
+import com.becon.opencelium.backend.ocel.ExpressionProcessorFactory;
+import com.becon.opencelium.backend.ocel.ProcessorType;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
@@ -43,6 +46,7 @@ import java.util.Objects;
 
 public class ConnectorExecutor {
 
+    private final ExpressionProcessor expressionProcessor;
     private final Connector connector;
     private final ExecutionManager executionManager;
     private final RestTemplate restTemplate;
@@ -53,6 +57,7 @@ public class ConnectorExecutor {
     private static final String BREAK = "======================= %s %s -- INDEX: %s =======================";
 
     public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, MaskingService masking, String direction) {
+        this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
         this.executionManager = executionManager;
         this.restTemplate = restTemplate;
         this.logger = logger;
@@ -276,43 +281,8 @@ public class ConnectorExecutor {
         operation.addResponse(key, responseEntity);
     }
 
-    private boolean executeIfOperator(OperatorEx operatorDTO) {
-        ConditionEx condition = operatorDTO.getCondition();
-        Object leftValue = executionManager.getValue(condition.getLeft());
-        if (leftValue != null) {
-            logger.logAndSend("Left Statement: " + leftValue);
-        }
-
-        Object rightValue;
-        String likeValueRef = condition.getRight();
-        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
-            int beginIndex = likeValueRef.startsWith("%") ? 1 : 0;
-            int endIndex = likeValueRef.length() - (likeValueRef.endsWith("%") ? 1 : 0);
-
-            likeValueRef = likeValueRef.substring(beginIndex, endIndex);
-        }
-
-        if (ReferenceUtility.containsRef(likeValueRef)) {
-            rightValue = executionManager.getValue(likeValueRef);
-        } else {
-            rightValue = likeValueRef;
-        }
-
-        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
-            rightValue = condition.getRight().replace(likeValueRef, (String) rightValue);
-        }
-
-        if (rightValue != null) {
-            if (rightValue.getClass().isArray()) {
-                logger.logAndSend("Right Statement: " + Arrays.toString((String[]) rightValue));
-            } else {
-                logger.logAndSend("Right Statement: " + rightValue);
-            }
-        }
-
-        Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(condition.getRelationalOperator());
-
-        return operator.apply(leftValue, rightValue);
+    private boolean executeIfOperator(OperatorEx operator) {
+        return (Boolean) expressionProcessor.evaluate(operator.getExpression());
     }
 
     private Class<?> getResponseType(OperationDTO dto) {
