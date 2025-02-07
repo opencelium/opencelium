@@ -58,19 +58,24 @@ class Header extends React.Component {
 
 	getCurrentBindingItem(fieldName) {
 		const { connection, method } = this.props;
+
 		return connection.fieldBinding.find((item) => {
 			return (
 				item.to.findIndex((elem) => {
-					let name = elem.field.split('[]').join('');
-					name = name.split('[*]').join('');
-					return elem.color === method.color && name === `body.$.${fieldName}`;
+					let name = elem.field
+						.replace(/^body\.\$\./, '')
+						.replace(/^header\.\$\./, '');
+					let normalizedFieldName = fieldName
+						.replace(/^body\.\$\./, '')
+						.replace(/^header\.\$\./, '');
+
+					return elem.color === method.color && name === normalizedFieldName;
 				}) !== -1
 			);
 		});
 	}
 
 	setCurrentEnhancementClickingOnPointer(e, value, fieldName = '') {
-		
 		const { connection, connector, method } = this.props;
 		/*if(connector.getConnectorType() === CONNECTOR_FROM){
               return;
@@ -155,7 +160,7 @@ class Header extends React.Component {
 		} = this.props;
 		return (
 			<JsonBody
-        target='header'
+				target='header'
 				ref={this.JsonBodyRef}
 				id={'description_body'}
 				isDraft={isDraft}
@@ -358,7 +363,7 @@ class Header extends React.Component {
 					theme={{
 						dialog: styles.body_dialog_with_enhancement,
 						body: styles.enhancement_dialog_body,
-            content: styles.body_content,
+						content: styles.body_content,
 					}}
 				>
 					{this.renderInfo()}
@@ -369,9 +374,9 @@ class Header extends React.Component {
 }
 
 Header.defaultProps = {
-  hasEnhancement: true,
-  isDraft: false,
-  hasError: false,
-}
+	hasEnhancement: true,
+	isDraft: false,
+	hasError: false,
+};
 
 export default Header;

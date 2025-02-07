@@ -13,17 +13,17 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, replaceVariables} from "@application/utils/utils";
-import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO, OUTSIDE_ITEM} from "./CConnectorItem";
-import CFieldBinding from "./field_binding/CFieldBinding";
+import { consoleLog, isId, replaceVariables } from "@application/utils/utils";
+import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
+import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
+import CMethodItem from "@classes/content/connection/method/CMethodItem";
+import COperatorItem from "@classes/content/connection/operator/COperatorItem";
+import { RESPONSE_FAIL, RESPONSE_SUCCESS } from "../invoker/response/CResponse";
+import CConnectorItem, { CONNECTOR_FROM, CONNECTOR_TO, OUTSIDE_ITEM } from "./CConnectorItem";
 import CTemplate from "./CTemplate";
 import CBindingItem from "./field_binding/CBindingItem";
-import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../invoker/response/CResponse";
-import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
- import CMethodItem from "@classes/content/connection/method/CMethodItem";
- import COperatorItem from "@classes/content/connection/operator/COperatorItem";
- import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
- import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
+import CFieldBinding from "./field_binding/CFieldBinding";
+import { STATEMENT_REQUEST, STATEMENT_RESPONSE } from "./operator/CStatement";
 
 const DEFAULT_COLOR = '#ffffff';
 
@@ -739,7 +739,7 @@ export default class CConnection{
             && (value.type === STATEMENT_REQUEST
             || value.type === STATEMENT_RESPONSE)){
                 if(fieldType[0] === RESPONSE_SUCCESS
-                    || fieldType[0] === RESPONSE_FAIL){
+                    || fieldType[0] === RESPONSE_FAIL || 'header' || 'body'){
                     return true;
                 }
         }
@@ -844,13 +844,16 @@ export default class CConnection{
                 if(!hasFound){
                     for(let i = 0; i < this._fieldBinding.length; i++) {
                         if(this._fieldBinding[i].to.length === 1 && this._fieldBinding[i].from.length === 0){
+                            
                             let index = bindingItem.to.findIndex(b => CFieldBinding.compareTwoBindingItems(b, this._fieldBinding[i].to[0]));
+                            
                             if(index !== -1){
                                 this._fieldBinding.splice(i, 1);
                             }
                         }
                     }
                     newFieldBinding = CFieldBinding.createFieldBinding({from: bindingItem.from, to: bindingItem.to});
+                    console.log('first add', newFieldBinding)
                     this._fieldBinding.push(newFieldBinding);
                     for(let i = 0; i < this._fieldBinding.length; i++) {
                         if(this._fieldBinding[i].to.length === 1 && this._fieldBinding[i].from.length === 0){

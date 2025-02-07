@@ -64,14 +64,17 @@ export function putAsterixInEmptyBrackets(data) {
 	return data;
 }
 
-
-
 export function transformExpertVar(expertVar, from = 'body') {
-	if (typeof expertVar !== 'string' || expertVar.trim() === '')
+	if (expertVar.includes('header.$') || expertVar.includes('body.$')) {
 		return expertVar;
+	}
+
+	if (!expertVar.match(/#[0-9a-fA-F]{6}\.\((?:response|request)\)\./)) {
+		return `${from === 'header' ? 'header.$' : 'body.$'}.${expertVar}`;
+	}
 
 	return expertVar.replace(
-		/(#[0-9a-fA-F]{6}\.\((?:response|request)\)\.)((?:success|fail)\.?)?([\w\[\]\.\-]+)/g,
+		/(#[0-9a-fA-F]{6}\.\((?:response|request)\)\.)(success|fail)?\.?([\w\[\]\.\-]+)/g,
 		(match, prefix, status, fieldPart) => {
 			if (fieldPart.startsWith('body.$') || fieldPart.startsWith('header.$')) {
 				return `${prefix}${fieldPart}`;

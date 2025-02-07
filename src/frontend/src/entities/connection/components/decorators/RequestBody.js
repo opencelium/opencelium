@@ -184,17 +184,17 @@ export function RequestBody(CRequestType){
 
 						const transformedData = {
 							...data,
-							new_value: transformDataFields(data.new_value, target),
-							updated_src: transformDataFields(data.updated_src, target),
+							new_value: transformDataFields(data.new_value, 'body'),
+							updated_src: transformDataFields(data.updated_src, 'body'),
 						};
 
 						CRequestType.updateFieldsBinding(
 							connection,
 							connector,
 							method,
-							CRequestType.convertForFieldBinding(transformedData)
+							CRequestType.convertForFieldBinding(transformedData),
+							target
 						);
-
 
 						if (target === 'header') {
 							method.setRequestHeaderFields(
