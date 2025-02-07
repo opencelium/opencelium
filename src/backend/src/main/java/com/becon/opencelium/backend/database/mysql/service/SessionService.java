@@ -28,7 +28,9 @@ public interface SessionService {
 
     Optional<Session> findByUserId(int userId);
 
-    boolean deleteByUserId(int userId);
+    void deleteByUserId(int userId);
 
-    void updateLastAccessedTime(Session session);
+    Session replace(int userId);
+
+    void updateLastAccessedTime(String sessionId);
 }

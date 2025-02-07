@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
+import com.becon.opencelium.backend.configuration.OpenCeliumProps;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -27,6 +29,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final EnhancementService enhancementService;
     private final MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper;
     private final Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper;
+    private final OpenCeliumProps ocProps;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
@@ -35,7 +38,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             @Qualifier("operatorMngServiceImp") OperatorMngService operatorMngService,
             @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
-            Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper
+            Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper,
+            OpenCeliumProps ocProps
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -44,6 +48,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         this.enhancementService = enhancementService;
         this.enhancementMapper = enhancementMapper;
         this.enhancementMngMapper = enhancementMngMapper;
+        this.ocProps = ocProps;
     }
 
     @Override
@@ -53,12 +58,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public ConnectionMng save(ConnectionMng connectionMng) {
-        if (connectionMng == null){
-            return null;
-        }
+        if (Objects.isNull(connectionMng)) return null;
         if (connectionMng.getConnectionId() != null && existsByConnectionId(connectionMng.getConnectionId())) {
             throw new RuntimeException("CONNECTION_ALREADY_EXISTS");
         }
+        connectionMng.setVersion(ocProps.getVersion());
         try {
             fieldBindingMngService.bind(connectionMng); // also saves to db
             if (connectionMng.getFromConnector() != null) {
@@ -86,19 +90,14 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public ConnectionMng saveDirectly(ConnectionMng connectionMng) {
-        if (connectionMng == null){
-            return null;
-        }
-        if (connectionMng.getConnectionId() != null && existsByConnectionId(connectionMng.getConnectionId())) {
-            throw new RuntimeException("CONNECTION_ALREADY_EXISTS");
-        }
+        if (Objects.isNull(connectionMng)) return null;
+
         return connectionMngRepository.save(connectionMng);
     }
 
     @Override
     public void updateAndBind(ConnectionMng old, ConnectionMng connectionMng) {
-        if (connectionMng == null)
-            return;
+        if (Objects.isNull(connectionMng)) return;
 
         try {
             updateWithoutRollback(old, connectionMng);
@@ -120,6 +119,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     public ConnectionMng getByConnectionId(Long connectionId) {
         ConnectionMng connectionMng = connectionMngRepository.findByConnectionId(connectionId)
                 .orElseThrow(() -> new ConnectionNotFoundException(connectionId));
+
         setEnhancements(connectionMng);
         return connectionMng;
     }
@@ -127,6 +127,38 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public List<ConnectionMng> getAll() {
         return connectionMngRepository.findAll();
+    }
+
+    public void updateWithoutBinding(ConnectionMng connectionMng) {
+        if (Objects.isNull(connectionMng)) return;
+        if (Objects.isNull(connectionMng.getId()) || !connectionMngRepository.existsById(connectionMng.getId())) {
+            throw new RuntimeException("CONNECTION_NOT_FOUND");
+        }
+        try {
+            if (Objects.nonNull(connectionMng.getFromConnector())) {
+                if (Objects.nonNull(connectionMng.getFromConnector().getMethods())) {
+                    connectionMng.getFromConnector().setMethods(methodMngService.saveAll(connectionMng.getFromConnector().getMethods()));
+                }
+                if (Objects.nonNull(connectionMng.getFromConnector().getOperators())) {
+                    connectionMng.getFromConnector().setOperators(operatorMngService.saveAll(connectionMng.getFromConnector().getOperators()));
+                }
+            }
+            if (Objects.nonNull(connectionMng.getToConnector())) {
+                if (Objects.nonNull(connectionMng.getToConnector().getMethods())) {
+                    connectionMng.getToConnector().setMethods(methodMngService.saveAll(connectionMng.getToConnector().getMethods()));
+                }
+                if (Objects.nonNull( connectionMng.getToConnector().getOperators())) {
+                    connectionMng.getToConnector().setOperators(operatorMngService.saveAll(connectionMng.getToConnector().getOperators()));
+                }
+            }
+            if (Objects.nonNull(connectionMng.getFieldBindings())) {
+                fieldBindingMngService.saveAll(connectionMng.getFieldBindings());
+            }
+        } catch (Exception e) {
+            deleteChildren(connectionMng);
+            throw e;
+        }
+        connectionMngRepository.save(connectionMng);
     }
 
     @Override

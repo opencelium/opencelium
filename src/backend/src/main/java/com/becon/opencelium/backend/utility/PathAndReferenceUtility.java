@@ -2,7 +2,9 @@ package com.becon.opencelium.backend.utility;
 
 import java.util.*;
 
-public class EndpointUtility {
+import static com.becon.opencelium.backend.constant.RegExpression.referencePath;
+
+public class PathAndReferenceUtility {
     private static final String PRE_DIRECT_REF = "{%#";
     private static final String SUF_DIRECT_REF = "%}";
     private static final String PRE_WEBHOOK = "${";
@@ -10,7 +12,7 @@ public class EndpointUtility {
     private static final String PRE_BRACKET = "['";
     private static final String SUF_BRACKET = "']";
 
-    public static int indexOf(String path, char ch, boolean hasWebHook, boolean hasDirectRef){
+    public static int indexOf(String path, char ch, boolean hasWebHook, boolean hasDirectRef) {
         return indexOf(path, ch, true, hasWebHook, hasDirectRef);
     }
 
@@ -193,7 +195,7 @@ public class EndpointUtility {
                 i += PRE_WEBHOOK.length() - 1;
             } else if (i + PRE_BRACKET.length() < n && path.startsWith(PRE_BRACKET, i)) {
                 stack.push(SUF_BRACKET);
-                i += SUF_BRACKET.length() - 1;
+                i += PRE_BRACKET.length() - 1;
             } else if (i + SUF_DIRECT_REF.length() < n && path.startsWith(SUF_DIRECT_REF, i)) {
                 if (!stack.empty() && stack.peek().equals(SUF_DIRECT_REF)) {
                     stack.pop();
@@ -258,5 +260,29 @@ public class EndpointUtility {
     private static boolean isSpecialRegexChar(char delim) {
         String specialChars = ".^$*+?()[]{}\\|/";
         return specialChars.indexOf(delim) != -1;
+    }
+
+    public static boolean isBody(String path) {
+        return path != null && path.startsWith("body.$.");
+    }
+
+    public static String getActualPathOfBody(String path) {
+        return path.substring(7);
+    }
+
+    public static String getHeaderParameterName(String path) {
+        return path.substring(9);
+    }
+
+    public static String getPlaceTypeOfRef(String field) {
+        return field == null ? null
+                : !field.matches(referencePath) ? null
+                : field.equals("path") ? field
+                : isBody(field) ? "body"
+                : field;
+    }
+
+    public static String rebuildReference(String color, String type, String field) {
+        return color + ".(" + type + ")" + (field == null ? "" : "." + field);
     }
 }

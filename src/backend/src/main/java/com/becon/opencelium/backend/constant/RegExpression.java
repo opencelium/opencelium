@@ -7,6 +7,7 @@ public interface RegExpression {
 
     // Another one
     String arrayWithLetterIndex = "\\[([a-z,*]+)\\]";
+    String array = "\\[.*\\]";
     String arrayWithNumberIndex = "\\[([0-9]+)\\]";
     String wholeArray = "\\[([*]){1}\\]";
     String isNumber = "^[+-]?\\d+(\\.\\d+)?$";
@@ -16,4 +17,5 @@ public interface RegExpression {
     String enhancement = "#\\{%[0-9a-fA-F]{24}%\\}";
     String requestData = "\\{(.*?)\\}";
     String pageRef = "@\\{([^}]+)\\}";
+    String referencePath = "(body\\.\\$\\..+)|(header\\.\\$\\..+)|(path)";
 }

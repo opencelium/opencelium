@@ -38,7 +38,7 @@ public class JwtTokenUtil {
     @Autowired
     private TokenUtility tokenUtility;
 
-    public String extractEmail(String token) {
+    public String extractPrincipal(String token) {
         return getClaimFromToken(token, JWTClaimsSet::getSubject);
     }
 
@@ -68,14 +68,14 @@ public class JwtTokenUtil {
             .claim("sessionTime", tokenUtility.getActivityTime())
             .expirationTime(new Date(System.currentTimeMillis() + tokenUtility.getExpirationTime() * 1000))
             .issueTime(new Date(System.currentTimeMillis()))
-            .subject(user.getEmail())
+            .subject(user.getPrincipal())
             .jwtID(user.getSession().getId())
             .build();
 
         return generateToken(claimsSet);
     }
 
-    public Boolean validateToken(String token, UserPrincipals userDetails) throws Exception {
+    public Boolean validateToken(String token, User user) throws Exception {
 
         SignedJWT signedJWT = SignedJWT.parse(token);
         // Create HMAC verifier
@@ -84,7 +84,7 @@ public class JwtTokenUtil {
             return false;
         }
 
-        Session session = userDetails.getUser().getSession();
+        Session session = user.getSession();
         if (session == null || !session.isActive()){
             return false;
         }
@@ -95,11 +95,8 @@ public class JwtTokenUtil {
         }
 
         final String sessionId = extractSessionId(token);
-        final String email = extractEmail(token);
 
-        return (email.equals(userDetails.getUsername())
-                && !isTokenExpired(token)
-                && sessionId.equals(session.getId()));
+        return isNotExpired(token) && sessionId.equals(session.getId());
     }
 
     public JWTClaimsSet getAllClaimsFromToken(String token) {
@@ -128,8 +125,8 @@ public class JwtTokenUtil {
         return claims.getClaim(name);
     }
 
-    private Boolean isTokenExpired(String token) {
+    private Boolean isNotExpired(String token) {
         final Date expiration = extractExpirationDate(token);
-        return expiration.before(new Date());
+        return expiration.after(new Date());
     }
 }

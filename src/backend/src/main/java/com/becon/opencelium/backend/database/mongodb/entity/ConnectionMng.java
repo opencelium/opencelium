@@ -20,21 +20,40 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Document(collection = "connection")
 public class ConnectionMng {
+
+    private String version;
+
     @MongoId(targetType = FieldType.OBJECT_ID)
     private String id; // id generated in mongodb
+
     @Indexed
     @Field(name = "connection_id")
     private Long connectionId; // id generated in mariadb.
+
     @Field(name = "from_connector")
     private ConnectorMng fromConnector;
+
     @Field(name = "to_connector")
     private ConnectorMng toConnector;
+
     @DBRef
     private List<FieldBindingMng> fieldBindings;
+
+    private Map<String, Object> ui;
+
     public ConnectionMng() {
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public String getId() {
@@ -75,5 +94,13 @@ public class ConnectionMng {
 
     public void setFieldBindings(List<FieldBindingMng> fieldBindings) {
         this.fieldBindings = fieldBindings;
+    }
+
+    public Map<String, Object> getUi() {
+        return ui;
+    }
+
+    public void setUi(Map<String, Object> ui) {
+        this.ui = ui;
     }
 }

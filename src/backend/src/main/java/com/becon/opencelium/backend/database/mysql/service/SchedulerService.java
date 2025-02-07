@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
+import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
@@ -49,6 +50,7 @@ public interface SchedulerService {
 
     void startNow(Scheduler scheduler);
     void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception;
+    void startNow(Scheduler scheduler, List<MaskingRule> rules);
     void saveEntity(Scheduler scheduler);
     void disable(Scheduler scheduler);
     void enable(Scheduler scheduler);

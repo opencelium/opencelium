@@ -16,7 +16,12 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mysql.entity.*;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
+import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
+import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
@@ -35,7 +40,12 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +53,6 @@ public class SchedulerServiceImp implements SchedulerService {
 
     private final ConnectionService connectionService;
     private final WebhookService webhookService;
-    private final ExecutionService executionService;
     private final ConnectorService connectorService;
     private final LastExecutionService lastExecutionService;
     private final RecipientService recipientService;
@@ -57,7 +66,6 @@ public class SchedulerServiceImp implements SchedulerService {
     public SchedulerServiceImp(
             @Lazy @Qualifier("connectionServiceImp") ConnectionService connectionService,
             @Qualifier("webhookServiceImp") WebhookService webhookService,
-            @Qualifier("executionServiceImp") ExecutionService executionService,
             @Qualifier("lastExecutionServiceImp") LastExecutionService lastExecutionService,
             @Qualifier("messageServiceImpl") MessageService messageService,
             @Qualifier("recipientServiceImpl") RecipientService recipientService,
@@ -69,7 +77,6 @@ public class SchedulerServiceImp implements SchedulerService {
     ) {
         this.connectionService = connectionService;
         this.webhookService = webhookService;
-        this.executionService = executionService;
         this.lastExecutionService = lastExecutionService;
         this.recipientService = recipientService;
         this.messageService = messageService;
@@ -165,8 +172,7 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public Scheduler toEntity(SchedulerRequestResource resource) {
-        Connection connection = connectionService.findById(resource.getConnectionId())
-                .orElseThrow(() -> new RuntimeException("Connection with id=" + resource.getConnectionId() + " not found"));
+        Connection connection = connectionService.getById(resource.getConnectionId());
         Scheduler scheduler = new Scheduler();
         scheduler.setId(resource.getSchedulerId());
         scheduler.setTitle(resource.getTitle());
@@ -222,6 +228,11 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public void startNow(Scheduler scheduler, Map<String, Object> webhook) throws Exception {
         schedulingStrategy.runJob(scheduler, webhook);
+    }
+
+    @Override
+    public void startNow(Scheduler scheduler, List<MaskingRule> rules) {
+        schedulingStrategy.runJob(scheduler, rules);
     }
 
     @Override

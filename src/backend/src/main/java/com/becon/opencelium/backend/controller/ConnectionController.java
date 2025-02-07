@@ -21,19 +21,26 @@ import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
-import com.becon.opencelium.backend.resource.connection.*;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.connection.MethodDTO;
+import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
+import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,8 +54,21 @@ import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.env.Environment;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -56,6 +76,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/connection", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -65,6 +87,7 @@ public class ConnectionController {
     private final Environment environment;
     private final ConnectionService connectionService;
     private final ConnectionMngService connectionMngService;
+    private final SchedulerService schedulerService;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final Mapper<Connection, ConnectionResource> connectionResourceMapper;
@@ -73,7 +96,7 @@ public class ConnectionController {
 
     public ConnectionController(
             Environment environment,
-            Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
+            SchedulerService schedulerService, Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             Mapper<Connection, ConnectionResource> connectionResourceMapper,
             Mapper<ConnectionDTO, ConnectionOldDTO> connectionOldDTOMapper,
@@ -82,6 +105,7 @@ public class ConnectionController {
             PatchHelper patchHelper
     ) {
         this.environment = environment;
+        this.schedulerService = schedulerService;
         this.connectionService = connectionService;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
@@ -520,4 +544,176 @@ public class ConnectionController {
         }
     }
 
+    @Operation(summary = "Retrieves all masking rules of connection from database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "All rules of a connection have been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionOldDTO.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/{connectionId}/rule/all")
+    public ResponseEntity<List<RuleDTO>> getAllRules(@PathVariable long connectionId) {
+        List<RuleDTO> rules = connectionService.getAllRules(connectionId).stream()
+                .map(RuleDTO::fromEntity)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(rules);
+    }
+
+
+    @Operation(summary = "Retrieves specified masking rule of connection from database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Specified rule of a connection has been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/{connectionId}/rule/{ruleId}")
+    public ResponseEntity<RuleDTO> getOneRule(@PathVariable long connectionId, @PathVariable long ruleId) {
+        return ResponseEntity.ok(connectionService.getOneRule(connectionId, ruleId));
+    }
+
+    @Operation(summary = "Creates set of masking rules for a connection")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Masking rules for a connection have been created successfully",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path="/{connectionId}/rule/list", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<RuleDTO>> saveRuleList(@PathVariable long connectionId, @RequestBody List<RuleDTO> dtos) throws Exception {
+        final URI uri = MvcUriComponentsBuilder
+                .fromController(getClass())
+                .buildAndExpand().toUri();
+
+        return ResponseEntity.created(uri).body(connectionService.saveRuleList(connectionId, dtos));
+    }
+
+    @Operation(summary = "Creates a masking rule for a connection")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Masking rule for a connection has been created successfully",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path="/{connectionId}/rule", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<RuleDTO> saveRule(@PathVariable long connectionId, @RequestBody RuleDTO dto) throws Exception {
+        final URI uri = MvcUriComponentsBuilder
+                .fromController(getClass())
+                .buildAndExpand().toUri();
+
+        return ResponseEntity.created(uri).body(connectionService.saveRule(connectionId, dto));
+    }
+
+    @Operation(summary = "Updates masking rule for a connection")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Masking rule for a connection has been updated successfully",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping(path = "/{connectionId}/rule/{ruleId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateRule(@PathVariable long connectionId, @PathVariable long ruleId, @RequestBody RuleDTO dto) throws Exception {
+        return ResponseEntity.ok(connectionService.updateRule(connectionId, ruleId, dto));
+    }
+
+    @Operation(summary = "Deletes masking rules of a connection by provided connection ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Masking rules of a connection have been deleted successfully.",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping(path = "/{connectionId}/rule/all")
+    public ResponseEntity<?> deleteRuleList(@PathVariable long connectionId) {
+        connectionService.deleteRuleList(connectionId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Deletes a masking rule of a connection by provided connection ID and rule ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Masking rule of a connection has been deleted successfully.",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping(path = "/{connectionId}/rule/{ruleId}")
+    public ResponseEntity<?> deleteRule(@PathVariable long connectionId, @PathVariable long ruleId) {
+        connectionService.deleteRule(connectionId, ruleId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Create support file with given masking for connection execution")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Process started successfully.",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/execute/{connectionId}/support-file")
+    public ResponseEntity<?> executeWithSupportFile(@PathVariable long connectionId, @RequestBody List<RuleDTO> ruleDTOs) {
+        // create temporary scheduler, will be deleted after execution finished
+        SchedulerRequestResource resource = new SchedulerRequestResource();
+        resource.setConnectionId(connectionId);
+        resource.setTitle(connectionId + "_" + UUID.randomUUID());
+        resource.setStatus(true);
+        resource.setCronExp("59 59 23 31 12 ? 2123");
+        resource.setDebugMode(true);
+
+        Scheduler scheduler = schedulerService.toEntity(resource);
+        schedulerService.save(scheduler);
+
+        // map rule dtos
+        List<MaskingRule> rules = ruleDTOs.stream().map(dto -> {
+            MaskingRule rule = new MaskingRule();
+            rule.setType(dto.getType());
+            rule.setExpression(dto.getExpression());
+
+            return rule;
+        }).toList();
+
+        schedulerService.startNow(scheduler, rules);
+
+        return ResponseEntity.ok().build();
+    }
 }
