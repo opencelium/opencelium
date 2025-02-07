@@ -13,15 +13,16 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {createAsyncThunk} from "@reduxjs/toolkit";
-import {errorHandler, sortByIndex} from "@application/utils/utils";
-import {ConnectionRequest} from "../../requests/classes/Connection";
+import { ResponseMessages } from "@application/requests/interfaces/IResponse";
+import { errorHandler, sortByIndex } from "@application/utils/utils";
+import { transformDataFields } from '@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/utils';
+import { ScheduleRequest } from "@entity/schedule/requests/classes/Schedule";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { GetConnectionWebhooksResponse } from "@root/requests/interfaces/IConnection";
 import { IConnection } from "../../interfaces/IConnection";
-import {ResponseMessages} from "@application/requests/interfaces/IResponse";
-import {ScheduleRequest} from "@entity/schedule/requests/classes/Schedule";
-import {GetConnectionWebhooksResponse} from "@root/requests/interfaces/IConnection";
 import {RuleRequest} from "@root/requests/classes/Rule";
 import {RuleBaseModel} from "@root/requests/models/Rule";
+import { ConnectionRequest } from "../../requests/classes/Connection";
 
 
 export const getLogs = createAsyncThunk(
@@ -228,7 +229,8 @@ export const getConnectionById = createAsyncThunk(
         try {
             const request = new ConnectionRequest({endpoint: `/${connectionId}`});
             const response = await request.getConnectionById();
-            return response.data;
+            const transformedConnection = transformDataFields(response.data);
+            return transformedConnection;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

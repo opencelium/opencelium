@@ -619,20 +619,25 @@ $DASHED_COLOR: #58854d;
 	margin-top: 20px;
 	th {
 		border-bottom: none !important;
-		width: 50%;
+		width: 33.3%;
 	}
 }
 .header_body {
 	max-height: 250px;
-	overflow-y: auto;
+	// overflow-y: auto;
 	table {
 		margin-bottom: 0 !important;
 	}
 	td {
-		width: 50%;
+		width: 30%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 	tr {
-		height: 50px;
+		height: 70px;
+		display: flex;
+		align-items: stretch;
 	}
 }
 .if_condition_dialog {
@@ -672,7 +677,12 @@ $DASHED_COLOR: #58854d;
 	width: 160px !important;
 }
 .header_dialog {
-	min-width: 750px;
+	min-width: 90vw;
+	max-width: 90vw;
+	width: 90vw;
+}
+.header_dialog_body{
+	
 }
 .body_dialog {
 	min-width: 45vw;

@@ -77,12 +77,18 @@ class Body extends React.Component {
 
 	getCurrentBindingItem(fieldName) {
 		const { connection, method } = this.props;
+
 		return connection.fieldBinding.find((item) => {
 			return (
 				item.to.findIndex((elem) => {
-					let name = elem.field.split('[]').join('');
-					name = name.split('[*]').join('');
-					return elem.color === method.color && name === fieldName;
+					let name = elem.field
+						.replace(/^body\.\$\./, '')
+						.replace(/^header\.\$\./, '');
+					let normalizedFieldName = fieldName
+						.replace(/^body\.\$\./, '')
+						.replace(/^header\.\$\./, '');
+
+					return elem.color === method.color && name === normalizedFieldName;
 				}) !== -1
 			);
 		});
@@ -194,6 +200,7 @@ class Body extends React.Component {
 			case BODY_FORMAT.JSON:
 				return (
 					<JsonBody
+						target='body'
 						ref={this.JsonBodyRef}
 						id={'description_body'}
 						isDraft={isDraft}
@@ -265,7 +272,10 @@ class Body extends React.Component {
 					active={isOpenedEnhancement}
 					toggle={() => this.toggleEnhancement()}
 					title={'Enhancement'}
-					theme={{ dialog: styles.enhancement_dialog, content: styles.enhancement_dialog_content }}
+					theme={{
+						dialog: styles.enhancement_dialog,
+						content: styles.enhancement_dialog_content,
+					}}
 				>
 					{isOpenedEnhancement && enhancementElement}
 				</Dialog>

@@ -13,9 +13,9 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CEnhancement from "./CEnhancement";
+import { ARRAY_SIGN } from "@change_component//form_elements/form_connection/form_methods/help";
 import CBindingItem from "./CBindingItem";
-import {ARRAY_SIGN} from "@change_component//form_elements/form_connection/form_methods/help";
+import CEnhancement from "./CEnhancement";
 /**
  * Field binding class for Connection class
  */
@@ -57,14 +57,18 @@ export default class CFieldBinding{
         return result;
     }
 
-    static compareTwoBindingItems(bindingItem1, bindingItem2){
+    static compareTwoBindingItems(bindingItem1, bindingItem2) {
         bindingItem1 = this.convertBindingItem(bindingItem1);
         bindingItem2 = this.convertBindingItem(bindingItem2);
-        if((bindingItem1.field === '' && bindingItem1.type === '') || (bindingItem2.field === '' && bindingItem2.type === '')){
-            return bindingItem1.color === bindingItem2.color;
-        }
-        return bindingItem1.field.replace(ARRAY_SIGN, '') === bindingItem2.field.replace(ARRAY_SIGN, '') && bindingItem1.color === bindingItem2.color && bindingItem1.type === bindingItem2.type;
+    
+        let field1 = bindingItem1.field.replace(/^body\.\$\.|header\.\$\./, '');
+        let field2 = bindingItem2.field.replace(/^body\.\$\.|header\.\$\./, '');
+    
+        return field1 === field2 &&
+               bindingItem1.color === bindingItem2.color &&
+               bindingItem1.type === bindingItem2.type;
     }
+    
 
     get from(){
         return this._from;
