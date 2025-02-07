@@ -131,11 +131,11 @@ public class ConnectorExecutor {
             masking.setOperationId(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
-                logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "START", index));
-                logger.logAndSend(String.format(
-                        "=============== %s =============== -- next function: %s -- next operator: %s -- index: %s",
-                        operator.getCondition().getRelationalOperator(), next[0], next[1], index
-                ));
+                logger.logAndSend(String.format(BREAK, operator.getExpression(), "START", index));
+//                logger.logAndSend(String.format(
+//                        "=============== %s =============== -- next function: %s -- next operator: %s -- index: %s",
+//                        operator.getCondition().getRelationalOperator(), next[0], next[1], index
+//                ));
 
                 boolean result = (Boolean) expressionProcessor.evaluate(operator.getExpression(), executionManager::getValue);
                 logger.logAndSend("OPERATOR_RESULT: " + (result ? "TRUE" : "FALSE") + " -- index: " + index);
