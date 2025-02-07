@@ -25,8 +25,6 @@ public class ConditionDTO {
     private StatementDTO leftStatement;
     private StatementDTO rightStatement;
 
-    private String expression;
-
     public ConditionDTO() {
     }
 
@@ -52,13 +50,5 @@ public class ConditionDTO {
 
     public void setRightStatement(StatementDTO rightStatement) {
         this.rightStatement = rightStatement;
-    }
-
-    public String getExpression() {
-        return expression;
-    }
-
-    public void setExpression(String expression) {
-        this.expression = expression;
     }
 }

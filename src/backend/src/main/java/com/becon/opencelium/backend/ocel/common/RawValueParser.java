@@ -30,6 +30,11 @@ public class RawValueParser {
             return val.substring(1, val.length() - 1);
         }
 
+        // string
+        if (val.startsWith("'") && val.endsWith("'")) {
+            return val.substring(1, val.length() - 1);
+        }
+
         if (ValueUtils.isNumberStr(val)) {
             return Double.valueOf(val);
         }

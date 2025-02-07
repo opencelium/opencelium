@@ -7,8 +7,6 @@ public class ConditionEx {
     private String right;
     private RelationalOperator relationalOperator;
 
-    private String expression;
-
     public ConditionEx() {
     }
 
@@ -34,13 +32,5 @@ public class ConditionEx {
 
     public void setRelationalOperator(RelationalOperator relationalOperator) {
         this.relationalOperator = relationalOperator;
-    }
-
-    public String getExpression() {
-        return expression;
-    }
-
-    public void setExpression(String expression) {
-        this.expression = expression;
     }
 }

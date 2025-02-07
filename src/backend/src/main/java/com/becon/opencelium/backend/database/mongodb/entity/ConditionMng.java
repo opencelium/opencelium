@@ -29,8 +29,6 @@ public class ConditionMng {
     @Field(name = "right_statement")
     private StatementMng rightStatement;
 
-    private String expression;
-
     public ConditionMng() {
     }
 
@@ -56,13 +54,5 @@ public class ConditionMng {
 
     public void setRightStatement(StatementMng rightStatement) {
         this.rightStatement = rightStatement;
-    }
-
-    public String getExpression() {
-        return expression;
-    }
-
-    public void setExpression(String expression) {
-        this.expression = expression;
     }
 }
