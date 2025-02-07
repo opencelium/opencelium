@@ -31,6 +31,10 @@ public enum RelationalOperator {
 
     private final String name;
 
+    public String getName() {
+        return name;
+    }
+
     RelationalOperator(String name) {
         this.name = name;
     }
