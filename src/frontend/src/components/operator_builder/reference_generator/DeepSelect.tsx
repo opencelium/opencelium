@@ -16,7 +16,7 @@ interface OptionType {
 
 const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, builderProps}) => {
     const [searchValue, setSearchValue] = useState<string>(field);
-    const [selectedOption, setSelectedOption] = useState<OptionType | null>(null);
+    const [selectedOption, setSelectedOption] = useState<OptionType | null>(undefined);
     const [filteredOptions, setFilteredOptions] = useState<OptionType[]>([]);
     const [allOptions, setAllOptions] = useState<OptionType[]>([]);
     const [iterators, setIterators] = useState<string[]>([]);
@@ -130,10 +130,12 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
         }
     };
     useEffect(() => {
-        if (selectedOption){
-            onValueSelect(selectedOption.value);
-        } else {
-            onValueSelect('');
+        if (selectedOption !== undefined) {
+            if (selectedOption){
+                onValueSelect(selectedOption.value);
+            } else {
+                onValueSelect('');
+            }
         }
     }, [selectedOption]);
     useEffect(() => {

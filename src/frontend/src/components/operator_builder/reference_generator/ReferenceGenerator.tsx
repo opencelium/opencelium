@@ -45,24 +45,24 @@ const ReferenceGenerator = ({reference, setValue, builderProps}: ReferenceGenera
             if (referenceInstance) {
                 const referenceData = referenceInstance.extractData();
                 if (referenceInstance instanceof DirectReference) {
-                    setColor(prevState => referenceData.color);
-                    setCurrentField(prevState => referenceData.field);
+                    setColor(referenceData.color);
+                    setCurrentField(referenceData.field);
                     if (referenceType !== 'direct') {
-                        changeReferenceType('direct');
+                        updateReferenceType('direct');
                     }
                 }
                 if (referenceInstance instanceof WebhookReference) {
                     setColor('');
                     setCurrentField(referenceInstance.reference)
                     if (referenceType !== 'webhook') {
-                        changeReferenceType('webhook');
+                        updateReferenceType('webhook');
                     }
                 }
             } else {
                 setColor('');
                 setCurrentField(reference)
                 if (referenceType !== 'constant') {
-                    changeReferenceType('constant');
+                    updateReferenceType('constant');
                 }
             }
         }

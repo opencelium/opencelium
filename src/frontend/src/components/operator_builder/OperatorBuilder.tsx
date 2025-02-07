@@ -43,10 +43,10 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
     return (
         <div style={{margin: 20}}>
             <Group builderProps={props} isInitial={true} hasNext={false} updateGroup={(newGroup) => setTree({...newGroup})} group={tree}/>
-            {/*<p>
+            <p>
                 {jsonToString(tree, props.type).result}
             </p>
-            <pre>
+            {/*<pre>
                 {JSON.stringify(tree, null, 2)}
             </pre>*/}
             <SaveOperatorButton
