@@ -91,6 +91,6 @@ export function stringToJson(input: string): GroupProps | RuleProps | any {
 }
 
 export function getEnumKeyByValue(enumData: any, value: string): string | undefined {
-    const entry = Object.entries(enumData).find(([key, val]) => val === value);
+    const entry = Object.entries(enumData).find(([key, val]) => key === value);
     return entry ? entry[0] : undefined;
 }

@@ -31,11 +31,11 @@ export default class IfOperatorsConfigGenerator {
         switch (operatorName) {
             case UnaryOperatorName.IsEmpty:
                 return (new IsEmpty()).getOption();
-            case UnaryOperatorName.IsNotEmpty:
+            case UnaryOperatorName.NotEmpty:
                 return (new IsNotEmpty()).getOption();
             case UnaryOperatorName.IsNull:
                 return (new IsNull()).getOption();
-            case UnaryOperatorName.IsNotNull:
+            case UnaryOperatorName.NotNull:
                 return (new IsNotNull()).getOption();
             case BinaryOperatorName.Equal:
                 return (new Equal()).getOption();

@@ -4,6 +4,7 @@ import {generateUUID, getEnumKeyByValue} from "@app_component/operator_builder/u
 import React from "react";
 import ReferenceGenerator from "@app_component/operator_builder/reference_generator/ReferenceGenerator";
 import OperatorSelect from "@app_component/operator_builder/operator_select/OperatorSelect";
+import ReferenceFactory from "@app_component/operator_builder/classes/references/ReferenceFactory";
 
 export default class LoopOperator {
     type = OperatorType.Loop;
@@ -25,10 +26,14 @@ export default class LoopOperator {
     static getExpressionFormat(ruleProps: RulePropertyProps): string {
         const {rightField, leftField, operator} = ruleProps;
         const operatorName = getEnumKeyByValue(LoopOperatorName, operator);
+        const isLeftFieldReference = leftField && !!(ReferenceFactory.createReferenceInstance(leftField));
+        const isRightFieldReference = rightField && !!(ReferenceFactory.createReferenceInstance(rightField));
+        const leftExpression = isLeftFieldReference ? leftField : `'${leftField}'`;
+        const rightExpression = isRightFieldReference ? rightField : `'${rightField}'`;
         if (operator === LoopOperatorName.SplitString) {
-            return rightField ? `'${leftField}' ${operatorName} '${rightField}'` : `'${leftField}' ${operatorName}`;
+            return rightField ? `${leftExpression} ${operatorName} ${rightExpression}` : `${leftExpression} ${operatorName}`;
         } else {
-            return rightField ? `${operatorName} '${leftField}' '${rightField}'` : `${operatorName} '${leftField}'`;
+            return rightField ? `${operatorName} ${leftExpression} ${rightExpression}` : `${operatorName} ${leftExpression}`;
         }
     }
 

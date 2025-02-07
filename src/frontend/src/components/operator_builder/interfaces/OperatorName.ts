@@ -1,30 +1,30 @@
 export enum LoopOperatorName {
-    For= 'for',
-    ForIn= 'forin',
+    For= 'For',
+    ForIn= 'ForIn',
     SplitString= 'SplitString',
 }
 export enum UnaryOperatorName {
-    IsEmpty= 'is_empty',
-    IsNotEmpty= 'is_not_empty',
-    IsNotNull= 'is_not_null',
-    IsNull= 'is_null',
+    IsEmpty= 'IsEmpty',
+    NotEmpty= 'NotEmpty',
+    NotNull= 'NotNull',
+    IsNull= 'IsNull',
 }
 
 export enum BinaryOperatorName {
-    Contains= 'contains',
-    ContainsSubStr= 'contains_substr',
-    AllowList= 'allow_list',
-    DenyList= 'deny_list',
-    Equal= 'equal',
-    IsTypeOf= 'is_type_off',
-    NotContains= 'not_contains',
-    NotContainsSubStr= 'not_contains_substr',
-    Like= 'like',
-    NotLike= 'not_like',
-    Matches= 'matches',
-    PropertyExists= 'property_exists',
-    PropertyNotExists= 'property_not_exists',
-    RegEx= 'reg_ex',
+    Contains= 'Contains',
+    ContainsSubStr= 'ContainsSubStr',
+    AllowList= 'AllowList',
+    DenyList= 'DenyList',
+    Equal= 'Equal',
+    IsTypeOf= 'IsTypeOf',
+    NotContains= 'NotContains',
+    NotContainsSubStr= 'NotContainsSubStr',
+    Like= 'Like',
+    NotLike= 'NotLike',
+    Matches= 'Matches',
+    PropertyExists= 'PropertyExists',
+    PropertyNotExists= 'PropertyNotExists',
+    RegEx= 'RegEx',
 }
 
 export const AllOperatorNames = {
@@ -55,7 +55,7 @@ export const OperatorLabel: {[name in OperatorName]: string} = {
     [BinaryOperatorName.Equal]: 'Equal',
 
     [UnaryOperatorName.IsEmpty]: 'Is Empty',
-    [UnaryOperatorName.IsNotEmpty]: 'Is Not Empty',
+    [UnaryOperatorName.NotEmpty]: 'Is Not Empty',
     [UnaryOperatorName.IsNull]: 'Is Null',
-    [UnaryOperatorName.IsNotNull]: 'Is Not Null'
+    [UnaryOperatorName.NotNull]: 'Is Not Null'
 }
