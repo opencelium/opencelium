@@ -5,6 +5,6 @@ import {UnaryOperatorName} from "../../../interfaces/OperatorName";
 export default class IsNotNull extends IfBaseOperator{
 
     constructor() {
-        super({name: UnaryOperatorName.IsNotNull})
+        super({name: UnaryOperatorName.NotNull})
     }
 }
