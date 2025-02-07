@@ -13,20 +13,21 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {renderToString} from 'react-dom/server';
-import React, {Component} from 'react';
-import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import ContentEditable from 'react-contenteditable';
+import { renderToString } from 'react-dom/server';
+import { connect } from 'react-redux';
 
-import styles from '@entity/connection/components/themes/default/general/form_methods.scss';
-import CMethodItem from "@entity/connection/components/classes/components/content/connection/method/CMethodItem";
-import ParamGenerator from "./ParamGenerator";
-import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
-import {freeStringFromAmp, getCaretPositionOfDivEditable, setFocusByCaretPositionInDivEditable} from "@application/utils/utils";
+import { freeStringFromAmp, getCaretPositionOfDivEditable, setFocusByCaretPositionInDivEditable } from "@application/utils/utils";
 import QueryString from "@change_component/form_elements/form_connection/form_methods/method/query_string/QueryString";
+import CMethodItem from "@entity/connection/components/classes/components/content/connection/method/CMethodItem";
 import CEndpoint from "@entity/connection/components/classes/components/general/change_component/form_elements/CEndpoint";
-import {BACKSPACE_KEY_CODE} from "@entity/connection/components/utils/constants/inputs";
+import styles from '@entity/connection/components/themes/default/general/form_methods.scss';
+import { BACKSPACE_KEY_CODE } from "@entity/connection/components/utils/constants/inputs";
+import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
+import { transformDataFields } from '../../form_svg/utils';
+import ParamGenerator from "./ParamGenerator";
 
 const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
 
@@ -213,8 +214,9 @@ class Endpoint extends Component{
         let newCaretPosition = 0;
         let hasNewCaretPosition = false;
         const requiredInvokerData = this.props.connector.invoker.data;
+        const transformedParam = transformDataFields(param);
         if(caretPosition === -1 || caretPosition === 0 && contentEditableValue === ''){
-            contentEditableValue = `${contentEditableValue}{%${param}%}`;
+            contentEditableValue = `${contentEditableValue}{%${transformedParam}%}`;
         } else{
             const dividedByReferences = CEndpoint.divideEndpointValueByReferences(contentEditableValue, requiredInvokerData);
             let action = {index: -1, name: '', position: 0}
@@ -265,16 +267,16 @@ class Endpoint extends Component{
             switch(action.name){
                 case 'put':
                     if(dividedByReferences[action.index].value.length === action.position){
-                        dividedByReferences.splice(action.index + 1, 0, {value: `{%${param}%}`});
+                        dividedByReferences.splice(action.index + 1, 0, {value: `{%${transformedParam}%}`});
                     } else{
-                        dividedByReferences[action.index].value = `${dividedByReferences[action.index].value.substr(0, action.position)}{%${param}%}${dividedByReferences[action.index].value.substr(action.position)}`;
+                        dividedByReferences[action.index].value = `${dividedByReferences[action.index].value.substr(0, action.position)}{%${transformedParam}%}${dividedByReferences[action.index].value.substr(action.position)}`;
                     }
                     break;
                 case 'after':
-                    dividedByReferences.splice(action.index, 0, {value: `{%${param}%}`});
+                    dividedByReferences.splice(action.index, 0, {value: `{%${transformedParam}%}`});
                     break;
                 case 'replace':
-                    dividedByReferences[action.index].value = `{%${param}%}`;
+                    dividedByReferences[action.index].value = `{%${transformedParam}%}`;
                     break;
             }
             contentEditableValue = dividedByReferences.map(ref => ref.value).join('');

@@ -13,29 +13,25 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import {connect} from 'react-redux';
-import {isString} from "@application/utils/utils";
-import {Col, Row} from "react-grid-system";
-import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
-import Name from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Name";
-import Label
-    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Label";
-import Url from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Url";
-import Header
-    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Header";
+import { isString } from "@application/utils/utils";
 import Body from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Body";
+import DataAggregator from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregator";
+import Header from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Header";
+import Label from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Label";
+import Name from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Name";
+import Url from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Url";
 import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
-import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
-import {toggleRequestBodyDialog, toggleResponseSuccessBodyDialog, toggleResponseFailBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
-import {withTheme} from "styled-components";
-import DataAggregator
-    from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregator";
+import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
+import { setCurrentTechnicalItem } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import { toggleRequestBodyDialog, toggleResponseFailBodyDialog, toggleResponseSuccessBodyDialog } from "@root/redux_toolkit/slices/EditorSlice";
+import React from 'react';
+import { Col, Row } from "react-grid-system";
+import { connect } from 'react-redux';
+import { withTheme } from "styled-components";
 
-import { setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
+import TestMethodButton from "@change_component/form_elements/form_connection/form_svg/details/test_method/TestMethodButton";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
-import TestMethodButton
-    from "@change_component/form_elements/form_connection/form_svg/details/test_method/TestMethodButton";
+import { setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 function mapStateToProps(state){
     const editor = state.connectionEditorReducer;
     return{
@@ -170,6 +166,13 @@ class TechnicalProcessDescription extends React.Component {
                             isExtended={isExtended}
                             items={request.header}
                             ref={this.headerRef}
+                            connection={connection}
+                            updateConnection={(a) => this.updateConnection(a)}
+                            connector={connector}
+                            method={methodItem}
+                            readOnly={readOnly}
+                            theme={theme}
+                            source={request.getHeaderFields()}
                         />
                         <Body toggleBodyDialog={toggleRequestBodyDialog} isBodyDialogOpened={isRequestBodyDialogOpened} readOnly={readOnly} nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={(a) => this.updateConnection(a)} method={methodItem}
                               bodyTitle={"Request data"}

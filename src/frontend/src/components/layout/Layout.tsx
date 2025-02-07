@@ -45,7 +45,7 @@ const Layout: FC =
                     <Outlet/>
                 </Suspense>
             </Suspense>
-            <CheckConnectionComponent/>
+            {/*<CheckConnectionComponent/>*/}
         </React.Fragment>
     )
 }
