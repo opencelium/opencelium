@@ -21,7 +21,6 @@ import { CommonState } from "@application/utils/store";
 import { COLOR_MODE } from "@classes/content/connection_overview_2/CSvg";
 import { WebhookProps } from "@entity/connection/classes/Webhook";
 import AnimationFunctionSteps from "@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/layouts/button_panel/help_block/classes/AnimationFunctionSteps";
-import { deepTransformFields, transformFieldFormat } from '@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/utils';
 import { getWebhookTypes } from "@entity/schedule/redux_toolkit/action_creators/WebhookCreators";
 import { CaseReducers, createSlice, current, PayloadAction, SliceCaseReducers } from "@reduxjs/toolkit";
 import { NoInfer } from "@reduxjs/toolkit/dist/tsHelpers";
@@ -320,32 +319,12 @@ const connectionReducers = (isModal: boolean = false) => {
       }
     },
     setConnectionData: (state: any, action: PayloadAction<any>) => {
-      const connection: any = JSON.parse(JSON.stringify(action.payload.connection));
-    
-      const transformedConnection = deepTransformFields(connection);
-    
-      state.connection = transformedConnection;
+      state.connection = action.payload.connection;
       if (action.payload.updateConnection) {
         state.updateConnection = action.payload.updateConnection;
       }
     },
     setCurrentTechnicalItem: (state, action: PayloadAction<any>) => {
-      if (
-        action.payload &&
-        action.payload.entity &&
-        action.payload.entity.request &&
-        action.payload.entity.request.body &&
-        action.payload.entity.request.body.fields
-      ) {
-        const fields = { ...action.payload.entity.request.body.fields };
-        for (const key in fields) {
-          if (fields.hasOwnProperty(key)) {
-            fields[key] = transformFieldFormat(fields[key]);
-          }
-        }
-        action.payload.entity.request.body.fields = fields;
-      }
-    
       state.currentTechnicalItem = action.payload;
       state.isCreateElementPanelOpened = action.payload !== null;
     },

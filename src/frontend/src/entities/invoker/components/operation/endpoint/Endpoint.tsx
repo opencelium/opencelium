@@ -14,7 +14,7 @@
  */
 
 import InputText from "@app_component/base/input/text/InputText";
-import { transformFieldFormat } from '@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/utils';
+import { transformDataFields } from '@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/utils';
 import React, { ChangeEvent, FC, useEffect, useState } from 'react';
 import { EndpointProps } from "../interfaces";
 
@@ -22,9 +22,9 @@ const Endpoint: FC<EndpointProps> =
     ({
          ...props
      }) => {
-        const [newEndpoint, setNewEndpoint] = useState(transformFieldFormat(props.operationItem.request.endpoint) || '');
+        const [newEndpoint, setNewEndpoint] = useState(transformDataFields(props.operationItem.request.endpoint) || '');
         useEffect(() => {
-            setNewEndpoint(transformFieldFormat(props.operationItem.request.endpoint));
+            setNewEndpoint(transformDataFields(props.operationItem.request.endpoint));
         }, [props.operationItem?.request.endpoint])
         return (
             <InputText
@@ -33,7 +33,7 @@ const Endpoint: FC<EndpointProps> =
                     setNewEndpoint(e.target.value);
                 }}
                 onBlur={() => {
-                    const endpoint = transformFieldFormat(newEndpoint);
+                    const endpoint = transformDataFields(newEndpoint);
                     props.operationItem.request.endpoint = endpoint;
                     props.updateOperation(props.operationItem);
                 }}

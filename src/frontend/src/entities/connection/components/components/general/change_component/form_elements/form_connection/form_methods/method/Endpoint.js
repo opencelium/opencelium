@@ -26,7 +26,7 @@ import CEndpoint from "@entity/connection/components/classes/components/general/
 import styles from '@entity/connection/components/themes/default/general/form_methods.scss';
 import { BACKSPACE_KEY_CODE } from "@entity/connection/components/utils/constants/inputs";
 import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
-import { transformFieldFormat } from '../../form_svg/utils';
+import { transformDataFields } from '../../form_svg/utils';
 import ParamGenerator from "./ParamGenerator";
 
 const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
@@ -214,7 +214,7 @@ class Endpoint extends Component{
         let newCaretPosition = 0;
         let hasNewCaretPosition = false;
         const requiredInvokerData = this.props.connector.invoker.data;
-        const transformedParam = transformFieldFormat(param);
+        const transformedParam = transformDataFields(param);
         if(caretPosition === -1 || caretPosition === 0 && contentEditableValue === ''){
             contentEditableValue = `${contentEditableValue}{%${transformedParam}%}`;
         } else{

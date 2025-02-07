@@ -32,7 +32,7 @@ import TooltipFontIcon from "@entity/connection/components/components/general/ba
 import styles from '@entity/connection/components/themes/default/general/form_methods.scss';
 import { addCloseParamGeneratorNavigation, removeCloseParamGeneratorNavigation } from "@entity/connection/components/utils/key_navigation";
 import ReactDOM from "react-dom";
-import { transformFieldFormat } from '../../form_svg/utils';
+import { transformDataFields } from '../../form_svg/utils';
 
 
 class ParamGenerator extends Component {
@@ -228,7 +228,7 @@ class ParamGenerator extends Component {
     
         let finalRef = `${statement.color}.(${statement.type}).${statement.field}`;
         
-        finalRef = transformFieldFormat(finalRef, headerParamGenerator === true ? 'header' : 'body');
+        finalRef = transformDataFields(finalRef, headerParamGenerator === true ? 'header' : 'body');
         addParam(finalRef);
         if (!isVisible) {
             this.setState({ showGenerator: !this.state.showGenerator });
@@ -448,7 +448,6 @@ class ParamGenerator extends Component {
         const {showGenerator, color, field, referenceType} = this.state;
         const hasMethod = color !== '' && field !== '';
         const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue, readOnly, hasNotType, headerParamGenerator} = this.props;
-        console.log(headerParamGenerator)
         let themeParamGenerator = '';
         let themeParamGeneratorForm = '';
         if(theme){

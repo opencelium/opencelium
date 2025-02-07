@@ -13,15 +13,15 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { consoleLog, isNumber, isString } from "@application/utils/utils";
 import {
     convertFieldNameForBackend,
     markFieldNameAsArray
 } from "@change_component//form_elements/form_connection/form_methods/help";
+import { CONNECTOR_TO } from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 import CBindingItem from "@entity/connection/components/classes/components/content/connection/field_binding/CBindingItem";
-import {CONNECTOR_TO} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
-import {consoleLog, isNumber, isString} from "@application/utils/utils";
-import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "@entity/connection/components/classes/components/content/connection/operator/CStatement";
-import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "@entity/connection/components/classes/components/content/invoker/response/CResponse";
+import { STATEMENT_REQUEST, STATEMENT_RESPONSE } from "@entity/connection/components/classes/components/content/connection/operator/CStatement";
+import { RESPONSE_FAIL, RESPONSE_SUCCESS } from "@entity/connection/components/classes/components/content/invoker/response/CResponse";
 
 export class CBodyEditor{
 
@@ -117,7 +117,7 @@ export class CBodyEditor{
                     if (existingValueSplitted[1] === `(${STATEMENT_REQUEST})`
                         || existingValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {
                         if (existingValueSplitted[2] === RESPONSE_SUCCESS
-                            || existingValueSplitted[2] === RESPONSE_FAIL) {
+                            || existingValueSplitted[2] === RESPONSE_FAIL || newValueSplitted[2] === 'header' || newValueSplitted[2] === 'body') {
                             result = 2;
                         }
                     }
@@ -125,11 +125,12 @@ export class CBodyEditor{
             }
             if(isString(bodyData.newValue)) {
                 let newValueSplitted = bodyData.newValue.split('.');
+                
                 if (newValueSplitted.length > 3) {
                     if (newValueSplitted[1] === `(${STATEMENT_REQUEST})`
                         || newValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {
                         if (newValueSplitted[2] === RESPONSE_SUCCESS
-                            || newValueSplitted[2] === RESPONSE_FAIL) {
+                            || newValueSplitted[2] === RESPONSE_FAIL || newValueSplitted[2] === 'header' || newValueSplitted[2] === 'body') {
                             result = 1;
                         }
                     }

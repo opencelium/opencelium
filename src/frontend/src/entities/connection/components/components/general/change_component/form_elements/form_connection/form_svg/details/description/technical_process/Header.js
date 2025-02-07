@@ -273,6 +273,10 @@ class Header extends React.Component {
 		);
 	}
 
+	toggleEnhancement() {
+		this.setState({ isOpenedEnhancement: !this.state.isOpenedEnhancement });
+	}
+
 	renderEnhancement() {
 		const { currentEnhancement, isOpenedEnhancement } = this.state;
 		const { readOnly, connection, method } = this.props;

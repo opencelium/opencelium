@@ -20,7 +20,7 @@ import React, { Component } from 'react';
 import COperation from "@entity/connection/components/classes/components/content/invoker/COperation";
 import styles from '@entity/connection/components/themes/default/general/change_component.scss';
 
-import { transformFieldFormat } from '../../form_connection/form_svg/utils';
+import { transformDataFields } from '../../form_connection/form_svg/utils';
 /**
  * Component for Path in Invoker.RequestItem
  */
@@ -30,7 +30,7 @@ class Endpoint extends Component{
         super(props);
 
         this.state = {
-            endpoint: transformFieldFormat(props.operation.request.endpoint),
+            endpoint: transformDataFields(props.operation.request.endpoint),
         };
     }
 
@@ -38,7 +38,7 @@ class Endpoint extends Component{
         let endpoint = this.props.operation.request.endpoint;
         if(endpoint === ''){
             this.setState({
-                endpoint: transformFieldFormat(endpoint) 
+                endpoint: transformDataFields(endpoint) 
             });
         }
     }
@@ -50,7 +50,7 @@ class Endpoint extends Component{
     onBlur(){
         const {operation, updateEntity} = this.props;
         let {endpoint} = this.state;
-        endpoint = transformFieldFormat(endpoint);
+        endpoint = transformDataFields(endpoint);
         if(operation.request.endpoint !== endpoint) {
             operation.request.endpoint = endpoint;
             updateEntity();

@@ -15,7 +15,7 @@
 
 import { ResponseMessages } from "@application/requests/interfaces/IResponse";
 import { errorHandler, sortByIndex } from "@application/utils/utils";
-import { deepTransformFields } from '@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/utils';
+import { transformDataFields } from '@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/utils';
 import { ScheduleRequest } from "@entity/schedule/requests/classes/Schedule";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { GetConnectionWebhooksResponse } from "@root/requests/interfaces/IConnection";
@@ -204,7 +204,7 @@ export const getConnectionById = createAsyncThunk(
         try {
             const request = new ConnectionRequest({endpoint: `/${connectionId}`});
             const response = await request.getConnectionById();
-            const transformedConnection = deepTransformFields(response.data);
+            const transformedConnection = transformDataFields(response.data);
             return transformedConnection;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

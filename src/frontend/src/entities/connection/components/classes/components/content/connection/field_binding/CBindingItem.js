@@ -15,7 +15,7 @@
 
 import {
 	putAsterixInEmptyBrackets,
-	transformFieldFormat,
+	transformDataFields,
 } from '@change_component/form_elements/form_connection/form_svg/utils';
 
 /**
@@ -24,7 +24,7 @@ import {
 export default class CBindingItem {
 	constructor(color = '', field = '', type = '') {
 		this._color = color;
-		this._field = putAsterixInEmptyBrackets(transformFieldFormat(field));
+		this._field = putAsterixInEmptyBrackets(transformDataFields(field));
 		this._type = type;
 	}
 
@@ -35,7 +35,7 @@ export default class CBindingItem {
 				: '';
 		let field =
 			bindingItem && bindingItem.hasOwnProperty('field')
-				? transformFieldFormat(bindingItem.field)
+				? transformDataFields(bindingItem.field)
 				: '';
 		let type =
 			bindingItem && bindingItem.hasOwnProperty('type') ? bindingItem.type : '';
@@ -67,14 +67,14 @@ export default class CBindingItem {
 	}
 
 	getReference() {
-		const transformedField = transformFieldFormat(this.field);
+		const transformedField = transformDataFields(this.field);
 		return `${this.color}.(${this.type}).${transformedField}`;
 	}
 
 	getObject() {
 		let obj = {
 			color: this._color,
-			field: transformFieldFormat(this._field),
+			field: transformDataFields(this._field),
 			type: this._type,
 		};
 		return obj;

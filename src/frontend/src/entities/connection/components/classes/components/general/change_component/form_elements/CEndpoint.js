@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { transformFieldFormat } from '@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/utils';
+import { transformDataFields } from '@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/utils';
 import { colorRegex } from "@entity/connection/components/utils/constants/regular_expressions";
 
 export default class CEndpoint{
@@ -105,7 +105,7 @@ export default class CEndpoint{
     }
 
     static isCaretPositionFocusedOnReference(caretPosition = 0, endpointValue = '', requiredInvokerData = [], shouldReturnIndex = false) {
-        endpointValue = transformFieldFormat(endpointValue);
+        endpointValue = transformDataFields(endpointValue);
         
         let dividedByReferences = CEndpoint.divideEndpointValueByReferences(endpointValue, requiredInvokerData);
         for (let i = 0; i < dividedByReferences.length; i++) {

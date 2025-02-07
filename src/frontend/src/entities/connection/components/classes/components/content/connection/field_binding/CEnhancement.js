@@ -14,7 +14,7 @@
  */
 
 import { consoleLog, isId } from "@application/utils/utils";
-import { putAsterixInEmptyBrackets, transformExpertVar, transformFieldFormat } from "@change_component/form_elements/form_connection/form_svg/utils";
+import { putAsterixInEmptyBrackets, transformDataFields, transformExpertVar } from "@change_component/form_elements/form_connection/form_svg/utils";
 
 /**
  * Enhancement class for Field Binding class
@@ -55,7 +55,7 @@ export default class CEnhancement{
         if (result === '') {
             result = this.getExpertVar();
         }
-        this._expertVar = transformExpertVar(result);
+        this._expertVar = result;
         return putAsterixInEmptyBrackets(this._expertVar);
     }
 
@@ -63,7 +63,7 @@ export default class CEnhancement{
         const binding = this._fieldBinding;
         let variables = [];
         for (let i = 0; i < binding.from.length; i++) {
-          const fromFieldName = transformFieldFormat(binding.from[i].field);
+          const fromFieldName = transformDataFields(binding.from[i].field);
           variables.push({
             name: fromFieldName,
             value: null,
@@ -81,7 +81,7 @@ export default class CEnhancement{
         let variables = this.getVariables();
         let result = { name: '', value: null, type: 'variable' };
         if (binding.to.length > 0) {
-            let toFieldName = transformFieldFormat(binding.to[0].field);
+            let toFieldName = transformDataFields(binding.to[0].field);
             let toFieldType = binding.to[0].type;
             let toFieldColor = binding.to[0].color;
             if (toFieldName !== '') {
@@ -99,16 +99,31 @@ export default class CEnhancement{
     getExpertVar() {
         let result = '';
         if (this._fieldBinding) {
-          let resultVariable = this.getResultVariable();
-          let variables = this.getVariables();
-          result += `//var RESULT_VAR = ${resultVariable.color}.(${resultVariable.type}).${transformFieldFormat(resultVariable.name || resultVariable.field)};\n`;
-          for (let i = 0; i < variables.length; i++) {
-            result += `//var VAR_${i} = ${variables[i].color}.(${variables[i].type}).${transformFieldFormat(variables[i].name)};`;
-            if (i < variables.length - 1) result += "\n";
-          }
+            let resultVariable = this.getResultVariable();
+            let variables = this.getVariables();
+    
+            
+            let from = 'body'; 
+            
+            console.log(resultVariable);
+            console.log(variables);
+            
+            result += `//var RESULT_VAR = ${resultVariable.color}.(${resultVariable.type}).${transformExpertVar(resultVariable.name, from)};\n`;
+    
+            for (let i = 0; i < variables.length; i++) {
+                let varFrom = variables[i].name?.startsWith('header.$') ? 'header' : 'body';
+                result += `//var VAR_${i} = ${variables[i].color}.(${variables[i].type}).${transformExpertVar(variables[i].name, varFrom)};`;
+                if (i < variables.length - 1) result += "\n";
+            }
         }
-        return transformExpertVar(result);
-      }
+        return result;
+    }
+    
+    
+    
+    
+    
+    
       
     
 
