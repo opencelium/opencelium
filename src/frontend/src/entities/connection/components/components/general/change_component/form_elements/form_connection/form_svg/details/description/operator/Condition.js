@@ -43,6 +43,8 @@ import GetModalProp from '@entity/connection/components/decorators/GetModalProp'
 import WebhookGenerator from "@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator";
 import Webhook from "@root/classes/Webhook";
 import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
+import OperatorBuilder from "@app_component/operator_builder/OperatorBuilder";
+import {OperatorType} from "@app_component/operator_builder/props";
 
 export const TransitionEffect = 'width 0.3s ease 0s';
 
@@ -417,7 +419,7 @@ class Condition extends React.Component{
 
     renderInfo(){
         const {condition, referenceTypeLeft, referenceTypeRight} = this.state;
-        const {connection, details, readOnly, isExtended} = this.props;
+        const {connection, details, readOnly, isExtended, updateConnection, toggleConditionDialog} = this.props;
         const operator = details.entity;
         const isLoopOperator = operator.type === LOOP_OPERATOR;
         const connector = connection.getConnectorByType(details.connectorType);
@@ -427,6 +429,18 @@ class Condition extends React.Component{
         const operatorOptions = isLoopOperator ? FUNCTIONAL_OPERATORS_FOR_LOOP : FUNCTIONAL_OPERATORS_FOR_IF;
         let functionalOperator = operatorOptions.find(o => o.value === relationalOperatorValue);
         const placeholder = functionalOperator?.placeholder || '';
+        return (
+            <OperatorBuilder
+                type={isIfOperator ? OperatorType.If : OperatorType.Loop}
+                updateConnection={(c) => {
+                    updateConnection(c);
+                    toggleConditionDialog();
+                }}
+                connection={connection}
+                connector={connector}
+                operator={operator}
+            />
+        )/*
         return(
             <React.Fragment>
                 {this.renderType('left')}
@@ -493,24 +507,26 @@ class Condition extends React.Component{
                     />
                 }
             </React.Fragment>
-        );
+        );*/
     }
 
     render(){
         const {isMouseOver} = this.state;
         const {details, isExtended, isCurrentInfo, readOnly, theme, connection, isConditionDialogOpened} = this.props;
         const operator = details.entity;
+        const isIfOperator = operator.type === IF_OPERATOR;
         const conditionText = operator.condition.generateStatementText();
         const conditionTextTitle = operator.condition.generateStatementText(true);
         const label = readOnly ? 'Ok' : 'Apply';
         const errorColor = theme?.input?.error?.color || '#9b2e2e';
         const connector = connection.getConnectorByType(details.connectorType);
         const errorMessages = connector ? connector.getOperatorByIndex(operator.index)?.error?.messages || [] : [];
+        const expression = connector.getOperatorByIndex(operator.index)?.expression ? 'The operator is set' : 'The operator is not set';
         return(
             <React.Fragment>
                 <Col id='condition_name' xs={4} className={styles.col} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{`Condition`}</Col>
                 <Col id="condition_label" xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
-                    <span className={styles.value} title={conditionTextTitle} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{conditionText}</span>
+                    <span className={styles.value} title={conditionTextTitle} style={{color: errorMessages.length > 0 ? errorColor : '#000'}}>{expression}</span>
                     {isMouseOver && !isConditionDialogOpened && !readOnly && <EditIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isMouseOver && !isConditionDialogOpened && readOnly && <ViewIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isExtended && isCurrentInfo &&
@@ -519,12 +535,12 @@ class Condition extends React.Component{
                         )
                     }
                     <Dialog
-                        actions={[{label, onClick: (a) => this.updateConnection(a), id: 'condition_apply'}]}
+                        actions={/*[{label, onClick: (a) => this.updateConnection(a), id: 'condition_apply'}]*/[]}
                         active={isConditionDialogOpened && !isExtended}
                         toggle={(a) => this.toggleEdit(a)}
                         title={'Condition'}
                         theme={{
-                            dialog: styles.condition_dialog,
+                            dialog: styles[`${operator.type}_condition_dialog`],
                             content: styles.condition_content,
                             body: styles.condition_body,
                         }}

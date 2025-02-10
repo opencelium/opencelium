@@ -46,6 +46,17 @@ public class ReferenceUtility {
         return result;
     }
 
+    public static String extractRef(String value, String type) {
+        Pattern pattern = Pattern.compile(type);
+        Matcher matcher = pattern.matcher(value);
+
+        if (matcher.find()) {
+            return matcher.group();
+        }
+
+        return null;
+    }
+
     public static String extractDirectRef(String ref) {
         // '{%#ababab.(response).body.$.field[*]%}'
         if (ref.startsWith("{%") && ref.endsWith("%}")) {

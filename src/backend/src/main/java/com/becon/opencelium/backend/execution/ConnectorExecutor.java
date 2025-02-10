@@ -1,11 +1,11 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.enums.LogType;
+import com.becon.opencelium.backend.enums.MaskPart;
 import com.becon.opencelium.backend.enums.OpType;
 import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
-import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
@@ -16,6 +16,11 @@ import com.becon.opencelium.backend.execution.operator.Operator;
 import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
+import com.becon.opencelium.backend.execution.masking.MaskingService;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.ocel.ExpressionProcessor;
+import com.becon.opencelium.backend.ocel.ExpressionProcessorFactory;
+import com.becon.opencelium.backend.ocel.ProcessorType;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
@@ -23,7 +28,6 @@ import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.becon.opencelium.backend.utility.ReferenceUtility;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -42,18 +46,22 @@ import java.util.Objects;
 
 public class ConnectorExecutor {
 
+    private final ExpressionProcessor expressionProcessor;
     private final Connector connector;
     private final ExecutionManager executionManager;
     private final RestTemplate restTemplate;
     private final List<Object> executables;
     private final OcLogger<ExecutionLog> logger;
+    private final MaskingService masking;
     private final String direction;
     private static final String BREAK = "======================= %s %s -- INDEX: %s =======================";
 
-    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, String direction) {
+    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, MaskingService masking, String direction) {
+        this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
         this.executionManager = executionManager;
         this.restTemplate = restTemplate;
         this.logger = logger;
+        this.masking = masking;
         this.direction = direction;
 
         this.executables = new ArrayList<>();
@@ -106,7 +114,8 @@ public class ConnectorExecutor {
                 throw new RuntimeException("Methods cannot have body");
             }
 
-            // set up logger for the current operation
+            // set up logger and masking for the current operation
+            masking.setOperationId(operation.getOperationId());
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
             logger.logAndSend(String.format(BREAK, "API OPERATION", "START", index));
             logger.logAndSend(String.format(
@@ -119,15 +128,16 @@ public class ConnectorExecutor {
             logger.logAndSend(String.format(BREAK, "API OPERATION", "END", index));
             // clean up after operation execution
             logger.getLogEntity().setMethodData(null);
+            masking.setOperationId(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
-                logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "START", index));
-                logger.logAndSend(String.format(
-                        "=============== %s =============== -- next function: %s -- next operator: %s -- index: %s",
-                        operator.getCondition().getRelationalOperator(), next[0], next[1], index
-                ));
+                logger.logAndSend(String.format(BREAK, operator.getExpression(), "START", index));
+//                logger.logAndSend(String.format(
+//                        "=============== %s =============== -- next function: %s -- next operator: %s -- index: %s",
+//                        operator.getCondition().getRelationalOperator(), next[0], next[1], index
+//                ));
 
-                boolean result = executeIfOperator(operator);
+                boolean result = (Boolean) expressionProcessor.evaluate(operator.getExpression(), executionManager::getValue);
                 logger.logAndSend("OPERATOR_RESULT: " + (result ? "TRUE" : "FALSE") + " -- index: " + index);
 
                 if (result) {
@@ -176,16 +186,16 @@ public class ConnectorExecutor {
 
                 // remove executed loops' data
                 executionManager.getLoops().remove(loop);
+                // log after executing operator
+                next = getNextIndex(tail, hasCircle, loopHead, loopTail);
+                logger.logAndSend("============================================================================");
+                logger.logAndSend(String.format(
+                        "Operator: -- next function: %s -- next operator: %s -- type: %s -- index: %s",
+                        next[0], next[1], operator.getType(), index)
+                );
+                logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "END", index));
             }
 
-            // log after executing operator
-            next = getNextIndex(tail, hasCircle, loopHead, loopTail);
-            logger.logAndSend("============================================================================");
-            logger.logAndSend(String.format(
-                    "Operator: -- next function: %s -- next operator: %s -- type: %s -- index: %s",
-                    next[0], next[1], operator.getType(), index)
-            );
-            logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "END", index));
         } else {
             throw new RuntimeException("Wrong type is supplied");
         }
@@ -227,9 +237,9 @@ public class ConnectorExecutor {
             }
 
             logger.logAndSend("Http Method: " + requestEntity.getMethod());
-            logger.logAndSend("URL: " + uri);
-            logger.logAndSend("Header: " + requestEntity.getHeaders());
-            logger.logAndSend("Body: " + requestEntity.getBody());
+            logger.logAndSend("URL: " + masking.applyMask(uri, MaskPart.URL));
+            logger.logAndSend("Header: " + masking.applyMask(requestEntity.getHeaders(), MaskPart.HEADER));
+            logger.logAndSend("Body: " + masking.applyMask(requestEntity.getBody(), MaskPart.BODY));
             logger.logAndSend("============================================================================");
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
@@ -253,7 +263,7 @@ public class ConnectorExecutor {
             pagination = null;
             executionManager.setPagination(pagination);
         }
-        logger.logAndSend("Response : " + convertToStringIfNecessary(responseEntity.getBody()));
+        logger.logAndSend("Response: " + masking.applyMask(responseEntity.getBody(), MaskPart.RESPONSE));
 
         Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
@@ -271,45 +281,6 @@ public class ConnectorExecutor {
         operation.addResponse(key, responseEntity);
     }
 
-    private boolean executeIfOperator(OperatorEx operatorDTO) {
-        ConditionEx condition = operatorDTO.getCondition();
-        Object leftValue = executionManager.getValue(condition.getLeft());
-        if (leftValue != null) {
-            logger.logAndSend("Left Statement: " + leftValue);
-        }
-
-        Object rightValue;
-        String likeValueRef = condition.getRight();
-        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
-            int beginIndex = likeValueRef.startsWith("%") ? 1 : 0;
-            int endIndex = likeValueRef.length() - (likeValueRef.endsWith("%") ? 1 : 0);
-
-            likeValueRef = likeValueRef.substring(beginIndex, endIndex);
-        }
-
-        if (ReferenceUtility.containsRef(likeValueRef)) {
-            rightValue = executionManager.getValue(likeValueRef);
-        } else {
-            rightValue = likeValueRef;
-        }
-
-        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
-            rightValue = condition.getRight().replace(likeValueRef, (String) rightValue);
-        }
-
-        if (rightValue != null) {
-            if (rightValue.getClass().isArray()) {
-                logger.logAndSend("Right Statement: " + Arrays.toString((String[]) rightValue));
-            } else {
-                logger.logAndSend("Right Statement: " + rightValue);
-            }
-        }
-
-        Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(condition.getRelationalOperator());
-
-        return operator.apply(leftValue, rightValue);
-    }
-
     private Class<?> getResponseType(OperationDTO dto) {
         MediaType mediaType = MediaType.APPLICATION_JSON;
         for (ResponseDTO response : dto.getResponses()) {
@@ -319,20 +290,6 @@ public class ConnectorExecutor {
         }
 
         return MediaTypeUtility.isJsonCompatible(mediaType) ? Object.class : String.class;
-    }
-
-    private String convertToStringIfNecessary(Object body) {
-        if (body == null) {
-            return "";
-        } else if (body instanceof String result) {
-            return result;
-        }
-
-        try {
-            return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private int getTailPointer(int headPointer) {

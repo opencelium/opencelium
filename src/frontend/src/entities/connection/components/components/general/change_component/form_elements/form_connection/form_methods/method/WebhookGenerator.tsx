@@ -136,6 +136,8 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
                 openMenuOnClick={true}
                 maxMenuHeight={250}
                 minMenuHeight={50}
+                menuPortalTarget={document.body}
+                menuPosition="absolute"
                 filterOption={
                     (candidate: any, input: any) => {
                         if (candidate.value === 'add_webhook' && candidate.label === 'add') {
@@ -150,6 +152,9 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
                 getOptionValue={(option: any) =>
                     option.component ? option.value : option.value
                 }
+                styles={{
+                    menuPortal: (base: any) => ({ ...base, zIndex: 10000 }),
+                }}
                 components={{
                     MenuList: CustomMenuList,
                     Option: (props: any) => {

@@ -13,8 +13,13 @@ src/main/resources/invoker/baramundi.xml
 src/main/resources/invoker/lansweeper.xml
 src/main/resources/invoker/jdisc.xml
 src/main/resources/invoker/fake_invoker.xml
+src/main/resources/support-files
 src/test/
 src/test/java/com/becon/opencelium/backend/ApplicationTests.java
+!src/test/OCELTest.java
+!src/test/OCELFunctionsTest.java
+!src/test/ValidationTest.java
+!src/test/EvaluationTest.java
 
 ### STS ###
 .apt_generated
@@ -41,3 +46,4 @@ out/
 
 ### VS Code ###
 .vscode/
+/src/main/resources/support-files/

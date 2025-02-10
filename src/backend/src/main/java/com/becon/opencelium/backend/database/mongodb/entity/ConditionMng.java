@@ -19,10 +19,13 @@ package com.becon.opencelium.backend.database.mongodb.entity;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 public class ConditionMng {
+
     @Field(name = "relational_statement")
     private String relationalOperator;
+
     @Field(name = "left_statement")
     private StatementMng leftStatement;
+
     @Field(name = "right_statement")
     private StatementMng rightStatement;
 

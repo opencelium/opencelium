@@ -13,17 +13,18 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {ChangeEvent, FC, useEffect, useState} from 'react';
 import InputText from "@app_component/base/input/text/InputText";
-import {EndpointProps} from "../interfaces";
+import { transformDataFields } from '@entity/connection/components/components/general/change_component/form_elements/form_connection/form_svg/utils';
+import React, { ChangeEvent, FC, useEffect, useState } from 'react';
+import { EndpointProps } from "../interfaces";
 
 const Endpoint: FC<EndpointProps> =
     ({
          ...props
      }) => {
-        const [newEndpoint, setNewEndpoint] = useState(props.operationItem.request.endpoint || '');
+        const [newEndpoint, setNewEndpoint] = useState(transformDataFields(props.operationItem.request.endpoint) || '');
         useEffect(() => {
-            setNewEndpoint(props.operationItem.request.endpoint);
+            setNewEndpoint(transformDataFields(props.operationItem.request.endpoint));
         }, [props.operationItem?.request.endpoint])
         return (
             <InputText
@@ -32,7 +33,8 @@ const Endpoint: FC<EndpointProps> =
                     setNewEndpoint(e.target.value);
                 }}
                 onBlur={() => {
-                    props.operationItem.request.endpoint = newEndpoint;
+                    const endpoint = transformDataFields(newEndpoint);
+                    props.operationItem.request.endpoint = endpoint;
                     props.updateOperation(props.operationItem);
                 }}
                 value={newEndpoint}
@@ -45,5 +47,6 @@ Endpoint.defaultProps = {
 
 
 export {
-    Endpoint,
+    Endpoint
 };
+

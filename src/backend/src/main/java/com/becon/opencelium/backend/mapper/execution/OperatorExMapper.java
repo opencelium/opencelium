@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class OperatorExMapper {
@@ -22,7 +23,10 @@ public class OperatorExMapper {
         operatorEx.setIndex(dto.getIndex());
         operatorEx.setType(dto.getType());
         operatorEx.setIterator(dto.getIterator());
-        operatorEx.setCondition(conditionExMapper.toEntity(dto.getCondition(), dto.getType()));
+        operatorEx.setExpression(dto.getExpression());
+        if (Objects.nonNull(dto.getCondition()) && Objects.equals(dto.getType(), "loop")) {
+            operatorEx.setCondition(conditionExMapper.toEntity(dto.getCondition(), dto.getType()));
+        }
         return operatorEx;
     }
 

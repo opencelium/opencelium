@@ -13,10 +13,10 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { BODY_DATA } from "@entity/connection/components/classes/components/content/invoker/CBody";
+import CInvoker from "../../invoker/CInvoker";
 import CRequest from "../../invoker/request/CRequest";
 import CResponse from "../../invoker/response/CResponse";
-import CInvoker from "../../invoker/CInvoker";
-import {BODY_DATA} from "@entity/connection/components/classes/components/content/invoker/CBody";
 
 export const FIELD_TYPE_STRING = 'string';
 export const FIELD_TYPE_ARRAY = 'array';
@@ -68,7 +68,9 @@ export default class CMethodItem{
     getReferences(){
         const fieldsString = JSON.stringify(this._request.body.fields) + JSON.stringify(this._request.endpoint);
         //const referenceRegExp = /\#[0-9a-fA-F]{6}\.\((request|response)\)\./g;
-        const referenceRegExp = /\#[0-9a-fA-F]{6}\.\((request|response)\)\.[^\"]*\"/g;
+        // const referenceRegExp = /\#[0-9a-fA-F]{6}\.\((request|response)\)\.[^\"]*\"/g;
+        const referenceRegExp = /\#[0-9a-fA-F]{6}\.\((request|response)\)\.(?:success|body\.\$)\.[^\"]*/g;
+
         const references = fieldsString.match(referenceRegExp);
         return new Set(references ? references/*.map(ref => ref.substring(0, 7))*/ : []);
     }
@@ -226,6 +228,10 @@ export default class CMethodItem{
 
     setRequestBodyFields(fields){
         this._request.body.fields = fields;
+    }
+
+    setRequestHeaderFields(header){
+        this._request.header = header;
     }
 
     setResponseSuccessBodyFields(fields){

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
 
 import java.util.List;
+import java.util.Map;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -37,6 +38,7 @@ public class ConnectionOldDTO {
     private List<FieldBindingOldDTO> fieldBinding;
     private BusinessLayoutResource businessLayout;
     private Integer categoryId;
+    private Map<String, Object> ui;
 
     public String getNodeId() {
         return nodeId;
@@ -116,5 +118,13 @@ public class ConnectionOldDTO {
 
     public void setCategoryId(Integer categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public Map<String, Object> getUi() {
+        return ui;
+    }
+
+    public void setUi(Map<String, Object> ui) {
+        this.ui = ui;
     }
 }

@@ -54,6 +54,8 @@ export class Connection extends HookStateClass implements IConnection{
 
     mode: any;
 
+    ui: any;
+
     fieldBinding: any;
 
 

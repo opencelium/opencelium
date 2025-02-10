@@ -44,6 +44,7 @@ export interface IConnection extends IConnectionForm{
     fieldBinding?: any;
     dataAggregator?: any,
     categoryId?: OptionProps;
+    ui: any,
     getObjectForBackend?(): any;
 }
 

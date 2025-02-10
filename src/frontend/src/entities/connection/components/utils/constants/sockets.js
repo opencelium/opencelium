@@ -14,8 +14,8 @@
  */
 
 import openSocket from 'socket.io-client';
-import {socketServer} from "./url";
 import {SOCKET_IS_ON} from "@entity/connection/components/utils/constants/app";
+import {socketServer} from "@entity/application/requests/classes/url";
 
 
 /**

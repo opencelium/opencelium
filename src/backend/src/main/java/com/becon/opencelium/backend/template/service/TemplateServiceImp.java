@@ -26,6 +26,8 @@ import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.utility.FileNameUtils;
+import com.becon.opencelium.backend.version_manager.EntityVersionManager;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
@@ -51,7 +53,7 @@ public class TemplateServiceImp implements TemplateService {
     private final Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper;
     private final Environment environment;
 
-    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionOldDTO, CtionTemplateResource> mapper, Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper, Environment environment) {
+    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionOldDTO, CtionTemplateResource> mapper, Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper, Environment environment, EntityVersionManager entityVersionManager) {
         this.connectionService = connectionService;
         this.mapper = mapper;
         this.oldDTOMapper = oldDTOMapper;
@@ -104,12 +106,12 @@ public class TemplateServiceImp implements TemplateService {
     public List<Template> findByFromInvokerAndToInvoker(String fromInvoker, String toInvoker) {
         List<Template> result = new ArrayList<>();
         getAll(PathConstant.TEMPLATE).forEach(t -> {
-            if (t == null){
+            if (t == null) {
                 return;
             }
             String invNameFrom = t.getConnection().getFromConnector().getInvoker().getName().toUpperCase();
             String invNameTo = t.getConnection().getToConnector().getInvoker().getName().toUpperCase();
-            if (invNameFrom.equals(fromInvoker.toUpperCase()) && invNameTo.equals(toInvoker.toUpperCase())){
+            if (invNameFrom.equals(fromInvoker.toUpperCase()) && invNameTo.equals(toInvoker.toUpperCase())) {
                 result.add(t);
             }
         });
@@ -143,7 +145,7 @@ public class TemplateServiceImp implements TemplateService {
         templateResource.setName(connectionRes.getTitle());
         templateResource.setDescription(connectionRes.getDescription());
         templateResource.setTemplateId(UUID.randomUUID().toString());
-        templateResource.setVersion(environment.getProperty("opencelium.version",""));
+        templateResource.setVersion(environment.getProperty("opencelium.version", ""));
         return templateResource;
     }
 
@@ -158,7 +160,7 @@ public class TemplateServiceImp implements TemplateService {
         }
         String path = PathConstant.TEMPLATE + fileName;
         File file = new File(path);
-        if (!file.delete()){
+        if (!file.delete()) {
             throw new RuntimeException("FILE_NOT_DELETED");
         }
     }
@@ -167,7 +169,7 @@ public class TemplateServiceImp implements TemplateService {
     public Optional<Template> findById(String id) {
         StringBuilder contentBuilder = new StringBuilder();
         try (Stream<String> stream = Files
-                .lines( Paths.get(PathConstant.TEMPLATE + id.concat(".json")), StandardCharsets.UTF_8)) {
+                .lines(Paths.get(PathConstant.TEMPLATE + id.concat(".json")), StandardCharsets.UTF_8)) {
 
             stream.forEach(s -> contentBuilder.append(s).append("\n"));
         } catch (IOException e) {
@@ -175,10 +177,11 @@ public class TemplateServiceImp implements TemplateService {
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
             return Optional.of(template);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("ERROR while converting from json to Template object");
         }
     }
@@ -212,15 +215,15 @@ public class TemplateServiceImp implements TemplateService {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Template> files = new HashMap<>();
             walk.filter(Files::isRegularFile).forEach(path -> {
-                if(!FileNameUtils.getExtension(path.toString()).equals("json")){
+                if (!FileNameUtils.getExtension(path.toString()).equals("json")) {
                     return;
                 }
                 StringBuilder contentBuilder = new StringBuilder();
                 Path filePath = Paths.get(path.toString());
                 try (Stream<String> stream = Files.lines(filePath, StandardCharsets.UTF_8)) {
                     stream.forEach(s -> contentBuilder.append(s).append("\n"));
-                    files.put(filePath.getFileName().toString(), objectMapper.readValue(contentBuilder.toString(), Template.class));
-                    return;
+                    Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
+                    files.put(filePath.getFileName().toString(), template);
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new WrongEncode("UTF8");

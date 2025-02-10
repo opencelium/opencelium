@@ -156,6 +156,7 @@ class FormConnectionSvg extends Component {
       createElementPanelConnectorType,
       createElementPanelPosition,
     } = this.state;
+    console.log(connection.getObject())
     return (
       <div
         className={`${styles.connection_editor}`}

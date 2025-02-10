@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
+    <name>Ivanti</name>
+    <description>What is Ivanti? Ivanti is an asset management software system used to remotely inventory and manage desktop computers. It has the ability to report on installed software and hardware, allow remote assistance, and install security patches.</description>
+    <hint>This interface provides the basic_auth. Read the documentation here https://forums.ivanti.com/s/article/Getting-Started-with-the-MBSDK-Example-Scripts-Included?language=en_US</hint>
+    <icon></icon>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="ListMachines" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <body data="raw" format="xml" type="object">
+                    <field name="soap:Envelope" type="object">
+                        <field name="soap:Header" type="string"/>
+                        <field name="__oc__attributes" type="object">
+                            <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                        </field>
+                        <field name="soap:Body" type="object">
+                            <field name="ListMachines" type="object">
+                                <field name="__oc__attributes" type="object">
+                                    <field name="xmlns" type="string">http://landesk.com/MBSDKService/MBSDK/</field>
+                                </field>
+                                <field name="Filter" type="string"/>
+                            </field>
+                        </field>
+                    </field>
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">text/xml</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="xml" type="object">
+                        <field name="env:Envelope" type="object">
+                            <field name="env:Header" type="string"/>
+                            <field name="__oc__attributes" type="object">
+                                <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                            </field>
+                            <field name="env:Body" type="object">
+                                <field name="ListMachinesResponse" type="object">
+                                    <field name="__oc__attributes" type="object">
+                                        <field name="xmlns" type="string">http://landesk.com/MBSDKService/MBSDK/</field>
+                                    </field>
+                                    <field name="ListMachinesResult" type="object">
+                                        <field name="count" type="number">100</field>
+                                        <field name="Devices" type="array">
+                                            <field name="Device" type="object">
+                                                <field name="GUID" type="string"/>
+                                                <field name="DeviceName" type="string"/>
+                                                <field name="DomainName" type="string"/>
+                                                <field name="LastLogin" type="string"/>
+                                                <field name="IPAddress" type="string"/>
+                                                <field name="SubNetMask" type="string"/>
+                                                <field name="MACAddress" type="string"/>
+                                                <field name="OSName" type="string"/>
+                                            </field>
+                                        </field>
+                                    </field>
+                                </field>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="xml" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="RunQuery" type="test">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <body data="raw" format="xml" type="object">
+                    <field name="soap:Envelope" type="object">
+                        <field name="soap:Header" type="string"/>
+                        <field name="__oc__attributes" type="object">
+                            <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                        </field>
+                        <field name="soap:Body" type="object">
+                            <field name="RunQuery" type="object">
+                                <field name="__oc__attributes" type="object">
+                                    <field name="xmlns" type="string">http://landesk.com/MBSDKService/MBSDK/</field>
+                                </field>
+                                <field name="queryName" type="object">
+                                    <field name="__oc__value" type="string">CMDB_query</field>
+                                </field>
+                            </field>
+                        </field>
+                    </field>
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">text/xml</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="xml" type="object">
+                        <field name="env:Envelope" type="object">
+                            <field name="env:Header" type="string"/>
+                            <field name="__oc__attributes" type="object">
+                                <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                            </field>
+                            <field name="env:Body" type="object">
+                                <field name="RunQueryResponse" type="object">
+                                    <field name="__oc__attributes" type="object">
+                                        <field name="xmlns" type="string">http://landesk.com/MBSDKService/MBSDK/</field>
+                                    </field>
+                                    <field name="RunQueryResult" type="object">
+                                        <field name="__oc__attributes" type="object"/>
+                                        <field name="diffgr:diffgram" type="object">
+                                            <field name="__oc__attributes" type="object"/>                                            
+                                            <field name="NewDataSet" type="object">
+                                               <field name="__oc__attributes" type="object"/>
+                                                <field name="Table" type="array">
+                                                    <field name="__oc__attributes" type="object"/>
+                                                    <field name="Device_x0020_Name" type="object">
+                                                        <field name="__oc__attributes" type="object"/>
+                                                        <field name="__oc__value" type="string"/>
+                                                    </field>                                                      
+                                                    <field name="Primary_x0020_Owner" type="object">
+                                                        <field name="__oc__attributes" type="object"/>
+                                                        <field name="__oc__value" type="string"/>
+                                                    </field>                                                           
+                                                    <field name="Type" type="object">
+                                                        <field name="__oc__attributes" type="object"/>
+                                                        <field name="__oc__value" type="string"/>
+                                                    </field>
+                                                    <field name="Name" type="object">
+                                                        <field name="__oc__attributes" type="object"/>
+                                                        <field name="__oc__value" type="string"/>
+                                                    </field>                                                            
+                                                    <field name="Service_x0020_Tag" type="object">
+                                                        <field name="__oc__attributes" type="object"/>
+                                                        <field name="__oc__value" type="string"/>
+                                                    </field>    
+                                                    <field name="Release_x0020_ID" type="object">
+                                                        <field name="__oc__attributes" type="object"/>
+                                                        <field name="__oc__value" type="string"/>
+                                                    </field>                                                        
+                                                    <field name="Manufacturer" type="object">
+                                                        <field name="__oc__attributes" type="object"/>
+                                                        <field name="__oc__value" type="string"/>
+                                                    </field>    
+                                                    <field name="Model" type="object">
+                                                        <field name="__oc__attributes" type="object"/>
+                                                        <field name="__oc__value" type="string"/>
+                                                    </field>    
+                                                </field>
+                                            </field>
+                                        </field>    
+                                    </field>
+                                </field>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="xml" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="ListQueries" type="">
+        <request>
+            <method>POST</method>
+            <endpoint>{url}</endpoint>
+            <body data="raw" format="xml" type="object">
+                <field name="soap:Envelope" type="object">
+                    <field name="soap:Header" type="string"/>
+                    <field name="__oc__attributes" type="object">
+                        <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                    </field>
+                    <field name="soap:Body" type="object">
+                        <field name="ListQueries" type="object"/>
+                    </field>
+                </field>
+            </body>
+            <header>
+                <item name="Authorization" type="string">{token}</item>
+                <item name="Content-Type" type="string">text/xml</item>
+            </header>
+        </request>
+        <response>
+            <success status="200">
+                <body data="raw" format="xml" type="object">
+                    <field name="env:Envelope" type="object">
+                        <field name="env:Header" type="string"/>
+                        <field name="__oc__attributes" type="object">
+                            <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                        </field>
+                        <field name="env:Body" type="object">
+                            <field name="ListQueriesResponse" type="object">
+                                <field name="__oc__attributes" type="object">
+                                    <field name="xmlns" type="string">http://landesk.com/MBSDKService/MBSDK/</field>
+                                </field>
+                                <field name="ListQueriesResult" type="object">
+                                    <field name="count" type="number">100</field>
+                                    <field name="Queries" type="array">
+                                        <field name="Query" type="object">
+                                            <field name="QueryName" type="string"/>
+                                        </field>
+                                    </field>
+                                </field>
+                            </field>
+                        </field>
+                    </field>
+                </body>
+            </success>
+            <fail status="401">
+                <body data="raw" format="xml" type="object">
+                </body>
+            </fail>
+        </response>
+    </operation>
+        <operation name="GetMachineData" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <body data="raw" format="xml" type="object">
+                    <field name="soap:Envelope" type="object">
+                        <field name="soap:Header" type="string"/>
+                        <field name="__oc__attributes" type="object">
+                            <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                        </field>
+                        <field name="soap:Body" type="object">
+                            <field name="GetMachineData" type="object">
+                                <field name="__oc__attributes" type="object">
+                                    <field name="xmlns" type="string">http://landesk.com/MBSDKService/MBSDK/</field>
+                                </field>
+                                <field name="GUID" type="string"/>
+                                <field name="ColumnDefXML" type="string"/>
+                            </field>
+                        </field>
+                    </field>
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">text/xml</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="xml" type="object">
+                        <field name="env:Envelope" type="object">
+                            <field name="env:Header" type="string"/>
+                            <field name="__oc__attributes" type="object">
+                                <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                            </field>
+                            <field name="env:Body" type="object">
+                                <field name="GetMachineDataResponse" type="object">
+                                    <field name="__oc__attributes" type="object">
+                                        <field name="xmlns" type="string">http://landesk.com/MBSDKService/MBSDK/</field>
+                                    </field>
+                                    <field name="GetMachineDataResult" type="object">
+                                        <field name="count" type="number">100</field>
+                                        <field name="MachineData" type="array">
+                                            <field name="ValuePair" type="object">
+                                                <field name="Column" type="string"/>
+                                                <field name="Value" type="string"/>
+                                            </field>
+                                        </field>
+                                    </field>
+                                </field>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="xml" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="ListColumnSets" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <body data="raw" format="xml" type="object">
+                    <field name="soap:Envelope" type="object">
+                        <field name="soap:Header" type="string"/>
+                        <field name="__oc__attributes" type="object">
+                            <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                        </field>
+                        <field name="soap:Body" type="object">
+                            <field name="ListColumnSets" type="object">
+                                <field name="__oc__attributes" type="object">
+                                    <field name="xmlns" type="string">http://landesk.com/MBSDKService/MBSDK/</field>
+                                </field>
+                            </field>
+                        </field>
+                    </field>
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">text/xml</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="xml" type="object">
+                        <field name="env:Envelope" type="object">
+                            <field name="env:Header" type="string"/>
+                            <field name="__oc__attributes" type="object">
+                                <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                            </field>
+                            <field name="env:Body" type="object">
+                                <field name="ListColumnSetsResponse" type="object">
+                                    <field name="__oc__attributes" type="object">
+                                        <field name="xmlns" type="string">http://landesk.com/MBSDKService/MBSDK/</field>
+                                    </field>
+                                    <field name="ListColumnSetsResult" type="object">
+                                        <field name="count" type="number">100</field>
+                                        <field name="ColumnSets" type="array">
+                                            <field name="ColumnSet" type="object">
+                                                <field name="Name" type="string"/>
+                                            </field>
+                                        </field>
+                                    </field>
+                                </field>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="xml" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

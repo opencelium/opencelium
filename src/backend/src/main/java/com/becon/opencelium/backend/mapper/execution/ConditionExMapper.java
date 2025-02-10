@@ -2,34 +2,46 @@ package com.becon.opencelium.backend.mapper.execution;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConditionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.StatementMng;
-import com.becon.opencelium.backend.enums.DataTypeEnum;
 import com.becon.opencelium.backend.enums.RelationalOperator;
-import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
+import io.micrometer.common.util.StringUtils;
 import org.springframework.stereotype.Component;
 
-import static com.becon.opencelium.backend.constant.RegExpression.*;
-import static com.becon.opencelium.backend.utility.PathAndReferenceUtility.*;
+import java.util.Objects;
 
 @Component
 public class ConditionExMapper {
+
+    // this mapper is only 'loop' operators
     public ConditionEx toEntity(ConditionMng dto, String type) {
+        if (Objects.isNull(dto)) {
+            return null;
+        }
         ConditionEx condition = new ConditionEx();
 
         RelationalOperator ro = identifyRelationalOperator(dto.getRelationalOperator(), type);
         condition.setRelationalOperator(ro);
 
-        condition.setLeft(composeLeft(dto.getLeftStatement(), dto.getRightStatement(), ro));
-        condition.setRight(composeRight(dto.getRightStatement(), ro));
-
+        if (Objects.nonNull(dto.getLeftStatement())) {
+            condition.setLeft(areColorAndOrTypeNullOrEmpty(dto.getLeftStatement())
+                    ? dto.getLeftStatement().getField()
+                    : flatten(dto.getLeftStatement()));
+        }
+        if(Objects.nonNull(dto.getRightStatement())) {
+            condition.setRight(areColorAndOrTypeNullOrEmpty(dto.getRightStatement())
+                    ? dto.getRightStatement().getField()
+                    : flatten(dto.getRightStatement()));
+        }
         return condition;
     }
 
-    /**
-     * This method is exception-free.
-     * @param type is only needed to check exceptional case. In the future, it can be fixed from frontend so that it will no longer be needed
-     * @return if ro is invalid then it returns DEFAULT, otherwise returns a RelationalOperator object corresponding to ro
-     */
+    private String flatten(StatementMng st) {
+        return st.getColor() + // color
+                ".(" + st.getType() + ")" + // type
+                (st.getField() == null ? "" : "." + st.getField()) + // field
+                (StringUtils.isBlank(st.getRightPropertyValue()) ? "" : "." + st.getRightPropertyValue()); // rpv
+    }
+
     private RelationalOperator identifyRelationalOperator(String ro, String type) {
         RelationalOperator res;
         if (type.equals("loop") && (ro == null || ro.isBlank())) {
@@ -42,120 +54,7 @@ public class ConditionExMapper {
         return res;
     }
 
-    private String composeLeft(StatementMng ls, StatementMng rs, RelationalOperator ro) {
-        if (ls == null) {
-            throw new RuntimeException("leftStatement can't be null");
-        }
-
-        boolean webHook = isWebHookParam(ls);
-        boolean containsRelated = ro == RelationalOperator.CONTAINS
-                || ro == RelationalOperator.NOT_CONTAINS
-                || ro == RelationalOperator.CONTAINS_SUB_STR
-                || ro == RelationalOperator.NOT_CONTAINS_SUB_STR;
-
-        if (webHook && !containsRelated) {
-            return ls.getField();
-        }
-        if (containsRelated && !webHook) {
-            return rebuildReference(rs.getColor(), rs.getType(), rs.getField()) + "." + rs.getRightPropertyValue();
-        }
-        if (webHook) {
-            return stringify(ls.getField(), rs.getRightPropertyValue());
-        }
-
-        if (areColorAndOrTypeNullOrEmpty(ls)) {
-            throw new RuntimeException("Invalid leftStatement[color: %s, type: %s, field: %s]".formatted(ls.getColor(), ls.getType(), ls.getField()));
-        }
-
-        return rebuildReference(ls.getColor(), ls.getType(), ls.getField());
-    }
-
-    private String composeRight(StatementMng rs, RelationalOperator ro) {
-        if (rs != null && isWebHookParam(rs)) {
-            return rs.getField();
-        }
-
-        if (ro == RelationalOperator.IS_EMPTY
-                || ro == RelationalOperator.IS_NOT_EMPTY
-                || ro == RelationalOperator.IS_NOT_NULL
-                || ro == RelationalOperator.IS_NULL
-                || ro == RelationalOperator.FOR
-                || ro == RelationalOperator.FOR_IN
-                || ro == RelationalOperator.DEFAULT) {
-            return null;
-        }
-
-        if (ro == RelationalOperator.IS_TYPE_OF) {
-            try {
-                return DataTypeEnum.getEnumType(getActualPathOfBody(rs.getField())).name();
-            } catch (Exception ignored) {
-            }
-        }
-
-        if (rs == null &&
-                !(ro == RelationalOperator.CONTAINS
-                        || ro == RelationalOperator.NOT_CONTAINS
-                        || ro == RelationalOperator.LIKE
-                        || ro == RelationalOperator.NOT_LIKE
-                        || ro == RelationalOperator.CONTAINS_SUB_STR
-                        || ro == RelationalOperator.NOT_CONTAINS_SUB_STR)) {
-            return "";
-        } else if (rs == null) {
-            throw new RuntimeException("rightStatement can't be null for " + ro.name() + " relational operator");
-        }
-
-        if (areColorAndOrTypeNullOrEmpty(rs)) {
-            return rs.getField();
-        }
-
-        if (ro == RelationalOperator.LIKE || ro == RelationalOperator.NOT_LIKE) {
-            return composeForLikeAndNotLikeOperators(rs);
-        }
-
-        return rebuildReference(rs.getColor(), rs.getType(), rs.getField());
-    }
-
-    private String composeForLikeAndNotLikeOperators(StatementMng rs) {
-        if (!rs.getField().contains("%")) {
-            return rebuildReference(rs.getColor(), rs.getType(), rs.getField());
-        }
-        boolean first = rs.getField().startsWith("body.$.%") || rs.getField().startsWith("header.$.%");
-        boolean last = rs.getField().endsWith("%");
-
-        if (first) {
-            rs.setField(rs.getField().replaceFirst("%", ""));
-        }
-        if (last) {
-            rs.setField(rs.getField().substring(0, rs.getField().length() - 1));
-        }
-        return (first ? "%" : "")
-                + rebuildReference(rs.getColor(), rs.getType(), rs.getField())
-                + (last ? "%" : "");
-    }
-
-    private String stringify(String field, String rpv) {
-        if (field.matches(webhook)) {
-            int index = indexOf(field, ':', false, false);
-            int array = field.lastIndexOf(DataType.ARRAY.getType());
-            if (index == -1) {
-                return field.substring(0, field.length() - 1) + "." + rpv + "}";
-            }
-            if (array == -1 || array < index) {
-                return field.substring(0, index).stripTrailing() + "." + rpv + field.substring(index);
-            }
-            return field.substring(0, index).stripTrailing() + "[*]." + rpv + ":" + DataType.ARRAY.getType() + "}";
-        }
-        return field + "." + rpv;
-    }
-
     private boolean areColorAndOrTypeNullOrEmpty(StatementMng st) {
-        return st.getColor() == null || st.getColor().isBlank() || st.getType() == null || st.getType().isBlank();
-    }
-
-    private boolean isWebHookParam(StatementMng st) {
-        return st.getField() != null
-                && areColorAndOrTypeNullOrEmpty(st)
-                && (st.getField().matches(webhook)
-                || st.getField().matches(requestData));
+        return StringUtils.isBlank(st.getColor()) || StringUtils.isBlank(st.getType());
     }
 }

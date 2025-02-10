@@ -195,7 +195,7 @@ public class PathAndReferenceUtility {
                 i += PRE_WEBHOOK.length() - 1;
             } else if (i + PRE_BRACKET.length() < n && path.startsWith(PRE_BRACKET, i)) {
                 stack.push(SUF_BRACKET);
-                i += SUF_BRACKET.length() - 1;
+                i += PRE_BRACKET.length() - 1;
             } else if (i + SUF_DIRECT_REF.length() < n && path.startsWith(SUF_DIRECT_REF, i)) {
                 if (!stack.empty() && stack.peek().equals(SUF_DIRECT_REF)) {
                     stack.pop();
@@ -266,6 +266,10 @@ public class PathAndReferenceUtility {
         return path != null && path.startsWith("body.$.");
     }
 
+    public static boolean isHeader(String path) {
+        return path != null && path.startsWith("header.$.");
+    }
+
     public static String getActualPathOfBody(String path) {
         return path.substring(7);
     }
@@ -279,7 +283,8 @@ public class PathAndReferenceUtility {
                 : !field.matches(referencePath) ? null
                 : field.equals("path") ? field
                 : isBody(field) ? "body"
-                : field;
+                : isHeader(field) ? "header"
+                : null;
     }
 
     public static String rebuildReference(String color, String type, String field) {

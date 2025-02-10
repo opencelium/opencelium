@@ -25,7 +25,7 @@ export const LOOP_OPERATOR = 'loop';
  */
 export default class COperatorItem{
 
-    constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false, iterator = '', dataAggregator = null){
+    constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false, iterator = '', dataAggregator = null, expression = '', uiId = ''){
         this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._type = this.checkType(type) ? type : '';
@@ -37,6 +37,8 @@ export default class COperatorItem{
         this._isDisabled = false;
         this._iterator = iterator;
         this._dataAggregator = dataAggregator;
+        this._expression = expression;
+        this._uiId = uiId;
     }
 
     static createOperatorItem(operatorItem){
@@ -48,7 +50,9 @@ export default class COperatorItem{
         let isToggled = operatorItem && operatorItem.hasOwnProperty('isToggled') ? operatorItem.isToggled : false;
         let iterator = operatorItem && operatorItem.hasOwnProperty('iterator') ? operatorItem.iterator : '';
         let dataAggregator = operatorItem && operatorItem.hasOwnProperty('dataAggregator') ? operatorItem.dataAggregator : null;
-        return new COperatorItem(index, type, condition, error, isMinimized, isToggled, iterator, dataAggregator);
+        let expression = operatorItem && operatorItem.hasOwnProperty('expression') ? operatorItem.expression : '';
+        let uiId = operatorItem && operatorItem.hasOwnProperty('uiId') ? operatorItem.uiId : '';
+        return new COperatorItem(index, type, condition, error, isMinimized, isToggled, iterator, dataAggregator, expression, uiId);
     }
 
     cleanConditionFromReference(methodColor) {
@@ -118,6 +122,22 @@ export default class COperatorItem{
 
     set type(type){
         this._type = this.checkType(type) ? type : '';
+    }
+
+    get expression(){
+        return this._expression;
+    }
+
+    set expression(expression){
+        this._expression = expression;
+    }
+
+    get uiId(){
+        return this._uiId;
+    }
+
+    set uiId(uiId){
+        this._uiId = uiId;
     }
 
     get condition(){
@@ -290,6 +310,8 @@ export default class COperatorItem{
             index: this._index,
             type: this._type,
             condition: this._condition.getObject(),
+            expression: this._expression,
+            uiId: this._uiId,
             dataAggregator: this._dataAggregator?.id || this._dataAggregator,
         };
         if(this._iterator !== ''){

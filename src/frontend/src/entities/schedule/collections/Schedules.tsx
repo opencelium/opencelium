@@ -47,6 +47,7 @@ import SelectedNotificationButton
 import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
 import InputSwitch from "@app_component/base/input/switch/InputSwitch";
 import StartSchedule from "@entity/schedule/components/start_schedule/StartSchedule";
+import LogsButton from "@entity/schedule/components/logs_button/LogsButton";
 
 class Schedules extends ListCollection<ScheduleProps>{
     name: string = 'schedules';
@@ -176,6 +177,7 @@ class Schedules extends ListCollection<ScheduleProps>{
                 <StartSchedule entity={entity} scheduleModel={scheduleModel} componentPermission={componentPermission}/>
                 <PermissionTooltipButton target={`webhook_entity_${entity.id.toString()}`} position={'top'} tooltip={'Webhook'} hasBackground={false} handleClick={webhookAction} icon={entity.webhook ? 'link_off' : 'link'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
                 <ScheduleNotificationsIcon schedule={entity}/>
+                <LogsButton schedule={entity}/>
                 {hasDeleteButton && <PermissionTooltipButton target={`delete_entity_${entity.id.toString()}`} position={'top'} tooltip={'Delete'} hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
             </React.Fragment>
         );
