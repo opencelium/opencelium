@@ -43,8 +43,9 @@ class Header extends React.Component {
 	}
 
 	toggleHeaderVisible() {
-		const { setCurrentInfo, nameOfCurrentInfo } = this.props;
+		const { setCurrentInfo, nameOfCurrentInfo, updateConnection, connection } = this.props;
 		if (setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
+		updateConnection(connection);
 		this.setState({
 			isHeaderVisible: !this.state.isHeaderVisible,
 		});

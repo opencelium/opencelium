@@ -73,6 +73,7 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
             fromConnector: {...connection.fromConnector, invoker: {name: connection.fromConnector.invoker.name}},
             toConnector: {...connection.toConnector, invoker: {name: connection.toConnector.invoker.name}},
             fieldBinding: connection.fieldBinding,
+            ui: connection.ui || null,
         };
         if(connection.categoryId) {
             mappedConnection.categoryId = connection.categoryId;
