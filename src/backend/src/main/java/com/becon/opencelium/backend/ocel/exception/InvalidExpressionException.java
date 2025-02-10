@@ -47,7 +47,7 @@ public class InvalidExpressionException extends RuntimeException {
         return new InvalidExpressionException(ErrorCode.UNEXPECTED_END_OF_EXPRESSION, "Invalid end of expression : %s".formatted(exp));
     }
 
-    public static InvalidExpressionException unexpectedException(RuntimeException e) {
+    public static InvalidExpressionException unexpectedException(Exception e) {
         return new InvalidExpressionException(ErrorCode.UNEXPECTED_EXCEPTION, e.getMessage());
     }
 

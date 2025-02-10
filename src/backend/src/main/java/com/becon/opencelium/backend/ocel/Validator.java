@@ -52,7 +52,9 @@ public class Validator {
             firstLevelCheck(tokens);
             secondLevelCheck(tokens);
             return tokens;
-        } catch (RuntimeException e) {
+        } catch (InvalidExpressionException e) {
+            throw e;
+        } catch (Exception e){
             throw InvalidExpressionException.unexpectedException(e);
         }
     }
@@ -65,7 +67,9 @@ public class Validator {
             List<Token> tokens = Tokenizer.splitTokens(expression);
             firstLevelCheck(tokens);
             secondLevelCheck(tokens);
-        } catch (RuntimeException e) {
+        } catch (InvalidExpressionException e) {
+            throw e;
+        } catch (Exception e){
             throw InvalidExpressionException.unexpectedException(e);
         }
     }

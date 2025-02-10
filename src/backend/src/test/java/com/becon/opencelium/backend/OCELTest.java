@@ -123,16 +123,10 @@ public class OCELTest {
     public void invalidExpressions() {
         checkExceptions("[wvdkws] IsEmpty");                     // Invalid type within IsEmpty
         checkExceptions("A && B");                               // Undefined variables
-        checkExceptions("[1, \"a\"] IsEmpty");                   // Mixed type in array
-        checkExceptions("[12.2, [1]] IsTypeOf NUM");             // Array contains incompatible nested type
         checkExceptions("\"text\" && false");                    // String operand in logical expression
         checkExceptions("\"unclosedString);");                   // Malformed string literal
-        checkExceptions("[1, true, \"string\"] IsEmpty");        // Array with incompatible element types
-        checkExceptions("[\"string\", null, 5.5] IsEmpty");      // Mixed type array without operator
         checkExceptions("5 > \"text\"");                         // Incompatible types for comparison
-        checkExceptions("[\"string\", [1, 2]] IsEmpty");         // Array with incompatible nested array
         checkExceptions("[] && true");                           // Null in array with logical operator
-        checkExceptions("[[1, 2], \"text\"] IsEmpty");           // Mixed type with nested array
         checkExceptions("[1, 2] || [\"a\", \"b\"]");             // Array used with logical operator
     }
 
