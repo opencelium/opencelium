@@ -46,12 +46,12 @@ public class BindingUtility {
 
                 for (FieldBindingMng fb : fbs) {
                     if (method.getRequest().getEndpoint().contains("{%" + fb.getId() + "%}")) {
-                        method.getRequest().setEndpoint(method.getRequest().getEndpoint().replace("{%" + fb.getId() + "%}", getRefOfFBForPathOrHeader(fb.getFrom())));
+                        method.getRequest().setEndpoint(method.getRequest().getEndpoint().replace("{%" + fb.getId() + "%}", getRefOfFBForPath(fb.getFrom())));
                     }
                     if (method.getRequest().getHeader() != null) {
-                        for (Map.Entry<String, String> entry : method.getRequest().getHeader().entrySet()) {
-                            if (entry.getKey().equals("{%" + fb.getId() + "%}")) {
-                                entry.setValue(getRefOfFBForPathOrHeader(fb.getFrom()));
+                                for (Map.Entry<String, String> entry : method.getRequest().getHeader().entrySet()) {
+                            if (entry.getValue().equals("{%" + fb.getId() + "%}")) {
+                                entry.setValue(getRefOfFBForHeader(fb.getFrom()));
                                 break;
                             }
                         }
@@ -99,13 +99,22 @@ public class BindingUtility {
         throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
     }
 
-    private static String getRefOfFBForPathOrHeader(List<LinkedFieldMng> froms) {
+    private static String getRefOfFBForPath(List<LinkedFieldMng> froms) {
         StringBuilder sb = new StringBuilder();
         for (LinkedFieldMng from : froms) {
             sb.append(rebuildReference(from.getColor(), from.getType(), from.getField())).append(";");
         }
         sb.deleteCharAt(sb.length() - 1);
         return "{%" + sb + "%}";
+    }
+
+    private static String getRefOfFBForHeader(List<LinkedFieldMng> froms) {
+        StringBuilder sb = new StringBuilder();
+        for (LinkedFieldMng from : froms) {
+            sb.append(rebuildReference(from.getColor(), from.getType(), from.getField())).append(";");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
     }
 
 //--------------------------------------------------------------------------------------------------------//
@@ -173,9 +182,10 @@ public class BindingUtility {
         List<String> refs = from.stream().map(x -> rebuildReference(x.getColor(), x.getType(), x.getField())).toList();
         header.entrySet()
                 .stream()
-                .filter(entry -> entry.getValue().equals(fieldName))
+                .filter(entry -> entry.getKey().equals(fieldName))
                 .findFirst()
-                .ifPresent(entry -> entry.setValue(PathAndReferenceUtility.bindExactlyPlace(entry.getValue(), refs, id)));
+                .ifPresent(entry -> entry.setValue("{%" + id + "%}"));
+//                .ifPresent(entry -> entry.setValue(PathAndReferenceUtility.bindExactlyPlace(entry.getValue(), refs, id)));
     }
 
     public static Map<String, Object> doWithBody(BodyMng body, List<String> fieldPaths, String id, String format) {
