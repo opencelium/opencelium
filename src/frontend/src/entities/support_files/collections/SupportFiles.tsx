@@ -37,7 +37,7 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
             width: '30%',
             getValue: (entity: SupportFileResponse) => {
                 return(
-                    <div>{entity.connection.title}</div>
+                    <div>{entity.connectionTitle}</div>
                 )
             }
         },
@@ -70,7 +70,7 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
             <React.Fragment>
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <DeleteSupportFiles isDisabled={checked.length === 0} supportFilesResponses={this.entities.filter(entity => checked.findIndex(check => check.toString() === entity.connection.connectionId.toString()) !== -1)}/>}
+                {viewType === ViewType.LIST && this.entities.length !== 0 && <DeleteSupportFiles isDisabled={checked.length === 0} supportFilesResponses={this.entities.filter(entity => checked.findIndex(check => check.toString() === entity.connectionId.toString()) !== -1)}/>}
             </React.Fragment>
         );
     };

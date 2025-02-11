@@ -11,9 +11,13 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
             return {};
         }
         const operator = props.connector.getOperatorByIndex(props.operator.index);
+        let generatedTree;
+        if (operator?.expression && !operator.uiId) {
+            generatedTree = (new OperatorTypeFactory(props.type)).generateTreeByExpression(operator.expression);
+        }
         const foundTree = props.connection.ui?.operators.find((o: any) => o.id === operator?.uiId);
         const initialTree = (new OperatorTypeFactory(props.type)).getInitialTree();
-        return foundTree || {...initialTree, id: generateUUID()};
+        return generatedTree || foundTree || {...initialTree, id: generateUUID()};
     }, [props.operator, props.connection]);
     const [tree, setTree] = useState<GroupProps>(existedTree);
     const updateOperator = () => {
@@ -43,9 +47,9 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
     return (
         <div style={{margin: 20}}>
             <Group builderProps={props} isInitial={true} hasNext={false} updateGroup={(newGroup) => setTree({...newGroup})} group={tree}/>
-            {/*<p>
+            <p>
                 {jsonToString(tree, props.type).result}
-            </p>*/}
+            </p>
             {/*<pre>
                 {JSON.stringify(tree, null, 2)}
             </pre>*/}

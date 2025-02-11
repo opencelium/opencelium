@@ -34,7 +34,7 @@ const DownloadSupportFile: FC<DownloadSupportFileProps> =
         const [isDownloading, setIsDownloading] = useState<boolean>(false);
         const download = () => {
             setIsDownloading(true);
-            dispatch(downloadSupportFile({connectionId: supportFileResponse.connection.connectionId, zipFileName: supportFileResponse.supportFiles[0]}));
+            dispatch(downloadSupportFile({connectionId: supportFileResponse.connectionId, zipFileName: supportFileResponse.supportFiles[0]}));
         }
         useEffect(() => {
             switch (downloadingSupportFile) {
@@ -49,7 +49,7 @@ const DownloadSupportFile: FC<DownloadSupportFileProps> =
         return (
             <PermissionTooltipButton
                 isLoading={isDownloading}
-                target={`download_${supportFileResponse.connection.connectionId.toString()}`}
+                target={`download_${supportFileResponse.connectionId.toString()}`}
                 position={'top'}
                 tooltip={'Download'}
                 hasBackground={false}

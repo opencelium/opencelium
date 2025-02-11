@@ -38,7 +38,7 @@ import {
   getAndUpdateConnectionDescription,
   getAndUpdateConnectionTitle,
   getConnectionById,
-  getConnectionWebhooks, getLogs,
+  getConnectionWebhooks, generateLogs,
   testConnection,
   updateConnection,
 } from "../action_creators/ConnectionCreators";
@@ -77,7 +77,7 @@ export interface ConnectionState extends ICommonState {
   deletingConnectionsById: API_REQUEST_STATE;
   gettingConnectionWebhooks: API_REQUEST_STATE;
   gettingWebhookTypes: API_REQUEST_STATE;
-  gettingLogs: API_REQUEST_STATE,
+  generatingLogs: API_REQUEST_STATE,
   webhookTypes: string[],
   currentConnection: IConnection;
   /*
@@ -130,7 +130,7 @@ let initialState: ConnectionState = {
   deletingConnectionsById: API_REQUEST_STATE.INITIAL,
   gettingConnectionWebhooks: API_REQUEST_STATE.INITIAL,
   gettingWebhookTypes: API_REQUEST_STATE.INITIAL,
-  gettingLogs: API_REQUEST_STATE.INITIAL,
+  generatingLogs: API_REQUEST_STATE.INITIAL,
   webhookTypes: [],
   currentConnection: null,
   currentTechnicalItem: null,
@@ -330,7 +330,7 @@ const connectionReducers = (isModal: boolean = false) => {
       state.currentTechnicalItem = action.payload;
       state.isCreateElementPanelOpened = action.payload !== null;
     },
-    
+
     setDetailsLocation: (state, action: PayloadAction<any>) => {
       state.detailsLocation = action.payload.location;
     },
@@ -568,15 +568,15 @@ const connectionReducers = (isModal: boolean = false) => {
         state.gettingConnectionWebhooks = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },
-      [getLogs.pending.type]: (state) => {
-        state.gettingLogs = API_REQUEST_STATE.START;
+      [generateLogs.pending.type]: (state) => {
+        state.generatingLogs = API_REQUEST_STATE.START;
       },
-      [getLogs.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
-        state.gettingLogs = API_REQUEST_STATE.FINISH;
+      [generateLogs.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
+        state.generatingLogs = API_REQUEST_STATE.FINISH;
         state.error = null;
       },
-      [getLogs.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-        state.gettingLogs = API_REQUEST_STATE.ERROR;
+      [generateLogs.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.generatingLogs = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },
       [getWebhookTypes.pending.type]: (state) => {

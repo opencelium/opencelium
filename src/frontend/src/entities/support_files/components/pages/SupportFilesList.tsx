@@ -25,7 +25,7 @@ import SupportFiles from "@entity/support_files/collections/SupportFiles";
 
 const SupportFilesList: FC<SupportFilesListProps> = permission(ConnectionPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
-    const {gettingSupportFiles, supportFileResponses} = useAppSelector((state: RootState) => state.supportFileReducer);
+    const {gettingSupportFiles, supportFileResponses, error} = useAppSelector((state: RootState) => state.supportFileReducer);
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     useEffect(() => {
         dispatch(getSupportFiles());
@@ -39,6 +39,7 @@ const SupportFilesList: FC<SupportFilesListProps> = permission(ConnectionPermiss
             hasViewSection={false}
             collection={CSupportFiles}
             shouldBeUpdated={shouldBeUpdated}
+            hasError={!!error}
             isLoading={gettingSupportFiles === API_REQUEST_STATE.START}
             componentPermission={ConnectionPermissions}
         />

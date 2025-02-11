@@ -1,5 +1,9 @@
 import {GroupProps, OperatorType, RulePropertyProps, RuleUIProps} from "@app_component/operator_builder/props";
-import {AllOperatorNames, UnaryOperatorName} from "@app_component/operator_builder/interfaces/OperatorName";
+import {
+    AllOperatorNames,
+    OperatorName,
+    UnaryOperatorName
+} from "@app_component/operator_builder/interfaces/OperatorName";
 import {generateUUID, getEnumKeyByValue, isBinaryOperator} from "@app_component/operator_builder/utils";
 import ReferenceGenerator from "@app_component/operator_builder/reference_generator/ReferenceGenerator";
 import React from "react";

@@ -22,6 +22,11 @@ import RegEx from "./types/RegEx";
 import PropertyExists from "./types/PropertyExists";
 import PropertyNotExists from "./types/PropertyNotExists";
 import {OptionType} from "@app_component/operator_builder/interfaces/IBaseOperator";
+import NotEqual from "@app_component/operator_builder/classes/if_operator/types/NotEqual";
+import LessThan from "@app_component/operator_builder/classes/if_operator/types/LessThan";
+import LessThanOrEqual from "@app_component/operator_builder/classes/if_operator/types/LessThanOrEqual";
+import GreaterThan from "@app_component/operator_builder/classes/if_operator/types/GreaterThan";
+import GreaterThanOrEqualTo from "@app_component/operator_builder/classes/if_operator/types/GreaterThanOrEqual";
 
 export default class IfOperatorsConfigGenerator {
 
@@ -39,6 +44,16 @@ export default class IfOperatorsConfigGenerator {
                 return (new IsNotNull()).getOption();
             case BinaryOperatorName.Equal:
                 return (new Equal()).getOption();
+            case BinaryOperatorName.NotEqual:
+                return (new NotEqual()).getOption();
+            case BinaryOperatorName.LessThan:
+                return (new LessThan()).getOption();
+            case BinaryOperatorName.LessThanOrEqualTo:
+                return (new LessThanOrEqual()).getOption();
+            case BinaryOperatorName.GreaterThan:
+                return (new GreaterThan()).getOption();
+            case BinaryOperatorName.GreaterThanOrEqualTo:
+                return (new GreaterThanOrEqualTo()).getOption();
             case BinaryOperatorName.Contains:
                 return (new Contains()).getOption();
             case BinaryOperatorName.NotContains:

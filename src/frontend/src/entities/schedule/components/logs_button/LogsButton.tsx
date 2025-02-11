@@ -11,7 +11,7 @@ import {
 import {RuleBaseModel} from "@root/requests/models/Rule";
 import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {getLogs} from "@root/redux_toolkit/action_creators/ConnectionCreators";
+import {generateLogs} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import Button from "@basic_components/buttons/Button";
 import Rule from "@root/classes/Rule";
 import FormSelect from "@change_component/form_elements/FormSelect";
@@ -19,7 +19,7 @@ import InputSelect from "@app_component/base/input/select/InputSelect";
 
 const LogsButton = ({schedule}: {schedule: ISchedule}) => {
     const dispatch = useAppDispatch();
-    const {gettingLogs} = useAppSelector((state: RootState) => state.connectionReducer);
+    const {generatingLogs} = useAppSelector((state: RootState) => state.connectionReducer);
     const [startAction, toggleAction] = useState<boolean>(false);
     const [isToggled, toggle] = useState<boolean>(false);
     const [level, setLevel] = useState<any>( {label: 'Light', value: 'light'});
@@ -42,10 +42,10 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
             isResponse: maskedResponse,
         })
         toggleAction(true);
-        dispatch(getLogs({
+        dispatch(generateLogs({
             rules,
             connectionId: schedule.connection.connectionId,
-            schedulerId: schedule.schedulerId,
+            schedulerId: schedule.id,
         }))
     }
     useEffect(() => {
@@ -90,10 +90,11 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
         }
     }, [maskedUrl, maskedHeader, maskedRequest, maskedResponse])
     useEffect(() => {
-        if (gettingLogs === API_REQUEST_STATE.FINISH || gettingLogs === API_REQUEST_STATE.ERROR){
+        if (startAction && generatingLogs === API_REQUEST_STATE.FINISH || generatingLogs === API_REQUEST_STATE.ERROR){
             toggleAction(false);
+            toggle(false);
         }
-    }, [gettingLogs]);
+    }, [generatingLogs]);
     return (
         <React.Fragment>
             <TooltipButton
@@ -106,7 +107,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                 size={TextSize.Size_20}
             />
             <Dialog
-                actions={[{label: 'Start collection logs', isLoading: startAction && gettingLogs === API_REQUEST_STATE.START, onClick: startCollectingLogs, id: 'get_logs_button'}, {label: 'Cancel', onClick: () => toggle(false), id: 'cancel_button'}]}
+                actions={[{label: 'Start collection logs', isLoading: startAction && generatingLogs === API_REQUEST_STATE.START, onClick: startCollectingLogs, id: 'get_logs_button'}, {label: 'Cancel', onClick: () => toggle(false), id: 'cancel_button'}]}
                 active={isToggled}
                 toggle={() => toggle(!isToggled)}
                 title={"Get Logs"}

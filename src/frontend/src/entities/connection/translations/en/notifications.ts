@@ -18,10 +18,22 @@ import {getAndUpdateConnectionTitle, getAndUpdateConnectionDescription} from "@r
 import { syncInvokers } from "@entity/connection/redux_toolkit/slices/EditorSlice";
 import { requestRemoteApi } from "@entity/connection/redux_toolkit/action_creators/EditorCreators";
 
-const {testConnection, addConnection, updateConnection, deleteConnectionById, deleteConnectionsById, getConnectionById, getAllMetaConnections, getAllConnections, checkConnectionTitle, graphQLLogin} = ActionCreators;
+const {
+    testConnection, addConnection,
+    updateConnection, deleteConnectionById,
+    deleteConnectionsById, getConnectionById,
+    getAllMetaConnections, getAllConnections,
+    checkConnectionTitle, graphQLLogin,
+    generateLogs, deleteSupportFile,
+    deleteSupportFiles, downloadSupportFile,
+} = ActionCreators;
 
 export default {
     fulfilled: {
+        [deleteSupportFile.fulfilled.type]: "The support file was successfully deleted.",
+        [deleteSupportFiles.fulfilled.type]: "The support files were successfully deleted.",
+        [downloadSupportFile.fulfilled.type]: "The support files was successfully downloaded.",
+        [generateLogs.fulfilled.type]: "Support file generation has started.",
         [testConnection.fulfilled.type]: "Test run was successfully triggered",
         [addConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully added",
         [updateConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully updated",
@@ -36,6 +48,18 @@ export default {
         [requestRemoteApi.rejected.type]: {
             "__DEFAULT__": "There is an error during the test of the method"
         },*/
+        [deleteSupportFile.rejected.type]: {
+            "__DEFAULT__": "There is an error deleting support file."
+        },
+        [deleteSupportFiles.rejected.type]: {
+            "__DEFAULT__": "There is an error deleting support files."
+        },
+        [downloadSupportFile.rejected.type]: {
+            "__DEFAULT__": "There is an error downloading the support file."
+        },
+        [generateLogs.rejected.type]: {
+            "__DEFAULT__": "Could not start generation of the support file."
+        },
         [testConnection.rejected.type]: {
             "__DEFAULT__": "There is an error in during the test of the connection"
         },

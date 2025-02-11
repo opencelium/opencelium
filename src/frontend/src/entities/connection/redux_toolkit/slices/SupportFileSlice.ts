@@ -18,13 +18,6 @@ import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
 import { ICommonState } from "@application/interfaces/core";
 import { CommonState } from "@application/utils/store";
 import { IResponse } from "@application/requests/interfaces/IResponse";
-import {
-    createRule, deleteAllRulesByConnection, deleteRule,
-    getAllRulesByConnection,
-    getRule,
-    updateRule
-} from "@root/redux_toolkit/action_creators/RuleCreators";
-import {RuleRecordModel} from "@root/requests/models/Rule";
 import {SupportFileResponse} from "@root/requests/interfaces/ISupportFile";
 import {
     deleteSupportFile, deleteSupportFiles,

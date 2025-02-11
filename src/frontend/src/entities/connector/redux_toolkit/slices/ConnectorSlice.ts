@@ -32,7 +32,6 @@ import {
 } from "../action_creators/ConnectorCreators";
 import ModelConnectorPoust from "../../requests/models/ConnectorPoust";
 import ModelConnector from "../../requests/models/Connector";
-import {getLogs} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 
 export interface ConnectorState extends ICommonState{
     connectors: ModelConnector[],

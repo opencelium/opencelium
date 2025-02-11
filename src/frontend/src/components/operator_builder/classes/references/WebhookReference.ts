@@ -10,6 +10,10 @@ export default class WebhookReference extends BaseReference {
         this.type = "webhook";
     }
 
+    static getRegex(): RegExp {
+        return /\${.*?}/;
+    }
+
     extractData(): WebhookReferenceData | null {
         const splitReference = this.reference.split(':');
         let result = null;
