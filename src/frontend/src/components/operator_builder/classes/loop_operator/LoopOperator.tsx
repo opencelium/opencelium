@@ -45,7 +45,7 @@ export default class LoopOperator {
     static getRuleComponent(props: RuleUIProps): any {
         const {rule, updateRule, hasNext, builderProps} = props;
         return (
-            <React.Fragment>
+            <div style={{display: 'flex', justifyContent: 'left', width: '100%'}}>
                 <OperatorSelect
                     type={props.builderProps.type}
                     operator={rule?.properties?.operator || ''}
@@ -72,7 +72,7 @@ export default class LoopOperator {
                     }
                 </React.Fragment>
                 }
-            </React.Fragment>
+            </div>
         )
     }
 }
