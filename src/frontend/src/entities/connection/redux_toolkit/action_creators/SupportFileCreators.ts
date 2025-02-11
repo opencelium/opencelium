@@ -41,10 +41,6 @@ export const getSupportFiles = createAsyncThunk(
     'connection/get/all/support-file',
     async(data: never, thunkAPI) => {
         try{
-            return [
-                {id: 12, connection: {connectionId: 12, title: 'connection 12'}, supportFiles: [`12_e_support_${+new Date()}.zip`]},
-                {id: 13, connection: {connectionId: 13, title: 'connection 13'}, supportFiles: [`13_e_support_${+new Date()}.zip`]},
-            ]
             const request = new SupportFileRequest({endpoint: `/list`});
             const response = await request.getSupportFiles();
             return response.data.map((file => ({...file, id: file.connection.connectionId}))).filter(r => r.supportFiles.length > 0);
@@ -57,8 +53,8 @@ export const deleteSupportFile = createAsyncThunk(
     'connection/delete/support-file',
     async(filename: string, thunkAPI) => {
         try{
-            //const request = new SupportFileRequest({endpoint: `/${filename}`});
-            //await request.deleteSupportFile();
+            const request = new SupportFileRequest({endpoint: `/${filename}`});
+            await request.deleteSupportFile();
             return filename;
         }catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -69,8 +65,8 @@ export const deleteSupportFiles = createAsyncThunk(
     'connection/delete/support-file/list',
     async(data: DeleteSupportFilesRequest, thunkAPI) => {
         try{
-            //const request = new SupportFileRequest();
-            //await request.deleteSupportFiles(data);
+            const request = new SupportFileRequest();
+            await request.deleteSupportFiles(data);
             return data.filenames;
         }catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

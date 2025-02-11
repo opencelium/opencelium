@@ -8,8 +8,12 @@ export default class DirectReference extends BaseReference {
         this.type = "direct";
     }
 
+    static getRegex(): RegExp {
+        return /\{%(#[0-9A-Fa-f]{6})\.\((request|response)\)\.body\.\$\.(.*?)%\}/;
+    }
+
     extractData(): DirectReferenceData | null {
-        const regex = /\{%(#[0-9A-Fa-f]{6})\.\((request|response)\)\.body\.\$\.(.*?)%\}/;
+        const regex = DirectReference.getRegex();
         const match = this.reference.match(regex);
         return match ? { color: match[1], type: match[2] as SourceType, field: match[3] } : null;
     }

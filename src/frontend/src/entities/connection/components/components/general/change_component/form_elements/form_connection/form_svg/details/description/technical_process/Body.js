@@ -65,7 +65,6 @@ class Body extends React.Component {
 			connection.currentEnhancemnet = null;
 		}
 		if (setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
-		updateConnection(connection);
 		toggleBodyDialog();
 		this.setState({
 			currentEnhancement: null,

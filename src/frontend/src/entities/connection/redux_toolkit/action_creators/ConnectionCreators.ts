@@ -33,7 +33,7 @@ export const getLogs = createAsyncThunk(
             const allRulesResponse = await getAllRulesRequest.getRulesByConnection();
             if (allRulesResponse.data.length !== 0) {
                 const deleteAllRulesRequest = new RuleRequest({endpoint: `/${connectionId}/rule/all`});
-                await deleteAllRulesRequest.getRulesByConnection();
+                await deleteAllRulesRequest.deleteRulesByConnection();
             }
             for(let i = 0; i < rules.length; i++) {
                 const createRuleRequest = new RuleRequest({endpoint: `/${connectionId}/rule`});
@@ -327,6 +327,7 @@ export const deleteConnectionsById = createAsyncThunk(
 )
 
 export default {
+    getLogs,
     getConnectionWebhooks,
     testConnection,
     checkConnectionTitle,

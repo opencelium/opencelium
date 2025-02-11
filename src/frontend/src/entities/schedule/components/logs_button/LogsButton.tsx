@@ -45,7 +45,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
         dispatch(getLogs({
             rules,
             connectionId: schedule.connection.connectionId,
-            schedulerId: schedule.schedulerId,
+            schedulerId: schedule.id,
         }))
     }
     useEffect(() => {
@@ -90,8 +90,9 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
         }
     }, [maskedUrl, maskedHeader, maskedRequest, maskedResponse])
     useEffect(() => {
-        if (gettingLogs === API_REQUEST_STATE.FINISH || gettingLogs === API_REQUEST_STATE.ERROR){
+        if (startAction && gettingLogs === API_REQUEST_STATE.FINISH || gettingLogs === API_REQUEST_STATE.ERROR){
             toggleAction(false);
+            toggle(false);
         }
     }, [gettingLogs]);
     return (

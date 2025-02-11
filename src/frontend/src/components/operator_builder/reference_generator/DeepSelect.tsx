@@ -58,7 +58,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
                 lastValidPath += (lastValidPath ? "." : "") + key;
             } else if (Array.isArray(currentData) && (key === "[0]" || key === "[*]" || iterators.includes(key.slice(1, -1)))) {
                 // Navigate into the first element if `[0]` is selected
-                currentData = key === "[*]" ? currentData : currentData[0];
+                currentData = currentData[0];
                 lastValidPath += (lastValidPath ? "." : "") + key;
             } else {
                 break;

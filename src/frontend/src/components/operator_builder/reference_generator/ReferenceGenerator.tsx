@@ -14,7 +14,7 @@ import InputText from "@app_component/base/input/text/InputText";
 const ReferenceGenerator = ({reference, setValue, builderProps}: ReferenceGeneratorProps) => {
     const [color, setColor] = useState<string>('');
     const [currentField, setCurrentField] = useState<string>('');
-    const [referenceType, updateReferenceType] = useState<ReferenceType>('constant');
+    const [referenceType, updateReferenceType] = useState<ReferenceType>('direct');
     const changeReferenceType = (newReferenceType: ReferenceType) => {
         updateReferenceType(newReferenceType);
         setColor('');
