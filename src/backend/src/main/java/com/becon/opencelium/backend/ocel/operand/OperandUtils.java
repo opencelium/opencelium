@@ -12,6 +12,7 @@ public class OperandUtils {
                 || "false".equals(token)
                 || ReferenceUtils.isReference(token)
                 || token.startsWith("\"") && token.endsWith("\"")
+                || token.startsWith("'") && token.endsWith("'")
                 || ValueUtils.isNumberStr(token)
                 || token.startsWith("[") && token.endsWith("]")
                 || checkTypeAvailability(token);
