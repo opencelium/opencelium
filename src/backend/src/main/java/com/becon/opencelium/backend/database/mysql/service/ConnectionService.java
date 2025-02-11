@@ -88,4 +88,6 @@ public interface ConnectionService {
     void deleteRuleList(long connectionId);
 
     void deleteRule(long connectionId, long ruleId);
+
+    void updateConnectionsToCurrentVersion();
 }

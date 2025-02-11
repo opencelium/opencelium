@@ -40,6 +40,7 @@ import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
+import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
@@ -73,6 +74,8 @@ public class ConnectionServiceImp implements ConnectionService {
     private final PatchHelper patchHelper;
     private final WebhookService webhookService;
     private final OpenCeliumProps ocProps;
+    private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
+    private final EntityUpdater<Enhancement> enhancementEntityUpdater;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -88,8 +91,10 @@ public class ConnectionServiceImp implements ConnectionService {
             Mapper<Connector, ConnectorDTO> connectorMapper,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
-            ConnectionUpdateTracker updateTracker, MaskingRuleRepository ruleRepository,
-            EntityVersionManager entityVersionManager, OpenCeliumProps ocProps
+            ConnectionUpdateTracker updateTracker,
+            MaskingRuleRepository ruleRepository,
+            EntityVersionManager entityVersionManager,
+            OpenCeliumProps ocProps
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -107,6 +112,8 @@ public class ConnectionServiceImp implements ConnectionService {
         this.webhookService = webhookService;
         this.ruleRepository = ruleRepository;
         this.ocProps = ocProps;
+        this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
+        this.enhancementEntityUpdater = entityVersionManager.getUpdater(Enhancement.class);
     }
 
 
@@ -487,6 +494,34 @@ public class ConnectionServiceImp implements ConnectionService {
         throwIfConnectionNotExists(connectionId);
 
         ruleRepository.deleteByConnectionIdAndId(connectionId, ruleId);
+    }
+
+    @Override
+    public void updateConnectionsToCurrentVersion() {
+        List<Connection> connections = findAll();
+        for (Connection connection : connections) {
+            // UPDATE ENHANCEMENTS
+            connection.getEnhancements().forEach(enhancement -> {
+                enhancement.setConnection(null);
+                enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
+                        .ifUpdated(x->{
+                            x.setConnection(connection);
+                            enhancementService.save(enhancement);
+                        });
+                enhancement.setConnection(connection);
+            });
+
+            // UPDATE CONNECTION_MNG
+            ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
+            connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
+                    .ifChangedOrElseIfUpdated(
+                            connectionMngService::updateWithoutBinding, // if any field is updated
+                            connectionMngService::saveDirectly // only version is set to the current version
+                    );
+
+            connection.setOcVersion(ocProps.getVersion());
+            connectionRepository.save(connection);
+        }
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
