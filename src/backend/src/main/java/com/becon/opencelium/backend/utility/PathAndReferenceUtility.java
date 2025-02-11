@@ -172,7 +172,21 @@ public class PathAndReferenceUtility {
         int pre2 = path.indexOf(PRE_WEBHOOK);
         int pre3 = path.indexOf(PRE_BRACKET);
         if (pre1 == -1 && pre2 == -1 && pre3 == -1) {
-            return new ArrayList<>(List.of(path.split((isSpecialRegexChar(delim) ? "\\" : "") + delim)));
+            String[] split = path.split((isSpecialRegexChar(delim) ? "\\" : "") + delim);
+            ArrayList<String> res = new ArrayList<>();
+            for (int i = 0; i < split.length; i++) {
+                String s = split[i];
+                if (s.matches("\\[.*]")) {
+                    if (res.isEmpty()) {
+                        res.add(s);
+                    } else {
+                        res.set(i - 1, res.get(i - 1) + s);
+                    }
+                } else {
+                    res.add(s);
+                }
+            }
+            return res;
         }
 
         List<String> res = new ArrayList<>();
@@ -182,9 +196,31 @@ public class PathAndReferenceUtility {
         for (int i = 0; i < n; i++) {
             if (stack.empty() && path.charAt(i) == delim) {
                 if (hasBracket) {
-                    res.addAll(parseBracketNotationPath(path.substring(start, i)));
+                    List<String> subParts = parseBracketNotationPath(path.substring(start, i));
+                    if (subParts.size() > 1) {
+                        res.addAll(subParts);
+                    } else {
+                        if (subParts.get(0).matches("\\[.*]")) {
+                            if (!res.isEmpty()) {
+                                res.set(res.size() - 1, res.get(res.size() - 1) + subParts.get(0));
+                            } else {
+                                res.add(subParts.get(0));
+                            }
+                        } else {
+                            res.add(subParts.get(0));
+                        }
+                    }
                 } else {
-                    res.add(path.substring(start, i));
+                    String val = path.substring(start, i);
+                    if (val.matches("\\[.*]")) {
+                        if (!res.isEmpty()) {
+                            res.set(res.size() - 1, res.get(res.size() - 1) + val);
+                        } else {
+                            res.add(val);
+                        }
+                    } else {
+                        res.add(val);
+                    }
                 }
                 start = i + 1;
             } else if (i + PRE_DIRECT_REF.length() < n && path.startsWith(PRE_DIRECT_REF, i)) {
@@ -213,9 +249,31 @@ public class PathAndReferenceUtility {
                 }
             } else if (i == n - 1) {
                 if (hasBracket) {
-                    res.addAll(parseBracketNotationPath(path.substring(start)));
+                    List<String> subParts = parseBracketNotationPath(path.substring(start));
+                    if (subParts.size() > 1) {
+                        res.addAll(subParts);
+                    } else {
+                        if (subParts.get(0).matches("\\[.*]")) {
+                            if (!res.isEmpty()) {
+                                res.set(res.size() - 1, res.get(res.size() - 1) + subParts.get(0));
+                            } else {
+                                res.add(subParts.get(0));
+                            }
+                        } else {
+                            res.add(subParts.get(0));
+                        }
+                    }
                 } else {
-                    res.add(path.substring(start));
+                    String val = path.substring(start);
+                    if (val.matches("\\[.*]")) {
+                        if (!res.isEmpty()) {
+                            res.set(res.size() - 1, res.get(res.size() - 1) + val);
+                        } else {
+                            res.add(val);
+                        }
+                    } else {
+                        res.add(val);
+                    }
                 }
             }
         }
