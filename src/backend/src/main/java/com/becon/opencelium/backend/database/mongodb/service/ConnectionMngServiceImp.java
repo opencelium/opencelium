@@ -129,6 +129,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         return connectionMngRepository.findAll();
     }
 
+    @Override
     public void updateWithoutBinding(ConnectionMng connectionMng) {
         if (Objects.isNull(connectionMng)) return;
         if (Objects.isNull(connectionMng.getId()) || !connectionMngRepository.existsById(connectionMng.getId())) {

@@ -17,14 +17,8 @@
 package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.entity.RequestData;
-import com.becon.opencelium.backend.database.mysql.entity.Subscription;
-import com.becon.opencelium.backend.database.mysql.service.ActivationRequestService;
-import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
-import com.becon.opencelium.backend.database.mysql.service.RequestDataService;
-import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
+import com.becon.opencelium.backend.database.mysql.entity.*;
+import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
@@ -35,6 +29,7 @@ import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
 import org.quartz.*;
+import org.quartz.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +62,7 @@ public class StorageConfiguration {
     private final Environment environment;
     private final SubscriptionService subscriptionService;
     private final ActivationRequestService activationRequestService;
+    private final ConnectionService connectionService;
 
     @Autowired
     private ResourceLoader resourceLoader;
@@ -84,7 +80,8 @@ public class StorageConfiguration {
             @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService,
             InvokerContainer invokerContainer,
             DataSource dataSource,
-            Environment environment
+            Environment environment,
+            ConnectionService connectionService
     ) {
         this.userStorageService = userStorageService;
         this.connectorService = connectorService;
@@ -94,6 +91,7 @@ public class StorageConfiguration {
         this.environment = environment;
         this.subscriptionService = subscriptionService;
         this.activationRequestService = activationRequestService;
+        this.connectionService = connectionService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -120,6 +118,9 @@ public class StorageConfiguration {
 
         // creates storage for files
         userStorageService.init();
+
+        // updates connections and enhancements to current version
+        connectionService.updateConnectionsToCurrentVersion();
 
         // saves new changesets
         if (YAMLMigrator.getChangeSetsToSave() != null) {
