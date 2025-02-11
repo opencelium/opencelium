@@ -20,6 +20,7 @@ src/test/java/com/becon/opencelium/backend/ApplicationTests.java
 !src/test/OCELFunctionsTest.java
 !src/test/ValidationTest.java
 !src/test/EvaluationTest.java
+.DS_Store
 
 ### STS ###
 .apt_generated
