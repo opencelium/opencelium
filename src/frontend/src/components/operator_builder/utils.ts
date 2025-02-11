@@ -94,3 +94,6 @@ export function getEnumKeyByValue(enumData: any, value: string): string | undefi
     const entry: any = Object.entries(enumData).find(([key, val]) => val === value);
     return entry ? entry[1] : undefined;
 }
+
+export const flattenOptions = (groups: any[]) =>
+    groups.flatMap((group) => group.options);

@@ -1,6 +1,7 @@
 import React, {useEffect, useMemo, useState} from "react";
 import Select, { SingleValue, StylesConfig } from "react-select";
 import {MethodSelectProps} from "@app_component/operator_builder/reference_generator/props";
+import {flattenOptions} from "@app_component/operator_builder/utils";
 
 interface OptionType {
     label: string;
@@ -68,7 +69,11 @@ const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor,
     }, [selectedOption])
     useEffect(() => {
         if (methodColor) {
-            setSelectedOption(options.find((o: OptionType) => o.color === methodColor));
+            let flatOptions = flattenOptions(options);
+            if (flatOptions.length > 0 && flatOptions[0] === undefined) {
+                flatOptions = options;
+            }
+            setSelectedOption(flatOptions.find((o: OptionType) => o.color === methodColor));
         }
     }, [methodColor])
     return (
