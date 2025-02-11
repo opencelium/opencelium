@@ -20,12 +20,17 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IConnection} from "../../interfaces/IConnection";
 import {GetConnectionWebhooksResponse, IConnectionRequest} from "../interfaces/IConnection";
 import category from "@entity/category/translations/interpolations/category";
+import {RuleBaseModel} from "@root/requests/models/Rule";
 
 
 export class ConnectionRequest extends Request implements IConnectionRequest{
 
     constructor(settings?: Partial<IRequestSettings>) {
         super({url: 'connection', ...settings});
+    }
+
+    async generateSupportFile(rule: RuleBaseModel[]): Promise<AxiosResponse<IResponse>> {
+        return super.post<IResponse>(rule);
     }
 
     async getConnectionWebhooks(): Promise<AxiosResponse<GetConnectionWebhooksResponse[]>> {

@@ -16,6 +16,7 @@
 import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import { IConnection } from "../../interfaces/IConnection";
+import {RuleBaseModel} from "@root/requests/models/Rule";
 
 export interface GetConnectionWebhooksResponse {
     name: string,
@@ -23,6 +24,9 @@ export interface GetConnectionWebhooksResponse {
 }
 
 export interface IConnectionRequest {
+
+    //to generate support file
+    generateSupportFile(rule: RuleBaseModel[]): Promise<AxiosResponse<IResponse>>,
 
     //to get webhooks params of the connection
     getConnectionWebhooks(): Promise<AxiosResponse<GetConnectionWebhooksResponse[]>>,

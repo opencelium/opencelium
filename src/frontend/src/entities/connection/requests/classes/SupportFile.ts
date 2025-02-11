@@ -15,7 +15,8 @@ export class SupportFileRequest extends Request implements ISupportFileRequest {
     }
 
     async downloadSupportFile(): Promise<AxiosResponse<Blob>> {
-        return super.get<Blob>();
+        this.url = '';
+        return super.get<Blob>({responseType: 'blob'});
     }
 
     async downloadSuccessSupportFile(): Promise<AxiosResponse<Blob>> {

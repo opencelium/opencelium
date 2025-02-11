@@ -2,11 +2,8 @@ import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 
 export interface SupportFileResponse {
-    connection: {
-        id: number,
-        connectionId: number,
-        title: string,
-    },
+    connectionId: number,
+    connectionTitle: string,
     supportFiles: string[],
 }
 

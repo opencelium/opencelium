@@ -7,8 +7,17 @@ export const downloadSupportFile = createAsyncThunk(
     'connection/download/support-file',
     async(data: {connectionId: number, zipFileName: string}, thunkAPI) => {
         try{
-            const request = new SupportFileRequest({endpoint: `/${data.connectionId}/${data.zipFileName}`});
-            await request.downloadSupportFile();
+            const request = new SupportFileRequest({isApi: false, endpoint: `${data.zipFileName.substring(1)}`});
+            const response = await request.downloadSupportFile();
+            const filename = data.zipFileName.split("/").pop();
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
         }catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -43,7 +52,7 @@ export const getSupportFiles = createAsyncThunk(
         try{
             const request = new SupportFileRequest({endpoint: `/list`});
             const response = await request.getSupportFiles();
-            return response.data.map((file => ({...file, id: file.connection.connectionId}))).filter(r => r.supportFiles.length > 0);
+            return response.data.map((file => ({...file, id: file.connectionId}))).filter(r => r.supportFiles.length > 0);
         }catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
