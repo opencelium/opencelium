@@ -17,11 +17,15 @@ import connectionReducer from "./ConnectionSlice";
 import connectionEditorReducer from "./EditorSlice";
 import modalConnectionReducer from './ModalConnectionSlice';
 import graphQLReducer from './GraphQLSlice';
+import ruleReducer from './RuleSlice';
+import supportFileReducer from './SupportFileSlice';
 
 export default {
     connectionReducer,
     connectionEditorReducer,
     modalConnectionReducer,
     graphQLReducer,
+    ruleReducer,
+    supportFileReducer,
 }
 

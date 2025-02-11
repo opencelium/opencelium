@@ -266,6 +266,10 @@ public class PathAndReferenceUtility {
         return path != null && path.startsWith("body.$.");
     }
 
+    public static boolean isHeader(String path) {
+        return path != null && path.startsWith("header.$.");
+    }
+
     public static String getActualPathOfBody(String path) {
         return path.substring(7);
     }
@@ -279,7 +283,8 @@ public class PathAndReferenceUtility {
                 : !field.matches(referencePath) ? null
                 : field.equals("path") ? field
                 : isBody(field) ? "body"
-                : field;
+                : isHeader(field) ? "header"
+                : null;
     }
 
     public static String rebuildReference(String color, String type, String field) {

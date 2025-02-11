@@ -242,6 +242,9 @@ export default class CCondition{
             relationalOperator: this._relationalOperator,
             rightStatement: this._rightStatement.getObject(),
         };
+        if (!obj?.leftStatement?.field){
+            return null;
+        }
         return obj;
     }
 }

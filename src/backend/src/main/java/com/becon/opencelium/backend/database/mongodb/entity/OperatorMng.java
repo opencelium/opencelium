@@ -30,6 +30,7 @@ public class OperatorMng {
     private String iterator;
     private ConditionMng condition;
     private String uiId;
+    private String expression;
 
     public OperatorMng() {
     }
@@ -79,5 +80,13 @@ public class OperatorMng {
     }
     public void setUiId(String uiId) {
         this.uiId = uiId;
+    }
+
+    public String getExpression() {
+        return expression;
+    }
+
+    public void setExpression(String expression) {
+        this.expression = expression;
     }
 }

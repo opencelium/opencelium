@@ -121,7 +121,9 @@ public class PostfixEvaluator implements Evaluator {
                 }
             }
             return last.getValue();
-        } catch (RuntimeException e) {
+        } catch (InvalidExpressionException e) {
+            throw e;
+        } catch (Exception e){
             throw InvalidExpressionException.unexpectedException(e);
         }
     }

@@ -18,6 +18,9 @@ import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.ocel.ExpressionProcessor;
+import com.becon.opencelium.backend.ocel.ExpressionProcessorFactory;
+import com.becon.opencelium.backend.ocel.ProcessorType;
 import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
@@ -43,6 +46,7 @@ import java.util.Objects;
 
 public class ConnectorExecutor {
 
+    private final ExpressionProcessor expressionProcessor;
     private final Connector connector;
     private final ExecutionManager executionManager;
     private final RestTemplate restTemplate;
@@ -53,6 +57,7 @@ public class ConnectorExecutor {
     private static final String BREAK = "======================= %s %s -- INDEX: %s =======================";
 
     public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, MaskingService masking, String direction) {
+        this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
         this.executionManager = executionManager;
         this.restTemplate = restTemplate;
         this.logger = logger;
@@ -126,13 +131,13 @@ public class ConnectorExecutor {
             masking.setOperationId(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
-                logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "START", index));
-                logger.logAndSend(String.format(
-                        "=============== %s =============== -- next function: %s -- next operator: %s -- index: %s",
-                        operator.getCondition().getRelationalOperator(), next[0], next[1], index
-                ));
+                logger.logAndSend(String.format(BREAK, operator.getExpression(), "START", index));
+//                logger.logAndSend(String.format(
+//                        "=============== %s =============== -- next function: %s -- next operator: %s -- index: %s",
+//                        operator.getCondition().getRelationalOperator(), next[0], next[1], index
+//                ));
 
-                boolean result = executeIfOperator(operator);
+                boolean result = (Boolean) expressionProcessor.evaluate(operator.getExpression(), executionManager::getValue);
                 logger.logAndSend("OPERATOR_RESULT: " + (result ? "TRUE" : "FALSE") + " -- index: " + index);
 
                 if (result) {
@@ -181,16 +186,16 @@ public class ConnectorExecutor {
 
                 // remove executed loops' data
                 executionManager.getLoops().remove(loop);
+                // log after executing operator
+                next = getNextIndex(tail, hasCircle, loopHead, loopTail);
+                logger.logAndSend("============================================================================");
+                logger.logAndSend(String.format(
+                        "Operator: -- next function: %s -- next operator: %s -- type: %s -- index: %s",
+                        next[0], next[1], operator.getType(), index)
+                );
+                logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "END", index));
             }
 
-            // log after executing operator
-            next = getNextIndex(tail, hasCircle, loopHead, loopTail);
-            logger.logAndSend("============================================================================");
-            logger.logAndSend(String.format(
-                    "Operator: -- next function: %s -- next operator: %s -- type: %s -- index: %s",
-                    next[0], next[1], operator.getType(), index)
-            );
-            logger.logAndSend(String.format(BREAK, operator.getCondition().getRelationalOperator(), "END", index));
         } else {
             throw new RuntimeException("Wrong type is supplied");
         }
@@ -274,45 +279,6 @@ public class ConnectorExecutor {
 
         operation.addRequest(key, requestEntity);
         operation.addResponse(key, responseEntity);
-    }
-
-    private boolean executeIfOperator(OperatorEx operatorDTO) {
-        ConditionEx condition = operatorDTO.getCondition();
-        Object leftValue = executionManager.getValue(condition.getLeft());
-        if (leftValue != null) {
-            logger.logAndSend("Left Statement: " + leftValue);
-        }
-
-        Object rightValue;
-        String likeValueRef = condition.getRight();
-        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
-            int beginIndex = likeValueRef.startsWith("%") ? 1 : 0;
-            int endIndex = likeValueRef.length() - (likeValueRef.endsWith("%") ? 1 : 0);
-
-            likeValueRef = likeValueRef.substring(beginIndex, endIndex);
-        }
-
-        if (ReferenceUtility.containsRef(likeValueRef)) {
-            rightValue = executionManager.getValue(likeValueRef);
-        } else {
-            rightValue = likeValueRef;
-        }
-
-        if (condition.getRight() != null && condition.getRelationalOperator() == RelationalOperator.LIKE) {
-            rightValue = condition.getRight().replace(likeValueRef, (String) rightValue);
-        }
-
-        if (rightValue != null) {
-            if (rightValue.getClass().isArray()) {
-                logger.logAndSend("Right Statement: " + Arrays.toString((String[]) rightValue));
-            } else {
-                logger.logAndSend("Right Statement: " + rightValue);
-            }
-        }
-
-        Operator operator = OperatorAbstractFactory.getFactoryByType(OperatorType.COMPARISON).getOperator(condition.getRelationalOperator());
-
-        return operator.apply(leftValue, rightValue);
     }
 
     private Class<?> getResponseType(OperationDTO dto) {

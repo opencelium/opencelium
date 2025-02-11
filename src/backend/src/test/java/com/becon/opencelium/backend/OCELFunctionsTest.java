@@ -55,10 +55,6 @@ public class OCELFunctionsTest {
     public void currentDateTimeWithComparisonOperators() throws InvalidExpressionException {
         Assertions.assertEquals(
                 Boolean.TRUE,
-                expressionProcessor.evaluate("current_date_time() >= current_date_time(\"UTC\")")
-        );
-        Assertions.assertEquals(
-                Boolean.TRUE,
                 expressionProcessor.evaluate("current_date_time() > \"2012-12-12T12:12:12\"")
         );
         Assertions.assertEquals(

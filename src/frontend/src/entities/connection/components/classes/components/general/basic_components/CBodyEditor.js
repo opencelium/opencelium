@@ -13,37 +13,48 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { consoleLog, isNumber, isString } from "@application/utils/utils";
 import {
     convertFieldNameForBackend,
     markFieldNameAsArray
 } from "@change_component//form_elements/form_connection/form_methods/help";
+import { CONNECTOR_TO } from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 import CBindingItem from "@entity/connection/components/classes/components/content/connection/field_binding/CBindingItem";
-import {CONNECTOR_TO} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
-import {consoleLog, isNumber, isString} from "@application/utils/utils";
-import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "@entity/connection/components/classes/components/content/connection/operator/CStatement";
-import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "@entity/connection/components/classes/components/content/invoker/response/CResponse";
+import { STATEMENT_REQUEST, STATEMENT_RESPONSE } from "@entity/connection/components/classes/components/content/connection/operator/CStatement";
+import { RESPONSE_FAIL, RESPONSE_SUCCESS } from "@entity/connection/components/classes/components/content/invoker/response/CResponse";
 
 export class CBodyEditor{
 
-    static updateFieldsBinding(connection, connector, method, bodyData){
+    static updateFieldsBinding(connection, connector, method, bodyData, target = null) {
         const checkBodyData = CBodyEditor.shouldUpdateFieldBinding(connector, bodyData);
         let invokerBody = method.request.invokerBody;
-        if(checkBodyData !== 0){
+        
+        if (checkBodyData !== 0) {
             let parents = bodyData.namespaces;
             let newValue = bodyData.newValue;
             let currentItem = connector.getCurrentItem();
             let item = {};
             item.color = currentItem.color;
-            if(parents.length === 0){
+    
+            if (parents.length === 0) {
                 item.field = bodyData.name;
             } else {
                 item.field = `${parents.join('.')}.${bodyData.name}`;
             }
+    
             item.field = convertFieldNameForBackend(invokerBody.fields, item.field, true);
+    
+            if (target === 'header') {
+                item.field = `header.$.${item.field.replace(/^body\.\$\.|header\.\$\./, '')}`;
+            } else {
+                item.field = `body.$.${item.field.replace(/^body\.\$\.|header\.\$\./, '')}`;
+            }
+    
             item.type = 'request';
             let toBindingItems = [CBindingItem.createBindingItem(item)];
+    
             let fromBindingItems = [];
-            switch(checkBodyData) {
+            switch (checkBodyData) {
                 case 1:
                     let newValueSplitted = newValue.split(';');
                     for (let i = 0; i < newValueSplitted.length; i++) {
@@ -52,16 +63,23 @@ export class CBodyEditor{
                         newItem.color = bindingItemSplitted[0];
                         newItem.type = bindingItemSplitted[1].substr(1, bindingItemSplitted[1].length - 2);
                         newItem.field = bindingItemSplitted.slice(2, bindingItemSplitted.length).join('.');
+    
+                        newItem.field = newItem.field.replace(/^header\.\$/, 'body.$');
                         fromBindingItems.push(CBindingItem.createBindingItem(newItem));
                     }
                     break;
                 case 2:
                     break;
             }
-            connection.updateFieldBinding(connector.getConnectorType(), {from: fromBindingItems, to: toBindingItems});
+
+            connection.updateFieldBinding(connector.getConnectorType(), { from: fromBindingItems, to: toBindingItems });
+
+
         }
+    
         CBodyEditor.cleanFieldBinding(connection, bodyData);
     }
+    
 
     static cleanFieldBinding(connection, bodyData){
         if(bodyData.newValue === '' || typeof bodyData.newValue === 'undefined') {
@@ -71,7 +89,7 @@ export class CBodyEditor{
                     if (existingValueSplitted[1] === `(${STATEMENT_REQUEST})`
                         || existingValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {
                         if (existingValueSplitted[2] === RESPONSE_SUCCESS
-                            || existingValueSplitted[2] === RESPONSE_FAIL) {
+                            || existingValueSplitted[2] === RESPONSE_FAIL || 'header' || 'body') {
                             let parents = bodyData.namespaces;
                             let currentItem = connection.toConnector.getCurrentItem();
                             let item = {};
@@ -117,7 +135,7 @@ export class CBodyEditor{
                     if (existingValueSplitted[1] === `(${STATEMENT_REQUEST})`
                         || existingValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {
                         if (existingValueSplitted[2] === RESPONSE_SUCCESS
-                            || existingValueSplitted[2] === RESPONSE_FAIL) {
+                            || existingValueSplitted[2] === RESPONSE_FAIL || 'header' || 'body') {
                             result = 2;
                         }
                     }
@@ -125,11 +143,12 @@ export class CBodyEditor{
             }
             if(isString(bodyData.newValue)) {
                 let newValueSplitted = bodyData.newValue.split('.');
+                
                 if (newValueSplitted.length > 3) {
                     if (newValueSplitted[1] === `(${STATEMENT_REQUEST})`
                         || newValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {
                         if (newValueSplitted[2] === RESPONSE_SUCCESS
-                            || newValueSplitted[2] === RESPONSE_FAIL) {
+                            || newValueSplitted[2] === RESPONSE_FAIL || newValueSplitted[2] === 'header' || newValueSplitted[2] === 'body') {
                             result = 1;
                         }
                     }

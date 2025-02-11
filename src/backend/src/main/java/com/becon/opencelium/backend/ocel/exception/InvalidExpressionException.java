@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.ocel.exception;
 import com.becon.opencelium.backend.ocel.function.FunctionEnum;
 import org.apache.commons.lang3.StringUtils;
 
-public class InvalidExpressionException extends Exception {
+public class InvalidExpressionException extends RuntimeException {
     private final ErrorCode errorCode;
 
     public InvalidExpressionException(ErrorCode errorCode, String message) {
@@ -47,7 +47,7 @@ public class InvalidExpressionException extends Exception {
         return new InvalidExpressionException(ErrorCode.UNEXPECTED_END_OF_EXPRESSION, "Invalid end of expression : %s".formatted(exp));
     }
 
-    public static InvalidExpressionException unexpectedException(RuntimeException e) {
+    public static InvalidExpressionException unexpectedException(Exception e) {
         return new InvalidExpressionException(ErrorCode.UNEXPECTED_EXCEPTION, e.getMessage());
     }
 
@@ -65,6 +65,10 @@ public class InvalidExpressionException extends Exception {
 
     public static InvalidExpressionException applyFunctionException(ApplyFunctionException e) {
         return new InvalidExpressionException(e.getCode(), e.getMessage());
+    }
+
+    public static InvalidExpressionException emptyExpression() {
+        return new InvalidExpressionException(ErrorCode.EMPTY_EXPRESSION, "Expression is empty");
     }
 
     public ErrorCode getErrorCode() {

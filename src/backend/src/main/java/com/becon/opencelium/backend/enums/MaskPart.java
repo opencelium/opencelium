@@ -22,7 +22,7 @@ public enum MaskPart {
 
         @Override
         public String toString(Object message) {
-            return message.toString();
+            return MaskPart.convertToStringIfNecessary(message);
         }
     },
     BODY {
@@ -62,7 +62,7 @@ public enum MaskPart {
         try {
             return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(message);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return message.toString();
         }
     }
 }

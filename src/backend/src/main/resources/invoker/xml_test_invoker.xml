@@ -1,0 +1,263 @@
+<invoker type="wsdl11">
+    <name>invokerXmlTest</name>
+    <description>This service allows operations on user data including creation and retrieval.</description>
+    <hint>any hints here</hint>
+    <authType>basic</authType>
+    <requiredData>
+        <item name="url" type="string" visibility="public">http://localhost:8081/UserService</item>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <operations>
+        <operation name="CreateUser" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">text/xml</item>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body data="raw" format="xml" type="object">
+                    <field name="soap:Envelope" type="object">
+                        <field name="__oc__attributes" type="object">
+                            <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                        </field>
+                        <field name="soap:Body" type="object">
+                            <field name="__oc__attributes" type="object"/>
+                            <field name="usr:CreateUserRequest" type="object">
+                                <field name="__oc__attributes" type="object"/>
+                                <field name="usr:User" type="object">
+                                    <field name="__oc__attributes" type="object"/>
+                                    <field name="usr:userId" type="object">
+                                        <field name="__oc__attributes" type="object"/>
+                                        <field name="__oc__value" type="string"/>
+                                    </field>
+                                    <field name="usr:name" type="object">
+                                        <field name="__oc__attributes" type="object"/>
+                                        <field name="__oc__value" type="string"/>
+                                    </field>
+                                    <field name="usr:email" type="string">
+                                        <field name="__oc__attributes" type="object"/>
+                                        <field name="__oc__value" type="string"/>
+                                    </field>
+                                    <field name="usr:address" type="object">
+                                        <field name="__oc__attributes" type="object"/>
+                                        <field name="usr:street" type="object">
+                                            <field name="__oc__attributes" type="object"/>
+                                            <field name="__oc__value" type="string"/>
+                                        </field>
+                                        <field name="usr:city" type="object">
+                                            <field name="__oc__attributes" type="object"/>
+                                            <field name="__oc__value" type="string"/>
+                                        </field>
+                                        <field name="usr:state" type="object">
+                                            <field name="__oc__attributes" type="object"/>
+                                            <field name="__oc__value" type="string"/>
+                                        </field>
+                                        <field name="usr:zipCode" type="object">
+                                            <field name="__oc__attributes" type="object"/>
+                                            <field name="__oc__value" type="string"/>
+                                        </field>
+                                    </field>
+                                    <field name="usr:job" type="object">
+                                        <field name="__oc__attributes" type="object"/>
+                                        <field name="__oc__value" type="string"/>
+                                    </field>
+                                    <field name="usr:hobbies" type="array">
+                                        <field name="__oc__attributes" type="object"/>
+                                        <field name="__oc__value" type="string"/>
+                                    </field>
+                                </field>
+                            </field>
+                        </field>
+                    </field>
+                </body>
+                <endpoint>{url}</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="xml" type="object">
+                        <field name="soap:Envelope" type="object">
+                            <field name="__oc__attributes" type="object">
+                                <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                            </field>
+                            <field name="soap:Body" type="object">
+                                <field name="__oc__attributes" type="object"/>
+                                <field name="GetUserResponse" type="object">
+                                    <field name="__oc__attributes" type="object"/>
+                                    <field name="userId" type="object">
+                                        <field name="__oc__attributes" type="object"/>
+                                        <field name="__oc__value" type="string"/>
+                                    </field>
+                                </field>
+                            </field>
+                        </field>
+                    </body>
+                    <header>
+                        <item name="Content-Type" type="string">text/xml</item>
+                        <item name="Authorization" type="string">{token}</item>
+                    </header>
+                </success>
+                <fail status="400">
+                    <header/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetUsers" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">text/xml</item>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+                <endpoint>{url}</endpoint>
+                <method>GET</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="xml" type="object">
+                        <field name="soap:Envelope" type="object">
+                            <field name="__oc__attributes" type="object">
+                                <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                            </field>
+                            <field name="soap:Body" type="object">
+                                <field name="__oc__attributes" type="object"/>
+                                <field name="GetUsersResponse" type="object">
+                                    <field name="__oc__attributes" type="object"/>
+                                    <field name="Users" type="object">
+                                        <field name="__oc__attributes" type="object"/>
+                                        <field name="usr:User" type="object">
+                                            <field name="__oc__attributes" type="object"/>
+                                            <field name="usr:userId" type="object">
+                                                <field name="__oc__attributes" type="object"/>
+                                                <field name="__oc__value" type="string"/>
+                                            </field>
+                                            <field name="usr:name" type="object">
+                                                <field name="__oc__attributes" type="object"/>
+                                                <field name="__oc__value" type="string"/>
+                                            </field>
+                                            <field name="usr:email" type="string">
+                                                <field name="__oc__attributes" type="object"/>
+                                                <field name="__oc__value" type="string"/>
+                                            </field>
+                                            <field name="usr:address" type="object">
+                                                <field name="__oc__attributes" type="object"/>
+                                                <field name="usr:street" type="object">
+                                                    <field name="__oc__attributes" type="object"/>
+                                                    <field name="__oc__value" type="string"/>
+                                                </field>
+                                                <field name="usr:city" type="object">
+                                                    <field name="__oc__attributes" type="object"/>
+                                                    <field name="__oc__value" type="string"/>
+                                                </field>
+                                                <field name="usr:state" type="object">
+                                                    <field name="__oc__attributes" type="object"/>
+                                                    <field name="__oc__value" type="string"/>
+                                                </field>
+                                                <field name="usr:zipCode" type="object">
+                                                    <field name="__oc__attributes" type="object"/>
+                                                    <field name="__oc__value" type="string"/>
+                                                </field>
+                                            </field>
+                                            <field name="usr:job" type="object">
+                                                <field name="__oc__attributes" type="object"/>
+                                                <field name="__oc__value" type="string"/>
+                                            </field>
+                                            <field name="usr:hobbies" type="object">
+                                                <field name="__oc__attributes" type="object"/>
+                                                <field name="__oc__value" type="array"/>
+                                            </field>
+                                        </field>
+                                    </field>
+                                </field>
+                            </field>
+                        </field>
+                    </body>
+                    <header>
+                        <item name="Content-Type" type="string">text/xml</item>
+                        <item name="Authorization" type="string">{token}</item>
+                    </header>
+                </success>
+                <fail status="400">
+                    <header/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetUser" type="">
+            <request>
+                <header>
+                    <item name="Content-Type" type="string">text/xml</item>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                
+                <endpoint>{url}</endpoint>
+                <method>POST</method>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="xml" type="object">
+                        <field name="soap:Envelope" type="object">
+                            <field name="__oc__attributes" type="object">
+                                <field name="xmlns:soap" type="string">http://schemas.xmlsoap.org/soap/envelope/</field>
+                            </field>
+                            <field name="soap:Body" type="object">
+                                <field name="__oc__attributes" type="object"/>
+                                <field name="usr:GetUserRequest" type="object">
+                                    <field name="__oc__attributes" type="object"/>
+                                    <field name="usr:User" type="object">
+                                        <field name="__oc__attributes" type="object"/>
+                                        <field name="usr:userId" type="object">
+                                            <field name="__oc__attributes" type="object"/>
+                                            <field name="__oc__value" type="string"/>
+                                        </field>
+                                        <field name="usr:name" type="object">
+                                            <field name="__oc__attributes" type="object"/>
+                                            <field name="__oc__value" type="string"/>
+                                        </field>
+                                        <field name="usr:email" type="string">
+                                            <field name="__oc__attributes" type="object"/>
+                                            <field name="__oc__value" type="string"/>
+                                        </field>
+                                        <field name="usr:address" type="object">
+                                            <field name="__oc__attributes" type="object"/>
+                                            <field name="usr:street" type="object">
+                                                <field name="__oc__attributes" type="object"/>
+                                                <field name="__oc__value" type="string"/>
+                                            </field>
+                                            <field name="usr:city" type="object">
+                                                <field name="__oc__attributes" type="object"/>
+                                                <field name="__oc__value" type="string"/>
+                                            </field>
+                                            <field name="usr:state" type="object">
+                                                <field name="__oc__attributes" type="object"/>
+                                                <field name="__oc__value" type="string"/>
+                                            </field>
+                                            <field name="usr:zipCode" type="object">
+                                                <field name="__oc__attributes" type="object"/>
+                                                <field name="__oc__value" type="string"/>
+                                            </field>
+                                        </field>
+                                        <field name="usr:job" type="object">
+                                            <field name="__oc__attributes" type="object"/>
+                                            <field name="__oc__value" type="string"/>
+                                        </field>
+                                        <field name="usr:hobbies" type="array">
+                                            <field name="__oc__attributes" type="object"/>
+                                            <field name="__oc__value" type="string"/>
+                                        </field>
+                                    </field>
+                                </field>
+                            </field>
+                        </field>
+                    </body>
+                    <header>
+                        <item name="Content-Type" type="string">text/xml</item>
+                    </header>
+                </success>
+                <fail status="400">
+                    <header/>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

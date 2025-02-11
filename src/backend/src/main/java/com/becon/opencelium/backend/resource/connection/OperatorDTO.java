@@ -27,6 +27,7 @@ public class OperatorDTO {
     private String iterator;
     private ConditionDTO condition;
     private String uiId;
+    private String expression;
 
     public String getId() {
         return id;
@@ -74,5 +75,13 @@ public class OperatorDTO {
 
     public void setUiId(String uiId) {
         this.uiId = uiId;
+    }
+
+    public String getExpression() {
+        return expression;
+    }
+
+    public void setExpression(String expression) {
+        this.expression = expression;
     }
 }

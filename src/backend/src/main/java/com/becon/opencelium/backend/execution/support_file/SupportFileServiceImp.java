@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -149,7 +151,7 @@ public class SupportFileServiceImp implements SupportFileService {
         throwIfConnectionNotExistsById(connectionId);
 
         // try to find successful execution support file by pattern
-        String filePattern = connectionId + "_s_support_*.zip";
+        String filePattern =  connectionId + "_s_support_*.zip";
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(toPath(base, connectionId.toString()), filePattern)) {
             for (Path path : stream) {

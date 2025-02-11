@@ -8,7 +8,9 @@ import com.becon.opencelium.backend.ocel.operator.Arity;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.operator.Operator;
 import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 public class Validator {
@@ -43,21 +45,31 @@ public class Validator {
      */
     public List<Token> validateAndTokenize(String expression) throws InvalidExpressionException {
         try {
+            if (StringUtils.isBlank(expression)) {
+                throw InvalidExpressionException.emptyExpression();
+            }
             List<Token> tokens = Tokenizer.splitTokens(expression);
             firstLevelCheck(tokens);
             secondLevelCheck(tokens);
             return tokens;
-        } catch (RuntimeException e) {
+        } catch (InvalidExpressionException e) {
+            throw e;
+        } catch (Exception e){
             throw InvalidExpressionException.unexpectedException(e);
         }
     }
 
     public void validate(String expression) throws InvalidExpressionException {
         try {
+            if (StringUtils.isBlank(expression)) {
+                throw InvalidExpressionException.emptyExpression();
+            }
             List<Token> tokens = Tokenizer.splitTokens(expression);
             firstLevelCheck(tokens);
             secondLevelCheck(tokens);
-        } catch (RuntimeException e) {
+        } catch (InvalidExpressionException e) {
+            throw e;
+        } catch (Exception e){
             throw InvalidExpressionException.unexpectedException(e);
         }
     }

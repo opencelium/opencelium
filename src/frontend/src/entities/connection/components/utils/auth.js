@@ -25,8 +25,8 @@ import {doRequestRejected} from '@actions/app';
 import {updateMenu} from '@actions/app';
 
 import {getCryptLS, setCryptLS} from '@entity/connection/components/utils/LocalStorage';
-import {baseUrl, baseUrlApi} from '@entity/connection/components/utils/constants/url';
 import {API_METHOD} from "@entity/connection/components/utils/constants/app";
+import {baseUrl, baseUrlApi} from "@entity/application/requests/classes/url";
 
 const {ajax} = Rx.Observable;
 

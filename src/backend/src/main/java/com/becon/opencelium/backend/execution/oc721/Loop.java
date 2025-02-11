@@ -3,6 +3,11 @@ package com.becon.opencelium.backend.execution.oc721;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
+import com.becon.opencelium.backend.utility.ReferenceUtility;
+
+import static com.becon.opencelium.backend.enums.RelationalOperator.FOR;
+import static com.becon.opencelium.backend.enums.RelationalOperator.FOR_IN;
+import static com.becon.opencelium.backend.enums.RelationalOperator.SPLIT_STRING;
 
 
 public class Loop {
@@ -14,22 +19,36 @@ public class Loop {
     private RelationalOperator operator;
 
     public static Loop fromEx(OperatorEx operatorEx) {
-        String ref = operatorEx.getCondition().getLeft();
-
         Loop result = new Loop();
-        result.setDelimiter(operatorEx.getCondition().getRight());
+
         result.setIterator(operatorEx.getIterator());
-        result.setOperator(operatorEx.getCondition().getRelationalOperator());
 
-        // if loops' type is FOR_IN then add indicator
-        if (result.getOperator() == RelationalOperator.FOR_IN) {
-            if (ref.matches(RegExpression.webhook)) {
+        String expression = operatorEx.getExpression();
+
+        String ref = ReferenceUtility.extractRef(expression, RegExpression.wrappedDirectRef);
+        if (expression.startsWith(FOR_IN.getName())) {
+            result.setOperator(FOR_IN);
+
+            if (ref == null) {
+                // then 'ref' is a 'webhook'
+                ref = ReferenceUtility.extractRef(expression, RegExpression.webhook);
+
                 int index = ref.contains(":") ? ref.indexOf(":") : ref.length() - 1;
-
                 ref = ref.substring(0, index) + "['*']~" + ref.substring(index);
             } else {
-                ref = ref + "['*']~";
+                ref = ReferenceUtility.extractDirectRef(ref) + "['*']~";
             }
+        } else if (expression.startsWith(FOR.getName())) {
+            result.setOperator(FOR);
+        } else {
+            result.setOperator(SPLIT_STRING);
+
+            String delimiter = expression.replace(ref, "")
+                    .replace(SPLIT_STRING.getName(), "")
+                    .replace("'", "")
+                    .trim();
+
+            result.setDelimiter(delimiter);
         }
         result.setRef(ref);
 

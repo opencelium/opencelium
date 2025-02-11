@@ -40,7 +40,6 @@ import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
-import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
@@ -73,7 +72,6 @@ public class ConnectionServiceImp implements ConnectionService {
     private final MaskingRuleRepository ruleRepository;
     private final PatchHelper patchHelper;
     private final WebhookService webhookService;
-    private final EntityUpdater<Enhancement> enhancementUpdater;
     private final OpenCeliumProps ocProps;
 
     public ConnectionServiceImp(
@@ -108,7 +106,6 @@ public class ConnectionServiceImp implements ConnectionService {
         this.schedulerService = schedulerService;
         this.webhookService = webhookService;
         this.ruleRepository = ruleRepository;
-        this.enhancementUpdater = entityVersionManager.getUpdater(Enhancement.class);
         this.ocProps = ocProps;
     }
 
@@ -308,48 +305,28 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public Connection getById(Long id) {
-        Connection connection = connectionRepository.findById(id)
+        return connectionRepository.findById(id)
                 .orElseThrow(() -> new ConnectionNotFoundException(id));
-
-        updateWithVersion(connection);
-
-        return connection;
     }
 
     @Override
     public List<Connection> findAll() {
-        List<Connection> all = connectionRepository.findAll();
-
-        all.forEach(this::updateWithVersion);
-
-        return all;
+        return connectionRepository.findAll();
     }
 
     @Override
     public List<Connection> findAllByConnectorId(int connectorId) {
-        LinkedList<Connection> connections = connectionRepository.findAllByConnectorId(connectorId);
-
-        connections.forEach(this::updateWithVersion);
-
-        return connections;
+        return connectionRepository.findAllByConnectorId(connectorId);
     }
 
     @Override
     public List<Connection> findAllByNameContains(String name) {
-        List<Connection> connections = connectionRepository.findAllByTitleContains(name);
-
-        connections.forEach(this::updateWithVersion);
-
-        return connections;
+        return connectionRepository.findAllByTitleContains(name);
     }
 
     @Override
     public List<Connection> getAllConnectionsNotContains(List<Long> ids) {
-        List<Connection> connections = connectionRepository.findAllByIdNotIn(ids);
-
-        connections.forEach(this::updateWithVersion);
-
-        return connections;
+        return connectionRepository.findAllByIdNotIn(ids);
     }
 
     @Override
@@ -399,11 +376,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public List<Connection> getAllByCategoryId(Integer categoryId) {
-        List<Connection> connections = connectionRepository.findAllByCategoryId(categoryId);
-
-        connections.forEach(this::updateWithVersion);
-
-        return connections;
+        return connectionRepository.findAllByCategoryId(categoryId);
     }
 
     @Override
@@ -519,17 +492,6 @@ public class ConnectionServiceImp implements ConnectionService {
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    private void updateWithVersion(Connection connection) {
-        for (Enhancement enhancement : connection.getEnhancements()) {
-            enhancementUpdater.updateFrom(enhancement, connection.getOcVersion())
-                    .ifUpdated(enhancementService::save);
-        }
-        if (!Objects.equals(connection.getOcVersion(), ocProps.getVersion())) {
-            connection.setOcVersion(ocProps.getVersion());
-            connectionRepository.save(connection);
-        }
-    }
 
     private void extractVars(Object json, List<String> varList) {
         if (json instanceof JSONObject jsonObject) {

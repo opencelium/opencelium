@@ -13,17 +13,17 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, replaceVariables} from "@application/utils/utils";
-import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO, OUTSIDE_ITEM} from "./CConnectorItem";
-import CFieldBinding from "./field_binding/CFieldBinding";
+import { consoleLog, isId, replaceVariables } from "@application/utils/utils";
+import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
+import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
+import CMethodItem from "@classes/content/connection/method/CMethodItem";
+import COperatorItem from "@classes/content/connection/operator/COperatorItem";
+import { RESPONSE_FAIL, RESPONSE_SUCCESS } from "../invoker/response/CResponse";
+import CConnectorItem, { CONNECTOR_FROM, CONNECTOR_TO, OUTSIDE_ITEM } from "./CConnectorItem";
 import CTemplate from "./CTemplate";
 import CBindingItem from "./field_binding/CBindingItem";
-import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../invoker/response/CResponse";
-import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
- import CMethodItem from "@classes/content/connection/method/CMethodItem";
- import COperatorItem from "@classes/content/connection/operator/COperatorItem";
- import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
- import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
+import CFieldBinding from "./field_binding/CFieldBinding";
+import { STATEMENT_REQUEST, STATEMENT_RESPONSE } from "./operator/CStatement";
 
 const DEFAULT_COLOR = '#ffffff';
 
@@ -67,13 +67,14 @@ export const ALL_COLORS = [
  */
 export default class CConnection{
 
-    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false, categoryId = null){
+    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false, categoryId = null, ui = null){
         if(connectionId !== 0){
             this._id = isId(connectionId) ? connectionId : 0;
         }
         this._title = title;
         this._description = description;
         this._categoryId = categoryId;
+        this._ui = ui;
         if(fromConnector !== null){
             fromConnector.connectorType = CONNECTOR_FROM;
         }
@@ -146,7 +147,8 @@ export default class CConnection{
         const error = connection && connection.hasOwnProperty('error') ? connection.error : null;
         const readOnly = connection && connection.hasOwnProperty('readOnly') ? connection.readOnly : false;
         const categoryId = connection && connection.hasOwnProperty('categoryId') ? connection.categoryId : null;
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly, categoryId);
+        const ui = connection && connection.hasOwnProperty('ui') ? connection.ui : null;
+        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly, categoryId, ui);
     }
 
     static duplicateConnection(connection){
@@ -452,6 +454,14 @@ export default class CConnection{
         this._categoryId = categoryId;
     }
 
+    get ui(){
+        return this._ui;
+    }
+
+    set ui(ui){
+        this._ui = ui;
+    }
+
     get fromConnector(){
         return this._fromConnector;
     }
@@ -662,12 +672,21 @@ export default class CConnection{
             let operatorIndex = operators[i].index;
             let subIndex = operatorIndex.substring(0, operator.index.length);
             if(subIndex === operator.index && operatorIndex.length !== operator.index.length){
+                this.removeUiOperator(operators[i]);
                 connector.removeOperator(operators[i], false);
             }
         }
+        this.removeUiOperator(operator);
         connector.removeOperator(operator, true, true);
     }
-
+    removeUiOperator(operator) {
+        const uiOperators = this._ui?.operators ? [...this._ui?.operators] : [];
+        const index = uiOperators.findIndex(o => o.id === operator.uiId)
+        if (index !== -1) {
+            uiOperators.splice(index, 1)
+            this._ui = {operators: uiOperators};
+        }
+    }
     addFromConnectorOperator(operator, mode = OUTSIDE_ITEM){
         const newOperator = this.fromConnector.addOperator(operator, mode);
         this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
@@ -739,7 +758,7 @@ export default class CConnection{
             && (value.type === STATEMENT_REQUEST
             || value.type === STATEMENT_RESPONSE)){
                 if(fieldType[0] === RESPONSE_SUCCESS
-                    || fieldType[0] === RESPONSE_FAIL){
+                    || fieldType[0] === RESPONSE_FAIL || 'header' || 'body'){
                     return true;
                 }
         }
@@ -844,13 +863,16 @@ export default class CConnection{
                 if(!hasFound){
                     for(let i = 0; i < this._fieldBinding.length; i++) {
                         if(this._fieldBinding[i].to.length === 1 && this._fieldBinding[i].from.length === 0){
+                            
                             let index = bindingItem.to.findIndex(b => CFieldBinding.compareTwoBindingItems(b, this._fieldBinding[i].to[0]));
+                            
                             if(index !== -1){
                                 this._fieldBinding.splice(i, 1);
                             }
                         }
                     }
                     newFieldBinding = CFieldBinding.createFieldBinding({from: bindingItem.from, to: bindingItem.to});
+                    console.log('first add', newFieldBinding)
                     this._fieldBinding.push(newFieldBinding);
                     for(let i = 0; i < this._fieldBinding.length; i++) {
                         if(this._fieldBinding[i].to.length === 1 && this._fieldBinding[i].from.length === 0){
@@ -979,6 +1001,7 @@ export default class CConnection{
             toConnector,
             fieldBinding,
             categoryId: this._categoryId,
+            ui: this._ui,
         };
         if(this.hasOwnProperty('_id')){
             obj.id = this._id;

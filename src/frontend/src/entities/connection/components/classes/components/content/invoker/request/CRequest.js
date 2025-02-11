@@ -13,15 +13,15 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isArray, isString} from "@application/utils/utils";
-import CBody from "@entity/connection/components/classes/components/content/invoker/CBody";
-import {instanceOf} from "prop-types";
-import {API_METHOD} from "@entity/connection/components/utils/constants/app";
-import COperation from "@entity/connection/components/classes/components/content/invoker/COperation";
+import { consoleLog, isArray, isString } from "@application/utils/utils";
 import {
     convertHeaderFormatToObject,
     parseHeader
 } from "@change_component//form_elements/form_connection/form_methods/help";
+import CBody from "@entity/connection/components/classes/components/content/invoker/CBody";
+import COperation from "@entity/connection/components/classes/components/content/invoker/COperation";
+import { API_METHOD } from "@entity/connection/components/utils/constants/app";
+import { instanceOf } from "prop-types";
 export const METHOD_TYPES = [
     {value: API_METHOD.POST, label: 'POST'},
     {value: API_METHOD.GET, label: 'GET'},
@@ -96,6 +96,22 @@ export default class CRequest{
         this._body.fields = fields;
     }
 
+    getHeaderFields(){
+        const result = this._header.reduce((acc, item) => {
+            acc[item.name] = item.value;
+            return acc;
+        }, {});
+        return result;
+    }
+
+    setHeaderFields(fields){
+        this._header = fields;
+    }
+
+    setBodyFields(fields){
+        this._body.fields = fields;
+    }
+
     get method(){
         return this._method;
     }
@@ -110,6 +126,10 @@ export default class CRequest{
 
     get header(){
         return this._header;
+    }
+
+    set header(header) {
+        this._header = header;
     }
 
     get operation(){
@@ -173,8 +193,14 @@ export default class CRequest{
             body: params.bodyOnlyConvert ? this._body.convertToObject() : this._body.getObject(),
             method: this._method,
         };
-        if(this._header && this._header.length > 0){
-            obj.header = convertHeaderFormatToObject(this._header);
+        if (this._header && Object.keys(this._header).length > 0) {
+            
+            if (typeof this._header === 'object' && !Array.isArray(this._header)) {
+                obj.header = this._header;
+            }
+            else{
+                obj.header = convertHeaderFormatToObject(this._header);
+            }
         }
         return obj;
     }

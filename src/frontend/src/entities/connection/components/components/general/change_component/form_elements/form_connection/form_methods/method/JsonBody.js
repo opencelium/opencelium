@@ -13,59 +13,81 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
+import CConnection from '@entity/connection/components/classes/components/content/connection/CConnection';
+import CConnectorItem from '@entity/connection/components/classes/components/content/connection/CConnectorItem';
+import { CJsonEditor } from '@entity/connection/components/classes/components/general/basic_components/json_editor/CJsonEditor';
+import { RequestBody } from '@entity/connection/components/decorators/RequestBody';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { withTranslation } from 'react-i18next';
 import ReactJson from 'react-json-view';
-import {withTranslation} from "react-i18next";
-import {RequestBody} from "@entity/connection/components/decorators/RequestBody";
-import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
-import CConnectorItem from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
-import {CJsonEditor} from "@entity/connection/components/classes/components/general/basic_components/json_editor/CJsonEditor";
 
 @withTranslation('basic_components')
 @RequestBody(CJsonEditor)
-class JsonBody extends Component{
+class JsonBody extends Component {
+	constructor(props) {
+		super(props);
+	}
 
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        const {readOnly, method, updateBody, ReferenceComponent, PointerComponent, WebhookComponent, onReferenceClick, source} = this.props;
-        const src = source === null ? method.request.getBodyFields() : source;
-        return(
-            <ReactJson
-                ref={this.props.reactJsonRef}
-                name={false}
-                collapsed={false}
-                src={src}
-                onEdit={readOnly ? false : updateBody}
-                onDelete={readOnly ? false : updateBody}
-                onAdd={readOnly ? false : updateBody}
-                style={{wordBreak: 'break-word', padding: '8px 0', width: '80%', display: 'inline-block', position: 'relative'}}
-                ReferenceComponent={ReferenceComponent}
-                PointerComponent={PointerComponent}
-                WebhookComponent={WebhookComponent}
-                onReferenceClick={onReferenceClick}
-            />
-        );
-    }
+	render() {
+		const {
+			readOnly,
+			method,
+			updateBody,
+			ReferenceComponent,
+			PointerComponent,
+			WebhookComponent,
+			onReferenceClick,
+			source,
+			target,
+		} = this.props;
+		const src =
+			source === null
+				? target === 'header'
+					? method.request.getHeaderFields()
+					: method.request.getBodyFields()
+				: source;
+		return (
+			<ReactJson
+				ref={this.props.reactJsonRef}
+				name={false}
+				collapsed={false}
+				src={src}
+				onEdit={readOnly ? false : updateBody}
+				onDelete={readOnly ? false : updateBody}
+				onAdd={readOnly ? false : updateBody}
+				style={{
+					wordBreak: 'break-word',
+					padding: '8px 0',
+					width: '80%',
+					display: 'inline-block',
+					position: 'relative',
+				}}
+				ReferenceComponent={ReferenceComponent}
+				PointerComponent={PointerComponent}
+				WebhookComponent={WebhookComponent}
+				onReferenceClick={onReferenceClick}
+			/>
+		);
+	}
 }
 
 JsonBody.propTypes = {
-    id: PropTypes.string.isRequired,
-    readOnly: PropTypes.bool,
-    connection: PropTypes.instanceOf(CConnection),
-    connector: PropTypes.instanceOf(CConnectorItem),
-    updateBody: PropTypes.func,
+	id: PropTypes.string.isRequired,
+	readOnly: PropTypes.bool,
+	connection: PropTypes.instanceOf(CConnection),
+	connector: PropTypes.instanceOf(CConnectorItem),
+	updateBody: PropTypes.func,
 };
 
 JsonBody.defaultProps = {
-    readOnly: false,
-    bodyStyles: {},
-    isDraft: false,
-    source: null,
-    noPlaceholder: false,
+	readOnly: false,
+	bodyStyles: {},
+	isDraft: false,
+	source: null,
+	noPlaceholder: false,
 };
 
-export default React.forwardRef((props, ref) => <JsonBody reactJsonRef={ref} {...props}/>);
+export default React.forwardRef((props, ref) => (
+	<JsonBody reactJsonRef={ref} {...props} />
+));

@@ -17,11 +17,12 @@ public class MaskingServiceImp implements MaskingService {
     @Override
     public String applyMask(Object message, MaskPart part) {
         String prefix = part.toRef(operationId);
+        String all = part.toRef("#[*]");
 
         String result = part.toString(message);
 
         for (MaskingRule rule : rules) {
-            if (rule.getType() ==  RuleType.REGEX || rule.getExpression().startsWith(prefix) || rule.getExpression().startsWith("#[*].")) {
+            if (rule.getType() ==  RuleType.REGEX || rule.getExpression().startsWith(prefix) || rule.getExpression().startsWith(all)) {
                 result = rule.getType().apply(result, rule);
             }
         }

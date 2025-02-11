@@ -86,7 +86,6 @@ public class ExecutionAspect {
     private final LastExecutionService lastExecutionService;
     private final DataAggregatorService dataAggregatorService;
     private final SupportFileService supportFileService;
-
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             @Qualifier("userServiceImpl") UserService userService,

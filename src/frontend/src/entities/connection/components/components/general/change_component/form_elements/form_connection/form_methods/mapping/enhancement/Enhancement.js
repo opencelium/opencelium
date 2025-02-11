@@ -131,7 +131,7 @@ class Enhancement extends Component {
 				<ReferenceBlockStyled key={key} style={{ margin: '5px 0' }}>
 					<span>{`${item.var} equals to `}</span>
 					<SourceFieldStyled style={{ color: item.color }}>
-						{item.prop}
+						{item.prop[item.prop.length - 1] === '.' ? item.prop.substring(0, item.prop.length - 1) : item.prop}
 					</SourceFieldStyled>
 					<span>{' field of method '}</span>
 					<SourceMethodNameStyled style={{ background: item.color }}>

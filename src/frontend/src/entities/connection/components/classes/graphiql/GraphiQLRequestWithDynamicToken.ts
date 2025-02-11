@@ -21,7 +21,7 @@ import {
     REQUEST_METHOD
 } from "@application/requests/interfaces/IApplication";
 import {AxiosResponse} from "axios";
-import { GraphQLRequestProps } from "@entity/connection/requests/interfaces/IGraphQL";
+import { GraphQLRequestProps } from "@root/requests/interfaces/IGraphQL";
 
 export default class GraphiQLRequestWithDynamicToken extends GraphiQLRequest {
 
