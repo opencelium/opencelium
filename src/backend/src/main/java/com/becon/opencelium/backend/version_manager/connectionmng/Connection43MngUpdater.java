@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.version_manager.connectionmng;
 
 import com.becon.opencelium.backend.database.mongodb.entity.*;
+import com.becon.opencelium.backend.ocel.OCExpressionHelper;
 import com.becon.opencelium.backend.version_manager.Wrapper;
 import com.becon.opencelium.backend.version_manager.backup.Backup;
 import com.becon.opencelium.backend.version_manager.base.Reference;
@@ -34,7 +35,7 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
         return updateFromInternal(connection, oldVersion);
     }
 
-    private Wrapper<ConnectionMng> updateFromInternal(ConnectionMng connection, String oldVersion){
+    private Wrapper<ConnectionMng> updateFromInternal(ConnectionMng connection, String oldVersion) {
         if (Objects.isNull(connection) || Objects.equals(oldVersion, currentVersion.getVersion()))
             return Wrapper.notUpdated(connection);
 
@@ -65,7 +66,7 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
     }
 
     private void update(OperatorMng operator, Reference<Boolean> changed) {
-        if (!Objects.isNull(operator) && !Objects.isNull(operator.getCondition())) {
+        if (Objects.nonNull(operator) && Objects.nonNull(operator.getCondition())) {
             ConditionMng condition = operator.getCondition();
             StatementMng leftStatement = condition.getLeftStatement();
             StatementMng rightStatement = condition.getRightStatement();
@@ -75,9 +76,14 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
                 }
             }
             if (!Objects.isNull(rightStatement)) {
-                if (!StringUtils.isBlank(rightStatement.getType())){
+                if (!StringUtils.isBlank(rightStatement.getType())) {
                     rightStatement.setField(Version43Utils.replace(rightStatement.getField(), changed, true, Objects.equals(rightStatement.getType(), "header")));
                 }
+            }
+            String exp = OCExpressionHelper.buildExp(operator.getCondition());
+            if (Objects.nonNull(exp)) {
+                operator.setExpression(exp);
+                operator.setCondition(null);
             }
         }
     }
@@ -106,7 +112,7 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
             if (Objects.nonNull(fieldBindingMng.getFrom())) {
                 fieldBindingMng.getFrom().forEach(x -> {
                     if (Objects.nonNull(x)) {
-                        if (!StringUtils.isBlank(x.getType())){
+                        if (!StringUtils.isBlank(x.getType())) {
                             x.setField(Version43Utils.replace(x.getField(), changed, true, Objects.equals(x.getType(), "header")));
                         }
                     }
@@ -115,7 +121,7 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
             if (Objects.nonNull(fieldBindingMng.getTo())) {
                 fieldBindingMng.getTo().forEach(x -> {
                     if (Objects.nonNull(x)) {
-                        if (!StringUtils.isBlank(x.getType())){
+                        if (!StringUtils.isBlank(x.getType())) {
                             x.setField(Version43Utils.replace(x.getField(), changed, true, Objects.equals(x.getType(), "header")));
                         }
                     }

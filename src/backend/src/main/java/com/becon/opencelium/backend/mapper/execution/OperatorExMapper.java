@@ -7,14 +7,11 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Component
 public class OperatorExMapper {
-    private final ConditionExMapper conditionExMapper;
 
-    public OperatorExMapper(ConditionExMapper conditionExMapper) {
-        this.conditionExMapper = conditionExMapper;
+    public OperatorExMapper() {
     }
 
     public OperatorEx toEntity(OperatorMng dto) {
@@ -24,9 +21,7 @@ public class OperatorExMapper {
         operatorEx.setType(dto.getType());
         operatorEx.setIterator(dto.getIterator());
         operatorEx.setExpression(dto.getExpression());
-        if (Objects.nonNull(dto.getCondition()) && Objects.equals(dto.getType(), "loop")) {
-            operatorEx.setCondition(conditionExMapper.toEntity(dto.getCondition(), dto.getType()));
-        }
+
         return operatorEx;
     }
 

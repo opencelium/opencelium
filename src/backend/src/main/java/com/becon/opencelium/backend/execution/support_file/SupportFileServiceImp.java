@@ -218,6 +218,17 @@ public class SupportFileServiceImp implements SupportFileService {
         }
     }
 
+    @Override
+    public void deleteSupportFile(String zipFileName) {
+        String connectionId = zipFileName.substring(0, zipFileName.indexOf('_'));
+        Path zipPath =  toPath(base, connectionId, zipFileName);
+        try {
+            delete(zipPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void throwIfConnectionNotExistsById(Long connectionId) {
         boolean exists = connectionSqlService.existsById(connectionId) && connectionMngService.existsByConnectionId(connectionId);
 
