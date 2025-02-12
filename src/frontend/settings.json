@@ -17,5 +17,4 @@
     "ca": "path_to_ca"
   },
   "SERVER_ENDPOINT": "",
-  "SERVER_API_ENDPOINT": ""
 }
