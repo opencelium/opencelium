@@ -63,4 +63,12 @@ public class ValueUtils {
         return o1 instanceof Boolean
                 || o1 instanceof String str && ("true".equals(str) || "false".equals(str));
     }
+
+    public static boolean isString(String x) {
+        return x.startsWith("\"") && x.endsWith("\"") || x.startsWith("'") && x.endsWith("'");
+    }
+
+    public static boolean isArray(String x) {
+        return x.startsWith("[") && x.endsWith("]");
+    }
 }

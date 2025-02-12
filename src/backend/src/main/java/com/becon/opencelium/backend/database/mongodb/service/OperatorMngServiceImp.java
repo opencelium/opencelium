@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.database.mongodb.service;
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.repository.OperatorMngRepository;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.ocel.OCExpressionHelper;
 import com.becon.opencelium.backend.ocel.Validator;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
@@ -28,19 +29,13 @@ public class OperatorMngServiceImp implements OperatorMngService {
 
     @Override
     public List<OperatorMng> saveAll(List<OperatorMng> operators) {
-        for (OperatorMng operator : operators) {
-            if("if".equals(operator.getType())){
-                ocelValidator.validate(operator.getExpression());
-            }
-        }
+        operators.forEach(this::validateExpression);
         return operatorMngRepository.saveAll(operators);
     }
 
     @Override
     public OperatorMng save(OperatorMng operatorMng) {
-        if("if".equals(operatorMng.getType())){
-            ocelValidator.validate(operatorMng.getExpression());
-        }
+        validateExpression(operatorMng);
         return operatorMngRepository.save(operatorMng);
     }
 
@@ -71,9 +66,7 @@ public class OperatorMngServiceImp implements OperatorMngService {
             int idx = patchHelper.getIndexOfList(opDetail.getIndexOfOperator(), patched.getOperators().size());
             OperatorDTO toSave = patched.getOperators().get(idx);
             toSave.setId(null);
-            if("if".equals(toSave.getType())){
-                ocelValidator.validate(toSave.getExpression());
-            }
+            validateExpression(toSave.getExpression(), toSave.getType());
             OperatorMng saved = save(operatorMngMapper.toEntity(toSave));
             patched.getOperators().get(idx).setId(saved.getId());
         } else if (opDetail.isOperatorDeleted()) {
@@ -86,18 +79,14 @@ public class OperatorMngServiceImp implements OperatorMngService {
 
             //saving new operator
             OperatorDTO toSave = patched.getOperators().get(idx);
-            if("if".equals(toSave.getType())){
-                ocelValidator.validate(toSave.getExpression());
-            }
+            validateExpression(toSave.getExpression(), toSave.getType());
             OperatorMng saved = save(operatorMngMapper.toEntity(toSave));
             patched.getOperators().get(idx).setId(saved.getId());
         } else if (opDetail.isOperatorModified()) {
             int idx = patchHelper.getIndexOfList(opDetail.getIndexOfOperator(), patched.getOperators().size());
             List<OperatorDTO> operators = patched.getOperators();
             OperatorDTO toModify = operators.get(idx);
-            if("if".equals(toModify.getType())){
-                ocelValidator.validate(toModify.getExpression());
-            }
+            validateExpression(toModify.getExpression(), toModify.getType());
             try {
                 getById(toModify.getId());
             } catch (RuntimeException e) {
@@ -112,14 +101,24 @@ public class OperatorMngServiceImp implements OperatorMngService {
 
             //saving new operators
             if (patched != null && patched.getOperators() != null) {
+                patched.getOperators().forEach(o -> validateExpression(o.getExpression(), o.getType()));
                 patched.getOperators().forEach(o -> {
-                    if("if".equals(o.getType())){
-                        ocelValidator.validate(o.getExpression());
-                    }
                     OperatorMng saved = save(operatorMngMapper.toEntity(o));
                     o.setId(saved.getId());
                 });
             }
+        }
+    }
+
+    private void validateExpression(OperatorMng operator) {
+        validateExpression(operator.getExpression(), operator.getType());
+    }
+
+    private void validateExpression(String exp, String type) {
+        if ("if".equals(type)) {
+            ocelValidator.validate(exp);
+        } else {
+            OCExpressionHelper.validateLoopExp(exp);
         }
     }
 }
