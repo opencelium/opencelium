@@ -1,7 +1,8 @@
-import { v4 as uuidv4 } from "uuid";
-import {UnaryOperatorName, BinaryOperatorName, AllOperatorNames, OperatorName} from './interfaces/OperatorName';
+import {v4 as uuidv4} from "uuid";
+import {BinaryOperatorName, OperatorName, UnaryOperatorName} from './interfaces/OperatorName';
 import {Conjunction, GroupProps, OperatorType, RuleProps} from './props';
 import OperatorTypeFactory from "@app_component/operator_builder/classes/OperatorTypeFactory";
+
 export const generateUUID = (): string => {
     return uuidv4();
 };
@@ -33,7 +34,12 @@ export function jsonToString(json: GroupProps | RuleProps, type: OperatorType): 
         } else {
             itemsString = itemsString.join('');
         }
-        return { result: `(${itemsString})`, isNotValid };
+        switch (type) {
+            case OperatorType.Loop:
+                return { result: itemsString, isNotValid };
+            case OperatorType.If:
+                return { result: `(${itemsString})`, isNotValid };
+        }
     }
 
     return { result: '', isNotValid: true };
