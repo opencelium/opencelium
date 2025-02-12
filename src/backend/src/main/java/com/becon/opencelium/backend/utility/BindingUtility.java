@@ -184,7 +184,7 @@ public class BindingUtility {
                 .stream()
                 .filter(entry -> entry.getKey().equals(fieldName))
                 .findFirst()
-                .ifPresent(entry -> entry.setValue("{%" + id + "%}"));
+                .ifPresent(entry -> entry.setValue("#{%" + id + "%}"));
 //                .ifPresent(entry -> entry.setValue(PathAndReferenceUtility.bindExactlyPlace(entry.getValue(), refs, id)));
     }
 
