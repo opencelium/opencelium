@@ -1,5 +1,8 @@
 package com.becon.opencelium.backend.ocel.utils;
 
+import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -66,4 +69,19 @@ public class Utils {
 
         return result;
     }
+
+    public static String buildExp(Object left, Object right, OperatorEnum operator) {
+        return StringUtils.joinWith(" ", left, operator.getName(), right);
+    }
+
+    public static String buildExp(Object operand, OperatorEnum operator) {
+        return buildExp(operand, operator, false);
+    }
+
+    public static String buildExp(Object operand, OperatorEnum operator, boolean leftSided) {
+        return leftSided
+                ? operator.getName() + " " + operand.toString()
+                : operand.toString() + " " + operator.getName();
+    }
+
 }
