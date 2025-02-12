@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/aggregator", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/aggregator", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Aggregator", description = "Manages operation for collecting data from responses of executed methods")
 public class AggregatorController {
 

@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Application Components", description = "Manages operations related to Application Components management")
-@RequestMapping(value = "/api/component", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/component", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ComponentController {
 
     @Autowired

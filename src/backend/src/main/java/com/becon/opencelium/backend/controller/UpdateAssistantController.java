@@ -68,7 +68,7 @@ import java.util.zip.ZipFile;
 
 @RestController
 @Tag(name = "Update Assistant", description = "Manages version control operations.")
-@RequestMapping(value = "/api/assistant", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/assistant", produces = MediaType.APPLICATION_JSON_VALUE)
 public class UpdateAssistantController {
 
     @Autowired

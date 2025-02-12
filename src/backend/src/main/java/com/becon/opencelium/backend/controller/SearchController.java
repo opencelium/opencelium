@@ -23,7 +23,7 @@ import java.util.*;
 
 @RestController
 @Tag(name = "Search", description = "Manages operations related to search function")
-@RequestMapping(value = "/api/search", produces = "application/json")
+@RequestMapping(value = "/search", produces = "application/json")
 public class SearchController {
 
     @Autowired

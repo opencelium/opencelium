@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import java.net.URI;
 
 @RestController
-@RequestMapping("api/editor/settings")
+@RequestMapping("/editor/settings")
 @Tag(name = "Category", description = "Manages operations related to Editor Settings management")
 public class EditorSettingsController {
 

@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 
 @RestController
 @Tag(name = "Event Message", description = "Manages operations related to Event Messages management")
-@RequestMapping(value = "/api/message", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/message", produces = MediaType.APPLICATION_JSON_VALUE)
 public class MessageController {
 
     @Autowired

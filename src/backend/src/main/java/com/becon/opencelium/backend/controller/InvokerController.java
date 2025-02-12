@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Invoker", description = "Manages operations related to Invoker management")
-@RequestMapping(value = "/api/invoker", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/invoker", produces = MediaType.APPLICATION_JSON_VALUE)
 public class InvokerController {
     private final InvokerService invokerService;
     private final ConnectorService connectorService;
