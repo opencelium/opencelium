@@ -36,8 +36,9 @@ export const APP_STATUS_UP = 'UP';
 /**
  * urls for requests
  */
-export const baseUrl = SETTINGS.hasOwnProperty('SERVER_ENDPOINT') && SETTINGS.SERVER_ENDPOINT !== '' ? SETTINGS.SERVER_ENDPOINT : `${protocol}//${hostname}:${apiPort}/`;
-export const baseUrlApi = SETTINGS.hasOwnProperty('SERVER_ENDPOINT') && SETTINGS.SERVER_ENDPOINT !== '' ? SETTINGS.SERVER_ENDPOINT : `${protocol}//${hostname}:${apiPort}/`;
+export const baseUrl = SETTINGS.hasOwnProperty('SERVER_ENDPOINT') && SETTINGS.SERVER_ENDPOINT !== '' ? SETTINGS.SERVER_ENDPOINT : `${protocol}//${hostname}${apiPort ? `:${apiPort}` : ""}/`;
+export const baseUrlApi = SETTINGS.hasOwnProperty('SERVER_ENDPOINT') && SETTINGS.SERVER_ENDPOINT !== '' ? SETTINGS.SERVER_ENDPOINT : `${protocol}//${hostname}${apiPort ? `:${apiPort}` : ""}/`;
+`${protocol}//${hostname}${SETTINGS.SERVER_ENDPOINT}`
 export const socketServer = `${protocol}//${hostname}:${socketPort}/`;
 export const kibanaUrl = `${protocol}//${hostname}:${kibanaPort}/app/kibana`;
 export const errorTicketUrl = 'https://becon88.atlassian.net/rest/collectors/1.0/template/form/cb37ee4e';
