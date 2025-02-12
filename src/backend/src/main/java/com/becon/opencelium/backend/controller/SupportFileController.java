@@ -151,7 +151,7 @@ public class SupportFileController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping
-    public ResponseEntity<Resource> deleteSupportFile(@RequestBody SupportFileNamesDTO dto) {
+    public ResponseEntity<Resource> deleteSupportFiles(@RequestBody SupportFileNamesDTO dto) {
         dto.getFilenames().forEach(fileService::deleteSupportFile);
         return ResponseEntity.noContent().build();
     }
