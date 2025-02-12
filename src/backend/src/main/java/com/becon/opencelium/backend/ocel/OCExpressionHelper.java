@@ -28,11 +28,11 @@ public class OCExpressionHelper {
         }
 
         if (operatorEnum == OperatorEnum.FOR || operatorEnum == OperatorEnum.FOR_IN) {
-            return operatorEnum.getName() + " " + buildOperand(leftStatement);
+            return operatorEnum.getName() + " " + buildOperand(leftStatement, rightStatement.getRightPropertyValue());
         }
 
         if (operatorEnum == OperatorEnum.SPLIT_STRING) {
-            return buildOperand(leftStatement) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement);
+            return buildOperand(leftStatement, rightStatement.getRightPropertyValue()) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement);
         }
 
         Operator operator = OperatorFactory.getOperator(operatorEnum);
@@ -43,28 +43,35 @@ public class OCExpressionHelper {
             if (operator.isLeftSided()) {
                 return operatorEnum.getName() + " " + buildOperand(rightStatement);
             } else {
-                return buildOperand(leftStatement) + " " + operatorEnum.getName();
+                return buildOperand(leftStatement, rightStatement.getRightPropertyValue()) + " " + operatorEnum.getName();
             }
         } else {
             if (operatorEnum == OperatorEnum.IS_TYPE_OF) {
-                return buildOperand(leftStatement) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement, false);
+                return buildOperand(leftStatement, rightStatement.getRightPropertyValue()) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement, false);
             }
-            return buildOperand(leftStatement) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement);
+            return buildOperand(leftStatement, rightStatement.getRightPropertyValue()) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement);
         }
-
     }
 
-    private static String buildOperand(StatementMng statement, boolean quoted) {
+    private static String buildOperand(StatementMng statement, String rightPropertyValue) {
+        return buildOperand(statement, false, rightPropertyValue);
+    }
+
+    private static String buildOperand(StatementMng statement, boolean quoted, String rpv) {
         if (Objects.isNull(statement)) return "";
         if (StringUtils.isBlank(statement.getType()) && StringUtils.isBlank(statement.getColor())) {
             if (!quoted) return statement.getField();
             return "'" + statement.getField() + "'";
         } else {
-            return "{%" + PathAndReferenceUtility.rebuildReference(statement.getColor(), statement.getType(), statement.getField()) + "%}";
+            return "{%" + PathAndReferenceUtility.rebuildReference(statement.getColor(), statement.getType(), statement.getField()) + (StringUtils.isBlank(rpv) ? "" : "." + rpv) + "%}";
         }
     }
 
+    private static String buildOperand(StatementMng statement, boolean quoted) {
+        return buildOperand(statement, quoted, "");
+    }
+
     private static String buildOperand(StatementMng statement) {
-        return buildOperand(statement, true);
+        return buildOperand(statement, true, "");
     }
 }
