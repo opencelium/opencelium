@@ -34,10 +34,9 @@ const cards = [
     {id: 7, name: 'Data Aggregator', link: '/data_aggregator'},
     {id: 8, name: 'Notification Templates', link: '/notification_templates'},
     {id: 9, name: 'Update Assistant', link: '/update_assistant', isLoading: true, isDisabled: true},
-    {id: 10, name: 'Swagger API Docs', link: `${Urls.baseUrl}docs`, isExternalHref: true},
-    {id: 11, name: 'License Management', link: `/license_management`},
-    {id: 12, name: 'Migration', link: `/migration`},
-    {id: 13, name: 'Categories', link: `/categories`},
+    {id: 10, name: 'License Management', link: `/license_management`},
+    {id: 11, name: 'Migration', link: `/migration`},
+    {id: 12, name: 'Categories', link: `/categories`},
 ]
 const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
