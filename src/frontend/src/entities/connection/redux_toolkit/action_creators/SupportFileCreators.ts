@@ -60,8 +60,9 @@ export const getSupportFiles = createAsyncThunk(
 )
 export const deleteSupportFile = createAsyncThunk(
     'connection/delete/support-file',
-    async(filename: string, thunkAPI) => {
+    async(filepath: string, thunkAPI) => {
         try{
+            const filename = filepath.split("/").pop();
             const request = new SupportFileRequest({endpoint: `/${filename}`});
             await request.deleteSupportFile();
             return filename;
