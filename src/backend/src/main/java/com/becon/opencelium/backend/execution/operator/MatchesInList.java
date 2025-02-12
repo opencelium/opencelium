@@ -11,6 +11,6 @@ public class MatchesInList implements Operator {
 //        String[] values = (String[]) o2;
         Like like = new Like();
 
-        return Arrays.stream(values).anyMatch(v -> like.apply(o1, v));
+        return Arrays.stream(values).anyMatch(v -> like.apply(o1.toString(), v));
     }
 }
