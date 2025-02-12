@@ -504,7 +504,7 @@ public class ConnectionServiceImp implements ConnectionService {
             connection.getEnhancements().forEach(enhancement -> {
                 enhancement.setConnection(null);
                 enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
-                        .ifUpdated(x->{
+                        .ifUpdated(x -> {
                             x.setConnection(connection);
                             enhancementService.save(enhancement);
                         });

@@ -21,6 +21,7 @@ public class Tokenizer {
         prefixSuffixMap = new HashMap<>();
         prefixSuffixMap.putAll(ReferenceUtils.getPreSufMap());
         prefixSuffixMap.put("\"", "\"");
+        prefixSuffixMap.put("'", "'");
         prefixSuffixMap.put("[", "]");
     }
 
