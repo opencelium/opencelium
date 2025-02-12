@@ -7,6 +7,7 @@ import com.becon.opencelium.backend.ocel.operator.Operator;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.OperatorFactory;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
+import io.micrometer.common.util.StringUtils;
 
 import java.util.Objects;
 
@@ -15,6 +16,10 @@ public class OCExpressionHelper {
         StatementMng leftStatement = condition.getLeftStatement();
         StatementMng rightStatement = condition.getRightStatement();
         String op = condition.getRelationalOperator();
+
+        if (StringUtils.isBlank(op)) {
+            op = "for";
+        }
 
         OperatorEnum operatorEnum = OperatorEnum.fromName(op);
 
@@ -51,7 +56,7 @@ public class OCExpressionHelper {
 
     private static String buildOperand(StatementMng statement, boolean quoted) {
         if (Objects.isNull(statement)) return "";
-        if (Objects.isNull(statement.getType()) && Objects.isNull(statement.getColor())) {
+        if (StringUtils.isBlank(statement.getType()) && StringUtils.isBlank(statement.getColor())) {
             if (!quoted) return statement.getField();
             return "'" + statement.getField() + "'";
         } else {
