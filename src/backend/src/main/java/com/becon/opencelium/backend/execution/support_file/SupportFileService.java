@@ -9,4 +9,5 @@ public interface SupportFileService {
     File getSupportFile(Long connectionId, String zipFileName);
     File getSupportFile(Long connectionId);
     void collectFiles(Long connectionId, long timestamp, String type);
+    void deleteSupportFile(String zipFileName);
 }

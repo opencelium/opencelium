@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.execution.support_file.ConnectionSupportFiles;
 import com.becon.opencelium.backend.execution.support_file.SupportFileService;
+import com.becon.opencelium.backend.resource.connection.SupportFileNamesDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.ComponentResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,8 +19,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -114,5 +118,41 @@ public class SupportFileController {
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
 
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Deletes support file by file name")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Support file has been successfully deleted",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ComponentResource.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping("/{zipFileName}")
+    public ResponseEntity<Resource> deleteSupportFile(@PathVariable String zipFileName) {
+        fileService.deleteSupportFile(zipFileName);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Deletes support files by file names")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Support files have been successfully deleted",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ComponentResource.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping
+    public ResponseEntity<Resource> deleteSupportFile(@RequestBody SupportFileNamesDTO dto) {
+        dto.getFilenames().forEach(fileService::deleteSupportFile);
+        return ResponseEntity.noContent().build();
     }
 }
