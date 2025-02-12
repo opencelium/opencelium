@@ -1,9 +1,7 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.enums.LogType;
-import com.becon.opencelium.backend.enums.MaskPart;
 import com.becon.opencelium.backend.enums.OpType;
-import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
 import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
@@ -12,8 +10,6 @@ import com.becon.opencelium.backend.execution.logger.msg.MethodData;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
-import com.becon.opencelium.backend.execution.operator.Operator;
-import com.becon.opencelium.backend.execution.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
@@ -21,13 +17,11 @@ import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.ocel.ExpressionProcessor;
 import com.becon.opencelium.backend.ocel.ExpressionProcessorFactory;
 import com.becon.opencelium.backend.ocel.ProcessorType;
-import com.becon.opencelium.backend.resource.execution.ConditionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
-import com.becon.opencelium.backend.utility.ReferenceUtility;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -38,11 +32,11 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
 
 public class ConnectorExecutor {
 
@@ -115,7 +109,6 @@ public class ConnectorExecutor {
             }
 
             // set up logger and masking for the current operation
-            masking.setOperationId(operation.getOperationId());
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
             logger.logAndSend(String.format(BREAK, "API OPERATION", "START", index));
             logger.logAndSend(String.format(
@@ -128,7 +121,6 @@ public class ConnectorExecutor {
             logger.logAndSend(String.format(BREAK, "API OPERATION", "END", index));
             // clean up after operation execution
             logger.getLogEntity().setMethodData(null);
-            masking.setOperationId(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
                 logger.logAndSend(String.format(BREAK, operator.getExpression(), "START", index));
@@ -205,6 +197,8 @@ public class ConnectorExecutor {
     }
 
     private void executeOperation(OperationDTO dto) {
+        BiFunction<String, String, String> toRef = (type, part) -> dto.getOperationId() + ".(" + type + ")." + part;
+
         Pagination pagination = null;
         if (dto.getOperationType() == OpType.PAGINATION) {
             pagination = dto.getPagination() != null ? dto.getPagination() : connector.getPagination();
@@ -237,9 +231,9 @@ public class ConnectorExecutor {
             }
 
             logger.logAndSend("Http Method: " + requestEntity.getMethod());
-            logger.logAndSend("URL: " + masking.applyMask(uri, MaskPart.URL));
-            logger.logAndSend("Header: " + masking.applyMask(requestEntity.getHeaders(), MaskPart.HEADER));
-            logger.logAndSend("Body: " + masking.applyMask(requestEntity.getBody(), MaskPart.BODY));
+            logger.logAndSend(masking.applyMask(uri, toRef.apply("request", "url")));
+            logger.logAndSend(masking.applyMask(requestEntity.getHeaders(), toRef.apply("request", "header")));
+            logger.logAndSend(masking.applyMask(requestEntity.getBody(), toRef.apply("request", "body")));
             logger.logAndSend("============================================================================");
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
@@ -263,7 +257,7 @@ public class ConnectorExecutor {
             pagination = null;
             executionManager.setPagination(pagination);
         }
-        logger.logAndSend("Response: " + masking.applyMask(responseEntity.getBody(), MaskPart.RESPONSE));
+        logger.logAndSend(masking.applyMask(responseEntity.getBody(), toRef.apply("response", "body")));
 
         Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
