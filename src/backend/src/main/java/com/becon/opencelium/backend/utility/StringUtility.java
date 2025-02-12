@@ -55,8 +55,6 @@ public class StringUtility {
         if (image == null || image.trim().isBlank()) {
             return null;
         }
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
-        return imagePath + image;
+        return PathConstant.IMAGES + image;
     }
 }

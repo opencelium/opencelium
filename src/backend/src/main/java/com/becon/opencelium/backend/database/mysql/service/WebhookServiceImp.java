@@ -124,7 +124,7 @@ public class WebhookServiceImp implements WebhookService {
     @Override
     public String buildUrl(Webhook webhook) {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        return uri.getScheme() + "://" + uri.getAuthority() + "/api/webhook/execute/" + webhook.getToken();
+        return "/api/webhook/execute/" + webhook.getToken();
     }
 
     @Override
