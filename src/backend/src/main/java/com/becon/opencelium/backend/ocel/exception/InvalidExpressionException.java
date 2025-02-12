@@ -71,6 +71,10 @@ public class InvalidExpressionException extends RuntimeException {
         return new InvalidExpressionException(ErrorCode.EMPTY_EXPRESSION, "Expression is empty");
     }
 
+    public static InvalidExpressionException invalidLoopExpression(String exp) {
+        return new InvalidExpressionException(ErrorCode.INVALID_LOOP_EXPRESSION, "Invalid loop expression : '%s'".formatted(exp));
+    }
+
     public ErrorCode getErrorCode() {
         return errorCode;
     }
