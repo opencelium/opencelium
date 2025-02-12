@@ -20,6 +20,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
     const [filteredOptions, setFilteredOptions] = useState<OptionType[]>([]);
     const [allOptions, setAllOptions] = useState<OptionType[]>([]);
     const [iterators, setIterators] = useState<string[]>([]);
+    const [menuIsOpen, toggleMenu] = useState<boolean>(false);
     useEffect(() => {
         setIterators(builderProps.connector.getPreviousIterators());
     }, [builderProps.connector]);
@@ -102,7 +103,12 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
             }
             if (input.includes(".")) {
                 // Fetch nested options if input contains a dot
-                setFilteredOptions(getNestedOptions(input));
+
+                if (input.endsWith(".[0]") || input.endsWith(".[*]") || iterators.some(it => input.endsWith(`.[${it}]`))) {
+                    setFilteredOptions(getNestedOptions(`${input}.`));
+                } else {
+                    setFilteredOptions(getNestedOptions(input));
+                }
             } else {
                 // Filter from top-level options
                 setFilteredOptions(
@@ -122,8 +128,11 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
         setSelectedOption(selectedOption);
         if (selectedOption) {
             setSearchValue(selectedOption.value);
-            // Determine if further options exist based on selection
-            setFilteredOptions(getNestedOptions(selectedOption.value));
+            if (selectedOption && (selectedOption.value.endsWith(".[0]") || selectedOption.value.endsWith(".[*]") || iterators.some(it => selectedOption.value.endsWith(`.[${it}]`)))) {
+                setFilteredOptions(getNestedOptions(`${selectedOption.value}.`));
+            } else {
+                setFilteredOptions(getNestedOptions(selectedOption?.value || ""));
+            }
         } else {
             setSearchValue('')
             setFilteredOptions(allOptions);
@@ -168,6 +177,9 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
                 onChange={handleChange}
                 value={selectedOption}
                 isClearable
+                onFocus={() => {if (!menuIsOpen) toggleMenu(true)}}
+                onBlur={() => {if (menuIsOpen) toggleMenu(false)}}
+                menuIsOpen={menuIsOpen}
                 isDisabled={!color}
                 styles={{
                     control: (base) => ({

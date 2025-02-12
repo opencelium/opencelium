@@ -1,6 +1,6 @@
 export enum LoopOperatorName {
-    For= 'For',
-    ForIn= 'ForIn',
+    For= 'for',
+    ForIn= 'forin',
     SplitString= 'SplitString',
 }
 export enum UnaryOperatorName {
