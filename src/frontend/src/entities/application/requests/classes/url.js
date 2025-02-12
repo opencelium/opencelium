@@ -13,6 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import SETTINGS from "../../../../../settings.json";
+
 const isBuild = false;
 
 let {protocol, hostname, port, pathname} = window.location;
@@ -20,12 +22,12 @@ if(isBuild){
     protocol = 'https:';
     hostname = 'opencelium-demo.becon.de';
 }
-const apiPort = window.config.env.urlInfo.port.api;
-const socketPort = window.config.env.urlInfo.port.socket;
-const kibanaPort = window.config.env.urlInfo.port.kibana;
-if(window.config.env.urlInfo.hasOwnProperty('protocol') && window.config.env.urlInfo.protocol !== '') protocol = window.config.env.urlInfo.protocol;
-if(window.config.env.urlInfo.hasOwnProperty('hostname') && window.config.env.urlInfo.hostname !== '') hostname = window.config.env.urlInfo.hostname;
-if(window.config.env.urlInfo.port.hasOwnProperty('application')) port = window.config.env.urlInfo.port.application;
+const apiPort = SETTINGS.PORT.API;
+const socketPort = SETTINGS.PORT.SOCKET;
+const kibanaPort = SETTINGS.PORT.KIBANA;
+if(SETTINGS.hasOwnProperty('PROTOCOL') && SETTINGS.PROTOCOL !== '') protocol = SETTINGS.PROTOCOL;
+if(SETTINGS.hasOwnProperty('HOSTNAME') && SETTINGS.HOSTNAME !== '') hostname = SETTINGS.HOSTNAME;
+if(SETTINGS.PORT.hasOwnProperty('APPLICATION') && SETTINGS.PORT.APPLICATION !== 0) port = SETTINGS.PORT.APPLICATION;
 
 export {protocol, hostname, port};
 
@@ -34,15 +36,10 @@ export const APP_STATUS_UP = 'UP';
 /**
  * urls for requests
  */
-export const baseUrl = `${protocol}//${hostname}:${apiPort}/`;
-export const baseUrlApi = `${protocol}//${hostname}:${apiPort}/api/`;
+export const baseUrl = SETTINGS.hasOwnProperty('SERVER_ENDPOINT') && SETTINGS.SERVER_ENDPOINT !== '' ? SETTINGS.SERVER_ENDPOINT : `${protocol}//${hostname}:${apiPort}/`;
+export const baseUrlApi = SETTINGS.hasOwnProperty('SERVER_API_ENDPOINT') && SETTINGS.SERVER_API_ENDPOINT !== '' ? SETTINGS.SERVER_API_ENDPOINT : `${protocol}//${hostname}:${apiPort}/api/`;
 export const socketServer = `${protocol}//${hostname}:${socketPort}/`;
 export const kibanaUrl = `${protocol}//${hostname}:${kibanaPort}/app/kibana`;
-
-export const appUrl = `${protocol}//${hostname}:${port}/apps`;
-export const invokerUrl = `${protocol}//${hostname}:${port}/invokers`;
-export const i18nextLoadPath = isBuild ? `${pathname.substring(0, pathname.lastIndexOf('/'))}/locales/{{lng}}/{{ns}}.json` : `${window.location.protocol}//${window.location.host}/locales/{{lng}}/{{ns}}.json`;
-
 export const errorTicketUrl = 'https://becon88.atlassian.net/rest/collectors/1.0/template/form/cb37ee4e';
 export const onlineServiceOpenCeliumUrl = `https://service.opencelium.io:443/`;
 export const onlineApiServerOpenCeliumUrl = 'https://service.opencelium.io:443/api/';

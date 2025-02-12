@@ -83,6 +83,10 @@ const getConfig = ({isBuild, envVar}) => {
             from: path.resolve(__dirname, 'src/styles/fonts'),
             to: path.resolve(__dirname, 'dist/styles/fonts')
         },
+        {
+            from: path.resolve(__dirname, 'settings.json'),
+            to: path.resolve(__dirname, 'dist/settings.json')
+        },
     ];
     if(envVar && envVar.hasOwnProperty('process.env.isDevelopment') && envVar['process.env.isDevelopment']){
         copyWebpackPluginSettings.patterns.push(
