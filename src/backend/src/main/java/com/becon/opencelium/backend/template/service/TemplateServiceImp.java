@@ -171,10 +171,11 @@ public class TemplateServiceImp implements TemplateService {
             Template template = entry.getValue();
             if (Utils.compare(ocProps.getVersion(), template.getVersion()) > 0) {
                 try {
+                    String oldVersion = template.getVersion();
                     templateEntityUpdater.updateToCurrentVersion(template)
                             .ifUpdated(x -> {
                                 save(template, fileName);
-                                BackupManager.doBackup(x, x.getVersion(), ocProps.getVersion());
+                                BackupManager.doBackup(x, oldVersion, ocProps.getVersion());
                             });
                     log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
                 } catch (Exception e) {
