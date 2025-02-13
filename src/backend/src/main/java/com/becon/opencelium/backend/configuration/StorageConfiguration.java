@@ -120,7 +120,7 @@ public class StorageConfiguration {
         userStorageService.init();
 
         // updates connections and enhancements to current version
-//        connectionService.updateConnectionsToCurrentVersion();
+        connectionService.updateConnectionsToCurrentVersion();
 
         // saves new changesets
         if (YAMLMigrator.getChangeSetsToSave() != null) {
