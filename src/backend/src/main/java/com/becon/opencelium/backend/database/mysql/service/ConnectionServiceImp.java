@@ -46,6 +46,8 @@ import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +60,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ConnectionServiceImp implements ConnectionService {
+    private static final Logger log = LoggerFactory.getLogger(ConnectionServiceImp.class);
     private final ConnectionRepository connectionRepository;
     private final ConnectorService connectorService;
     private final ConnectionMngService connectionMngService;
@@ -497,30 +500,36 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
+    @Transactional
     public void updateConnectionsToCurrentVersion() {
         List<Connection> connections = findAll();
         for (Connection connection : connections) {
-            // UPDATE ENHANCEMENTS
-            connection.getEnhancements().forEach(enhancement -> {
-                enhancement.setConnection(null);
-                enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
-                        .ifUpdated(x -> {
-                            x.setConnection(connection);
-                            enhancementService.save(enhancement);
-                        });
-                enhancement.setConnection(connection);
-            });
+            try {
+                // UPDATE CONNECTION_MNG
+                ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
+                connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
+                        .ifChangedOrElseIfUpdated(
+                                connectionMngService::updateWithoutBinding, // if any field is updated
+                                connectionMngService::saveDirectly // only version is set to the current version
+                        );
 
-            // UPDATE CONNECTION_MNG
-            ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
-            connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
-                    .ifChangedOrElseIfUpdated(
-                            connectionMngService::updateWithoutBinding, // if any field is updated
-                            connectionMngService::saveDirectly // only version is set to the current version
-                    );
+                // UPDATE ENHANCEMENTS
+                connection.getEnhancements().forEach(enhancement -> {
+                    enhancement.setConnection(null);
+                    enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
+                            .ifUpdated(x -> {
+                                x.setConnection(connection);
+                                enhancementService.save(enhancement);
+                            });
+                    enhancement.setConnection(connection);
+                });
 
-            connection.setOcVersion(ocProps.getVersion());
-            connectionRepository.save(connection);
+                connection.setOcVersion(ocProps.getVersion());
+                connectionRepository.save(connection);
+            } catch (Exception e) {
+                log.error("Failed to update connection with id = {}", connection.getId(), e);
+            }
+
         }
     }
 
