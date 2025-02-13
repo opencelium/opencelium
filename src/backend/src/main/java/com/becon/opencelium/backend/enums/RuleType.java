@@ -22,7 +22,7 @@ public enum RuleType {
     X_PATH("XPath") {
         @Override
         public String apply(String message, MaskingRule rule) {
-            return null;
+            return message;
         }
     };
 

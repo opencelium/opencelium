@@ -87,6 +87,15 @@ public class OcLogger<T extends LogMessage> {
         logAndSend(printStrategy, message);
     }
 
+    public void logAndSend(Exception e){
+        Consumer<Exception> printStrategy = x -> {
+            logger.error(e.getMessage(), e);
+        };
+
+        logAndSend(printStrategy, e);
+    }
+
+
     private <E> void logAndSend(Consumer<E> t, E message) {
         if (!enable) {
             return;

@@ -50,7 +50,7 @@ public class BindingUtility {
                     }
                     if (method.getRequest().getHeader() != null) {
                                 for (Map.Entry<String, String> entry : method.getRequest().getHeader().entrySet()) {
-                            if (entry.getValue().equals("{%" + fb.getId() + "%}")) {
+                            if (entry.getValue().equals("#{%" + fb.getId() + "%}")) {
                                 entry.setValue(getRefOfFBForHeader(fb.getFrom()));
                                 break;
                             }

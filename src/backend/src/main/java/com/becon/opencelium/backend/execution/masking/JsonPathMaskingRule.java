@@ -26,7 +26,7 @@ public class JsonPathMaskingRule implements MaskingRuleApplier {
             }
 
             return jsonContext.jsonString();
-        } catch (PathNotFoundException e) {
+        } catch (Exception e) {
             return json;
         }
     }
