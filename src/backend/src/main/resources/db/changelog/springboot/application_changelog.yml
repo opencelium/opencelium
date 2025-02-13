@@ -51,3 +51,9 @@ versions:
         operation: add
         value: OFF
         path: logging.level.org.springframework.data.ldap
+  - version: 4.3
+    changes:
+      - changeset: 1
+        operation: add
+        value: 4.3
+        path: opencelium.version
