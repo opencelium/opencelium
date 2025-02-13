@@ -31,6 +31,7 @@ public interface PathConstant {
     String APP_YML = "src/main/resources/application.yml";
     String INSTRUCTION = "src/backend/assistant/instruction/update_instruction.html";
     String IMAGES = "./storage/files/";
+    String TEMPLATE_URL = "./template/";
     String VERSIONS = "versions/";
     String ASSISTANT = "assistant/";
     String LIBS = "build/libs/";
