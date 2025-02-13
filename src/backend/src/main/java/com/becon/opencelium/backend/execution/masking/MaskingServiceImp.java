@@ -4,7 +4,10 @@ import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.enums.RuleType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.net.URL;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MaskingServiceImp implements MaskingService {
     private final List<MaskingRule> rules;
@@ -42,7 +45,8 @@ public class MaskingServiceImp implements MaskingService {
                     (expression.endsWith("].(response).body") && expression.length() == 23)
                 )
                 {
-                    return rule.getMask();
+                    result = rule.getMask();
+                    break;
                 }
 
                 result = rule.getType().apply(result, rule);
@@ -57,6 +61,8 @@ public class MaskingServiceImp implements MaskingService {
             return "";
         } else if (message instanceof String result) {
             return result;
+        } else if (message instanceof URL) {
+            return message.toString();
         }
 
         try {
@@ -66,9 +72,22 @@ public class MaskingServiceImp implements MaskingService {
         }
     }
 
-    private boolean contains(String expression, String ref) {
+    private boolean contains(String expression, String incoming) {
         // rule.getExpression().startsWith(ref) || rule.getExpression().startsWith(all)
-        return expression.startsWith(ref);
+        if (expression.startsWith(incoming)) {
+            return true;
+        }
+
+        String regex = "^#\\[\\*\\]\\.(\\(response\\)|\\(request\\))\\.(url|header|body)";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(expression);
+
+        if (matcher.find()) {
+            return expression.startsWith("#[*]" + incoming.substring(7));
+        }
+
+        return false;
     }
 
     private String getPrefix(String ref) {
