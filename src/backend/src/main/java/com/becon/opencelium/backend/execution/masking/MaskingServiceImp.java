@@ -25,7 +25,26 @@ public class MaskingServiceImp implements MaskingService {
         String result = toJsonElseString(message);
 
         for (MaskingRule rule : rules) {
-            if (rule.getType() ==  RuleType.REGEX || contains(rule.getExpression(), ref)) {
+            if (rule.getType() ==  RuleType.REGEX) {
+                result = rule.getType().apply(result, rule);
+            } else if (contains(rule.getExpression(), ref)) {
+                String expression = rule.getExpression();
+
+                // check if we have a full path:
+                if (
+                    expression.equals("#[*].(request).url") ||
+                    expression.equals("#[*].(request).header") ||
+                    expression.equals("#[*].(request).body") ||
+                    expression.equals("#[*].(response).body") ||
+                    (expression.endsWith("].(request).url") && expression.length() == 21) ||
+                    (expression.endsWith("].(request).header") && expression.length() == 24) ||
+                    (expression.endsWith("].(request).body") && expression.length() == 22) ||
+                    (expression.endsWith("].(response).body") && expression.length() == 23)
+                )
+                {
+                    return rule.getMask();
+                }
+
                 result = rule.getType().apply(result, rule);
             }
         }
