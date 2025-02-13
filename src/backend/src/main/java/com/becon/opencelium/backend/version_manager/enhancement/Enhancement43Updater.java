@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.version_manager.Wrapper;
 import com.becon.opencelium.backend.version_manager.base.SuspendException;
 import com.becon.opencelium.backend.version_manager.base.UpdaterVersion;
+import com.becon.opencelium.backend.version_manager.base.Utils;
 import com.becon.opencelium.backend.version_manager.base.Version43Utils;
 import org.springframework.stereotype.Component;
 
@@ -26,12 +27,12 @@ public class Enhancement43Updater implements EnhancementUpdater {
         return updateFromInternal(enhancement, oldVersion);
     }
 
-    private Wrapper<Enhancement> updateFromInternal(Enhancement enhancement, String oldVersion){
-        if (Objects.equals(currentVersion.getVersion(), oldVersion))
+    private Wrapper<Enhancement> updateFromInternal(Enhancement enhancement, String oldVersion) {
+        if (Objects.isNull(enhancement) || Utils.compare(currentVersion.getVersion(), oldVersion) <= 0)
             return Wrapper.notUpdated(enhancement);
 
         boolean changed = false;
-        if (Objects.nonNull(enhancement) && Objects.nonNull(enhancement.getArgs())) {
+        if (Objects.nonNull(enhancement.getArgs())) {
             String replaced = Version43Utils.updateRef(enhancement.getArgs());
             if (!Objects.equals(replaced, enhancement.getArgs())) {
                 changed = true;

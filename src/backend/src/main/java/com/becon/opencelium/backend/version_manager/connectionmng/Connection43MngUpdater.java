@@ -3,10 +3,7 @@ package com.becon.opencelium.backend.version_manager.connectionmng;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.ocel.OCExpressionHelper;
 import com.becon.opencelium.backend.version_manager.Wrapper;
-import com.becon.opencelium.backend.version_manager.base.Reference;
-import com.becon.opencelium.backend.version_manager.base.SuspendException;
-import com.becon.opencelium.backend.version_manager.base.UpdaterVersion;
-import com.becon.opencelium.backend.version_manager.base.Version43Utils;
+import com.becon.opencelium.backend.version_manager.base.*;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +30,7 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
     }
 
     private Wrapper<ConnectionMng> updateFromInternal(ConnectionMng connection, String oldVersion) {
-        if (Objects.isNull(connection) || Objects.equals(oldVersion, currentVersion.getVersion()))
+        if (Objects.isNull(connection) || Utils.compare(currentVersion.getVersion(), oldVersion) <= 0)
             return Wrapper.notUpdated(connection);
 
         connection.setVersion(currentVersion.getVersion());

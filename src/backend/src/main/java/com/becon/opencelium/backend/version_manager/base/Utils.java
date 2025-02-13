@@ -7,12 +7,15 @@ import java.util.Objects;
 
 public class Utils {
     public static int compare(String v1, String v2) {
-        if (Objects.isNull(v1)) {
-            return Objects.isNull(v2) ? 0 : 1;
+        if (StringUtils.isBlank(v1)) {
+            return Objects.isNull(v2) ? 0 : -1;
         }
-        if (Objects.isNull(v2)) {
-            return -1;
+        if (StringUtils.isBlank(v2)) {
+            return 1;
         }
+        v1 = v1.replaceAll("[^\\d.]", "");
+        v2 = v2.replaceAll("[^\\d.]", "");
+
         int[] parts1 = parseVersion(v1);
         int[] parts2 = parseVersion(v2);
 
@@ -33,10 +36,13 @@ public class Utils {
                 : value;
     }
 
-
     private static int[] parseVersion(String version) {
-        return Arrays.stream(version.split("\\."))
-                .mapToInt(Integer::parseInt)
-                .toArray();
+        try {
+            return Arrays.stream(version.split("\\."))
+                    .mapToInt(Integer::parseInt)
+                    .toArray();
+        } catch (Exception e) {
+            return new int[]{-1};
+        }
     }
 }

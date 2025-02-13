@@ -99,13 +99,16 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public void save(Template template) {
+        save(template, template.getTemplateId() + ".json");
+    }
+
+    public void save(Template template, String fileName) {
         try {
             String id = template.getTemplateId();
-            String filename = id + ".json";
             ObjectMapper objectMapper = new ObjectMapper();
             template.setTemplateId(id);
             String json = objectMapper.writeValueAsString(template);
-            FileWriter jsonTemplate = new FileWriter(PathConstant.TEMPLATE + filename);
+            FileWriter jsonTemplate = new FileWriter(PathConstant.TEMPLATE + fileName);
             jsonTemplate.write(json);
             jsonTemplate.close();
         } catch (IOException e) {
@@ -162,13 +165,15 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public void updateTemplatesToCurrentVersion() {
-        List<Template> templates = findAll();
-        for (Template template : templates) {
+        Map<String, Template> templateMap = getAllAsMap();
+        for (Map.Entry<String, Template> entry : templateMap.entrySet()) {
+            String fileName = entry.getKey();
+            Template template = entry.getValue();
             if (Utils.compare(ocProps.getVersion(), template.getVersion()) > 0) {
                 try {
                     templateEntityUpdater.updateToCurrentVersion(template)
                             .ifUpdated(x -> {
-                                save(template);
+                                save(template, fileName);
                                 BackupManager.doBackup(x, x.getVersion(), ocProps.getVersion());
                             });
                     log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());

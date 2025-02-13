@@ -37,11 +37,11 @@ public class OCExpressionHelper {
         }
 
         if (operatorEnum == OperatorEnum.FOR || operatorEnum == OperatorEnum.FOR_IN) {
-            return operatorEnum.getName() + " " + buildOperand(leftStatement, rightStatement.getRightPropertyValue());
+            return operatorEnum.getName() + " " + buildOperand(leftStatement, rpv(rightStatement));
         }
 
         if (operatorEnum == OperatorEnum.SPLIT_STRING) {
-            return buildOperand(leftStatement, rightStatement.getRightPropertyValue()) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement);
+            return buildOperand(leftStatement, rpv(rightStatement)) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement);
         }
 
         Operator operator = OperatorFactory.getOperator(operatorEnum);
@@ -52,13 +52,13 @@ public class OCExpressionHelper {
             if (operator.isLeftSided()) {
                 return operatorEnum.getName() + " " + buildOperand(rightStatement);
             } else {
-                return buildOperand(leftStatement, rightStatement.getRightPropertyValue()) + " " + operatorEnum.getName();
+                return buildOperand(leftStatement, rpv(rightStatement)) + " " + operatorEnum.getName();
             }
         } else {
             if (operatorEnum == OperatorEnum.IS_TYPE_OF) {
-                return buildOperand(leftStatement, rightStatement.getRightPropertyValue()) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement, false);
+                return buildOperand(leftStatement, rpv(rightStatement)) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement, false);
             }
-            return buildOperand(leftStatement, rightStatement.getRightPropertyValue()) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement);
+            return buildOperand(leftStatement, rpv(rightStatement)) + " " + operatorEnum.getName() + " " + buildOperand(rightStatement);
         }
     }
 
@@ -131,5 +131,9 @@ public class OCExpressionHelper {
 
     private static String buildOperand(StatementMng statement) {
         return buildOperand(statement, true, "");
+    }
+
+    private static String rpv(StatementMng statement) {
+        return statement == null ? null : statement.getRightPropertyValue();
     }
 }

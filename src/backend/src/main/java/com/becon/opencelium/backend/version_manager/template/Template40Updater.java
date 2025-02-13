@@ -12,6 +12,7 @@ import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.Wrapper;
 import com.becon.opencelium.backend.version_manager.base.SuspendException;
 import com.becon.opencelium.backend.version_manager.base.UpdaterVersion;
+import com.becon.opencelium.backend.version_manager.base.Utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -45,7 +46,7 @@ public class Template40Updater implements EntityUpdater<Template> {
     @Override
     @SuspendException
     public Wrapper<Template> updateFrom(Template template, String oldVersion) {
-        if (Objects.isNull(template) || Objects.equals(oldVersion, updaterVersion.getVersion()))
+        if (Objects.isNull(template) || Utils.compare(updaterVersion.getVersion(), oldVersion) <= 0)
             return Wrapper.notUpdated(template);
 
         template.setVersion(updaterVersion.getVersion());
