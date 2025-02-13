@@ -121,7 +121,7 @@ public class ReferenceExtractor implements Extractor {
 
     private Object extractFromWebhook(String ref) {
         Map<String, Object> webhookVars = executionManager.getWebhookVars();
-        if (webhookVars.isEmpty()) {
+        if (webhookVars == null || webhookVars.isEmpty()) {
             return null;
         }
 
