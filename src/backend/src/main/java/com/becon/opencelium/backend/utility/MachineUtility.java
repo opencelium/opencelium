@@ -39,6 +39,9 @@ public class MachineUtility {
             InetAddress localHost = InetAddress.getLocalHost();
             if (localHost == null) return "0";
             NetworkInterface networkInterface = NetworkInterface.getByInetAddress(localHost);
+            if (networkInterface == null) {
+                return "0";
+            }
 
             byte[] macBytes = networkInterface.getHardwareAddress();
 
