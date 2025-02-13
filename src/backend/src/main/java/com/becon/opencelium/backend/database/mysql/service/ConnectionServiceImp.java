@@ -42,6 +42,8 @@ import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
+import com.becon.opencelium.backend.version_manager.backup.BackupManager;
+import com.becon.opencelium.backend.version_manager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
@@ -54,6 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -500,36 +503,46 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
-    @Transactional
     public void updateConnectionsToCurrentVersion() {
         List<Connection> connections = findAll();
         for (Connection connection : connections) {
-            try {
-                // UPDATE CONNECTION_MNG
-                ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
-                connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
-                        .ifChangedOrElseIfUpdated(
-                                connectionMngService::updateWithoutBinding, // if any field is updated
-                                connectionMngService::saveDirectly // only version is set to the current version
-                        );
+            ConnectionDTO forBackup = getFullConnection(connection.getId());
+            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0) {
+                try {
+                    AtomicBoolean connectionChanged = new AtomicBoolean(false);
+                    // UPDATE CONNECTION_MNG
+                    ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
+                    connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
+                            .ifChangedOrElseIfUpdated(
+                                    x -> {
+                                        connectionMngService.updateWithoutBinding(x);
+                                        connectionChanged.set(true);
+                                    }, // if any field is updated
+                                    connectionMngService::saveDirectly // only version is set to the current version
+                            );
 
-                // UPDATE ENHANCEMENTS
-                connection.getEnhancements().forEach(enhancement -> {
-                    enhancement.setConnection(null);
-                    enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
-                            .ifUpdated(x -> {
-                                x.setConnection(connection);
-                                enhancementService.save(enhancement);
-                            });
-                    enhancement.setConnection(connection);
-                });
+                    AtomicBoolean anyEnhancementChanged = new AtomicBoolean(false);
+                    // UPDATE ENHANCEMENTS
+                    connection.getEnhancements().forEach(enhancement -> {
+                        enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
+                                .ifChanged(x -> {
+                                    anyEnhancementChanged.set(true);
+                                    enhancementService.save(enhancement);
+                                });
+                    });
 
-                connection.setOcVersion(ocProps.getVersion());
-                connectionRepository.save(connection);
-            } catch (Exception e) {
-                log.error("Failed to update connection with id = {}", connection.getId(), e);
+                    // BACKUP
+                    if (Boolean.logicalOr(connectionChanged.get(), anyEnhancementChanged.get())) {
+                        BackupManager.doBackup(forBackup, connection.getOcVersion(), ocProps.getVersion());
+                    }
+
+                    connection.setOcVersion(ocProps.getVersion());
+                    connectionRepository.save(connection);
+                    log.info("Connection[id={}, name={}] is successfully updated to {} version", connection.getId(), connection.getTitle(), ocProps.getVersion());
+                } catch (Exception e) {
+                    log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
+                }
             }
-
         }
     }
 

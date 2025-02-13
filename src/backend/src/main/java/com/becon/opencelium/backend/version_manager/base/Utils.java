@@ -3,9 +3,16 @@ package com.becon.opencelium.backend.version_manager.base;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class Utils {
     public static int compare(String v1, String v2) {
+        if (Objects.isNull(v1)) {
+            return Objects.isNull(v2) ? 0 : 1;
+        }
+        if (Objects.isNull(v2)) {
+            return -1;
+        }
         int[] parts1 = parseVersion(v1);
         int[] parts2 = parseVersion(v2);
 

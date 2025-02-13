@@ -26,6 +26,7 @@ import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.subscription.quartz.OperationUsageReportJob;
 import com.becon.opencelium.backend.subscription.quartz.QuartzCronUpdater;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
+import com.becon.opencelium.backend.template.service.TemplateService;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
 import org.quartz.*;
@@ -63,6 +64,7 @@ public class StorageConfiguration {
     private final SubscriptionService subscriptionService;
     private final ActivationRequestService activationRequestService;
     private final ConnectionService connectionService;
+    private final TemplateService templateService;
 
     @Autowired
     private ResourceLoader resourceLoader;
@@ -81,7 +83,7 @@ public class StorageConfiguration {
             InvokerContainer invokerContainer,
             DataSource dataSource,
             Environment environment,
-            ConnectionService connectionService
+            ConnectionService connectionService, TemplateService templateService
     ) {
         this.userStorageService = userStorageService;
         this.connectorService = connectorService;
@@ -92,6 +94,7 @@ public class StorageConfiguration {
         this.subscriptionService = subscriptionService;
         this.activationRequestService = activationRequestService;
         this.connectionService = connectionService;
+        this.templateService = templateService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -121,6 +124,9 @@ public class StorageConfiguration {
 
         // updates connections and enhancements to current version
         connectionService.updateConnectionsToCurrentVersion();
+
+        // updates templates to the current version
+        templateService.updateTemplatesToCurrentVersion();
 
         // saves new changesets
         if (YAMLMigrator.getChangeSetsToSave() != null) {

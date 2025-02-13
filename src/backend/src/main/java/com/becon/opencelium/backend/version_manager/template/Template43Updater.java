@@ -4,13 +4,11 @@ import com.becon.opencelium.backend.resource.connection.ConditionDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import com.becon.opencelium.backend.resource.connection.StatementDTO;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connection.old.FieldBindingOldDTO;
 import com.becon.opencelium.backend.resource.connector.BodyDTO;
 import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.version_manager.Wrapper;
-import com.becon.opencelium.backend.version_manager.backup.Backup;
 import com.becon.opencelium.backend.version_manager.base.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,14 +32,12 @@ public class Template43Updater implements TemplateUpdater {
     }
 
     @Override
-    @Backup
     @SuspendException
     public Wrapper<Template> updateToCurrentVersion(Template template) {
         return updateFromInternal(template, template.getVersion());
     }
 
     @Override
-    @Backup
     @SuspendException
     public Wrapper<Template> updateFrom(Template template, String oldVersion) {
         return updateFromInternal(template, oldVersion);
