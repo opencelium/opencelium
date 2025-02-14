@@ -56,3 +56,4 @@ versions:
       - changeset: 1
         operation: add
         value: 4.3
+        path: opencelium.version
