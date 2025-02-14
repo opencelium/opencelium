@@ -564,7 +564,7 @@ Prepare environment:
 
 **3. Install Webserver: (optional)**
 
-| The installation installs and configures Nginx by default.
+| The deb package installs and configures Nginx by default.
 | If you want to use Apache instead of Nginx, please install it manually now.
 | If Apache is installed before the deb package, it will be configured as Webserver for Opencelium.
 
