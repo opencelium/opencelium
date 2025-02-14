@@ -667,7 +667,7 @@ Prepare environment:
 Install Application:
 ==================
 
-**1. Install deb package for OpenCelium:**
+**1. Install rpm package for OpenCelium:**
 
 .. code-block:: sh
 	:linenos:
@@ -759,7 +759,7 @@ Prepare environment:
 Install Application:
 ==================
 
-**1. Install deb package for OpenCelium:**
+**1. Install rpm package for OpenCelium:**
 
 .. code-block:: sh
 	:linenos:
