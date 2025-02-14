@@ -2,6 +2,27 @@
 Changelog
 *********
 
+4.3
+========
+
+:Date: February 14, 2025
+
+Features
+--------
+
+* Security-Update! Backend routing through endpoint /api instead of port 9090
+* i-doit OTRSC AddOn extended. Now supports KIX
+* Package extension. DEB package now supports Apache2 web server
+
+Fixes
+--------
+
+* Fixed a bug in pagination when property nextLink is missing (OC-963)
+* Fixed a bug where AllowList is not working with integers (OC-999)
+* Fixed a bug when reading MacAddress in license management (OC-994)
+* Fixed a bug when openening api documentation in swagger (OC-1004)
+
+
 4.2
 ========
 
@@ -23,6 +44,7 @@ Fixes
 * Fix bug with drag and drop in connection editor (OC-932)
 * Error when downloading changelog.rst file (OC-920)
 * CHAR in property name(OC-948)
+
 
 4.1
 ========
@@ -297,7 +319,7 @@ Fixes
 * can't save the template (OC-444)
 * increment index on arrays in xml (OC-440)
 * new invokers and templates are available (OC-443)
-* new frontend engine has some issuesÃ¢â‚¬Â¦ (OC-438)
+* new frontend engine has some issuesÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ (OC-438)
 * error during updateing a connector (OC-439)
 
 |
@@ -479,3 +501,4 @@ Connector
 * Zabbix
 * Icinga2
 * OTRS/Znuny/OTOBO
+
