@@ -562,7 +562,7 @@ Prepare environment:
 | You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 	
 
-**3. Install Webserver:**
+**3. Install Webserver: (optional)**
 
 | The installation installs and configures Nginx by default.
 | If you want to use Apache instead of Nginx, please install it manually now.
