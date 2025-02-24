@@ -86,6 +86,11 @@ Open the settings of your webserver (usually it is nginx) and add the follow con
 		}
 	}
 
+.. note::
+	| You can get the webserver configs for nginx and apache2 underneath the conf directory.
+	|  
+	| https://github.com/opencelium/opencelium/tree/prod/conf
+
 **3. Restart your webserver:**
 
 .. code-block:: sh
