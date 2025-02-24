@@ -52,10 +52,10 @@ Create a settings.json file inside of frontend directory (usually underneath /op
 
 	{
 		"PORT": {
-		"APPLICATION": "",
-		"API": ""
-	},
-	"SERVER_ENDPOINT": "/api/"
+			"APPLICATION": "",
+			"API": ""
+		},
+		"SERVER_ENDPOINT": "/api/"
 	}
 
 **2. Add proxy in the webserver config:**
