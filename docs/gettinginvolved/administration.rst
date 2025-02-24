@@ -39,7 +39,7 @@ Backend:
 	systemctl disable opencelium 
 
 
-Routing backend through endpoint /api/
+Routing of the backend through an endpoint
 """""""""""""""""
 
 To change this routing you need to follow the next steps.
@@ -90,7 +90,7 @@ Open the settings of your webserver (usually it is nginx) and add the follow con
 
 .. code-block:: sh
 
-	systemctl status nginx
+	systemctl restart nginx
 
 
 Check health
