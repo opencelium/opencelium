@@ -3,7 +3,11 @@ Installation
 ##################
 
 .. note::
-	Please check the software requirements, before installing OC.
+	| Please check the software requirements, before installing OC.
+	| 
+	| If you have changed the original umask on you linux server, 
+	| please set additional permissions to /opt/opencelium. 
+	| Otherwise nginx is not able to access the files. 
 
 Debian/Ubuntu (example for 24.04 LTS)
 """""""""""""""""
@@ -506,7 +510,7 @@ This repo is meant to be the starting point for somebody who likes to use
 dockerized multi-container OpenCelium in production. The OpenCelium Docker image uses 
 the stable branch of OpenCelium's Git repo.
 
-The Docker images are hosted on `Dockerhub <https://hub.docker.com/u/opencelium>`_.
+The Docker images are hosted on `Dockerhub <https://hub.docker.com/u/becongmbh>`_.
 
 **Install Docker Environment:**
 
@@ -516,6 +520,7 @@ Use default Docker installation guide.
 
    * `Docker Engine <https://docs.docker.com/engine/installation/>`_
    * `Docker Compose <https://docs.docker.com/compose/install/>`_
+(opt. Docker Engine installation usually already includes Docker Compose Plugin)
 
 2. Getting started with opencelium-docker-compose:
 
@@ -556,6 +561,19 @@ Prepare environment:
 | Use default MongoDB installation guide.
 | You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 	
+
+**3. Install Webserver: (optional)**
+
+| The deb package installs and configures Nginx by default.
+| If you want to use Apache instead of Nginx, please install it manually now.
+| If Apache is installed before the deb package, it will be configured as Webserver for Opencelium.
+
+.. code-block:: sh
+        :linenos:
+
+        apt install apache2
+        a2enmode proxy proxy_http headers
+
 
 Install Application:
 ==================
@@ -649,7 +667,7 @@ Prepare environment:
 Install Application:
 ==================
 
-**1. Install deb package for OpenCelium:**
+**1. Install rpm package for OpenCelium:**
 
 .. code-block:: sh
 	:linenos:
@@ -741,7 +759,7 @@ Prepare environment:
 Install Application:
 ==================
 
-**1. Install deb package for OpenCelium:**
+**1. Install rpm package for OpenCelium:**
 
 .. code-block:: sh
 	:linenos:
