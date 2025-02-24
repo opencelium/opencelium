@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "User", description = "Manages operations related to user management")
-@RequestMapping(value = "/api/user", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
 public class UserController {
 
     @Autowired

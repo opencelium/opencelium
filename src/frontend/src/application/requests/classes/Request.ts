@@ -14,7 +14,7 @@
  */
 
 import axios, {AxiosRequestConfig, AxiosResponse} from "axios";
-import {baseUrl, baseUrlApi} from "@entity/application/requests/classes/url";
+import {Urls} from "@entity/application/requests/classes/url";
 import {IRequest, IRequestSettings} from "../interfaces/IRequest";
 
 export class Request implements IRequest{
@@ -40,9 +40,9 @@ export class Request implements IRequest{
         let url = this.url;
         if(!this.isFullUrl){
             if(this.isApi){
-                url = baseUrlApi + this.url;
+                url = Urls.baseUrlApi + this.url;
             } else{
-                url = baseUrl + this.url;
+                url = Urls.baseUrl + this.url;
             }
             if(this.endpoint){
                 url += `${this.endpoint}`;

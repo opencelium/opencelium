@@ -204,9 +204,9 @@ public class SecurityConfiguration {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         String[] enpoints = new String[] {
-                "/api/storage/files/**",
-                "/api/webhook/execute/**",
-                "/api/webhook/health",
+                "/storage/files/**",
+                "/webhook/execute/**",
+                "/webhook/health",
                 "/v3/api-docs",
                 "/swagger-ui.html",
                 "/swagger-ui/**",

@@ -37,7 +37,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @RestController
-@RequestMapping(value = "/api/subs")
+@RequestMapping(value = "/subs")
 @Tag(name = "Subscription")
 public class SubscriptionController {
 

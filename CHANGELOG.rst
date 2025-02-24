@@ -20,7 +20,7 @@ Fixes
 * Fixed a bug in pagination when property nextLink is missing (OC-963)
 * Fixed a bug where AllowList is not working with integers (OC-999)
 * Fixed a bug when reading MacAddress in license management (OC-994)
-* Fixed a bug when openening api documentation in swagger (OC-1004)
+* Fixed a bug when opening api documentation in swagger (OC-1004)
 
 
 4.2
@@ -179,7 +179,7 @@ Features
 * Update from Java 8 to Java 17 (latest lts version)
 * Update from Neo4j 3.5 to Neo4j 5.6 (latest lts version)
 * Update from Spring Boot 2.0 to Spring Boot 3.0 (latest lts version)
-* Connection Edior improvements:
+* Connection Editor improvements:
 * Show connection logs on the web interface
 * Added test run
 * Allow changing size of items
@@ -195,7 +195,7 @@ Connector
 ---------
 
 * RedmineCRM
-* Dell Warrenty Check
+* Dell Warranty Check
 * StarFace
 * Weclapp
 
@@ -204,14 +204,14 @@ Fixes
 -----
 
 * js error in developer tools (OC-483)
-* clicking on external apps doesnt work (OC-533)
+* clicking on external apps doesn't work (OC-533)
 * themes from service portal are not synced to opencelium (OC-557)
 * cant update a connection (OC-563)
 * after login into opencelium a git error appears in logs (OC-565)
 * waiting to long to get connections on frontend (OC-566)
 
 
-Major Relase :loudspeaker:
+Major Release :loudspeaker:
 ============
 
 |
@@ -276,7 +276,7 @@ Features
 --------
 
 * Manage own CI theme on service portal
-* Support multi-step authentification
+* Support multi-step authentication
 * OAuth2 support for service portal
 
 Connector
@@ -319,33 +319,33 @@ Fixes
 * can't save the template (OC-444)
 * increment index on arrays in xml (OC-440)
 * new invokers and templates are available (OC-443)
-* new frontend engine has some issuesÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ (OC-438)
-* error during updateing a connector (OC-439)
+* new frontend engine had some issues (OC-438)
+* error during updating a connector (OC-439)
 
 |
 2.1
 ===
-:Date: Januar 18, 2022
+:Date: January 18, 2022
 
 Features
 --------
 
 * Enable/disable logs for a job
-* Dupplicate connections
-* Dupplicate business templates
+* Duplicate connections
+* Duplicate business templates
 * Edit business templates
 
 Fixes
 -----
 
 * Image is deleted (OC-425)
-* API Operation didnt execute correctly with the fields defined in the invoker file (OC-417)
+* API Operation didn't execute correctly with the fields defined in the invoker file (OC-417)
 * Layout problems when deleting a connection (OC-419)
 * Starting a job (OC-424)
 * When you update a job, it is automatically activated (OC-423)
 
 
-Major Relase :loudspeaker:
+Major Release :loudspeaker:
 ============
 
 |
@@ -400,7 +400,7 @@ Fixes
 -----
 
 * Creates a white method what could not use (OC-299)
-* Wrong synax generated on a query by using ref generator (OC-330)
+* Wrong syntax generated on a query by using ref generator (OC-330)
 
 |
 1.3
@@ -478,7 +478,7 @@ Connector
 Fixes
 -----
 
-* Execute several jobs doesnt work (OC-226)
+* Execute several jobs doesn't work (OC-226)
 * Connection get error via notification (OC-206)
 * No kibana link was created after triggering a job (OC-189)
 * Connection get error via notification (OC-189)
@@ -486,13 +486,13 @@ Fixes
 * First execution job will not be updated on scheduler view (OC-225)
 
 
-Major Relase :loudspeaker:
+Major Release :loudspeaker:
 ============
 
 |
 1.0
 ===
-:Date: Februar 1, 2020
+:Date: February 1, 2020
 
 Connector
 ---------

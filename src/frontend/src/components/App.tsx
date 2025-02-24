@@ -13,30 +13,53 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, Suspense, useEffect} from 'react';
+import React, {FC, Suspense, useEffect, useState} from 'react';
 import {BrowserRouter} from "react-router-dom";
 import {ThemeProvider, withTheme} from 'styled-components';
 import {getRoutes} from "@application/utils/routes";
 import {Application} from "@application/classes/Application";
-import {offlineServiceOpenCeliumUrls, onlineServiceOpenCeliumUrl} from '@entity/application/requests/classes/url';
-import {bindWithServicePortalThemes, unbindWithServicePortalThemes} from "@entity/application/utils/utils";
+import {
+    offlineServiceOpenCeliumUrls,
+    onlineServiceOpenCeliumUrl, Urls
+} from '@entity/application/requests/classes/url';
+import {bindWithServicePortalThemes} from "@entity/application/utils/utils";
 import Themes, {DefaultTheme, updateThemeWithColors} from "@style/Theme";
 import {Global} from "@style/global";
 import {Auth} from "@application/classes/Auth";
-import {AppDispatch, useAppDispatch} from "@application/utils/store";
-import { setThemes } from '@application/redux_toolkit/slices/ApplicationSlice';
+import {useAppDispatch} from "@application/utils/store";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {getLogoName} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {isArray} from "@application/utils/utils";
-import {updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
+import {Loading} from "@app_component/base/loading/Loading";
 
 
 const App = ({}) => {
     const dispatch = useAppDispatch();
     const {isAuth, authUser} = Auth.getReduxState();
     const {themes} = Application.getReduxState();
+    const [hasSettings, toggleHasSettings] = useState(false);
     let selectedTheme: any = themes && isArray(themes) ? themes.find(theme => theme.isCurrent) || DefaultTheme : DefaultTheme;
     const appTheme = updateThemeWithColors(Themes.default, selectedTheme);
+    const setSettings = (settings: any) => {
+        const apiPort = settings.PORT.API;
+        const socketPort = settings.PORT.SOCKET;
+        const kibanaPort = settings.PORT.KIBANA;
+        let {protocol, hostname, port, pathname} = window.location;
+        if(settings.hasOwnProperty('PROTOCOL') && settings.PROTOCOL !== '') protocol = settings.PROTOCOL;
+        if(settings.hasOwnProperty('HOSTNAME') && settings.HOSTNAME !== '') hostname = settings.HOSTNAME;
+        if(settings.PORT.hasOwnProperty('APPLICATION') && settings.PORT.APPLICATION !== 0) port = settings.PORT.APPLICATION;
+        Urls.baseUrl = settings.hasOwnProperty('SERVER_ENDPOINT') && settings.SERVER_ENDPOINT !== '' ? `${protocol}//${hostname}${apiPort ? `:${apiPort}` : ""}${settings.SERVER_ENDPOINT}` : `${protocol}//${hostname}${apiPort ? `:${apiPort}` : ""}/`;
+        Urls.baseUrlApi = settings.hasOwnProperty('SERVER_ENDPOINT') && settings.SERVER_ENDPOINT !== '' ? `${protocol}//${hostname}${apiPort ? `:${apiPort}` : ""}${settings.SERVER_ENDPOINT}` : `${protocol}//${hostname}${apiPort ? `:${apiPort}` : ""}/`;
+        Urls.socketServer = `${protocol}//${hostname}:${socketPort}/`;
+        Urls.kibanaUrl = `${protocol}//${hostname}:${kibanaPort}/app/kibana`;
+        toggleHasSettings(true);
+    }
+    useEffect(() => {
+        fetch("/settings.json")
+            .then((response) => response.json())
+            .then((data) => setSettings(data))
+            .catch((error) => console.error("Error loading settings:", error));
+    }, []);
     useEffect(() => {
         if(authUser) {
             //if (authUser.userDetail.themeSync) {
@@ -63,6 +86,9 @@ const App = ({}) => {
             }
         }
     },[isAuth])
+    if (!hasSettings) {
+        return <div style={{marginTop: 200}}><Loading/></div>
+    }
     return (
         <ThemeProvider theme={appTheme}>
             <BrowserRouter>

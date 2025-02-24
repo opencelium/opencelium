@@ -14,15 +14,15 @@
  */
 
 import openSocket from 'socket.io-client';
-import {socketServer} from "./url";
 import {SOCKET_IS_ON} from "@entity/connection/components/utils/constants/app";
+import {Urls} from "@entity/application/requests/classes/url";
 
 
 /**
  * open socket
  */
 
-export const socket = SOCKET_IS_ON ? openSocket(socketServer) : {
+export const socket = SOCKET_IS_ON ? openSocket(Urls.socketServer) : {
     on: () => {},
     emit: () => {},
 };

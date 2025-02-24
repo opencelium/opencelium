@@ -48,7 +48,7 @@ import java.util.Map;
 
 @RestController
 @Tag(name = "Webhook", description = "Manages operations related to webhook management")
-@RequestMapping(value = "/api/webhook")
+@RequestMapping(value = "/webhook")
 public class WebhookController {
 
     @Autowired

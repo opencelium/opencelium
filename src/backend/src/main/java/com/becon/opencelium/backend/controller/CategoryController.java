@@ -27,7 +27,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/category", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/category", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Category", description = "Manages operations related to Category management")
 public class CategoryController {
     private final CategoryService categoryService;

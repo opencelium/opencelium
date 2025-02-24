@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Widget", description = "Manages operations related to Widget.")
-@RequestMapping(value = "/api/widget", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/widget", produces = MediaType.APPLICATION_JSON_VALUE)
 public class WidgetController {
 
     @Autowired

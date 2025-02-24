@@ -15,7 +15,7 @@
 
 import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
-import {kibanaUrl} from "@entity/application/requests/classes/url";
+import {Urls} from "@entity/application/requests/classes/url";
 import {usePrevious} from "@application/utils/hooks/usePrevious";
 import {convertTimeForSchedulerList} from "@application/utils/utils";
 import { LastSuccessExecutionProps } from './interfaces';
@@ -43,7 +43,7 @@ const LastSuccessExecution: FC<LastSuccessExecutionProps> =
             let taIdComponent = null;
             if (taId !== '') {
                 executionId = taId.split('-')[1]
-                url = `${kibanaUrl}#/discover?_g=()&_a=(columns:!(taId,orderId,message,method,exchange,methodPart,datetime),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'96f425a0-ce27-11e9-8c24-b7d9afe6d21c',key:taId,negate:!f,params:(query:'${taId}',type:phrase),type:phrase,value:'${taId}'),query:(match:(taId:(query:'${taId}',type:phrase))))),index:'96f425a0-ce27-11e9-8c24-b7d9afe6d21c',interval:auto,query:(language:lucene,query:''),sort:!(orderId,asc))`;
+                url = `${Urls.kibanaUrl}#/discover?_g=()&_a=(columns:!(taId,orderId,message,method,exchange,methodPart,datetime),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'96f425a0-ce27-11e9-8c24-b7d9afe6d21c',key:taId,negate:!f,params:(query:'${taId}',type:phrase),type:phrase,value:'${taId}'),query:(match:(taId:(query:'${taId}',type:phrase))))),index:'96f425a0-ce27-11e9-8c24-b7d9afe6d21c',interval:auto,query:(language:lucene,query:''),sort:!(orderId,asc))`;
                 if(hasElasticSearch){
                     taIdComponent = <a id={`last_success_${schedule.id}`} href={url} target={'_blank'}>#{executionId}</a>;
                 } else{

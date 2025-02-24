@@ -39,7 +39,7 @@ import java.util.List;
 
 @Controller
 @Tag(name = "Ldap", description = "To retrieve ldap configuration and test connection to ldap server")
-@RequestMapping(value = "/api/ldap")
+@RequestMapping(value = "/ldap")
 public class LdapController {
 
     @Autowired

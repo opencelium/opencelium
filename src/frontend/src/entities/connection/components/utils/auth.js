@@ -25,8 +25,8 @@ import {doRequestRejected} from '@actions/app';
 import {updateMenu} from '@actions/app';
 
 import {getCryptLS, setCryptLS} from '@entity/connection/components/utils/LocalStorage';
-import {baseUrl, baseUrlApi} from '@entity/connection/components/utils/constants/url';
 import {API_METHOD} from "@entity/connection/components/utils/constants/app";
+import {Urls} from "@entity/application/requests/classes/url";
 
 const {ajax} = Rx.Observable;
 
@@ -42,7 +42,7 @@ export function getRequestSettings(params){
     isApi = isApi ?? true;
     isIframeUrl = isIframeUrl ?? false;
     if(fullUrl !== true){
-        url = isApi ? baseUrlApi + url : baseUrl + url;
+        url = isApi ? Urls.baseUrlApi + url : Urls.baseUrl + url;
     }
     method = method ?? API_METHOD.GET;
     data = data ?? {};
