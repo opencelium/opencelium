@@ -27,10 +27,12 @@ import LessThan from "@app_component/operator_builder/classes/if_operator/types/
 import LessThanOrEqual from "@app_component/operator_builder/classes/if_operator/types/LessThanOrEqual";
 import GreaterThan from "@app_component/operator_builder/classes/if_operator/types/GreaterThan";
 import GreaterThanOrEqualTo from "@app_component/operator_builder/classes/if_operator/types/GreaterThanOrEqual";
+import OperatorsConfigGenerator from "@app_component/operator_builder/classes/OperatorsConfigGenerator";
 
-export default class IfOperatorsConfigGenerator {
+export default class IfOperatorsConfigGenerator extends OperatorsConfigGenerator {
 
     constructor() {
+        super(Object.values(AllOperatorNames));
     }
     getOption(operatorName: OperatorName): OptionType {
         switch (operatorName) {
