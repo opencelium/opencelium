@@ -28,18 +28,21 @@ export default class SupportFileResponseClass {
     convertFilenamesIntoObjects(): SupportFileObject[] {
         const objets = [];
         for(let i = 0; i < this.supportFiles.length; i++) {
-            objets.push(this.convertFilenameIntoObject(this.supportFiles[i]));
+            const supportFileObject = this.convertFilenameIntoObject(this.supportFiles[i]);
+            if (supportFileObject) {
+                objets.push(this.convertFilenameIntoObject(this.supportFiles[i]));
+            }
         }
         return objets;
     }
 
-    convertFilenameIntoObject(filename: string): SupportFileObject {
+    convertFilenameIntoObject(filename: string): SupportFileObject | undefined {
         try {
             const filenameSplit = filename.split(this.getSplitter());
             if (filenameSplit.length !== 2) {
-                throw {message: 'WRONG_SUPPORT_FILENAME'};
+                return undefined;
             }
-            const timestamp = getDateFormat(+filenameSplit[1].substring(0, filenameSplit[1].length - '.zip'.length));
+            const timestamp = getDateFormat(+`${filenameSplit[1].substring(0, filenameSplit[1].length - '.zip'.length)}000`);
             return {
                 path: filename,
                 connectionId: filenameSplit[0],

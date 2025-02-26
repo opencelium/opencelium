@@ -34,7 +34,7 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
     listProps: ListProp<SupportFileResponseProps>[] = [
         {
             propertyKey: 'connection',
-            width: '30%',
+            width: '25%',
             getValue: (entity: SupportFileResponse) => {
                 return(
                     <div>{entity.connectionTitle}</div>
@@ -52,11 +52,33 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
         },
         {
             propertyKey: 'timestamp',
-            width: '25%',
+            width: '20%',
             getValue: (entity: SupportFileResponse) => {
-                const supportFileInstance = new SupportFileResponseClass(entity, 'error');
+                const errorSupportFileInstance = new SupportFileResponseClass(entity, 'error');
+                const successSupportFileInstance = new SupportFileResponseClass(entity, 'success');
+                let timestamp = errorSupportFileInstance.supportFilesObjects.length > 0 ? errorSupportFileInstance.supportFilesObjects[0].timestamp : '-';
+                if (timestamp === '-') {
+                    timestamp = successSupportFileInstance.supportFilesObjects.length > 0 ? successSupportFileInstance.supportFilesObjects[0].timestamp : '-';
+                }
                 return(
-                    <div>{supportFileInstance.supportFilesObjects[0].timestamp}</div>
+                    <div>{timestamp}</div>
+                )
+            }
+        },
+        {
+            propertyKey: 'status',
+            width: '10%',
+            replace: true,
+            getValue: (entity: SupportFileResponse) => {
+                const errorSupportFileInstance = new SupportFileResponseClass(entity, 'error');
+                const successSupportFileInstance = new SupportFileResponseClass(entity, 'success');
+                let hasError = errorSupportFileInstance.supportFilesObjects.length > 0;
+                if (!hasError) {
+                    hasError = successSupportFileInstance.supportFilesObjects.length === 0;
+                }
+                let background = hasError ? '#f5c3c3' : '#c3f5c3';
+                return (
+                    <td key={'status'} style={{background}}></td>
                 )
             }
         },
@@ -65,6 +87,7 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
         connection: 'Connection',
         supportFiles: 'File path',
         timestamp: 'Timestamp',
+        status: 'Status',
     };
     getTopActions = (viewType: ViewType, checked: number[]) => {
         const hasSearch = this.hasSearch && this.entities.length > 0;

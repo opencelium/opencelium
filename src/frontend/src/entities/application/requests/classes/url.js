@@ -41,7 +41,6 @@ export const APP_STATUS_UP = 'UP';
  */
 export const baseUrl = !hasServerEndpoint ? `${protocol}//${hostname}:${apiPort}/` : SETTINGS.SERVER_ENDPOINT;
 export const baseUrlApi = !hasServerApiEndpoint ? `${protocol}//${hostname}:${apiPort}/api/` : SETTINGS.SERVER_API_ENDPOINT;
-console.log(SETTINGS, SETTINGS.SERVER_API_ENDPOINT, baseUrlApi)
 export const socketServer = `${protocol}//${hostname}:${socketPort}/`;
 export const kibanaUrl = `${protocol}//${hostname}:${kibanaPort}/app/kibana`;
 
