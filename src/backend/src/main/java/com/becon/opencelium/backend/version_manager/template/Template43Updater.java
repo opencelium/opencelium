@@ -1,16 +1,17 @@
 package com.becon.opencelium.backend.version_manager.template;
 
+import com.becon.opencelium.backend.database.mongodb.entity.ConditionMng;
+import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.ocel.OCExpressionHelper;
 import com.becon.opencelium.backend.resource.connection.ConditionDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import com.becon.opencelium.backend.resource.connection.StatementDTO;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connection.old.FieldBindingOldDTO;
 import com.becon.opencelium.backend.resource.connector.BodyDTO;
 import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.version_manager.Wrapper;
-import com.becon.opencelium.backend.version_manager.backup.Backup;
 import com.becon.opencelium.backend.version_manager.base.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,33 +28,31 @@ public class Template43Updater implements TemplateUpdater {
     private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_3;
     private final Template40Updater template40Updater;
     private final ObjectMapper objectMapper;
+    private final Mapper<ConditionMng, ConditionDTO> conditionMapper;
 
-    public Template43Updater(Template40Updater template40Updater, ObjectMapper objectMapper) {
+    public Template43Updater(Template40Updater template40Updater, ObjectMapper objectMapper, Mapper<ConditionMng, ConditionDTO> conditionMapper) {
         this.template40Updater = template40Updater;
         this.objectMapper = objectMapper;
+        this.conditionMapper = conditionMapper;
     }
 
     @Override
-    @Backup
     @SuspendException
     public Wrapper<Template> updateToCurrentVersion(Template template) {
         return updateFromInternal(template, template.getVersion());
     }
 
     @Override
-    @Backup
     @SuspendException
     public Wrapper<Template> updateFrom(Template template, String oldVersion) {
         return updateFromInternal(template, oldVersion);
     }
 
-    private Wrapper<Template> updateFromInternal(Template template, String oldVersion){
-        if (Objects.isNull(template) || Objects.equals(oldVersion, currentVersion.getVersion()))
+    private Wrapper<Template> updateFromInternal(Template template, String oldVersion) {
+        if (Objects.isNull(template) || Utils.compare(currentVersion.getVersion(), oldVersion) <= 0)
             return Wrapper.notUpdated(template);
 
-        oldVersion = oldVersion.replaceAll("[^\\d.]", "");
-
-        if (StringUtils.isBlank(oldVersion) || Utils.compare(oldVersion, "4.0") < 0) {
+        if (Utils.compare(oldVersion, "4.0") < 0) {
             Wrapper<Template> updatedTo4_0 = template40Updater.updateFrom(template, oldVersion);
             if (!updatedTo4_0.isUpdated()) {
                 return updatedTo4_0;
@@ -156,6 +155,13 @@ public class Template43Updater implements TemplateUpdater {
                     rightStatement.setField(Version43Utils.replace(rightStatement.getField(), changed, true, Objects.equals(rightStatement.getType(), "header")));
                 }
             }
+
+            String exp = OCExpressionHelper.buildExp(conditionMapper.toEntity(operator.getCondition()));
+            if (Objects.nonNull(exp)) {
+                operator.setExpression(exp);
+                operator.setCondition(null);
+            }
+
         }
     }
 
