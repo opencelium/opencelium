@@ -7,6 +7,8 @@ ApiExtension package
 
 The ApiExtension is an otrs package. It extends the system's API functions.
 
+Download from `Packagecloud <https://packagecloud.io/becon/opencelium_addons>`_.
+
 See below the new operations
 
 - Link::LinkCreate

@@ -109,30 +109,30 @@ part and calls that should be used in *Connection*.
 
 |image_admin_2|
 
-For subscribers there is also a possibility to add and to update actions. `Here
-<https://docs.opencelium.io/en/prod/management/invoker.html>`_, you can read more
-information.
+For subscribers there is also a possibility to add and to update actions. 
+:ref:`Here <management-invoker>`, you can read how to manage with them.
 
 Templates
 """""""""""""""""
 
 These are business templates. In other words, they are connections that are saved as templates for
-often use. `Here
-<https://docs.opencelium.io/en/prod/management/template.html>`_, you can read how to manage with them.
+often use. :ref:`Here <management-business_template>`, you can read how to manage with them.
+
+.. _admin_panel-data_aggregator:
 
 Data Aggregator
 """""""""""""""""
 
 Data Aggregator is a feature that provides a possibility to notify a user after the
-triggered connection (this happens in *Schedules*). `Here
-<https://docs.opencelium.io/en/prod/management/aggregator.html>`_, you can read how to manage with them.
+triggered connection (this happens in *Schedules*). :ref:`Here <management-data_aggregator>`, you can read how to manage with them.
 
 Notification Templates
 """""""""""""""""
 
 Notification Templates are templates that are used in scheduler jobs to notify users for three event
-types: *pre*, *post*, and *alert*. `Here
-<https://docs.opencelium.io/en/prod/management/notification_template.html>`_, you can read how to manage with them.
+types: *pre*, *post*, and *alert*.  :ref:`Here <management-notification_template>`, you can read how to manage with them.
+
+.. _admin_panel-update_assistant:
 
 Update Assistant
 """""""""""""""""
@@ -147,15 +147,15 @@ system before update.
 |image_update_assistant_0|
 
 | The *Update Assistant* provides two options: 
-| * **Online:** get the new versions via package cloud
+| * **Online:** get the new versions via package cloud 
 | * **Offline:** download the version and upload it offline
 
 |image_update_assistant_1|
 
 After choosing the right version click on the *Update OC* to finish the procedure. If you want to see logs, please
-read the `Administration
-<https://docs.opencelium.io/en/prod/gettinginvolved/administration.html>`_ paragraph.
+read the  :ref:`Logging <getting_started-administration-logging>` paragraph.
 
+.. _admin_panel-migration:
 
 Migration from 3.x to 4.x
 """""""""""""""""

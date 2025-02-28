@@ -1,3 +1,5 @@
+.. _management-notification_template:
+
 ##################
 Notification Template
 ##################
