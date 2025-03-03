@@ -48,7 +48,7 @@ public class SupportFileServiceImp implements SupportFileService {
     private final ConnectorService connectorSqlService;
     private final InvokerService invokerService;
 
-    @Value("${support.files.directory:src/main/resources/support-files}")
+    @Value("${opencelium.support.file.directory:src/main/resources/support-files}")
     private String base;
     @Value("${opencelium.support.file.limit.success:1}")
     private int successFileLimit;
