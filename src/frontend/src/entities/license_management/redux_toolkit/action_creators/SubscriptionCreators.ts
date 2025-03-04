@@ -49,10 +49,24 @@ export const setCurrentSubscription = createAsyncThunk(
         }
     }
 )
+export const importCredits = createAsyncThunk(
+    'subscription/import/credits',
+    async(creditsFile: Blob[], thunkAPI) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', creditsFile[0]);
+            const request = new SubscriptionRequest({isFormData: true});
+            await request.importCredits(formData);
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 
 export default {
     getCurrentSubscription,
     getOperationUsageEntries,
     getOperationUsageDetails,
     setCurrentSubscription,
+    importCredits,
 }

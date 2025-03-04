@@ -19,7 +19,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import {IResponse, PageResponse} from "@application/requests/interfaces/IResponse";
 import {
-    getCurrentSubscription, getOperationUsageDetails, getOperationUsageEntries, setCurrentSubscription
+    getCurrentSubscription, getOperationUsageDetails, getOperationUsageEntries, importCredits, setCurrentSubscription
 } from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import SubscriptionModel, {
     OperationUsageDetailModel,
@@ -32,6 +32,7 @@ export interface SubscriptionState extends ICommonState{
     gettingOperationUsageEntries: API_REQUEST_STATE,
     gettingOperationUsageDetails: API_REQUEST_STATE,
     settingCurrentSubscription: API_REQUEST_STATE,
+    importingCredits: API_REQUEST_STATE,
     operationUsageEntries: OperationUsageEntryModel[],
     entriesTotalPages: number,
     operationUsageDetails: OperationUsageDetailModel[],
@@ -44,6 +45,7 @@ const initialState: SubscriptionState = {
     gettingOperationUsageEntries: API_REQUEST_STATE.INITIAL,
     gettingOperationUsageDetails: API_REQUEST_STATE.INITIAL,
     settingCurrentSubscription: API_REQUEST_STATE.INITIAL,
+    importingCredits: API_REQUEST_STATE.INITIAL,
     operationUsageEntries: [],
     entriesTotalPages: 0,
     operationUsageDetails: [],
@@ -105,6 +107,17 @@ export const subscriptionSlice = createSlice({
         },
         [setCurrentSubscription.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.settingCurrentSubscription = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [importCredits.pending.type]: (state) => {
+            state.importingCredits = API_REQUEST_STATE.START;
+        },
+        [importCredits.fulfilled.type]: (state, action: PayloadAction<SubscriptionModel>) => {
+            state.importingCredits = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [importCredits.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.importingCredits = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }

@@ -18,7 +18,7 @@ import SubscriptionModel, {
     OperationUsageDetailModel,
     OperationUsageEntryModel
 } from "@entity/license_management/requests/models/SubscriptionModel";
-import {PageResponse} from "@application/requests/interfaces/IResponse";
+import {IResponse, PageResponse} from "@application/requests/interfaces/IResponse";
 
 export default interface ISubscriptionRequest {
 
@@ -33,5 +33,8 @@ export default interface ISubscriptionRequest {
 
     //to get operation usage details
     getOperationUsageDetails (): Promise<AxiosResponse<PageResponse<OperationUsageDetailModel>>>
+
+    //to import credits
+    importCredits (creditsFile: FormData): Promise<AxiosResponse<IResponse>>,
 
 }

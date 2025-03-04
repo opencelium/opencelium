@@ -33,6 +33,7 @@ import {Auth} from "@application/classes/Auth";
 import ActivateLicenseComponent from "@entity/license_management/components/activate_license/ActivateLicenseComponent";
 import Button from "@app_component/base/button/Button";
 import {DetailView} from "@entity/license_management/components/detail_view/DetailView";
+import ImportCreditsComponent from "@entity/license_management/components/import_credits/ImportCreditsComponent";
 
 
 const LicenseManagement: FC<IForm> = ({}) => {
@@ -77,7 +78,8 @@ const LicenseManagement: FC<IForm> = ({}) => {
             />
         );
         //if (activationRequestStatus === ActivationRequestStatus.PENDING) {
-            actions.push(<ImportLicenseComponent key={'upload'}/>);
+        actions.push(<ImportLicenseComponent key={'upload'}/>);
+        actions.push(<ImportCreditsComponent key={'upload'}/>);
         //}
     } else {
         if (authUser.userDetail.themeSync && (!currentSubscription || Subscription.isFree(currentSubscription))) {

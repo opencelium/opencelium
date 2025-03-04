@@ -6,7 +6,7 @@ import SubscriptionModel, {
     OperationUsageDetailModel,
     OperationUsageEntryModel
 } from "@entity/license_management/requests/models/SubscriptionModel";
-import {PageResponse} from "@application/requests/interfaces/IResponse";
+import {IResponse, PageResponse} from "@application/requests/interfaces/IResponse";
 
 export default class SubscriptionRequest extends Request implements ISubscriptionRequest {
 
@@ -29,6 +29,10 @@ export default class SubscriptionRequest extends Request implements ISubscriptio
 
     async getOperationUsageDetails(): Promise<AxiosResponse<PageResponse<OperationUsageDetailModel>>>{
         return super.get<PageResponse<OperationUsageDetailModel>>();
+    }
+
+    async importCredits(creditsFile: FormData): Promise<AxiosResponse<IResponse>>{
+        return super.post<IResponse>(creditsFile);
     }
 
 }
