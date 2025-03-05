@@ -221,6 +221,12 @@ opencelium:
   service_portal:
     base_url: "https://api.serviceportal.com"
     token: "your-token-here"
+#  support:
+#    file:
+#      directory: src/main/resources/support-files
+#      limit:
+#        success: 1
+#        fail: 5
 #  rest_template:
 #    proxy:
 #      host: 127.0.0.1
