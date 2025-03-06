@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.execution.support_file.ConnectionSupportFiles;
+import com.becon.opencelium.backend.execution.support_file.SupportFile;
 import com.becon.opencelium.backend.execution.support_file.SupportFileService;
 import com.becon.opencelium.backend.resource.connection.SupportFileNamesDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -51,7 +51,7 @@ public class SupportFileController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/list")
-    public ResponseEntity<List<ConnectionSupportFiles>> supportFileList() {
+    public ResponseEntity<List<SupportFile>> supportFileList() {
         return ResponseEntity.ok(fileService.supportFileList());
     }
 
@@ -68,7 +68,7 @@ public class SupportFileController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/{connectionId}/list")
-    public ResponseEntity<ConnectionSupportFiles> connectionSupportFileList(@PathVariable Long connectionId) {
+    public ResponseEntity<List<SupportFile>> connectionSupportFileList(@PathVariable Long connectionId) {
         return ResponseEntity.ok(fileService.connectionSupportFileList(connectionId));
     }
 
@@ -133,7 +133,7 @@ public class SupportFileController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @DeleteMapping("/{zipFileName}")
-    public ResponseEntity<Resource> deleteSupportFile(@PathVariable String zipFileName) {
+    public ResponseEntity<Void> deleteSupportFile(@PathVariable String zipFileName) {
         fileService.deleteSupportFile(zipFileName);
         return ResponseEntity.noContent().build();
     }
@@ -151,7 +151,7 @@ public class SupportFileController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping
-    public ResponseEntity<Resource> deleteSupportFiles(@RequestBody SupportFileNamesDTO dto) {
+    public ResponseEntity<Void> deleteSupportFiles(@RequestBody SupportFileNamesDTO dto) {
         dto.getFilenames().forEach(fileService::deleteSupportFile);
         return ResponseEntity.noContent().build();
     }
