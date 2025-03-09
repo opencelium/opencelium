@@ -129,7 +129,12 @@ public class ConnectorExecutor {
                         operator.getExpression(), next[0], next[1], index
                 ));
 
-                boolean result = (Boolean) expressionProcessor.evaluate(operator.getExpression(), executionManager::getValue);
+                boolean result = (Boolean) expressionProcessor.evaluate(
+                        operator.getExpression(),
+                        executionManager::getValue,
+                        logger,
+                        masking
+                );
                 logger.logAndSend("OPERATOR_RESULT: " + (result ? "TRUE" : "FALSE") + " -- index: " + index);
 
                 if (result) {

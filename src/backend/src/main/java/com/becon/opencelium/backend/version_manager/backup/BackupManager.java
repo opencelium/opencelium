@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.version_manager.backup;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.template.entity.Template;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Component;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,37 +13,30 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 
-@Component
 public class BackupManager {
 
-    private final ObjectMapper objectMapper;
-    private final Path backupDir = Paths.get(new File("").toURI()).resolve("src/main/resources/updating-backup");
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Path backupDir = Paths.get(new File("").toURI()).resolve("src/main/resources/backup");
 
-    public BackupManager(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public static void doBackup(ConnectionDTO connection, String fromVersion, String toVersion) {
+        doBackup(connection, fromVersion, toVersion, "connection");
     }
 
-    public void doBackup(Object data, String fromVersion, String toVersion) {
-        try {
-            doBackup(objectMapper.writeValueAsString(data), data.getClass(),  fromVersion, toVersion);
-        } catch (JsonProcessingException ignored) {
-        }
+    public static void doBackup(Template template, String fromVersion, String toVersion) {
+        doBackup(template, fromVersion, toVersion, "template");
     }
 
-    public void doBackup(Object obj, Class<?> clazz, String fromVersion, String toVersion) {
+    private static <T> void doBackup(T entity, String fromVersion, String toVersion, String entityType) {
         try {
             BackupEntity backup = new BackupEntity();
             backup.setTimestamp(Instant.now().toEpochMilli());
             backup.setFromVersion(fromVersion);
             backup.setToVersion(toVersion);
-            backup.setEntityClass(clazz.getName());
-            backup.setData(obj);
+            backup.setEntityClass(entity.getClass().getName());
+            backup.setData(entity);
 
-            String entityClassName = clazz.getSimpleName();
-            Path entityBackupDir = backupDir.resolve(entityClassName);
-            if (!Files.exists(entityBackupDir)) {
-                Files.createDirectories(entityBackupDir);
-            }
+            Path entityBackupDir = backupDir.resolve(entityType);
+            Files.createDirectories(entityBackupDir); // No need to check existence; `createDirectories` does it safely
 
             String fileName = String.format("%d.json", backup.getTimestamp());
             Path filePath = entityBackupDir.resolve(fileName);
@@ -54,4 +47,5 @@ public class BackupManager {
         } catch (IOException ignored) {
         }
     }
+
 }

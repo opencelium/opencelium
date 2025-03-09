@@ -42,4 +42,7 @@ public interface TemplateService {
     boolean existsById(String templateId);
 
     TemplateResource getByConnectionId(Long connectionId);
+
+    void updateTemplatesToCurrentVersion();
+
 }
