@@ -1,6 +1,9 @@
 package com.becon.opencelium.backend.resource.subs;
 
 import com.becon.opencelium.backend.constant.SubscriptionConstant;
+import com.becon.opencelium.backend.subscription.dto.ExtraOpsDTO;
+
+import java.util.List;
 
 public class SubsDTO {
     private String subId;
@@ -12,6 +15,7 @@ public class SubsDTO {
     private long totalOperationUsage;
     private long currentOperationUsage;
     private boolean active;
+    private List<ExtraOpsDTO> extraOps;
 
     // Getters and Setters
     public String getSubId() {
@@ -84,6 +88,14 @@ public class SubsDTO {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public List<ExtraOpsDTO> getExtraOpsDTOS() {
+        return extraOps;
+    }
+
+    public void setExtraOpsDTOS(List<ExtraOpsDTO> extraOpsDTOS) {
+        this.extraOps = extraOpsDTOS;
     }
 
     @Override
