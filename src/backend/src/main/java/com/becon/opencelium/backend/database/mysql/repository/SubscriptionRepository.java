@@ -26,4 +26,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Stri
     Optional<Subscription> findBySubId(String subId);
 
     boolean existsBySubId(String subId);
+
+    Optional<Subscription> findByLicenseId(String licenseId);
 }

@@ -59,7 +59,9 @@ public class ExtraOpsController {
         if (encryptedExtraOpsFile == null) {
             throw new RuntimeException("Extra Ops is not valid");
         }
+        Subscription sub = subscriptionService.findByLicenseId(encryptedExtraOpsFile.getLicenseId());
         ExtraOps extraOps = extraOpsService.toEntityFromEncryption(encryptedExtraOpsFile);
+        extraOps.setSubscription(sub);
         extraOpsService.save(extraOps);
 
         return ResponseEntity.ok().build();

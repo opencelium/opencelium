@@ -23,4 +23,6 @@ public interface SubscriptionService {
     void updateUsage(Subscription activeSub, ConnectionEx connectionEx, long requestSize, long startTime);
     void createFreeLicenseFileIfNotExists();
     void resetMonthlyUsageForLicense(String subId);
+
+    Subscription findByLicenseId(String licenseId);
 }
