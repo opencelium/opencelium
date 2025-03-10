@@ -18,8 +18,11 @@ package com.becon.opencelium.backend.database.mysql.repository;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -38,4 +41,9 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
 
     @Query("SELECT c.id FROM Connection c")
     List<Long> findIds();
+
+    @Transactional
+    @Modifying
+    @Query("update Connection c set c.ocVersion = :version")
+    void updateVersion(@Param("version")String version);
 }

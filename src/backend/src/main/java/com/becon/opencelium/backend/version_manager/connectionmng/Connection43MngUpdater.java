@@ -32,12 +32,6 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
         if (Objects.isNull(connection) || Utils.compare(currentVersion.getVersion(), oldVersion) <= 0)
             return Wrapper.notUpdated(connection);
 
-        boolean b = new Random().nextBoolean();
-        System.out.println(b);
-        if(b){
-            throw new RuntimeException();
-        }
-
         connection.setVersion(currentVersion.getVersion());
 
         Reference<Boolean> changed = new Reference<>(false);

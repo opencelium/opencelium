@@ -2,8 +2,6 @@ package com.becon.opencelium.backend.version_manager.backup;
 
 import com.becon.opencelium.backend.configuration.OpenCeliumProps;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -23,9 +20,6 @@ import java.util.regex.Pattern;
 
 @Service
 public class MysqlBackupService {
-
-    private static final String ROOT_FOLDER = "/src/main/resources/backup";
-    private static final Logger log = LoggerFactory.getLogger(MysqlBackupService.class);
 
     private final OpenCeliumProps ocProps;
     private final DataSourceProperties dbProperties;
@@ -50,7 +44,11 @@ public class MysqlBackupService {
 
         ProcessBuilder processBuilder = new ProcessBuilder(command);
 
-        File existingMatchedFile = getBackupWithCurrentVersionIfPresent(entity);
+        Path rootPath = Paths.get("src", "main", "resources", "backup", entity).toAbsolutePath();
+        File rootFolder = rootPath.toFile();
+        rootFolder.mkdirs();
+
+        File existingMatchedFile = getBackupWithCurrentVersionIfPresent(entity, rootFolder);
         if (Objects.nonNull(existingMatchedFile)) {
             try {
                 Files.deleteIfExists(Path.of(existingMatchedFile.getAbsolutePath()));
@@ -58,7 +56,7 @@ public class MysqlBackupService {
             }
         }
 
-        File backupFile = new File(Paths.get(new File("").toURI()).resolve(buildFilePath(entity)).toString());
+        File backupFile = rootPath.resolve(buildFilePath(entity)).toFile();
         if (!backupFile.exists()) {
             backupFile.getParentFile().mkdirs();
             try {
@@ -78,14 +76,12 @@ public class MysqlBackupService {
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Error executing backup", e);
-        } finally {
-            killActiveConnection();
         }
     }
 
-    private File getBackupWithCurrentVersionIfPresent(String entity) {
-        File[] matchingFiles = new File(ROOT_FOLDER + "/" + entity).listFiles((dir, name) ->
-                isThisVersion(name)
+    private File getBackupWithCurrentVersionIfPresent(String entity, File rootFolder) {
+        File[] matchingFiles = rootFolder.listFiles((dir, name) ->
+                isThisVersion(name, entity)
         );
         return (matchingFiles != null && matchingFiles.length > 0) ? matchingFiles[0] : null;
     }
@@ -101,7 +97,9 @@ public class MysqlBackupService {
         );
         ProcessBuilder processBuilder = new ProcessBuilder(command);
 
-        File backupFile = getBackupWithCurrentVersionIfPresent(entity);
+        Path rootPath = Paths.get("src", "main", "resources", "backup", entity).toAbsolutePath();
+        File backupFile = getBackupWithCurrentVersionIfPresent(entity, rootPath.toFile());
+
         if (Objects.isNull(backupFile)) {
             throw new RuntimeException("Backup file not found");
         }
@@ -120,22 +118,19 @@ public class MysqlBackupService {
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Error executing restore", e);
-        } finally {
-            killActiveConnection();
         }
     }
 
     private String buildFilePath(String entityName) {
-        return ROOT_FOLDER + "/" +
-               entityName +
+        return entityName +
                "_backup_v" +
                ocProps.getVersion().replace('.', '_') + "_" +
                LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd")) +
                ".sql";
     }
 
-    private boolean isThisVersion(String name) {
-        return name.startsWith(name + "_backup_v" + ocProps.getVersion().replace('.', '_') + "_")
+    private boolean isThisVersion(String name, String entity) {
+        return name.startsWith(entity + "_backup_v" + ocProps.getVersion().replace('.', '_') + "_")
                && name.endsWith(".sql");
     }
 
@@ -168,24 +163,4 @@ public class MysqlBackupService {
         }
         throw new IllegalStateException("Invalid JDBC URL: " + url);
     }
-
-    private void killActiveConnection() {
-        try (Connection connection = DriverManager.getConnection(
-                dbProperties.determineUrl(),
-                dbProperties.determineUsername(),
-                dbProperties.determinePassword()
-        );
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT CONNECTION_ID()")) {
-
-            if (resultSet.next()) {
-                int connectionId = resultSet.getInt(1);
-                statement.execute("KILL " + connectionId);
-            }
-        } catch (SQLException e) {
-            log.error("Error killing a connection to mysql");
-        }
-    }
-
-
 }

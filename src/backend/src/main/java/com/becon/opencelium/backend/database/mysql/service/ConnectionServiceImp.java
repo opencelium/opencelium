@@ -564,6 +564,7 @@ public class ConnectionServiceImp implements ConnectionService {
                 log.info("Connection[id={}, name={}] is successfully updated to {} version", connection.getId(), connection.getTitle(), ocProps.getVersion());
             }
         }
+        connectionRepository.updateVersion(ocProps.getVersion());
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
