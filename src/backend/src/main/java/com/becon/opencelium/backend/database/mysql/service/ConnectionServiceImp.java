@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.EntityNames;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
@@ -42,7 +43,7 @@ import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
-import com.becon.opencelium.backend.version_manager.backup.BackupManager;
+import com.becon.opencelium.backend.version_manager.Wrapper;
 import com.becon.opencelium.backend.version_manager.backup.MongoDbBackupService;
 import com.becon.opencelium.backend.version_manager.backup.MysqlBackupService;
 import com.becon.opencelium.backend.version_manager.base.Utils;
@@ -515,16 +516,20 @@ public class ConnectionServiceImp implements ConnectionService {
         for (Long id : ids) {
             Connection connection = getById(id);
             if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0) {
-                if(!gotBackup){
-                    mysqlBackupService.backup();
-                    mongoDbBackupService.backup();
-                    gotBackup = true;
-                    log.error("Failed to backup. Skipped updating connections");
+                if (!gotBackup) {
+                    try {
+                        mysqlBackupService.backup(EntityNames.ENHANCEMENT);
+                        mongoDbBackupService.backup();
+                        gotBackup = true;
+                    } catch (Exception e) {
+                        log.error("Failed to backup. Skipped updating connections");
+                        throw new RuntimeException(e);
+                    }
                 }
+                AtomicBoolean connectionChanged = new AtomicBoolean(false);
+                // UPDATE CONNECTION_MNG
+                ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
                 try {
-                    AtomicBoolean connectionChanged = new AtomicBoolean(false);
-                    // UPDATE CONNECTION_MNG
-                    ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
                     connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
                             .ifChangedOrElseIfUpdated(
                                     x -> {
@@ -533,24 +538,30 @@ public class ConnectionServiceImp implements ConnectionService {
                                     }, // if any field is updated
                                     connectionMngService::saveDirectly // only version is set to the current version
                             );
-
-                    AtomicBoolean anyEnhancementChanged = new AtomicBoolean(false);
-                    // UPDATE ENHANCEMENTS
-                    connection.getEnhancements().forEach(enhancement -> {
-                        enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
-                                .ifChanged(x -> {
-                                    anyEnhancementChanged.set(true);
-                                    enhancementService.save(enhancement);
-                                });
-                    });
-                    log.info("Connection[id={}, name={}] is successfully updated to {} version", connection.getId(), connection.getTitle(), ocProps.getVersion());
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
-                    mysqlBackupService.restore();
+                    mysqlBackupService.restore(EntityNames.ENHANCEMENT);
                     mongoDbBackupService.restore();
                     log.warn("Rolled back all changes");
-                    throw e;
+                    throw new RuntimeException(e);
                 }
+
+                AtomicBoolean anyEnhancementChanged = new AtomicBoolean(false);
+                // UPDATE ENHANCEMENTS
+                try {
+                    connection.getEnhancements().forEach(enhancement -> enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
+                            .ifChanged(x -> {
+                                anyEnhancementChanged.set(true);
+                                enhancementService.save(enhancement);
+                            }));
+                } catch (Exception e) {
+                    log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
+                    mysqlBackupService.restore(EntityNames.ENHANCEMENT);
+                    mongoDbBackupService.restore();
+                    log.warn("Rolled back all changes");
+                    throw new RuntimeException(e);
+                }
+                log.info("Connection[id={}, name={}] is successfully updated to {} version", connection.getId(), connection.getTitle(), ocProps.getVersion());
             }
         }
     }

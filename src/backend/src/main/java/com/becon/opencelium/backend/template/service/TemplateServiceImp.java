@@ -29,7 +29,7 @@ import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
-import com.becon.opencelium.backend.version_manager.backup.BackupManager;
+import com.becon.opencelium.backend.version_manager.backup.FileBackupManager;
 import com.becon.opencelium.backend.version_manager.base.Utils;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -174,8 +174,8 @@ public class TemplateServiceImp implements TemplateService {
                     String oldVersion = template.getVersion();
                     templateEntityUpdater.updateToCurrentVersion(template)
                             .ifUpdated(x -> {
+                                FileBackupManager.doBackup(x, oldVersion, ocProps.getVersion());
                                 save(template, fileName);
-                                BackupManager.doBackup(x, oldVersion, ocProps.getVersion());
                             });
                     log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
                 } catch (Exception e) {

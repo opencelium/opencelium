@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 
 @Component
 public class Connection43MngUpdater implements ConnectionMngUpdater {
@@ -16,7 +17,6 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
     private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_3;
 
     @Override
-    @SuspendException
     public Wrapper<ConnectionMng> updateToCurrentVersion(ConnectionMng connection) {
         return Objects.isNull(connection)
                 ? Wrapper.notUpdated(null)
@@ -24,7 +24,6 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
     }
 
     @Override
-    @SuspendException
     public Wrapper<ConnectionMng> updateFrom(ConnectionMng connection, String oldVersion) {
         return updateFromInternal(connection, oldVersion);
     }
@@ -32,6 +31,12 @@ public class Connection43MngUpdater implements ConnectionMngUpdater {
     private Wrapper<ConnectionMng> updateFromInternal(ConnectionMng connection, String oldVersion) {
         if (Objects.isNull(connection) || Utils.compare(currentVersion.getVersion(), oldVersion) <= 0)
             return Wrapper.notUpdated(connection);
+
+        boolean b = new Random().nextBoolean();
+        System.out.println(b);
+        if(b){
+            throw new RuntimeException();
+        }
 
         connection.setVersion(currentVersion.getVersion());
 

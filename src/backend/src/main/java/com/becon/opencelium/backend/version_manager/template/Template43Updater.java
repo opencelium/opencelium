@@ -37,13 +37,11 @@ public class Template43Updater implements TemplateUpdater {
     }
 
     @Override
-    @SuspendException
     public Wrapper<Template> updateToCurrentVersion(Template template) {
         return updateFromInternal(template, template.getVersion());
     }
 
     @Override
-    @SuspendException
     public Wrapper<Template> updateFrom(Template template, String oldVersion) {
         return updateFromInternal(template, oldVersion);
     }

@@ -1,8 +1,10 @@
 package com.becon.opencelium.backend.version_manager.backup;
 
+import com.becon.opencelium.backend.configuration.OpenCeliumProps;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
+
 import java.util.Arrays;
 
 @Service
@@ -14,24 +16,43 @@ public class MongoDbBackupService {
     private static final String OPERATOR_COLLECTION = "operator";
 
     private final MongoTemplate mongoTemplate;
+    private final OpenCeliumProps ocProps;
 
-    public MongoDbBackupService(MongoTemplate mongoTemplate) {
+    public MongoDbBackupService(MongoTemplate mongoTemplate, OpenCeliumProps ocProps) {
         this.mongoTemplate = mongoTemplate;
+        this.ocProps = ocProps;
     }
 
-    /**
-     * Creates backups for all collections.
-     */
+    //TODO: instead of early dropping use create-drop-rename approach
     public void backup() {
-        copyCollection(CONNECTION_COLLECTION, CONNECTION_COLLECTION + "_backup");
-        copyCollection(FIELD_BINDING_COLLECTION, FIELD_BINDING_COLLECTION + "_backup");
-        copyCollection(METHOD_COLLECTION, METHOD_COLLECTION + "_backup");
-        copyCollection(OPERATOR_COLLECTION, OPERATOR_COLLECTION + "_backup");
+        String connectionBackupCollection = buildBackupName(CONNECTION_COLLECTION);
+        String fbBackupCollection = buildBackupName(FIELD_BINDING_COLLECTION);
+        String methodBackupCollection = buildBackupName(METHOD_COLLECTION);
+        String operatorBackupCollection = buildBackupName(OPERATOR_COLLECTION);
+
+        if (mongoTemplate.collectionExists(connectionBackupCollection)) {
+            mongoTemplate.dropCollection(connectionBackupCollection);
+        }
+        if (mongoTemplate.collectionExists(fbBackupCollection)) {
+            mongoTemplate.dropCollection(fbBackupCollection);
+        }
+        if (mongoTemplate.collectionExists(methodBackupCollection)) {
+            mongoTemplate.dropCollection(methodBackupCollection);
+        }
+        if (mongoTemplate.collectionExists(operatorBackupCollection)) {
+            mongoTemplate.dropCollection(operatorBackupCollection);
+        }
+
+        copyCollection(CONNECTION_COLLECTION, connectionBackupCollection);
+        copyCollection(FIELD_BINDING_COLLECTION, fbBackupCollection);
+        copyCollection(METHOD_COLLECTION, methodBackupCollection);
+        copyCollection(OPERATOR_COLLECTION, operatorBackupCollection);
     }
 
-    /**
-     * Restores all collections from their backups and deletes the backups.
-     */
+    private String buildBackupName(String name) {
+        return name + "_backup_v" + ocProps.getVersion().replace('.', '_');
+    }
+
     public void restore() {
         restoreCollection(CONNECTION_COLLECTION);
         restoreCollection(FIELD_BINDING_COLLECTION);
@@ -39,9 +60,6 @@ public class MongoDbBackupService {
         restoreCollection(OPERATOR_COLLECTION);
     }
 
-    /**
-     * Copies data from one collection to another.
-     */
     private void copyCollection(String source, String destination) {
         mongoTemplate.getDb().getCollection(source)
                 .aggregate(Arrays.asList(
@@ -51,7 +69,7 @@ public class MongoDbBackupService {
     }
 
     private void restoreCollection(String collectionName) {
-        String backupName = collectionName + "_backup";
+        String backupName = buildBackupName(collectionName);
 
         // Ensure the backup collection exists before restoring
         if (mongoTemplate.getDb().getCollection(backupName).countDocuments() == 0) {

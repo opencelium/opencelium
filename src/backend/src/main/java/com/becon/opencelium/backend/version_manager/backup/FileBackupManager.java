@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.version_manager.backup;
 
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -13,14 +12,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 
-public class BackupManager {
+public class FileBackupManager {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Path backupDir = Paths.get(new File("").toURI()).resolve("src/main/resources/backup");
-
-    public static void doBackup(ConnectionDTO connection, String fromVersion, String toVersion) {
-        doBackup(connection, fromVersion, toVersion, "connection");
-    }
 
     public static void doBackup(Template template, String fromVersion, String toVersion) {
         doBackup(template, fromVersion, toVersion, "template");
@@ -38,7 +33,7 @@ public class BackupManager {
             Path entityBackupDir = backupDir.resolve(entityType);
             Files.createDirectories(entityBackupDir); // No need to check existence; `createDirectories` does it safely
 
-            String fileName = String.format("%d.json", backup.getTimestamp());
+            String fileName = String.format("%s_%d.json", entityType, backup.getTimestamp());
             Path filePath = entityBackupDir.resolve(fileName);
 
             try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardOpenOption.CREATE)) {
