@@ -1,21 +1,10 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
 import com.becon.opencelium.backend.database.mysql.entity.ExtraOps;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
-import com.becon.opencelium.backend.database.mysql.service.ActivationRequestService;
 import com.becon.opencelium.backend.database.mysql.service.ExtraOpsService;
-import com.becon.opencelium.backend.database.mysql.service.OperationUsageHistoryService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
-import com.becon.opencelium.backend.enums.ActivReqStatus;
-import com.becon.opencelium.backend.mapper.mysql.ActivationRequestMapper;
 import com.becon.opencelium.backend.subscription.dto.EncryptedExtraOpsFile;
-import com.becon.opencelium.backend.subscription.dto.ExtraOpsDTO;
-import com.becon.opencelium.backend.subscription.dto.LicenseKey;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApi;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApiFactory;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiType;
-import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
@@ -28,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/extra-ops")
+@RequestMapping(value = "/extra-ops")
 @Tag( name = "Extra Operations",
       description = "Extra Operations are temporary allowances that extend a user’s " +
                     "monthly quota, consumed in FIFO order, and expiring at the end " +

@@ -27,15 +27,12 @@ import java.util.Optional;
 @Service
 public class ExtraOpsServiceImp implements ExtraOpsService {
 
-    private final SubscriptionService subscriptionService;
     private final ExtraOpsRepository extraOpsRepository;
     private final Scheduler scheduler;
 
-    public ExtraOpsServiceImp(ExtraOpsRepository extraOpsRepository, Scheduler scheduler,
-                              SubscriptionService subscriptionService) {
+    public ExtraOpsServiceImp(ExtraOpsRepository extraOpsRepository, Scheduler scheduler) {
         this.extraOpsRepository = extraOpsRepository;
         this.scheduler = scheduler;
-        this.subscriptionService = subscriptionService;
     }
 
     @Override
@@ -51,10 +48,12 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
 
     @Override
     public void save(ExtraOps extraOps) {
-        if (!HmacUtility.verify(Long.toString(extraOps.getCurrentOpsUsage()), extraOps.getCurrentOpsUsageHmac())) {
+        String hmac = constructHmac(extraOps, extraOps.getCurrentOpsUsage());
+        if (!hmac.equals(extraOps.getCurrentOpsUsageHmac())) {
             throw new RuntimeException("Current usage was changed manually in Extra Ops");
         }
-        if (!HmacUtility.verify(Long.toString(extraOps.getTotalOpsUsage()), extraOps.getCurrentOpsUsageHmac())) {
+        hmac = constructHmac(extraOps, extraOps.getTotalOpsUsage());
+        if (!hmac.equals(extraOps.getTotalOpsUsageHmac())) {
             throw new RuntimeException("Total usage was changed manually in Extra Ops");
         }
         // If Active Extra Ops not found then activate current.
@@ -84,11 +83,13 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
     public ExtraOpsDTO toDTO(ExtraOps extraOps) {
         ExtraOpsDTO extraOpsDTO = new ExtraOpsDTO();
         extraOpsDTO.setId(extraOps.getId());
+        extraOpsDTO.setLicenseId(extraOps.getSubscription().getLicenseId());
         extraOpsDTO.setTotalOpsUsage(extraOps.getTotalOpsUsage());
         extraOpsDTO.setCurrentOpsUsage(extraOps.getCurrentOpsUsage());
         extraOpsDTO.setEndDate(convertToUnixMillis(extraOps.getEndDate()));
         extraOpsDTO.setActivationDate(convertToUnixMillis(extraOps.getEndDate()));
         extraOpsDTO.setGeneratedAt(extraOps.getGeneratedAt());
+        extraOpsDTO.setStatus(extraOps.getStatus());
         return extraOpsDTO;
     }
 
@@ -142,7 +143,7 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
             ExtraOps extraOps = extraOpsOptional.get();
 
             // 2. Validate currentOpsUsage using HMAC to ensure data integrity.
-            String expectedHmac = constructHmac(extraOps);
+            String expectedHmac = constructHmac(extraOps, extraOps.getCurrentOpsUsage());
             if (!expectedHmac.equals(extraOps.getCurrentOpsUsageHmac())) {
                 throw new IllegalStateException("HMAC validation failed for ExtraOps id: " + extraOps.getId());
             }
@@ -153,14 +154,15 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
             if (opsUsage >= availableOps) {
                 // If remaining opsUsage can fully consume this extraOps:
                 extraOps.setCurrentOpsUsage(extraOps.getTotalOpsUsage());
-                extraOps.setCurrentOpsUsageHmac(constructHmac(extraOps));
+                extraOps.setCurrentOpsUsageHmac(constructHmac(extraOps, extraOps.getTotalOpsUsage()));
                 extraOps.setStatus(ExtraOpsStatus.CONSUMED);
                 // Deduct the amount consumed from opsUsage.
                 opsUsage -= availableOps;
             } else {
                 // If remaining opsUsage is not enough to consume the extraOps fully:
-                extraOps.setCurrentOpsUsage(extraOps.getCurrentOpsUsage() + opsUsage);
-                extraOps.setCurrentOpsUsageHmac(constructHmac(extraOps));
+                long operationUsage = extraOps.getCurrentOpsUsage() + opsUsage;
+                extraOps.setCurrentOpsUsage(operationUsage);
+                extraOps.setCurrentOpsUsageHmac(constructHmac(extraOps, operationUsage));
                 // If this extraOps was PENDING, mark it as ACTIVE now.
                 if (extraOps.getStatus() == ExtraOpsStatus.PENDING) {
                     extraOps.setStatus(ExtraOpsStatus.ACTIVE);
@@ -174,11 +176,11 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
     }
 
     @Override
-    public String constructHmac(ExtraOps extraOps) {
+    public String constructHmac(ExtraOps extraOps, long usage) {
         return HmacUtility.encode(
                 extraOps.getSubscription().getLicenseId() +
                      extraOps.getGeneratedAt() +
-                     extraOps.getCurrentOpsUsage());
+                     usage);
     }
 
     @Override
@@ -207,6 +209,10 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
             Date triggerDate = Date.from(endDate.atZone(ZoneId.systemDefault()).toInstant());
             String jobKey = "ExtraOpsJob-" + extraOpsId;
             String groupKey = "ExtraOpsJobs";
+            JobKey jobIdentity = new JobKey(jobKey, groupKey);
+            if (scheduler.checkExists(jobIdentity)) {
+                return;
+            }
             // Define a job and tie it to our ExampleJob class.
             JobDetail job = JobBuilder.newJob(ExtraOpsJob.class)
                     .withIdentity(jobKey, groupKey)

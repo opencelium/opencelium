@@ -1,11 +1,13 @@
 package com.becon.opencelium.backend.subscription.dto;
 
 import com.becon.opencelium.backend.subscription.enums.ExtraOpsStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 
 public class ExtraOpsDTO {
     private long id;
+    @JsonIgnore
     private String licenseId; // could be subscription id
     private long totalOpsUsage;
     private long currentOpsUsage;

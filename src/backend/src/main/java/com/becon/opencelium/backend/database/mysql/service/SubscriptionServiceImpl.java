@@ -218,6 +218,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         SubsDTO subsDTO = new SubsDTO();
         subsDTO.setActive(subscription.isActive());
         subsDTO.setSubId(subscription.getSubId());
+        subsDTO.setLicenseId(subscription.getLicenseId());
         subsDTO.setCurrentOperationUsage(subscription.getCurrentUsage());
 
         subsDTO.setDuration(licenseKey.getDuration());
@@ -274,12 +275,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         LicenseKey licenseKey = LicenseKeyUtility.decrypt(sub.getLicenseKey());
         long totalUsage = licenseKey.getOperationUsage();
         long remain = totalUsage - updatedOperationUsage;
-        long subOpsUsage = remain <= 0 ? totalUsage : updatedOperationUsage;
-        String newHmac = HmacUtility.encode(sub.getId() + subOpsUsage);
-        sub.setCurrentUsage(subOpsUsage);
-        sub.setCurrentUsageHmac(newHmac);
-        update(sub);
+
+        if (sub.getCurrentUsage() < totalUsage){
+            long subOpsUsage = remain <= 0 ? totalUsage : updatedOperationUsage;
+            String newHmac = HmacUtility.encode(sub.getId() + subOpsUsage);
+            sub.setCurrentUsage(subOpsUsage);
+            sub.setCurrentUsageHmac(newHmac);
+            update(sub);
+        }
         if (remain <= 0) {
+            remain = Math.abs(remain);
             extraOpsService.updateExtraOpsForSubscription(sub, remain);
         }
     }

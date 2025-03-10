@@ -29,6 +29,6 @@ public interface ExtraOpsService {
 
     void updateExtraOpsForSubscription(Subscription sub, long opsUsage);
 
-    String constructHmac(ExtraOps extraOps);
+    String constructHmac(ExtraOps extraOps, long usage);
     String constructHmac(EncryptedExtraOpsFile encryptExtraOps, long usage);
 }
