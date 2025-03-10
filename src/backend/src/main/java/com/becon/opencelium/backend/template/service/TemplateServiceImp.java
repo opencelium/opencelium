@@ -31,6 +31,7 @@ import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
 import com.becon.opencelium.backend.version_manager.backup.FileBackupManager;
 import com.becon.opencelium.backend.version_manager.base.Utils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -61,14 +62,16 @@ public class TemplateServiceImp implements TemplateService {
     private final Environment environment;
     private final OpenCeliumProps ocProps;
     private final EntityUpdater<Template> templateEntityUpdater;
+    private final ObjectMapper objectMapper;
 
-    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionOldDTO, CtionTemplateResource> mapper, Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper, Environment environment, EntityVersionManager entityVersionManager, OpenCeliumProps ocProps) {
+    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionOldDTO, CtionTemplateResource> mapper, Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper, Environment environment, EntityVersionManager entityVersionManager, OpenCeliumProps ocProps, @Qualifier("objectMapper") ObjectMapper objectMapper) {
         this.connectionService = connectionService;
         this.mapper = mapper;
         this.oldDTOMapper = oldDTOMapper;
         this.environment = environment;
         this.ocProps = ocProps;
         this.templateEntityUpdater = entityVersionManager.getUpdater(Template.class);
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -169,12 +172,19 @@ public class TemplateServiceImp implements TemplateService {
         for (Map.Entry<String, Template> entry : templateMap.entrySet()) {
             String fileName = entry.getKey();
             Template template = entry.getValue();
+            Template backup;
+            try {
+                backup = objectMapper.readValue(objectMapper.writeValueAsString(template), Template.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
             if (Utils.compare(ocProps.getVersion(), template.getVersion()) > 0) {
                 try {
                     String oldVersion = template.getVersion();
                     templateEntityUpdater.updateToCurrentVersion(template)
                             .ifUpdated(x -> {
-                                FileBackupManager.doBackup(x, oldVersion, ocProps.getVersion());
+                                FileBackupManager.doBackup(backup, oldVersion, ocProps.getVersion());
                                 save(template, fileName);
                             });
                     log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
