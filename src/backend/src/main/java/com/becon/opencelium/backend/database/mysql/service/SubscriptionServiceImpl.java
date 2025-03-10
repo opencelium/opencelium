@@ -126,6 +126,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public Subscription findByLicenseId(String licenseId) {
+        return subscriptionRepository.findByLicenseId(licenseId)
+                .orElseThrow(() -> new RuntimeException("Subscription not found for licenseId: " + licenseId));
+    }
+
+    @Override
     public void save(Subscription subscription) {
         deactivateAll();
         subscription.setCurrentUsageHmac(HmacUtility

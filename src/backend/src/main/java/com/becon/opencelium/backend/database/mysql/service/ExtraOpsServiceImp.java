@@ -27,12 +27,15 @@ import java.util.Optional;
 @Service
 public class ExtraOpsServiceImp implements ExtraOpsService {
 
+    private final SubscriptionService subscriptionService;
     private final ExtraOpsRepository extraOpsRepository;
     private final Scheduler scheduler;
 
-    public ExtraOpsServiceImp(ExtraOpsRepository extraOpsRepository, Scheduler scheduler) {
+    public ExtraOpsServiceImp(ExtraOpsRepository extraOpsRepository, Scheduler scheduler,
+                              SubscriptionService subscriptionService) {
         this.extraOpsRepository = extraOpsRepository;
         this.scheduler = scheduler;
+        this.subscriptionService = subscriptionService;
     }
 
     @Override
