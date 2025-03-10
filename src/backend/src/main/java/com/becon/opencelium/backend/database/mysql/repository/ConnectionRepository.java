@@ -35,4 +35,7 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     List<Connection> findAllByIdNotIn(List<Long> ids);
 
     List<Connection> findAllByCategoryId(Integer categoryId);
+
+    @Query("SELECT c.id FROM Connection c")
+    List<Long> findIds();
 }

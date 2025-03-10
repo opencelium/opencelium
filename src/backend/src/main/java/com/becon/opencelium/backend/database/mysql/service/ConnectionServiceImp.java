@@ -43,6 +43,8 @@ import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
 import com.becon.opencelium.backend.version_manager.backup.BackupManager;
+import com.becon.opencelium.backend.version_manager.backup.MongoDbBackupService;
+import com.becon.opencelium.backend.version_manager.backup.MysqlBackupService;
 import com.becon.opencelium.backend.version_manager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
@@ -82,6 +84,8 @@ public class ConnectionServiceImp implements ConnectionService {
     private final OpenCeliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
     private final EntityUpdater<Enhancement> enhancementEntityUpdater;
+    private final MysqlBackupService mysqlBackupService;
+    private final MongoDbBackupService mongoDbBackupService;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -100,7 +104,7 @@ public class ConnectionServiceImp implements ConnectionService {
             ConnectionUpdateTracker updateTracker,
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
-            OpenCeliumProps ocProps
+            OpenCeliumProps ocProps, MysqlBackupService mysqlBackupService, MongoDbBackupService mongoDbBackupService
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -120,6 +124,8 @@ public class ConnectionServiceImp implements ConnectionService {
         this.ocProps = ocProps;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
         this.enhancementEntityUpdater = entityVersionManager.getUpdater(Enhancement.class);
+        this.mysqlBackupService = mysqlBackupService;
+        this.mongoDbBackupService = mongoDbBackupService;
     }
 
 
@@ -504,10 +510,17 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public void updateConnectionsToCurrentVersion() {
-        List<Connection> connections = findAll();
-        for (Connection connection : connections) {
-            ConnectionDTO forBackup = getFullConnection(connection.getId());
+        List<Long> ids = connectionRepository.findIds();
+        boolean gotBackup = false;
+        for (Long id : ids) {
+            Connection connection = getById(id);
             if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0) {
+                if(!gotBackup){
+                    mysqlBackupService.backup();
+                    mongoDbBackupService.backup();
+                    gotBackup = true;
+                    log.error("Failed to backup. Skipped updating connections");
+                }
                 try {
                     AtomicBoolean connectionChanged = new AtomicBoolean(false);
                     // UPDATE CONNECTION_MNG
@@ -530,17 +543,13 @@ public class ConnectionServiceImp implements ConnectionService {
                                     enhancementService.save(enhancement);
                                 });
                     });
-
-                    // BACKUP
-                    if (Boolean.logicalOr(connectionChanged.get(), anyEnhancementChanged.get())) {
-                        BackupManager.doBackup(forBackup, connection.getOcVersion(), ocProps.getVersion());
-                    }
-
-                    connection.setOcVersion(ocProps.getVersion());
-                    connectionRepository.save(connection);
                     log.info("Connection[id={}, name={}] is successfully updated to {} version", connection.getId(), connection.getTitle(), ocProps.getVersion());
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
+                    mysqlBackupService.restore();
+                    mongoDbBackupService.restore();
+                    log.warn("Rolled back all changes");
+                    throw e;
                 }
             }
         }

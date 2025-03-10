@@ -93,6 +93,11 @@ public class EnhancementServiceImp implements EnhancementService {
         enhancementRepository.deleteById(id);
     }
 
+    @Override
+    public void deleteAll() {
+        enhancementRepository.deleteAll();
+    }
+
     public FieldBindingMng toFieldBinding(Enhancement enhancement) {
         FieldBindingMng fieldBindingMng = new FieldBindingMng();
         EnhancementMng enhancementMng = enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancement));
