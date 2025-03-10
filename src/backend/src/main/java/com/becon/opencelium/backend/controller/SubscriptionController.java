@@ -46,11 +46,13 @@ public class SubscriptionController {
     private final ActivationRequestService activationRequestService;
     private final ActivationRequestMapper activationRequestMapper;
     private final OperationUsageHistoryService operationUsageHistoryService;
+    private final ExtraOpsService extraOpsService;
 
     public SubscriptionController(
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
             @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService,
             @Qualifier("operationUsageHistoryServiceImpl") OperationUsageHistoryService operationUsageHistoryService,
+            @Qualifier("extraOpsServiceImp") ExtraOpsService extraOpsService,
             ActivationRequestMapper activationRequestMapper
 
     ) {
@@ -59,6 +61,7 @@ public class SubscriptionController {
         this.remoteApi = RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL);
         this.activationRequestMapper = activationRequestMapper;
         this.operationUsageHistoryService = operationUsageHistoryService;
+        this.extraOpsService = extraOpsService;
     }
 
     // -------------------- ONLINE -------------------- //
