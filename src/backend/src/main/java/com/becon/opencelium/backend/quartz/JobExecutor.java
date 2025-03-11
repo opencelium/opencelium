@@ -46,7 +46,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ConnectionService connectionService;
     private final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
 
-    private Thread thread;
+    private volatile Thread thread;
 
     public JobExecutor(@Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
                        @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
@@ -88,7 +88,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             String connectionName = executionObj.getConnection().getConnectionName();
             if (connectionName != null && !connectionName.contains("!*test_connection_")) {
                 long operationUsage = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
-                logger.info("Operation usage for Connection " + connectionName + " is " + operationUsage);
+                logger.info("Operation usage for Connection {} is {}", connectionName, operationUsage);
                 subscriptionService.updateUsage(activeSub, executionObj.getConnection(), operationUsage, startTime);
             }
         } catch (ThreadDeath ignored) {
@@ -100,7 +100,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     @Override
     public void interrupt() {
         if (thread != null) {
-            thread.stop();
+            thread.interrupt();
             thread = null;
         }
     }
