@@ -6,6 +6,8 @@ import com.becon.opencelium.backend.database.mysql.service.ExtraOpsService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.subscription.dto.EncryptedExtraOpsFile;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ public class ExtraOpsController {
 
     private final SubscriptionService subscriptionService;
     private final ExtraOpsService extraOpsService;
+    private final Logger logger = LoggerFactory.getLogger(ExtraOpsController.class);
 
     public ExtraOpsController(
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
@@ -49,8 +52,9 @@ public class ExtraOpsController {
             throw new RuntimeException("Extra Ops is not valid");
         }
         if (extraOpsService.existsByGeneratedAt(encryptedExtraOpsFile.getGeneratedAt())) {
-            throw new RuntimeException("ExtraOps record already exists in the system for " +
-                    "license id: " + encryptedExtraOpsFile.getLicenseId());
+            logger.error("ExtraOps record already exists in the system for " +
+                    "license id: {}", encryptedExtraOpsFile.getLicenseId());
+            throw new RuntimeException("EXTRA_OPS_ALREADY_EXISTS");
         }
         Subscription sub = subscriptionService.findByLicenseId(encryptedExtraOpsFile.getLicenseId());
         ExtraOps extraOps = extraOpsService.toEntityFromEncryption(encryptedExtraOpsFile);
