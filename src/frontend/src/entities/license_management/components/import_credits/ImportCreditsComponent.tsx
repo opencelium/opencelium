@@ -5,7 +5,10 @@ import Dialog from "@basic_components/Dialog";
 import InputFile from "@app_component/base/input/file/InputFile";
 import Subscription from "@entity/license_management/classes/Subscription";
 import {useAppDispatch} from "@application/utils/store";
-import {importCredits} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
+import {
+    getCurrentSubscription,
+    importCredits
+} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 
 const ImportCreditsComponent = () => {
     const dispatch = useAppDispatch();
@@ -18,6 +21,7 @@ const ImportCreditsComponent = () => {
     }
     useEffect(() => {
         if (importingCredits === API_REQUEST_STATE.FINISH) {
+            dispatch(getCurrentSubscription());
             toggleDialog(false);
         }
     }, [importingCredits])
