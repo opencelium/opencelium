@@ -74,7 +74,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                                         <InfoStyled key={`${extraOp.generatedAt}_${index}`}>
                                             <div style={{marginLeft: 20}}><b>{`Extra ${index}:`}</b></div>
                                             <div>
-                                                {`+ ${extraOp.totalOpsUsage}`}
+                                                {`+ ${formatOperationUsage(extraOp.totalOpsUsage)}`}
                                             </div>
                                         </InfoStyled>
                                     )

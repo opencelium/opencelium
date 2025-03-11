@@ -21,7 +21,6 @@ const ImportCreditsComponent = () => {
     }
     useEffect(() => {
         if (importingCredits === API_REQUEST_STATE.FINISH) {
-            dispatch(getCurrentSubscription());
             toggleDialog(false);
         }
     }, [importingCredits])

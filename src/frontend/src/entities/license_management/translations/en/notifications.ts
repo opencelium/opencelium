@@ -30,7 +30,9 @@ export default {
     },
     rejected: {
         [importCredits.rejected.type]: {
-            "__DEFAULT__": "There is an error in uploading credits."
+            "EXTRA_OPS_ALREADY_EXISTS": "These credits are already used.",
+            "SUBSCRIPTION_NOT_FOUND": "Subscription not found for this license.",
+            "__DEFAULT__": "The credits file is corrupted. Please, contact with support."
         },
         [activateLicenseFile.rejected.type]: {
             "__DEFAULT__": "There is an error activating license file."
