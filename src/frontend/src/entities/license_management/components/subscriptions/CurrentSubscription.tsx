@@ -66,7 +66,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                     </InfoStyled>
                     }
                     {
-                        subscription?.extraOps.length > 0
+                        subscription?.extraOps?.length > 0
                             ?
                             <React.Fragment>
                                 {subscription?.extraOps.map((extraOp, index) => {
