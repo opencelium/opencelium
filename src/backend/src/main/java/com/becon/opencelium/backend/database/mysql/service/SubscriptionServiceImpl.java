@@ -128,7 +128,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public Subscription findByLicenseId(String licenseId) {
         return subscriptionRepository.findByLicenseId(licenseId)
-                .orElseThrow(() -> new RuntimeException("Subscription not found for licenseId: " + licenseId));
+                .orElseThrow(() -> {
+                    logger.error("Subscription not found for licenseId: {}", licenseId);
+                    return new RuntimeException("SUBSCRIPTION_NOT_FOUND");
+                });
     }
 
     @Override
