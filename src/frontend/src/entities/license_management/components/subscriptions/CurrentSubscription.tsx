@@ -30,7 +30,7 @@ export const RoleNames: any = {
 const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionModel, theme: ITheme}) => {
     const totalWithCredits = Subscription.getTotalOpsWithCredits(subscription);
     const max = totalWithCredits;
-    const divisionStep = max / 10;
+    const divisionStep = Math.round(max / 10);
     const divisions = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     const progressbarHeight = 30;
     const now = Subscription.getCurrentOpsWithCredits(subscription);
@@ -66,7 +66,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                     </InfoStyled>
                     }
                     {
-                        subscription?.extraOps.length > 0
+                        subscription?.extraOps?.length > 0
                             ?
                             <React.Fragment>
                                 {subscription?.extraOps.map((extraOp, index) => {
