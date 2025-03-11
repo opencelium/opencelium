@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "subscription")
@@ -38,6 +39,9 @@ public class Subscription {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "activation_request_id", referencedColumnName = "id")
     private ActivationRequest activationRequest;
+
+    @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<ExtraOps> extraOpsList = new ArrayList<>();
 
     // Getters and Setters
     public String getId() {
@@ -110,5 +114,13 @@ public class Subscription {
 
     public void setActivationRequest(ActivationRequest activationRequest) {
         this.activationRequest = activationRequest;
+    }
+
+    public List<ExtraOps> getExtraOpsList() {
+        return extraOpsList;
+    }
+
+    public void setExtraOpsList(List<ExtraOps> extraOpsList) {
+        this.extraOpsList = extraOpsList;
     }
 }
