@@ -78,8 +78,8 @@ const LicenseManagement: FC<IForm> = ({}) => {
             />
         );
         //if (activationRequestStatus === ActivationRequestStatus.PENDING) {
-        actions.push(<ImportLicenseComponent key={'upload'}/>);
-        actions.push(<ImportCreditsComponent key={'upload'}/>);
+        actions.push(<ImportLicenseComponent key={'upload_license'}/>);
+        actions.push(<ImportCreditsComponent key={'upload_credits'}/>);
         //}
     } else {
         if (authUser.userDetail.themeSync && (!currentSubscription || Subscription.isFree(currentSubscription))) {

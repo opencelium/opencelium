@@ -37,7 +37,7 @@ const ImportCreditsComponent = () => {
                     error={error}
                     onChange={(file) => setCreditFile([file])}
                     value={creditFile}
-                    label={'Key'}
+                    label={'Credits file'}
                     icon={'lock_outline'}
                     hasNoImage={false}
                     hasCrop={false}
@@ -47,7 +47,7 @@ const ImportCreditsComponent = () => {
             </Dialog>
             <Button
                 label={'Import Credits'}
-                icon={'file_upload'}
+                icon={'library_add'}
                 handleClick={() => toggleDialog(true)}
                 isLoading={importingCredits === API_REQUEST_STATE.START}
             />

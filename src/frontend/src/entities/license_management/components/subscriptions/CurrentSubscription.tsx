@@ -71,7 +71,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                             <React.Fragment>
                                 {subscription?.extraOps.map((extraOp, index) => {
                                     return (
-                                        <InfoStyled>
+                                        <InfoStyled key={`${extraOp.generatedAt}_${index}`}>
                                             <div style={{marginLeft: 20}}><b>{`Extra ${index}:`}</b></div>
                                             <div>
                                                 {`+ ${extraOp.totalOpsUsage}`}
