@@ -23,7 +23,21 @@ export default class Subscription {
             subId: '',
             totalOperationUsage: null,
             currentOperationUsage: null,
+            extraOps: [],
         }
+    }
+
+    static hasReachedLimit(subscription: SubscriptionModel): boolean {
+        const totalWithCredits = this.getTotalOpsWithCredits(subscription);
+        const currentWithCredits = this.getCurrentOpsWithCredits(subscription);
+        return !subscription || (currentWithCredits >= totalWithCredits && totalWithCredits !== 0)
+    }
+
+    static getTotalOpsWithCredits(subscription: SubscriptionModel): number {
+        return (subscription?.totalOperationUsage || 0) + (subscription?.extraOps?.reduce((sum, obj) => sum + obj.totalOpsUsage, 0) || 0);
+    }
+    static getCurrentOpsWithCredits(subscription: SubscriptionModel): number {
+        return (subscription?.currentOperationUsage || 0) + (subscription?.extraOps?.reduce((sum, obj) => sum + obj.currentOpsUsage, 0) || 0);
     }
 
     static getMonthlyPeriod(comingDate: number): string {

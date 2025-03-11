@@ -28,11 +28,12 @@ export const RoleNames: any = {
     empty: '-',
 }
 const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionModel, theme: ITheme}) => {
-    const max = subscription?.totalOperationUsage || 0;
+    const totalWithCredits = Subscription.getTotalOpsWithCredits(subscription);
+    const max = totalWithCredits;
     const divisionStep = max / 10;
     const divisions = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     const progressbarHeight = 30;
-    const now = subscription?.currentOperationUsage || 0;
+    const now = Subscription.getCurrentOpsWithCredits(subscription);
     const percentage = (now / max) * 100;
     const hasNoSubscription = subscription?.type === 'empty' || false;
     const [showDocsDialog, toggleDocsDialog] = useState<boolean>(hasNoSubscription);
@@ -63,6 +64,31 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                             {hasNoSubscription ? '-' : formatOperationUsage(subscription.totalOperationUsage)}
                         </div>
                     </InfoStyled>
+                    }
+                    {
+                        subscription?.extraOps.length > 0
+                            ?
+                            <React.Fragment>
+                                {subscription?.extraOps.map((extraOp, index) => {
+                                    return (
+                                        <InfoStyled>
+                                            <div style={{marginLeft: 20}}><b>{`Extra ${index}:`}</b></div>
+                                            <div>
+                                                {`+ ${extraOp.totalOpsUsage}`}
+                                            </div>
+                                        </InfoStyled>
+                                    )
+                                })
+                                }
+                                <InfoStyled>
+                                    <div style={{marginLeft: 20}}><b>{`Total:`}</b></div>
+                                    <div>
+                                        {formatOperationUsage(totalWithCredits)}
+                                    </div>
+                                </InfoStyled>
+                            </React.Fragment>
+                            :
+                            null
                     }
                     <InfoStyled>
                         <div><b>Expiration Date:</b></div>

@@ -7,7 +7,24 @@ export default interface SubscriptionModel {
     endDate: number,
     totalOperationUsage: number | null,
     currentOperationUsage?: number,
+    extraOps: ExtraOp[] | null,
     active: boolean,
+}
+export enum ExtraOpStatus {
+    Active= 'ACTIVE',
+    Expired= 'EXPIRED',
+    Consumed= 'CONSUMED',
+    Pending= 'PENDING',
+}
+export interface ExtraOp {
+    id: number,
+    licenseId: string,
+    totalOpsUsage: number,
+    currentOpsUsage: number,
+    generatedAt: number,
+    activationDate: number,
+    endDate: number,
+    status: ExtraOpStatus,
 }
 
 export interface OperationUsageEntryModel {
