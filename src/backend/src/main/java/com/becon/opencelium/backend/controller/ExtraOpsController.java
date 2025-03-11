@@ -48,6 +48,10 @@ public class ExtraOpsController {
         if (encryptedExtraOpsFile == null) {
             throw new RuntimeException("Extra Ops is not valid");
         }
+        if (extraOpsService.existsByGeneratedAt(encryptedExtraOpsFile.getGeneratedAt())) {
+            throw new RuntimeException("ExtraOps record already exists in the system for " +
+                    "license id: " + encryptedExtraOpsFile.getLicenseId());
+        }
         Subscription sub = subscriptionService.findByLicenseId(encryptedExtraOpsFile.getLicenseId());
         ExtraOps extraOps = extraOpsService.toEntityFromEncryption(encryptedExtraOpsFile);
         extraOps.setSubscription(sub);

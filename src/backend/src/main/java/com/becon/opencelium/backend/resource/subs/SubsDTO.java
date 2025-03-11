@@ -90,12 +90,12 @@ public class SubsDTO {
         this.active = active;
     }
 
-    public List<ExtraOpsDTO> getExtraOpsDTOS() {
+    public List<ExtraOpsDTO> getExtraOps() {
         return extraOps;
     }
 
-    public void setExtraOpsDTOS(List<ExtraOpsDTO> extraOpsDTOS) {
-        this.extraOps = extraOpsDTOS;
+    public void setExtraOps(List<ExtraOpsDTO> extraOps) {
+        this.extraOps = extraOps;
     }
 
     @Override

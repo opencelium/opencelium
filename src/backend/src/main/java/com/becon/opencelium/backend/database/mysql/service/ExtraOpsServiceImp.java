@@ -191,6 +191,11 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
                      usage);
     }
 
+    @Override
+    public boolean existsByGeneratedAt(long generatedAt) {
+        return extraOpsRepository.existsByGeneratedAt(generatedAt);
+    }
+
     private LocalDateTime getLastDayOfMonthFromCurrentTime(long millis) {
         // Convert the millisecond timestamp to LocalDateTime using the system default time zone
         LocalDateTime dateTime = Instant.ofEpochMilli(millis)

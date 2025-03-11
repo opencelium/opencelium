@@ -230,7 +230,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if(subscription.getExtraOpsList() != null && !subscription.getExtraOpsList().isEmpty()) {
             List<ExtraOpsDTO> extraOpsDTOList = subscription.getExtraOpsList().stream()
                     .map(extraOpsService::toDTO).toList();
-            subsDTO.setExtraOpsDTOS(extraOpsDTOList);
+            subsDTO.setExtraOps(extraOpsDTOList);
         }
         return subsDTO;
     }

@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface ExtraOpsRepository extends JpaRepository<ExtraOps, Long> {
 
     boolean existsByStatus(ExtraOpsStatus status);
+
+    boolean existsByGeneratedAt(long generatedAt);
 }
