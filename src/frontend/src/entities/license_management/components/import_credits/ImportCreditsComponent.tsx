@@ -28,15 +28,15 @@ const ImportCreditsComponent = () => {
         <div style={{display: 'inline-block'}}>
             <Dialog
                 actions={[
-                    {id: 'import', label: 'Import', onClick: upload, isLoading: importingCredits === API_REQUEST_STATE.START},
+                    {id: 'import', label: 'Upload', onClick: upload, isLoading: importingCredits === API_REQUEST_STATE.START},
                     {id: 'cancel', label: 'Cancel', onClick: () => toggleDialog(false)}]}
-                title={'Import Credits'} active={showDialog} toggle={() => toggleDialog(!showDialog)}>
+                title={'Upload Extra Ops'} active={showDialog} toggle={() => toggleDialog(!showDialog)}>
                 <InputFile
                     id={`input_credit_file`}
                     error={error}
                     onChange={(file) => setCreditFile([file])}
                     value={creditFile}
-                    label={'Credits file'}
+                    label={'Extra Ops File'}
                     icon={'lock_outline'}
                     hasNoImage={false}
                     hasCrop={false}
@@ -45,7 +45,7 @@ const ImportCreditsComponent = () => {
                 />
             </Dialog>
             <Button
-                label={'Import Credits'}
+                label={'Extra Ops'}
                 icon={'library_add'}
                 handleClick={() => toggleDialog(true)}
                 isLoading={importingCredits === API_REQUEST_STATE.START}
