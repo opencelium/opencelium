@@ -31,4 +31,6 @@ public interface ExtraOpsService {
 
     String constructHmac(ExtraOps extraOps, long usage);
     String constructHmac(EncryptedExtraOpsFile encryptExtraOps, long usage);
+
+    boolean existsByGeneratedAt(long generatedAt);
 }
