@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SchedulerWebSocketHandler implements WebSocketTopicHandler {
 
+    // Service used to register and deregister scheduler sessions.
     private final SchedulerRegisterSession schedulerRegisterSession;
     private static final Logger logger = LoggerFactory.getLogger(SchedulerWebSocketHandler.class);
 
@@ -22,6 +23,14 @@ public class SchedulerWebSocketHandler implements WebSocketTopicHandler {
         return WebSocketTopicType.SCHEDULER;
     }
 
+    /**
+     * Handles the CONNECT event for a scheduler WebSocket connection.
+     * <p>
+     * It retrieves the scheduler ID from the session attributes (populated during the handshake)
+     * and registers the scheduler using the schedulerRegisterSession service.
+     *
+     * @param accessor the STOMP header accessor containing connection details.
+     */
     @Override
     public void handleConnect(StompHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
@@ -34,6 +43,14 @@ public class SchedulerWebSocketHandler implements WebSocketTopicHandler {
         }
     }
 
+    /**
+     * Handles the DISCONNECT event for a scheduler WebSocket connection.
+     * <p>
+     * It retrieves the scheduler ID from the session attributes and deregisters the scheduler,
+     * ensuring proper cleanup when the connection is closed.
+     *
+     * @param accessor the STOMP header accessor containing connection details.
+     */
     @Override
     public void handleDisconnect(StompHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
