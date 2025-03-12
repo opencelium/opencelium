@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.execution.service;
 
-import com.becon.opencelium.backend.configuration.WebSocketConfig;
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
@@ -62,9 +61,7 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
 
         Logger logger = new Logger();
         logger.setDebugMode(scheduler.getDebugMode());
-        if (WebSocketConfig.getSchedulerId() != null) {
-            logger.setWSocketOpen(scheduler.getId() == WebSocketConfig.getSchedulerId());
-        }
+        logger.setWSocketOpen(schedulerService.isWebSocketRequired(scheduleId));
         executionObj.setLogger(logger);
 
         return executionObj;
