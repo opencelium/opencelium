@@ -14,7 +14,7 @@ const EntriesCollection = ({currentEntry, setCurrentEntry, collection, setCollec
     const dispatch = useAppDispatch();
     const {
         gettingOperationUsageEntries, gettingOperationUsageDetails,
-        operationUsageEntries,
+        operationUsageEntries, currentSubscription,
         entriesTotalPages,
     } = Subscription.getReduxState();
     const [entriesShouldBeUpdated, setEntriesShouldBeUpdated] = useState(false);
@@ -25,11 +25,13 @@ const EntriesCollection = ({currentEntry, setCurrentEntry, collection, setCollec
     const isLoading = gettingOperationUsageDetails === API_REQUEST_STATE.START || gettingOperationUsageEntries === API_REQUEST_STATE.START;
 
     useEffect(() => {
-        dispatch(getOperationUsageEntries({page: entryPage, size: EntriesPerPage}));
+        const {startDate, endDate} = Subscription.getMonthlyPeriod(currentSubscription.startDate)
+        dispatch(getOperationUsageEntries({page: entryPage, size: EntriesPerPage, startDate, endDate}));
     }, [entryPage])
     useEffect(() => {
         if (!currentEntry) {
-            dispatch(getOperationUsageEntries({page: entryPage, size: EntriesPerPage}));
+            const {startDate, endDate} = Subscription.getMonthlyPeriod(currentSubscription.startDate)
+            dispatch(getOperationUsageEntries({page: entryPage, size: EntriesPerPage, startDate, endDate}));
         } else {
             setCollection('details');
         }
