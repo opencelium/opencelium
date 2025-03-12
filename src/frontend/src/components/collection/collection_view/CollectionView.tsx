@@ -75,7 +75,7 @@ const CollectionView: FC<CollectionViewProps> =
         const [filterData, setFilterData] = useState(defaultFilterData);
         const [checks, setChecks] = useState<any>({});
         const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER)
-        const [currentPage, setCurrentPage] = useState(searchValuePropertyName ? currentPages[searchValuePropertyName] || 1 : 1);
+        const [currentPage, setCurrentPage] = useState(searchValuePropertyName ? currentPages[searchValuePropertyName] || 1 : paginationProps?.page ? paginationProps.page : 1);
         const [totalPages, setTotalPages] = useState(!!paginationProps ? paginationProps.totalPages : Math.ceil(collection.entities.length / entitiesPerPage))
         let applicationViewType = viewType;
         if(defaultViewType !== ''){

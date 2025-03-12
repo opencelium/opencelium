@@ -71,8 +71,8 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                             <React.Fragment>
                                 {subscription?.extraOps.map((extraOp, index) => {
                                     return (
-                                        <InfoStyled key={`${extraOp.generatedAt}_${index}`}>
-                                            <div style={{marginLeft: 20}}><b>{`Extra ${index}:`}</b></div>
+                                        <InfoStyled key={`${extraOp.generatedAt}_${index + 1}`}>
+                                            <div style={{marginLeft: 20}}><b>{`Extra Ops (activated at ${convertTimeForSubscription(extraOp.activationDate, {hasHours: false, hasMinutes: false, hasSeconds: false})}):`}</b></div>
                                             <div>
                                                 {`+ ${formatOperationUsage(extraOp.totalOpsUsage)}`}
                                             </div>
