@@ -72,7 +72,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                                 {subscription?.extraOps.map((extraOp, index) => {
                                     return (
                                         <InfoStyled key={`${extraOp.generatedAt}_${index + 1}`}>
-                                            <div style={{marginLeft: 20}}><b>{`Extra Ops (activated at ${convertTimeForSubscription(extraOp.activationDate, {hasHours: false, hasMinutes: false, hasSeconds: false})}):`}</b></div>
+                                            <div style={{marginLeft: 20}}><b>{`Extra Ops (activated at ${convertTimeForSubscription(extraOp.activationDate, {hasHours: false, hasMinutes: false, hasSeconds: false}).trim()}):`}</b></div>
                                             <div>
                                                 {`+ ${formatOperationUsage(extraOp.totalOpsUsage)}`}
                                             </div>
