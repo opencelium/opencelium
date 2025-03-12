@@ -87,7 +87,7 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
         extraOpsDTO.setTotalOpsUsage(extraOps.getTotalOpsUsage());
         extraOpsDTO.setCurrentOpsUsage(extraOps.getCurrentOpsUsage());
         extraOpsDTO.setEndDate(convertToUnixMillis(extraOps.getEndDate()));
-        extraOpsDTO.setActivationDate(convertToUnixMillis(extraOps.getEndDate()));
+        extraOpsDTO.setActivationDate(convertToUnixMillis(extraOps.getStartDate()));
         extraOpsDTO.setGeneratedAt(extraOps.getGeneratedAt());
         extraOpsDTO.setStatus(extraOps.getStatus());
         return extraOpsDTO;
