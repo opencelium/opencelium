@@ -107,7 +107,7 @@ public class OcLogger<T extends LogMessage> {
         }
         if (isWebsocket) {
             logEntity.setMessage(message);
-            simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, logEntity);
+            simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION_EXECUTION_LOG, logEntity);
         } else {
             t.accept(message);
         }

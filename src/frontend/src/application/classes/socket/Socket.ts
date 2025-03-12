@@ -37,7 +37,7 @@ export default class CSocket{
     }
 
     static createSocket(token: string, params: string = ''): CSocket {
-        const socket = new SockJS(`${this.url}?token=${token}${params}`);
+        const socket = new SockJS(`${this.url}?token=${token}${params}`, {auth:{token:"asdadasd"}});
         const client = over(socket);
         //if(!process.env.isDevelopment){
             client.debug = null;
