@@ -2,6 +2,9 @@ package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.execution.socket.SchedulerRegisterSession;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.execution.socket.handler.WebSocketTopicHandler;
+import com.becon.opencelium.backend.execution.socket.handler.WebSocketTopicHandlerFactory;
+import com.becon.opencelium.backend.execution.socket.handler.WebSocketTopicType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -27,6 +30,7 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 
 @Configuration
@@ -34,11 +38,10 @@ import java.util.Map;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
+    private final WebSocketTopicHandlerFactory handlerFactory;
 
-    private final SchedulerRegisterSession schedulerRegisterSession;
-
-    public WebSocketConfig(SchedulerRegisterSession schedulerRegisterSession) {
-        this.schedulerRegisterSession = schedulerRegisterSession;
+    public WebSocketConfig(WebSocketTopicHandlerFactory handlerFactory) {
+        this.handlerFactory = handlerFactory;
     }
 
     @Override
@@ -61,7 +64,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private HandshakeInterceptor myHandler() {
         return new HttpSessionHandshakeInterceptor() {
             /**
-             * Before the WebSocket handshake, extract `schedulerId` from query parameters and store it in attributes.
+             * Before the WebSocket handshake, extracts `schedulerId` from query parameters and store it in attributes.
              */
             @Override
             public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
@@ -89,29 +92,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 if (accessor == null) {
                     return message;
                 }
-                String sessionId = accessor.getSessionId();
 
-                // Handle CONNECT event (when the client successfully connects to WebSocket)
+                // Define the action to execute based on the STOMP command
+                Consumer<WebSocketTopicHandler> handlerAction = null;
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    // Retrieve schedulerId stored during handshake
-                    Integer schedulerId = (Integer) accessor.getSessionAttributes().get("schedulerId");
-
-                    if (schedulerId != null) {
-                        schedulerRegisterSession.addScheduler(schedulerId); // Add schedulerId
-                        logger.info("Scheduler ID " + schedulerId + " registered for WebSocket session " + sessionId);
-                    } else {
-                        logger.warn("No scheduler ID found for session: " + sessionId);
-                    }
+                    handlerAction = handler -> handler.handleConnect(accessor);
+                } else if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+                    handlerAction = handler -> handler.handleDisconnect(accessor);
                 }
 
-                // Handle DISCONNECT event (when the client disconnects)
-                if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
-                    Integer schedulerId = (Integer) accessor.getSessionAttributes().get("schedulerId");
-
-                    if (schedulerId != null) {
-                        schedulerRegisterSession.removeScheduler(schedulerId); //Remove schedulerId
-                        logger.info("Scheduler ID " + schedulerId + " removed from WebSocket session " + sessionId);
-                    }
+                if (handlerAction != null) {
+                    WebSocketTopicType topicType = WebSocketTopicType.detectTopic(accessor);
+                    WebSocketTopicHandler webSocketTopicHandler = handlerFactory.getHandler(topicType);
+                    handlerAction.accept(webSocketTopicHandler);
                 }
                 return ChannelInterceptor.super.preSend(message, channel);
             }
