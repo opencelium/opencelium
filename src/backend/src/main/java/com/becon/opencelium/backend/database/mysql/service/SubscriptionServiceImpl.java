@@ -69,20 +69,23 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public boolean isValid(Subscription sub) {
         if (sub == null) {
-//            logger.warn("");
-            throw new RuntimeException("No active subscription found. Please activate a free license or upload your license");
+            logger.warn("No active subscription found. Please activate a free license or upload your license");
+            return false;
         }
         LicenseKey licenseKey = LicenseKeyUtility.decrypt(sub.getLicenseKey());
         boolean isValid = LicenseKeyUtility.verify(licenseKey, sub.getActivationRequest());
         if (!isCurrentUsageIsValid(sub)) {
-            throw new RuntimeException("Usage number of operation has been changed manually.");
+            logger.warn("Usage number of operation has been changed manually.");
+            return false;
         }
         if (licenseKey.getOperationUsage() != 0 && sub.getCurrentUsage() >= licenseKey.getOperationUsage()) {
             if (!hasExtra(sub)) {
-                throw new RuntimeException("You have reached limit of operation usage: " + licenseKey.getOperationUsage());
+                logger.warn("You have reached limit of operation usage: {}", licenseKey.getOperationUsage());
+                return false;
             }
             if (!hasExtraUsage(sub.getExtraOpsList())) {
-                throw new RuntimeException("You have reached limit of Extra Ops usage: " + licenseKey.getOperationUsage());
+                logger.warn("You have reached limit of Extra Ops usage: {}", licenseKey.getOperationUsage());
+                return false;
             }
         }
         return isValid;
