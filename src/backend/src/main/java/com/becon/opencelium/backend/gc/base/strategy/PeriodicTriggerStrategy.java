@@ -3,15 +3,12 @@ package com.becon.opencelium.backend.gc.base.strategy;
 import com.becon.opencelium.backend.configuration.ApplicationContextProvider;
 import com.becon.opencelium.backend.gc.base.RunGCEvent;
 import com.becon.opencelium.backend.gc.connection.ConnectionForGC;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
-import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
 
 public class PeriodicTriggerStrategy<T> implements GCTriggerStrategy {
     private final long fixedDelay;
@@ -48,8 +45,8 @@ public class PeriodicTriggerStrategy<T> implements GCTriggerStrategy {
     public void startTrigger() {
         taskScheduler.scheduleWithFixedDelay(
                 () -> applicationEventPublisher.publishEvent(new RunGCEvent<T>(new ConnectionForGC())),
-                new Date(System.currentTimeMillis() + initialDelay),
-                fixedDelay);
+                Instant.now().plusMillis(initialDelay),
+                Duration.ofMillis(fixedDelay));
     }
 
     @Override
