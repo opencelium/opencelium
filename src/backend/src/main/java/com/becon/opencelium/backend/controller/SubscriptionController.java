@@ -203,15 +203,9 @@ public class SubscriptionController {
                                                           @RequestParam(required = false) Long startDate,
                                                           @RequestParam(required = false) Long endDate) {
 
-//        Page<OperationUsageHistory> usageHistories = operationUsageHistoryService.getAllUsage(page, size, sort);
-//        PaginatedDto dto = operationUsageHistoryService.toPaginatedDto(usageHistories);
-
-
-
-
         Page<OperationUsageHistory> usageHistories;
         if (startDate != null || endDate != null) {
-            usageHistories = operationUsageHistoryService.findAllByDetailsStartDateBetween(page, size, startDate, endDate);
+            usageHistories = operationUsageHistoryService.findAllByDetailsStartDateBetween(page, size, startDate, endDate, sort);
         } else {
             usageHistories = operationUsageHistoryService.getAllUsage(page, size, sort);
         }
@@ -224,10 +218,19 @@ public class SubscriptionController {
     public ResponseEntity<PaginatedDto> getOperationUsageDetails(
                                                                 @RequestParam(defaultValue = "0") int page,
                                                                 @RequestParam(defaultValue = "10") int size,
-                                                                @PathVariable String usageId,
-                                                                @RequestParam(defaultValue = "id,asc") String[] sort) {
+                                                                @PathVariable Long usageId,
+                                                                @RequestParam(defaultValue = "id,asc") String[] sort,
+                                                                @RequestParam(required = false) Long startDate,
+                                                                @RequestParam(required = false) Long endDate) {
+        // Convert Unix timestamps (assumed in seconds) to LocalDateTime if provided, else keep as null.
+        LocalDateTime start = startDate != null
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startDate), ZoneId.systemDefault())
+                : null;
+        LocalDateTime end = endDate != null
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.systemDefault())
+                : null;
         Page<OperationUsageHistoryDetail> usageDetails = operationUsageHistoryService
-                .getAllUsageDetailsByUsageId(usageId,page, size, sort);
+                .getAllUsageDetailsByUsageId(usageId,page, size, sort, start, end);
         PaginatedDto dto = operationUsageHistoryService.toUsageDetailsDto(usageDetails);
         return ResponseEntity.ok(dto);
     }
