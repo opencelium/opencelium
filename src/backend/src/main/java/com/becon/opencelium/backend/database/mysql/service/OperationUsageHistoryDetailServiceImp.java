@@ -38,4 +38,9 @@ public class OperationUsageHistoryDetailServiceImp implements OperationUsageHist
     public Page<OperationUsageHistoryDetail> findDetailsByHistoryIdAndStartDateBetween(Long historyId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         return operationUsageHistoryDetailRepository.findDetailsByHistoryIdAndStartDateBetween(historyId, startDate, endDate, pageable);
     }
+
+    @Override
+    public List<OperationUsageHistoryDetail> findDetailsByHistoryIdAndStartDateBetween(Long historyId, LocalDateTime startDate, LocalDateTime endDate) {
+        return operationUsageHistoryDetailRepository.findDetailsByHistoryIdAndStartDateBetween(historyId, startDate, endDate);
+    }
 }
