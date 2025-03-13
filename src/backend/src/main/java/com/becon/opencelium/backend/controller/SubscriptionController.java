@@ -224,10 +224,10 @@ public class SubscriptionController {
                                                                 @RequestParam(required = false) Long endDate) {
         // Convert Unix timestamps (assumed in seconds) to LocalDateTime if provided, else keep as null.
         LocalDateTime start = startDate != null
-                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startDate), ZoneId.systemDefault())
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startDate), ZoneId.of("UTC"))
                 : null;
         LocalDateTime end = endDate != null
-                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.systemDefault())
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.of("UTC"))
                 : null;
         Page<OperationUsageHistoryDetail> usageDetails = operationUsageHistoryService
                 .getAllUsageDetailsByUsageId(usageId,page, size, sort, start, end);

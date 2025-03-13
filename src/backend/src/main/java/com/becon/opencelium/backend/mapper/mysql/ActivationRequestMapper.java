@@ -25,11 +25,11 @@ public interface ActivationRequestMapper extends Mapper<ActivationRequest, Activ
 
     default LocalDateTime map(long value) {
         // Convert long (epoch timestamp) to LocalDateTime
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault());
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("UTC"));
     }
 
     default long map(LocalDateTime value) {
         // Convert LocalDateTime to long (epoch timestamp)
-        return value.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        return value.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
     }
 }
