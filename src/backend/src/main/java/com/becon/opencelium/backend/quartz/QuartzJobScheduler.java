@@ -238,7 +238,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
                     .stream()
                     .map(JobExecutionContext::getJobDetail)
                     .map(JobDetail::getKey)
-                    .filter(k -> k.getName().split("-")[0].matches("-?\\\\d+(\\\\.\\\\d+)?") && k.getName().split("-")[1].matches("-?\\\\d+(\\\\.\\\\d+)?"))
+                    .filter(k -> k.getName().split("-")[0].matches("-?\\d+(\\.\\d+)?") && k.getName().split("-")[1].matches("-?\\d+(\\.\\d+)?"))
                     .collect(Collectors.toMap(e ->
                             Long.valueOf(e.getName().split("-")[0]), e -> Integer.parseInt(e.getName().split("-")[1])));
         } catch (SchedulerException e) {
