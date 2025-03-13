@@ -12,6 +12,8 @@ import com.becon.opencelium.backend.utility.crypto.CryptoUtil;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.quartz.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -29,6 +31,8 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
 
     private final ExtraOpsRepository extraOpsRepository;
     private final Scheduler scheduler;
+
+    Logger logger = LoggerFactory.getLogger(ExtraOpsServiceImp.class);
 
     public ExtraOpsServiceImp(ExtraOpsRepository extraOpsRepository, Scheduler scheduler) {
         this.extraOpsRepository = extraOpsRepository;
@@ -137,7 +141,8 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
             }
 
             if (extraOpsOptional.isEmpty()) {
-                throw new IllegalStateException("No available ExtraOps found for subscription: " + sub.getId());
+                logger.warn("No available ExtraOps found for subscription: {}", sub.getId());
+                return;
             }
 
             ExtraOps extraOps = extraOpsOptional.get();

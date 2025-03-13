@@ -18,23 +18,8 @@ package com.becon.opencelium.backend.aspect;
 
 import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.AppYamlPath;
-import com.becon.opencelium.backend.database.mysql.entity.Argument;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
-import com.becon.opencelium.backend.database.mysql.entity.EventContent;
-import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
-import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
-import com.becon.opencelium.backend.database.mysql.entity.Execution;
-import com.becon.opencelium.backend.database.mysql.entity.ExecutionArgument;
-import com.becon.opencelium.backend.database.mysql.entity.LastExecution;
-import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
-import com.becon.opencelium.backend.database.mysql.entity.User;
-import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.database.mysql.service.DataAggregatorService;
-import com.becon.opencelium.backend.database.mysql.service.ExecutionService;
-import com.becon.opencelium.backend.database.mysql.service.LastExecutionService;
-import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
-import com.becon.opencelium.backend.database.mysql.service.UserService;
+import com.becon.opencelium.backend.database.mysql.entity.*;
+import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
@@ -86,11 +71,15 @@ public class ExecutionAspect {
     private final LastExecutionService lastExecutionService;
     private final DataAggregatorService dataAggregatorService;
     private final SupportFileService supportFileService;
+    private final SubscriptionService subscriptionService;
+    private final Subscription activSub;
+
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             @Qualifier("userServiceImpl") UserService userService,
             @Qualifier("executionServiceImp") ExecutionService executionService,
             @Qualifier("lastExecutionServiceImp") LastExecutionService lastExecutionService,
+            @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
             @Qualifier("dataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
             IncomingWebhookService incomingWebhookService,
             EmailServiceImpl emailService,
@@ -105,10 +94,16 @@ public class ExecutionAspect {
         this.lastExecutionService = lastExecutionService;
         this.dataAggregatorService = dataAggregatorService;
         this.supportFileService = supportFileService;
+        this.subscriptionService = subscriptionService;
+        this.activSub = subscriptionService.getActiveSubs();
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
     public void sendBefore(JobExecutionContext context) {
+        if (!subscriptionService.isValid(activSub)) {
+            logger.warn("Subscription is not valid");
+            return;
+        }
         logger.info("------------------- PRE --------------------");
 
         JobDataMap jobDataMap = context.getMergedJobDataMap();
@@ -123,6 +118,10 @@ public class ExecutionAspect {
 
     @AfterReturning("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
     public void sendAfter(JobExecutionContext context) {
+        if (!subscriptionService.isValid(activSub)) {
+            logger.warn("Subscription is not valid");
+            return;
+        }
         logger.info("------------------- POST --------------------");
 
         JobDataMap jobDataMap = context.getMergedJobDataMap();
@@ -148,6 +147,10 @@ public class ExecutionAspect {
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
             throwing = "ex")
     public void sendAlert(JobExecutionContext context, Exception ex) {
+        if (!subscriptionService.isValid(activSub)) {
+            logger.warn("Subscription is not valid");
+            return;
+        }
         logger.info("------------------- EXCEPTION --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
