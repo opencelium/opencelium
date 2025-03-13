@@ -442,12 +442,16 @@ const connectionReducers = (isModal: boolean = false) => {
         state.connections = state.connections.map((connection) =>
             connection.connectionId === action.payload.connectionId
                 ? action.payload
-                : connection
+                : connection.id === action.payload.connectionId
+                    ? action.payload
+                    : connection
         );
         state.metaConnections = state.metaConnections.map((connection) =>
             connection.connectionId === action.payload.connectionId
                 ? action.payload
-                : connection
+                : connection.id === action.payload.connectionId
+                    ? action.payload
+                    : connection
         );
         if (
             state.currentConnection &&
@@ -475,12 +479,16 @@ const connectionReducers = (isModal: boolean = false) => {
         state.connections = state.connections.map((connection) =>
             connection.connectionId === action.payload.connectionId
                 ? action.payload
-                : connection
+                : connection.id === action.payload.connectionId
+                    ? action.payload
+                    : connection
         );
         state.metaConnections = state.metaConnections.map((connection) =>
             connection.connectionId === action.payload.connectionId
                 ? action.payload
-                : connection
+                : connection.id === action.payload.connectionId
+                    ? action.payload
+                    : connection
         );
         if (
             state.currentConnection &&
