@@ -9,7 +9,7 @@ import {
 } from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import {useAppDispatch} from "@application/utils/store";
 
-const DetailsPerPage = 3;
+const DetailsPerPage = 5;
 const DetailsCollection = ({currentEntry, detailsPage, setDetailsPage, setCollection}: any) => {
     const dispatch = useAppDispatch();
     const {

@@ -11,9 +11,6 @@ const StartSchedule = ({entity, scheduleModel, componentPermission}: any) => {
     const dispatch = useAppDispatch();
     const {currentSubscription, gettingCurrentSubscription} = Subscription.getReduxState();
     const isDisabled = Subscription.hasReachedLimit(currentSubscription);
-    useEffect(() => {
-        dispatch(getCurrentSubscription())
-    }, []);
     return (
         <PermissionTooltipButton
             target={`start_entity_${entity.id.toString()}`}
@@ -24,7 +21,6 @@ const StartSchedule = ({entity, scheduleModel, componentPermission}: any) => {
             icon={'play_arrow'}
             size={TextSize.Size_20}
             permission={componentPermission.UPDATE}
-            isLoading={gettingCurrentSubscription !== API_REQUEST_STATE.FINISH}
             isDisabled={isDisabled}
         />
     )

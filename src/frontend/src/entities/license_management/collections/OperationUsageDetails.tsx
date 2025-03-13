@@ -21,6 +21,7 @@ import {OperationUsageDetail} from "@entity/license_management/classes/Operation
 import {convertTimeForTotalUsage} from "@application/utils/utils";
 
 class OperationUsageDetails extends ListCollection<OperationUsageDetailProps>{
+    name: string = 'operation_usage_details';
     entities: OperationUsageDetailModel[];
     keyPropName: OperationUsageDetailProps ='startDate';
     listProps: ListProp<OperationUsageDetailProps>[] = [
