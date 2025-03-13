@@ -1,26 +1,20 @@
 package com.becon.opencelium.backend.configuration;
 
-import com.becon.opencelium.backend.execution.socket.SchedulerRegisterSession;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
-import com.becon.opencelium.backend.execution.socket.handler.WebSocketTopicHandler;
+import com.becon.opencelium.backend.execution.socket.handler.WebSocketEventHandler;
 import com.becon.opencelium.backend.execution.socket.handler.WebSocketTopicHandlerFactory;
 import com.becon.opencelium.backend.execution.socket.handler.WebSocketTopicType;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.web.socket.WebSocketHandler;
@@ -113,7 +107,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 }
 
                 // Determine the action (connect or disconnect) based on the STOMP command.
-                Consumer<WebSocketTopicHandler> handlerAction = null;
+                Consumer<WebSocketEventHandler> handlerAction = null;
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
                     handlerAction = handler -> handler.handleConnect(accessor);
                 } else if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
@@ -125,9 +119,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     // Automatically detect the topic type based on headers or session attributes.
                     WebSocketTopicType topicType = WebSocketTopicType.detectTopic(accessor);
                     // Retrieve the handler corresponding to the detected topic type.
-                    WebSocketTopicHandler webSocketTopicHandler = handlerFactory.getHandler(topicType);
+                    WebSocketEventHandler webSocketEventHandler = handlerFactory.getHandler(topicType);
                     // Execute the determined action (connect/disconnect) on the retrieved handler.
-                    handlerAction.accept(webSocketTopicHandler);
+                    handlerAction.accept(webSocketEventHandler);
                 }
                 return ChannelInterceptor.super.preSend(message, channel);
             }

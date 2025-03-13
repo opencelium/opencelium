@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.execution.socket.handler;
 
-import com.becon.opencelium.backend.configuration.WebSocketConfig;
 import com.becon.opencelium.backend.execution.socket.SchedulerRegisterSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +7,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SchedulerWebSocketHandler implements WebSocketTopicHandler {
+public class SchedulerWebSocketHandler implements WebSocketEventHandler {
 
     // Service used to register and deregister scheduler sessions.
     private final SchedulerRegisterSession schedulerRegisterSession;
