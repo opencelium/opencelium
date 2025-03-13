@@ -5,7 +5,9 @@ import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistoryD
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,4 +24,6 @@ public interface OperationUsageHistoryService {
     Optional<OperationUsageHistory> findByConnectionTitle(String title);
     PaginatedDto toPaginatedDto(Page<OperationUsageHistory> page);
     PaginatedDto toUsageDetailsDto(Page<OperationUsageHistoryDetail> page);
+
+    Page<OperationUsageHistory> findAllByDetailsStartDateBetween(int page, int size, Long startDate, Long endDate) ;
 }

@@ -20,6 +20,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OperationUsageHistoryServiceImpl implements OperationUsageHistoryService {
@@ -106,5 +107,50 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     @Override
     public PaginatedDto<OperationUsageHistoryDetail, OperationUsageDetailsDto> toUsageDetailsDto(Page<OperationUsageHistoryDetail> page) {
         return new PaginatedDto<OperationUsageHistoryDetail, OperationUsageDetailsDto>(page, OperationUsageDetailsDto::new);
+    }
+
+    //TODO: create a filter class for start and end date
+    @Override
+    public Page<OperationUsageHistory> findAllByDetailsStartDateBetween(int page, int size,
+                                                                        Long startDate, Long endDate) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Convert Unix timestamps (assumed in seconds) to LocalDateTime if provided, else keep as null.
+        LocalDateTime start = startDate != null
+                ? LocalDateTime.ofInstant(Instant.ofEpochSecond(startDate), ZoneId.systemDefault())
+                : null;
+        LocalDateTime end = endDate != null
+                ? LocalDateTime.ofInstant(Instant.ofEpochSecond(endDate), ZoneId.systemDefault())
+                : null;
+        Page<OperationUsageHistory> usageHistories;
+        if (start != null || end != null) {
+            usageHistories = operationUsageHistoryRepository.findAllByDetailsStartDateBetween(start, end, pageable);
+        } else {
+            usageHistories = operationUsageHistoryRepository.findAll(pageable);
+        }
+
+        usageHistories.forEach(history -> {
+            if (history.getDetails() != null) {
+                List<OperationUsageHistoryDetail> filteredDetails = history.getDetails().stream()
+                        .filter(detail -> {
+                            boolean valid = true;
+                            if (start != null) {
+                                valid = valid && !detail.getStartDate().isBefore(start);
+                            }
+                            if (end != null) {
+                                valid = valid && !detail.getStartDate().isAfter(end);
+                            }
+                            return valid;
+                        })
+                        .collect(Collectors.toList());
+                history.setDetails(filteredDetails);
+                long sumUsage = filteredDetails.stream()
+                        .mapToLong(OperationUsageHistoryDetail::getOperationUsage)
+                        .sum();
+                history.setTotalUsage(sumUsage);
+            }
+        });
+        return usageHistories;
     }
 }

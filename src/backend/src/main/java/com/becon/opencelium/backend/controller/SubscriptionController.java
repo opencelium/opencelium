@@ -26,6 +26,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +38,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @RestController
 @RequestMapping(value = "/subs")
@@ -193,9 +199,23 @@ public class SubscriptionController {
     @GetMapping("/operation/usage")
     public ResponseEntity<PaginatedDto> getOperationUsage(@RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "10") int size,
-                                                          @RequestParam(defaultValue = "id,asc") String[] sort) {
+                                                          @RequestParam(defaultValue = "id,asc") String[] sort,
+                                                          @RequestParam(required = false) Long startDate,
+                                                          @RequestParam(required = false) Long endDate) {
 
-        Page<OperationUsageHistory> usageHistories = operationUsageHistoryService.getAllUsage(page, size, sort);
+//        Page<OperationUsageHistory> usageHistories = operationUsageHistoryService.getAllUsage(page, size, sort);
+//        PaginatedDto dto = operationUsageHistoryService.toPaginatedDto(usageHistories);
+
+
+
+
+        Page<OperationUsageHistory> usageHistories;
+        if (startDate != null || endDate != null) {
+            usageHistories = operationUsageHistoryService.findAllByDetailsStartDateBetween(page, size, startDate, endDate);
+        } else {
+            usageHistories = operationUsageHistoryService.getAllUsage(page, size, sort);
+        }
+
         PaginatedDto dto = operationUsageHistoryService.toPaginatedDto(usageHistories);
         return ResponseEntity.ok(dto);
     }
@@ -238,5 +258,4 @@ public class SubscriptionController {
         }
         return licenseKeyRaw;
     }
-
 }
