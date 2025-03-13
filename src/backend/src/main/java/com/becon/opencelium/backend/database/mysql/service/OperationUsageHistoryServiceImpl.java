@@ -134,14 +134,11 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
                 ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.of("UTC"))
                 : null;
 
-        Sort.Direction direction = Sort.Direction.fromString(sorts[1]);
-        Sort sortBy = Sort.by(direction, sorts[0]);
-        Pageable pageable = PageRequest.of(page, size, sortBy);
         Page<OperationUsageHistory> usageHistories = getAllUsage(page,size, sorts);
         usageHistories.forEach(history -> {
             if (history.getDetails() != null) {
-                Page<OperationUsageHistoryDetail> filteredDetails = operationUsageHistoryDetailServiceImp
-                        .findDetailsByHistoryIdAndStartDateBetween(history.getId(), start, end, pageable);
+                List<OperationUsageHistoryDetail> filteredDetails = operationUsageHistoryDetailServiceImp
+                        .findDetailsByHistoryIdAndStartDateBetween(history.getId(), start, end);
                 long sumUsage = filteredDetails.stream()
                         .mapToLong(OperationUsageHistoryDetail::getOperationUsage)
                         .sum();

@@ -13,5 +13,5 @@ public interface OperationUsageHistoryDetailService {
                                                                                   String[] sort);
 
     Page<OperationUsageHistoryDetail> findDetailsByHistoryIdAndStartDateBetween(Long historyId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-
+    List<OperationUsageHistoryDetail> findDetailsByHistoryIdAndStartDateBetween(Long historyId, LocalDateTime startDate, LocalDateTime endDate);
 }

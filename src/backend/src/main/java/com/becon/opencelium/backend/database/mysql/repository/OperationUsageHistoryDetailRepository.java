@@ -22,4 +22,13 @@ public interface OperationUsageHistoryDetailRepository extends JpaRepository<Ope
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable);
+
+    @Query("SELECT d FROM OperationUsageHistoryDetail d " +
+            "WHERE d.operationUsageHistory.id = :historyId " +
+            "AND (:startDate IS NULL OR d.startDate >= :startDate) " +
+            "AND (:endDate IS NULL OR d.startDate <= :endDate)")
+    List<OperationUsageHistoryDetail> findDetailsByHistoryIdAndStartDateBetween(
+            @Param("historyId") Long historyId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 }
