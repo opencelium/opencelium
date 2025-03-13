@@ -421,7 +421,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
      * This handles edge cases where the day of the month may exceed the number of days in certain months (e.g., February).
      */
     private String generateCronExpression(long startDateMillis) {
-        LocalDateTime startDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneId.systemDefault());
+        LocalDateTime startDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneId.of("UTC"));
         int dayOfMonth = startDate.getDayOfMonth();
 
         // Handle edge cases where the day of the month might exceed the max days in the current month

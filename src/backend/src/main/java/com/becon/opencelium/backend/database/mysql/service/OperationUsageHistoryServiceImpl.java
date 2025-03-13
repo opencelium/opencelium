@@ -128,10 +128,10 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
 
         // Convert Unix timestamps (assumed in seconds) to LocalDateTime if provided, else keep as null.
         LocalDateTime start = startDate != null
-                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startDate), ZoneId.systemDefault())
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startDate), ZoneId.of("UTC"))
                 : null;
         LocalDateTime end = endDate != null
-                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.systemDefault())
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.of("UTC"))
                 : null;
 
         Sort.Direction direction = Sort.Direction.fromString(sorts[1]);
