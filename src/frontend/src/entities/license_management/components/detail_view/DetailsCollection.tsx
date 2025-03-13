@@ -14,8 +14,8 @@ const DetailsCollection = ({currentEntry, detailsPage, setDetailsPage, setCollec
     const dispatch = useAppDispatch();
     const {
         gettingOperationUsageEntries, gettingOperationUsageDetails,
-        operationUsageDetails, operationUsageEntries,
-        entriesTotalPages, detailsTotalPages,
+        operationUsageDetails, currentSubscription,
+        detailsTotalPages,
     } = Subscription.getReduxState();
     const details = new OperationUsageDetails(operationUsageDetails);
     const isLoading = gettingOperationUsageDetails === API_REQUEST_STATE.START || gettingOperationUsageEntries === API_REQUEST_STATE.START;
@@ -26,7 +26,8 @@ const DetailsCollection = ({currentEntry, detailsPage, setDetailsPage, setCollec
     }, [operationUsageDetails, currentEntry])
     useEffect(() => {
         if (currentEntry) {
-            dispatch(getOperationUsageDetails({entryId: currentEntry.id, page: detailsPage, size: DetailsPerPage}));
+            const {startDate, endDate} = Subscription.getMonthlyPeriod(currentSubscription.startDate)
+            dispatch(getOperationUsageDetails({entryId: currentEntry.id, page: detailsPage, size: DetailsPerPage, startDate, endDate}));
         }
     }, [detailsPage])
     useEffect(() => {
@@ -34,7 +35,8 @@ const DetailsCollection = ({currentEntry, detailsPage, setDetailsPage, setCollec
             if (detailsPage !== 0) {
                 setDetailsPage(0);
             } else {
-                dispatch(getOperationUsageDetails({entryId: currentEntry.id, page: detailsPage, size: DetailsPerPage}));
+                const {startDate, endDate} = Subscription.getMonthlyPeriod(currentSubscription.startDate)
+                dispatch(getOperationUsageDetails({entryId: currentEntry.id, page: detailsPage, size: DetailsPerPage, startDate, endDate}));
             }
         } else {
             setCollection('entries');

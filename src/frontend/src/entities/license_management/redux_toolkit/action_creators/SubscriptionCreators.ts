@@ -15,9 +15,10 @@ export const getCurrentSubscription = createAsyncThunk(
 )
 export const getOperationUsageEntries = createAsyncThunk(
     'subscription/get/operation/usage',
-    async(data: {page: number, size: number} = {page: 0, size: 10000}, thunkAPI) => {
+    async(data: {page: number, size: number, startDate: number, endDate: number, } = {page: 0, size: 10000, startDate: 0, endDate: 0}, thunkAPI) => {
         try {
-            const request = new SubscriptionRequest({endpoint: `/operation/usage?page=${data.page}&size=${data.size}`});
+            const timeRangeParams = data.startDate && data.endDate ? `&startDate=${data.startDate}&endDate=${data.endDate}` : '';
+            const request = new SubscriptionRequest({endpoint: `/operation/usage?page=${data.page}&size=${data.size}${timeRangeParams}`});
             const response = await request.getOperationUsageEntries();
             return response.data;
         } catch(e){
@@ -27,9 +28,10 @@ export const getOperationUsageEntries = createAsyncThunk(
 )
 export const getOperationUsageDetails = createAsyncThunk(
     'subscription/get/operation/usage/details',
-    async(data: {page: number, size: number, entryId: number} = {page: 0, size: 5, entryId: 0}, thunkAPI) => {
+    async(data: {page: number, size: number, startDate: number, endDate: number, entryId: number} = {page: 0, size: 5, entryId: 0, startDate: 0, endDate: 0}, thunkAPI) => {
         try {
-            const request = new SubscriptionRequest({endpoint: `/operation/usage/${data.entryId}/details?page=${data.page}&size=${data.size}&sort=startDate,desc`});
+            const timeRangeParams = data.startDate && data.endDate ? `&startDate=${data.startDate}&endDate=${data.endDate}` : '';
+            const request = new SubscriptionRequest({endpoint: `/operation/usage/${data.entryId}/details?page=${data.page}&size=${data.size}&sort=startDate,desc${timeRangeParams}`});
             const response = await request.getOperationUsageDetails();
             return response.data;
         } catch(e){

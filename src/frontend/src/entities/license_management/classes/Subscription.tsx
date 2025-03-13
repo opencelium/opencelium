@@ -40,7 +40,7 @@ export default class Subscription {
         return (subscription?.currentOperationUsage || 0) + (subscription?.extraOps?.reduce((sum, obj) => sum + obj.currentOpsUsage, 0) || 0);
     }
 
-    static getMonthlyPeriod(comingDate: number): string {
+    static getMonthlyPeriod(comingDate: number): {startDate: number, endDate: number, text: string} {
         const date = new Date(comingDate);
         const inputDay = date.getDate();
         // End date is one day before the input day, same month and year as today
@@ -69,6 +69,10 @@ export default class Subscription {
         }
         const leftDate = convertTimeForSubscription(startDate, {hasHours: false, hasMinutes: false, hasSeconds: false})
         const rightDate = convertTimeForSubscription(endDate, {hasHours: false, hasMinutes: false, hasSeconds: false})
-        return `${leftDate} - ${rightDate}`;
+        return {
+            startDate: +startDate,
+            endDate: +endDate,
+            text: `${leftDate} - ${rightDate}`,
+        };
     }
 }

@@ -72,7 +72,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                                 {subscription?.extraOps.map((extraOp, index) => {
                                     return (
                                         <InfoStyled key={`${extraOp.generatedAt}_${index + 1}`}>
-                                            <div style={{marginLeft: 20}}><b>{`Extra Ops (activated at ${convertTimeForSubscription(extraOp.activationDate, {hasHours: false, hasMinutes: false, hasSeconds: false})}):`}</b></div>
+                                            <div style={{marginLeft: 20}}><b>{`Extra Ops (activated at ${convertTimeForSubscription(extraOp.activationDate, {hasHours: false, hasMinutes: false, hasSeconds: false}).trim()}):`}</b></div>
                                             <div>
                                                 {`+ ${formatOperationUsage(extraOp.totalOpsUsage)}`}
                                             </div>
@@ -99,7 +99,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                     <InfoStyled>
                         <div><b>Monthly Period:</b></div>
                         <div>
-                            {hasNoSubscription ? '-' : Subscription.getMonthlyPeriod(subscription.startDate)}
+                            {hasNoSubscription ? '-' : Subscription.getMonthlyPeriod(subscription.startDate).text}
                         </div>
                     </InfoStyled>
                     {isUnlimited && !hasNoSubscription && <React.Fragment>
