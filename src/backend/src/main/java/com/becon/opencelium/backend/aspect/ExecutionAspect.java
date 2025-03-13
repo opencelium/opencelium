@@ -61,12 +61,15 @@ public class ExecutionAspect {
     private final Environment env;
     private final LastExecutionService lastExecutionService;
     private final DataAggregatorService dataAggregatorService;
+    private final SubscriptionService subscriptionService;
+    private final Subscription activSub;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             @Qualifier("userServiceImpl") UserService userService,
             @Qualifier("executionServiceImp") ExecutionService executionService,
             @Qualifier("lastExecutionServiceImp") LastExecutionService lastExecutionService,
+            @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
             @Qualifier("dataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
             IncomingWebhookService incomingWebhookService,
             EmailServiceImpl emailService,
@@ -80,10 +83,16 @@ public class ExecutionAspect {
         this.env = env;
         this.lastExecutionService = lastExecutionService;
         this.dataAggregatorService = dataAggregatorService;
+        this.subscriptionService = subscriptionService;
+        this.activSub = subscriptionService.getActiveSubs();
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
     public void sendBefore(JobExecutionContext context) {
+        if (!subscriptionService.isValid(activSub)) {
+            logger.warn("Subscription is not valid");
+            return;
+        }
         logger.info("------------------- PRE --------------------");
 
         JobDataMap jobDataMap = context.getMergedJobDataMap();
@@ -98,6 +107,10 @@ public class ExecutionAspect {
 
     @AfterReturning("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
     public void sendAfter(JobExecutionContext context) {
+        if (!subscriptionService.isValid(activSub)) {
+            logger.warn("Subscription is not valid");
+            return;
+        }
         logger.info("------------------- POST --------------------");
 
         JobDataMap jobDataMap = context.getMergedJobDataMap();
@@ -115,6 +128,10 @@ public class ExecutionAspect {
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
             throwing = "ex")
     public void sendAlert(JobExecutionContext context, Exception ex) {
+        if (!subscriptionService.isValid(activSub)) {
+            logger.warn("Subscription is not valid");
+            return;
+        }
         logger.info("------------------- EXCEPTION --------------------");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
