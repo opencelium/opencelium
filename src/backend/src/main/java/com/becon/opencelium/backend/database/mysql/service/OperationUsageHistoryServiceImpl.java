@@ -49,7 +49,19 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     }
 
     @Override
-    public Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(String usageId, int page, int size, String[] sort) {
+    public Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(
+            Long usageId,
+            int page,
+            int size,
+            String[] sort,
+            LocalDateTime startDate,
+            LocalDateTime endDate) {
+        Sort.Direction direction = Sort.Direction.fromString(sort[1]);
+        Sort sortBy = Sort.by(direction, sort[0]);
+        Pageable pageable = PageRequest.of(page, size, sortBy);
+        if (startDate != null || endDate != null) {
+            return operationUsageHistoryDetailServiceImp.findDetailsByHistoryIdAndStartDateBetween(usageId,startDate, endDate, pageable);
+        }
         return operationUsageHistoryDetailServiceImp.getAllUsageDetailsByOperationUsageHistoryId(usageId,page, size, sort);
     }
 
@@ -112,39 +124,24 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     //TODO: create a filter class for start and end date
     @Override
     public Page<OperationUsageHistory> findAllByDetailsStartDateBetween(int page, int size,
-                                                                        Long startDate, Long endDate) {
-
-        Pageable pageable = PageRequest.of(page, size);
+                                                                        Long startDate, Long endDate, String[] sorts) {
 
         // Convert Unix timestamps (assumed in seconds) to LocalDateTime if provided, else keep as null.
         LocalDateTime start = startDate != null
-                ? LocalDateTime.ofInstant(Instant.ofEpochSecond(startDate), ZoneId.systemDefault())
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startDate), ZoneId.systemDefault())
                 : null;
         LocalDateTime end = endDate != null
-                ? LocalDateTime.ofInstant(Instant.ofEpochSecond(endDate), ZoneId.systemDefault())
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.systemDefault())
                 : null;
-        Page<OperationUsageHistory> usageHistories;
-        if (start != null || end != null) {
-            usageHistories = operationUsageHistoryRepository.findAllByDetailsStartDateBetween(start, end, pageable);
-        } else {
-            usageHistories = operationUsageHistoryRepository.findAll(pageable);
-        }
 
+        Sort.Direction direction = Sort.Direction.fromString(sorts[1]);
+        Sort sortBy = Sort.by(direction, sorts[0]);
+        Pageable pageable = PageRequest.of(page, size, sortBy);
+        Page<OperationUsageHistory> usageHistories = getAllUsage(page,size, sorts);
         usageHistories.forEach(history -> {
             if (history.getDetails() != null) {
-                List<OperationUsageHistoryDetail> filteredDetails = history.getDetails().stream()
-                        .filter(detail -> {
-                            boolean valid = true;
-                            if (start != null) {
-                                valid = valid && !detail.getStartDate().isBefore(start);
-                            }
-                            if (end != null) {
-                                valid = valid && !detail.getStartDate().isAfter(end);
-                            }
-                            return valid;
-                        })
-                        .collect(Collectors.toList());
-                history.setDetails(filteredDetails);
+                Page<OperationUsageHistoryDetail> filteredDetails = operationUsageHistoryDetailServiceImp
+                        .findDetailsByHistoryIdAndStartDateBetween(history.getId(), start, end, pageable);
                 long sumUsage = filteredDetails.stream()
                         .mapToLong(OperationUsageHistoryDetail::getOperationUsage)
                         .sum();
