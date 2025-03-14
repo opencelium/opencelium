@@ -27,7 +27,7 @@ const LicenseAlertMessage = () => {
             </Alert>
         )
     }
-    if (hasApiLimit || hasApiLimitOnlyForSchedules) {
+    if (hasApiLimitOnlyForSchedules || hasApiLimit) {
         return (
             <Alert color="danger" style={{marginTop: 20, marginBottom: 0}}>
                 {"You have reached the subscription limit of api calls. Please, click "}

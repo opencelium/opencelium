@@ -43,7 +43,9 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
     const [currentSubscriptionInterval, setCurrentSubscriptionInterval] = useState<any>(null);
 
     useEffect(() => {
-        setCurrentSubscriptionInterval(setInterval(() => dispatch(getCurrentSubscriptionOnlyForSchedules()), 2000));
+        if (!currentSubscriptionInterval){
+            setCurrentSubscriptionInterval(setInterval(() => dispatch(getCurrentSubscriptionOnlyForSchedules()), 2000));
+        }
         return () => {
             clearInterval(currentSchedulesInterval);
             clearInterval(currentSubscriptionInterval);
