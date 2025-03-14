@@ -62,7 +62,6 @@ public class ExecutionAspect {
     private final LastExecutionService lastExecutionService;
     private final DataAggregatorService dataAggregatorService;
     private final SubscriptionService subscriptionService;
-    private final Subscription activSub;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -84,11 +83,11 @@ public class ExecutionAspect {
         this.lastExecutionService = lastExecutionService;
         this.dataAggregatorService = dataAggregatorService;
         this.subscriptionService = subscriptionService;
-        this.activSub = subscriptionService.getActiveSubs();
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
     public void sendBefore(JobExecutionContext context) {
+        Subscription activSub = subscriptionService.getActiveSubs();
         if (!subscriptionService.isValid(activSub)) {
             logger.warn("Subscription is not valid");
             return;
@@ -107,13 +106,12 @@ public class ExecutionAspect {
 
     @AfterReturning("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
     public void sendAfter(JobExecutionContext context) {
-        if (!subscriptionService.isValid(activSub)) {
-            logger.warn("Subscription is not valid");
+        JobDataMap jobDataMap = context.getMergedJobDataMap();
+        boolean licenseIsValid = jobDataMap.getBoolean("licenseIsValid");
+        if (!licenseIsValid) {
             return;
         }
         logger.info("------------------- POST --------------------");
-
-        JobDataMap jobDataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 
@@ -128,12 +126,12 @@ public class ExecutionAspect {
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
             throwing = "ex")
     public void sendAlert(JobExecutionContext context, Exception ex) {
-        if (!subscriptionService.isValid(activSub)) {
-            logger.warn("Subscription is not valid");
+        JobDataMap jobDataMap = context.getMergedJobDataMap();
+        boolean licenseIsValid = jobDataMap.getBoolean("licenseIsValid");
+        if (!licenseIsValid) {
             return;
         }
         logger.info("------------------- EXCEPTION --------------------");
-        JobDataMap jobDataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 

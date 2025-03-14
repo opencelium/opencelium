@@ -58,8 +58,10 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
         Subscription activeSub = subscriptionService.getActiveSubs();
         if (!subscriptionService.isValid(activeSub)) {
             logger.warn("Subscription is not valid");
+            context.getMergedJobDataMap().put("licenseIsValid", false);
             return;
         }
+        context.getMergedJobDataMap().put("licenseIsValid", true);
         try {
             JobDataMap dataMap = context.getMergedJobDataMap();
             QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
