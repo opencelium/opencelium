@@ -20,9 +20,10 @@ public interface SubscriptionService {
     Subscription getActiveSubs();
     SubsDTO toDto(LicenseKey licenseKey, Subscription subscription);
     Subscription getById(String id);
-    void updateUsage(Subscription activeSub, ConnectionEx connectionEx, long requestSize, long startTime);
+    void updateUsage(String subId, ConnectionEx connectionEx, long requestSize, long startTime);
     void createFreeLicenseFileIfNotExists();
     void resetMonthlyUsageForLicense(String subId);
 
     Subscription findByLicenseId(String licenseId);
+
 }

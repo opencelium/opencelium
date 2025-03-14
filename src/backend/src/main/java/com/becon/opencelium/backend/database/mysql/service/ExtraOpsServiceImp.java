@@ -145,8 +145,11 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
                 return;
             }
 
+            Optional<ExtraOps> optionalExtraOps = extraOpsRepository.findAndLockById(extraOpsOptional.get().getId());
+            if (optionalExtraOps.isEmpty()) {
+                throw new RuntimeException("Extra ops not found during usage update: " + extraOpsOptional.get().getId());
+            }
             ExtraOps extraOps = extraOpsOptional.get();
-
             // 2. Validate currentOpsUsage using HMAC to ensure data integrity.
             String expectedHmac = constructHmac(extraOps, extraOps.getCurrentOpsUsage());
             if (!expectedHmac.equals(extraOps.getCurrentOpsUsageHmac())) {

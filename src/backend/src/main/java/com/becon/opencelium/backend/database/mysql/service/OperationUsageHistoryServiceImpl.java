@@ -147,4 +147,9 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
         });
         return usageHistories;
     }
+
+    @Override
+    public void incrementUsageByConnectionTitle(Long id, long opsUsage) {
+        operationUsageHistoryRepository.incrementUsageByConnectionTitle(id, opsUsage);
+    }
 }
