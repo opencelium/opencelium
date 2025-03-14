@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.resource.subs;
 
 import com.becon.opencelium.backend.constant.SubscriptionConstant;
 import com.becon.opencelium.backend.subscription.dto.ExtraOpsDTO;
+import com.becon.opencelium.backend.subscription.utility.MonthPeriod;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class SubsDTO {
     private long totalOperationUsage;
     private long currentOperationUsage;
     private boolean active;
+    private MonthPeriod monthPeriod;
     private List<ExtraOpsDTO> extraOps;
 
     // Getters and Setters
@@ -88,6 +90,14 @@ public class SubsDTO {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public MonthPeriod getMonthPeriod() {
+        return monthPeriod;
+    }
+
+    public void setMonthPeriod(MonthPeriod monthPeriod) {
+        this.monthPeriod = monthPeriod;
     }
 
     public List<ExtraOpsDTO> getExtraOps() {

@@ -19,7 +19,7 @@ public class OperationUsageHistoryDetail {
     private long operationUsage;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "operation_usage_history_id", nullable = false)
+    @JoinColumn(name = "operation_usage_history_id", nullable = false, updatable = false)
     private OperationUsageHistory operationUsageHistory;
 
     public Long getId() {

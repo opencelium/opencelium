@@ -13,6 +13,7 @@ import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.enums.ExtraOpsStatus;
 import com.becon.opencelium.backend.subscription.quartz.QuartzCronUpdater;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
+import com.becon.opencelium.backend.subscription.utility.MonthPeriod;
 import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import jakarta.transaction.Transactional;
@@ -238,6 +239,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     .map(extraOpsService::toDTO).toList();
             subsDTO.setExtraOps(extraOpsDTOList);
         }
+        MonthPeriod period = LicenseKeyUtility.getCurrentMonthPeriod(licenseKey.getStartDate());
+        subsDTO.setMonthPeriod(period);
         return subsDTO;
     }
 
@@ -247,16 +250,20 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .orElseThrow(() -> new RuntimeException("Subscription not found: " + id));
     }
 
+    @Transactional
     @Override
-    public void updateUsage(Subscription sub, ConnectionEx connectionEx, long opsUsage, long startTime) {
+    public void updateUsage(String subId, ConnectionEx connectionEx, long opsUsage, long startTime) {
+        Optional<Subscription> subOptional = subscriptionRepository.findAndLockById(subId);
+        if (subOptional.isEmpty()) {
+            throw new RuntimeException("Subscription not found when updating usage: " + subId);
+        }
+        Subscription sub = subOptional.get();
         // Try to find existing operation usage history
         OperationUsageHistory operationUsageHistory = operationUsageHistoryService
                 .findByConnectionTitle(connectionEx.getConnectionName())
                 .map(history -> {
                     // If history exists, increment its total usage
-                    history.setTotalUsage(history.getTotalUsage() + opsUsage);
-                    history.setFromInvoker(connectionEx.getSource().getInvoker());
-                    history.setToInvoker(connectionEx.getTarget().getInvoker());
+                    operationUsageHistoryService.incrementUsageByConnectionTitle(history.getId(), opsUsage);
                     // Create and add a new OperationUsageHistoryDetail
                     OperationUsageHistoryDetail newDetail = new OperationUsageHistoryDetail();
                     newDetail.setOperationUsage(opsUsage);

@@ -26,4 +26,6 @@ public interface OperationUsageHistoryService {
     PaginatedDto toUsageDetailsDto(Page<OperationUsageHistoryDetail> page);
 
     Page<OperationUsageHistory> findAllByDetailsStartDateBetween(int page, int size, Long startDate, Long endDate, String[] sort) ;
+
+    void incrementUsageByConnectionTitle(Long id, long opsUsage);
 }

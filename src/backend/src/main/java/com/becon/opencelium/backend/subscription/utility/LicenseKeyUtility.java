@@ -14,6 +14,10 @@ import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Base64;
 
@@ -105,6 +109,32 @@ public class LicenseKeyUtility {
             offset += chunk.length;
         }
         return result;
+    }
+
+    public static MonthPeriod getCurrentMonthPeriod(long initialDateMillis) {
+        // Convert initial date from UNIX milliseconds to LocalDateTime in UTC
+        Instant initialInstant = Instant.ofEpochMilli(initialDateMillis);
+        LocalDateTime initialDate = LocalDateTime.ofInstant(initialInstant, ZoneOffset.UTC);
+
+        // Get the current date in UTC
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+
+        // Determine the start of the period (same day as initialDate in the current month)
+        LocalDateTime startDate = now.withDayOfMonth(initialDate.getDayOfMonth()).with(LocalTime.MIN);
+
+        // If the startDate is in the future (because the current month has fewer days), move to last valid day
+        if (startDate.getDayOfMonth() != initialDate.getDayOfMonth()) {
+            startDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
+        }
+
+        // Determine the end of the period (same day next month or the last day of the month)
+        LocalDateTime endDate = startDate.plusMonths(1).minusSeconds(1);
+
+        // Convert to UNIX timestamp in milliseconds
+        long startMillis = startDate.toInstant(ZoneOffset.UTC).toEpochMilli();
+        long endMillis = endDate.toInstant(ZoneOffset.UTC).toEpochMilli();
+
+        return new MonthPeriod(startMillis, endMillis);
     }
 
     public static String readFreeLicense() {
