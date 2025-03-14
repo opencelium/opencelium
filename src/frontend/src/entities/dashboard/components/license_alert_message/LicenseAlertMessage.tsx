@@ -9,15 +9,16 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 const LicenseAlertMessage = () => {
     const dispatch = useAppDispatch();
-    const {currentSubscription, gettingCurrentSubscription} = Subscription.getReduxState();
+    const {currentSubscription, currentSubscriptionOnlyForSchedules, gettingCurrentSubscription, gettingCurrentSubscriptionOnlyForSchedules} = Subscription.getReduxState();
     const hasApiLimit = Subscription.hasReachedLimit(currentSubscription);
+    const hasApiLimitOnlyForSchedules = Subscription.hasReachedLimit(currentSubscriptionOnlyForSchedules);
     useEffect(() => {
         dispatch(getCurrentSubscription())
     }, [])
-    if (gettingCurrentSubscription !== API_REQUEST_STATE.FINISH) {
-        return null;
-    }
     if (!currentSubscription) {
+        if (gettingCurrentSubscription !== API_REQUEST_STATE.FINISH) {
+            return null;
+        }
         return (
             <Alert color="danger" style={{marginTop: 20, marginBottom: 0}}>
                 {"Your OpenCelium is currently not licensed. Please, click "}
@@ -26,7 +27,7 @@ const LicenseAlertMessage = () => {
             </Alert>
         )
     }
-    if (hasApiLimit) {
+    if (hasApiLimit || hasApiLimitOnlyForSchedules) {
         return (
             <Alert color="danger" style={{marginTop: 20, marginBottom: 0}}>
                 {"You have reached the subscription limit of api calls. Please, click "}

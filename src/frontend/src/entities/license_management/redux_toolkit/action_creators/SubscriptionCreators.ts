@@ -13,6 +13,18 @@ export const getCurrentSubscription = createAsyncThunk(
         }
     }
 )
+export const getCurrentSubscriptionOnlyForSchedules = createAsyncThunk(
+    'subscription/get/current/only-for-schedules',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new SubscriptionRequest();
+            const response = await request.getCurrent();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 export const getOperationUsageEntries = createAsyncThunk(
     'subscription/get/operation/usage',
     async(data: {page: number, size: number, startDate: number, endDate: number, } = {page: 0, size: 10000, startDate: 0, endDate: 0}, thunkAPI) => {
@@ -71,4 +83,5 @@ export default {
     getOperationUsageDetails,
     setCurrentSubscription,
     importCredits,
+    getCurrentSubscriptionOnlyForSchedules,
 }

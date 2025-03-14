@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
 import {usePrevious} from "@application/utils/hooks/usePrevious";
 import {useAppDispatch} from "@application/utils/store";
@@ -22,19 +22,49 @@ import {CurrentSchedulesStyled, EmptyListStyled, HeaderStyled} from './styles';
 import {Schedule} from "../../classes/Schedule";
 import {getCurrentSchedules, getSchedulesById} from "../../redux_toolkit/action_creators/ScheduleCreators";
 import {ProgressBarElement} from "../../components/progress_bar_element/ProgressBarElement";
+import {
+    getCurrentSubscription,
+    getCurrentSubscriptionOnlyForSchedules
+} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
+import Subscription from "@entity/license_management/classes/Subscription";
+import {clearInterval} from "stompjs";
 
 const CurrentSchedules: FC<CurrentSchedulesProps> =
     ({
 
     }) => {
     const dispatch = useAppDispatch();
+    const {
+        currentSubscriptionOnlyForSchedules: currentSubscription,
+    } = Subscription.getReduxState();
     const {currentSchedules} = Schedule.getReduxState();
     const preProps: any[] = usePrevious({currentSchedules}) || [];
-    let interval: any = null;
+    const [currentSchedulesInterval, setCurrentSchedulesInterval] = useState<any>(null);
+    const [currentSubscriptionInterval, setCurrentSubscriptionInterval] = useState<any>(null);
+
     useEffect(() => {
-        interval = setInterval(() => dispatch(getCurrentSchedules()), 2000)
-        return () => clearInterval(interval);
+        setCurrentSubscriptionInterval(setInterval(() => dispatch(getCurrentSubscriptionOnlyForSchedules()), 2000));
+        return () => {
+            clearInterval(currentSchedulesInterval);
+            clearInterval(currentSubscriptionInterval);
+        }
     }, []);
+    useEffect(() => {
+        if(currentSubscription) {
+            if (!Subscription.hasReachedLimit(currentSubscription)) {
+                if (!currentSchedulesInterval) {
+                    setCurrentSchedulesInterval(setInterval(() => dispatch(getCurrentSchedules()), 2000));
+                }
+            } else {
+                if (currentSubscriptionInterval) {
+                    setTimeout(() => {
+                        clearInterval(currentSchedulesInterval);
+                        setCurrentSchedulesInterval(null);
+                    }, 1000)
+                }
+            }
+        }
+    }, [currentSubscription])
     useEffect(() => {
         let ids = [];
         let index = -1;
