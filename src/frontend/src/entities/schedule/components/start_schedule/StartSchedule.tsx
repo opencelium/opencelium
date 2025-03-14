@@ -9,8 +9,8 @@ import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/a
 
 const StartSchedule = ({entity, scheduleModel, componentPermission}: any) => {
     const dispatch = useAppDispatch();
-    const {currentSubscription, gettingCurrentSubscription} = Subscription.getReduxState();
-    const isDisabled = Subscription.hasReachedLimit(currentSubscription);
+    const {currentSubscriptionOnlyForSchedules} = Subscription.getReduxState();
+    const isDisabled = Subscription.hasReachedLimit(currentSubscriptionOnlyForSchedules);
     return (
         <PermissionTooltipButton
             target={`start_entity_${entity.id.toString()}`}
