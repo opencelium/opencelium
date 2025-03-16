@@ -9,6 +9,10 @@ export default interface SubscriptionModel {
     currentOperationUsage?: number,
     extraOps: ExtraOp[] | null,
     active: boolean,
+    monthPeriod: {
+        startDate: number,
+        endDate: number,
+    }
 }
 export enum ExtraOpStatus {
     Active= 'ACTIVE',

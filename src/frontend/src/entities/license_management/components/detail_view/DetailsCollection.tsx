@@ -26,7 +26,7 @@ const DetailsCollection = ({currentEntry, detailsPage, setDetailsPage, setCollec
     }, [operationUsageDetails, currentEntry])
     useEffect(() => {
         if (currentEntry) {
-            const {startDate, endDate} = Subscription.getMonthlyPeriod(currentSubscription.startDate)
+            const {startDate, endDate} = currentSubscription.monthPeriod;
             dispatch(getOperationUsageDetails({entryId: currentEntry.id, page: detailsPage, size: DetailsPerPage, startDate, endDate}));
         }
     }, [detailsPage])
@@ -35,7 +35,7 @@ const DetailsCollection = ({currentEntry, detailsPage, setDetailsPage, setCollec
             if (detailsPage !== 0) {
                 setDetailsPage(0);
             } else {
-                const {startDate, endDate} = Subscription.getMonthlyPeriod(currentSubscription.startDate)
+                const {startDate, endDate} = currentSubscription.monthPeriod;
                 dispatch(getOperationUsageDetails({entryId: currentEntry.id, page: detailsPage, size: DetailsPerPage, startDate, endDate}));
             }
         } else {

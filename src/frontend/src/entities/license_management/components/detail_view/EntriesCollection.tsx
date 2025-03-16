@@ -25,12 +25,12 @@ const EntriesCollection = ({currentEntry, setCurrentEntry, collection, setCollec
     const isLoading = gettingOperationUsageDetails === API_REQUEST_STATE.START || gettingOperationUsageEntries === API_REQUEST_STATE.START;
 
     useEffect(() => {
-        const {startDate, endDate} = Subscription.getMonthlyPeriod(currentSubscription.startDate)
+        const {startDate, endDate} = currentSubscription.monthPeriod;
         dispatch(getOperationUsageEntries({page: entryPage, size: EntriesPerPage, startDate, endDate}));
     }, [entryPage])
     useEffect(() => {
         if (!currentEntry) {
-            const {startDate, endDate} = Subscription.getMonthlyPeriod(currentSubscription.startDate)
+            const {startDate, endDate} = currentSubscription.monthPeriod;
             dispatch(getOperationUsageEntries({page: entryPage, size: EntriesPerPage, startDate, endDate}));
         } else {
             setCollection('details');
