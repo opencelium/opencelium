@@ -23,7 +23,7 @@ public interface ExtraOpsService {
 
     ExtraOpsDTO toDTO(ExtraOps extraOps);
 
-    ExtraOps toEntityFromEncryption(EncryptedExtraOpsFile encryptedExtraOpsFile);
+    ExtraOps toEntityFromEncryption(EncryptedExtraOpsFile encryptedExtraOpsFile, LicenseKey licenseKey);
 
     void update(ExtraOps extraOps);
 
