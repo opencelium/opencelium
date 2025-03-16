@@ -92,7 +92,7 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
 
         // Set the fields for OperationUsageHistoryDetail
         operationUsageHistoryDetail.setOperationUsage(operationUsage); // This specific usage request
-        operationUsageHistoryDetail.setStartDate(Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime());
+        operationUsageHistoryDetail.setStartDate(Instant.ofEpochMilli(startTime).atZone(ZoneId.of("UTC")).toLocalDateTime());
 
         // Set the bidirectional relationship
         operationUsageHistoryDetail.setOperationUsageHistory(operationUsageHistory);

@@ -6,8 +6,11 @@ import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.repository.ExtraOpsRepository;
 import com.becon.opencelium.backend.subscription.dto.EncryptedExtraOpsFile;
 import com.becon.opencelium.backend.subscription.dto.ExtraOpsDTO;
+import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.enums.ExtraOpsStatus;
 import com.becon.opencelium.backend.subscription.quartz.ExtraOpsJob;
+import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
+import com.becon.opencelium.backend.subscription.utility.MonthPeriod;
 import com.becon.opencelium.backend.utility.crypto.CryptoUtil;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -98,12 +101,15 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
     }
 
     @Override
-    public ExtraOps toEntityFromEncryption(EncryptedExtraOpsFile encryptedExtraOpsFile) {
+    public ExtraOps toEntityFromEncryption(EncryptedExtraOpsFile encryptedExtraOpsFile, LicenseKey licenseKey) {
         long currentInMillis = System.currentTimeMillis();
         LocalDateTime startDate = Instant.ofEpochMilli(currentInMillis)
-                .atZone(ZoneId.systemDefault())
+                .atZone(ZoneId.of("UTC"))
                 .toLocalDateTime();
-        LocalDateTime endDate = getLastDayOfMonthFromCurrentTime(currentInMillis);
+        MonthPeriod monthPeriod = LicenseKeyUtility.getCurrentMonthPeriod(licenseKey.getStartDate());
+        LocalDateTime endDate = Instant.ofEpochMilli(monthPeriod.getStartDate())
+                .atZone(ZoneId.of("UTC"))
+                .toLocalDateTime();
 
         String hmacTotal = constructHmac(encryptedExtraOpsFile, encryptedExtraOpsFile.getTotalOpsUsage());
         long currentUsage = 0;
@@ -207,7 +213,7 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
     private LocalDateTime getLastDayOfMonthFromCurrentTime(long millis) {
         // Convert the millisecond timestamp to LocalDateTime using the system default time zone
         LocalDateTime dateTime = Instant.ofEpochMilli(millis)
-                .atZone(ZoneId.systemDefault())
+                .atZone(ZoneId.of("UTC"))
                 .toLocalDateTime();
 
         // Adjust the date portion to the last day of the month
@@ -219,7 +225,7 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
 
     private void schedulerExpireDateForExtraOps(long extraOpsId, LocalDateTime endDate) {
         try {
-            Date triggerDate = Date.from(endDate.atZone(ZoneId.systemDefault()).toInstant());
+            Date triggerDate = Date.from(endDate.atZone(ZoneId.of("UTC")).toInstant());
             String jobKey = "ExtraOpsJob-" + extraOpsId;
             String groupKey = "ExtraOpsJobs";
             JobKey jobIdentity = new JobKey(jobKey, groupKey);
@@ -253,7 +259,7 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
      * @return the Unix time in milliseconds.
      */
     private long convertToUnixMillis(LocalDateTime localDateTime) {
-        return localDateTime.atZone(ZoneId.systemDefault())
+        return localDateTime.atZone(ZoneId.of("UTC"))
                 .toInstant()
                 .toEpochMilli();
     }

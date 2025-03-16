@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.ExtraOpsService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.subscription.dto.EncryptedExtraOpsFile;
+import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,8 @@ public class ExtraOpsController {
             throw new RuntimeException("EXTRA_OPS_ALREADY_EXISTS");
         }
         Subscription sub = subscriptionService.findByLicenseId(encryptedExtraOpsFile.getLicenseId());
-        ExtraOps extraOps = extraOpsService.toEntityFromEncryption(encryptedExtraOpsFile);
+        ExtraOps extraOps = extraOpsService
+                .toEntityFromEncryption(encryptedExtraOpsFile, LicenseKeyUtility.decrypt(sub.getLicenseKey()));
         extraOps.setSubscription(sub);
         extraOpsService.save(extraOps);
 
