@@ -99,7 +99,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                     <InfoStyled>
                         <div><b>Monthly Period:</b></div>
                         <div>
-                            {hasNoSubscription ? '-' : Subscription.getMonthlyPeriod(subscription.startDate).text}
+                            {hasNoSubscription ? '-' : Subscription.getMonthlyPeriod(subscription.monthPeriod)}
                         </div>
                     </InfoStyled>
                     {isUnlimited && !hasNoSubscription && <React.Fragment>
