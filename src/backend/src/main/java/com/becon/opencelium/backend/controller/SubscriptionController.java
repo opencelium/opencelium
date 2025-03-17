@@ -25,10 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +38,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/subs")
@@ -210,7 +209,14 @@ public class SubscriptionController {
             usageHistories = operationUsageHistoryService.getAllUsage(page, size, sort);
         }
 
-        PaginatedDto dto = operationUsageHistoryService.toPaginatedDto(usageHistories);
+        // Stream and filter histories with totalUsage > 0
+        List<OperationUsageHistory> filteredHistories = usageHistories.getContent().stream()
+                .filter(history -> history.getTotalUsage() > 0)
+                .collect(Collectors.toList());
+
+// Return a new Page object with only the filtered histories
+        Page<OperationUsageHistory> filteredPage = new PageImpl<>(filteredHistories, usageHistories.getPageable(), filteredHistories.size());
+        PaginatedDto dto = operationUsageHistoryService.toPaginatedDto(filteredPage);
         return ResponseEntity.ok(dto);
     }
 
