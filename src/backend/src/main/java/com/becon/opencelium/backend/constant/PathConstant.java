@@ -35,4 +35,5 @@ public interface PathConstant {
     String VERSIONS = "versions/";
     String ASSISTANT = "assistant/";
     String LIBS = "build/libs/";
+    String CHANGELOG = "./assistant/changelog/file/";
 }

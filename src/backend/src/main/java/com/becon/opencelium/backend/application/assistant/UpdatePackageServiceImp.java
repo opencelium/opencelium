@@ -153,7 +153,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     private String getChangelogLink(String ocPackage) {
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        return uri.getScheme() + "://" + uri.getAuthority() + "/api/assistant/changelog/file/" + ocPackage;
+        return PathConstant.CHANGELOG + ocPackage;
     }
 
     // [1.2, 1.3] :  1.2 - current

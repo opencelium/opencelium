@@ -36,10 +36,7 @@ public class UserRoleResource {
     private String icon;
     private List<ComponentResource> components = new ArrayList<>();
 
-//    private final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-//    private final String imagePath = new ServerUtility().getUri();
-    private final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-    private final String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
+    private final String imagePath = PathConstant.IMAGES;
 
     public UserRoleResource(UserRole userRole) {
         this.groupId = userRole.getId();
