@@ -16,10 +16,15 @@
 import ListCollection from "@application/classes/ListCollection";
 import {ListProp} from "@application/interfaces/IListCollection";
 import {SortType} from "@app_component/collection/collection_view/interfaces";
-import {OperationUsageEntryModel} from "@entity/license_management/requests/models/SubscriptionModel";
+import {
+    OperationUsageDetailModel,
+    OperationUsageEntryModel
+} from "@entity/license_management/requests/models/SubscriptionModel";
 import {OperationUsageEntryProps} from "@entity/license_management/interfaces/ISubscription";
 import {OperationUsageEntry} from "@entity/license_management/classes/OperationUsageEntry";
 import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
+import {convertTimeForTotalUsage, formatOperationUsage} from "@application/utils/utils";
+import React from "react";
 
 class OperationUsageEntries extends ListCollection<OperationUsageEntryProps>{
     name: string = 'operation_usage_entries';
@@ -35,6 +40,11 @@ class OperationUsageEntries extends ListCollection<OperationUsageEntryProps>{
         {
             propertyKey: 'totalUsage',
             width: '50%',
+            getValue: (entity: OperationUsageEntryModel) => {
+                return (
+                    <span>{formatOperationUsage(entity.totalUsage)}</span>
+                )
+            }
         },
     ];
     translations = {

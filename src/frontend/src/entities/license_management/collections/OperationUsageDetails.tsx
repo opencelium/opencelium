@@ -18,7 +18,7 @@ import {ListProp} from "@application/interfaces/IListCollection";
 import {OperationUsageDetailModel} from "@entity/license_management/requests/models/SubscriptionModel";
 import {OperationUsageDetailProps} from "@entity/license_management/interfaces/ISubscription";
 import {OperationUsageDetail} from "@entity/license_management/classes/OperationUsageDetail";
-import {convertTimeForTotalUsage} from "@application/utils/utils";
+import {convertTimeForTotalUsage, formatOperationUsage} from "@application/utils/utils";
 
 class OperationUsageDetails extends ListCollection<OperationUsageDetailProps>{
     name: string = 'operation_usage_details';
@@ -37,6 +37,11 @@ class OperationUsageDetails extends ListCollection<OperationUsageDetailProps>{
         {
             propertyKey: 'operationUsage',
             width: '50%',
+            getValue: (entity: OperationUsageDetailModel) => {
+                return (
+                    <span>{formatOperationUsage(entity.operationUsage)}</span>
+                )
+            }
         },
     ];
     translations = {

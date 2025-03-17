@@ -32,7 +32,8 @@ export const getOperationUsageEntries = createAsyncThunk(
             const timeRangeParams = data.startDate && data.endDate ? `&startDate=${data.startDate}&endDate=${data.endDate}` : '';
             const request = new SubscriptionRequest({endpoint: `/operation/usage?page=${data.page}&size=${data.size}${timeRangeParams}`});
             const response = await request.getOperationUsageEntries();
-            return response.data;
+            const content = response.data.content.filter(c => c.totalUsage !== 0);
+            return {...response.data, content};
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
