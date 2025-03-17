@@ -111,9 +111,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             LocalDate currentDate = LocalDate.now();
             LicenseKey licenseKey = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
             LocalDate startDate = Instant.ofEpochMilli(licenseKey.getStartDate())
-                    .atZone(ZoneId.systemDefault()).toLocalDate();
+                    .atZone(ZoneId.of("UTC")).toLocalDate();
             LocalDate endDate = Instant.ofEpochMilli(licenseKey.getEndDate())
-                    .atZone(ZoneId.systemDefault()).toLocalDate();
+                    .atZone(ZoneId.of("UTC")).toLocalDate();
 
             if (currentDate.isAfter(startDate) && currentDate.isBefore(endDate)) {
                 // Reset current_usage
@@ -267,7 +267,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     // Create and add a new OperationUsageHistoryDetail
                     OperationUsageHistoryDetail newDetail = new OperationUsageHistoryDetail();
                     newDetail.setOperationUsage(opsUsage);
-                    newDetail.setStartDate(Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime());
+                    newDetail.setStartDate(Instant.ofEpochMilli(startTime).atZone(ZoneId.of("UTC")).toLocalDateTime());
                     newDetail.setOperationUsageHistory(history);  // Set the bidirectional relationship
                     operationUsageHistoryDetailService.save(newDetail);
                          // Add the new detail to the existing list

@@ -12,7 +12,7 @@ public class OperationUsageDetailsDto {
 
     public OperationUsageDetailsDto(OperationUsageHistoryDetail usageHistoryDetail) {
         this.id = usageHistoryDetail.getId();
-        this.startDate = usageHistoryDetail.getStartDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        this.startDate = usageHistoryDetail.getStartDate().atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
         this.operationUsage = usageHistoryDetail.getOperationUsage();
     }
 

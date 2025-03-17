@@ -83,7 +83,7 @@ public class ExtraOps {
 
     public void setStartDate(long unixTime) {
         this.startDate = this.endDate = Instant.ofEpochMilli(unixTime)
-                .atZone(ZoneId.systemDefault())
+                .atZone(ZoneId.of("UTC"))
                 .toLocalDateTime();;
     }
 
@@ -97,7 +97,7 @@ public class ExtraOps {
 
     public void setEndDate(long unixTime) {
         this.endDate = Instant.ofEpochMilli(unixTime)
-                .atZone(ZoneId.systemDefault())
+                .atZone(ZoneId.of("UTC"))
                 .toLocalDateTime();;
     }
 
