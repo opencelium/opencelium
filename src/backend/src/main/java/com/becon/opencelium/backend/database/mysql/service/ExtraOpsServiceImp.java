@@ -65,7 +65,9 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
             throw new RuntimeException("Total usage was changed manually in Extra Ops");
         }
         // If Active Extra Ops not found then activate current.
-        if (!extraOpsRepository.existsByStatus(ExtraOpsStatus.ACTIVE)) {
+        if (!extraOpsRepository.existsByStatus(ExtraOpsStatus.ACTIVE) &&
+                extraOps.getStatus() != ExtraOpsStatus.CONSUMED &&
+                extraOps.getStatus() != ExtraOpsStatus.EXPIRED) {
             extraOps.setStatus(ExtraOpsStatus.ACTIVE);
         }
         extraOpsRepository.save(extraOps);
