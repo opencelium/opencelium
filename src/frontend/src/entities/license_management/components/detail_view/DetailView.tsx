@@ -18,11 +18,18 @@ import Button from "@app_component/base/button/Button";
 import {OperationUsageEntryModel} from "@entity/license_management/requests/models/SubscriptionModel";
 import EntriesCollection from "@entity/license_management/components/detail_view/EntriesCollection";
 import DetailsCollection from "@entity/license_management/components/detail_view/DetailsCollection";
+import Subscription from "@entity/license_management/classes/Subscription";
 const DetailView = () => {
     const [collection, setCollection] = useState<'entries' | 'details'>('entries');
     const [currentEntry, setCurrentEntry] = useState<null | OperationUsageEntryModel>(null);
     const [entryPage, setEntryPage] = useState<number>(0);
     const [detailsPage, setDetailsPage] = useState<number>(0);
+    const {
+        currentSubscription,
+    } = Subscription.getReduxState();
+    if (!currentSubscription) {
+        return null;
+    }
     return (
         <div style={{marginLeft: '20px'}}>
             {collection === 'details' &&

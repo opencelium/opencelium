@@ -25,11 +25,13 @@ const EntriesCollection = ({currentEntry, setCurrentEntry, collection, setCollec
     const isLoading = gettingOperationUsageDetails === API_REQUEST_STATE.START || gettingOperationUsageEntries === API_REQUEST_STATE.START;
 
     useEffect(() => {
-        const {startDate, endDate} = currentSubscription.monthPeriod;
-        dispatch(getOperationUsageEntries({page: entryPage, size: EntriesPerPage, startDate, endDate}));
+        if (currentSubscription) {
+            const {startDate, endDate} = currentSubscription.monthPeriod;
+            dispatch(getOperationUsageEntries({page: entryPage, size: EntriesPerPage, startDate, endDate}));
+        }
     }, [entryPage])
     useEffect(() => {
-        if (!currentEntry) {
+        if (!currentEntry && currentSubscription) {
             const {startDate, endDate} = currentSubscription.monthPeriod;
             dispatch(getOperationUsageEntries({page: entryPage, size: EntriesPerPage, startDate, endDate}));
         } else {

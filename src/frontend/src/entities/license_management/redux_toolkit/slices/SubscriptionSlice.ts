@@ -47,7 +47,7 @@ export interface SubscriptionState extends ICommonState{
 }
 
 const initialState: SubscriptionState = {
-    currentSubscription: null,
+    currentSubscription: undefined,
     currentSubscriptionOnlyForSchedules: null,
     gettingCurrentSubscription: API_REQUEST_STATE.INITIAL,
     gettingCurrentSubscriptionOnlyForSchedules: API_REQUEST_STATE.INITIAL,

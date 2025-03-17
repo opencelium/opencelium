@@ -1,7 +1,6 @@
 import React, {useEffect} from 'react';
 import {Alert} from "reactstrap";
 import {Link} from "react-router-dom";
-import OperationalUsageLimitMessage from "@entity/schedule/components/pages/OperationalUsageLimitMessage";
 import Subscription from "@entity/license_management/classes/Subscription";
 import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import {useAppDispatch} from "@application/utils/store";
@@ -9,9 +8,8 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 const LicenseAlertMessage = () => {
     const dispatch = useAppDispatch();
-    const {currentSubscription, currentSubscriptionOnlyForSchedules, gettingCurrentSubscription, gettingCurrentSubscriptionOnlyForSchedules} = Subscription.getReduxState();
+    const {currentSubscription, gettingCurrentSubscription} = Subscription.getReduxState();
     const hasApiLimit = Subscription.hasReachedLimit(currentSubscription);
-    const hasApiLimitOnlyForSchedules = Subscription.hasReachedLimit(currentSubscriptionOnlyForSchedules);
     useEffect(() => {
         dispatch(getCurrentSubscription())
     }, [])
@@ -27,7 +25,7 @@ const LicenseAlertMessage = () => {
             </Alert>
         )
     }
-    if (hasApiLimitOnlyForSchedules || hasApiLimit) {
+    if (hasApiLimit) {
         return (
             <Alert color="danger" style={{marginTop: 20, marginBottom: 0}}>
                 {"You have reached the subscription limit of api calls. Please, click "}
