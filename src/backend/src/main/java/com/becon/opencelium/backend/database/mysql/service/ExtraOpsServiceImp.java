@@ -14,6 +14,7 @@ import com.becon.opencelium.backend.subscription.utility.MonthPeriod;
 import com.becon.opencelium.backend.utility.crypto.CryptoUtil;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,6 +133,7 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
 
     }
 
+    @Transactional
     @Override
     public void updateExtraOpsForSubscription(Subscription sub, long opsUsage) {
         while (opsUsage > 0) {
@@ -155,7 +157,7 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
             if (optionalExtraOps.isEmpty()) {
                 throw new RuntimeException("Extra ops not found during usage update: " + extraOpsOptional.get().getId());
             }
-            ExtraOps extraOps = extraOpsOptional.get();
+            ExtraOps extraOps = optionalExtraOps.get();
             // 2. Validate currentOpsUsage using HMAC to ensure data integrity.
             String expectedHmac = constructHmac(extraOps, extraOps.getCurrentOpsUsage());
             if (!expectedHmac.equals(extraOps.getCurrentOpsUsageHmac())) {
@@ -171,7 +173,7 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
                 extraOps.setCurrentOpsUsageHmac(constructHmac(extraOps, extraOps.getTotalOpsUsage()));
                 extraOps.setStatus(ExtraOpsStatus.CONSUMED);
                 // Deduct the amount consumed from opsUsage.
-                opsUsage -= availableOps;
+                opsUsage = availableOps - opsUsage;
             } else {
                 // If remaining opsUsage is not enough to consume the extraOps fully:
                 long operationUsage = extraOps.getCurrentOpsUsage() + opsUsage;
