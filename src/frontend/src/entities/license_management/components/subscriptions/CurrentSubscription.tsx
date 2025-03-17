@@ -132,15 +132,15 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                         let thousandStep: number = divisionStep * index / 1000;
                         let millionStep: number = 0;
                         if (thousandStep >= 1000) {
-                            millionStep = thousandStep / 1000;
-                            thousandStep = thousandStep - (millionStep * 1000);
+                            millionStep =  Math.round(thousandStep / 1000);
+                            thousandStep =  Math.round(thousandStep - (millionStep * 1000));
                         }
                         return (
                             <DivisionStyled key={index} style={{
                                 height: progressbarHeight + 10,
                                 borderLeft: index !== 0 && index !== divisions.length - 1 ? '1px dotted #000' : 'unset'
                             }}>
-                                <LabelStyled key={index} style={millionStep > 0 && thousandStep > 0 ? {lineHeight: '18px', bottom: '-40px'} : {bottom: '-25px'}}>
+                                <LabelStyled key={index} style={millionStep > 0 && thousandStep > 0 ? {bottom: '-25px'} : {bottom: '-25px'}}>
                                     {`${index === 0 ? '0' : `${millionStep > 0 ? `${millionStep}M` : ''}${thousandStep > 0 ? ' ' : ''}${thousandStep > 0 ? `${thousandStep}K` : ''}`}`}
                                 </LabelStyled>
                             </DivisionStyled>
