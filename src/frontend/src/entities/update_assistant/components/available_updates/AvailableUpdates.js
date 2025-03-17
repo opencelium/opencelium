@@ -37,6 +37,7 @@ import Loading from "@app_component/base/loading/Loading";
  import DownloadOnlineVersionIcon
      from "@entity/update_assistant/components/available_updates/DownloadOnlineVersionIcon";
  import {Dialog} from "@app_component/base/dialog/Dialog";
+ import {Urls} from "@entity/application/requests/classes/url";
 
 export const ONLINE_UPDATE = 'ONLINE_UPDATE';
 export const OFFLINE_UPDATE = 'OFFLINE_UPDATE';
@@ -113,8 +114,8 @@ class AvailableUpdates extends React.Component{
         })
     }
 
-    getChangelog(url) {
-        this.props.getChangelogInfo(url);
+    getChangelog(endpoint) {
+        this.props.getChangelogInfo(`${Urls.baseUrl}${endpoint}`);
         this.toggleChangelog();
     }
 
@@ -438,7 +439,7 @@ class AvailableUpdates extends React.Component{
         if(activeMode === OFFLINE_UPDATE) {
             if(uploadingVersion !== API_REQUEST_STATE.START) {
                 return (
-                    <div style={{float: 'right'}}>
+                    <div style={{float: 'right', marginTop: 10}}>
                         <InputFile
                             id={`input_upload`}
                             icon={'attach_file'}
