@@ -2,6 +2,26 @@
 Changelog
 *********
 
+4.4
+========
+
+:Date: March 17, 2025
+
+Features
+--------
+
+* Extra-Ops integration
+
+Fixes
+--------
+
+* Triggers from old scheduler has disappeared (OC-964)
+* Current scheduler is Empty (OC-1059)
+* Fix bug with drag and drop in connection editor (OC-932)
+* Error when downloading changelog.rst file (OC-920)
+* GraphQL is missing when executing (OC-945)
+
+
 4.3
 ========
 
@@ -501,4 +521,3 @@ Connector
 * Zabbix
 * Icinga2
 * OTRS/Znuny/OTOBO
-
