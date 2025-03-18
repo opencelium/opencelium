@@ -8,10 +8,7 @@ import com.becon.opencelium.backend.resource.subs.OperationUsageHistoryDto;
 import com.becon.opencelium.backend.resource.subs.OperationUsageDetailsDto;
 import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -134,18 +131,26 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
                 ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.of("UTC"))
                 : null;
 
+        Sort.Direction direction = Sort.Direction.fromString(sorts[1]);
+        Sort sortBy = Sort.by(direction, sorts[0]);
+
         Page<OperationUsageHistory> usageHistories = getAllUsage(page,size, sorts);
-        usageHistories.forEach(history -> {
-            if (history.getDetails() != null) {
-                List<OperationUsageHistoryDetail> filteredDetails = operationUsageHistoryDetailServiceImp
-                        .findDetailsByHistoryIdAndStartDateBetween(history.getId(), start, end);
-                long sumUsage = filteredDetails.stream()
-                        .mapToLong(OperationUsageHistoryDetail::getOperationUsage)
-                        .sum();
-                history.setTotalUsage(sumUsage);
-            }
-        });
-        return usageHistories;
+        List<OperationUsageHistory> filteredList = usageHistories.getContent().stream()
+                .peek(history -> {
+                    if (history.getDetails() != null) {
+                        List<OperationUsageHistoryDetail> filteredDetails = operationUsageHistoryDetailServiceImp
+                                .findDetailsByHistoryIdAndStartDateBetween(history.getId(), start, end);
+                        long sumUsage = filteredDetails.stream()
+                                .mapToLong(OperationUsageHistoryDetail::getOperationUsage)
+                                .sum();
+                        history.setTotalUsage(sumUsage);
+                    }
+                })
+                .filter(history -> history.getTotalUsage() > 0)  // Only keep records where totalUsage > 0
+                .limit(size) // Ensure only the requested page size is returned
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(filteredList, PageRequest.of(page, size, sortBy), filteredList.size());
     }
 
     @Override
