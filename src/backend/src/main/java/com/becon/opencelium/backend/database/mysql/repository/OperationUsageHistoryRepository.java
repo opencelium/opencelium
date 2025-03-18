@@ -37,4 +37,7 @@ public interface OperationUsageHistoryRepository extends JpaRepository<Operation
             nativeQuery = true)
     int incrementUsageByConnectionTitle(@Param("id") Long id,
                                         @Param("opsUsage") long opsUsage);
+
+    @Query("SELECT h FROM OperationUsageHistory h WHERE h.totalUsage > 0")
+    Page<OperationUsageHistory> findAllByTotalUsageGreaterThan(Pageable pageable);
 }

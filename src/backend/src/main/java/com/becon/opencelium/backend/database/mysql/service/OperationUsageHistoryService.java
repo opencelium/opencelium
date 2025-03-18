@@ -15,7 +15,10 @@ public interface OperationUsageHistoryService {
     void save(OperationUsageHistory operationUsageHistory);
     List<OperationUsageHistory> findAll();
     Page<OperationUsageHistory> getAllUsage(int page, int size, String[] sort);
-    Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(Long usageId,int page, int size, String[] sort, LocalDateTime startDate, LocalDateTime endTime);
+
+    Page<OperationUsageHistory> getUsageHistoriesWithTotalUsage(int page, int size, String[] sorts);
+
+    Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(Long usageId, int page, int size, String[] sort, LocalDateTime startDate, LocalDateTime endTime);
     Optional<OperationUsageHistory> findById(Long id);
     OperationUsageHistory createNewEntity(Subscription sub, String connectionName,
                                           long operationUsage, long startTime,
