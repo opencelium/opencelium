@@ -206,7 +206,7 @@ public class SubscriptionController {
         if (startDate != null || endDate != null) {
             usageHistories = operationUsageHistoryService.findAllByDetailsStartDateBetween(page, size, startDate, endDate, sort);
         } else {
-            usageHistories = operationUsageHistoryService.getAllUsage(page, size, sort);
+            usageHistories = operationUsageHistoryService.getUsageHistoriesWithTotalUsage(page, size, sort);
         }
 
         // Stream and filter histories with totalUsage > 0

@@ -46,6 +46,15 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     }
 
     @Override
+    public Page<OperationUsageHistory> getUsageHistoriesWithTotalUsage(int page, int size, String[] sorts) {
+        Sort.Direction direction = Sort.Direction.fromString(sorts[1]);
+        Sort sortBy = Sort.by(direction, sorts[0]);
+        Pageable pageable = PageRequest.of(page, size, sortBy);
+
+        return operationUsageHistoryRepository.findAllByTotalUsageGreaterThan(pageable);
+    }
+
+    @Override
     public Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(
             Long usageId,
             int page,
@@ -134,7 +143,7 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
         Sort.Direction direction = Sort.Direction.fromString(sorts[1]);
         Sort sortBy = Sort.by(direction, sorts[0]);
 
-        Page<OperationUsageHistory> usageHistories = getAllUsage(page,size, sorts);
+        Page<OperationUsageHistory> usageHistories = getUsageHistoriesWithTotalUsage(page,size, sorts);
         List<OperationUsageHistory> filteredList = usageHistories.getContent().stream()
                 .peek(history -> {
                     if (history.getDetails() != null) {
