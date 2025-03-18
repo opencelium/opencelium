@@ -38,37 +38,22 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     }
 
     @Override
-    public Page<OperationUsageHistory> getAllUsage(int page, int size, String[] sort) {
-        Sort.Direction direction = Sort.Direction.fromString(sort[1]);
-        Sort sortBy = Sort.by(direction, sort[0]);
-        Pageable pageable = PageRequest.of(page, size, sortBy);
-        return operationUsageHistoryRepository.findAll(pageable);
-    }
-
-    @Override
-    public Page<OperationUsageHistory> getUsageHistoriesWithTotalUsage(int page, int size, String[] sorts) {
+    public Pageable createPageable(int page, int size, String[] sorts) {
         Sort.Direction direction = Sort.Direction.fromString(sorts[1]);
         Sort sortBy = Sort.by(direction, sorts[0]);
-        Pageable pageable = PageRequest.of(page, size, sortBy);
-
-        return operationUsageHistoryRepository.findAllByTotalUsageGreaterThan(pageable);
+        return PageRequest.of(page, size, sortBy);
     }
 
     @Override
     public Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(
             Long usageId,
-            int page,
-            int size,
-            String[] sort,
+            Pageable pageable,
             LocalDateTime startDate,
             LocalDateTime endDate) {
-        Sort.Direction direction = Sort.Direction.fromString(sort[1]);
-        Sort sortBy = Sort.by(direction, sort[0]);
-        Pageable pageable = PageRequest.of(page, size, sortBy);
         if (startDate != null || endDate != null) {
             return operationUsageHistoryDetailServiceImp.findDetailsByHistoryIdAndStartDateBetween(usageId,startDate, endDate, pageable);
         }
-        return operationUsageHistoryDetailServiceImp.getAllUsageDetailsByOperationUsageHistoryId(usageId,page, size, sort);
+        return operationUsageHistoryDetailServiceImp.getAllUsageDetailsByOperationUsageHistoryId(usageId,pageable);
     }
 
     @Override
@@ -129,8 +114,7 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
 
     //TODO: create a filter class for start and end date
     @Override
-    public Page<OperationUsageHistory> findAllByDetailsStartDateBetween(int page, int size,
-                                                                        Long startDate, Long endDate, String[] sorts) {
+    public Page<OperationUsageHistory> findAllByDetailsStartDateBetween(Pageable pageable, Long startDate, Long endDate) {
 
         // Convert Unix timestamps (assumed in seconds) to LocalDateTime if provided, else keep as null.
         LocalDateTime start = startDate != null
@@ -140,26 +124,21 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
                 ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.of("UTC"))
                 : null;
 
-        Sort.Direction direction = Sort.Direction.fromString(sorts[1]);
-        Sort sortBy = Sort.by(direction, sorts[0]);
+        Page<OperationUsageHistory> usageHistories = operationUsageHistoryRepository
+                .findAllByTotalUsageGreaterThan(pageable, start, end);
 
-        Page<OperationUsageHistory> usageHistories = getUsageHistoriesWithTotalUsage(page,size, sorts);
-        List<OperationUsageHistory> filteredList = usageHistories.getContent().stream()
-                .peek(history -> {
-                    if (history.getDetails() != null) {
-                        List<OperationUsageHistoryDetail> filteredDetails = operationUsageHistoryDetailServiceImp
-                                .findDetailsByHistoryIdAndStartDateBetween(history.getId(), start, end);
-                        long sumUsage = filteredDetails.stream()
-                                .mapToLong(OperationUsageHistoryDetail::getOperationUsage)
-                                .sum();
-                        history.setTotalUsage(sumUsage);
-                    }
-                })
-                .filter(history -> history.getTotalUsage() > 0)  // Only keep records where totalUsage > 0
-                .limit(size) // Ensure only the requested page size is returned
-                .collect(Collectors.toList());
+        usageHistories.forEach(history -> {
+            if (history.getDetails() != null) {
+                List<OperationUsageHistoryDetail> filteredDetails = operationUsageHistoryDetailServiceImp
+                        .findDetailsByHistoryIdAndStartDateBetween(history.getId(), start, end);
+                long sumUsage = filteredDetails.stream()
+                        .mapToLong(OperationUsageHistoryDetail::getOperationUsage)
+                        .sum();
+                history.setTotalUsage(sumUsage);
+            }
+        });
 
-        return new PageImpl<>(filteredList, PageRequest.of(page, size, sortBy), filteredList.size());
+        return usageHistories;
     }
 
     @Override

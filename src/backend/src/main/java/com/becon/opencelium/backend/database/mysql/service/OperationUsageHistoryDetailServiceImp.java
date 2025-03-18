@@ -26,11 +26,7 @@ public class OperationUsageHistoryDetailServiceImp implements OperationUsageHist
     }
 
     @Override
-    public Page<OperationUsageHistoryDetail> getAllUsageDetailsByOperationUsageHistoryId(Long usageId,int page,
-                                                                                         int size, String[] sort) {
-        Sort.Direction direction = Sort.Direction.fromString(sort[1]);
-        Sort sortBy = Sort.by(direction, sort[0]);
-        Pageable pageable = PageRequest.of(page, size, sortBy);
+    public Page<OperationUsageHistoryDetail> getAllUsageDetailsByOperationUsageHistoryId(Long usageId, Pageable pageable) {
         return operationUsageHistoryDetailRepository.findAllByOperationUsageHistoryId(usageId,pageable);
     }
 
