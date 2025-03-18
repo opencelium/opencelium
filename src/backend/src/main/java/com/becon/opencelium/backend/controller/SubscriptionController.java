@@ -202,21 +202,15 @@ public class SubscriptionController {
                                                           @RequestParam(required = false) Long startDate,
                                                           @RequestParam(required = false) Long endDate) {
 
-        Page<OperationUsageHistory> usageHistories;
-        if (startDate != null || endDate != null) {
-            usageHistories = operationUsageHistoryService.findAllByDetailsStartDateBetween(page, size, startDate, endDate, sort);
-        } else {
-            usageHistories = operationUsageHistoryService.getUsageHistoriesWithTotalUsage(page, size, sort);
-        }
+        Pageable pageable = operationUsageHistoryService.createPageable(page, size, sort);
+        Page<OperationUsageHistory> usageHistories = operationUsageHistoryService
+                .findAllByDetailsStartDateBetween(pageable, startDate, endDate);
 
-        // Stream and filter histories with totalUsage > 0
-        List<OperationUsageHistory> filteredHistories = usageHistories.getContent().stream()
-                .filter(history -> history.getTotalUsage() > 0)
-                .collect(Collectors.toList());
-
-// Return a new Page object with only the filtered histories
-        Page<OperationUsageHistory> filteredPage = new PageImpl<>(filteredHistories, usageHistories.getPageable(), filteredHistories.size());
-        PaginatedDto dto = operationUsageHistoryService.toPaginatedDto(filteredPage);
+//        // Stream and filter histories with totalUsage > 0
+//        List<OperationUsageHistory> filteredHistories = usageHistories.getContent().stream()
+//                .filter(history -> history.getTotalUsage() > 0)
+//                .collect(Collectors.toList());
+        PaginatedDto dto = operationUsageHistoryService.toPaginatedDto(usageHistories);
         return ResponseEntity.ok(dto);
     }
 
@@ -235,8 +229,9 @@ public class SubscriptionController {
         LocalDateTime end = endDate != null
                 ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.of("UTC"))
                 : null;
+        Pageable pageable = operationUsageHistoryService.createPageable(page, size, sort);
         Page<OperationUsageHistoryDetail> usageDetails = operationUsageHistoryService
-                .getAllUsageDetailsByUsageId(usageId,page, size, sort, start, end);
+                .getAllUsageDetailsByUsageId(usageId, pageable, start, end);
         PaginatedDto dto = operationUsageHistoryService.toUsageDetailsDto(usageDetails);
         return ResponseEntity.ok(dto);
     }

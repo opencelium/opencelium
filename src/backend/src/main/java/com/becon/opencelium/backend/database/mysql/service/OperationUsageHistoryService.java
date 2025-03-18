@@ -14,11 +14,10 @@ import java.util.Optional;
 public interface OperationUsageHistoryService {
     void save(OperationUsageHistory operationUsageHistory);
     List<OperationUsageHistory> findAll();
-    Page<OperationUsageHistory> getAllUsage(int page, int size, String[] sort);
 
-    Page<OperationUsageHistory> getUsageHistoriesWithTotalUsage(int page, int size, String[] sorts);
+    Pageable createPageable(int page, int size, String[] sorts);
 
-    Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(Long usageId, int page, int size, String[] sort, LocalDateTime startDate, LocalDateTime endTime);
+    Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(Long usageId, Pageable pageable, LocalDateTime startDate, LocalDateTime endTime);
     Optional<OperationUsageHistory> findById(Long id);
     OperationUsageHistory createNewEntity(Subscription sub, String connectionName,
                                           long operationUsage, long startTime,
@@ -28,7 +27,7 @@ public interface OperationUsageHistoryService {
     PaginatedDto toPaginatedDto(Page<OperationUsageHistory> page);
     PaginatedDto toUsageDetailsDto(Page<OperationUsageHistoryDetail> page);
 
-    Page<OperationUsageHistory> findAllByDetailsStartDateBetween(int page, int size, Long startDate, Long endDate, String[] sort) ;
+    Page<OperationUsageHistory> findAllByDetailsStartDateBetween(Pageable pageable, Long startDate, Long endDate) ;
 
     void incrementUsageByConnectionTitle(Long id, long opsUsage);
 }

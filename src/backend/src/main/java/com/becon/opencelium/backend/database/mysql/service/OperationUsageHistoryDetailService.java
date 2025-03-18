@@ -9,8 +9,7 @@ import java.util.List;
 
 public interface OperationUsageHistoryDetailService {
     void save(OperationUsageHistoryDetail detail);
-    Page<OperationUsageHistoryDetail> getAllUsageDetailsByOperationUsageHistoryId(Long usageId,int page, int size,
-                                                                                  String[] sort);
+    Page<OperationUsageHistoryDetail> getAllUsageDetailsByOperationUsageHistoryId(Long usageId,Pageable pageable);
 
     Page<OperationUsageHistoryDetail> findDetailsByHistoryIdAndStartDateBetween(Long historyId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     List<OperationUsageHistoryDetail> findDetailsByHistoryIdAndStartDateBetween(Long historyId, LocalDateTime startDate, LocalDateTime endDate);

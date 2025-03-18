@@ -38,6 +38,13 @@ public interface OperationUsageHistoryRepository extends JpaRepository<Operation
     int incrementUsageByConnectionTitle(@Param("id") Long id,
                                         @Param("opsUsage") long opsUsage);
 
-    @Query("SELECT h FROM OperationUsageHistory h WHERE h.totalUsage > 0")
-    Page<OperationUsageHistory> findAllByTotalUsageGreaterThan(Pageable pageable);
+    @Query("SELECT h FROM OperationUsageHistory h " +
+            "JOIN h.details d " +
+            "WHERE (:startDate IS NULL OR d.startDate >= :startDate) " +
+            "AND (:endDate IS NULL OR d.startDate <= :endDate) " +
+            "GROUP BY h.id " +
+            "HAVING SUM(d.operationUsage) > 0")
+    Page<OperationUsageHistory> findAllByTotalUsageGreaterThan(Pageable pageable,
+                                                               @Param("startDate") LocalDateTime startDate,
+                                                               @Param("endDate") LocalDateTime endDate);
 }
