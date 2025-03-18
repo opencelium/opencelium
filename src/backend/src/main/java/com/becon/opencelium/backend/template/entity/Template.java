@@ -27,6 +27,7 @@ public class Template {
     private String version;
     private String link;
     private CtionTemplateResource connection;
+    private int ops;
 
     public String getTemplateId() {
         return templateId;
@@ -82,5 +83,13 @@ public class Template {
 
     public void setConnection(CtionTemplateResource connection) {
         this.connection = connection;
+    }
+
+    public int getOps() {
+        return ops;
+    }
+
+    public void setOps(int ops) {
+        this.ops = ops;
     }
 }
