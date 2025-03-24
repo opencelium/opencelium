@@ -1,11 +1,10 @@
 package com.becon.opencelium.backend.execution.support_file;
 
-import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
-import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.enums.SupportFileStatus;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
@@ -44,7 +43,6 @@ public class SupportFileServiceImp implements SupportFileService {
     private final ConnectionService connectionSqlService;
     private final Mapper<ConnectionOldDTO, CtionTemplateResource> oldDto2ResourceMapper;
     private final Mapper<ConnectionDTO, ConnectionOldDTO> dto2OldDtoMapper;
-    private final ConnectionMngService connectionMngService;
     private final ConnectorService connectorSqlService;
     private final InvokerService invokerService;
 
@@ -62,13 +60,11 @@ public class SupportFileServiceImp implements SupportFileService {
             ConnectionService connectionSqlService,
             Mapper<ConnectionOldDTO, CtionTemplateResource> oldDto2ResourceMapper,
             Mapper<ConnectionDTO, ConnectionOldDTO> dto2OldDtoMapper,
-            ConnectionMngService connectionMngService,
             ConnectorService connectorSqlService, InvokerService invokerService
     ) {
         this.connectionSqlService = connectionSqlService;
         this.oldDto2ResourceMapper = oldDto2ResourceMapper;
         this.dto2OldDtoMapper = dto2OldDtoMapper;
-        this.connectionMngService = connectionMngService;
         this.connectorSqlService = connectorSqlService;
         this.invokerService = invokerService;
     }
@@ -91,10 +87,10 @@ public class SupportFileServiceImp implements SupportFileService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ConnectionSupportFiles> supportFileList() {
+    public List<SupportFile> supportFileList() {
         Path path = toPath(base);
 
-        List<ConnectionSupportFiles> result = new ArrayList<>();
+        List<SupportFile> result = new ArrayList<>();
 
         try (Stream<Path> files = Files.list(path)) {
             files.forEach(file -> {
@@ -102,10 +98,25 @@ public class SupportFileServiceImp implements SupportFileService {
 
                 if (Files.isDirectory(file) && fileName.matches("\\d+")) {
                     Long connectionId = Long.parseLong(fileName);
-                    Connection connection = connectionSqlService.getById(connectionId);
                     List<String> urls = getZipUrls(connectionId, file);
 
-                    result.add(new ConnectionSupportFiles(connectionId, connection.getTitle(), urls));
+                    String connectionTitle;
+                    SupportFileStatus status;
+                    String message;
+
+                    if (connectionSqlService.existsById(connectionId)) {
+                        Connection connection = connectionSqlService.getById(connectionId);
+
+                        connectionTitle = connection.getTitle();
+                        status = SupportFileStatus.CONNECTION_FOUND;
+                        message = "Connection is found.";
+                    } else {
+                        connectionTitle = null;
+                        status = SupportFileStatus.CONNECTION_IS_MISSING;
+                        message = "Connection not found.";
+                    }
+
+                    urls.forEach(url -> result.add(new SupportFile(connectionId, connectionTitle, url, status, message)));
                 }
             });
         } catch (IOException e) {
@@ -116,28 +127,38 @@ public class SupportFileServiceImp implements SupportFileService {
     }
 
     @Override
-    public ConnectionSupportFiles connectionSupportFileList(Long connectionId) {
-        // check whether connection exists in both DBs
-        throwIfConnectionNotExistsById(connectionId);
-        Connection connection = connectionSqlService.getById(connectionId);
-
-        // check whether directory exists for this connection
+    public List<SupportFile> connectionSupportFileList(Long connectionId) {
         Path path = toPath(base, connectionId.toString());
+
+        List<SupportFile> result = new ArrayList<>();
 
         if (Files.isDirectory(path)) {
             List<String> urls = getZipUrls(connectionId, path);
 
-            return new ConnectionSupportFiles(connectionId, connection.getTitle(), urls);
-        } else {
-            return new ConnectionSupportFiles(connectionId, connection.getTitle());
+            String connectionTitle;
+            SupportFileStatus status;
+            String message;
+
+            if (connectionSqlService.existsById(connectionId)) {
+                Connection connection = connectionSqlService.getById(connectionId);
+
+                connectionTitle = connection.getTitle();
+                status = SupportFileStatus.CONNECTION_FOUND;
+                message = "Connection is found.";
+            } else {
+                connectionTitle = null;
+                status = SupportFileStatus.CONNECTION_IS_MISSING;
+                message = "Connection not found.";
+            }
+
+            urls.forEach(url -> result.add(new SupportFile(connectionId, connectionTitle, url, status, message)));
         }
+
+        return result;
     }
 
     @Override
     public File getSupportFile(Long connectionId, String zipFileName) {
-        // check whether connection exists in both DBs
-        throwIfConnectionNotExistsById(connectionId);
-
         // check whether file exists for this connection
         Path path = toPath(base, connectionId.toString(), zipFileName);
 
@@ -150,9 +171,6 @@ public class SupportFileServiceImp implements SupportFileService {
 
     @Override
     public File getSupportFile(Long connectionId) {
-        // check whether connection exists in both DBs
-        throwIfConnectionNotExistsById(connectionId);
-
         // try to find successful execution support file by pattern
         String filePattern =  connectionId + "_s_support_*.zip";
 
@@ -231,13 +249,6 @@ public class SupportFileServiceImp implements SupportFileService {
         }
     }
 
-    private void throwIfConnectionNotExistsById(Long connectionId) {
-        boolean exists = connectionSqlService.existsById(connectionId) && connectionMngService.existsByConnectionId(connectionId);
-
-        if (!exists) {
-            throw new ConnectionNotFoundException(connectionId);
-        }
-    }
 
     private List<String> getZipUrls(Long connectionId, Path directory) {
         List<String> names = new ArrayList<>();
