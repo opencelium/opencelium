@@ -53,15 +53,6 @@ public class YAMLMigrator {
         BACKUP_YML_FILE = new File(root.resolve("src/main/resources/application_copy.yml").toString());
     }
 
-    public static void main(String[] args) {
-        Map<String, Object> changelog = readYAMLFile(CHANGELOG_FILE);
-        try {
-            List<ChangeSet> changeSetList = validateAndConvert(changelog);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public static List<ChangeSet> getChangeSetsToSave() {
         List<ChangeSet> list = changeSetsToSave;
         changeSetsToSave = null;
