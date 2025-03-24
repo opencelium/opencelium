@@ -51,7 +51,7 @@ import java.util.*;
 
 @RestController
 @Tag(name = "Connector", description = "Manages operations related to Connector management")
-@RequestMapping(value = "/api/connector", produces = "application/json")
+@RequestMapping(value = "/connector", produces = "application/json")
 public class ConnectorController {
 
     private final ConnectorService connectorService;

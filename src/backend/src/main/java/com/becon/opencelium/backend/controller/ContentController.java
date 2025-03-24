@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Event Content", description = "Manages operations related to Event Content management")
-@RequestMapping(value = "/api/content", produces = "application/json")
+@RequestMapping(value = "/content", produces = "application/json")
 public class ContentController {
 
     @Autowired

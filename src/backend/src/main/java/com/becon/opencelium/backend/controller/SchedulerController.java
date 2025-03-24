@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Scheduler", description = "Manages operations related to Scheduler management")
-@RequestMapping(value = "/api/scheduler", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/scheduler", produces = MediaType.APPLICATION_JSON_VALUE)
 public class SchedulerController {
 
     @Autowired

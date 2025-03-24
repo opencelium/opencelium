@@ -52,7 +52,7 @@ import java.util.UUID;
 
 @RestController
 @Tag(name = "Template", description = "Manages operations related to template")
-@RequestMapping(value = "/api/template", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/template", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TemplateController {
 
     @Autowired

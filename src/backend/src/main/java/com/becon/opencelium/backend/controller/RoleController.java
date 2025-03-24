@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "User Role(Group)", description = "Manages operations related to User Roles management")
-@RequestMapping(value = "/api/role", produces = "application/json")
+@RequestMapping(value = "/role", produces = "application/json")
 public class RoleController {
 
     @Autowired

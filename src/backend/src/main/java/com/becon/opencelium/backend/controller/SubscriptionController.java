@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/api/subs")
+@RequestMapping(value = "/subs")
 @Tag(name = "Subscription")
 public class SubscriptionController {
 

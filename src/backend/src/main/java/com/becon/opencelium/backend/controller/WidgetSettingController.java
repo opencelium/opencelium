@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @Tag(name = "Widget Settings", description = "Manages operations related to WidgetSetting that contains coordinates of widget for frontend")
-@RequestMapping(value = "/api/widget_setting", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/widget_setting", produces = MediaType.APPLICATION_JSON_VALUE)
 public class WidgetSettingController {
 
     @Autowired
