@@ -150,7 +150,7 @@ public class SupportFileController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PutMapping
+    @PutMapping("/delete/list")
     public ResponseEntity<Void> deleteSupportFiles(@RequestBody SupportFileNamesDTO dto) {
         dto.getFilenames().forEach(fileService::deleteSupportFile);
         return ResponseEntity.noContent().build();
