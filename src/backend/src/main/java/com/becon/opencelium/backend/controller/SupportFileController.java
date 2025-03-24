@@ -32,7 +32,7 @@ import java.util.List;
 
 @RestController
 @Tag(name = "Support files for Connections", description = "Manages connection execution related support files")
-@RequestMapping(value = "/api/connection/support-file")
+@RequestMapping(value = "/connection/support-file")
 public class SupportFileController {
 
     @Autowired
