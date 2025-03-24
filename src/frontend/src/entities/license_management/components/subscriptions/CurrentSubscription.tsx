@@ -28,11 +28,12 @@ export const RoleNames: any = {
     empty: '-',
 }
 const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionModel, theme: ITheme}) => {
-    const max = subscription?.totalOperationUsage || 0;
-    const divisionStep = max / 10;
+    const totalWithCredits = Subscription.getTotalOpsWithCredits(subscription);
+    const max = totalWithCredits;
+    const divisionStep = Math.round(max / 10);
     const divisions = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     const progressbarHeight = 30;
-    const now = subscription?.currentOperationUsage || 0;
+    const now = Subscription.getCurrentOpsWithCredits(subscription);
     const percentage = (now / max) * 100;
     const hasNoSubscription = subscription?.type === 'empty' || false;
     const [showDocsDialog, toggleDocsDialog] = useState<boolean>(hasNoSubscription);
@@ -64,6 +65,31 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                         </div>
                     </InfoStyled>
                     }
+                    {
+                        subscription?.extraOps?.length > 0
+                            ?
+                            <React.Fragment>
+                                {subscription?.extraOps.map((extraOp, index) => {
+                                    return (
+                                        <InfoStyled key={`${extraOp.generatedAt}_${index + 1}`}>
+                                            <div style={{marginLeft: 20}}><b>{`Extra Ops (activated at ${convertTimeForSubscription(extraOp.activationDate, {hasHours: false, hasMinutes: false, hasSeconds: false}).trim()}):`}</b></div>
+                                            <div>
+                                                {`+ ${formatOperationUsage(extraOp.totalOpsUsage)}`}
+                                            </div>
+                                        </InfoStyled>
+                                    )
+                                })
+                                }
+                                <InfoStyled>
+                                    <div style={{marginLeft: 20}}><b>{`Total:`}</b></div>
+                                    <div>
+                                        {formatOperationUsage(totalWithCredits)}
+                                    </div>
+                                </InfoStyled>
+                            </React.Fragment>
+                            :
+                            null
+                    }
                     <InfoStyled>
                         <div><b>Expiration Date:</b></div>
                         <div>
@@ -73,7 +99,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                     <InfoStyled>
                         <div><b>Monthly Period:</b></div>
                         <div>
-                            {hasNoSubscription ? '-' : Subscription.getMonthlyPeriod(subscription.startDate)}
+                            {hasNoSubscription ? '-' : Subscription.getMonthlyPeriod(subscription.monthPeriod)}
                         </div>
                     </InfoStyled>
                     {isUnlimited && !hasNoSubscription && <React.Fragment>
@@ -106,15 +132,15 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                         let thousandStep: number = divisionStep * index / 1000;
                         let millionStep: number = 0;
                         if (thousandStep >= 1000) {
-                            millionStep = thousandStep / 1000;
-                            thousandStep = thousandStep - (millionStep * 1000);
+                            millionStep =  Math.round(thousandStep / 1000);
+                            thousandStep =  Math.round(thousandStep - (millionStep * 1000));
                         }
                         return (
                             <DivisionStyled key={index} style={{
                                 height: progressbarHeight + 10,
                                 borderLeft: index !== 0 && index !== divisions.length - 1 ? '1px dotted #000' : 'unset'
                             }}>
-                                <LabelStyled key={index} style={millionStep > 0 && thousandStep > 0 ? {lineHeight: '18px', bottom: '-40px'} : {bottom: '-25px'}}>
+                                <LabelStyled key={index} style={millionStep > 0 && thousandStep > 0 ? {bottom: '-25px'} : {bottom: '-25px'}}>
                                     {`${index === 0 ? '0' : `${millionStep > 0 ? `${millionStep}M` : ''}${thousandStep > 0 ? ' ' : ''}${thousandStep > 0 ? `${thousandStep}K` : ''}`}`}
                                 </LabelStyled>
                             </DivisionStyled>

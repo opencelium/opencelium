@@ -3,14 +3,14 @@ Updating
 ##################
 
 
-From OC 4.0 to latest
+From OC 4.x to latest
 """""""""""""""""
 
 Update zip file installations
 ==================
 
 | Log in to OpenCelium, open the *AdminPanel* and click on *Update Assistant*.
-| Click here to see, how to use `Update Assistant <https://docs.opencelium.io/en/prod/usage/admin.html#update-assistant>`_ 
+| Click here to see, how to use :ref:`Update Assistant <admin_panel-update_assistant>`.
 
 
 Update DEB package for Ubuntu 24.04 LTS
@@ -45,7 +45,7 @@ Update RPM package for RedHat 9.2
 | 
 | 
 
-From OC 3.x to 4.x (latest)
+From OC 3.x to 4.1 
 """""""""""""""""
 
 .. note::
@@ -89,9 +89,9 @@ Download and unzip application, and create a link for it.
 .. code-block:: sh
         :linenos:
 
-        wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
-        unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
-        rm /opt/opencelium/oc_latest.zip
+        wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_4.1.zip/download?distro_version_id=230" -P /opt/opencelium/
+        unzip -o -d /opt/opencelium/ /opt/opencelium/oc_4.1.zip
+        rm /opt/opencelium/oc_4.1.zip
         rm /usr/bin/oc
         ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
         chmod +x /usr/bin/oc
@@ -210,7 +210,7 @@ Finally start OpenCelium backend and frontend.
 **5. Migration from Neo4j to MongoDB:**
 
 | Log in to OpenCelium, open the *AdminPanel* and click on *Migration*.
-| Click here to see, how to use `Migration <https://docs.opencelium.io/en/prod/usage/admin.html#migration>`_ 
+| Click here to see, how to use  :ref:`Migration <admin_panel-migration>`:  
 
 
 .. |image0| image:: ../img/update_assistant/0.png

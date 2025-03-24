@@ -30,6 +30,7 @@ import {
     getAllMetaConnections
 } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {ConnectionOverviewTitle, ConnectionOverviewWidgetStyled} from './styles';
+import {Urls} from "@entity/application/requests/classes/url";
 
 const ConnectionOverviewWidget: FC =
     ({
@@ -50,7 +51,9 @@ const ConnectionOverviewWidget: FC =
             for (let i = 0; i < usedConnectors.length; i++) {
                 if (newNodes.findIndex(c => c.id === usedConnectors[i].connectorId) === -1) {
                     let description = usedConnectors[i].invoker.description;
-                    let image = isValidIconUrl(usedConnectors[i].icon) ? usedConnectors[i].icon : isValidIconUrl(usedConnectors[i].invoker.icon) ? usedConnectors[i].invoker.icon : DefaultConnectorImagePath;
+                    const connectorIcon = Urls.baseUrl + usedConnectors[i].icon;
+                    const invokerIcon = Urls.baseUrl + usedConnectors[i].invoker.icon;
+                    let image = isValidIconUrl(connectorIcon) ? connectorIcon : isValidIconUrl(invokerIcon) ? invokerIcon : DefaultConnectorImagePath;
                     newNodes.push({
                         id: usedConnectors[i].connectorId,
                         title: usedConnectors[i].title,

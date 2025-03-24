@@ -48,6 +48,7 @@ import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultLi
 import InputSwitch from "@app_component/base/input/switch/InputSwitch";
 import StartSchedule from "@entity/schedule/components/start_schedule/StartSchedule";
 import LogsButton from "@entity/schedule/components/logs_button/LogsButton";
+import {Urls} from "@entity/application/requests/classes/url";
 
 class Schedules extends ListCollection<ScheduleProps>{
     name: string = 'schedules';
@@ -136,7 +137,8 @@ class Schedules extends ListCollection<ScheduleProps>{
                         hasBackground={false}
                         color={ColorTheme.Turquoise}
                         handleClick={() => {
-                            copyStringToClipboard(schedule.webhook.url);
+                            const url = `${ Urls.baseUrl}${schedule.webhook.url}`;
+                            copyStringToClipboard(url);
                             this.dispatch(copyWebhookToClipboard())
                         }}
                     />

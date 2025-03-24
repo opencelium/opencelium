@@ -40,7 +40,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
     const dispatch = useAppDispatch();
     const {authUser} = Auth.getReduxState();
     const {
-        currentSubscription, gettingCurrentSubscription,
+        currentSubscription, gettingCurrentSubscription, importingCredits,
     } = Subscription.getReduxState();
     const {
         status, activatingLicense,
@@ -51,6 +51,11 @@ const LicenseManagement: FC<IForm> = ({}) => {
             dispatch(getLicenseStatus());
         }
     }, [authUser?.userDetail?.themeSync])
+    useEffect(() => {
+        if (importingCredits === API_REQUEST_STATE.FINISH) {
+            dispatch(getCurrentSubscription());
+        }
+    }, [importingCredits])
     useEffect(() => {
         if (activatingLicense === API_REQUEST_STATE.INITIAL || activatingLicense === API_REQUEST_STATE.FINISH) {
             dispatch(getCurrentSubscription());
@@ -77,13 +82,14 @@ const LicenseManagement: FC<IForm> = ({}) => {
                 handleClick={() => dispatch(generateActivateRequest())}
             />
         );
-        actions.push(<ImportLicenseComponent key={'upload'}/>);
         actions.push(<ImportCreditsComponent key={'upload'}/>);
+        actions.push(<ImportLicenseComponent key={'upload_license'}/>);
     } else {
         if (authUser.userDetail.themeSync && (!currentSubscription || Subscription.isFree(currentSubscription))) {
             actions.push(<ActivateLicenseComponent key={'activate'}/>);
         }
     }
+    actions.push(<ImportCreditsComponent key={'upload_credits'}/>);
     if (currentSubscription && !Subscription.isFree(currentSubscription)) {
         actions.push(
             <Button

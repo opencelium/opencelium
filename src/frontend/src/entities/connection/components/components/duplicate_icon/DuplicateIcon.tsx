@@ -133,7 +133,10 @@ const DuplicateIcon: FC<DuplicateIconProps> =
         if(fromConnectorData && toConnectorData) {
             connection.title = title;
             tmpFromConnector.methods = sortByIndex([...fromMethods]);
-            tmpFromConnector.operators = sortByIndex([...tmpFromConnector.operators]);
+            tmpFromConnector.operators = sortByIndex([...tmpFromConnector.operators].map((o: any) => {
+                const {nodeId, ...newOperator} = o;
+                return newOperator;
+            }));
             tmpFromConnector.connectorId = fromConnectorData.connectorId;
             tmpFromConnector.title = fromConnectorData.title;
             tmpFromConnector.icon = fromConnectorData.icon;

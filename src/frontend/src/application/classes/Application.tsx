@@ -20,7 +20,7 @@ import {capitalize, isString} from "../utils/utils";
 import {AppDispatch, RootState, useAppSelector} from "../utils/store";
 import {DispatchParamsProps, IObservation} from "../interfaces/IApplication";
 import {AsyncThunk} from "@reduxjs/toolkit";
-import {baseUrl} from "@entity/application/requests/classes/url";
+import {Urls} from "@entity/application/requests/classes/url";
 
 // Application class for managing core internal operations
 export class Application{
@@ -30,7 +30,7 @@ export class Application{
 
     // check if url is not part of opencelium
     static isExternalUrl(url: string){
-        return url.indexOf(baseUrl) === 0;
+        return url.indexOf(Urls.baseUrl) === 0;
     }
 
     // check if image's url has valid format

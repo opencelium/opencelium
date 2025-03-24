@@ -81,7 +81,7 @@ import java.util.zip.ZipInputStream;
 
 @Controller
 @Tag(name = "File", description = "Manages operations related to File management")
-@RequestMapping(value = "/api/storage")
+@RequestMapping(value = "/storage")
 public class FileController {
 
     @Autowired

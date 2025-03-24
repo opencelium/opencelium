@@ -1,3 +1,5 @@
+.. _management-data_aggregator:
+
 ##################
 Data Aggregator
 ##################

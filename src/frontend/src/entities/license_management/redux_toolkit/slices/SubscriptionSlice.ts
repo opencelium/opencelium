@@ -20,8 +20,10 @@ import {CommonState} from "@application/utils/store";
 import {IResponse, PageResponse} from "@application/requests/interfaces/IResponse";
 import {
     getCurrentSubscription,
+    getCurrentSubscriptionOnlyForSchedules,
     getOperationUsageDetails,
-    getOperationUsageEntries, importCredits,
+    getOperationUsageEntries,
+    importCredits,
     setCurrentSubscription
 } from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import SubscriptionModel, {
@@ -31,7 +33,9 @@ import SubscriptionModel, {
 
 export interface SubscriptionState extends ICommonState{
     currentSubscription: SubscriptionModel,
+    currentSubscriptionOnlyForSchedules: SubscriptionModel,
     gettingCurrentSubscription: API_REQUEST_STATE,
+    gettingCurrentSubscriptionOnlyForSchedules: API_REQUEST_STATE,
     gettingOperationUsageEntries: API_REQUEST_STATE,
     gettingOperationUsageDetails: API_REQUEST_STATE,
     settingCurrentSubscription: API_REQUEST_STATE,
@@ -43,8 +47,10 @@ export interface SubscriptionState extends ICommonState{
 }
 
 const initialState: SubscriptionState = {
-    currentSubscription: null,
+    currentSubscription: undefined,
+    currentSubscriptionOnlyForSchedules: null,
     gettingCurrentSubscription: API_REQUEST_STATE.INITIAL,
+    gettingCurrentSubscriptionOnlyForSchedules: API_REQUEST_STATE.INITIAL,
     gettingOperationUsageEntries: API_REQUEST_STATE.INITIAL,
     gettingOperationUsageDetails: API_REQUEST_STATE.INITIAL,
     settingCurrentSubscription: API_REQUEST_STATE.INITIAL,
@@ -72,6 +78,18 @@ export const subscriptionSlice = createSlice({
         },
         [getCurrentSubscription.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingCurrentSubscription = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getCurrentSubscriptionOnlyForSchedules.pending.type]: (state) => {
+            state.gettingCurrentSubscriptionOnlyForSchedules = API_REQUEST_STATE.START;
+        },
+        [getCurrentSubscriptionOnlyForSchedules.fulfilled.type]: (state, action: PayloadAction<SubscriptionModel>) => {
+            state.gettingCurrentSubscriptionOnlyForSchedules = API_REQUEST_STATE.FINISH;
+            state.currentSubscriptionOnlyForSchedules = action.payload;
+            state.error = null;
+        },
+        [getCurrentSubscriptionOnlyForSchedules.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingCurrentSubscriptionOnlyForSchedules = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [getOperationUsageEntries.pending.type]: (state) => {

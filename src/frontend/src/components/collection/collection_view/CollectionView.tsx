@@ -41,6 +41,8 @@ import {BadRequest} from "@app_component/default_pages/bad_request/BadRequest";
 import {debounce} from "@application/utils/utils";
 import CategoryTabs from '@entity/category/components/category_tabs/CategoryTabs';
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
+import LicenseAlertMessageForSchedules
+    from "@entity/dashboard/components/license_alert_message/LicenseAlertMessageForSchedules";
 
 const LIST_VIEW_ENTITIES_NUMBER = 10;
 
@@ -75,7 +77,7 @@ const CollectionView: FC<CollectionViewProps> =
         const [filterData, setFilterData] = useState(defaultFilterData);
         const [checks, setChecks] = useState<any>({});
         const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER)
-        const [currentPage, setCurrentPage] = useState(searchValuePropertyName ? currentPages[searchValuePropertyName] || 1 : 1);
+        const [currentPage, setCurrentPage] = useState(paginationProps?.page + 1 ? paginationProps.page + 1 : searchValuePropertyName ? currentPages[searchValuePropertyName] || 1 : 1);
         const [totalPages, setTotalPages] = useState(!!paginationProps ? paginationProps.totalPages : Math.ceil(collection.entities.length / entitiesPerPage))
         let applicationViewType = viewType;
         if(defaultViewType !== ''){
@@ -178,7 +180,7 @@ const CollectionView: FC<CollectionViewProps> =
             <ErrorBoundary>
                 <CollectionViewStyled>
                     {hasTitle && <Title title={collection.title}/>}
-                    {!hasNotAlert ? <LicenseAlertMessage/> : null}
+                    {!hasNotAlert ? collection.name === 'schedules' ? <LicenseAlertMessageForSchedules/> : <LicenseAlertMessage/> : null}
                     {hasTopBar && <TopSectionStyled hasViewSection={hasViewSection}>
                         <ActionsStyled>
                             {collection.getTopActions(applicationViewType, checkedIds)}

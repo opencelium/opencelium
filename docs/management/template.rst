@@ -1,3 +1,5 @@
+.. _management-business_template:
+
 ##################
 Business Template
 ##################

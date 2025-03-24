@@ -23,6 +23,8 @@ export const LabelStyled = styled.div`
     width: 50px;
     text-align: center;
     left: -22.5px;
+    font-size: 14px;
+    white-space: nowrap;
 `;
 
 export const NowValueStyled = styled.div`

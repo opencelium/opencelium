@@ -32,6 +32,7 @@ export default class SubscriptionRequest extends Request implements ISubscriptio
     }
 
     async importCredits(creditsFile: FormData): Promise<AxiosResponse<IResponse>>{
+        this.url = 'extra-ops';
         return super.post<IResponse>(creditsFile);
     }
 

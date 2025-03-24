@@ -18,6 +18,7 @@ import {errorHandler} from "@application/utils/utils";
 import {TemplateRequest} from "@entity/connection/requests/classes/Template";
 import { ITemplate } from "@entity/connection/interfaces/ITemplate";
 import ModelTemplate from "@entity/connection/requests/models/Template";
+import {Urls} from "@entity/application/requests/classes/url";
 
 
 export const checkTemplateId = createAsyncThunk(
@@ -54,7 +55,7 @@ export const exportTemplate = createAsyncThunk(
     'template/export/byId',
     async(template: ITemplate, thunkAPI) => {
         try {
-            const request = new TemplateRequest({url: template.link, isFullUrl: true, hasAuthToken: true,});
+            const request = new TemplateRequest({url: `${Urls.baseUrl}${template.link}`, isFullUrl: true, hasAuthToken: true,});
             const response = await request.exportTemplate();
             return {...template, templateContent: response.data};
         } catch(e){

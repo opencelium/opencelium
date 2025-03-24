@@ -80,7 +80,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/api/connection", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/connection", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Connection", description = "Manages operations related to Connection management")
 public class ConnectionController {
 

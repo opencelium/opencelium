@@ -43,7 +43,7 @@ import java.net.URI;
 
 @RestController
 @Tag(name = "User Details", description = "Stores detailed information about users")
-@RequestMapping(value = "/api/userDetail", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/userDetail", produces = MediaType.APPLICATION_JSON_VALUE)
 public class UserDetailController {
 
     @Autowired

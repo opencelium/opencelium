@@ -15,13 +15,27 @@ export const getCurrentSubscription = createAsyncThunk(
         }
     }
 )
+export const getCurrentSubscriptionOnlyForSchedules = createAsyncThunk(
+    'subscription/get/current/only-for-schedules',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new SubscriptionRequest();
+            const response = await request.getCurrent();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 export const getOperationUsageEntries = createAsyncThunk(
     'subscription/get/operation/usage',
-    async(data: {page: number, size: number} = {page: 0, size: 10000}, thunkAPI) => {
+    async(data: {page: number, size: number, startDate: number, endDate: number, } = {page: 0, size: 10000, startDate: 0, endDate: 0}, thunkAPI) => {
         try {
-            const request = new SubscriptionRequest({endpoint: `/operation/usage?page=${data.page}&size=${data.size}`});
+            const timeRangeParams = data.startDate && data.endDate ? `&startDate=${data.startDate}&endDate=${data.endDate}` : '';
+            const request = new SubscriptionRequest({endpoint: `/operation/usage?page=${data.page}&size=${data.size}${timeRangeParams}`});
             const response = await request.getOperationUsageEntries();
-            return response.data;
+            const content = response.data.content.filter(c => c.totalUsage !== 0);
+            return {...response.data, content};
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -29,9 +43,10 @@ export const getOperationUsageEntries = createAsyncThunk(
 )
 export const getOperationUsageDetails = createAsyncThunk(
     'subscription/get/operation/usage/details',
-    async(data: {page: number, size: number, entryId: number} = {page: 0, size: 5, entryId: 0}, thunkAPI) => {
+    async(data: {page: number, size: number, startDate: number, endDate: number, entryId: number} = {page: 0, size: 5, entryId: 0, startDate: 0, endDate: 0}, thunkAPI) => {
         try {
-            const request = new SubscriptionRequest({endpoint: `/operation/usage/${data.entryId}/details?page=${data.page}&size=${data.size}&sort=startDate,desc`});
+            const timeRangeParams = data.startDate && data.endDate ? `&startDate=${data.startDate}&endDate=${data.endDate}` : '';
+            const request = new SubscriptionRequest({endpoint: `/operation/usage/${data.entryId}/details?page=${data.page}&size=${data.size}&sort=startDate,desc${timeRangeParams}`});
             const response = await request.getOperationUsageDetails();
             return response.data;
         } catch(e){
@@ -51,7 +66,6 @@ export const setCurrentSubscription = createAsyncThunk(
         }
     }
 )
-
 export const importCredits = createAsyncThunk(
     'subscription/import/credits',
     async(creditsFile: Blob[], thunkAPI) => {
@@ -65,10 +79,12 @@ export const importCredits = createAsyncThunk(
         }
     }
 )
+
 export default {
     getCurrentSubscription,
     getOperationUsageEntries,
     getOperationUsageDetails,
     setCurrentSubscription,
     importCredits,
+    getCurrentSubscriptionOnlyForSchedules,
 }

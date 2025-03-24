@@ -37,4 +37,7 @@ export default interface ISubscriptionRequest {
     //to import credits
     importCredits (creditsFile: FormData): Promise<AxiosResponse<IResponse>>,
 
+    //to import credits
+    importCredits (creditsFile: FormData): Promise<AxiosResponse<IResponse>>,
+
 }

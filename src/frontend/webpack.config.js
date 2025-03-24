@@ -19,7 +19,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 const fs = require("fs");
-const SETTINGS = require('./settings.json');
+const SETTINGS = require('./public/settings.json');
 
 function getHttpsSettings(){
     let https = false;
@@ -82,6 +82,10 @@ const getConfig = ({isBuild, envVar}) => {
         {
             from: path.resolve(__dirname, 'src/styles/fonts'),
             to: path.resolve(__dirname, 'dist/styles/fonts')
+        },
+        {
+            from: path.resolve(__dirname, 'public/settings.json'),
+            to: path.resolve(__dirname, 'dist/settings.json')
         },
     ];
     if(envVar && envVar.hasOwnProperty('process.env.isDevelopment') && envVar['process.env.isDevelopment']){

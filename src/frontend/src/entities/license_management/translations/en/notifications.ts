@@ -14,6 +14,7 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
+import {importCredits} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 
 const {
     getLicenseStatus, activateLicenseString, activateLicenseFile,
@@ -25,8 +26,14 @@ export default {
     fulfilled: {
         [activateLicenseString.fulfilled.type]: "The license text was successfully activated.",
         [activateLicenseFile.fulfilled.type]: "The license file was successfully activated.",
+        [importCredits.fulfilled.type]: "The credits were successfully uploaded.",
     },
     rejected: {
+        [importCredits.rejected.type]: {
+            "EXTRA_OPS_ALREADY_EXISTS": "These credits are already used.",
+            "SUBSCRIPTION_NOT_FOUND": "Subscription not found for this license.",
+            "__DEFAULT__": "The credits file is corrupted. Please, contact with support."
+        },
         [activateLicenseFile.rejected.type]: {
             "__DEFAULT__": "There is an error activating license file."
         },
