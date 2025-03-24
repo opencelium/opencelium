@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
@@ -52,6 +53,15 @@ public class YAMLMigrator {
         BACKUP_YML_FILE = new File(root.resolve("src/main/resources/application_copy.yml").toString());
     }
 
+    public static void main(String[] args) {
+        Map<String, Object> changelog = readYAMLFile(CHANGELOG_FILE);
+        try {
+            List<ChangeSet> changeSetList = validateAndConvert(changelog);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static List<ChangeSet> getChangeSetsToSave() {
         List<ChangeSet> list = changeSetsToSave;
         changeSetsToSave = null;
@@ -59,12 +69,12 @@ public class YAMLMigrator {
     }
 
     public static void run() {
-        // checking an existence of changelog file
+        // checking the existence of changelog file
         if (!CHANGELOG_FILE.exists()) {
             return;
         }
 
-        // checking an existence of application.yml file
+        // checking the existence of application.yml file
         if (!APP_YML_FILE.exists()) {
             log.warn("A file 'application.yml' does not exist");
             return;
@@ -72,10 +82,13 @@ public class YAMLMigrator {
 
         // preparing a file before read
         if (!prepare()) return;
-        // prepare method creates a backup file. In case of any exception, this file must be deleted!
+        // Prepare method creates a backup file. In case of any exception, this file must be deleted!
 
-        runInternally();
-        BACKUP_YML_FILE.delete();
+        try {
+            runInternally();
+        } finally {
+            BACKUP_YML_FILE.delete();
+        }
     }
 
     // // // private zone
@@ -133,22 +146,24 @@ public class YAMLMigrator {
         if (!setDataSource(appYamlMap)) return;
 
         Map<String, Object> changelog = readYAMLFile(CHANGELOG_FILE);
-        if (changelog == null || changelog.isEmpty()) return;
+        if (CollectionUtils.isEmpty(changelog)) return;
+
+        List<ChangeSet> changeSetList = validateAndConvert(changelog);
+        if (changeSetList.isEmpty())
+            return;
+        String fullVersionOfLastChangeSetInFile = changeSetList.get(changeSetList.size() - 1).getVersion();
 
         ChangeSet lastSavedSet = getLastChangeSet();
-        String fullVersionOfLastChangeSetInFile = getLastChangeSetVersionToApply(changelog);
 
         if (lastSavedSet == null) {
             String ocVersion = getOcVersion(appYamlMap);
             lastSavedSet = new ChangeSet();
             lastSavedSet.setVersion(ocVersion);
         }
-        // there is not any new changes
-        if (fullVersionOfLastChangeSetInFile == null || isGreaterThanOrEqual(lastSavedSet.getVersion(), fullVersionOfLastChangeSetInFile)) {
+        // there are not any new changes
+        if (isGreaterThanOrEqual(lastSavedSet.getVersion(), fullVersionOfLastChangeSetInFile)) {
             return;
         }
-
-        List<ChangeSet> changeSetList = validateAndConvert((ArrayList<Map<String, Object>>) changelog.get("versions"));
 
         List<ChangeSet> newChangeSets = new ArrayList<>();
         for (ChangeSet changeSet : changeSetList) {
@@ -179,7 +194,7 @@ public class YAMLMigrator {
                     }
                     i--;
                 } else if (e.getCause() != null && e.getCause().getMessage().equals("value cannot be null")
-                        || changeSet.getOperation().equals("delete") && e.getCause() != null && e.getCause().getMessage().equals("no such path in target JSON document")) {
+                           || changeSet.getOperation().equals("delete") && e.getCause() != null && e.getCause().getMessage().equals("no such path in target JSON document")) {
                     changeSet.setSuccess(false);
                 } else {
                     log.warn("An error occurred while applying {} - changeset : {}", changeSet.getVersion(), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
@@ -258,23 +273,6 @@ public class YAMLMigrator {
         return line.trim().startsWith("#") || line.isEmpty();
     }
 
-    private static String getLastChangeSetVersionToApply(Map<String, Object> changelog) {
-        var versions = (ArrayList<Map<String, Object>>) changelog.getOrDefault("versions", new ArrayList<Map<String, Object>>());
-        if (versions.isEmpty()) {
-            return null;
-        }
-        var lastVersion = versions.get(versions.size() - 1);
-        try {
-            String version = lastVersion.get("version").toString();
-            var changes = (ArrayList<Map<String, Object>>) lastVersion.get("changes");
-            Map<String, Object> lastChaneSet = changes.get(changes.size() - 1);
-            var changeset = (Integer) lastChaneSet.get("changeset");
-            return version + ":" + changeset;
-        } catch (Exception e) {
-            return "-1.0:0";
-        }
-    }
-
     private static JsonPatch convertToJsonPatch(ChangeSet changeSet) {
         ArrayList<Map<?, ?>> opList = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
@@ -319,40 +317,70 @@ public class YAMLMigrator {
         return OBJECT_MAPPER.convertValue(opList, JsonPatch.class);
     }
 
-    private static List<ChangeSet> validateAndConvert(ArrayList<Map<String, Object>> versions) {
-        String regex = "^[0-9]+(?:\\.[0-9]+)*$";
-        List<ChangeSet> res = new ArrayList<>();
-        for (Map<String, Object> version : versions) {
-            if (!version.containsKey("version") || !version.containsKey("changes")) {
-                log.warn("Version does not contain 'version' and|or 'changes' field. All the rest changesets are ignored");
-                return res;
+    private static List<ChangeSet> validateAndConvert(Map<String, Object> changelog) {
+        if (changelog == null || !changelog.containsKey("versions")) {
+            throw new RuntimeException("Syntax error: Missing root property 'versions'");
+        }
+
+        List<Map<String, Object>> versions = getAsList(changelog, "versions", "Syntax error: 'versions' should be a list");
+
+        String versionRgx = "^[0-9]+(?:\\.[0-9]+)*$";
+        List<ChangeSet> result = new ArrayList<>();
+
+        for (int versionIndex = 0; versionIndex < versions.size(); versionIndex++) {
+            Map<String, Object> version = versions.get(versionIndex);
+
+            String versionVal = getAsString(version, "version", "Syntax error: 'version' property is required. Location: versions[%d]".formatted(versionIndex));
+            if (!versionVal.matches(versionRgx)) {
+                throw new RuntimeException("Syntax error: Invalid version format '%s'. Location: versions[%d]".formatted(versionVal, versionIndex));
             }
 
-            String versionVal = version.getOrDefault("version", "").toString();
-            if (versionVal == null || !versionVal.matches(regex)) {
-                log.warn("{} is not valid version. All the rest changesets are ignored", version.get("version"));
-                return res;
-            }
+            List<Map<String, Object>> changes = getAsList(version, "changes", "Syntax error: 'changes' array is required. Location: versions[%d]".formatted(versionIndex));
+            if (changes.isEmpty()) continue;
 
-            try {
-                List<Object> changes = (List<Object>) version.get("changes");
-                if (changes == null || changes.isEmpty()) continue;
-                for (Object change : changes) {
-                    Map<String, Object> map = (Map<String, Object>) change;
-                    ChangeSet changeSet = new ChangeSet();
-                    changeSet.setPath((String) map.get("path"));
-                    changeSet.setValue(map.get("value"));
-                    changeSet.setOperation((String) map.get("operation"));
-                    changeSet.setVersion(versionVal + ":" + map.get("changeset"));
-                    res.add(changeSet);
+            for (int changeIndex = 0; changeIndex < changes.size(); changeIndex++) {
+                Map<String, Object> change = changes.get(changeIndex);
+                ChangeSet changeSet = new ChangeSet();
+
+                String changeSetVersion = getAsString(change, "changeset", "Syntax error: 'changeset' property is required. Location: versions[%s] -> changes[%d]".formatted(versionVal, changeIndex));
+                changeSet.setVersion(versionVal + ":" + changeSetVersion);
+
+                changeSet.setPath(getAsString(change, "path", "Syntax error: 'path' property is required. Location: versions[%s] -> changeset[%s]".formatted(versionVal, changeSetVersion)));
+
+                String operation = getAsString(change, "operation", "Syntax error: 'operation' property is required. Location: versions[%s] -> changeset[%s]".formatted(versionVal, changeSetVersion));
+                if (!Set.of("add", "modify", "delete", "rename").contains(operation)) {
+                    throw new RuntimeException("Syntax error: Invalid operation '%s'. Location: versions[%s] -> changeset[%s]".formatted(operation, versionVal, changeSetVersion));
                 }
-            } catch (Exception e) {
-                log.warn("An error is occurred while reading changeset. All the rest changesets are ignored");
-                return res;
+                changeSet.setOperation(operation);
+
+                if (!operation.equals("delete")) {
+                    changeSet.setValue(getAsString(change, "value", "Syntax error: 'value' property is required for operations other than 'delete'. Location: versions[%s] -> changeset[%s]".formatted(versionVal, changeSetVersion)));
+                }
+
+                result.add(changeSet);
             }
         }
-        return res;
+
+        return result;
     }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> getAsList(Map<String, Object> map, String key, String errorMessage) {
+        Object value = map.get(key);
+        if (!(value instanceof List<?> list) || list.isEmpty() || !(list.get(0) instanceof Map)) {
+            throw new RuntimeException(errorMessage);
+        }
+        return (List<Map<String, Object>>) list;
+    }
+
+    private static String getAsString(Map<String, Object> map, String key, String errorMessage) {
+        Object value = map.get(key);
+        if (Objects.isNull(value) || value instanceof Map<?, ?> || value instanceof List) {
+            throw new RuntimeException(errorMessage);
+        }
+        return value.toString();
+    }
+
 
     private static boolean setDataSource(Map<String, Object> yaml) {
         Map<String, Object> spring = (Map<String, Object>) yaml.getOrDefault("spring", new HashMap<>());
