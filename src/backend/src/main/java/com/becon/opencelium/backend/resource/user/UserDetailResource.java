@@ -43,8 +43,7 @@ public class UserDetailResource {
     //TODO: need to make it long type. Should be in unix timestamp like 1232341312313
     private Date requestTime;
 
-    private final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-    private final String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
+    private final String imagePath = PathConstant.IMAGES;
 //    private final String imagePath = new ServerUtility().getUri();
 
     public UserDetailResource() {

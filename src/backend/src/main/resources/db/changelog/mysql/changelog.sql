@@ -576,3 +576,21 @@ CREATE TABLE IF NOT EXISTS masking_rule (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (connection_id) REFERENCES connection(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+--changeset 4.4:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE extra_ops (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    subscription_id VARCHAR(255) NOT NULL,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP NOT NULL,
+    status ENUM('ACTIVE','EXPIRED','CONSUMED','PENDING') NOT NULL,
+    current_ops_usage BIGINT NOT NULL,
+    current_ops_usage_hmac TEXT NOT NULL,
+    total_ops_usage BIGINT NOT NULL DEFAULT 0,
+    total_ops_usage_hmac TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    generated_at BIGINT NOT NULL,
+    CONSTRAINT fk_subscription
+        FOREIGN KEY (subscription_id)
+        REFERENCES subscription(id)
+);

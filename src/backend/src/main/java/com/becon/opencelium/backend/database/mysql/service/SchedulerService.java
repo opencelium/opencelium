@@ -65,4 +65,5 @@ public interface SchedulerService {
     void deleteNotificationById(int id);
 
     Scheduler getById(int id);
+    boolean isWebSocketRequired(int schedulerId);
 }

@@ -48,7 +48,7 @@ public class OcLogger<T extends LogMessage> {
 
             ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("OcLogger-" + loggerId);
             logger.addAppender(fileAppender);
-            logger.setAdditive(true);
+            logger.setAdditive(false); // do not pass message to parent, just write to the file
 
             this.logger = logger;
         } else {
@@ -97,12 +97,17 @@ public class OcLogger<T extends LogMessage> {
 
 
     private <E> void logAndSend(Consumer<E> t, E message) {
+        if (createZip) {
+            t.accept(message);
+            return;
+        }
+
         if (!enable) {
             return;
         }
         if (isWebsocket) {
             logEntity.setMessage(message);
-            simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION, logEntity);
+            simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION_EXECUTION_LOG, logEntity);
         } else {
             t.accept(message);
         }

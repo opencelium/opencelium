@@ -8,10 +8,7 @@ import com.becon.opencelium.backend.resource.subs.OperationUsageHistoryDto;
 import com.becon.opencelium.backend.resource.subs.OperationUsageDetailsDto;
 import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -20,6 +17,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OperationUsageHistoryServiceImpl implements OperationUsageHistoryService {
@@ -40,16 +38,22 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     }
 
     @Override
-    public Page<OperationUsageHistory> getAllUsage(int page, int size, String[] sort) {
-        Sort.Direction direction = Sort.Direction.fromString(sort[1]);
-        Sort sortBy = Sort.by(direction, sort[0]);
-        Pageable pageable = PageRequest.of(page, size, sortBy);
-        return operationUsageHistoryRepository.findAll(pageable);
+    public Pageable createPageable(int page, int size, String[] sorts) {
+        Sort.Direction direction = Sort.Direction.fromString(sorts[1]);
+        Sort sortBy = Sort.by(direction, sorts[0]);
+        return PageRequest.of(page, size, sortBy);
     }
 
     @Override
-    public Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(String usageId, int page, int size, String[] sort) {
-        return operationUsageHistoryDetailServiceImp.getAllUsageDetailsByOperationUsageHistoryId(usageId,page, size, sort);
+    public Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(
+            Long usageId,
+            Pageable pageable,
+            LocalDateTime startDate,
+            LocalDateTime endDate) {
+        if (startDate != null || endDate != null) {
+            return operationUsageHistoryDetailServiceImp.findDetailsByHistoryIdAndStartDateBetween(usageId,startDate, endDate, pageable);
+        }
+        return operationUsageHistoryDetailServiceImp.getAllUsageDetailsByOperationUsageHistoryId(usageId,pageable);
     }
 
     @Override
@@ -79,7 +83,7 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
 
         // Set the fields for OperationUsageHistoryDetail
         operationUsageHistoryDetail.setOperationUsage(operationUsage); // This specific usage request
-        operationUsageHistoryDetail.setStartDate(Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime());
+        operationUsageHistoryDetail.setStartDate(Instant.ofEpochMilli(startTime).atZone(ZoneId.of("UTC")).toLocalDateTime());
 
         // Set the bidirectional relationship
         operationUsageHistoryDetail.setOperationUsageHistory(operationUsageHistory);
@@ -106,5 +110,39 @@ public class OperationUsageHistoryServiceImpl implements OperationUsageHistorySe
     @Override
     public PaginatedDto<OperationUsageHistoryDetail, OperationUsageDetailsDto> toUsageDetailsDto(Page<OperationUsageHistoryDetail> page) {
         return new PaginatedDto<OperationUsageHistoryDetail, OperationUsageDetailsDto>(page, OperationUsageDetailsDto::new);
+    }
+
+    //TODO: create a filter class for start and end date
+    @Override
+    public Page<OperationUsageHistory> findAllByDetailsStartDateBetween(Pageable pageable, Long startDate, Long endDate) {
+
+        // Convert Unix timestamps (assumed in seconds) to LocalDateTime if provided, else keep as null.
+        LocalDateTime start = startDate != null
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startDate), ZoneId.of("UTC"))
+                : null;
+        LocalDateTime end = endDate != null
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.of("UTC"))
+                : null;
+
+        Page<OperationUsageHistory> usageHistories = operationUsageHistoryRepository
+                .findAllByTotalUsageGreaterThan(pageable, start, end);
+
+        usageHistories.forEach(history -> {
+            if (history.getDetails() != null) {
+                List<OperationUsageHistoryDetail> filteredDetails = operationUsageHistoryDetailServiceImp
+                        .findDetailsByHistoryIdAndStartDateBetween(history.getId(), start, end);
+                long sumUsage = filteredDetails.stream()
+                        .mapToLong(OperationUsageHistoryDetail::getOperationUsage)
+                        .sum();
+                history.setTotalUsage(sumUsage);
+            }
+        });
+
+        return usageHistories;
+    }
+
+    @Override
+    public void incrementUsageByConnectionTitle(Long id, long opsUsage) {
+        operationUsageHistoryRepository.incrementUsageByConnectionTitle(id, opsUsage);
     }
 }

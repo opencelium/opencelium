@@ -46,7 +46,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ConnectionService connectionService;
     private final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
 
-    private Thread thread;
+    private volatile Thread thread;
 
     public JobExecutor(@Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
                        @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
@@ -62,8 +62,11 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
         thread = Thread.currentThread();
         Subscription activeSub = subscriptionService.getActiveSubs();
         if (!subscriptionService.isValid(activeSub)) {
-            throw new RuntimeException("Subscription is not valid");
+            logger.warn("Subscription is not valid");
+            context.getMergedJobDataMap().put("licenseIsValid", false);
+            return;
         }
+        context.getMergedJobDataMap().put("licenseIsValid", true);
         try {
             long timestamp = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC); // execution start time
 
@@ -88,8 +91,8 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             String connectionName = executionObj.getConnection().getConnectionName();
             if (connectionName != null && !connectionName.contains("!*test_connection_")) {
                 long operationUsage = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
-                logger.info("Operation usage for Connection " + connectionName + " is " + operationUsage);
-                subscriptionService.updateUsage(activeSub, executionObj.getConnection(), operationUsage, startTime);
+                logger.info("Operation usage for Connection {} is {}", connectionName, operationUsage);
+                subscriptionService.updateUsage(activeSub.getId(), executionObj.getConnection(), operationUsage, startTime);
             }
         } catch (ThreadDeath ignored) {
         } finally {
@@ -100,7 +103,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     @Override
     public void interrupt() {
         if (thread != null) {
-            thread.stop();
+            thread.interrupt();
             thread = null;
         }
     }

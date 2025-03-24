@@ -5,15 +5,19 @@ import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistoryD
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface OperationUsageHistoryService {
     void save(OperationUsageHistory operationUsageHistory);
     List<OperationUsageHistory> findAll();
-    Page<OperationUsageHistory> getAllUsage(int page, int size, String[] sort);
-    Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(String usageId,int page, int size, String[] sort);
+
+    Pageable createPageable(int page, int size, String[] sorts);
+
+    Page<OperationUsageHistoryDetail> getAllUsageDetailsByUsageId(Long usageId, Pageable pageable, LocalDateTime startDate, LocalDateTime endTime);
     Optional<OperationUsageHistory> findById(Long id);
     OperationUsageHistory createNewEntity(Subscription sub, String connectionName,
                                           long operationUsage, long startTime,
@@ -22,4 +26,8 @@ public interface OperationUsageHistoryService {
     Optional<OperationUsageHistory> findByConnectionTitle(String title);
     PaginatedDto toPaginatedDto(Page<OperationUsageHistory> page);
     PaginatedDto toUsageDetailsDto(Page<OperationUsageHistoryDetail> page);
+
+    Page<OperationUsageHistory> findAllByDetailsStartDateBetween(Pageable pageable, Long startDate, Long endDate) ;
+
+    void incrementUsageByConnectionTitle(Long id, long opsUsage);
 }

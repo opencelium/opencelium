@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,8 +48,12 @@ public class SupportFileServiceImp implements SupportFileService {
     private final ConnectorService connectorSqlService;
     private final InvokerService invokerService;
 
-    @Value("${support.files.directory:src/main/resources/support-files}")
+    @Value("${opencelium.support.file.directory:src/main/resources/support-files}")
     private String base;
+    @Value("${opencelium.support.file.limit.success:1}")
+    private int successFileLimit;
+    @Value("${opencelium.support.file.limit.fail:5}")
+    private int failFileLimit;
 
     public static final String GET_URL = "/api/connection/support-file/%d/%s";
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
@@ -212,9 +215,8 @@ public class SupportFileServiceImp implements SupportFileService {
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
         } finally {
-            String reverse = "s".equals(type) ? "e" : "s";
-            enforceLimit(zipFilePath.getParent(), connectionId + "_" + type + "_support", 1);
-            enforceLimit(zipFilePath.getParent(), connectionId + "_" + reverse + "_support", 0);
+            int fileLimit = "s".equals(type) ? successFileLimit : failFileLimit;
+            enforceLimit(zipFilePath.getParent(), connectionId + "_" + type + "_support", fileLimit);
         }
     }
 

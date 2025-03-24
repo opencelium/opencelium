@@ -62,15 +62,13 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public TemplateResource toResource(Template template) {
-        final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        final String templatePath = uri.getScheme() + "://" + uri.getAuthority() + "/api/template/";
         TemplateResource templateResource = new TemplateResource();
         templateResource.setName(template.getName());
         templateResource.setTemplateId(template.getTemplateId());
         templateResource.setDescription(template.getDescription());
         templateResource.setVersion(template.getVersion());
         templateResource.setConnection(template.getConnection());
-        templateResource.setLink(templatePath + template.getTemplateId());
+        templateResource.setLink(PathConstant.TEMPLATE_URL + template.getTemplateId());
         return templateResource;
     }
 

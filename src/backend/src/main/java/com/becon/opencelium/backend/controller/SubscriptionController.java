@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +35,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/subs")
@@ -46,11 +51,13 @@ public class SubscriptionController {
     private final ActivationRequestService activationRequestService;
     private final ActivationRequestMapper activationRequestMapper;
     private final OperationUsageHistoryService operationUsageHistoryService;
+    private final ExtraOpsService extraOpsService;
 
     public SubscriptionController(
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
             @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService,
             @Qualifier("operationUsageHistoryServiceImpl") OperationUsageHistoryService operationUsageHistoryService,
+            @Qualifier("extraOpsServiceImp") ExtraOpsService extraOpsService,
             ActivationRequestMapper activationRequestMapper
 
     ) {
@@ -59,6 +66,7 @@ public class SubscriptionController {
         this.remoteApi = RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL);
         this.activationRequestMapper = activationRequestMapper;
         this.operationUsageHistoryService = operationUsageHistoryService;
+        this.extraOpsService = extraOpsService;
     }
 
     // -------------------- ONLINE -------------------- //
@@ -190,9 +198,18 @@ public class SubscriptionController {
     @GetMapping("/operation/usage")
     public ResponseEntity<PaginatedDto> getOperationUsage(@RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "10") int size,
-                                                          @RequestParam(defaultValue = "id,asc") String[] sort) {
+                                                          @RequestParam(defaultValue = "id,asc") String[] sort,
+                                                          @RequestParam(required = false) Long startDate,
+                                                          @RequestParam(required = false) Long endDate) {
 
-        Page<OperationUsageHistory> usageHistories = operationUsageHistoryService.getAllUsage(page, size, sort);
+        Pageable pageable = operationUsageHistoryService.createPageable(page, size, sort);
+        Page<OperationUsageHistory> usageHistories = operationUsageHistoryService
+                .findAllByDetailsStartDateBetween(pageable, startDate, endDate);
+
+//        // Stream and filter histories with totalUsage > 0
+//        List<OperationUsageHistory> filteredHistories = usageHistories.getContent().stream()
+//                .filter(history -> history.getTotalUsage() > 0)
+//                .collect(Collectors.toList());
         PaginatedDto dto = operationUsageHistoryService.toPaginatedDto(usageHistories);
         return ResponseEntity.ok(dto);
     }
@@ -201,10 +218,20 @@ public class SubscriptionController {
     public ResponseEntity<PaginatedDto> getOperationUsageDetails(
                                                                 @RequestParam(defaultValue = "0") int page,
                                                                 @RequestParam(defaultValue = "10") int size,
-                                                                @PathVariable String usageId,
-                                                                @RequestParam(defaultValue = "id,asc") String[] sort) {
+                                                                @PathVariable Long usageId,
+                                                                @RequestParam(defaultValue = "id,asc") String[] sort,
+                                                                @RequestParam(required = false) Long startDate,
+                                                                @RequestParam(required = false) Long endDate) {
+        // Convert Unix timestamps (assumed in seconds) to LocalDateTime if provided, else keep as null.
+        LocalDateTime start = startDate != null
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startDate), ZoneId.of("UTC"))
+                : null;
+        LocalDateTime end = endDate != null
+                ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.of("UTC"))
+                : null;
+        Pageable pageable = operationUsageHistoryService.createPageable(page, size, sort);
         Page<OperationUsageHistoryDetail> usageDetails = operationUsageHistoryService
-                .getAllUsageDetailsByUsageId(usageId,page, size, sort);
+                .getAllUsageDetailsByUsageId(usageId, pageable, start, end);
         PaginatedDto dto = operationUsageHistoryService.toUsageDetailsDto(usageDetails);
         return ResponseEntity.ok(dto);
     }
@@ -235,5 +262,4 @@ public class SubscriptionController {
         }
         return licenseKeyRaw;
     }
-
 }

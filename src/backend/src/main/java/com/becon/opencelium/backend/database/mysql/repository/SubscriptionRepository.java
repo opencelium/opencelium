@@ -1,8 +1,10 @@
 package com.becon.opencelium.backend.database.mysql.repository;
 
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -26,4 +28,11 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Stri
     Optional<Subscription> findBySubId(String subId);
 
     boolean existsBySubId(String subId);
+
+    Optional<Subscription> findByLicenseId(String licenseId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT o FROM Subscription o WHERE o.id = :subId")
+    Optional<Subscription> findAndLockById(@Param("subId") String subId);
+
 }

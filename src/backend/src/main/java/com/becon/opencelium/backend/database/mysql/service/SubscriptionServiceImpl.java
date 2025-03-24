@@ -8,9 +8,12 @@ import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.quartz.ResetLimitsJob;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
+import com.becon.opencelium.backend.subscription.dto.ExtraOpsDTO;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
+import com.becon.opencelium.backend.subscription.enums.ExtraOpsStatus;
 import com.becon.opencelium.backend.subscription.quartz.QuartzCronUpdater;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
+import com.becon.opencelium.backend.subscription.utility.MonthPeriod;
 import com.becon.opencelium.backend.utility.MachineUtility;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import jakarta.transaction.Transactional;
@@ -26,10 +29,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.*;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SubscriptionServiceImpl implements SubscriptionService {
@@ -40,6 +41,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final OperationUsageHistoryService operationUsageHistoryService;
     private final OperationUsageHistoryDetailService operationUsageHistoryDetailService;
     private final ActivationRequestService activationRequestService;
+    private final ExtraOpsService extraOpsService;
     private final Logger logger = LoggerFactory.getLogger(SubscriptionServiceImpl.class);
 
 
@@ -49,6 +51,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                                    @Qualifier("connectionServiceImp") ConnectionService connectionService,
                                    @Qualifier("operationUsageHistoryServiceImpl") OperationUsageHistoryService operationUsageHistoryService,
                                    @Qualifier("operationUsageHistoryDetailServiceImp") OperationUsageHistoryDetailService operationUsageHistoryDetailService,
+                                   @Qualifier("extraOpsServiceImp") ExtraOpsService extraOpsService,
                                    @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService) {
         this.subscriptionRepository = subscriptionRepository;
         this.scheduler = scheduler;
@@ -56,6 +59,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         this.operationUsageHistoryService = operationUsageHistoryService;
         this.operationUsageHistoryDetailService = operationUsageHistoryDetailService;
         this.activationRequestService = activationRequestService;
+        this.extraOpsService = extraOpsService;
     }
 
     @Override
@@ -66,18 +70,31 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public boolean isValid(Subscription sub) {
         if (sub == null) {
-//            logger.warn("");
-            throw new RuntimeException("No active subscription found. Please activate a free license or upload your license");
+            logger.warn("No active subscription found. Please activate a free license or upload your license");
+            return false;
         }
         LicenseKey licenseKey = LicenseKeyUtility.decrypt(sub.getLicenseKey());
         boolean isValid = LicenseKeyUtility.verify(licenseKey, sub.getActivationRequest());
         if (!isCurrentUsageIsValid(sub)) {
-            throw new RuntimeException("Usage number of operation has been changed manually.");
+            logger.warn("Usage number of operation has been changed manually.");
+            return false;
         }
         if (licenseKey.getOperationUsage() != 0 && sub.getCurrentUsage() >= licenseKey.getOperationUsage()) {
-            throw new RuntimeException("You have reached limit of operation usage: " + licenseKey.getOperationUsage());
+            if (!hasExtra(sub)) {
+                logger.warn("You have reached limit of operation usage: {}", licenseKey.getOperationUsage());
+                return false;
+            }
+            if (!hasExtraUsage(sub.getExtraOpsList())) {
+                logger.warn("You have reached limit of Extra Ops usage: {}", licenseKey.getOperationUsage());
+                return false;
+            }
         }
         return isValid;
+    }
+
+    private boolean hasExtraUsage(List<ExtraOps> extraOpsList) {
+        return extraOpsList.stream().filter(ops -> ops.getStatus() == ExtraOpsStatus.ACTIVE)
+                .anyMatch(ops -> ops.getCurrentOpsUsage() < ops.getTotalOpsUsage());
     }
 
     private boolean isHmacValid(Subscription sub, String hmac) {
@@ -94,9 +111,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             LocalDate currentDate = LocalDate.now();
             LicenseKey licenseKey = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
             LocalDate startDate = Instant.ofEpochMilli(licenseKey.getStartDate())
-                    .atZone(ZoneId.systemDefault()).toLocalDate();
+                    .atZone(ZoneId.of("UTC")).toLocalDate();
             LocalDate endDate = Instant.ofEpochMilli(licenseKey.getEndDate())
-                    .atZone(ZoneId.systemDefault()).toLocalDate();
+                    .atZone(ZoneId.of("UTC")).toLocalDate();
 
             if (currentDate.isAfter(startDate) && currentDate.isBefore(endDate)) {
                 // Reset current_usage
@@ -110,6 +127,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 subscriptionRepository.save(subscription);
             }
         }
+    }
+
+    @Override
+    public Subscription findByLicenseId(String licenseId) {
+        return subscriptionRepository.findByLicenseId(licenseId)
+                .orElseThrow(() -> {
+                    logger.error("Subscription not found for licenseId: {}", licenseId);
+                    return new RuntimeException("SUBSCRIPTION_NOT_FOUND");
+                });
     }
 
     @Override
@@ -199,6 +225,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         SubsDTO subsDTO = new SubsDTO();
         subsDTO.setActive(subscription.isActive());
         subsDTO.setSubId(subscription.getSubId());
+        subsDTO.setLicenseId(subscription.getLicenseId());
         subsDTO.setCurrentOperationUsage(subscription.getCurrentUsage());
 
         subsDTO.setDuration(licenseKey.getDuration());
@@ -207,50 +234,72 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subsDTO.setSubId(licenseKey.getSubId());
         subsDTO.setEndDate(licenseKey.getEndDate());
         subsDTO.setTotalOperationUsage(licenseKey.getOperationUsage());
+        if(subscription.getExtraOpsList() != null && !subscription.getExtraOpsList().isEmpty()) {
+            List<ExtraOpsDTO> extraOpsDTOList = subscription.getExtraOpsList().stream()
+                    .map(extraOpsService::toDTO).toList();
+            subsDTO.setExtraOps(extraOpsDTOList);
+        }
+        MonthPeriod period = LicenseKeyUtility.getCurrentMonthPeriod(licenseKey.getStartDate());
+        subsDTO.setMonthPeriod(period);
         return subsDTO;
     }
 
     @Override
     public Subscription getById(String id) {
         return subscriptionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Subsction not found"));
+                .orElseThrow(() -> new RuntimeException("Subscription not found: " + id));
     }
 
+    @Transactional
     @Override
-    public void updateUsage(Subscription sub, ConnectionEx connectionEx, long requestSize, long startTime) {
+    public void updateUsage(String subId, ConnectionEx connectionEx, long opsUsage, long startTime) {
+        Optional<Subscription> subOptional = subscriptionRepository.findAndLockById(subId);
+        if (subOptional.isEmpty()) {
+            throw new RuntimeException("Subscription not found when updating usage: " + subId);
+        }
+        Subscription sub = subOptional.get();
         // Try to find existing operation usage history
         OperationUsageHistory operationUsageHistory = operationUsageHistoryService
                 .findByConnectionTitle(connectionEx.getConnectionName())
                 .map(history -> {
                     // If history exists, increment its total usage
-                    history.setTotalUsage(history.getTotalUsage() + requestSize);
-                    history.setFromInvoker(connectionEx.getSource().getInvoker());
-                    history.setToInvoker(connectionEx.getTarget().getInvoker());
+                    operationUsageHistoryService.incrementUsageByConnectionTitle(history.getId(), opsUsage);
                     // Create and add a new OperationUsageHistoryDetail
                     OperationUsageHistoryDetail newDetail = new OperationUsageHistoryDetail();
-                    newDetail.setOperationUsage(requestSize);
-                    newDetail.setStartDate(Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime());
+                    newDetail.setOperationUsage(opsUsage);
+                    newDetail.setStartDate(Instant.ofEpochMilli(startTime).atZone(ZoneId.of("UTC")).toLocalDateTime());
                     newDetail.setOperationUsageHistory(history);  // Set the bidirectional relationship
                     operationUsageHistoryDetailService.save(newDetail);
-                    // Add the new detail to the existing list
+                         // Add the new detail to the existing list
 //                    history.getDetails().add(newDetail);
                     return history;
                 })
                 .orElseGet(() -> {
                     // If no history exists, create a new one
                     return operationUsageHistoryService.createNewEntity(sub, connectionEx.getConnectionName(),
-                            requestSize, startTime, connectionEx.getSource().getInvoker(), connectionEx.getTarget().getInvoker());
+                            opsUsage, startTime, connectionEx.getSource().getInvoker(), connectionEx.getTarget().getInvoker());
                 });
         operationUsageHistoryService.save(operationUsageHistory);
         if (!isCurrentUsageIsValid(sub)) {
-            throw new RuntimeException("Number of operations have been changed manually.");
+            throw new RuntimeException("Number of operations has been changed manually.");
         }
 
-        long updatedOperationUsage = sub.getCurrentUsage() + requestSize;
-        String newHmac = HmacUtility.encode(sub.getId() + updatedOperationUsage);
-        sub.setCurrentUsage(updatedOperationUsage);
-        sub.setCurrentUsageHmac(newHmac);
-        update(sub);
+        long updatedOperationUsage = sub.getCurrentUsage() + opsUsage;
+        LicenseKey licenseKey = LicenseKeyUtility.decrypt(sub.getLicenseKey());
+        long totalUsage = licenseKey.getOperationUsage();
+        long remain = totalUsage - updatedOperationUsage;
+
+        if (sub.getCurrentUsage() < totalUsage){
+            long subOpsUsage = remain <= 0 ? totalUsage : updatedOperationUsage;
+            String newHmac = HmacUtility.encode(sub.getId() + subOpsUsage);
+            sub.setCurrentUsage(subOpsUsage);
+            sub.setCurrentUsageHmac(newHmac);
+            update(sub);
+        }
+        if (remain <= 0) {
+            remain = Math.abs(remain);
+            extraOpsService.updateExtraOpsForSubscription(sub, remain);
+        }
     }
 
     @Override
@@ -379,7 +428,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
      * This handles edge cases where the day of the month may exceed the number of days in certain months (e.g., February).
      */
     private String generateCronExpression(long startDateMillis) {
-        LocalDateTime startDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneId.systemDefault());
+        LocalDateTime startDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneId.of("UTC"));
         int dayOfMonth = startDate.getDayOfMonth();
 
         // Handle edge cases where the day of the month might exceed the max days in the current month
@@ -391,5 +440,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         // Generate the cron expression for monthly execution on the given day of the month at midnight
         return String.format("0 0 0 %d * ?", dayOfMonth);
+    }
+
+    private boolean hasExtra(Subscription sub) {
+        return sub.getExtraOpsList() != null && !sub.getExtraOpsList().isEmpty();
     }
 }
