@@ -108,7 +108,7 @@ export const supportFileSlice = createSlice({
         },
         [deleteSupportFile.fulfilled.type]: (state, action: PayloadAction<string>) => {
             state.deletingSupportFile= API_REQUEST_STATE.FINISH;
-            state.supportFileResponses = state.supportFileResponses.filter(supportFile => supportFile.supportFiles.findIndex(path => path === action.payload) === -1);
+            state.supportFileResponses = state.supportFileResponses.filter(supportFile => supportFile.supportFile === action.payload);
             state.error = null;
         },
         [deleteSupportFile.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -120,7 +120,7 @@ export const supportFileSlice = createSlice({
         },
         [deleteSupportFiles.fulfilled.type]: (state, action: PayloadAction<string[]>) => {
             state.deletingSupportFiles= API_REQUEST_STATE.FINISH;
-            state.supportFileResponses = state.supportFileResponses.filter(supportFile => action.payload.findIndex(path => supportFile.supportFiles.findIndex(supportFilePath => supportFilePath === path) !== -1) === -1);
+            state.supportFileResponses = state.supportFileResponses.filter(supportFile => action.payload.findIndex(path => supportFile.supportFile === path) === -1);
             state.error = null;
         },
         [deleteSupportFiles.rejected.type]: (state, action: PayloadAction<IResponse>) => {

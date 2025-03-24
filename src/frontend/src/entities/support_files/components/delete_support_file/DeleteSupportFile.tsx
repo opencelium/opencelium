@@ -34,7 +34,7 @@ const DeleteSupportFile: FC<DeleteSupportFileProps> =
         const [isDeleting, setIsDeleting] = useState<boolean>(false);
         const deleteFile = () => {
             setIsDeleting(true);
-            dispatch(deleteSupportFile(supportFileResponse.supportFiles[0]));
+            dispatch(deleteSupportFile(supportFileResponse.supportFile));
         }
         useEffect(() => {
             switch (deletingSupportFile) {

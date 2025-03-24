@@ -40,7 +40,7 @@ export const getSupportFilesByConnection = createAsyncThunk(
         try{
             const request = new SupportFileRequest({endpoint: `/${data.connectionId}/list`});
             const response = await request.getSupportFilesByConnection();
-            return response.data?.supportFiles.length > 0 ? response.data : undefined;
+            return response.data;
         }catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -52,7 +52,7 @@ export const getSupportFiles = createAsyncThunk(
         try{
             const request = new SupportFileRequest({endpoint: `/list`});
             const response = await request.getSupportFiles();
-            return response.data.map((file => ({...file, id: file.connectionId}))).filter(r => r.supportFiles.length > 0);
+            return response.data;
         }catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

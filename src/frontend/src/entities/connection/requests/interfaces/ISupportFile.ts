@@ -4,7 +4,12 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 export interface SupportFileResponse {
     connectionId: number,
     connectionTitle: string,
-    supportFiles: string[],
+    status: SupportFileStatus,
+    supportFile: string,
+}
+
+export enum SupportFileStatus {
+    ConnectionFound= 'CONNECTION_FOUND',
 }
 
 export type SupportFileResponseProps = keyof SupportFileResponse | string;

@@ -34,7 +34,7 @@ const DownloadSupportFile: FC<DownloadSupportFileProps> =
         const [isDownloading, setIsDownloading] = useState<boolean>(false);
         const download = () => {
             setIsDownloading(true);
-            dispatch(downloadSupportFile({connectionId: supportFileResponse.connectionId, zipFileName: supportFileResponse.supportFiles[0]}));
+            dispatch(downloadSupportFile({connectionId: supportFileResponse.connectionId, zipFileName: supportFileResponse.supportFile}));
         }
         useEffect(() => {
             switch (downloadingSupportFile) {

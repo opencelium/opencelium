@@ -4,16 +4,16 @@ import {getDateFormat} from "@application/utils/utils";
 
 export default class SupportFileResponseClass {
 
-    supportFiles: string[] = [];
+    supportFile: string = '';
 
     type: SupportFileType;
 
-    supportFilesObjects: SupportFileObject[] = [];
+    supportFileObject: SupportFileObject;
 
     constructor(data: SupportFileResponse, type: SupportFileType) {
-        this.supportFiles = data.supportFiles;
+        this.supportFile = data.supportFile;
         this.type = type;
-        this.supportFilesObjects = this.convertFilenamesIntoObjects()
+        this.supportFileObject = this.convertFilenameIntoObject(this.supportFile)
     }
 
     getSplitter(): string {
@@ -24,18 +24,6 @@ export default class SupportFileResponseClass {
                 return '_s_support_';
         }
     }
-
-    convertFilenamesIntoObjects(): SupportFileObject[] {
-        const objets = [];
-        for(let i = 0; i < this.supportFiles.length; i++) {
-            const supportFileObject = this.convertFilenameIntoObject(this.supportFiles[i]);
-            if (supportFileObject) {
-                objets.push(this.convertFilenameIntoObject(this.supportFiles[i]));
-            }
-        }
-        return objets;
-    }
-
     convertFilenameIntoObject(filename: string): SupportFileObject | undefined {
         try {
             const filenameSplit = filename.split(this.getSplitter());

@@ -37,7 +37,7 @@ const DeleteSupportFiles: FC<DeleteSupportFilesProps> =
         const [isDeleting, setIsDeleting] = useState<boolean>(false);
         const deleteFile = () => {
             setIsDeleting(true);
-            dispatch(deleteSupportFiles({filenames: supportFilesResponses.map(f => f.supportFiles[0].split("/").pop())}));
+            dispatch(deleteSupportFiles({filenames: supportFilesResponses.map(f => f.supportFile.split("/").pop())}));
         }
         useEffect(() => {
             switch (deletingSupportFiles) {

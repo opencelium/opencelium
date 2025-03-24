@@ -42,11 +42,11 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
             }
         },
         {
-            propertyKey: 'supportFiles',
+            propertyKey: 'supportFile',
             width: '25%',
             getValue: (entity: SupportFileResponse) => {
                 return(
-                    <div>{entity.supportFiles.length > 0 ? entity.supportFiles[0] : '-'}</div>
+                    <div>{entity.supportFile || '-'}</div>
                 )
             }
         },
@@ -56,9 +56,9 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
             getValue: (entity: SupportFileResponse) => {
                 const errorSupportFileInstance = new SupportFileResponseClass(entity, 'error');
                 const successSupportFileInstance = new SupportFileResponseClass(entity, 'success');
-                let timestamp = errorSupportFileInstance.supportFilesObjects.length > 0 ? errorSupportFileInstance.supportFilesObjects[0].timestamp : '-';
+                let timestamp = errorSupportFileInstance.supportFileObject?.timestamp || '-';
                 if (timestamp === '-') {
-                    timestamp = successSupportFileInstance.supportFilesObjects.length > 0 ? successSupportFileInstance.supportFilesObjects[0].timestamp : '-';
+                    timestamp = successSupportFileInstance.supportFileObject?.timestamp || '-';
                 }
                 return(
                     <div>{timestamp}</div>
@@ -72,9 +72,9 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
             getValue: (entity: SupportFileResponse) => {
                 const errorSupportFileInstance = new SupportFileResponseClass(entity, 'error');
                 const successSupportFileInstance = new SupportFileResponseClass(entity, 'success');
-                let hasError = errorSupportFileInstance.supportFilesObjects.length > 0;
+                let hasError = errorSupportFileInstance.supportFileObject;
                 if (!hasError) {
-                    hasError = successSupportFileInstance.supportFilesObjects.length === 0;
+                    hasError = successSupportFileInstance.supportFileObject;
                 }
                 let background = hasError ? '#f5c3c3' : '#c3f5c3';
                 return (
@@ -85,7 +85,7 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
     ];
     translations = {
         connection: 'Connection',
-        supportFiles: 'File path',
+        supportFile: 'File path',
         timestamp: 'Timestamp',
         status: 'Status',
     };
