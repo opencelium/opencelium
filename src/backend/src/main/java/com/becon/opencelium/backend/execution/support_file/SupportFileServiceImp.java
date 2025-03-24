@@ -53,7 +53,7 @@ public class SupportFileServiceImp implements SupportFileService {
     @Value("${opencelium.support.file.limit.fail:5}")
     private int failFileLimit;
 
-    public static final String GET_URL = "/api/connection/support-file/%d/%s";
+    public static final String GET_URL = "/connection/support-file/%d/%s";
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
 
     public SupportFileServiceImp (
