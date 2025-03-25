@@ -13,10 +13,7 @@ import java.nio.file.Path;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -112,27 +109,28 @@ public class LicenseKeyUtility {
     }
 
     public static MonthPeriod getCurrentMonthPeriod(long initialDateMillis) {
-        // Convert initial date from UNIX milliseconds to LocalDateTime in UTC
-        Instant initialInstant = Instant.ofEpochMilli(initialDateMillis);
-        LocalDateTime initialDate = LocalDateTime.ofInstant(initialInstant, ZoneOffset.UTC);
+        // Convert initial date from millis to LocalDate in UTC
+        LocalDate initialDate = Instant.ofEpochMilli(initialDateMillis).atZone(ZoneOffset.UTC).toLocalDate();
 
-        // Get the current date in UTC
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        // Get the day-of-month to anchor the monthly cycle
+        int anchorDay = initialDate.getDayOfMonth();
 
-        // Determine the start of the period (same day as initialDate in the current month)
-        LocalDateTime startDate = now.withDayOfMonth(initialDate.getDayOfMonth()).with(LocalTime.MIN);
+        // Today's date (UTC)
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
 
-        // If the startDate is in the future (because the current month has fewer days), move to last valid day
-        if (startDate.getDayOfMonth() != initialDate.getDayOfMonth()) {
-            startDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
-        }
+        // Use the same day-of-month as the anchor, or adjust to the last valid day of the current month
+        int currentMonthDay = Math.min(anchorDay, today.lengthOfMonth());
+        LocalDate startDate = LocalDate.of(today.getYear(), today.getMonth(), currentMonthDay);
 
-        // Determine the end of the period (same day next month or the last day of the month)
-        LocalDateTime endDate = startDate.plusMonths(1).minusSeconds(1);
+        // Calculate endDate = day before same anchorDay in next month
+        LocalDate nextMonth = startDate.plusMonths(1);
+        int nextMonthDay = Math.min(anchorDay, nextMonth.lengthOfMonth());
 
-        // Convert to UNIX timestamp in milliseconds
-        long startMillis = startDate.toInstant(ZoneOffset.UTC).toEpochMilli();
-        long endMillis = endDate.toInstant(ZoneOffset.UTC).toEpochMilli();
+        LocalDate endDate = LocalDate.of(nextMonth.getYear(), nextMonth.getMonth(), nextMonthDay).minusDays(1);
+
+        // Convert to millis
+        long startMillis = startDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
+        long endMillis = endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant().toEpochMilli();
 
         return new MonthPeriod(startMillis, endMillis);
     }
