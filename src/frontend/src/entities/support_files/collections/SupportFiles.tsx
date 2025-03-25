@@ -22,15 +22,13 @@ import {DownloadSupportFile} from "@entity/support_files/components/download_sup
 import SupportFileResponseClass from "@entity/support_files/classes/SupportFileResponseClass";
 import {DeleteSupportFile} from "@entity/support_files/components/delete_support_file/DeleteSupportFile";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
-import {PermissionButton} from "@app_component/base/button/PermissionButton";
-import {UserGroupPermissions} from "@entity/user_group/constants";
 import {DeleteSupportFiles} from "@entity/support_files/components/delete_support_files/DeleteSupportFiles";
 
 class SupportFiles extends ListCollection<SupportFileResponseProps>{
     name: string = 'support_files';
     entities: SupportFileResponse[];
     title = 'Support Files';
-    keyPropName: SupportFileResponseProps ='id';
+    keyPropName: SupportFileResponseProps ='supportFile';
     listProps: ListProp<SupportFileResponseProps>[] = [
         {
             propertyKey: 'connection',
@@ -72,10 +70,7 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
             getValue: (entity: SupportFileResponse) => {
                 const errorSupportFileInstance = new SupportFileResponseClass(entity, 'error');
                 const successSupportFileInstance = new SupportFileResponseClass(entity, 'success');
-                let hasError = errorSupportFileInstance.supportFileObject;
-                if (!hasError) {
-                    hasError = successSupportFileInstance.supportFileObject;
-                }
+                let hasError = !!errorSupportFileInstance.supportFileObject;
                 let background = hasError ? '#f5c3c3' : '#c3f5c3';
                 return (
                     <td key={'status'} style={{background}}></td>
@@ -93,7 +88,7 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
             <React.Fragment>
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <DeleteSupportFiles isDisabled={checked.length === 0} supportFilesResponses={this.entities.filter(entity => checked.findIndex(check => check.toString() === entity.connectionId.toString()) !== -1)}/>}
+                {viewType === ViewType.LIST && this.entities.length !== 0 && <DeleteSupportFiles isDisabled={checked.length === 0} supportFilesResponses={this.entities.filter(entity => checked.findIndex(check => check.toString() === entity.supportFile) !== -1)}/>}
             </React.Fragment>
         );
     };

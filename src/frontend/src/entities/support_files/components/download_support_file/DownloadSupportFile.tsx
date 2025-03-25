@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useMemo, useState} from 'react';
 import {withTheme} from 'styled-components';
 import {DownloadSupportFileProps} from './interfaces';
 import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
@@ -22,6 +22,7 @@ import {PermissionTooltipButton} from "@app_component/base/button/PermissionButt
 import {ConnectionPermissions} from "@entity/connection/constants";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {downloadSupportFile} from "@root/redux_toolkit/action_creators/SupportFileCreators";
+import SupportFileResponseClass from "@entity/support_files/classes/SupportFileResponseClass";
 
 
 
@@ -32,6 +33,13 @@ const DownloadSupportFile: FC<DownloadSupportFileProps> =
         const dispatch = useAppDispatch();
         const {downloadingSupportFile} = useAppSelector((state: RootState) => state.supportFileReducer);
         const [isDownloading, setIsDownloading] = useState<boolean>(false);
+
+        const supportFileTimeStamp = useMemo(() => {
+            const errorSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 'error');
+            const successSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 'success');
+            const instance = errorSupportFileInstance.supportFileObject ? errorSupportFileInstance : successSupportFileInstance;
+            return instance.supportFileObject.timestamp;
+        }, [supportFileResponse])
         const download = () => {
             setIsDownloading(true);
             dispatch(downloadSupportFile({connectionId: supportFileResponse.connectionId, zipFileName: supportFileResponse.supportFile}));
@@ -49,7 +57,7 @@ const DownloadSupportFile: FC<DownloadSupportFileProps> =
         return (
             <PermissionTooltipButton
                 isLoading={isDownloading}
-                target={`download_${supportFileResponse.connectionId.toString()}`}
+                target={`download_${supportFileTimeStamp.toString()}`}
                 position={'top'}
                 tooltip={'Download'}
                 hasBackground={false}

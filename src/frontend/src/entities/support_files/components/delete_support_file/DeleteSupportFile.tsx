@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useMemo, useState} from 'react';
 import {withTheme} from 'styled-components';
 import {DeleteSupportFileProps} from './interfaces';
 import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
@@ -22,6 +22,7 @@ import {PermissionTooltipButton} from "@app_component/base/button/PermissionButt
 import {ConnectionPermissions} from "@entity/connection/constants";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {deleteSupportFile, downloadSupportFile} from "@root/redux_toolkit/action_creators/SupportFileCreators";
+import SupportFileResponseClass from "@entity/support_files/classes/SupportFileResponseClass";
 
 
 
@@ -36,6 +37,12 @@ const DeleteSupportFile: FC<DeleteSupportFileProps> =
             setIsDeleting(true);
             dispatch(deleteSupportFile(supportFileResponse.supportFile));
         }
+        const supportFileTimeStamp = useMemo(() => {
+            const errorSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 'error');
+            const successSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 'success');
+            const instance = errorSupportFileInstance.supportFileObject ? errorSupportFileInstance : successSupportFileInstance;
+            return instance.supportFileObject.timestamp;
+        }, [supportFileResponse])
         useEffect(() => {
             switch (deletingSupportFile) {
                 case API_REQUEST_STATE.FINISH:
@@ -51,7 +58,7 @@ const DeleteSupportFile: FC<DeleteSupportFileProps> =
                 hasConfirmation
                 confirmationText={'Do you really want to delete?'}
                 isLoading={isDeleting}
-                target={`delete_${supportFileResponse.connectionId.toString()}`}
+                target={`delete_${supportFileTimeStamp.toString()}`}
                 position={'top'}
                 tooltip={'Delete'}
                 hasBackground={false}
