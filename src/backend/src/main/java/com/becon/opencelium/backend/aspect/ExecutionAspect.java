@@ -103,13 +103,16 @@ public class ExecutionAspect {
             logger.warn("Subscription is not valid");
             return;
         }
-        logger.info("------------------- PRE --------------------");
 
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data != null ? data.getScheduleId() : jobDataMap.getIntValue("schedulerId");
         long execId = initExecutionObj(schedulerId);
         jobDataMap.put("execId", execId);
+
+        if (data == null || !data.isCreateZip()) {
+            logger.info("------------------- PRE --------------------");
+        }
 
         List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(eventNotifications, "pre", null);
@@ -122,7 +125,7 @@ public class ExecutionAspect {
         if (!licenseIsValid) {
             return;
         }
-        logger.info("------------------- POST --------------------");
+
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 
@@ -130,8 +133,7 @@ public class ExecutionAspect {
         updateExecutionObj(execId, true);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
-        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
-        triggerNotifications(en, "post", null);
+
         if (data.isCreateZip()) {
             Long connectionId = (Long) context.get("connectionId");
             long timestamp = (long) context.get("timestamp");
@@ -139,7 +141,12 @@ public class ExecutionAspect {
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
+        } else {
+            logger.info("------------------- POST --------------------");
         }
+
+        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
+        triggerNotifications(en, "post", null);
     }
 
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
@@ -150,7 +157,7 @@ public class ExecutionAspect {
         if (!licenseIsValid) {
             return;
         }
-        logger.info("------------------- EXCEPTION --------------------");
+
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 
@@ -158,8 +165,7 @@ public class ExecutionAspect {
         updateExecutionObj(execId, false);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
-        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
-        triggerNotifications(en, "alert", ex);
+
         if (data.isCreateZip()) {
             Long connectionId = (Long) context.get("connectionId");
             long timestamp = (long) context.get("timestamp");
@@ -167,7 +173,12 @@ public class ExecutionAspect {
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
+        } else {
+            logger.info("------------------- EXCEPTION --------------------");
         }
+
+        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
+        triggerNotifications(en, "alert", ex);
     }
 
     private long initExecutionObj(int schedulerId) {
