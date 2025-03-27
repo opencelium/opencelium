@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.EntityNames;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
@@ -42,6 +43,10 @@ import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
+import com.becon.opencelium.backend.version_manager.Wrapper;
+import com.becon.opencelium.backend.version_manager.backup.MongoDbBackupService;
+import com.becon.opencelium.backend.version_manager.backup.MysqlBackupService;
+import com.becon.opencelium.backend.version_manager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
@@ -54,6 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -79,6 +85,8 @@ public class ConnectionServiceImp implements ConnectionService {
     private final OpenCeliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
     private final EntityUpdater<Enhancement> enhancementEntityUpdater;
+    private final MysqlBackupService mysqlBackupService;
+    private final MongoDbBackupService mongoDbBackupService;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -97,7 +105,7 @@ public class ConnectionServiceImp implements ConnectionService {
             ConnectionUpdateTracker updateTracker,
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
-            OpenCeliumProps ocProps
+            OpenCeliumProps ocProps, MysqlBackupService mysqlBackupService, MongoDbBackupService mongoDbBackupService
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -117,6 +125,8 @@ public class ConnectionServiceImp implements ConnectionService {
         this.ocProps = ocProps;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
         this.enhancementEntityUpdater = entityVersionManager.getUpdater(Enhancement.class);
+        this.mysqlBackupService = mysqlBackupService;
+        this.mongoDbBackupService = mongoDbBackupService;
     }
 
 
@@ -500,37 +510,61 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
-    @Transactional
     public void updateConnectionsToCurrentVersion() {
-        List<Connection> connections = findAll();
-        for (Connection connection : connections) {
-            try {
+        List<Long> ids = connectionRepository.findIds();
+        boolean gotBackup = false;
+        for (Long id : ids) {
+            Connection connection = getById(id);
+            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0) {
+                if (!gotBackup) {
+                    try {
+                        mysqlBackupService.backup(EntityNames.ENHANCEMENT);
+                        mongoDbBackupService.backup();
+                        gotBackup = true;
+                    } catch (Exception e) {
+                        log.error("Failed to backup. Skipped updating connections");
+                        throw new RuntimeException(e);
+                    }
+                }
+                AtomicBoolean connectionChanged = new AtomicBoolean(false);
                 // UPDATE CONNECTION_MNG
                 ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
-                connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
-                        .ifChangedOrElseIfUpdated(
-                                connectionMngService::updateWithoutBinding, // if any field is updated
-                                connectionMngService::saveDirectly // only version is set to the current version
-                        );
+                try {
+                    connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
+                            .ifChangedOrElseIfUpdated(
+                                    x -> {
+                                        connectionMngService.updateWithoutBinding(x);
+                                        connectionChanged.set(true);
+                                    }, // if any field is updated
+                                    connectionMngService::saveDirectly // only version is set to the current version
+                            );
+                } catch (Exception e) {
+                    log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
+                    mysqlBackupService.restore(EntityNames.ENHANCEMENT);
+                    mongoDbBackupService.restore();
+                    log.warn("Rolled back all changes");
+                    throw new RuntimeException(e);
+                }
 
+                AtomicBoolean anyEnhancementChanged = new AtomicBoolean(false);
                 // UPDATE ENHANCEMENTS
-                connection.getEnhancements().forEach(enhancement -> {
-                    enhancement.setConnection(null);
-                    enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
-                            .ifUpdated(x -> {
-                                x.setConnection(connection);
+                try {
+                    connection.getEnhancements().forEach(enhancement -> enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
+                            .ifChanged(x -> {
+                                anyEnhancementChanged.set(true);
                                 enhancementService.save(enhancement);
-                            });
-                    enhancement.setConnection(connection);
-                });
-
-                connection.setOcVersion(ocProps.getVersion());
-                connectionRepository.save(connection);
-            } catch (Exception e) {
-                log.error("Failed to update connection with id = {}", connection.getId(), e);
+                            }));
+                } catch (Exception e) {
+                    log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
+                    mysqlBackupService.restore(EntityNames.ENHANCEMENT);
+                    mongoDbBackupService.restore();
+                    log.warn("Rolled back all changes");
+                    throw new RuntimeException(e);
+                }
+                log.info("Connection[id={}, name={}] is successfully updated to {} version", connection.getId(), connection.getTitle(), ocProps.getVersion());
             }
-
         }
+        connectionRepository.updateVersion(ocProps.getVersion());
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------

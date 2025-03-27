@@ -1,5 +1,8 @@
 package com.becon.opencelium.backend.ocel.postfix;
 
+import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
+import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
 import com.becon.opencelium.backend.ocel.exception.ApplyFunctionException;
 import com.becon.opencelium.backend.ocel.function.FunctionFactory;
@@ -32,6 +35,11 @@ public class PostfixEvaluator implements Evaluator {
 
     @Override
     public Object evaluate(List<Token> tokens, Function<String, Object> referenceExtractor) throws InvalidExpressionException {
+        return evaluate(tokens, referenceExtractor, null, null);
+    }
+
+    @Override
+    public Object evaluate(List<Token> tokens, Function<String, Object> referenceExtractor, OcLogger<ExecutionLog> logger, MaskingService masking) {
         try {
             Queue<Token> tokenQueue = postfixConverter.toPostfix(tokens);
             Stack<Operand> operandStack = new Stack<>();
@@ -46,7 +54,7 @@ public class PostfixEvaluator implements Evaluator {
                             Operand operand = operandStack.pop();
                             if (operand.isRaw()) {
                                 try {
-                                    operand.setValue(getValueOfRaw(operand.getRawValue(), referenceExtractor));
+                                    operand.setValue(getValueOfRaw(operand.getRawValue(), referenceExtractor, logger, masking));
                                 } catch (ValueParseException e) {
                                     throw InvalidExpressionException.valueParseException(e);
                                 }
@@ -64,14 +72,14 @@ public class PostfixEvaluator implements Evaluator {
 
                             if (left.isRaw()) {
                                 try {
-                                    left.setValue(getValueOfRaw(left.getRawValue(), referenceExtractor));
+                                    left.setValue(getValueOfRaw(left.getRawValue(), referenceExtractor, logger, masking));
                                 } catch (ValueParseException e) {
                                     throw InvalidExpressionException.valueParseException(e);
                                 }
                             }
                             if (right.isRaw()) {
                                 try {
-                                    right.setValue(getValueOfRaw(right.getRawValue(), referenceExtractor));
+                                    right.setValue(getValueOfRaw(right.getRawValue(), referenceExtractor, logger, masking));
                                 } catch (ValueParseException e) {
                                     throw InvalidExpressionException.valueParseException(e);
                                 }
@@ -92,7 +100,7 @@ public class PostfixEvaluator implements Evaluator {
                         Object[] parameterValues = new Object[parameters.size()];
                         for (int i = 0; i < parameters.size(); i++) {
                             List<Token> parameter = parameters.get(i);
-                            parameterValues[i] = evaluate(parameter, referenceExtractor);
+                            parameterValues[i] = evaluate(parameter, referenceExtractor, logger, masking);
                         }
                         var function = FunctionFactory.function(lexeme, parameterValues);
                         if (Objects.isNull(function)) {
@@ -123,20 +131,21 @@ public class PostfixEvaluator implements Evaluator {
             return last.getValue();
         } catch (InvalidExpressionException e) {
             throw e;
-        } catch (Exception e){
+        } catch (Exception e) {
             throw InvalidExpressionException.unexpectedException(e);
         }
     }
 
-    private Object getValueOfRaw(String rawValue, Function<String, Object> referenceExtractor) throws ValueParseException, InvalidExpressionException {
+    private Object getValueOfRaw(String rawValue, Function<String, Object> referenceExtractor, OcLogger<ExecutionLog> logger, MaskingService masking) throws ValueParseException, InvalidExpressionException {
         if (ReferenceUtils.isReference(rawValue)) {
             if (referenceExtractor == null)
                 throw InvalidExpressionException.referenceExtractorNotFound(rawValue);
-            try {
-                return referenceExtractor.apply(rawValue);
-            } catch (RuntimeException e) {
-                throw InvalidExpressionException.cannotExtractReferenceValue(rawValue, e);
+
+            Object result = referenceExtractor.apply(rawValue);
+            if (Objects.nonNull(logger) && Objects.nonNull(masking)) {
+                logger.logAndSend(masking.applyMask(result, rawValue));
             }
+            return result;
         }
         return rawValueParser.parse(rawValue);
     }
