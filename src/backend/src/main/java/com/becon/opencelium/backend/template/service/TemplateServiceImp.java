@@ -182,10 +182,11 @@ public class TemplateServiceImp implements TemplateService {
                     String oldVersion = template.getVersion();
                     templateEntityUpdater.updateToCurrentVersion(template)
                             .ifUpdated(x -> {
+                                template.setVersion(ocProps.getVersion());
                                 FileBackupManager.doBackup(backup, oldVersion, ocProps.getVersion());
                                 save(template, fileName);
+                                log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
                             });
-                    log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
                 } catch (Exception e) {
                     log.error("Failed to update Template[id={}, name={}]", template.getTemplateId(), template.getName(), e);
                 }
