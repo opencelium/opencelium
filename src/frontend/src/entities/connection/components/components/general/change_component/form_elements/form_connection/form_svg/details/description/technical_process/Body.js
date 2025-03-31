@@ -65,6 +65,7 @@ class Body extends React.Component {
 			connection.currentEnhancemnet = null;
 		}
 		if (setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
+		updateConnection(connection);
 		toggleBodyDialog();
 		this.setState({
 			currentEnhancement: null,
@@ -76,7 +77,6 @@ class Body extends React.Component {
 
 	getCurrentBindingItem(fieldName) {
 		const { connection, method } = this.props;
-
 		return connection.fieldBinding.find((item) => {
 			return (
 				item.to.findIndex((elem) => {
@@ -86,7 +86,7 @@ class Body extends React.Component {
 					let normalizedFieldName = fieldName
 						.replace(/^body\.\$\./, '')
 						.replace(/^header\.\$\./, '');
-
+								
 					return elem.color === method.color && name === normalizedFieldName;
 				}) !== -1
 			);

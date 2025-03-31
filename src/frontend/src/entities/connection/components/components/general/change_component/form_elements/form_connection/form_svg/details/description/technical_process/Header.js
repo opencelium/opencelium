@@ -47,6 +47,10 @@ class Header extends React.Component {
 		if (setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
 		updateConnection(connection);
 		this.setState({
+			currentEnhancement: null,
+			currentFieldName: '',
+			isToggledIcon: true,
+			isToggledReferenceIcon: false,
 			isHeaderVisible: !this.state.isHeaderVisible,
 		});
 	}
@@ -59,7 +63,6 @@ class Header extends React.Component {
 
 	getCurrentBindingItem(fieldName) {
 		const { connection, method } = this.props;
-
 		return connection.fieldBinding.find((item) => {
 			return (
 				item.to.findIndex((elem) => {
@@ -163,7 +166,7 @@ class Header extends React.Component {
 			<JsonBody
 				target='header'
 				ref={this.JsonBodyRef}
-				id={'description_body'}
+				id={'description_header'}
 				isDraft={isDraft}
 				isFullHeight={!isToggledReferenceIcon}
 				readOnly={readOnly}
