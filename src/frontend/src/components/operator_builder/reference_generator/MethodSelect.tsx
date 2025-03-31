@@ -14,9 +14,8 @@ const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor,
         if (!builderProps.connection){
             return [{label: 'Test', value: 'test', color: '#231'}];
         }
-        return builderProps.connection.getOptionsForMethods(builderProps.connector, builderProps.operator, {statement: 'leftStatement', isKeyConsidered: false, exceptCurrent: false})
+        return builderProps.connection.getOptionsForMethods(builderProps.connector, builderProps.item, {statement: 'leftStatement', isKeyConsidered: false, exceptCurrent: false})
     },[builderProps]);
-    console.log(options);
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(methodColor ? options.find((o: any) => o.color === methodColor) : null);
     const customStyles: StylesConfig<OptionType, false> = {
         control: (provided, state) => ({
