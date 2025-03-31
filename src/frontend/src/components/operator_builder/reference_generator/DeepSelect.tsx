@@ -11,7 +11,7 @@ interface OptionType {
     value: string;
 }
 
-const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, builderProps}) => {
+const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, connectionEditor}) => {
     const [searchValue, setSearchValue] = useState<string>(field);
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(undefined);
     const [filteredOptions, setFilteredOptions] = useState<OptionType[]>([]);
@@ -19,14 +19,14 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
     const [iterators, setIterators] = useState<string[]>([]);
     const [menuIsOpen, toggleMenu] = useState<boolean>(false);
     useEffect(() => {
-        setIterators(builderProps.connector.getPreviousIterators());
-    }, [builderProps.connector]);
+        setIterators(connectionEditor.connector.getPreviousIterators());
+    }, [connectionEditor.connector]);
     useEffect(() => {
         setAllOptions(getNestedOptions(''));
     }, []);
     const getNestedOptions = (path: string): OptionType[] => {
         const keys = path.split(".");
-        let currentData: DataStructure | null = !color ? {} : builderProps
+        let currentData: DataStructure | null = !color ? {} : connectionEditor
             .connection
             .getMethodByColor(color)
             .response
@@ -130,7 +130,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
     }, [allOptions]);
 
     useEffect(() => {
-        if (color && builderProps.connection) {
+        if (color && connectionEditor.connection) {
             setAllOptions(getNestedOptions(''));
         }
     }, [color]);

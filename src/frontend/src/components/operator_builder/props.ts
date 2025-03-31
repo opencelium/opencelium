@@ -24,7 +24,8 @@ export interface RuleProps {
 }
 export interface RuleUIProps extends UpdateRuleProps, Omit<RuleStyleProps, "isLoop">{
     rule: RuleProps,
-    builderProps: ConnectionEditorProps
+    connectionEditor: ConnectionEditorProps,
+    type: OperatorType,
 }
 export interface RuleStyleProps {
     hasNext: boolean,
@@ -43,8 +44,10 @@ export interface ConnectionEditorProps {
     connector: CConnectorItem,
     item: COperatorItem | CMethodItem,
     updateConnection: any,
-    type: OperatorType,
 
+}
+export interface OperatorBuilderProps extends ConnectionEditorProps {
+    type: OperatorType,
 }
 export interface GroupProps {
     id: string,
@@ -58,7 +61,8 @@ export interface GroupHeaderStyleProps {
 export type ChildProps = RuleProps | GroupProps;
 export interface GroupUIProps extends UpdateGroupProps, GroupStyleProps{
     group: GroupProps,
-    builderProps: ConnectionEditorProps
+    connectionEditor: ConnectionEditorProps
+    type: OperatorType,
 }
 export interface GroupHeaderUIProps extends UpdateGroupProps{
     group: GroupProps,

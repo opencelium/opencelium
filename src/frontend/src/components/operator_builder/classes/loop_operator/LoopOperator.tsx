@@ -43,27 +43,27 @@ export default class LoopOperator {
     }
 
     static getRuleComponent(props: RuleUIProps): any {
-        const {rule, updateRule, hasNext, builderProps} = props;
+        const {rule, updateRule, hasNext, connectionEditor} = props;
         return (
             <div style={{display: 'flex', justifyContent: 'left', width: '100%'}}>
                 <OperatorSelect
-                    type={props.builderProps.type}
+                    type={OperatorType.Loop}
                     operator={rule?.properties?.operator || ''}
                     updateOperator={(operator) => {
                         updateRule({...rule, properties: {...rule?.properties, operator, leftField: '', rightField: ''}})
                     }}
                 />
                 {rule?.properties?.operator && <React.Fragment>
-                    <ReferenceGenerator builderProps={builderProps} reference={rule?.properties?.leftField || ''} setValue={(leftField) => {
+                    <ReferenceGenerator connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField) => {
                         updateRule({...rule, properties: {...rule?.properties, leftField, rightField: ''}})
                     }}/>
                     {rule?.properties?.leftField &&
                         <React.Fragment>
                             {rule?.properties?.operator === LoopOperatorName.SplitString &&
                                 <ReferenceGenerator
-                                    builderProps={builderProps}
+                                    connectionEditor={connectionEditor}
                                     reference={rule?.properties?.rightField || ''}
-                                    setValue={(rightField) => {
+                                    setReference={(rightField) => {
                                         updateRule({...rule, properties: {...rule?.properties, rightField}})
                                     }}
                                 />

@@ -9,13 +9,13 @@ interface OptionType {
     color: string;
 }
 
-const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor, builderProps}) => {
+const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor, connectionEditor}) => {
     const options = useMemo(() => {
-        if (!builderProps.connection){
-            return [{label: 'Test', value: 'test', color: '#231'}];
+        if (!connectionEditor.connection){
+            return [];
         }
-        return builderProps.connection.getOptionsForMethods(builderProps.connector, builderProps.item, {statement: 'leftStatement', isKeyConsidered: false, exceptCurrent: false})
-    },[builderProps]);
+        return connectionEditor.connection.getOptionsForMethods(connectionEditor.connector, connectionEditor.item, {isKeyConsidered: false, exceptCurrent: false})
+    },[connectionEditor]);
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(methodColor ? options.find((o: any) => o.color === methodColor) : null);
     const customStyles: StylesConfig<OptionType, false> = {
         control: (provided, state) => ({

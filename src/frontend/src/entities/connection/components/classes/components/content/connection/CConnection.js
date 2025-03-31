@@ -308,9 +308,8 @@ export default class CConnection{
         return null;
     }
 
-    getOptionsForMethods(connector, item, settings = {statement: 'leftStatement', isKeyConsidered: true, exceptCurrent: true}){
+    getOptionsForMethods(connector, item, settings = {isKeyConsidered: true, exceptCurrent: true}){
         let result = [];
-        let statement = settings && settings.hasOwnProperty('statement') ? settings.statement : '';
         let isKeyConsidered = settings && settings.hasOwnProperty('isKeyConsidered') ? settings.isKeyConsidered : true;
         let exceptCurrent = settings && settings.hasOwnProperty('exceptCurrent') ? settings.exceptCurrent : true;
         switch(connector.getConnectorType()){
@@ -320,12 +319,12 @@ export default class CConnection{
                 }
                 break;
             case CONNECTOR_TO:
-                if(statement === 'rightStatement'){
+                /*if(statement === 'rightStatement'){
                     result.push({
                         label: 'No Method',
                         options: [{label: 'No Method', value: null, color: '#ffffff'}]
                     });
-                }
+                }*/
                 result.push({
                     label: 'From Connector',
                     options: this._fromConnector.getAllPrevMethods(item, isKeyConsidered, exceptCurrent),
@@ -863,9 +862,9 @@ export default class CConnection{
                 if(!hasFound){
                     for(let i = 0; i < this._fieldBinding.length; i++) {
                         if(this._fieldBinding[i].to.length === 1 && this._fieldBinding[i].from.length === 0){
-                            
+
                             let index = bindingItem.to.findIndex(b => CFieldBinding.compareTwoBindingItems(b, this._fieldBinding[i].to[0]));
-                            
+
                             if(index !== -1){
                                 this._fieldBinding.splice(i, 1);
                             }

@@ -438,7 +438,7 @@ class Condition extends React.Component{
                 }}
                 connection={connection}
                 connector={connector}
-                operator={operator}
+                item={operator}
             />
         )/*
         return(
